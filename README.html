@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="femtet-%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%9F%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E6%9C%80%E9%81%A9%E5%8C%96%E8%A8%AD%E8%A8%88">Femtet を使ったパラメータ最適化設計</h1>
+<h2 id="%E6%A9%9F%E8%83%BD">機能</h2>
+<p>Femtet を使ったシミュレーションによって、パラメータの最適化を行うことができます。
+連続変数の単目的・多目的最適化に対応しています。
+いくつかの最適化結果可視化機能を備えており、最適化結果の分析が可能です。</p>
+<p><em><strong>注意：現在、本ライブラリは α 版です！</strong></em></p>
+<h2 id="install">install</h2>
+<p>インストール方法は以下の通りです。</p>
+<ol>
+<li>
+<p>Femtet のインストール</p>
+<p><a href="https://www.muratasoftware.com/">https://www.muratasoftware.com/</a></p>
+</li>
+<li>
+<p>Python のインストール</p>
+<p><a href="https://www.python.org/">https://www.python.org/</a></p>
+</li>
+<li>
+<p>PyFemtetOpt のインストール</p>
+<ol>
+<li>zip をダウンロード（<a href="kazuma.naito@murata.com">kazuma.naito@murata.com</a> に連絡してください）</li>
+<li>ダウンロードした zip を解凍</li>
+<li>コマンドプロンプトを起動し、解凍されたフォルダ（README.md のあるフォルダ）にカレントディレクトリを設定</li>
+<li>以下を実行（現在の Python 環境に PyFemtetOpt がインストールされます）。<pre class="hljs"><code><div>pip install .
+</div></code></pre>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="%E5%8B%95%E4%BD%9C%E3%81%99%E3%82%8B%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%B3%E3%83%BC%E3%83%89%E3%83%BB%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E8%A7%A3%E6%9E%90%E3%83%A2%E3%83%87%E3%83%AB">動作するサンプルコード・サンプル解析モデル</h2>
+<p>.zip ファイル内の以下の位置に、いくつかの .py ファイルと、それと同名の .femprj ファイルが含まれています。</p>
+<pre class="hljs"><code><div>.\src\PyFemtetOpt\FemtetPJTSample
+</div></code></pre>
+<p>このフォルダに含まれる <code>.femprj</code> ファイルは、変数設定済みの単純な解析モデルです。対応する同名の <code>.py</code> ファイルは、そのパラメータを PyFemtetOpt を用いて最適化するサンプルコードです。</p>
+<p>Femtet でいずれかの <code>.femprj</code> ファイルを開き、その後対応する <code>.py</code> ファイルを実行してください。</p>
+<h2 id="%E4%BD%BF%E3%81%84%E6%96%B9">使い方</h2>
+<p>基本的な使い方は以下の通りです。</p>
+<ol>
+<li>
+<p>Femtet プロジェクトの作成</p>
+<p>Femtet 上で解析モデルを作成します。最適化したいパラメータを変数として登録してください。</p>
+</li>
+<li>
+<p>評価指標の設定</p>
+<p>解析結果やモデル形状から評価したい指標を出力する処理を Femtet Python マクロを用いて記述してください。
+以下に例を示します。</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> Dispatch, constants
+Femtet = Dispatch(<span class="hljs-string">"FemtetMacro.Femtet"</span>)
+
+<span class="hljs-comment"># 解析結果を取得するオブジェクトを作成</span>
+Gogh = Femtet.Gogh
+<span class="hljs-comment"># 流速を取得する設定</span>
+Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
+<span class="hljs-comment"># 目的の面で積分し流量を取得</span>
+_, ret = Gogh.SimpleIntegralVectorAtFace_py([<span class="hljs-number">2</span>], [<span class="hljs-number">0</span>], constants.PART_VEC_Y_PART_C)
+
+print(ret.Real) <span class="hljs-comment"># 流量（次のステップでこれを評価指標にする）</span>
+</div></code></pre>
+</li>
+<li>
+<p>メインスクリプトの作成</p>
+<p>上記で定義した評価指標を含むスクリプトで、メイン処理を書いてください。以下に例を示します。前のステップで記述した処理が <code>get_flow</code> 関数の中に記述されています。</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">from</span> PyFemtetOpt <span class="hljs-keyword">import</span> FemtetScipy
+<span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> Dispatch, constants
+Femtet = Dispatch(<span class="hljs-string">"FemtetMacro.Femtet"</span>)
+
+<span class="hljs-string">'''h, r という変数を有する解析モデルで簡易流体解析を行い、ある面の流量を 0.3 にしたい場合を想定したスクリプト'''</span>
+
+<span class="hljs-comment"># 解析結果から流量を取得する関数</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_flow</span><span class="hljs-params">(Femtet)</span>:</span>
+    Gogh = Femtet.Gogh
+    Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
+    _, ret = Gogh.SimpleIntegralVectorAtFace_py([<span class="hljs-number">2</span>], [<span class="hljs-number">0</span>], constants.PART_VEC_Y_PART_C)
+    flow = ret.Real
+    <span class="hljs-keyword">return</span> flow
+
+<span class="hljs-comment"># 最適化処理を行うオブジェクトを用意</span>
+FEMOpt = FemtetScipy()
+
+<span class="hljs-comment"># 解析モデルで登録された変数</span>
+FEMOpt.add_parameter(<span class="hljs-string">"h"</span>, <span class="hljs-number">10</span>, memo=<span class="hljs-string">'高さ'</span>)
+FEMOpt.add_parameter(<span class="hljs-string">"r"</span>, <span class="hljs-number">5</span>, memo=<span class="hljs-string">'半径'</span>)
+
+<span class="hljs-comment"># 流量が 0.3 に近づくようにゴールを設定する</span>
+FEMOpt.add_objective(get_flow, name=<span class="hljs-string">'流量'</span>, direction=<span class="hljs-number">0.3</span>)
+
+<span class="hljs-comment"># 最適化実行中にその収束状況を表示する(experimental)</span>
+FEMOpt.set_process_monitor()
+
+<span class="hljs-comment"># 最適化の実行</span>
+FEMOpt.main()
+
+<span class="hljs-comment"># 最適化過程の一覧表示</span>
+print(FEMOpt.history)
+
+<span class="hljs-comment"># 最適化過程の保存</span>
+path = <span class="hljs-string">'任意のファイル名.xlsx'</span>
+FEMOpt.history.to_excel(path, encoding=<span class="hljs-string">'shift-jis'</span>, index=<span class="hljs-literal">None</span>)
+
+</div></code></pre>
+<p>注意：Femtet 内で数式を設定した変数に対し <code>add_parameter</code> を行わないでください。数式が失われます。</p>
+</li>
+<li>
+<p><em><strong>Femtet で問題の解析モデルを開いた状態で</strong></em>、スクリプトを実行します。</p>
+</li>
+</ol>
+<hr>
+<h2 id="english-version-of-this-document">English version of this document</h2>
+<p>We're sorry, this section is under constructing.</p>
+<hr>
+<p>Copyright (C) 2023 kn514 <a href="mailto:kazuma.naito@murata.com">kazuma.naito@murata.com</a><br>
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.</p>
+
+</body>
+</html>
