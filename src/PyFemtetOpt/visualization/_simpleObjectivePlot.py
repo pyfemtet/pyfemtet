@@ -77,7 +77,7 @@ class SimpleProcessMonitor:
         self.FEMOpt = FEMOpt
         self.N = len(self.FEMOpt.objectives)
         # サブプロットを定義
-        self.fig, axes = plt.subplots(self.N, 1, sharex=True)
+        self.fig, axes = plt.subplots(self.N, 1, sharex=True, figsize=(3, 2))
         self.fig.suptitle('シンプル目的関数モニター')
         # ax を作って ilne と一緒に保持する
         self.lines = []
@@ -114,7 +114,7 @@ class SimpleProcessMonitor:
             else: # 指定値と見做す
                 y = objective.direction
             subLine.set_ydata(float(y))
-        plt.pause(0.001)
+        plt.pause(0.01)
         
     def adjustDirectionPosition(self, _):
         objectives = self.FEMOpt.objectives

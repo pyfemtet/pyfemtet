@@ -411,7 +411,8 @@ code {
 <p>評価指標の設定</p>
 <p>解析結果やモデル形状から評価したい指標を出力する処理を Femtet Python マクロを用いて記述してください。
 以下に例を示します。</p>
-<pre class="hljs"><code><div><span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> Dispatch, constants
+<pre class="hljs"><code><div><span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> constants
+<span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> Dispatch
 Femtet = Dispatch(<span class="hljs-string">"FemtetMacro.Femtet"</span>)
 
 <span class="hljs-comment"># 解析結果を取得するオブジェクトを作成</span>
@@ -428,8 +429,9 @@ print(ret.Real) <span class="hljs-comment"># 流量（次のステップでこ�
 <p>メインスクリプトの作成</p>
 <p>上記で定義した評価指標を含むスクリプトで、メイン処理を書いてください。以下に例を示します。前のステップで記述した処理が <code>get_flow</code> 関数の中に記述されています。</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">from</span> PyFemtetOpt <span class="hljs-keyword">import</span> FemtetScipy
-<span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> Dispatch, constants
-Femtet = Dispatch(<span class="hljs-string">"FemtetMacro.Femtet"</span>)
+<span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> constants
+<span class="hljs-comment"># from win32com.client import Dispatch</span>
+<span class="hljs-comment"># Femtet = Dispatch("FemtetMacro.Femtet") # メインスクリプトでは使用しません</span>
 
 <span class="hljs-string">'''h, r という変数を有する解析モデルで簡易流体解析を行い、ある面の流量を 0.3 にしたい場合を想定したスクリプト'''</span>
 

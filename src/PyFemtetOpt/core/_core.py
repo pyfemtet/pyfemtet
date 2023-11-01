@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Any, Callable
 from abc import ABC, abstractmethod
+from warnings import warn
 
 import os
 import time
@@ -27,6 +28,9 @@ class MeshError(Exception):
 class SolveError(Exception):
     pass
 
+class UserInterruption(Exception):
+    pass
+
 class FEM:
     '''FEM システムのインスタンス。
     ただし、このクラスは型ヒントのために定義されたダミークラスです。
@@ -37,7 +41,7 @@ class FEM:
 
 
 class Objective:
-    prefix = 'objective'
+    prefixForDefault = 'objective'
     def __init__(self, fun, direction, name, opt):
         
         self._checkDirection(direction)
@@ -70,7 +74,7 @@ class Objective:
                 
         
 class Constraint:
-    prefix = 'constraint'
+    prefixForDefault = 'constraint'
     def __init__(self, fun, lb, ub, name, opt):
         self.fun = fun
         self.lb = lb
@@ -158,6 +162,7 @@ class FemtetOptimizationCore(ABC):
         self.historyPath = None
         self.processMonitor = None
         self.continuation = False # 現在の結果に上書き
+        self.interruption = False
         
         if setFemtetStrategy is not None:
             self.FEM = Femtet()
@@ -175,7 +180,7 @@ class FemtetOptimizationCore(ABC):
             )
 
 
-    # pre-processing methods
+    #### pre-processing methods
 
 
     def add_objective(self,
@@ -185,10 +190,20 @@ class FemtetOptimizationCore(ABC):
                       args:tuple or None = None,
                       kwargs:dict or None = None):
 
-        f, name = self._setupFunction(fun, args, kwargs, name, Objective.prefix, self.objectives)
-
+        f, name = self._setupFunction(fun, args, kwargs, name, Objective.prefixForDefault, self.objectives)
+        
         obj = Objective(f, direction, name, self)
-        self.objectives.append(obj)
+
+        isExisting = False
+        for i, objective in enumerate(self.objectives):
+            if objective.name==name:
+                isExisting = True
+                # warn('すでに登録されている名前が追加されました。上書きされます。')
+                self.objectives[i] = obj
+        
+        if not isExisting:
+            self.objectives.append(obj)
+
     
     def add_constraint(self,
                       fun:Callable[[Any], float],
@@ -201,7 +216,16 @@ class FemtetOptimizationCore(ABC):
         f, name = self._setupFunction(fun, args, kwargs, name, Constraint.prefix, self.constraints)
 
         obj = Constraint(f, lower_bound, upper_bound, name, self)
-        self.constraints.append(obj)
+
+        isExisting = False
+        for i, constraint in enumerate(self.constraints):
+            if constraint.name==name:
+                isExisting = True
+                # warn('すでに登録されている名前が追加されました。上書きされます。')
+                self.constraints[i] = obj
+        
+        if not isExisting:
+            self.constraints.append(obj)
 
     def add_parameter(self,
                       name:str,
@@ -221,7 +245,6 @@ class FemtetOptimizationCore(ABC):
         if initial_value is None:
             initial_value = femtetValue
 
-        
         d = {
             'name':name,
             'value':initial_value,
@@ -229,8 +252,12 @@ class FemtetOptimizationCore(ABC):
             'ubound':upper_bound,
             'memo':memo,
                 }
-        df = pd.DataFrame(d, index=[0])        
-        newdf = pd.concat([self.parameters, df], ignore_index=True)
+        df = pd.DataFrame(d, index=[0], dtype=object)
+        
+        if len(self.parameters)==0:
+            newdf = df
+        else:
+            newdf = pd.concat([self.parameters, df], ignore_index=True)
         
         if self._isDfValid(newdf):
             self.parameters = newdf
@@ -261,10 +288,10 @@ class FemtetOptimizationCore(ABC):
     def set_process_monitor(self):
         self._initRecord()
         if len(self.objectives)==1:
-            from visualization.processMonitor import SimpleProcessMonitor
+            from visualization._simpleObjectivePlot import SimpleProcessMonitor
             self.processMonitor = SimpleProcessMonitor(self)
         elif len(self.objectives)>1:
-            from visualization.showMultiobjectiveResults import MultiobjectivePairPlot
+            from visualization._multiobjectivePairPlot import MultiobjectivePairPlot
             self.processMonitor = MultiobjectivePairPlot(self)
             
 
@@ -277,14 +304,14 @@ class FemtetOptimizationCore(ABC):
         if kwargs is None:
             kwargs = {}
 
-        # Femtetを使う場合は、第一引数に自動的に Femtet の com オブジェクトが入っていることとする。
+        #### Femtetを使う場合は、第一引数に自動的に Femtet の com オブジェクトが入っていることとする。
         if type(self.FEM)==Femtet:
             f = lambda : fun(self.FEM.Femtet, *args, **kwargs)
         else:
             f = lambda : fun(*args, **kwargs)
         
         if name is None:
-            name = self._getUniqueName(prefix, objects)
+            name = self._getUniqueDefaultName(prefix, objects)
         
         return f, name
 
@@ -334,7 +361,7 @@ class FemtetOptimizationCore(ABC):
         
         return True
 
-    def _getUniqueName(self, prefix, objects):
+    def _getUniqueDefaultName(self, prefix, objects):
         names = [obj.name for obj in objects]
         i = 0
         while True:
@@ -347,6 +374,11 @@ class FemtetOptimizationCore(ABC):
     #### processing methods
 
     def f(self, x:np.ndarray)->[float]:
+        # 中断指令があったら Exception を起こす
+        if self.interruption:
+            raise UserInterruption
+        
+        
         # 渡された x がすでに計算されたものであれば
         # objective も constraint も更新する必要がない
         if not self._isCalculated(x):
@@ -414,8 +446,8 @@ class FemtetOptimizationCore(ABC):
         # 一度だけ呼ばれる。何度も呼ぶのは f。
         
         # 実行前チェック
-        if ((self.objectives is None)
-            or (self.parameters is None)):
+        if ((len(self.objectives)==0)
+            or (len(self.parameters)==0)):
             raise Exception('パラメータまたは目的関数が設定されていません。')
         if historyPath is None:
             if self.historyPath is None:
@@ -432,7 +464,10 @@ class FemtetOptimizationCore(ABC):
 
         # 時間測定しながら実行
         startTime = time.time()
-        result = self._main()
+        try:
+            result = self._main()
+        except UserInterruption: # 中断指令があったら
+            pass
         endTime = time.time()
         self.lastExecutionTime = endTime - startTime
 
@@ -506,7 +541,7 @@ class FemtetOptimizationCore(ABC):
         # update non-domi
         self._calcNonDomi()
         # 保存
-        self.history.to_csv(self.historyPath)
+        self.history.to_csv(self.historyPath, index=None, encoding='shift-jis')
             
     def _calcNonDomi(self):
         '''non-dominant 解を計算する'''

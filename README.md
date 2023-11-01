@@ -55,7 +55,8 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     解析結果やモデル形状から評価したい指標を出力する処理を Femtet Python マクロを用いて記述してください。
     以下に例を示します。
     ```python
-    from win32com.client import Dispatch, constants
+    from win32com.client import constants
+    from win32com.client import Dispatch
     Femtet = Dispatch("FemtetMacro.Femtet")
 
     # 解析結果を取得するオブジェクトを作成
@@ -74,8 +75,9 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
 
     ```python
     from PyFemtetOpt import FemtetScipy
-    from win32com.client import Dispatch, constants
-    Femtet = Dispatch("FemtetMacro.Femtet")
+    from win32com.client import constants
+    # from win32com.client import Dispatch
+    # Femtet = Dispatch("FemtetMacro.Femtet") # メインスクリプトでは使用しません
 
     '''h, r という変数を有する解析モデルで簡易流体解析を行い、ある面の流量を 0.3 にしたい場合を想定したスクリプト'''
 

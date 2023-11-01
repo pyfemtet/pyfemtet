@@ -128,6 +128,8 @@ class MultiobjectivePairPlot:
         
         # 空のデータで pairplot の実行
         g = sns.pairplot(empty, vars=objective_names, diag_kind='None', corner=True)
+        g.fig.set_figheight(15)
+        g.fig.set_figwidth(15)
     
         # pairplot の対角要素は意味を持たないので
         # GridSpec を用意して ax の再配置を行う
