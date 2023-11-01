@@ -35,10 +35,10 @@ plt.style.use("ggplot")
 # 3D
 from mpl_toolkits.mplot3d import Axes3D
 
-# clipboard
-import io
-from PyQt5.QtGui import QImage
-from PyQt5.QtWidgets import QApplication
+# # clipboard
+# import io
+# from PyQt5.QtGui import QImage
+# from PyQt5.QtWidgets import QApplication
 
 # 型判定のためインポート
 from matplotlib.collections import PathCollection
