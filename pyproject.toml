@@ -109,9 +109,9 @@ dependencies = [ # Optional
     # pymoo==0.6.*,
     "optuna",
     # scikit-optimize,
-    "pyqt5",
+    #"pyqt5",
     # pyqtgraph,
-    "spyder",
+    #"spyder",
     "pywin32",
 ]
 
@@ -124,7 +124,7 @@ dependencies = [ # Optional
 # Similar to `dependencies` above, these must be valid existing
 # projects.
 [project.optional-dependencies] # Optional
-dev = ["spyder", "qt5-applications", "optuna-dashboard"]
+dev = ["pyqt5", "spyder", "qt5-applications", "optuna-dashboard"]
 # test = ["coverage"]
 
 # List URLs that are relevant to your project
