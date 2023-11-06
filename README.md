@@ -1,4 +1,5 @@
-# Femtet を使ったパラメータ最適化設計
+# Welcome To PyFemtet.Opt!
+Femtet を使ったパラメータ最適化設計
 
 ## 機能
 
@@ -21,12 +22,12 @@ Femtet を使ったシミュレーションによって、パラメータの最�
 
     [https://www.python.org/](https://www.python.org/)
 
-1. PyFemtetOpt のインストール
+1. PyFemtet のインストール
 
     1. zip をダウンロード（[kazuma.naito@murata.com](kazuma.naito@murata.com) に連絡してください）
     1. ダウンロードした zip を解凍
     1. コマンドプロンプトを起動し、解凍されたフォルダ（README.md のあるフォルダ）にカレントディレクトリを設定
-    1. 以下を実行（現在の Python 環境に PyFemtetOpt がインストールされます）。
+    1. 以下を実行（現在の Python 環境に PyFemtet がインストールされます）。
         ```
         pip install .
         ```
@@ -34,9 +35,9 @@ Femtet を使ったシミュレーションによって、パラメータの最�
 ## 動作するサンプルコード・サンプル解析モデル
 .zip ファイル内の以下の位置に、いくつかの .py ファイルと、それと同名の .femprj ファイルが含まれています。
 ```
-.\src\PyFemtetOpt\FemtetPJTSample
+.\src\PyFemtet\FemtetPJTSample
 ```
-このフォルダに含まれる ```.femprj``` ファイルは、変数設定済みの単純な解析モデルです。対応する同名の ```.py``` ファイルは、そのパラメータを PyFemtetOpt を用いて最適化するサンプルコードです。 
+このフォルダに含まれる ```.femprj``` ファイルは、変数設定済みの単純な解析モデルです。対応する同名の ```.py``` ファイルは、そのパラメータを PyFemtet を用いて最適化するサンプルコードです。 
 
 Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応する ```.py``` ファイルを実行してください。
 
@@ -74,7 +75,7 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     上記で定義した評価指標を含むスクリプトで、メイン処理を書いてください。以下に例を示します。前のステップで記述した処理が ```get_flow``` 関数の中に記述されています。
 
     ```python
-    from PyFemtetOpt import FemtetScipy
+    from PyFemtet.Opt import FemtetScipy
     from win32com.client import constants
     # from win32com.client import Dispatch
     # Femtet = Dispatch("FemtetMacro.Femtet") # メインスクリプトでは使用しません

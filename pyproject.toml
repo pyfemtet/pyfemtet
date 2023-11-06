@@ -10,7 +10,7 @@
 # There are some restrictions on what makes a valid project name
 # specification here:
 # https://packaging.python.org/specifications/core-metadata/#name
-name = "PyFemtetOpt"  # Required
+name = "PyFemtet"  # Required
 
 # Versions should comply with PEP 440:
 # https://www.python.org/dev/peps/pep-0440/
@@ -44,7 +44,7 @@ requires-python = ">=3.11"
 # This is either text indicating the license for the distribution, or a file
 # that contains the license
 # https://packaging.python.org/en/latest/specifications/core-metadata/#license
-license = {file = "LICENSE.txt"}
+license = {file = "LICENSE"}
 
 # This field adds keywords for your project which will appear on the
 # project page. What does your project relate to?
@@ -52,7 +52,7 @@ license = {file = "LICENSE.txt"}
 # Note that this is a list of additional keywords, separated
 # by commas, to be used to assist searching for the distribution in a
 # larger catalog.
-keywords = ["sample", "setuptools", "development"]  # Optional
+keywords = ["CAE", "FEM", "design", "optimization"]  # Optional
 
 # This should be your name or the name of the organization who originally
 # authored the project, and a valid email address corresponding to the name
@@ -162,7 +162,7 @@ dev = ["pyqt5", "spyder", "qt5-applications", "optuna-dashboard"]
 [build-system]
 requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
+
 # scmが管理しているバージョン番号を自動的に反映する設定
-# そのバージョンファイルを書き込み
 [tool.setuptools_scm]
 version_file = "src/PyFemtetOpt/_version.py"
