@@ -1,3 +1,8 @@
+from ._multiobjectivePairPlot import multiobjectivePairPlot
+from ._simpleObjectivePlot import simpleObjectivePlot
+
+
+
 import os
 here, me = os.path.split(__file__)
 import sys
@@ -42,3 +47,5 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # 型判定のためインポート
 from matplotlib.collections import PathCollection
+
+

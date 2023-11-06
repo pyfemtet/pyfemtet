@@ -1,8 +1,7 @@
-from .core import *
-from .visualization import *
+from ._version import __version__
 
 __copyright__    = 'Copyright (C) 2023 Kazuma Naito'
-__version__      = '0.1.0'
+# __version__      = '0.1.0'
 __license__      = 'GPLv3'
 __author__       = 'Kazuma Naito'
 __author_email__ = 'kazuma.naito@murata.com'
