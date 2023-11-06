@@ -165,4 +165,4 @@ build-backend = "setuptools.build_meta"
 
 # scmが管理しているバージョン番号を自動的に反映する設定
 [tool.setuptools_scm]
-version_file = "src/PyFemtetOpt/_version.py"
+version_file = "src/PyFemtet/_version.py"

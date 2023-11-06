@@ -9,7 +9,7 @@ p：流体を流すための速度ポテンシャル
 流量を特定の値にするために最適な r, h, p を求めます。
 '''
 
-from PyFemtetOpt import FemtetScipy
+from PyFemtet.opt import FemtetScipy
 from win32com.client import constants
 
 
