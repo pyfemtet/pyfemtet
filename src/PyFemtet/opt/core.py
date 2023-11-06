@@ -19,7 +19,7 @@ import pandas as pd
 # for Femtet
 import win32com.client
 from win32com.client import Dispatch #, constants
-from PyFemtet.tools.FemtetClassConst import FemtetClassName as const
+from ..tools.FemtetClassConst import FemtetClassName as const
 
 #### Exception for Femtet error
 class ModelError(Exception):
@@ -152,7 +152,6 @@ class Femtet:
             self.Femtet.ShowLastError
     
     
-
 class FemtetOptimizationCore(ABC):
     
     def __init__(self, setFemtetStrategy:str or FEM or None = 'catch'):
@@ -219,7 +218,7 @@ class FemtetOptimizationCore(ABC):
                       args:tuple or None = None,
                       kwargs:dict or None = None):
 
-        f, name = self._setupFunction(fun, args, kwargs, name, Constraint.prefix, self.constraints)
+        f, name = self._setupFunction(fun, args, kwargs, name, Constraint.prefixForDefault, self.constraints)
 
         obj = Constraint(f, lower_bound, upper_bound, name, self)
 
@@ -294,10 +293,10 @@ class FemtetOptimizationCore(ABC):
     def set_process_monitor(self):
         self._initRecord()
         if len(self.objectives)==1:
-            from visualization._simpleObjectivePlot import SimpleProcessMonitor
+            from .visualization import SimpleProcessMonitor
             self.processMonitor = SimpleProcessMonitor(self)
         elif len(self.objectives)>1:
-            from visualization._multiobjectivePairPlot import MultiobjectivePairPlot
+            from .visualization import MultiobjectivePairPlot
             self.processMonitor = MultiobjectivePairPlot(self)
             
 
@@ -579,5 +578,6 @@ class FemtetOptimizationCore(ABC):
         fit = np.all(pdf[[cName for cName in cNames if '_fit' in cName]])
         
         return fit
-        
-        
+
+
+#### 継承クラス
