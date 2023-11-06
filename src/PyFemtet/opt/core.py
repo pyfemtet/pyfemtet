@@ -1,8 +1,10 @@
+# for hint
 from __future__ import annotations
 from typing import Any, Callable
 from abc import ABC, abstractmethod
 from warnings import warn
 
+# built-in modules
 import os
 import time
 import datetime
@@ -10,15 +12,16 @@ import inspect
 def getCurrentMethod():
     return inspect.currentframe().f_code.co_name
 
+# 3rd-party modules
 import numpy as np
 import pandas as pd
 
+# for Femtet
 import win32com.client
 from win32com.client import Dispatch #, constants
-
 from PyFemtet.tools.FemtetClassConst import FemtetClassName as const
 
-
+#### Exception for Femtet error
 class ModelError(Exception):
     pass
 
@@ -31,6 +34,8 @@ class SolveError(Exception):
 class UserInterruption(Exception):
     pass
 
+
+#### ダミークラス
 class FEM:
     '''FEM システムのインスタンス。
     ただし、このクラスは型ヒントのために定義されたダミークラスです。
@@ -40,6 +45,7 @@ class FEM:
     pass
 
 
+#### Core クラスとその周辺
 class Objective:
     prefixForDefault = 'objective'
     def __init__(self, fun, direction, name, opt):

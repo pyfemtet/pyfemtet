@@ -1,11 +1,72 @@
-import os
-here, me = os.path.split(__file__)
-mother = os.path.dirname(here)
+# import os
+# here, me = os.path.split(__file__)
+# mother = os.path.dirname(here)
 
-cwd = os.getcwd()
-os.chdir(mother)
-from visualization import *
-os.chdir(cwd)
+# cwd = os.getcwd()
+# os.chdir(mother)
+from ._visualizationNameSpace import *
+# os.chdir(cwd)
+
+
+
+class SimpleProcessMonitor:
+    def __init__(self, FEMOpt):
+        # FEMOpt を貰う
+        self.FEMOpt = FEMOpt
+        self.N = len(self.FEMOpt.objectives)
+        # サブプロットを定義
+        self.fig, axes = plt.subplots(self.N, 1, sharex=True, figsize=(3, 2))
+        self.fig.suptitle('シンプル目的関数モニター')
+        # ax を作って ilne と一緒に保持する
+        self.lines = []
+        for i in range(self.N):
+            ax = self.fig.axes[i]
+            line, = ax.plot([], [], 'o-')
+            subLine = ax.axhline(y=0, color='red', linestyle='--', lw=1)
+            self.lines.append([line, subLine])
+            # スクロールした時に direction を移動させる関数を登録するためにイベントピッカーを登録する
+            ax.set_picker('draw_event')
+        # 登録したイベントピッカーを接続する
+        self.fig.canvas.mpl_connect('draw_event', self.adjustDirectionPosition)
+
+        
+    def update(self):
+        objectives = self.FEMOpt.objectives
+        xdata = self.FEMOpt.history['time']
+        for ax, (line, subLine), objective in zip(self.fig.axes, self.lines, objectives):
+            # 描画
+            ydata = self.FEMOpt.history[objective.name].values
+            line.set_data(xdata, ydata)
+            subLine.set_ydata(ydata[-1]) # 再設定の時前の値にひきずられるから
+            # lim 再設定
+            ax.set_ylabel(objective.name)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M'))
+            ax.relim()
+            ax.autoscale_view(True, True, True)
+            # ターゲット線の描画(get_limするから後で)
+            minimum, maximum = ax.get_ylim()
+            if objective.direction=='maximize':
+                y = maximum - (maximum - minimum) * 0.01
+            elif objective.direction=='minimize':
+                y = minimum + (maximum - minimum) * 0.01
+            else: # 指定値と見做す
+                y = objective.direction
+            subLine.set_ydata(float(y))
+        plt.pause(0.01)
+        
+    def adjustDirectionPosition(self, _):
+        objectives = self.FEMOpt.objectives
+        for ax, (line, subLine), objective in zip(self.fig.axes, self.lines, objectives):
+            # ターゲット線の描画(get_limするから後で)
+            minimum, maximum = ax.get_ylim()
+            if objective.direction=='maximize':
+                y = maximum - (maximum - minimum) * 0.01
+            elif objective.direction=='minimize':
+                y = minimum + (maximum - minimum) * 0.01
+            else: # 指定値と見做す
+                y = objective.direction
+            subLine.set_ydata(float(y))
+
 
 
 class MultiobjectivePairPlot:
@@ -235,4 +296,6 @@ class MultiobjectivePairPlot:
                         scat.set_offsets(pdf.values.T)
         
         
+
+
 

@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from ._core import FemtetOptimizationCore
+from .core import FemtetOptimizationCore
 
 import optuna
 import logging

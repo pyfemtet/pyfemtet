@@ -1,14 +1,10 @@
-from ._multiobjectivePairPlot import multiobjectivePairPlot
-from ._simpleObjectivePlot import simpleObjectivePlot
 
-
-
-import os
-here, me = os.path.split(__file__)
-import sys
-sys.path.append(here)
-mother_path = os.path.abspath(os.path.join(here, '..'))
-sys.path.append(mother_path)
+# import os
+# here, me = os.path.split(__file__)
+# import sys
+# sys.path.append(here)
+# mother_path = os.path.abspath(os.path.join(here, '..'))
+# sys.path.append(mother_path)
 
 import numpy as np
 import pandas as pd

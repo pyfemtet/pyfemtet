@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from ._core import FemtetOptimizationCore
+from .core import FemtetOptimizationCore
 
 from scipy.optimize import minimize # pip install scipy
 from scipy.optimize import NonlinearConstraint
