@@ -55,7 +55,7 @@ class FemtetScipy(FemtetOptimizationCore):
             bounds=bounds,
             method=method,
             constraints=self._constraints,
-            options={'maxiter':10},
+            # options={'maxiter':10},
             # callback=self.record,
             )
 

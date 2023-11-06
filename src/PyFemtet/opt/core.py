@@ -45,7 +45,7 @@ class FEM:
     pass
 
 
-#### Core クラスとその周辺
+#### 周辺クラス
 class Objective:
     prefixForDefault = 'objective'
     def __init__(self, fun, direction, name, opt):
@@ -151,7 +151,8 @@ class Femtet:
         if not(self.Femtet.OpenCurrentResult(True)):
             self.Femtet.ShowLastError
     
-    
+
+#### core クラス    
 class FemtetOptimizationCore(ABC):
     
     def __init__(self, setFemtetStrategy:str or FEM or None = 'catch'):
@@ -579,5 +580,3 @@ class FemtetOptimizationCore(ABC):
         
         return fit
 
-
-#### 継承クラス

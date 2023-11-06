@@ -365,7 +365,8 @@ code {
           : 'default'
     });
   </script>
-<h1 id="femtet-%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%9F%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E6%9C%80%E9%81%A9%E5%8C%96%E8%A8%AD%E8%A8%88">Femtet を使ったパラメータ最適化設計</h1>
+<h1 id="welcome-to-pyfemtetopt">Welcome To PyFemtet.Opt !</h1>
+<p>Femtet を使ったパラメータ最適化設計</p>
 <h2 id="%E6%A9%9F%E8%83%BD">機能</h2>
 <p>Femtet を使ったシミュレーションによって、パラメータの最適化を行うことができます。
 連続変数の単目的・多目的最適化に対応しています。
@@ -383,22 +384,22 @@ code {
 <p><a href="https://www.python.org/">https://www.python.org/</a></p>
 </li>
 <li>
-<p>PyFemtetOpt のインストール</p>
+<p>PyFemtet のインストール</p>
 <ol>
 <li>zip をダウンロード（<a href="kazuma.naito@murata.com">kazuma.naito@murata.com</a> に連絡してください）</li>
 <li>ダウンロードした zip を解凍</li>
 <li>コマンドプロンプトを起動し、解凍されたフォルダ（README.md のあるフォルダ）にカレントディレクトリを設定</li>
-<li>以下を実行（現在の Python 環境に PyFemtetOpt がインストールされます）。<pre class="hljs"><code><div>pip install .
+<li>以下を実行（現在の Python 環境に PyFemtet がインストールされます）。<pre class="hljs"><code><div>pip install .
 </div></code></pre>
 </li>
 </ol>
 </li>
 </ol>
 <h2 id="%E5%8B%95%E4%BD%9C%E3%81%99%E3%82%8B%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%B3%E3%83%BC%E3%83%89%E3%83%BB%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E8%A7%A3%E6%9E%90%E3%83%A2%E3%83%87%E3%83%AB">動作するサンプルコード・サンプル解析モデル</h2>
-<p>.zip ファイル内の以下の位置に、いくつかの .py ファイルと、それと同名の .femprj ファイルが含まれています。</p>
-<pre class="hljs"><code><div>.\src\PyFemtetOpt\FemtetPJTSample
+<p>.zip ファイル内の以下の位置に、.py ファイルと、それと同名の .femprj ファイルが含まれています。</p>
+<pre class="hljs"><code><div>.\src\PyFemtet\FemtetPJTSample
 </div></code></pre>
-<p>このフォルダに含まれる <code>.femprj</code> ファイルは、変数設定済みの単純な解析モデルです。対応する同名の <code>.py</code> ファイルは、そのパラメータを PyFemtetOpt を用いて最適化するサンプルコードです。</p>
+<p>このフォルダに含まれる <code>.femprj</code> ファイルは、変数設定済みの単純な解析モデルです。対応する同名の <code>.py</code> ファイルは、そのパラメータを PyFemtet を用いて最適化するサンプルコードです。</p>
 <p>Femtet でいずれかの <code>.femprj</code> ファイルを開き、その後対応する <code>.py</code> ファイルを実行してください。</p>
 <h2 id="%E4%BD%BF%E3%81%84%E6%96%B9">使い方</h2>
 <p>基本的な使い方は以下の通りです。</p>
@@ -428,15 +429,16 @@ print(ret.Real) <span class="hljs-comment"># 流量（次のステップでこ�
 <li>
 <p>メインスクリプトの作成</p>
 <p>上記で定義した評価指標を含むスクリプトで、メイン処理を書いてください。以下に例を示します。前のステップで記述した処理が <code>get_flow</code> 関数の中に記述されています。</p>
-<pre class="hljs"><code><div><span class="hljs-keyword">from</span> PyFemtetOpt <span class="hljs-keyword">import</span> FemtetScipy
+<pre class="hljs"><code><div><span class="hljs-keyword">from</span> PyFemtet.Opt <span class="hljs-keyword">import</span> FemtetScipy
 <span class="hljs-keyword">from</span> win32com.client <span class="hljs-keyword">import</span> constants
 <span class="hljs-comment"># from win32com.client import Dispatch</span>
-<span class="hljs-comment"># Femtet = Dispatch("FemtetMacro.Femtet") # メインスクリプトでは使用しません</span>
+<span class="hljs-comment"># Femtet = Dispatch("FemtetMacro.Femtet") # このスクリプトでは使用しません</span>
 
 <span class="hljs-string">'''h, r という変数を有する解析モデルで簡易流体解析を行い、ある面の流量を 0.3 にしたい場合を想定したスクリプト'''</span>
 
 <span class="hljs-comment"># 解析結果から流量を取得する関数</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_flow</span><span class="hljs-params">(Femtet)</span>:</span>
+    <span class="hljs-comment"># この関数は、第一引数に Femtet のインスタンスを取るようにしてください。</span>
     Gogh = Femtet.Gogh
     Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
     _, ret = Gogh.SimpleIntegralVectorAtFace_py([<span class="hljs-number">2</span>], [<span class="hljs-number">0</span>], constants.PART_VEC_Y_PART_C)
@@ -456,21 +458,27 @@ FEMOpt.add_objective(get_flow, name=<span class="hljs-string">'流量'</span>, d
 <span class="hljs-comment"># 最適化実行中にその収束状況を表示する(experimental)</span>
 FEMOpt.set_process_monitor()
 
-<span class="hljs-comment"># 最適化の実行</span>
+<span class="hljs-comment"># 最適化の実行 ※実行すると、csv ファイルでの最適化過程の保存が始まります。</span>
 FEMOpt.main()
 
-<span class="hljs-comment"># 最適化過程の一覧表示</span>
+<span class="hljs-comment"># 最適化過程の一覧表示（最適化終了時点での csv ファイルの内容と同じです）</span>
 print(FEMOpt.history)
-
-<span class="hljs-comment"># 最適化過程の保存</span>
-path = <span class="hljs-string">'任意のファイル名.xlsx'</span>
-FEMOpt.history.to_excel(path, encoding=<span class="hljs-string">'shift-jis'</span>, index=<span class="hljs-literal">None</span>)
 
 </div></code></pre>
 <p>注意：Femtet 内で数式を設定した変数に対し <code>add_parameter</code> を行わないでください。数式が失われます。</p>
 </li>
 <li>
 <p><em><strong>Femtet で問題の解析モデルを開いた状態で</strong></em>、スクリプトを実行します。</p>
+<ul>
+<li><em><strong>最適化を止めるには、計算中の Femtet を終了するか、スクリプトを実行している python プロセスを終了してください。</strong></em> それまでの最適化の過程は csv に保存されており、失われません。</li>
+</ul>
+</li>
+<li>
+<p>出力された最適化過程の一覧を確認します。一覧は表形式の構造を持っています。列は <em>変数、目的、拘束（設定した場合）、非劣解、拘束を満たすかどうか、解析終了時刻</em> です。各行は、その変数の組み合わせで FEM シミュレーションを行った結果の評価指標の値、拘束の値などを示しています。詳細は、以下も参考にしてください。</p>
+<ul>
+<li>拘束：ある数式が任意の範囲内にあるようにすることです。具体的な記述方法は<strong>動作するサンプルコード</strong>も参考にしてください。</li>
+<li>非劣解：劣解とは、解集合の中で、その解よりも全ての評価指標が好ましい解が存在する解のことです。非劣解とは、劣解ではない解のことです。単一の評価指標のみを持つ最適化問題の場合、非劣解は最適解です。</li>
+</ul>
 </li>
 </ol>
 <hr>

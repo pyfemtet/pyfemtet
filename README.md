@@ -1,4 +1,4 @@
-# Welcome To PyFemtet.Opt!
+# Welcome To PyFemtet.Opt !
 Femtet を使ったパラメータ最適化設計
 
 ## 機能
@@ -33,7 +33,7 @@ Femtet を使ったシミュレーションによって、パラメータの最�
         ```
 
 ## 動作するサンプルコード・サンプル解析モデル
-.zip ファイル内の以下の位置に、いくつかの .py ファイルと、それと同名の .femprj ファイルが含まれています。
+.zip ファイル内の以下の位置に、.py ファイルと、それと同名の .femprj ファイルが含まれています。
 ```
 .\src\PyFemtet\FemtetPJTSample
 ```
@@ -78,12 +78,13 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     from PyFemtet.Opt import FemtetScipy
     from win32com.client import constants
     # from win32com.client import Dispatch
-    # Femtet = Dispatch("FemtetMacro.Femtet") # メインスクリプトでは使用しません
+    # Femtet = Dispatch("FemtetMacro.Femtet") # このスクリプトでは使用しません
 
     '''h, r という変数を有する解析モデルで簡易流体解析を行い、ある面の流量を 0.3 にしたい場合を想定したスクリプト'''
 
     # 解析結果から流量を取得する関数
     def get_flow(Femtet):
+        # この関数は、第一引数に Femtet のインスタンスを取るようにしてください。
         Gogh = Femtet.Gogh
         Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
         _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
@@ -103,20 +104,23 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     # 最適化実行中にその収束状況を表示する(experimental)
     FEMOpt.set_process_monitor()
 
-    # 最適化の実行
+    # 最適化の実行 ※実行すると、csv ファイルでの最適化過程の保存が始まります。
     FEMOpt.main()
 
-    # 最適化過程の一覧表示
+    # 最適化過程の一覧表示（最適化終了時点での csv ファイルの内容と同じです）
     print(FEMOpt.history)
-
-    # 最適化過程の保存
-    path = '任意のファイル名.xlsx'
-    FEMOpt.history.to_excel(path, encoding='shift-jis', index=None)
 
     ```
     注意：Femtet 内で数式を設定した変数に対し ```add_parameter``` を行わないでください。数式が失われます。
 
 1. ***Femtet で問題の解析モデルを開いた状態で***、スクリプトを実行します。
+
+    - ***最適化を止めるには、計算中の Femtet を終了するか、スクリプトを実行している python プロセスを終了してください。*** それまでの最適化の過程は csv に保存されており、失われません。
+    
+1. 出力された最適化過程の一覧を確認します。一覧は表形式の構造を持っています。列は *変数、目的、拘束（設定した場合）、非劣解、拘束を満たすかどうか、解析終了時刻* です。各行は、その変数の組み合わせで FEM シミュレーションを行った結果の評価指標の値、拘束の値などを示しています。詳細は、以下も参考にしてください。
+    - 拘束：ある数式が任意の範囲内にあるようにすることです。具体的な記述方法は**動作するサンプルコード**も参考にしてください。
+    - 非劣解：劣解とは、解集合の中で、その解よりも全ての評価指標が好ましい解が存在する解のことです。非劣解とは、劣解ではない解のことです。単一の評価指標のみを持つ最適化問題の場合、非劣解は最適解です。
+
 
 ---
 

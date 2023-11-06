@@ -101,6 +101,7 @@ classifiers = [  # Optional
 dependencies = [ # Optional
     "numpy",
     "pandas",
+    "openpyxl",
     "scipy",
     "matplotlib",
     "japanize_matplotlib",
