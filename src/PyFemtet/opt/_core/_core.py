@@ -16,7 +16,7 @@ import pandas as pd
 import win32com.client
 from win32com.client import Dispatch #, constants
 
-from PyFemtetOpt.core.FemtetClassConst import FemtetClassName as const
+from PyFemtet.tools.FemtetClassConst import FemtetClassName as const
 
 
 class ModelError(Exception):
