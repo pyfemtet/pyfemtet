@@ -189,9 +189,10 @@ class MultiobjectivePairPlot:
         
         # 空のデータで pairplot の実行
         g = sns.pairplot(empty, vars=objective_names, diag_kind='None', corner=True)
-        g.fig.set_figheight(15)
-        g.fig.set_figwidth(15)
-    
+        g.fig.set_figheight(4)
+        g.fig.set_figwidth(6)
+        plt.tight_layout()
+
         # pairplot の対角要素は意味を持たないので
         # GridSpec を用意して ax の再配置を行う
         n = len(objective_names)
@@ -229,7 +230,11 @@ class MultiobjectivePairPlot:
         # plt.connect('pick_event', on_pick)
         
         # legend を作る（位置調整のため legend 用の ax を作る）
-        ax_legend = plt.subplot(gs[:int((n-1)/2), int(n/2):])
+        if n==2:
+            gs = gridspec.GridSpec(3, 4)
+            ax_legend = plt.subplot(gs[1,-1])
+        else:
+            ax_legend = plt.subplot(gs[:int((n-1)/2), int(n/2):])
         ax_legend.axis('off') # 軸の非表示
         # for 文の中で最後に実行された ax から label を取得（全部変わらないはずだから）
         handles, labels = ax.get_legend_handles_labels()
@@ -271,6 +276,7 @@ class MultiobjectivePairPlot:
         
         # 各 ax でデータを更新
         self.updateSelection()
+        
         
         plt.pause(0.01)
 

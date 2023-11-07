@@ -29,15 +29,15 @@ class FemtetOptuna(FemtetOptimizationCore):
             self.historyPath = historyPath
 
         if study_name is None:
-            study_name = os.path.splitext(os.path.basename(self.historyPath))[0] + ".db"
+            self.study_name = os.path.splitext(os.path.basename(self.historyPath))[0] + ".db"
             
-        study_db_path = os.path.abspath(
+        self.study_db_path = os.path.abspath(
             os.path.join(
                 os.path.dirname(self.historyPath),
-                study_name
+                self.study_name
                 )
             )
-        self.storage_name = f"sqlite:///{study_db_path}"
+        self.storage_name = f"sqlite:///{self.study_db_path}"
         self.timeout = timeout
         self.n_trials = n_trials
         super().main()

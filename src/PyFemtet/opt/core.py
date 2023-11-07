@@ -35,60 +35,19 @@ class UserInterruption(Exception):
     pass
 
 
-#### ダミークラス
-class FEM:
-    '''FEM システムのインスタンス。
-    ただし、このクラスは型ヒントのために定義されたダミークラスです。
-    このクラスのインスタンスを作成しても Femtet は操作できません。
+#### FEM クラス
+
+class FEMSystem(ABC):
+    '''FEM システムのクラス。
+    このクラスを継承して具体的な FEM システムのクラスを作成し、
+    そのインスタンスを FemtetOptimizationCore の FEM メンバーに割り当てる。
     '''
-    # 型ヒントのためだけのダミークラス
-    pass
+    @abstractmethod
+    def run(self, df):
+        pass
 
 
-#### 周辺クラス
-class Objective:
-    prefixForDefault = 'objective'
-    def __init__(self, fun, direction, name, opt):
-        
-        self._checkDirection(direction)
-        
-        self.fun = fun
-        self.direction = direction
-        self.name = name
-        
-
-    def _checkDirection(self, direction):
-        if type(direction)==float or type(direction)==int:
-            pass
-        elif direction=='minimize':
-            pass
-        elif direction=='maximize':
-            pass
-        else:
-            raise Exception(f'invalid direction "{direction}" for Objective')
-        
-        
-    def _convert(self, value:float):
-        ret = value
-        if type(self.direction)==float or type(self.direction)==int:
-            ret = abs(value - self.direction)
-        elif self.direction=='minimize':
-            ret = value
-        elif self.direction=='maximize':
-            ret = -value
-        return ret         
-                
-        
-class Constraint:
-    prefixForDefault = 'constraint'
-    def __init__(self, fun, lb, ub, name, opt):
-        self.fun = fun
-        self.lb = lb
-        self.ub = ub
-        self.name = name
-
-
-class Femtet:
+class Femtet(FEMSystem):
 
     def setFemtet(self, strategy='catch'):
         if strategy=='catch':
@@ -150,13 +109,71 @@ class Femtet:
         # 次に呼ばれるはずのユーザー定義コスト関数の記述を簡単にするため先に解析結果を開いておく
         if not(self.Femtet.OpenCurrentResult(True)):
             self.Femtet.ShowLastError
+
+
+class NoFEM(FEMSystem):
+    def __init__(self):
+        self.error_regions = []
+
+    def set_error_region(self, f):
+        self.error_regions.append(f)
     
+    def run(self, df):
+        for f in self.error_regions:
+            if f(df['value'].values)<0:
+                raise ModelError
+
+
+#### 周辺クラス
+
+class Objective:
+    prefixForDefault = 'objective'
+    def __init__(self, fun, direction, name, opt):
+        
+        self._checkDirection(direction)
+        
+        self.fun = fun
+        self.direction = direction
+        self.name = name
+        
+
+    def _checkDirection(self, direction):
+        if type(direction)==float or type(direction)==int:
+            pass
+        elif direction=='minimize':
+            pass
+        elif direction=='maximize':
+            pass
+        else:
+            raise Exception(f'invalid direction "{direction}" for Objective')
+        
+        
+    def _convert(self, value:float):
+        ret = value
+        if type(self.direction)==float or type(self.direction)==int:
+            ret = abs(value - self.direction)
+        elif self.direction=='minimize':
+            ret = value
+        elif self.direction=='maximize':
+            ret = -value
+        return ret         
+                
+        
+class Constraint:
+    prefixForDefault = 'constraint'
+    def __init__(self, fun, lb, ub, name, opt):
+        self.fun = fun
+        self.lb = lb
+        self.ub = ub
+        self.name = name
+
 
 #### core クラス    
 class FemtetOptimizationCore(ABC):
     
-    def __init__(self, setFemtetStrategy:str or FEM or None = 'catch'):
+    def __init__(self, setFemtetStrategy:str or FEMSystem or None = 'catch'):
 
+        # 初期化
         self.FEM = None
         self.objectives = []
         self.constraints = []
@@ -170,10 +187,15 @@ class FemtetOptimizationCore(ABC):
         self.continuation = False # 現在の結果に上書き
         self.interruption = False
         
-        if setFemtetStrategy is not None:
+        # 初期値
+        if type(setFemtetStrategy) is str:
             self.FEM = Femtet()
             self.FEM.setFemtet(setFemtetStrategy)
+        elif isinstance(setFemtetStrategy, FEMSystem):
+            self.FEM = setFemtetStrategy
 
+
+        # 初期値
         self.parameters = pd.DataFrame(
             columns=[
                 'name',
@@ -395,14 +417,46 @@ class FemtetOptimizationCore(ABC):
             if self.FEM is not None:
                 try:
                     self.FEM.run(self.parameters)
-                except (ModelError, MeshError, SolveError): # TODO:モデル、メッシャ、ソルバのエラーごとに何か処理を入れる
-                    pass
+                    # calc
+                    self.objectiveValues = [obj.fun() for obj in self.objectives]
+                    self.constraintValues = [obj.fun() for obj in self.constraints]
+                    self._record()
+                except (ModelError, MeshError, SolveError):
+                    # TODO: 勾配法でもなんとかできるように何とかする（要研究）
+                    # history から最も近傍の点を探す
+                    pHis = self.history[self.parameters['name'].values].values.astype(float)
+                    idx = np.argmin(np.linalg.norm(pHis - x, axis=1))
+                    # その時点の解の objective が必ず劣解になるようにする
+                    nearestResult = self.history.iloc[idx]
+                    nearestObjectiveValues = nearestResult[[obj.name for obj in self.objectives]]
+                    newObjectiveValues = []
+                    for vNearest, objective in zip(nearestObjectiveValues, self.objectives):
+                        d = objective.direction
+                        if (type(d)==float) or (type(d)==int):
+                            diff = vNearest - d
+                            if diff>0:
+                                vnew = vNearest+1
+                            else:
+                                vnew = vNearest-1
+                        elif d=='minimize':
+                            vnew = vNearest+1
+                        elif d=='maximize':
+                            vnew = vNearest-1
+                        else:
+                            raise Exception('何かおかしい')
+                        newObjectiveValues.append(vnew)
+                    self.objectiveValues = newObjectiveValues
+                    self.constraintValues = [-1 for obj in self.constraints]
+                    self._record()
+            else:
+                self.objectiveValues = [obj.fun() for obj in self.objectives]
+                self.constraintValues = [obj.fun() for obj in self.constraints]
+                self._record()
 
-            # calc
-            self.objectiveValues = [obj.fun() for obj in self.objectives]
-            self.constraintValues = [obj.fun() for obj in self.constraints]
-            self._record()
-        
+            # update process monitor
+            if self.processMonitor is not None:
+                self.processMonitor.update()
+                
         return [obj._convert(v) for obj, v in zip(self.objectives, self.objectiveValues)]
 
     def _isCalculated(self, x):
@@ -542,8 +596,6 @@ class FemtetOptimizationCore(ABC):
         pdf['fit'] = fit
         # add to history
         self.history.loc[len(self.history)] = pdf
-        if self.processMonitor is not None:
-            self.processMonitor.update()
         # update non-domi
         self._calcNonDomi()
         # 保存
