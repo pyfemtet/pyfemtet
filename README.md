@@ -1,5 +1,5 @@
-# Welcome To PyFemtet.Opt !
-Femtet を使ったパラメータ最適化設計
+# Welcome To PyFemtet.opt !
+PyFemtet.opt は、Femtet を用いてパラメータ最適化を行うことのできる Python パッケージです。
 
 ## 機能
 
@@ -72,10 +72,10 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
 
 1. メインスクリプトの作成
 
-    上記で定義した評価指標を含むスクリプトで、メイン処理を書いてください。以下に例を示します。前のステップで記述した処理が ```get_flow``` 関数の中に記述されています。
+    上記で定義した評価指標を含むスクリプトを書いてください。以下に例を示します。前のステップで記述した評価指標が ```get_flow``` 関数の中に記述されています。
 
     ```python
-    from PyFemtet.Opt import FemtetScipy
+    from PyFemtet.opt import FemtetScipy
     from win32com.client import constants
     # from win32com.client import Dispatch
     # Femtet = Dispatch("FemtetMacro.Femtet") # このスクリプトでは使用しません
