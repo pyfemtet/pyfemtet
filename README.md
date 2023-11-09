@@ -32,6 +32,12 @@ Femtet を使ったシミュレーションによって、パラメータの最�
         pip install .
         ```
 
+1. Femtet のアンインストール
+    PyFemtet をインストールした環境で下記のコマンドを実行してください。依存ライブラリは削除されません。
+    ```
+    pip uninstall PyFemtet
+    ```
+
 ## 動作するサンプルコード・サンプル解析モデル
 .zip ファイル内の以下の位置に、.py ファイルと、それと同名の .femprj ファイルが含まれています。
 ```
@@ -60,6 +66,8 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     from win32com.client import Dispatch
     Femtet = Dispatch("FemtetMacro.Femtet")
 
+    # マクロから解析結果を開く
+    Femtet.OpenCurrentResult(True)
     # 解析結果を取得するオブジェクトを作成
     Gogh = Femtet.Gogh
     # 流速を取得する設定
@@ -85,6 +93,7 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     # 解析結果から流量を取得する関数
     def get_flow(Femtet):
         # この関数は、第一引数に Femtet のインスタンスを取るようにしてください。
+        # Femtet.OpenCurrentResult(True) # この処理はあってもいいですが、不要です
         Gogh = Femtet.Gogh
         Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
         _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
