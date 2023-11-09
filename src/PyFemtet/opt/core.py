@@ -11,6 +11,7 @@ import datetime
 import inspect
 def getCurrentMethod():
     return inspect.currentframe().f_code.co_name
+import threading
 
 # 3rd-party modules
 import numpy as np
@@ -453,9 +454,6 @@ class FemtetOptimizationCore(ABC):
                 self.constraintValues = [obj.fun() for obj in self.constraints]
                 self._record()
 
-            # update process monitor
-            if self.processMonitor is not None:
-                self.processMonitor.update()
                 
         return [obj._convert(v) for obj, v in zip(self.objectives, self.objectiveValues)]
 
@@ -525,13 +523,24 @@ class FemtetOptimizationCore(ABC):
         # 時間測定しながら実行
         startTime = time.time()
         try:
-            result = self._main()
-        except UserInterruption: # 中断指令があったら
+            if self.processMonitor is None:
+                # multithread する必要がない
+                self._main()
+            else:
+                # GUI と別 thread にする
+                thread = threading.Thread(target=self._main)
+                thread.start()
+                while thread.is_alive():
+                    self.processMonitor.update()
+ 
+        except UserInterruption:
+            # 中断指令
             pass
+
         endTime = time.time()
         self.lastExecutionTime = endTime - startTime
 
-        return result
+        return
 
 
     # post-processing methods    

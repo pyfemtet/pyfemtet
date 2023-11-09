@@ -8,7 +8,6 @@ from ._visualizationNameSpace import *
 # os.chdir(cwd)
 
 
-
 class SimpleProcessMonitor:
     def __init__(self, FEMOpt):
         # FEMOpt を貰う
@@ -28,11 +27,19 @@ class SimpleProcessMonitor:
             ax.set_picker('draw_event')
         # 登録したイベントピッカーを接続する
         self.fig.canvas.mpl_connect('draw_event', self.adjustDirectionPosition)
+        
+        # TODO:中断（experimental）
+        def lmd(*args, **kwargs):
+            self.FEMOpt.interruption = True
+        self.fig.canvas.mpl_connect('close_event', lmd)
 
         
     def update(self):
         objectives = self.FEMOpt.objectives
         xdata = self.FEMOpt.history['time']
+        if len(xdata)==0:
+            plt.pause(0.5)
+            return
         for ax, (line, subLine), objective in zip(self.fig.axes, self.lines, objectives):
             # 描画
             ydata = self.FEMOpt.history[objective.name].values
@@ -99,6 +106,11 @@ class MultiobjectivePairPlot:
         '''FEMOpt の内容を g の scatter に反映する'''
         # データの用意
         history = self.FEMOpt.history
+
+        if len(history)==0:
+            plt.pause(0.5)
+            return
+
         objectiveNames = self.FEMOpt.get_history_columns('objective')
         constraintNames = self.FEMOpt.get_history_columns('constraint')
         
@@ -227,7 +239,13 @@ class MultiobjectivePairPlot:
 
 
         g.fig.canvas.mpl_connect('pick_event', self.onPick)
-        # plt.connect('pick_event', on_pick)
+
+        # TODO:中断（experimental）
+        def lmd(*args, **kwargs):
+            self.FEMOpt.interruption = True
+        g.figure.canvas.mpl_connect('close_event', lmd)
+
+
         
         # legend を作る（位置調整のため legend 用の ax を作る）
         if n==2:
