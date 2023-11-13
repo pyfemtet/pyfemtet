@@ -131,6 +131,22 @@ class NoFEM(FEMSystem):
 
 #### 周辺クラス
 
+def symlog(x):
+    if isinstance(x, np.ndarray):
+        ret = np.zeros(x.shape)
+        idx = np.where(x>=0)
+        ret[idx] = np.log10(x[idx] + 1)
+        idx = np.where(x<0)
+        ret[idx] = -np.log10(1 - x[idx])
+    else:
+        if x>=0:
+            ret = np.log10(x + 1)
+        else:
+            ret = -np.log10(1 - x)
+        
+    return ret
+    
+
 class Objective:
     prefixForDefault = 'objective'
     def __init__(self, fun, direction, name, opt, ptrFunc, args, kwargs):
@@ -165,6 +181,9 @@ class Objective:
             ret = value
         elif self.direction=='maximize':
             ret = -value
+
+        ret = symlog(ret)
+
         return ret         
                 
         

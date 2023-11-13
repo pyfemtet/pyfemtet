@@ -12,21 +12,19 @@ import win32con
 import numpy as np
 
 here, me = os.path.split(__file__)
-os.chdir(here)
+
 
 # ユーザーが案件ごとに設定する変数
-path_bas = os.path.abspath('TEST_femprj.bas')
-#path_x_t = os.path.abspath('TEST.x_t')
-path_prt = os.path.abspath('TEST.prt')
-# path_femprj = os.path.abspath('TEST.femprj')
+# path_bas = r"C:\Users\mm11592\Documents\myFiles2\working\PyFemtetOpt2\PyFemtetOptGit\NXTEST.bas"
+# path_prt = r"C:\Users\mm11592\Documents\myFiles2\working\PyFemtetOpt2\PyFemtetOptGit\NXTEST.prt"
 
 # ユーザーが環境ごとに設定する定数
-path_macro = r'C:\Program Files\Femtet_Ver2023_64bit_inside\Program\Macro32\FemtetMacro.dll'
-path_ref = r'C:\Program Files\Femtet_Ver2023_64bit_inside\Program\Macro32\FemtetRef.xla'
+PATH_MACRO = r'C:\Program Files\Femtet_Ver2023.1.0_64bit\Program\Macro32\FemtetMacro.dll'
+PATH_REF = r'C:\Program Files\Femtet_Ver2023.1.0_64bit\Program\Macro32\FemtetRef.xla'
+# TODO: Femtet のプロセスハンドルか何かから得られるようにする
 
 # ユーザーは設定しない定数
-path_hub = os.path.abspath('hub.xlsm')
-path_journal = os.path.abspath('update_model_parameter.py')
+PATH_JOURNAL = os.path.abspath(os.path.join(here, 'update_model_parameter.py'))
 
 
 
@@ -47,6 +45,19 @@ def _f(functions, arguments): # インスタンスメソッドにしたら動か
 from PyFemtet.opt.core import FEMSystem
 
 class NX_Femtet(FEMSystem):
+    def __init__(self, path_prt):
+        self._path_prt = os.path.abspath(path_prt)
+        self._path_bas = None
+        self._path_xlsm = None
+    
+    def set_bas(self, path_bas):
+        self._path_bas = os.path.abspath(path_bas)
+        self._path_xlsm = None
+
+    def set_excel(self, path_xlsx):
+        self._path_xlsm = os.path.abspath(path_xlsx)
+        self._path_bas = None
+            
     def run(self):
         # 使わないけど FEMSystem が実装を求めるためダミーで作成
         pass
@@ -62,11 +73,24 @@ class NX_Femtet(FEMSystem):
         exe = r'%UGII_BASE_DIR%\NXBIN\run_journal.exe'
         tmp = dict(zip(df.name.values, df.value.values.astype(str)))
         strDict = json.dumps(tmp)
-        subprocess.run([exe, path_journal, '-args', path_prt, strDict])
+        env = os.environ.copy()
+        subprocess.run(
+            [exe, PATH_JOURNAL, '-args', self._path_prt, strDict],
+            env=env,
+            shell=True,
+            cwd=os.path.dirname(self._path_prt))
         # prt と同じ名前の x_t ができる
+
+    def _set_reference_of_new_excel(self, wb):
+        try:
+            wb.VBProject.References.AddFromFile(PATH_MACRO)
+        except:
+            pass
+        try:
+            wb.VBProject.References.AddFromFile(PATH_REF)
+        except:
+            pass
         
-        
-    #     pass
     
     def _setup_new_Femtet(self):
         # excel 経由で bas を使って x_t から Femtet のセットアップをする
@@ -75,18 +99,36 @@ class NX_Femtet(FEMSystem):
         self.excel = DispatchEx("Excel.Application")
         self.excel.Visible = False
         self.excel.DisplayAlerts = False
-        self.excel.Workbooks.Open(path_hub)
-        self.wb = self.excel.Workbooks('hub.xlsm')
-        # Femtet マクロの導入
-        self.excel.Run('Module1.ImportFemtetMacroBas', path_bas)
-        self.excel.Run('Module1.FemtetSetup', path_ref)
-        self.excel.Run('Module1.FemtetSetup', path_macro)
-        # マクロの破棄
-        self.excel.Run('Module1.ReleaseFemtetMacroBas')    
-        self.excel.Run('Module1.ReleaseFemtetSetup')
+        
+        # bas 指定の場合：新しい xlsm を作る
+        if self._path_bas is not None:
+            # wb の準備
+            wb = self.excel.Workbooks.Add()
+            # マクロのセットアップ
+            wb.VBProject.VBComponents.Import(self._path_bas)
+            self._set_reference_of_new_excel(wb)
+
+        # xlsm 指定の場合：開く
+        elif self._path_xlsm is not None:
+            # wb の準備
+            wb = self.excel.Workbooks.Open(self._path_xlsm)
+            # マクロのセットアップ
+            self._set_reference_of_new_excel(wb)
+
+
+        # Femtet セットアップの実行
+        self.excel.Run('FemtetMacro.FemtetMain')
+
+        # # マクロの破棄
+        # if self._path_bas is not None:
+        #     self.excel.Run('HubModule.ReleaseFemtetMacroBas')    
+        #     self.excel.Run('HubModule.ReleaseReference', 'FemtetMacro')
+        #     self.excel.Run('HubModule.ReleaseReference', 'FemtetReference')
+
         # 保存せずに閉じる
-        self.wb.Saved = True
-        self.wb.Close()
+        wb.Saved = True
+        wb.Close()
+
         # 終了
         self._close_excel_by_force()
 

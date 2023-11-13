@@ -45,6 +45,7 @@ class FemtetScipy(FemtetOptimizationCore):
         df = self.parameters
         
         method='COBYLA'
+        # method='SLSQP'
         x0 = df['value'].values
         bounds = df[['lbound', 'ubound']].replace([np.nan], [None]).values
         self._parseConstraints(method)

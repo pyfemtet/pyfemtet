@@ -5,6 +5,22 @@ import NXOpen
 
 
 def main(prtPath:str, parameters:'dict as str'):
+    '''
+    .prt ファイルのパスを受け取り、parameters に指定された変数を更新し、
+    .prt と同じディレクトリに .x_t ファイルをエクスポートする
+
+    Parameters
+    ----------
+    prtPath : str
+        DESCRIPTION.
+    parameters : 'dict as str'
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    '''
     # 保存先の設定
     prtPath = os.path.abspath(prtPath) # 一応
     x_tPath = os.path.splitext(prtPath)[0] + '.x_t'
