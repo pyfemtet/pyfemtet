@@ -17,11 +17,11 @@ FEMOpt.add_parameter("h", 3, 1.5, memo='1巻きピッチ')
 FEMOpt.add_parameter("r", 5, 3, memo='コイル半径')
 FEMOpt.add_parameter("n", 5, 1, 20, memo='コイル半径')
 
-# 流量が 0.3 に近づくようにゴールを設定する
+# インダクタンスが 0.44 uF に近づくようにゴールを設定する
 FEMOpt.add_objective(
     L,
     name='自己インダクタンス',
-    direction=4.431495039557203e-07
+    direction=4.4e-07
     )
 
 # 最適化実行中にその収束状況を表示する(experimental)

@@ -16,7 +16,12 @@ Femtet を使ったシミュレーションによって、パラメータの最�
 1. Femtet のインストール
 
     [https://www.muratasoftware.com/](https://www.muratasoftware.com/)
-    
+
+
+1. Femtet のマクロ有効化
+
+    詳しくは、Femtet インストール後にスタートメニューから「マクロ機能を有効化する」を選択してください。
+    マクロ機能を利用するためには excel が必要です。
 
 1. Python のインストール
 
@@ -24,13 +29,7 @@ Femtet を使ったシミュレーションによって、パラメータの最�
 
 1. PyFemtet のインストール
 
-    1. zip をダウンロード（[kazuma.naito@murata.com](kazuma.naito@murata.com) に連絡してください）
-    1. ダウンロードした zip を解凍
-    1. コマンドプロンプトを起動し、解凍されたフォルダ（README.md のあるフォルダ）にカレントディレクトリを設定
-    1. 以下を実行（現在の Python 環境に PyFemtet がインストールされます）。
-        ```
-        pip install .
-        ```
+    ```pip install PyFemtet```
 
 1. Femtet のアンインストール
     PyFemtet をインストールした環境で下記のコマンドを実行してください。依存ライブラリは削除されません。
