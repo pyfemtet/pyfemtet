@@ -20,7 +20,11 @@ import pandas as pd
 # for Femtet
 import win32com.client
 from win32com.client import Dispatch #, constants
-from ..tools.FemtetClassConst import FemtetClassName as const
+# from ..tools.FemtetClassConst import FemtetClassName as const
+
+
+
+
 
 #### Exception for Femtet error
 class ModelError(Exception):
@@ -44,7 +48,7 @@ class FEMSystem(ABC):
     そのインスタンスを FemtetOptimizationCore の FEM メンバーに割り当てる。
     '''
     @abstractmethod
-    def run(self, df):
+    def run(self, df)->None:
         pass
 
 
@@ -53,7 +57,7 @@ class Femtet(FEMSystem):
     def setFemtet(self, strategy='catch'):
         if strategy=='catch':
             # 既存の Femtet を探す
-            self.Femtet = Dispatch(const.CFemtet)
+            self.Femtet = Dispatch('FemtetMacro.Femtet')
         elif strategy=='new':
             # femtetUtil を使って新しい Femtet を立てる
             raise Exception('femtetUtilを使って新しいFemtetを立てるのはまだ実装していません')
@@ -129,13 +133,17 @@ class NoFEM(FEMSystem):
 
 class Objective:
     prefixForDefault = 'objective'
-    def __init__(self, fun, direction, name, opt):
+    def __init__(self, fun, direction, name, opt, ptrFunc, args, kwargs):
         
         self._checkDirection(direction)
         
         self.fun = fun
         self.direction = direction
         self.name = name
+        
+        self.ptrFunc = ptrFunc
+        self.args = args
+        self.kwargs = kwargs
         
 
     def _checkDirection(self, direction):
@@ -162,17 +170,22 @@ class Objective:
         
 class Constraint:
     prefixForDefault = 'constraint'
-    def __init__(self, fun, lb, ub, name, opt):
+    def __init__(self, fun, lb, ub, name, opt, ptrFunc, args, kwargs):
         self.fun = fun
         self.lb = lb
         self.ub = ub
         self.name = name
 
+        self.ptrFunc = ptrFunc
+        self.args = args
+        self.kwargs = kwargs
+        
 
 #### core クラス    
 class FemtetOptimizationCore(ABC):
     
     def __init__(self, setFemtetStrategy:str or FEMSystem or None = 'catch'):
+        
 
         # 初期化
         self.FEM = None
@@ -219,9 +232,9 @@ class FemtetOptimizationCore(ABC):
                       args:tuple or None = None,
                       kwargs:dict or None = None):
 
-        f, name = self._setupFunction(fun, args, kwargs, name, Objective.prefixForDefault, self.objectives)
+        f, name, args, kwargs = self._setupFunction(fun, args, kwargs, name, Objective.prefixForDefault, self.objectives)
         
-        obj = Objective(f, direction, name, self)
+        obj = Objective(f, direction, name, self, fun, args, kwargs)
 
         isExisting = False
         for i, objective in enumerate(self.objectives):
@@ -242,9 +255,9 @@ class FemtetOptimizationCore(ABC):
                       args:tuple or None = None,
                       kwargs:dict or None = None):
 
-        f, name = self._setupFunction(fun, args, kwargs, name, Constraint.prefixForDefault, self.constraints)
+        f, name, args, kwargs = self._setupFunction(fun, args, kwargs, name, Constraint.prefixForDefault, self.constraints)
 
-        obj = Constraint(f, lower_bound, upper_bound, name, self)
+        obj = Constraint(f, lower_bound, upper_bound, name, self, fun, args, kwargs)
 
         isExisting = False
         for i, constraint in enumerate(self.constraints):
@@ -334,15 +347,18 @@ class FemtetOptimizationCore(ABC):
             kwargs = {}
 
         #### Femtetを使う場合は、第一引数に自動的に Femtet の com オブジェクトが入っていることとする。
+        from ._NX_Femtet import NX_Femtet
         if type(self.FEM)==Femtet:
             f = lambda : fun(self.FEM.Femtet, *args, **kwargs)
+        elif type(self.FEM)==NX_Femtet:
+            f = lambda Femtet : fun(Femtet, *args, **kwargs)
         else:
             f = lambda : fun(*args, **kwargs)
         
         if name is None:
             name = self._getUniqueDefaultName(prefix, objects)
         
-        return f, name
+        return f, name, args, kwargs
 
     def _isDfValid(self, df):
         # column が指定の属性をすべて有しなければ invalid
@@ -415,7 +431,20 @@ class FemtetOptimizationCore(ABC):
             self.parameters['value'] = x
 
             # solve
-            if self.FEM is not None:
+            from ._NX_Femtet import NX_Femtet
+            if type(self.FEM)==NoFEM:
+                self.objectiveValues = [obj.fun() for obj in self.objectives]
+                self.constraintValues = [obj.fun() for obj in self.constraints]
+                self._record()
+            elif type(self.FEM)==NX_Femtet:
+                print('experimental feature')
+                results = self.FEM.f(self.parameters, self.objectives)
+                # TODO: エラー対応を関数にしてここでも呼ぶ
+                self.objectiveValues = results
+                # TODO: constraint 対応
+                self.constraintValues = [obj.fun() for obj in self.constraints]
+                self._record()
+            else:
                 try:
                     self.FEM.run(self.parameters)
                     # calc
@@ -424,6 +453,7 @@ class FemtetOptimizationCore(ABC):
                     self._record()
                 except (ModelError, MeshError, SolveError):
                     # TODO: 勾配法でもなんとかできるように何とかする（要研究）
+                    # TODO: 別の関数にする（読みにくくて仕方がない）
                     # history から最も近傍の点を探す
                     pHis = self.history[self.parameters['name'].values].values.astype(float)
                     idx = np.argmin(np.linalg.norm(pHis - x, axis=1))
@@ -449,10 +479,6 @@ class FemtetOptimizationCore(ABC):
                     self.objectiveValues = newObjectiveValues
                     self.constraintValues = [-1 for obj in self.constraints]
                     self._record()
-            else:
-                self.objectiveValues = [obj.fun() for obj in self.objectives]
-                self.constraintValues = [obj.fun() for obj in self.constraints]
-                self._record()
 
                 
         return [obj._convert(v) for obj, v in zip(self.objectives, self.objectiveValues)]
