@@ -53,8 +53,10 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/PyFemtet  # Replace <package-name> with your PyPI project name
+    env:
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
     permissions:
-      id-token: ${{ secrets.PYPI_API_TOKEN }}  # IMPORTANT: mandatory for trusted publishing
+      id-token: "$PYPI_API_TOKEN"  # IMPORTANT: mandatory for trusted publishing
     # download(from repository?) and upload to PyPI
     steps:
     - name: Download all the dists
