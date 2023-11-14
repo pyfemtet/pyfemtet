@@ -592,6 +592,7 @@ class FemtetOptimizationCore(ABC):
         # 前処理
         if not self.continuation:
             self._initRecord()
+        self.interruption = False
 
         # 時間測定しながら実行
         startTime = time.time()
