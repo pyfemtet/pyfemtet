@@ -28,16 +28,16 @@ from win32com.client import Dispatch #, constants
 
 #### Exception for Femtet error
 class ModelError(Exception):
-    pass
+    _message = 'モデル作成に失敗しました。目的関数と拘束関数の値は意味を持ちません。'
 
 class MeshError(Exception):
-    pass
+    _message = 'メッシュ作成に失敗しました。目的関数と拘束関数の値は意味を持ちません。'
 
 class SolveError(Exception):
-    pass
+    _message = 'ソルブに失敗しました。目的関数と拘束関数の値は意味を持ちません。'
 
 class UserInterruption(Exception):
-    pass
+    _message = 'ユーザー操作によって中断されました'
 
 
 #### FEM クラス
@@ -219,6 +219,7 @@ class FemtetOptimizationCore(ABC):
         self.processMonitor = None
         self.continuation = False # 現在の結果に上書き
         self.interruption = False
+        self.error_message = ''
         
         # 初期値
         if type(setFemtetStrategy) is str:
@@ -456,6 +457,37 @@ class FemtetOptimizationCore(ABC):
                 
 
     #### processing methods
+    
+    def _onerror(self, x, e:Exception):
+        self.error_message = e._message
+        # history から最も近傍の点を探す
+        pHis = self.history[self.parameters['name'].values].values.astype(float)
+        idx = np.argmin(np.linalg.norm(pHis - x, axis=1))
+        # その時点の解の objective が必ず劣解になるようにする
+        nearestResult = self.history.iloc[idx]
+        nearestObjectiveValues = nearestResult[[obj.name for obj in self.objectives]]
+        newObjectiveValues = []
+        for vNearest, objective in zip(nearestObjectiveValues, self.objectives):
+            d = objective.direction
+            if (type(d)==float) or (type(d)==int):
+                diff = vNearest - d
+                if diff>0:
+                    vnew = vNearest+1
+                else:
+                    vnew = vNearest-1
+            elif d=='minimize':
+                vnew = vNearest+1
+            elif d=='maximize':
+                vnew = vNearest-1
+            else:
+                raise Exception(f'objectiveのdirection引数がおかしい：{d}')
+            newObjectiveValues.append(vnew)
+        self.objectiveValues = newObjectiveValues
+        # 拘束は適当に値を入れる
+        self.constraintValues = [-1 for obj in self.constraints]
+        
+        # self._record() # 値は返していいけど history には含めない
+        
 
     def f(self, x:np.ndarray)->[float]:
         # 中断指令があったら Exception を起こす
@@ -464,60 +496,35 @@ class FemtetOptimizationCore(ABC):
         
         
         # 渡された x がすでに計算されたものであれば
-        # objective も constraint も更新する必要がない
+        # objective も constraint も更新する必要がなく
+        # そのまま converted objective を返せばいい
         if not self._isCalculated(x):
+            
+            self.error_message = '' # onerror が呼ばれなければこのまま _record される
+            
             # update parameters
             self.parameters['value'] = x
 
             # solve
-            from ._NX_Femtet import NX_Femtet
-            if type(self.FEM)==NoFEM:
-                self.objectiveValues = [obj.fun() for obj in self.objectives]
-                self.constraintValues = [obj.fun() for obj in self.constraints]
-                self._record()
-            elif type(self.FEM)==NX_Femtet:
-                print('experimental feature')
-                results = self.FEM.f(self.parameters, self.objectives)
-                # TODO: エラー対応を関数にしてここでも呼ぶ
-                self.objectiveValues = results
-                # TODO: constraint 対応
-                self.constraintValues = [obj.fun() for obj in self.constraints]
-                self._record()
-            else:
-                try:
-                    self.FEM.run(self.parameters)
-                    # calc
+            try:
+                from ._NX_Femtet import NX_Femtet
+
+                if type(self.FEM)==NoFEM:
                     self.objectiveValues = [obj.fun() for obj in self.objectives]
                     self.constraintValues = [obj.fun() for obj in self.constraints]
-                    self._record()
-                except (ModelError, MeshError, SolveError):
-                    # TODO: 勾配法でもなんとかできるように何とかする（要研究）
-                    # TODO: 別の関数にする（読みにくくて仕方がない）
-                    # history から最も近傍の点を探す
-                    pHis = self.history[self.parameters['name'].values].values.astype(float)
-                    idx = np.argmin(np.linalg.norm(pHis - x, axis=1))
-                    # その時点の解の objective が必ず劣解になるようにする
-                    nearestResult = self.history.iloc[idx]
-                    nearestObjectiveValues = nearestResult[[obj.name for obj in self.objectives]]
-                    newObjectiveValues = []
-                    for vNearest, objective in zip(nearestObjectiveValues, self.objectives):
-                        d = objective.direction
-                        if (type(d)==float) or (type(d)==int):
-                            diff = vNearest - d
-                            if diff>0:
-                                vnew = vNearest+1
-                            else:
-                                vnew = vNearest-1
-                        elif d=='minimize':
-                            vnew = vNearest+1
-                        elif d=='maximize':
-                            vnew = vNearest-1
-                        else:
-                            raise Exception('何かおかしい')
-                        newObjectiveValues.append(vnew)
-                    self.objectiveValues = newObjectiveValues
-                    self.constraintValues = [-1 for obj in self.constraints]
-                    self._record()
+                elif type(self.FEM)==NX_Femtet:
+                    results = self.FEM.f(self.parameters, self.objectives)
+                    self.objectiveValues = results
+                    self.constraintValues = [obj.fun() for obj in self.constraints] # TODO: constraint 対応
+                else:
+                    self.FEM.run(self.parameters)
+                    self.objectiveValues = [obj.fun() for obj in self.objectives]
+                    self.constraintValues = [obj.fun() for obj in self.constraints]
+                self._record()
+
+            except (ModelError, MeshError, SolveError) as e:
+                # TODO: 勾配法でもなんとかできるように何とかする（要研究）
+                self._onerror(x, e)
 
                 
         return [obj._convert(v) for obj, v in zip(self.objectives, self.objectiveValues)]
@@ -641,6 +648,7 @@ class FemtetOptimizationCore(ABC):
         columns.extend(cNames)
         columns.append('non_domi')
         columns.append('fit')
+        columns.append('is_error')
         columns.append('time')
         self.history = pd.DataFrame(columns=columns)
     
@@ -661,8 +669,9 @@ class FemtetOptimizationCore(ABC):
         row.extend(paramValues)
         row.extend(objValues)
         row.extend(consData)
-        row.append(False) # non-domi, temporal data
+        row.append(False) # non_domi, temporal data
         row.append(False) # fit, temporal data
+        row.append(self.error_message) # is_error, temporal data
         row.append(datetime.datetime.now()) # time
         pdf = pd.Series(row, index=self.history.columns)
         # calc fit
@@ -694,7 +703,7 @@ class FemtetOptimizationCore(ABC):
             
         # 非劣解の登録
         self.history['non_domi'] = non_domi
-        
+
         del _objectiveValues
         
     def _calcConstraintFit(self, pdf):

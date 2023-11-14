@@ -7,9 +7,11 @@ import pandas as pd
 from .core import FemtetOptimizationCore
 
 import optuna
+
 import logging
 
 from scipy.stats.qmc import LatinHypercube
+
 
 
 def generate_LHS(bounds)->np.ndarray:
@@ -88,6 +90,7 @@ class FemtetOptuna(FemtetOptimizationCore):
         #### 拘束のセットアップ
         self._parseConstraints()
         
+
         # 目的関数の設定
         def __objectives(trial):
             # 変数の設定
@@ -102,6 +105,13 @@ class FemtetOptuna(FemtetOptimizationCore):
 
             # 計算実行
             ojectiveValuesToMinimize = self.f(x)
+            if self.error_message != '':
+                # 拘束の設定
+                constraintValuesToBeNotPositive = tuple([1 for f in self._constraints])
+                # Store the constraints as user attributes so that they can be restored after optimization.
+                trial.set_user_attr("constraint", constraintValuesToBeNotPositive)
+                raise optuna.TrialPruned()
+                
 
             # 拘束の設定
             constraintValuesToBeNotPositive = tuple([f(x) for f in self._constraints])
@@ -111,6 +121,7 @@ class FemtetOptuna(FemtetOptimizationCore):
 
             # 結果
             return tuple(ojectiveValuesToMinimize)
+
 
         # 拘束の設定（？）
         def __constraints(trial):

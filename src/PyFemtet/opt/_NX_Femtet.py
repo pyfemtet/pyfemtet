@@ -63,9 +63,23 @@ class NX_Femtet(FEMSystem):
         pass
     
     def f(self, df, objectives):
-        self._update_model(df)
-        self._setup_new_Femtet()
-        self._run_new_Femtet(objectives)
+        from PyFemtet.opt.core import ModelError, MeshError, SolveError
+
+        try:
+            self._update_model(df)
+        except:
+            raise ModelError
+
+        try:
+            self._setup_new_Femtet()
+        except:
+            raise ModelError
+
+        try:
+            self._run_new_Femtet(objectives)
+        except:
+            raise SolveError
+ 
         return self.objectiveValues
             
     def _update_model(self, df):
