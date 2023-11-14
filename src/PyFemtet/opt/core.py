@@ -332,7 +332,27 @@ class FemtetOptimizationCore(ABC):
         else:
             raise Exception('パラメータの設定が不正です。')
     
-    def get_parameter(self, format='dict'):
+    def get_parameter(self, format:str='dict'):
+        '''
+        
+
+        Parameters
+        ----------
+        format : str, optional
+            parameter format.  'df', 'value' or 'dict'.
+            The default is 'dict'.
+
+        Raises
+        ------
+        Exception
+            DESCRIPTION.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        '''
         if format=='df':
             return self.parameters
         elif format=='value':

@@ -9,7 +9,49 @@ from .core import FemtetOptimizationCore
 import optuna
 import logging
 
+from scipy.stats.qmc import LatinHypercube
 
+
+def generate_LHS(bounds)->np.ndarray:
+    '''
+    d 個の変数の bounds を貰い、N 個のサンプル点を得る。
+    N は d を超える最小の素数 p に対し N = p**2
+    '''
+    d = len(bounds)
+
+    sampler = LatinHypercube(
+        d,
+        scramble=False,
+        strength=2,
+        # optimization='lloyd',
+        optimization='random-cd',
+        # seed=1
+        )
+    
+    
+    LIMIT = 100
+
+    def is_prime(p):
+        for i in range(2, p):
+            if p%i==0:
+                return False
+        return True
+    
+    def get_prime(minimum):
+        for p in range(minimum, LIMIT):
+            if is_prime(p):
+                return p
+        
+    n = get_prime(d+1)**2
+    data = sampler.random(n) # [0,1)
+    
+    for i, (data_range, datum) in enumerate(zip(bounds, data.T)):
+        minimum, maximum = data_range
+        band = maximum - minimum
+        converted_datum = datum * band + minimum
+        data[:,i] = converted_datum
+    
+    return data # data.shape = (N, d)
 
 # https://optuna.readthedocs.io/en/stable/index.html
 class FemtetOptuna(FemtetOptimizationCore):
@@ -75,7 +117,8 @@ class FemtetOptuna(FemtetOptimizationCore):
             return trial.user_attrs["constraint"]
 
         #### sampler の設定
-        sampler = optuna.samplers.NSGAIISampler(constraints_func=__constraints)
+        # sampler = optuna.samplers.NSGAIISampler(constraints_func=__constraints)
+        sampler = optuna.samplers.TPESampler(constraints_func=__constraints)
 
         # #### study があったら消す
         # try:
@@ -95,9 +138,27 @@ class FemtetOptuna(FemtetOptimizationCore):
             sampler=sampler)
 
         #### study への初期値の設定
-        # TODO: ラテンハイパーキューブサンプリングを初期値にする
         params = self.get_parameter('dict')
         study.enqueue_trial(params, user_attrs={"memo": "initial"})
+        
+        # ラテンハイパーキューブサンプリングを初期値にする
+        df = self.get_parameter('df')
+        names = []
+        bounds = []
+        for i, row in df.iterrows():
+            names.append(row['name'])
+            lb = row['lbound']
+            ub = row['ubound']
+            bounds.append([lb, ub])
+        data = generate_LHS(bounds)
+        
+        for datum in data:
+            d = {}
+            for name, v in zip(names, datum):
+                d[name] = v
+            study.enqueue_trial(d, user_attrs={"memo": "initial LHS"})
+
+        
 
         # study の実行
         study.optimize(__objectives, timeout=self.timeout, n_trials=self.n_trials)
