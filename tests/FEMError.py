@@ -19,13 +19,21 @@ def parabora(FEMObj):
     else:
         raise ModelError
 
+def parabora2(FEMObj):
+    global i
+    x = FEMObj.get_parameter('value')
+    if i<=5:
+        return ((x-2)**2).sum()
+    else:
+        raise ModelError
 
 FEM = NoFEM()
-FEMOpt = FemtetScipy(FEM)
-# FEMOpt = FemtetOptuna(FEM)
+# FEMOpt = FemtetScipy(FEM)
+FEMOpt = FemtetOptuna(FEM)
 
-FEMOpt.add_parameter('x', 0, -1, 1)
+FEMOpt.add_parameter('x', 1, 0, 2)
 FEMOpt.add_objective(parabora, args=(FEMOpt,))
+FEMOpt.add_objective(parabora2, args=(FEMOpt,))
 FEMOpt.set_process_monitor()
 FEMOpt.main()
 print(FEMOpt.history)

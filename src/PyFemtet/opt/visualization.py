@@ -133,7 +133,8 @@ class MultiobjectivePairPlot:
                     continue
                 # scatter（set_offsets）
                 # all
-                pdf = history[[cName, rName]]
+                idx = history['error_message']==''
+                pdf = history[[cName, rName]][idx]
                 scat = self.getLabeledScatter(ax, label=self.labelAll)
                 if scat is not None:
                     scat.set_offsets(pdf.values)
@@ -158,7 +159,8 @@ class MultiobjectivePairPlot:
                         scat.set_offsets(pdf.values.T)
                     
                 # 視野調整
-                pdf = history[[cName, rName]]
+                idx = history['error_message']==''
+                pdf = history[[cName, rName]][idx]
                 if len(pdf)==1:
                     xlim = pdf.values.T[0].min(), pdf.values.T[0].max()
                     xrange = 1

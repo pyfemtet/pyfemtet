@@ -453,6 +453,7 @@ class FemtetOptimizationCore(ABC):
             name = f'{prefix}_{i}'
             if not(name in names):
                 break
+            i += 1
         return name
                 
 
