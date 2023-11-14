@@ -20,9 +20,10 @@ class SimpleProcessMonitor:
         self.lines = []
         for i in range(self.N):
             ax = self.fig.axes[i]
-            line, = ax.plot([], [], 'o-')
-            subLine = ax.axhline(y=0, color='red', linestyle='--', lw=1)
-            self.lines.append([line, subLine])
+            line, = ax.plot([], [], 'o-', zorder=2) # メインの履歴
+            scat = ax.scatter([], [], s=50, marker='x', color='black', lw=3, label='FEM error', zorder=3) # エラーが生じているとき
+            subLine = ax.axhline(y=0, color='red', linestyle='--', lw=1, zorder=1)
+            self.lines.append([line, subLine, scat])
             # スクロールした時に direction を移動させる関数を登録するためにイベントピッカーを登録する
             ax.set_picker('draw_event')
         # 登録したイベントピッカーを接続する
@@ -32,6 +33,8 @@ class SimpleProcessMonitor:
         def lmd(*args, **kwargs):
             self.FEMOpt.interruption = True
         self.fig.canvas.mpl_connect('close_event', lmd)
+        
+        self.fig.tight_layout()
 
         
     def update(self):
@@ -40,11 +43,18 @@ class SimpleProcessMonitor:
         if len(xdata)==0:
             plt.pause(0.5)
             return
-        for ax, (line, subLine), objective in zip(self.fig.axes, self.lines, objectives):
-            # 描画
+        for ax, (line, subLine, scat), objective in zip(self.fig.axes, self.lines, objectives):
+            # データの描画
             ydata = self.FEMOpt.history[objective.name].values
             line.set_data(xdata, ydata)
-            subLine.set_ydata(ydata[-1]) # 再設定の時前の値にひきずられるから
+            subLine.set_ydata(ydata[-1]) # ylim 再設定の時に邪魔になるから
+            
+            # エラーの描画
+            idx = self.FEMOpt.history['error_message']!=''
+            xdata = list(self.FEMOpt.history['time'][idx])
+            ydata = list(self.FEMOpt.history[objective.name][idx])
+            scat.set_offsets(np.array([xdata, ydata]).T)
+
             # lim 再設定
             ax.set_ylabel(objective.name)
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M'))
@@ -63,8 +73,9 @@ class SimpleProcessMonitor:
         
     def adjustDirectionPosition(self, _):
         objectives = self.FEMOpt.objectives
-        for ax, (line, subLine), objective in zip(self.fig.axes, self.lines, objectives):
+        for ax, lines, objective in zip(self.fig.axes, self.lines, objectives):
             # ターゲット線の描画(get_limするから後で)
+            subLine = lines[1]
             minimum, maximum = ax.get_ylim()
             if objective.direction=='maximize':
                 y = maximum - (maximum - minimum) * 0.01

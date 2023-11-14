@@ -486,7 +486,7 @@ class FemtetOptimizationCore(ABC):
         # 拘束は適当に値を入れる
         self.constraintValues = [-1 for obj in self.constraints]
         
-        # self._record() # 値は返していいけど history には含めない
+        self._record()
         
 
     def f(self, x:np.ndarray)->[float]:
@@ -648,7 +648,7 @@ class FemtetOptimizationCore(ABC):
         columns.extend(cNames)
         columns.append('non_domi')
         columns.append('fit')
-        columns.append('is_error')
+        columns.append('error_message')
         columns.append('time')
         self.history = pd.DataFrame(columns=columns)
     

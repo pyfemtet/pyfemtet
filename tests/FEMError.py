@@ -14,7 +14,7 @@ def parabora(FEMObj):
     global i
     x = FEMObj.get_parameter('value')
     i += 1
-    if i<=10:
+    if i<=5:
         return (x**2).sum()
     else:
         raise ModelError
