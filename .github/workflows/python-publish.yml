@@ -52,11 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/PyFemtet  # Replace <package-name> with your PyPI project name
-    env:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      url: https://pypi.org/p/<package-name>  # Replace <package-name> with your PyPI project name
     permissions:
-      id-token: "$PYPI_API_TOKEN"  # IMPORTANT: mandatory for trusted publishing
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
     # download(from repository?) and upload to PyPI
     steps:
     - name: Download all the dists
@@ -66,3 +64,6 @@ jobs:
         path: dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
