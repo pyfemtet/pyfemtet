@@ -84,6 +84,10 @@ class NX_Femtet(FEMSystem):
             
     def _update_model(self, df):
         # run_journal を使って prt から x_t を作る
+        # prt と同じ名前の x_t ができる
+        # 先にそれを消しておく
+        path_x_t = os.path.splitext(self._path_prt)[0] + '.x_t'
+        os.remove(path_x_t)
         exe = r'%UGII_BASE_DIR%\NXBIN\run_journal.exe'
         tmp = dict(zip(df.name.values, df.value.values.astype(str)))
         strDict = json.dumps(tmp)
@@ -93,7 +97,10 @@ class NX_Femtet(FEMSystem):
             env=env,
             shell=True,
             cwd=os.path.dirname(self._path_prt))
-        # prt と同じ名前の x_t ができる
+        # この時点で x_t ファイルがなければモデルエラー
+        if os.path.isfile(path_x_t):
+            from PyFemtet.opt.core import ModelError
+            raise ModelError
 
     def _set_reference_of_new_excel(self, wb):
         try:
