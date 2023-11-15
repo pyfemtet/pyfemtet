@@ -104,24 +104,26 @@ class FemtetOptuna(FemtetOptimizationCore):
                 x.append(trial.suggest_float(name, lb, ub))
             x = np.array(x)
 
+            # memo
+            try:
+                algorithm_message = trial.user_attrs["memo"]
+            except AttributeError:
+                algorithm_message = ''
+
+
             # 計算実行
-            ojectiveValuesToMinimize = self.f(x)
+            ojectiveValuesToMinimize = self.f(x, algorithm_message)
             if self.error_message != '':
                 # 拘束の設定
                 constraintValuesToBeNotPositive = tuple([1 for f in self._constraints])
-                # Store the constraints as user attributes so that they can be restored after optimization.
                 trial.set_user_attr("constraint", constraintValuesToBeNotPositive)
                 raise optuna.TrialPruned()
                 
-
             # 拘束の設定
             constraintValuesToBeNotPositive = tuple([f(x) for f in self._constraints])
 
             # Store the constraints as user attributes so that they can be restored after optimization.
             trial.set_user_attr("constraint", constraintValuesToBeNotPositive)
-            
-            # memo
-            self.algorithm_message = trial.user_attrs["memo"]
 
             # 結果
             return tuple(ojectiveValuesToMinimize)
@@ -173,20 +175,9 @@ class FemtetOptuna(FemtetOptimizationCore):
                 d[name] = v
             study.enqueue_trial(d, user_attrs={"memo": "initial Latin Hypercube Sampling"})
 
-        
-
         # study の実行
         study.optimize(__objectives, timeout=self.timeout, n_trials=self.n_trials)
 
-        # 出力（あとで消す）
-        # history とかの取得
-        # df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
-        # print("Best params: ", study.best_params)
-        # print("Best value: ", study.best_values)
-        # print("Best Trial: ", study.best_trials)
-        # print("Trials: ", study.trials)
-        # print(df)
-        
         return study
 
 

@@ -513,7 +513,7 @@ class FemtetOptimizationCore(ABC):
         self._record()
         
 
-    def f(self, x:np.ndarray)->[float]:
+    def f(self, x:np.ndarray, algorithm_message='')->[float]:
         # 中断指令があったら Exception を起こす
         if self.interruption:
             raise UserInterruption
@@ -525,7 +525,7 @@ class FemtetOptimizationCore(ABC):
         if not self._isCalculated(x):
             
             self.error_message = '' # onerror が呼ばれなければこのまま _record される
-            self.algorithm_message = ''
+            self.algorithm_message = algorithm_message
             
             # update parameters
             self.parameters['value'] = x
@@ -712,7 +712,7 @@ class FemtetOptimizationCore(ABC):
         # 保存
         try:
             self.history.to_csv(self.historyPath, index=None, encoding='shift-jis')
-        except:
+        except PermissionError:
             # excel で開くなど permission error が出る可能性がある。
             # その場合は単にスキップすれば、次の iteration ですべての履歴が保存される
             pass
