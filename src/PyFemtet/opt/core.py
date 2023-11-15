@@ -12,6 +12,7 @@ import inspect
 def getCurrentMethod():
     return inspect.currentframe().f_code.co_name
 import threading
+import functools
 
 # 3rd-party modules
 import numpy as np
@@ -241,6 +242,15 @@ class FemtetOptimizationCore(ABC):
             dtype=object
             )
 
+    # マルチプロセスなどで pickle するときに COM を持っていても仕方がないので消す
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['FEM']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
 
     #### pre-processing methods
 
@@ -386,14 +396,24 @@ class FemtetOptimizationCore(ABC):
         if kwargs is None:
             kwargs = {}
 
-        #### Femtetを使う場合は、第一引数に自動的に Femtet の com オブジェクトが入っていることとする。
+        #### Femtetを使う場合は、第一引数に自動的に Femtet の COM オブジェクトが入っていることとする。
+
         from ._NX_Femtet import NX_Femtet
         if type(self.FEM)==Femtet:
-            f = lambda : fun(self.FEM.Femtet, *args, **kwargs)
+            f = functools.partial(*(self.FEM.Femtet, *args), **kwargs)
         elif type(self.FEM)==NX_Femtet:
-            f = lambda Femtet : fun(Femtet, *args, **kwargs)
+            # partial オブジェクトを使って 2 番目から引数を埋めていくために
+            # args を kwargs に変換
+            _kwargs = kwargs.copy()
+            sig = inspect.signature(fun)
+            for name, arg in zip(list(sig.parameters.keys())[1:], args):
+                # kwargs の前に args が入っているはずなのでOK
+                # args のほうが短いはずだが、それでkwargsが被らないはずなのでOK
+                _kwargs[name] = arg
+            f = functools.partial(fun, **_kwargs)
         else:
-            f = lambda : fun(*args, **kwargs)
+            f = functools.partial(fun, *args, *kwargs)
+            
         
         if name is None:
             name = self._getUniqueDefaultName(prefix, objects)
@@ -516,9 +536,9 @@ class FemtetOptimizationCore(ABC):
                     self.objectiveValues = [obj.fun() for obj in self.objectives]
                     self.constraintValues = [obj.fun() for obj in self.constraints]
                 elif type(self.FEM)==NX_Femtet:
-                    results = self.FEM.f(self.parameters, self.objectives)
-                    self.objectiveValues = results
-                    self.constraintValues = [obj.fun() for obj in self.constraints] # TODO: constraint 対応
+                    obj_result, cons_result = self.FEM.f(self.parameters, self.objectives, self.constraints)
+                    self.objectiveValues = obj_result
+                    self.constraintValues = cons_result
                 else:
                     self.FEM.run(self.parameters)
                     self.objectiveValues = [obj.fun() for obj in self.objectives]

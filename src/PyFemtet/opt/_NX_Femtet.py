@@ -19,10 +19,8 @@ from PyFemtet.opt.core import FEMSystem
 
 # import re
 import warnings
-pattern = r"32-bit"
-warnings.filterwarnings("ignore", category=UserWarning, message=pattern)
-# warnings.filterwarnings("ignore", category=UserWarning, module='pywinauto')
-# warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning, message=r"32-bit")
+warnings.filterwarnings("ignore", category=UserWarning, message=r"64-bit")
 
 
 here, me = os.path.split(__file__)
@@ -41,7 +39,7 @@ PATH_REF = r'C:\Program Files\Femtet_Ver2023.1.0_64bit\Program\Macro32\FemtetRef
 PATH_JOURNAL = os.path.abspath(os.path.join(here, 'update_model_parameter.py'))
 
 
-def _f(functions, arguments):
+def _f(objective_functions, objective_arguments, constraint_functions, constraint_arguments):
     # インスタンスメソッドにしたら動かない
     # クラスメソッドにしても動かない。なんでだろう？
     # 新しいプロセスで呼ぶ関数。
@@ -49,13 +47,23 @@ def _f(functions, arguments):
     # その後、プロセスは死ぬので Femtet は解放される
     # TODO:この関数の最後で、Femtet を殺していいかどうか検討する
     Femtet = Dispatch('FemtetMacro.Femtet')
-    Femtet.Gaudi.Mesh()
-    Femtet.Solve()
+    from .core import MeshError, SolveError
+    try:
+        Femtet.Gaudi.Mesh()
+    except:
+        raise MeshError
+    try:
+        Femtet.Solve()
+    except:
+        raise SolveError
     Femtet.OpenCurrentResult(True)
-    ret = []
-    for func, (args, kwargs) in zip(functions, arguments):
-        ret.append(func(Femtet, *args, **kwargs))
-    return ret
+    ret_objective = []
+    ret_constraint = []
+    for func, (args, kwargs) in zip(objective_functions, objective_arguments):
+        ret_objective.append(func(Femtet, *args, **kwargs))
+    for func, (args, kwargs) in zip(constraint_functions, constraint_arguments):
+        ret_constraint.append(func(Femtet, *args, **kwargs))
+    return ret_objective, ret_constraint
 
 
 class NX_Femtet(FEMSystem):
@@ -64,7 +72,17 @@ class NX_Femtet(FEMSystem):
         self._path_bas = None
         self._path_xlsm = None
         self._stop_excel_watcher = False
-    
+        self.excel = None
+
+    # def __getstate__(self):
+    #     state = self.__dict__.copy()
+    #     # マルチプロセスのために picke できるようにするため COM オブジェクトを削除
+    #     del state['excel']
+    #     return state    
+
+    # def __setstate__(self, state):
+    #     self.__dict__.update(state)
+
     def set_bas(self, path_bas):
         self._path_bas = os.path.abspath(path_bas)
         self._path_xlsm = None
@@ -77,28 +95,28 @@ class NX_Femtet(FEMSystem):
         # 使わないけど FEMSystem が実装を求めるためダミーで作成
         pass
     
-    def f(self, df, objectives):
+    def f(self, df, objectives, constraints):
         from PyFemtet.opt.core import ModelError, MeshError, SolveError
 
         try:
             self._update_model(df)
-        except:
+        except ModelError as e:
             print('failed to create model via NX')
-            raise ModelError
+            raise e
 
         try:
             self._setup_new_Femtet()
-        except:
+        except ModelError as e:
             print('failed to setup model via Excel-Femtet')
-            raise ModelError # TODO: Excel のエラーを検出する
+            raise e
 
         try:
-            self._run_new_Femtet(objectives)
-        except:
+            self._run_new_Femtet(objectives, constraints)
+        except (MeshError, SolveError) as e:
             print('failed to mesh or solve via FEMOpt-Femtet')
-            raise SolveError
+            raise e
  
-        return self.objectiveValues
+        return self.objectiveValues, self.constraintValues
             
     def _update_model(self, df):
         # run_journal を使って prt から x_t を作る
@@ -182,13 +200,17 @@ class NX_Femtet(FEMSystem):
             # 終了
             self._close_excel_by_force()
 
-    def _run_new_Femtet(self, objectives):
-        # 関数を適用する
+    def _run_new_Femtet(self, objectives, constraints):
+        # Python のサブプロセスで目的関数の計算を適用する
+        # （メインプロセスでやるとサブスレッドであっても Femtet を捕まえて次の Excel 処理に渡さなくなる）
+        obj_functions = [obj.ptrFunc for obj in objectives]
+        obj_arguments = [(obj.args, obj.kwargs) for obj in objectives]
+        cons_functions = [obj.ptrFunc for obj in constraints]
+        cons_arguments = [(obj.args, obj.kwargs) for obj in constraints]
         with Pool(processes=1) as p:
-            functions = [obj.ptrFunc for obj in objectives]
-            arguments = [(obj.args, obj.kwargs) for obj in objectives]
-            result = p.apply(_f, (functions, arguments))
-            self.objectiveValues = result
+            obj_result, cons_result = p.apply(_f, (obj_functions, obj_arguments, cons_functions, cons_arguments))
+            self.objectiveValues = obj_result
+            self.constraintValues = cons_result
         
     def _close_excel_by_force(self):
         # プロセス ID の取得
