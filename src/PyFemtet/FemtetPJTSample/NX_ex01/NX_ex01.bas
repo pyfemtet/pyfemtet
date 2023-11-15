@@ -1,7 +1,7 @@
 Attribute VB_Name = "FemtetMacro"
 Option Explicit
 
-Dim Femtet As New CFemtet
+Dim FEMTET As New CFemtet
 Dim Als As CAnalysis
 Dim BodyAttr As CBodyAttribute
 Dim Bnd As CBoundary
@@ -23,20 +23,20 @@ Global nullBody() As CGaudiBody
 '///////////////////////////////////////////////////
 
 '変数の宣言
-Private pi as Double
+Private pi As Double
 '///////////////////////////////////////////////////
 
 
 '////////////////////////////////////////////////////////////
 '    Main関数
 '////////////////////////////////////////////////////////////
-Sub FemtetMain() 
+Sub FemtetMain()
     '------- Femtet自動起動 (不要な場合やExcelで実行しない場合は下行をコメントアウトしてください) -------
     Workbooks("FemtetRef.xla").AutoExecuteFemtet
 
     '------- 新規プロジェクト -------
-    If Femtet.OpenNewProject() = False Then
-        Femtet.ShowLastError
+    If FEMTET.OpenNewProject() = False Then
+        FEMTET.ShowLastError
     End If
 
     '------- 変数の定義 -------
@@ -49,20 +49,13 @@ Sub FemtetMain()
     BoundarySetUp
 
     '------- モデルの作成 -------
-    Set Gaudi = Femtet.Gaudi
+    Set Gaudi = FEMTET.Gaudi
     MakeModel
 
     '------- 標準メッシュサイズの設定 -------
     '<<<<<<< 自動計算に設定する場合は-1を設定してください >>>>>>>
-    Gaudi.MeshSize = 1
+    Gaudi.MeshSize = 4
 
-    '------- プロジェクトの保存 -------
-    Dim ProjectFilePath As String
-    ProjectFilePath = "C:\Users\mm11592\AppData\Local\Temp\FemtetPrjTmp_PID[9160]\新規プロジェクト"
-    '<<<<<<< プロジェクトを保存する場合は以下のコメントを外してください >>>>>>>
-    'If Femtet.SaveProject(ProjectFilePath & ".femprj", True) = False Then
-    '    Femtet.ShowLastError
-    'End If
 
     '------- メッシュの生成 -------
     '<<<<<<< メッシュを生成する場合は以下のコメントを外してください >>>>>>>
@@ -90,13 +83,19 @@ End Sub
 Sub AnalysisSetUp()
 
     '------- 変数にオブジェクトの設定 -------
-    Set Als = Femtet.Analysis
+    Set Als = FEMTET.Analysis
 
     '------- 解析条件共通(Common) -------
     Als.AnalysisType = GALILEO_C
 
+    '------- 磁場(Gauss) -------
+    Als.Gauss.b2ndEdgeElement = True
+
     '------- 応力(Galileo) -------
     Als.Galileo.bResultDetail = True
+
+    '------- 電磁波(Hertz) -------
+    Als.Hertz.b2ndEdgeElement = True
 
     '------- 調和解析(Harmonic) -------
     Als.Harmonic.FreqSweepType = LINEAR_INTERVAL_C
@@ -105,23 +104,22 @@ Sub AnalysisSetUp()
     Als.Transient.bAuto = False
 
     '------- 熱荷重(ThermalStress) -------
-    Als.ThermalStress.Temp = (25)
-    Als.ThermalStress.TempRef =(25)
+    Als.ThermalStress.Temp = (25#)
+    Als.ThermalStress.TempRef = (25#)
 
     '------- 高度な設定(HighLevel) -------
     Als.HighLevel.MemoryLimit = (32)
 
     '------- メッシュの設定(MeshProperty) -------
-    Als.MeshProperty.bMiddleNode = False
     Als.MeshProperty.bAdaptiveMeshOnCurve = True
     Als.MeshProperty.bAutoCalcAutoAirMeshSize = False
-    Als.MeshProperty.AutoAirMeshSize = (60)
+    Als.MeshProperty.AutoAirMeshSize = (60#)
     Als.MeshProperty.bChangePlane = True
     Als.MeshProperty.bMeshG2 = True
     Als.MeshProperty.bPeriodMesh = False
 
     '------- 複数ステップ設定(StepAnalysis) -------
-    Als.StepAnalysis.Set_Table_withoutTime 0, (20), (2.5) * 10 ^ (1)
+    Als.StepAnalysis.Set_Table_withoutTime 0, (20), (25#)
 
     '------- 結果インポート(Import) -------
     Als.Import.AnalysisModelName = "未選択"
@@ -133,7 +131,7 @@ End Sub
 Sub BodyAttributeSetUp()
 
     '------- 変数にオブジェクトの設定 -------
-    Set BodyAttr = Femtet.BodyAttribute
+    Set BodyAttr = FEMTET.BodyAttribute
 
     '------- Body属性の設定 -------
     BodyAttributeSetUp_ボディ属性_001
@@ -147,19 +145,22 @@ Sub BodyAttributeSetUp_ボディ属性_001()
     Dim Index As Integer
 
     '------- Body属性の追加 -------
-    BodyAttr.Add "ボディ属性_001" 
+    BodyAttr.Add "ボディ属性_001"
 
     '------- Body属性 Indexの設定 -------
-    Index = BodyAttr.Ask ( "ボディ属性_001" ) 
+    Index = BodyAttr.Ask("ボディ属性_001")
 
     '------- シートボディの厚み or 2次元解析の奥行き(BodyThickness)/ワイヤーボディ幅(WireWidth) -------
     BodyAttr.Length(Index).bUseAnalysisThickness2D = True
 
     '------- 方向(Direction) -------
-    BodyAttr.Direction(Index).SetAxisVector (0), (0), (1)
+    BodyAttr.Direction(Index).SetAxisVector (0#), (0#), (1#)
 
     '------- 初期速度(InitialVelocity) -------
     BodyAttr.InitialVelocity(Index).bAnalysisUse = True
+
+    '------- 流体(FluidBern) -------
+    BodyAttr.FluidAttribute(Index).FlowCondition.bSpline = False
 
     '------- 輻射(Emittivity) -------
     BodyAttr.ThermalSurface(Index).Emittivity.Eps = (0.8)
@@ -171,7 +172,7 @@ End Sub
 Sub MaterialSetUp()
 
     '------- 変数にオブジェクトの設定 -------
-    Set Mtl = Femtet.Material
+    Set Mtl = FEMTET.Material
 
     '------- Materialの設定 -------
     MaterialSetUp_007_鉄Fe
@@ -185,10 +186,10 @@ Sub MaterialSetUp_007_鉄Fe()
     Dim Index As Integer
 
     '------- Materialの追加 -------
-    Mtl.Add "007_鉄Fe" 
+    Mtl.Add "007_鉄Fe"
 
     '------- Material Indexの設定 -------
-    Index = Mtl.Ask ( "007_鉄Fe" ) 
+    Index = Mtl.Ask("007_鉄Fe")
 
     '------- 透磁率(Permeability) -------
     Mtl.Permeability(Index).sMu = (5000)
@@ -251,7 +252,7 @@ End Sub
 Sub BoundarySetUp()
 
     '------- 変数にオブジェクトの設定 -------
-    Set Bnd = Femtet.Boundary
+    Set Bnd = FEMTET.Boundary
 
     '------- Boundaryの設定 -------
     BoundarySetUp_RESERVED_default
@@ -267,10 +268,10 @@ Sub BoundarySetUp_RESERVED_default()
     Dim Index As Integer
 
     '------- Boundaryの追加 -------
-    Bnd.Add "RESERVED_default" 
+    Bnd.Add "RESERVED_default"
 
     '------- Boundary Indexの設定 -------
-    Index = Bnd.Ask ( "RESERVED_default" ) 
+    Index = Bnd.Ask("RESERVED_default")
 
     '------- 熱(Thermal) -------
     Bnd.Thermal(Index).bConAuto = True
@@ -291,10 +292,10 @@ Sub BoundarySetUp_fix()
     Dim Index As Integer
 
     '------- Boundaryの追加 -------
-    Bnd.Add "fix" 
+    Bnd.Add "fix"
 
     '------- Boundary Indexの設定 -------
-    Index = Bnd.Ask ( "fix" ) 
+    Index = Bnd.Ask("fix")
 
     '------- 機械(Mechanical) -------
     Bnd.Mechanical(Index).Condition = DISPLACEMENT_C
@@ -308,6 +309,9 @@ Sub BoundarySetUp_fix()
 
     '------- 輻射(Emittivity) -------
     Bnd.Thermal(Index).Emittivity.Eps = (0.8)
+
+    '------- 流体(FluidBern) -------
+    Bnd.FluidBern(Index).bSpline = True
 End Sub
 
 '////////////////////////////////////////////////////////////
@@ -318,14 +322,14 @@ Sub BoundarySetUp_load()
     Dim Index As Integer
 
     '------- Boundaryの追加 -------
-    Bnd.Add "load" 
+    Bnd.Add "load"
 
     '------- Boundary Indexの設定 -------
-    Index = Bnd.Ask ( "load" ) 
+    Index = Bnd.Ask("load")
 
     '------- 機械(Mechanical) -------
     Bnd.Mechanical(Index).Condition = FACE_LOAD_C
-    Bnd.Mechanical(Index).SetT (0), (0), (-10)
+    Bnd.Mechanical(Index).SetT (0#), (0#), (-10)
     Bnd.Mechanical(Index).SetTM (0), (0), (0)
     Bnd.Mechanical(Index).bT = True
 
@@ -338,6 +342,9 @@ Sub BoundarySetUp_load()
 
     '------- 輻射(Emittivity) -------
     Bnd.Thermal(Index).Emittivity.Eps = (0.8)
+
+    '------- 流体(FluidBern) -------
+    Bnd.FluidBern(Index).bSpline = True
 End Sub
 
 '////////////////////////////////////////////////////////////
@@ -359,7 +366,7 @@ Sub InitVariables()
 
 
     'VB上の変数の定義
-    pi = 3.1415926535897932
+    pi = 3.14159265358979
 
     'FemtetGUI上の変数の登録（既存モデルの変数制御等でのみ利用）
 
@@ -371,16 +378,16 @@ End Sub
 Sub MakeModel()
 
     '------- Body配列変数の定義 -------
-    Dim Body() as CGaudiBody
+    Dim Body() As CGaudiBody
 
     '------- モデルを描画させない設定 -------
-    Femtet.RedrawMode = False
+    FEMTET.RedrawMode = False
 
 
     '------- Import2 -------
     ReDim Preserve Body(0)
     Dim BodyArray0() As CGaudiBody
-    Gaudi.Import2 "C:\Users\mm11592\Documents\myFiles2\working\PyFemtetOpt2\PyFemtetOptGit\NXTEST.x_t", True, BodyArray0, False
+    Gaudi.Import2 ThisWorkbook.Path + "\NXTEST.x_t", True, BodyArray0, False
     Set Body(0) = BodyArray0(0)
 
     '------- SetName -------
@@ -399,7 +406,7 @@ Sub MakeModel()
 
 
     '------- モデルを再描画します -------
-    Femtet.Redraw
+    FEMTET.Redraw
 
 End Sub
 
@@ -409,11 +416,11 @@ End Sub
 Sub SamplingResult()
 
     '------- 変数にオブジェクトの設定 -------
-    Set Gogh = Femtet.Gogh
+    Set Gogh = FEMTET.Gogh
 
     '------- 現在の計算結果を中間ファイルから開く -------
-    If Femtet.OpenCurrentResult(True) = False Then
-        Femtet.ShowLastError
+    If FEMTET.OpenCurrentResult(True) = False Then
+        FEMTET.ShowLastError
     End If
 
     '------- フィールドの設定 -------
@@ -424,7 +431,7 @@ Sub SamplingResult()
     Dim ResultMax As Double ' 最大値
 
     If Gogh.Galileo.GetMAXVectorPoint(VEC_C, CMPX_REAL_C, PosMax, ResultMax) = False Then
-        Femtet.ShowLastError
+        FEMTET.ShowLastError
     End If
 
     '------- 最小値の取得 -------
@@ -432,14 +439,14 @@ Sub SamplingResult()
     Dim ResultMin As Double '最小値
 
     If Gogh.Galileo.GetMINVectorPoint(VEC_C, CMPX_REAL_C, PosMin, ResultMin) = False Then
-        Femtet.ShowLastError
+        FEMTET.ShowLastError
     End If
 
     '------- 任意座標の計算結果の取得 -------
     Dim Value() As New CComplex
 
-    If Gogh.Galileo.GetVectorAtPoint(0, 0, 0, Value()) = False Then
-        Femtet.ShowLastError
+    If Gogh.Galileo.GetVectorAtPoint(100, 5, 50, Value()) = False Then
+        FEMTET.ShowLastError
     End If
 
     ' 複数の座標の結果をまとめて取得する場合は、MultiGetVectorAtPoint関数をご利用ください。
