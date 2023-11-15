@@ -361,7 +361,7 @@ class FemtetOptimizationCore(ABC):
         elif format=='dict':
             ret = {}
             for i, row in self.parameters.iterrows():
-                ret[row.name] = row.value
+                ret[row['name']] = row.value
             return ret
         else:
             fname = getCurrentMethod()
@@ -460,6 +460,8 @@ class FemtetOptimizationCore(ABC):
     #### processing methods
     
     def _onerror(self, x, e:Exception):
+        if len(self.history)==0:
+            raise Exception('初期値での計算で FEM のエラーが生じました。初期値はエラーが出ないように選んでください。')
         self.error_message = e._message
         # history から最も近傍の点を探す
         pHis = self.history[self.parameters['name'].values].values.astype(float)
@@ -684,7 +686,12 @@ class FemtetOptimizationCore(ABC):
         # update non-domi
         self._calcNonDomi()
         # 保存
-        self.history.to_csv(self.historyPath, index=None, encoding='shift-jis')
+        try:
+            self.history.to_csv(self.historyPath, index=None, encoding='shift-jis')
+        except:
+            # excel で開くなど permission error が出る可能性がある。
+            # その場合は単にスキップすれば、次の iteration ですべての履歴が保存される
+            pass
             
     def _calcNonDomi(self):
         '''non-dominant 解を計算する'''

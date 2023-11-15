@@ -1,7 +1,7 @@
 import numpy as np
 
 from PyFemtet.opt._NX_Femtet import NX_Femtet
-from PyFemtet.opt import FemtetScipy
+from PyFemtet.opt import FemtetOptuna
 
 from win32com.client import constants
 from win32com.client import Dispatch
@@ -13,20 +13,33 @@ def disp(Femtet):
     # Femtet = Dispatch('FemtetMacro.Femtet')
     # Femtet.OpenCurrentResult(True)
     Gogh = Femtet.Gogh
-    Gogh.Activate()
     _, _, ret = Gogh.Galileo.GetMaxDisplacement_py()
     return ret
+
+def volume(Femtet):
+    '''評価指標を定義する関数は、第一引数に Femtet のインスタンスを取るようにしてください。'''
+    Gogh = Femtet.Gogh
+    _, ret = Gogh.CalcVolume_py([0])
+    return ret
+
 
 if __name__=='__main__':
     here, me = os.path.split(__file__)
     os.chdir(here)
     FEM = NX_Femtet('NXTEST.prt') # この機能を使う際はエントリポイントをガードしてください。
-    FEM.set_bas('NXTEST.bas')
-    # FEM.set_excel('NXTEST.xlsm')
-    FEMOpt = FemtetScipy(FEM)
-    FEMOpt.add_parameter('Cut_x', 20, lower_bound=0, upper_bound=50)
-    FEMOpt.add_parameter('Cut_y', 20, lower_bound=0, upper_bound=50)
+    # FEM.set_bas('NXTEST.bas')
+    FEM.set_excel('NXTEST.xlsm')
+    FEMOpt = FemtetOptuna(FEM)
+    FEMOpt.add_parameter('A_x', 50, lower_bound=25, upper_bound=95)
+    FEMOpt.add_parameter('A_y', 45, lower_bound=5, upper_bound=45)
+    FEMOpt.add_parameter('B_x', 30, lower_bound=25, upper_bound=95)
+    FEMOpt.add_parameter('B_y', 12, lower_bound=5, upper_bound=45)
+    FEMOpt.add_parameter('C_x', 90, lower_bound=25, upper_bound=95)
+    FEMOpt.add_parameter('C_y', 45, lower_bound=5, upper_bound=45)
+    FEMOpt.add_parameter('Cut_x', 10, lower_bound=5, upper_bound=45)
+    FEMOpt.add_parameter('Cut_y', 20, lower_bound=5, upper_bound=45)
     FEMOpt.add_objective(disp, direction=0)
+    FEMOpt.add_objective(volume, direction='minimize')
 
     # FEMOpt._initRecord()
     # print(FEMOpt.f(np.array((5,5))))

@@ -114,6 +114,7 @@ dependencies = [ # Optional
     # pyqtgraph,
     #"spyder",
     "pywin32",
+    "pywinauto",
 ]
 
 # List additional groups of dependencies here (e.g. development
