@@ -1,5 +1,6 @@
 import os
 import datetime
+import functools
 
 import numpy as np
 import pandas as pd
@@ -191,6 +192,11 @@ class FemtetOptuna(FemtetOptimizationCore):
             self.f(x)
         return self.constraintValues[i]
 
+    def _createLowerBoundFun(self, x, i, lb):
+        return lb - self._createConstraintFun(x, i)
+
+    def _createUpperBoundFun(self, x, i, ub):
+        return self._createConstraintFun(x, i) - ub
 
     def _parseConstraints(self):
         '''与えられた拘束情報を optuna 形式に変換する'''
@@ -200,13 +206,11 @@ class FemtetOptuna(FemtetOptimizationCore):
             # optuna で非正拘束にするためにそれぞれ関数を作る
             if lb is not None: # fun >= lb  <=>  lb - fun <= 0
                 self._constraints.append(
-                    lambda x,i=i,lb=lb:
-                        lb - self._createConstraintFun(x, i)
+                    functools.partial(self._createLowerBoundFun, i=i, lb=lb)
                     )
             if ub is not None: # ub >= fun  <=>  fun - ub <= 0
                 self._constraints.append(
-                    lambda x,i=i,ub=ub:
-                        self._createConstraintFun(x, i) - ub
+                    functools.partial(self._createLowerBoundFun, i=i, ub=ub)
                     )
             
 
