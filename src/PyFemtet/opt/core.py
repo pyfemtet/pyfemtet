@@ -220,6 +220,7 @@ class FemtetOptimizationCore(ABC):
         self.processMonitor = None
         self.continuation = False # 現在の結果に上書き
         self.interruption = False
+        self.algorithm_message = ''
         self.error_message = ''
         
         # 初期値
@@ -524,6 +525,7 @@ class FemtetOptimizationCore(ABC):
         if not self._isCalculated(x):
             
             self.error_message = '' # onerror が呼ばれなければこのまま _record される
+            self.algorithm_message = ''
             
             # update parameters
             self.parameters['value'] = x
@@ -672,6 +674,7 @@ class FemtetOptimizationCore(ABC):
         columns.extend(cNames)
         columns.append('non_domi')
         columns.append('fit')
+        columns.append('algorithm_message')
         columns.append('error_message')
         columns.append('time')
         self.history = pd.DataFrame(columns=columns)
@@ -695,7 +698,8 @@ class FemtetOptimizationCore(ABC):
         row.extend(consData)
         row.append(False) # non_domi, temporal data
         row.append(False) # fit, temporal data
-        row.append(self.error_message) # is_error, temporal data
+        row.append(self.algorithm_message)
+        row.append(self.error_message)
         row.append(datetime.datetime.now()) # time
         pdf = pd.Series(row, index=self.history.columns)
         # calc fit

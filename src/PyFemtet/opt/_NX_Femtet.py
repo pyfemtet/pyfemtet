@@ -173,8 +173,13 @@ class NX_Femtet(FEMSystem):
             # マクロのセットアップ
             self._set_reference_of_new_excel(wb)
 
-        # TODO: この処理の検証：保存したことにする（エラーで強制終了されるときにこの子にアクセスできないからここで Saved しとけば「アイテムの回復」に出てこないことを期待、まだ未テスト）
-        wb.Saved = True
+        # Saved にしておけば自動回復ファイルが保存されない
+        while True:
+            try:
+                wb.Saved = True
+                break
+            except AttributeError: # wb が開く前に Saved が走る対策
+                continue
         
         # excel VBA エラー監視スレッドの開始
         self._stop_excel_watcher = False

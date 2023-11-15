@@ -119,6 +119,9 @@ class FemtetOptuna(FemtetOptimizationCore):
 
             # Store the constraints as user attributes so that they can be restored after optimization.
             trial.set_user_attr("constraint", constraintValuesToBeNotPositive)
+            
+            # memo
+            self.algorithm_message = trial.user_attrs["memo"]
 
             # 結果
             return tuple(ojectiveValuesToMinimize)
@@ -168,7 +171,7 @@ class FemtetOptuna(FemtetOptimizationCore):
             d = {}
             for name, v in zip(names, datum):
                 d[name] = v
-            study.enqueue_trial(d, user_attrs={"memo": "initial LHS"})
+            study.enqueue_trial(d, user_attrs={"memo": "initial Latin Hypercube Sampling"})
 
         
 
