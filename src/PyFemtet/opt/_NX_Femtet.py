@@ -72,6 +72,7 @@ class NX_Femtet(FEMSystem):
         self._path_bas = None
         self._path_xlsm = None
         self._stop_excel_watcher = False
+        self.excel = None
 
     # def __getstate__(self):
     #     state = self.__dict__.copy()
