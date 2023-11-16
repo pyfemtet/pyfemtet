@@ -43,5 +43,5 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # 型判定のためインポート
 from matplotlib.collections import PathCollection
-
+from matplotlib.lines import Line2D
 

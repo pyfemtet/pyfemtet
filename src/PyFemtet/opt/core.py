@@ -13,16 +13,17 @@ def getCurrentMethod():
     return inspect.currentframe().f_code.co_name
 import threading
 import functools
+import math
 
 # 3rd-party modules
 import numpy as np
 import pandas as pd
+from optuna._hypervolume import WFG
 
 # for Femtet
 import win32com.client
 from win32com.client import Dispatch #, constants
 # from ..tools.FemtetClassConst import FemtetClassName as const
-
 
 
 
@@ -378,14 +379,19 @@ class FemtetOptimizationCore(ABC):
             fname = getCurrentMethod()
             raise Exception(f'{fname} got invalid format: {format}')
 
-    def set_process_monitor(self):
-        self._initRecord()
-        if len(self.objectives)==1:
-            from .visualization import SimpleProcessMonitor
-            self.processMonitor = SimpleProcessMonitor(self)
-        elif len(self.objectives)>1:
-            from .visualization import MultiobjectivePairPlot
-            self.processMonitor = MultiobjectivePairPlot(self)
+    def set_process_monitor(self, ProcessMonitorClass=None):
+        if self.history is None:
+            self._initRecord()
+        
+        if ProcessMonitorClass is None:
+            if len(self.objectives)==1:
+                from .visualization import SimpleProcessMonitor
+                self.processMonitor = SimpleProcessMonitor(self)
+            elif len(self.objectives)>1:
+                from .visualization import MultiobjectivePairPlot
+                self.processMonitor = MultiobjectivePairPlot(self)
+        else:
+            self.processMonitor = ProcessMonitorClass(self)
             
 
     def _setupFunction(self, fun, args, kwargs, name, prefix, objects):
@@ -652,7 +658,21 @@ class FemtetOptimizationCore(ABC):
             consNames.extend([f'{n}_lower_bound', n, f'{n}_upper_bound', f'{n}_fit'])
         return paramNames, objNames, consNames
 
-    def get_history_columns(self, kind='objective'):
+    def get_history_columns(self, kind:str='objective')->[str]:
+        '''
+        get history column names. 
+
+        Parameters
+        ----------
+        kind : str, optional
+            valid kind is: "objective", "parameter", "constraint". The default is 'objective'.
+
+        Returns
+        -------
+        [str]
+            list of column names.
+
+        '''
         p, o, c = self._genarateHistoryColumnNames()
         if kind == 'parameter':
             return p
@@ -676,6 +696,7 @@ class FemtetOptimizationCore(ABC):
         columns.append('fit')
         columns.append('algorithm_message')
         columns.append('error_message')
+        columns.append('hypervolume')
         columns.append('time')
         self.history = pd.DataFrame(columns=columns)
     
@@ -700,6 +721,7 @@ class FemtetOptimizationCore(ABC):
         row.append(False) # fit, temporal data
         row.append(self.algorithm_message)
         row.append(self.error_message)
+        row.append(np.nan) # hypervolume, temporal data
         row.append(datetime.datetime.now()) # time
         pdf = pd.Series(row, index=self.history.columns)
         # calc fit
@@ -707,8 +729,10 @@ class FemtetOptimizationCore(ABC):
         pdf['fit'] = fit
         # add to history
         self.history.loc[len(self.history)] = pdf
-        # update non-domi
+        # update non-domi(after addition to history)
         self._calcNonDomi()
+        # calc hypervolume(after addition to history)
+        self._calc_hypervolume()
         # 保存
         try:
             self.history.to_csv(self.historyPath, index=None, encoding='shift-jis')
@@ -748,3 +772,67 @@ class FemtetOptimizationCore(ABC):
         
         return fit
 
+    def _calc_hypervolume(self):
+        '''
+        hypervolume 履歴を更新する
+        ※ reference point が変わるたびに hypervolume を計算しなおす必要がある
+        [1]Hisao Ishibuchi et al. "Reference Point Specification in Hypercolume Calculation for Fair Comparison and Efficient Search"
+        '''
+        #### 前準備
+        # パレート集合の抽出
+        idx = self.history['non_domi']
+        pdf = self.history[idx]
+        parate_set = pdf[self.get_history_columns('objective')].values
+        n = len(parate_set) # 集合の要素数
+        m = len(parate_set.T) # 目的変数数
+        # 長さが 2 以上でないと計算できない
+        if n<=1:
+            return np.nan
+        # 最小化問題に convert
+        for i, objective in enumerate(self.objectives):
+            for j in range(n):
+                parate_set[j,i] = objective._convert(parate_set[j,i])        
+        #### reference point の計算[1]
+        # 逆正規化のための範囲計算
+        maximum = parate_set.max(axis=0)
+        minimum = parate_set.min(axis=0)
+        # (H+m-1)C(m-1) <= n <= (m-1)C(H+m) になるような H を探す
+        H = 0
+        while True:
+            left = math.comb(H+m-1, m-1)
+            right = math.comb(H+m, m-1)
+            if left <= n <= right:
+                break
+            else:
+                H += 1
+        # H==0 なら r は最大の値
+        if H==0:
+            r = 2
+        else:
+            # r を計算
+            r = 1 + 1./H
+        r = 1.01
+        # r を逆正規化
+        reference_point = r * (maximum - minimum) + minimum
+        
+        #### hv 履歴の計算
+        wfg = WFG()
+        hvs = []
+        for i in range(n):
+            hv = wfg.compute(parate_set[:i], reference_point)
+            hvs.append(hv)
+        
+        # 計算結果を履歴の一部に割り当て
+        df = self.history
+        df.loc[idx, 'hypervolume'] = np.array(hvs)
+
+        # dominated の行に対して、上に見ていって
+        # 最初に見つけた non-domi 行の hypervolume の値を割り当てます
+        for i in range(len(df)):
+            if df.loc[i, 'non_domi'] == False:
+                try:
+                    df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
+                except IndexError:
+                    pass # nan のままにする
+        
+    
