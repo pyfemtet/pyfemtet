@@ -9,7 +9,6 @@ from .core import FemtetOptimizationCore
 
 import optuna
 
-import logging
 
 from scipy.stats.qmc import LatinHypercube
 
@@ -107,7 +106,7 @@ class FemtetOptuna(FemtetOptimizationCore):
             # memo
             try:
                 algorithm_message = trial.user_attrs["memo"]
-            except AttributeError:
+            except (AttributeError, KeyError):
                 algorithm_message = ''
 
 

@@ -3,6 +3,7 @@ import json
 from time import sleep
 from multiprocessing import Pool
 import subprocess
+import threading
 
 from win32com.client import Dispatch, DispatchEx
 import win32process
@@ -11,13 +12,13 @@ import win32con
 from pywinauto import Application
 from pywinauto.application import ProcessNotFoundError
 
-import threading
+print_progress = False
+if print_progress:
+    import optuna
+    optuna.logging.disable_default_handler()
 
 from PyFemtet.opt.core import FEMSystem
 
-
-
-# import re
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, message=r"32-bit")
 warnings.filterwarnings("ignore", category=UserWarning, message=r"64-bit")
@@ -40,6 +41,9 @@ PATH_JOURNAL = os.path.abspath(os.path.join(here, 'update_model_parameter.py'))
 
 
 def _f(objective_functions, objective_arguments, constraint_functions, constraint_arguments):
+    # if print_progress:
+    #     print('NX_Femtet solve Femtet / start')
+
     # インスタンスメソッドにしたら動かない
     # クラスメソッドにしても動かない。なんでだろう？
     # 新しいプロセスで呼ぶ関数。
@@ -56,6 +60,11 @@ def _f(objective_functions, objective_arguments, constraint_functions, constrain
         Femtet.Solve()
     except:
         raise SolveError
+
+    # if print_progress:
+    #     print('NX_Femtet solve Femtet / end')
+    #     print('NX_Femtet calc objectives / start')
+
     Femtet.OpenCurrentResult(True)
     ret_objective = []
     ret_constraint = []
@@ -63,6 +72,10 @@ def _f(objective_functions, objective_arguments, constraint_functions, constrain
         ret_objective.append(func(Femtet, *args, **kwargs))
     for func, (args, kwargs) in zip(constraint_functions, constraint_arguments):
         ret_constraint.append(func(Femtet, *args, **kwargs))
+
+    # if print_progress:
+    #     print('NX_Femtet calc objectives / end')
+
     return ret_objective, ret_constraint
 
 
@@ -96,7 +109,14 @@ class NX_Femtet(FEMSystem):
         pass
     
     def f(self, df, objectives, constraints):
+        if print_progress:
+            print('')
+            print('NX_Femtet iteration / start')
+
         from PyFemtet.opt.core import ModelError, MeshError, SolveError
+
+        if print_progress:
+            print('  start update model via NX')
 
         try:
             self._update_model(df)
@@ -104,18 +124,30 @@ class NX_Femtet(FEMSystem):
             print('failed to create model via NX')
             raise e
 
+        if print_progress:
+            print('  end update model via NX')
+            print('  start Femtet setup via Excel')
+
         try:
             self._setup_new_Femtet()
         except ModelError as e:
             print('failed to setup model via Excel-Femtet')
             raise e
 
+        if print_progress:
+            print('  end Femtet setup via Excel')
+            print('  start solve')
+
         try:
             self._run_new_Femtet(objectives, constraints)
         except (MeshError, SolveError) as e:
             print('failed to mesh or solve via FEMOpt-Femtet')
             raise e
- 
+
+        if print_progress:
+            print('  end Excel-Femtet')
+            print('NX_Femtet iteration / end')
+
         return self.objectiveValues, self.constraintValues
             
     def _update_model(self, df):
@@ -212,10 +244,17 @@ class NX_Femtet(FEMSystem):
         obj_arguments = [(obj.args, obj.kwargs) for obj in objectives]
         cons_functions = [obj.ptrFunc for obj in constraints]
         cons_arguments = [(obj.args, obj.kwargs) for obj in constraints]
+
+        if print_progress:
+            print('    start Pool')
+        
         with Pool(processes=1) as p:
             obj_result, cons_result = p.apply(_f, (obj_functions, obj_arguments, cons_functions, cons_arguments))
             self.objectiveValues = obj_result
             self.constraintValues = cons_result
+
+        if print_progress:
+            print('    end Pool')
         
     def _close_excel_by_force(self):
         # プロセス ID の取得
@@ -254,13 +293,15 @@ def _get_excel_state(pid, timeout=1):
 
 
 def _excel_watcher(pid, stopper:NX_Femtet):
-    print('excel_watcher has been launched')
+    if print_progress:
+        print('    excel_watcher has been launched')
     # threading に呼ばれ、1秒ごとに excel の状態を監視
     # エラーが出ていれば excel を終了して仕事を終了する
     # excel が終了していれば仕事を終了する
     while True:
         excel_state = _get_excel_state(pid, timeout=1)
-        print('excel state is ', excel_state)
+        if print_progress:
+            print('    excel state is ', excel_state)
         if excel_state==-1:
             # excel を強制終了して break する
             try:
@@ -277,7 +318,8 @@ def _excel_watcher(pid, stopper:NX_Femtet):
         if stopper._stop_excel_watcher:
             # 終了する
             break
-    print('excel_watcher will be terminated successfully')
+    if print_progress:
+        print('    excel_watcher will be terminated successfully')
     return None # thread 終了
 
 #     print(FEMOpt.f(df, [get_flow]))
