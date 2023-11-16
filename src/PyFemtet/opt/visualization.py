@@ -1,13 +1,100 @@
-# import os
-# here, me = os.path.split(__file__)
-# mother = os.path.dirname(here)
+# for hint
+from __future__ import annotations
+from typing import Any, Callable
+from abc import ABC, abstractmethod
 
-# cwd = os.getcwd()
-# os.chdir(mother)
+from time import sleep
+import datetime
+
 from ._visualizationNameSpace import *
-# os.chdir(cwd)
+
+figsize = (4,3)
+
+class ProcessMonitorBase(ABC):
+    def __init__(self, FEMOpt):
+        self.FEMOpt = FEMOpt
+        self.picked_index = -1
+        self.plots = {}
+        self.fig, self.ax = plt.subplots(figsize=figsize)
+        self.fig.canvas.mpl_connect('pick_event', self.on_pick)
+        self.fig.canvas.mpl_connect('close_event', self.interrupt)
+        self.fig.tight_layout()
+
+    def interrupt(self, *args, **kwargs):
+        self.FEMOpt.interruption = True
+
+    @abstractmethod
+    def on_pick(self, event):
+        # self.picked = idx        
+        pass
+
+    @abstractmethod
+    def update(self):
+        # plt.pause(0.1)
+        pass
 
 
+class HypervolumeMonitor(ProcessMonitorBase):
+    
+    label_hv = 'hypervolume'
+    
+    def __init__(self, FEMOpt):
+        super().__init__(FEMOpt)
+        self.fig.suptitle('process monitor')
+        self.ax.set(
+            xlabel='試行回数',
+            ylabel='hypervolume',
+            )
+        line, = self.ax.plot([], [], label=self.label_hv)
+        text_start_time = self.ax.text(0, 0, '', fontsize=9, ha='left')
+        text_last_time = self.ax.text(0, 0, '', fontsize=9, ha='right')
+        self.plots[self.label_hv] = line
+        self.plots['start'] = text_start_time
+        self.plots['end'] = text_last_time
+
+        self.fig.tight_layout()
+
+    def update(self):
+        line = self.plots[self.label_hv]
+        text_start_time = self.plots['start']
+        text_last_time = self.plots['end']
+        
+        # data の取得
+        xdata, ydata = self.FEMOpt.history[['time', 'hypervolume']].dropna().values.T
+        if len(xdata)<=1:
+            plt.pause(1)
+            return
+
+        _xdata = range(len(xdata))
+        line.set_data(_xdata, ydata)
+        text_start_time.set_position((_xdata[0], ydata[0]))
+        text_start_time.set_text(xdata[0].strftime('%m/%d\n%H:%M'))
+        text_last_time.set_position((_xdata[-1], ydata[-1]))
+        text_last_time.set_text(xdata[-1].strftime('%m/%d\n%H:%M'))
+        
+        # lim 再設定
+        ax = self.ax
+        xmergin = (max(_xdata)-min(_xdata))*0.05
+        ymergin = (max(ydata)-min(ydata))*0.05
+
+        ax.set(
+            xlim=(min(_xdata), max(_xdata)+xmergin),
+            ylim=(min(ydata)-ymergin, max(ydata)+ymergin))
+        ax.autoscale_view(True, True, True)
+        
+        self.fig.tight_layout()
+        plt.pause(1)
+        
+    def on_pick(self, event):
+        if isinstance(event.artist, PathCollection): # scat
+            x, y = event.artist.get_offsets()[event.ind[0]]
+            print(x, y)
+        elif isinstance(event.artist, Line2D): # line
+            xdata, ydata = event.artist.get_data()
+            x, y = xdata[event.ind[0]], ydata[event.ind[0]]
+            print(x, y)
+
+            
 class SimpleProcessMonitor:
     def __init__(self, FEMOpt):
         # FEMOpt を貰う
