@@ -6,6 +6,7 @@ from warnings import warn
 
 # built-in modules
 import os
+import sys
 import time
 import datetime
 import inspect
@@ -22,9 +23,9 @@ from optuna._hypervolume import WFG
 
 # for Femtet
 import win32com.client
-from win32com.client import Dispatch #, constants
+from win32com.client import Dispatch, constants
 # from ..tools.FemtetClassConst import FemtetClassName as const
-
+from femtetutils import util, constant
 
 
 
@@ -55,14 +56,26 @@ class FEMSystem(ABC):
 
 
 class Femtet(FEMSystem):
-
-    def setFemtet(self, strategy='catch'):
+    
+    def setFemtet(self, strategy):
         if strategy=='catch':
             # 既存の Femtet を探す
             self.Femtet = Dispatch('FemtetMacro.Femtet')
         elif strategy=='new':
             # femtetUtil を使って新しい Femtet を立てる
-            raise Exception('femtetUtilを使って新しいFemtetを立てるのはまだ実装していません')
+            succeed = util.execute_femtet()
+            if succeed:
+                self.Femtet = Dispatch('FemtetMacro.Femtet')
+        elif strategy=='auto':
+            succeed = util.auto_execute_femtet()
+            if succeed:
+                self.Femtet = Dispatch('FemtetMacro.Femtet')
+        
+        if not hasattr(constants, 'STATIC_C'):
+            cmd = f'{sys.executable} -m win32com.client.makepy FemtetMacro'
+            os.system(cmd)
+            message = 'Femtet の定数を使う設定が行われていなかったので、設定を自動で実行しました。設定を反映するため、Pythonコンソールを再起動してください。'
+            raise Exception(message)
 
     def run(self, df):
         '''run : 渡された df に基づいて Femtet に計算を実行させる関数。
@@ -205,7 +218,7 @@ class Constraint:
 #### core クラス    
 class FemtetOptimizationCore(ABC):
     
-    def __init__(self, setFemtetStrategy:str or FEMSystem or None = 'catch'):
+    def __init__(self, setFemtetStrategy:str or FEMSystem = 'auto'):
         
 
         # 初期化

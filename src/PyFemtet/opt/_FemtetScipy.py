@@ -23,8 +23,11 @@ class FemtetScipy(FemtetOptimizationCore):
     Attributes:
 
     """    
-    def __init__(self, setFemtetStorategy='catch'):
-        super().__init__(setFemtetStorategy)
+    def __init__(self, setFemtetStorategy=None):
+        if setFemtetStorategy is None:
+            super().__init__()
+        else:
+            super().__init__(setFemtetStorategy)
         self._objectives = []
         self._constraints = []
         

@@ -58,9 +58,12 @@ def generate_LHS(bounds)->np.ndarray:
 # https://optuna.readthedocs.io/en/stable/index.html
 class FemtetOptuna(FemtetOptimizationCore):
 
-    def __init__(self, setFemtet='catch'):
+    def __init__(self, setFemtetStorategy=None):
         self._constraints = []
-        super().__init__(setFemtet)
+        if setFemtetStorategy is None:
+            super().__init__()
+        else:
+            super().__init__(setFemtetStorategy)
 
     def main(self, historyPath:str or None = None, timeout=None, n_trials=None, study_name=None):
         if historyPath is None:
