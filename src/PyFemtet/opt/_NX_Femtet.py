@@ -12,7 +12,9 @@ import win32con
 from pywinauto import Application
 from pywinauto.application import ProcessNotFoundError
 
-print_progress = False
+from femtetutils import util, const
+
+print_progress = True
 if print_progress:
     import optuna
     optuna.logging.disable_default_handler()
@@ -26,15 +28,6 @@ warnings.filterwarnings("ignore", category=UserWarning, message=r"64-bit")
 
 here, me = os.path.split(__file__)
 
-
-# ユーザーが案件ごとに設定する変数
-# path_bas = r"C:\Users\mm11592\Documents\myFiles2\working\PyFemtetOpt2\PyFemtetOptGit\NXTEST.bas"
-# path_prt = r"C:\Users\mm11592\Documents\myFiles2\working\PyFemtetOpt2\PyFemtetOptGit\NXTEST.prt"
-
-# ユーザーが環境ごとに設定する定数
-PATH_MACRO = r'C:\Program Files\Femtet_Ver2023.1.0_64bit\Program\Macro32\FemtetMacro.dll'
-PATH_REF = r'C:\Program Files\Femtet_Ver2023.1.0_64bit\Program\Macro32\FemtetRef.xla'
-# TODO: Femtet のプロセスハンドルか何かから得られるようにする
 
 # ユーザーは設定しない定数
 PATH_JOURNAL = os.path.abspath(os.path.join(here, 'update_model_parameter.py'))
@@ -79,6 +72,7 @@ def _f(objective_functions, objective_arguments, constraint_functions, constrain
     return ret_objective, ret_constraint
 
 
+
 class NX_Femtet(FEMSystem):
     def __init__(self, path_prt):
         self._path_prt = os.path.abspath(path_prt)
@@ -86,15 +80,10 @@ class NX_Femtet(FEMSystem):
         self._path_xlsm = None
         self._stop_excel_watcher = False
         self.excel = None
-
-    # def __getstate__(self):
-    #     state = self.__dict__.copy()
-    #     # マルチプロセスのために picke できるようにするため COM オブジェクトを削除
-    #     del state['excel']
-    #     return state    
-
-    # def __setstate__(self, state):
-    #     self.__dict__.update(state)
+        
+        femtet_dir = os.path.split(util.get_femtet_exe_path())[0]
+        self._path_macro = os.path.join(femtet_dir, 'Macro32/FemtetMacro.dll')
+        self._path_ref = os.path.join(femtet_dir, 'Macro32/FemtetRef.xla')
 
     def set_bas(self, path_bas):
         self._path_bas = os.path.abspath(path_bas)
@@ -173,11 +162,11 @@ class NX_Femtet(FEMSystem):
 
     def _set_reference_of_new_excel(self, wb):
         try:
-            wb.VBProject.References.AddFromFile(PATH_MACRO)
+            wb.VBProject.References.AddFromFile(self._path_macro)
         except:
             pass
         try:
-            wb.VBProject.References.AddFromFile(PATH_REF)
+            wb.VBProject.References.AddFromFile(self._path_ref)
         except:
             pass
         
