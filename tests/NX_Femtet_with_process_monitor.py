@@ -52,16 +52,14 @@ if __name__=='__main__':
     FEMOpt.add_constraint(
         Ax_is_greater_than_Bx,
         lower_bound=0,
-        kwargs={'FEMOpt': FEMOpt} # NXFemtet では args は指定できません
+        args=FEMOpt
         )
     FEMOpt.add_constraint(
         Ay_is_greater_than_By,
         lower_bound=0,
-        kwargs={'FEMOpt': FEMOpt}
+        args=FEMOpt
         )
 
-    # FEMOpt._initRecord()
-    # print(FEMOpt.f(np.array((5,5))))
-    # FEMOpt.set_process_monitor() # TODO: サブスレッドからサブプロセスを呼び出せないので設計をなんとかする
+    FEMOpt.set_process_monitor()
     FEMOpt.main()
     

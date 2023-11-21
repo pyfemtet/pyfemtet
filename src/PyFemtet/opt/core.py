@@ -408,9 +408,8 @@ class FemtetOptimizationCore(ABC):
             kwargs = {}
 
         #### Femtetを使う場合は、第一引数に自動的に Femtet の COM オブジェクトが入っていることとする。
-
-        if type(self.FEM)==Femtet:
-            f = functools.partial(*(self.FEM.Femtet, *args), **kwargs)
+        if isinstance(self.FEM, Femtet):
+            f = functools.partial(fun, *(self.FEM.Femtet, *args), **kwargs)
         else:
             f = functools.partial(fun, *args, *kwargs)
             

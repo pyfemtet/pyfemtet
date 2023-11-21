@@ -115,6 +115,7 @@ dependencies = [ # Optional
     #"spyder",
     "pywin32",
     "pywinauto",
+    "femtetutils",
 ]
 
 # List additional groups of dependencies here (e.g. development
