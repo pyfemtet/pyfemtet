@@ -26,9 +26,7 @@ def volume(Femtet):
 if __name__=='__main__':
     here, me = os.path.split(__file__)
     os.chdir(here)
-    FEM = NX_Femtet('NXTEST.prt') # この機能を使う際はエントリポイントをガードしてください。
-    # FEM.set_bas('NXTEST.bas')
-    FEM.set_excel('NXTEST.xlsm')
+    FEM = NX_Femtet('NX_ex01.prt') # この機能を使う際はエントリポイントをガードしてください。
     FEMOpt = FemtetOptuna(FEM)
     FEMOpt.add_parameter('A_x', 50, lower_bound=25, upper_bound=95)
     FEMOpt.add_parameter('A_y', 45, lower_bound=5, upper_bound=45)
@@ -41,8 +39,6 @@ if __name__=='__main__':
     FEMOpt.add_objective(disp, direction=0)
     FEMOpt.add_objective(volume, direction='minimize')
 
-    # FEMOpt._initRecord()
-    # print(FEMOpt.f(np.array((5,5))))
-    # FEMOpt.set_process_monitor() # TODO: サブスレッドからサブプロセスを呼び出せないので設計をなんとかする
+    FEMOpt.set_process_monitor()
     FEMOpt.main()
     
