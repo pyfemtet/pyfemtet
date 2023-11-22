@@ -37,7 +37,7 @@ if __name__=='__main__':
     FEMOpt.add_objective(fundamental_resonance, '共振周波数(Hz)', 50)
     FEMOpt.add_objective(mass, '質量(kg)', 1000)
     
-    FEMOpt.add_constraint(thickness, '厚さ(m)', lower_bound=0)
+    FEMOpt.add_constraint(thickness, '厚さ(m)', lower_bound=0.3)
     
     FEMOpt.set_process_monitor(HypervolumeMonitor)
     
