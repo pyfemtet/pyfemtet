@@ -52,6 +52,10 @@ class FEMSystem(ABC):
     '''
     @abstractmethod
     def run(self, df)->None:
+        '''
+        FEM の制御を実装して df に基づいてモデルを更新し
+        objectiveValues と constraintValues を更新する
+        '''
         pass
 
 
@@ -417,20 +421,8 @@ class FemtetOptimizationCore(ABC):
             kwargs = {}
 
         #### Femtetを使う場合は、第一引数に自動的に Femtet の COM オブジェクトが入っていることとする。
-
-        from ._NX_Femtet import NX_Femtet
-        if type(self.FEM)==Femtet:
-            f = functools.partial(*(self.FEM.Femtet, *args), **kwargs)
-        elif type(self.FEM)==NX_Femtet:
-            # partial オブジェクトを使って 2 番目から引数を埋めていくために
-            # args を kwargs に変換
-            _kwargs = kwargs.copy()
-            sig = inspect.signature(fun)
-            for name, arg in zip(list(sig.parameters.keys())[1:], args):
-                # kwargs の前に args が入っているはずなのでOK
-                # args のほうが短いはずだが、それでkwargsが被らないはずなのでOK
-                _kwargs[name] = arg
-            f = functools.partial(fun, **_kwargs)
+        if isinstance(self.FEM, Femtet):
+            f = functools.partial(fun, *(self.FEM.Femtet, *args), **kwargs)
         else:
             f = functools.partial(fun, *args, *kwargs)
             
@@ -551,15 +543,9 @@ class FemtetOptimizationCore(ABC):
 
             # solve
             try:
-                from ._NX_Femtet import NX_Femtet
-
                 if type(self.FEM)==NoFEM:
                     self.objectiveValues = [obj.fun() for obj in self.objectives]
                     self.constraintValues = [obj.fun() for obj in self.constraints]
-                elif type(self.FEM)==NX_Femtet:
-                    obj_result, cons_result = self.FEM.f(self.parameters, self.objectives, self.constraints)
-                    self.objectiveValues = obj_result
-                    self.constraintValues = cons_result
                 else:
                     self.FEM.run(self.parameters)
                     self.objectiveValues = [obj.fun() for obj in self.objectives]

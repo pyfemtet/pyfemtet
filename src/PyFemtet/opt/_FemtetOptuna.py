@@ -169,8 +169,7 @@ class FemtetOptuna(FemtetOptimizationCore):
             lb = row['lbound']
             ub = row['ubound']
             bounds.append([lb, ub])
-        data = generate_LHS(bounds)
-        
+        data = generate_LHS(bounds)        
         for datum in data:
             d = {}
             for name, v in zip(names, datum):

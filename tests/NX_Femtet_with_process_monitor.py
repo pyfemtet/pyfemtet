@@ -37,7 +37,6 @@ if __name__=='__main__':
     here, me = os.path.split(__file__)
     os.chdir(here)
     FEM = NX_Femtet('NXFemtetWithProcessMonitor/NXTEST.prt') # この機能を使う際はエントリポイントをガードしてください。
-    FEM.set_excel('NXFemtetWithProcessMonitor/NXTEST.xlsm')
     FEMOpt = FemtetOptuna(FEM)
     FEMOpt.add_parameter('A_x', 50, lower_bound=25, upper_bound=95)
     FEMOpt.add_parameter('A_y', 45, lower_bound=5, upper_bound=45)

@@ -4,10 +4,11 @@ import json
 import NXOpen
 
 
-def main(prtPath:str, parameters:'dict as str'):
+def main(prtPath:str, parameters:'dict as str', x_tPath:str = None):
     '''
     .prt ファイルのパスを受け取り、parameters に指定された変数を更新し、
-    .prt と同じディレクトリに .x_t ファイルをエクスポートする
+    x_tPath が None のときは.prt と同じディレクトリに
+    .x_t ファイルをエクスポートする
 
     Parameters
     ----------
@@ -23,7 +24,8 @@ def main(prtPath:str, parameters:'dict as str'):
     '''
     # 保存先の設定
     prtPath = os.path.abspath(prtPath) # 一応
-    x_tPath = os.path.splitext(prtPath)[0] + '.x_t'
+    if x_tPath is None:
+        x_tPath = os.path.splitext(prtPath)[0] + '.x_t'
 
     # 辞書の作成
     parameters = json.loads(parameters)
