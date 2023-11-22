@@ -32,6 +32,9 @@ class SW_Femtet(Femtet):
         # open model
         self.swApp.OpenDoc(self.path_sldprt, swDocPART)
         self.swModel = self.swApp.ActiveDoc
+        self.swEqnMgr = self.swModel.GetEquationMgr
+        self.nEquation = self.swEqnMgr.GetCount        
+        
         
         # Femtet を捕まえる
         if strategy is None:
@@ -39,16 +42,37 @@ class SW_Femtet(Femtet):
         else:
             super().setFemtet(strategy)
 
-    def __del__(self):
-        self.swApp.ExitApp()
+    # def __del__(self):
+    #     self.swApp.ExitApp()
 
 
     def run(self, df):
         # Femtet が参照しているパスの x_t をアップデートする
-        self.update_model_via_SW(df)
+        user_param_dict = {}
+        for i, row in df.iterrows():
+            user_param_dict[row['name']] = row['value']
+        self.check_parameter(user_param_dict)
+        self.update_model_via_SW(user_param_dict)
         super().run(df)
+
+    def check_parameter(self, user_param_dict):
+        swEqnMgr = self.swModel.GetEquationMgr
+
+        # 指定された変数が SW に存在するかどうかをチェック
+        for user_param_name in user_param_dict.keys():
+            is_in_model = False
+            # global 変数に存在するかどうか
+            nEquation = swEqnMgr.GetCount
+            global_param_names = [self.get_name(swEqnMgr.Equation(i)) for i in range(nEquation) if swEqnMgr.GlobalVariable(i)]
+            is_in_model = is_in_model or (user_param_name in global_param_names)
+            # 寸法に存在するかどうか
+            swParam = self.swModel.Parameter(user_param_name)
+            is_in_model = is_in_model or (swParam is not None)
+            # is_in_model が False ならエラー
+            if not is_in_model:
+                raise Exception(f'no such parameter in SW:{user_param_name}')
     
-    def update_model_via_SW(self, df):
+    def update_model_via_SW(self, user_param_dict):
         # SW を使って parasolid を作る
         
         # Femtet が参照している x_t パスを取得する
@@ -58,129 +82,62 @@ class SW_Femtet(Femtet):
         if os.path.isfile(path_x_t):
             os.remove(path_x_t)
 
-        # 変数ひとつひとつ処理していく（エラー箇所同定のため）
-        # self.initialize_parameter()
-        for i, row in df.iterrows():
-            name = row['name']
-            value = row['value']
-            self.update_parameter(name, value)
+        # 変数の更新
+        self.update_parameter(user_param_dict)
 
         # export parasolid
         self.swModel.SaveAs(path_x_t)
-        
-        sleep(1)
-        print(os.path.isfile(path_x_t))
+
+        # 30 秒待っても parasolid ができてなければエラー
+        timeout = 30
+        waiting = 0
+        while True:
+            sleep(1)
+            waiting += 1
+            if os.path.isfile(path_x_t):
+                break
+            else:
+                if waiting<timeout:
+                    continue
+                else:
+                    # from .core import ModelError
+                    # 再構築できていれば保存はできているはず
+                    raise SolidWorksAutomationError('parasolid 書き出しに失敗しました')
 
         # ReExecute Femtet History
         self.Femtet.Gaudi.ReExecute()
 
-    # def initialize_parameter(self):
-    #     # evaluate とか rebuild がマクロ経由の関係式しか見ないらしく
-    #     # 一度すべての関係式を消して作り直す
-    #     swEqnMgr = self.swModel.GetEquationMgr
-    #     swEqnMgr.AutomaticSolveOrder = True
-    #     swEqnMgr.AutomaticRebuild = True
-    #     nEquation = swEqnMgr.GetCount
-    #     for i in range(nEquation):
-    #         existing_equation:str = swEqnMgr.Equation(i)
-    #         name:str = self.get_parameter_name(existing_equation)
+    def update_parameter(self, user_param_dict):
+        # プロパティを退避
+        buffer_aso = self.swEqnMgr.AutomaticSolveOrder
+        buffer_ar = self.swEqnMgr.AutomaticRebuild
+        self.swEqnMgr.AutomaticSolveOrder = False
+        self.swEqnMgr.AutomaticRebuild = False
         
-    #         # delete
-    #         error_code = swEqnMgr.Delete(i)
-    #         if error_code==-1:
-    #             raise SolidWorksAutomationError(f'failed to initialize/delete {name} in SW')
-        
-    #         # add
-    #         added_index = swEqnMgr.Add2(
-    #             i,
-    #             existing_equation,
-    #             False
-    #             )
-    #         if added_index==-1:
-    #             raise SolidWorksAutomationError(f'failed to initialize/update {name} in SW')
-    #     swEqnMgr.EvaluateAll
-        
-    def update_parameter(self, name, value):
-        # global parameter
-        status = self.update_parameter_as_global_parameter(name, value)
-        if status==0:
-            # dimension
-            status2 = self.update_parameter_as_dimension(name, value)
-            if status2==0:
-                raise Exception(f'no such parameter in SW: "{name}"')
+        from tqdm import trange
+        for i in trange(self.nEquation):
+            # name, equation の取得
+            current_equation = self.swEqnMgr.Equation(i)
+            current_name = self.get_name(current_equation)
+            # 対象なら処理
+            if current_name in list(user_param_dict.keys()):
+                new_equation = f'"{current_name}" = {user_param_dict[current_name]}'
+                self.swEqnMgr.Equation(i, new_equation)
 
-    def update_parameter_as_dimension(self, name, value):
-        status = 0 # 0：処理した、1：処理なかった
-        # name = 'D1@ｽｹｯﾁ1' # @以降まで必要、エクスポート機能を活用のこと（その際、「ファイルへリンク」を外すこと。）
-
-        # 寸法の取得       
-        swParameter = self.swModel.Parameter(name)
-        if swParameter is None:
-            return status
-
-        # 寸法に値を更新
-        error_code = swParameter.SetValue3(value, swThisConfiguration)
-        from .core import ModelError
-        if error_code>0:
-            raise ModelError(f'変数の更新に失敗しました：変数名{name}, 値{value}')
-        status = 1
+        # 式の計算
+        self.swEqnMgr.EvaluateAll # always returns -1
         
+        # プロパティをもとに戻す
+        self.swEqnMgr.AutomaticSolveOrder = buffer_aso
+        self.swEqnMgr.AutomaticRebuild = buffer_ar
+
+        # 更新する（ここで失敗はしうる）
         result = self.swModel.EditRebuild3 # モデル再構築
         if result==False:
-            raise ModelError(f'モデル再構築に失敗しました：変数名{name}, 値{value}')
-        
-        return status
-        
-        
-            
-
-    def update_parameter_as_global_parameter(self, name, value):
-        status = 0 # 0:処理なし、1：処理した
-        swEqnMgr = self.swModel.GetEquationMgr
-        swEqnMgr.AutomaticSolveOrder = True
-        swEqnMgr.AutomaticRebuild = True
-        nEquation = swEqnMgr.GetCount
-        # evaluate とか rebuild がマクロ経由の関係式しか見ないらしく
-        # 一度すべての関係式を消して作り直す
-        for i in range(nEquation):
-            existing_equation = swEqnMgr.Equation(i)
-            existing_name = self.get_parameter_name(existing_equation)
-            
-            # 対象であれば式を更新する
-            if name==existing_name:
-                new_equation = f'"{existing_name}"={value}'
-                status = 1
-            else:
-                new_equation = existing_equation
-        
-            # delete
-            error_code = swEqnMgr.Delete(i)
-            if error_code==-1:
-                raise Exception(f'failed to delete {existing_name} in SW')
-        
-            # add
-            added_index = swEqnMgr.Add2(
-                i,
-                new_equation,
-                False
-                )
-            if added_index==-1:
-                raise Exception(f'failed to update {existing_name} in SW')
- 
-        
-        result = swEqnMgr.EvaluateAll
-        # if result == -1:
-        #     from .core import ModelError
-        #     raise ModelError(f'関係式の更新に失敗しました：変数名{existing_name}, 値{value}')
-        
-        result2 = self.swModel.EditRebuild3 # OK, but...What's True/False?
-        if result2==False:
             from .core import ModelError
-            # raise ModelError(f'モデル再構築に失敗しました：変数名{name}, 値{value}')
-
-        return status
+            raise ModelError('モデル再構築に失敗しました')
         
-    def get_parameter_name(self, equation:str):
+    def get_name(self, equation:str):
         pattern = r'^\s*"(.+?)"\s*$'
         matched = re.match(pattern, equation.split('=')[0])
         if matched:
