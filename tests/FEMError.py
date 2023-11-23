@@ -1,28 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Nov 14 11:20:38 2023
-
-@author: MM11592
-"""
-
+import numpy as np
 from PyFemtet.opt import FemtetScipy, FemtetOptuna
 from PyFemtet.opt.core import NoFEM, ModelError, MeshError, SolveError
 
-i = 0
+np.random.seed(3)
 
 def parabora(FEMObj):
-    global i
     x = FEMObj.get_parameter('value')
-    i += 1
-    if i<=5:
+    if np.random.rand()>.5:
         return (x**2).sum()
     else:
         raise ModelError
 
 def parabora2(FEMObj):
-    global i
     x = FEMObj.get_parameter('value')
-    if i<=5:
+    if np.random.rand()>.5:
         return ((x-2)**2).sum()
     else:
         raise ModelError
@@ -35,6 +27,6 @@ FEMOpt.add_parameter('x', 1, 0, 2)
 FEMOpt.add_objective(parabora, args=(FEMOpt,))
 FEMOpt.add_objective(parabora2, args=(FEMOpt,))
 FEMOpt.set_process_monitor()
-FEMOpt.main()
+FEMOpt.main(n_trials=100)
 print(FEMOpt.history)
  

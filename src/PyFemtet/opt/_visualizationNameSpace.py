@@ -214,14 +214,15 @@ class UpdatableFigure(ABC):
                 )
         if type(self.fig)==Figure:
             self.text_suptitle.set_y(0.96)
-            self.fig.subplots_adjust(
-                left=0.2,
-                bottom=0.2,
-                right=0.95,
-                top=0.95,
-                wspace=0.05,
-                hspace=0.05
-                )
+            # self.fig.subplots_adjust(
+            #     left=0.2,
+            #     bottom=0.2,
+            #     right=0.95,
+            #     top=0.95,
+            #     wspace=0.05,
+            #     hspace=0.05
+            #     )
+            self.fig.tight_layout()
         elif type(self.fig)==SubFigure:
             self.text_suptitle.set_y(0.85)
             self.fig.subplots_adjust(

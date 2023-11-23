@@ -8,9 +8,11 @@ import pandas as pd
 from .core import FemtetOptimizationCore
 
 import optuna
-
+# optuna.logging.disable_default_handler()
 
 from scipy.stats.qmc import LatinHypercube
+
+import gc
 
 
 
@@ -29,7 +31,6 @@ def generate_LHS(bounds)->np.ndarray:
         optimization='random-cd',
         # seed=1
         )
-    
     
     LIMIT = 100
 
@@ -65,7 +66,19 @@ class FemtetOptuna(FemtetOptimizationCore):
         else:
             super().__init__(setFemtetStorategy)
 
-    def main(self, historyPath:str or None = None, timeout=None, n_trials=None, study_name=None):
+    def main(
+            self,
+            timeout=None,
+            n_trials=None,
+            study_name=None,
+            historyPath=None,
+            use_init_LHS=True, # Latin Hypercube Sampling を初期値にする
+            ):
+        # 引数の処理
+        self.use_init_LHS = use_init_LHS
+        
+        #### study name のセットアップ
+        # csv 保存パスの設定
         if historyPath is None:
             if self.historyPath is None:
                 name = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
@@ -74,10 +87,10 @@ class FemtetOptuna(FemtetOptimizationCore):
                 pass
         else:
             self.historyPath = historyPath
-
+        # study_name（ファイル名）の設定
         if study_name is None:
             self.study_name = os.path.splitext(os.path.basename(self.historyPath))[0] + ".db"
-            
+        # csv 保存パスと同じところに db ファイルを保存する
         self.study_db_path = os.path.abspath(
             os.path.join(
                 os.path.dirname(self.historyPath),
@@ -85,18 +98,21 @@ class FemtetOptuna(FemtetOptimizationCore):
                 )
             )
         self.storage_name = f"sqlite:///{self.study_db_path}"
+
+        #### timeout or n_trials の設定
         self.timeout = timeout
         self.n_trials = n_trials
+
+        # 本番処理に移る
         super().main()
         
     def _main(self):
-        #### 拘束のセットアップ
+        #### 拘束関数のセットアップ
         self._parseConstraints()
-        
 
-        # 目的関数の設定
+        #### 目的関数のセットアップ
         def __objectives(trial):
-            # 変数の設定
+            #### 変数の設定
             x = []
             df = self.get_parameter('df')
             for i, row in df.iterrows():
@@ -106,26 +122,51 @@ class FemtetOptuna(FemtetOptimizationCore):
                 x.append(trial.suggest_float(name, lb, ub))
             x = np.array(x)
 
+            #### user_attribute の設定
             # memo
             try:
+                # あれば
                 algorithm_message = trial.user_attrs["memo"]
             except (AttributeError, KeyError):
+                # なければ
                 algorithm_message = ''
+            # 拘束のアトリビュート（Prune などの対策、計算できたら後で上書きする）
+            dummy_data = tuple([1 for f in self._constraints])
+            trial.set_user_attr("constraint", dummy_data)
+            
+            #### strict 拘束の計算
+            # solve を伴わないからややこしい方法を使わなくていいか？
+            # 順序的に Gaudi にアクセスできるか？
+            # is_calcrated の前に変数をアップデートする必要があるため、
+            # 一度 buff に現在の変数を控える
+            buff = self.parameters['value']
+            self.parameters['value']= x
+            val_lb_ub_list = [[cns.fun(), cns.lb, cns.ub] for cns in self.constraints if cns.strict==True]
+            for val, lb, ub in val_lb_ub_list:
+                if lb is not None:
+                    if not (lb <= val):
+                        self.parameters['value']= buff
+                        raise optuna.TrialPruned()
+                if ub is not None:
+                    if not (val <= ub):
+                        self.parameters['value']= buff
+                        raise optuna.TrialPruned()
+            self.parameters['value']= buff
 
-
-            # 計算実行
-            ojectiveValuesToMinimize = self.f(x, algorithm_message)
-            if self.error_message != '':
-                # 拘束の設定
-                constraintValuesToBeNotPositive = tuple([1 for f in self._constraints])
-                trial.set_user_attr("constraint", constraintValuesToBeNotPositive)
+            #### 解析実行
+            # ModelError 等が起こりうる
+            from .core import ModelError, MeshError, SolveError
+            try:
+                # parameters を更新し、解析、目的関数、全ての拘束の計算
+                ojectiveValuesToMinimize = self.f(x, algorithm_message)
+            except (ModelError, MeshError, SolveError):
                 raise optuna.TrialPruned()
-                
-            # 拘束の設定
+            
+            #### 拘束の計算
             constraintValuesToBeNotPositive = tuple([f(x) for f in self._constraints])
-
-            # Store the constraints as user attributes so that they can be restored after optimization.
             trial.set_user_attr("constraint", constraintValuesToBeNotPositive)
+            
+            gc.collect()
 
             # 結果
             return tuple(ojectiveValuesToMinimize)
@@ -137,6 +178,7 @@ class FemtetOptuna(FemtetOptimizationCore):
 
         #### sampler の設定
         # sampler = optuna.samplers.NSGAIISampler(constraints_func=__constraints)
+        # sampler = optuna.samplers.NSGAIIISampler()
         sampler = optuna.samplers.TPESampler(constraints_func=__constraints)
 
         #### study の設定
@@ -147,25 +189,26 @@ class FemtetOptuna(FemtetOptimizationCore):
             directions=['minimize']*len(self.objectives),
             sampler=sampler)
 
-        #### study への初期値の設定
+        #### 初期値の設定
         params = self.get_parameter('dict')
         study.enqueue_trial(params, user_attrs={"memo": "initial"})
         
-        # ラテンハイパーキューブサンプリングを初期値にする
-        df = self.get_parameter('df')
-        names = []
-        bounds = []
-        for i, row in df.iterrows():
-            names.append(row['name'])
-            lb = row['lbound']
-            ub = row['ubound']
-            bounds.append([lb, ub])
-        data = generate_LHS(bounds)        
-        for datum in data:
-            d = {}
-            for name, v in zip(names, datum):
-                d[name] = v
-            study.enqueue_trial(d, user_attrs={"memo": "initial Latin Hypercube Sampling"})
+        #### LHS を初期値にする
+        if self.use_init_LHS:
+            df = self.get_parameter('df')
+            names = []
+            bounds = []
+            for i, row in df.iterrows():
+                names.append(row['name'])
+                lb = row['lbound']
+                ub = row['ubound']
+                bounds.append([lb, ub])
+            data = generate_LHS(bounds)        
+            for datum in data:
+                d = {}
+                for name, v in zip(names, datum):
+                    d[name] = v
+                study.enqueue_trial(d, user_attrs={"memo": "initial Latin Hypercube Sampling"})
 
         # study の実行
         study.optimize(__objectives, timeout=self.timeout, n_trials=self.n_trials)

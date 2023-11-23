@@ -15,6 +15,7 @@ def getCurrentMethod():
 import threading
 import functools
 import math
+import ast
 
 # 3rd-party modules
 import numpy as np
@@ -148,7 +149,34 @@ class NoFEM(FEMSystem):
                 raise ModelError
 
 
-#### 周辺クラス
+#### 周辺クラス、関数
+
+def is_access_Gaudi(f):
+    # 関数fのソースコードを取得
+    source = inspect.getsource(f)
+    
+    # ソースコードを抽象構文木（AST）に変換
+    tree = ast.parse(source)
+    
+    # 関数定義を見つける
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            # 関数の第一引数の名前を取得
+            first_arg_name = node.args.args[0].arg
+            
+            # 関数内の全ての属性アクセスをチェック
+            for sub_node in ast.walk(node):
+                if isinstance(sub_node, ast.Attribute):
+                    # 第一引数に対して 'Gaudi' へのアクセスがあるかチェック
+                    if (
+                            isinstance(sub_node.value, ast.Name)
+                            and sub_node.value.id == first_arg_name
+                            and sub_node.attr == 'Gaudi'
+                            ):
+                        return True
+            # ここまできてもなければアクセスしてない
+            return False
+
 
 def symlog(x):
     if isinstance(x, np.ndarray):
@@ -208,13 +236,14 @@ class Objective:
         
 class Constraint:
     prefixForDefault = 'constraint'
-    def __init__(self, fun, lb, ub, name, opt, ptrFunc, args, kwargs):
-        self.fun = fun
+    def __init__(self, fun, lb, ub, name, strict, opt, ptrFunc, args, kwargs):
+        self.fun = fun # partial object
         self.lb = lb
         self.ub = ub
         self.name = name
+        self.strict = strict
 
-        self.ptrFunc = ptrFunc
+        self.ptrFunc = ptrFunc # original function
         self.args = args
         self.kwargs = kwargs
         
@@ -295,18 +324,28 @@ class FemtetOptimizationCore(ABC):
         if not isExisting:
             self.objectives.append(obj)
 
+
+    
+
     
     def add_constraint(self,
                       fun:Callable[[Any], float],
                       name:str or None = None,
                       lower_bound:float or None = None,
                       upper_bound:float or None = None,
+                      strict:bool = True,
                       args:tuple or None = None,
-                      kwargs:dict or None = None):
+                      kwargs:dict or None = None,
+                      ):
+
+        if strict:
+            if is_access_Gaudi(fun):
+                raise Exception(f'関数{fun.__name__}に Gaudi へのアクセスがあります。拘束の計算において解析結果にアクセスするには、strict = False を指定してください。')
+                
 
         f, name, args, kwargs = self._setupFunction(fun, args, kwargs, name, Constraint.prefixForDefault, self.constraints)
 
-        obj = Constraint(f, lower_bound, upper_bound, name, self, fun, args, kwargs)
+        obj = Constraint(f, lower_bound, upper_bound, name, strict, self, fun, args, kwargs)
 
         isExisting = False
         for i, constraint in enumerate(self.constraints):
@@ -497,41 +536,10 @@ class FemtetOptimizationCore(ABC):
                 
 
     #### processing methods
-    
-    def _onerror(self, x, e:Exception):
-        if len(self.history)==0:
-            raise Exception('初期値での計算で FEM のエラーが生じました。初期値はエラーが出ないように選んでください。')
-        self.error_message = e._message
-        # history から最も近傍の点を探す
-        pHis = self.history[self.parameters['name'].values].values.astype(float)
-        idx = np.argmin(np.linalg.norm(pHis - x, axis=1))
-        # その時点の解の objective が必ず劣解になるようにする
-        nearestResult = self.history.iloc[idx]
-        nearestObjectiveValues = nearestResult[[obj.name for obj in self.objectives]]
-        newObjectiveValues = []
-        for vNearest, objective in zip(nearestObjectiveValues, self.objectives):
-            d = objective.direction
-            if (type(d)==float) or (type(d)==int):
-                diff = vNearest - d
-                if diff>0:
-                    vnew = vNearest+1
-                else:
-                    vnew = vNearest-1
-            elif d=='minimize':
-                vnew = vNearest+1
-            elif d=='maximize':
-                vnew = vNearest-1
-            else:
-                raise Exception(f'objectiveのdirection引数がおかしい：{d}')
-            newObjectiveValues.append(vnew)
-        self.objectiveValues = newObjectiveValues
-        # 拘束は適当に値を入れる
-        self.constraintValues = [-1 for obj in self.constraints]
-        
-        self._record()
-        
 
     def f(self, x:np.ndarray, algorithm_message='')->[float]:
+        # 具象クラスの _main に呼ばれる関数
+        
         # 中断指令があったら Exception を起こす
         if self.interruption:
             raise UserInterruption
@@ -541,6 +549,8 @@ class FemtetOptimizationCore(ABC):
         # objective も constraint も更新する必要がなく
         # そのまま converted objective を返せばいい
         if not self._isCalculated(x):
+
+
             
             self.error_message = '' # onerror が呼ばれなければこのまま _record される
             self.algorithm_message = algorithm_message
