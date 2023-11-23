@@ -82,24 +82,7 @@ class Femtet(FEMSystem):
             message = 'Femtet の定数を使う設定が行われていなかったので、設定を自動で実行しました。設定を反映するため、Pythonコンソールを再起動してください。'
             raise Exception(message)
 
-    def run(self, df):
-        '''run : 渡された df に基づいて Femtet に計算を実行させる関数。
-        
-
-        Raises
-        ------
-        ModelError
-            アップデートされた変数セットでモデルの再構築に失敗した場合.
-        MeshError
-            アップデートされた変数セットでメッシュ生成に失敗した場合.
-        SolveError
-            アップデートされた変数セットでソルブに失敗した場合.
-
-        Returns
-        -------
-        None.
-
-        '''
+    def update_model(self, df):
         # 変数更新のための処理
         time.sleep(0.1) # Gaudi がおかしくなる時がある対策
         Gaudi = self.Femtet.Gaudi
@@ -109,15 +92,21 @@ class Femtet(FEMSystem):
         for i, row in df.iterrows():
             name = row['name']
             value = row['value']
-            
             if not (self.Femtet.UpdateVariable(name, value) ):
-                self.Femtet.ShowLastError
+                raise ModelError('変数の更新に失敗しました：変数{name}, 値{value}')
             
         # 設計変数に従ってモデルを再構築
-        try:
-            Gaudi.ReExecute()
-        except win32com.client.pythoncom.com_error:
-            raise ModelError('error was occured on updating model')
+        # 失敗した場合、変数の更新が反映されない
+        if not Gaudi.ReExecute():
+            raise ModelError('モデル再構築に失敗しました')
+
+    def run(self, df):
+        '''run : 渡された df に基づいて Femtet に計算を実行させる関数。
+
+        '''
+        self.update_model(df)
+        
+        Gaudi = self.Femtet.Gaudi
 
         # メッシュを切る
         try:
@@ -167,11 +156,11 @@ def is_access_Gaudi(f):
             # 関数内の全ての属性アクセスをチェック
             for sub_node in ast.walk(node):
                 if isinstance(sub_node, ast.Attribute):
-                    # 第一引数に対して 'Gaudi' へのアクセスがあるかチェック
+                    # 第一引数に対して 'Gogh' へのアクセスがあるかチェック
                     if (
                             isinstance(sub_node.value, ast.Name)
                             and sub_node.value.id == first_arg_name
-                            and sub_node.attr == 'Gaudi'
+                            and sub_node.attr == 'Gogh'
                             ):
                         return True
             # ここまできてもなければアクセスしてない

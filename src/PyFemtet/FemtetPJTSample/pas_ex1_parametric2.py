@@ -42,7 +42,7 @@ FEMOpt.add_parameter('r', 50, lower_bound=0, upper_bound=99)
 FEMOpt.add_parameter('h', 200, lower_bound=0, upper_bound=290)
 
 FEMOpt.add_objective(flow, direction='maximize', name='流量')
-FEMOpt.add_objective(volume, name='流量')
+FEMOpt.add_objective(volume, name='体積')
 
 FEMOpt.add_constraint(volume, name='障害物の体積',
                       lower_bound=0, upper_bound=3.14 * 20**2 * 150)

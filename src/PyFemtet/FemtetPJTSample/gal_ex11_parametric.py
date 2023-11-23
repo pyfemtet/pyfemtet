@@ -23,6 +23,7 @@ def mass(Femtet):
 def thickness(Femtet):
     external_r = Femtet.GetVariableValue('external_r')
     internal_r = Femtet.GetVariableValue('internal_r')
+    # Femtet.Gogh
     return external_r - internal_r
     
 
@@ -30,21 +31,21 @@ if __name__=='__main__':
 
     FEMOpt = FemtetOptuna()
 
-    FEMOpt.add_parameter('internal_r', lower_bound=0.2, upper_bound=3)
-    FEMOpt.add_parameter('external_r', lower_bound=0.1, upper_bound=2.9)
-    FEMOpt.add_parameter('rho', lower_bound=6000, upper_bound=9000)
+    FEMOpt.add_parameter('internal_r', initial_value=1.1, lower_bound=0.2, upper_bound=3)
+    FEMOpt.add_parameter('external_r', initial_value=1.5, lower_bound=0.1, upper_bound=2.9)
+    FEMOpt.add_parameter('rho', initial_value=8000, lower_bound=6000, upper_bound=9000)
 
     FEMOpt.add_objective(fundamental_resonance, '共振周波数(Hz)', 50)
     FEMOpt.add_objective(mass, '質量(kg)', 1000)
     
     FEMOpt.add_constraint(thickness, '厚さ(m)', lower_bound=0.3)
     
-    FEMOpt.set_process_monitor(HypervolumeMonitor)
+    FEMOpt.set_process_monitor()
     
     FEMOpt.main()
     
-    import matplotlib.pyplot as plt
-    plt.show() # メインルーチンをここで止め、プロセスモニタが消えないようにする
+    # import matplotlib.pyplot as plt
+    # plt.show() # メインルーチンをここで止め、プロセスモニタが消えないようにする
     
 
 

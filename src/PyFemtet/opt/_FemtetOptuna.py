@@ -139,19 +139,35 @@ class FemtetOptuna(FemtetOptimizationCore):
             # 順序的に Gaudi にアクセスできるか？
             # is_calcrated の前に変数をアップデートする必要があるため、
             # 一度 buff に現在の変数を控える
-            buff = self.parameters['value']
-            self.parameters['value']= x
+
+            # 退避+更新
+            buff = self.parameters.copy()
+            self.parameters['value'] = x
+
+            # restore 関数 の準備 / この一連の処理から抜けうるところにはすべて配置
+
+            # Femtet を新しい変数に更新
+            from .core import FEMSystem, ModelError
+            if isinstance(self.FEM, FEMSystem):
+                try:
+                    # ModelError が起きうる
+                    self.FEM.update_model(self.parameters)
+                except ModelError:
+                    raise optuna.TrialPruned()
+
+            # strict 拘束の計算
             val_lb_ub_list = [[cns.fun(), cns.lb, cns.ub] for cns in self.constraints if cns.strict==True]
             for val, lb, ub in val_lb_ub_list:
                 if lb is not None:
                     if not (lb <= val):
-                        self.parameters['value']= buff
+                        self.parameters = buff # Femtet は戻す必要ない、以下同文
                         raise optuna.TrialPruned()
                 if ub is not None:
                     if not (val <= ub):
-                        self.parameters['value']= buff
+                        self.parameters = buff
                         raise optuna.TrialPruned()
-            self.parameters['value']= buff
+            self.parameters = buff
+            
 
             #### 解析実行
             # ModelError 等が起こりうる
