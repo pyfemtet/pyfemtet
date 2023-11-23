@@ -1,3 +1,5 @@
+from time import sleep
+
 from PyFemtet.opt import FemtetOptuna
 from PyFemtet.opt.core import NoFEM
 
@@ -9,6 +11,7 @@ def objective_x(FEMOpt):
 
 def objective_y(FEMOpt):
     r, theta = FEMOpt.get_parameter('value')
+    sleep(1)
     return r * np.sin(theta)
 
 def constraint_y(FEMOpt):

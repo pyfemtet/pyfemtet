@@ -106,7 +106,6 @@ dependencies = [ # Optional
     "scipy",
     "matplotlib",
     "japanize_matplotlib",
-    "seaborn",
     "optuna",
     "pywin32",
     "pywinauto",

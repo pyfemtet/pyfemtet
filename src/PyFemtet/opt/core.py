@@ -405,8 +405,15 @@ class FemtetOptimizationCore(ABC):
                 from .visualization import SimpleProcessMonitor
                 self.processMonitor = SimpleProcessMonitor(self)
             elif len(self.objectives)>1:
+                from .visualization import UpdatableSuperFigure
+                from .visualization import HypervolumeMonitor
                 from .visualization import MultiobjectivePairPlot
-                self.processMonitor = MultiobjectivePairPlot(self)
+                # self.processMonitor = HypervolumeMonitor(self)
+                self.processMonitor = UpdatableSuperFigure(
+                    self,
+                    HypervolumeMonitor,
+                    MultiobjectivePairPlot
+                    )
         else:
             self.processMonitor = ProcessMonitorClass(self)
             
@@ -687,6 +694,7 @@ class FemtetOptimizationCore(ABC):
             
     def _initRecord(self):
         columns = []
+        columns.append('n_trial')
         pNames, oNames, cNames = self._genarateHistoryColumnNames()
         columns.extend(pNames)
         columns.extend(oNames)
@@ -713,6 +721,7 @@ class FemtetOptimizationCore(ABC):
             ub = np.inf if ub is None else ub
             fit = (lb <= v <= ub)
             consData.extend([fit])
+        row.append(len(self.history)+1)
         row.extend(paramValues)
         row.extend(objValues)
         row.extend(consData)
