@@ -1,100 +1,16 @@
-# for hint
 from __future__ import annotations
 from typing import Any, Callable
 from abc import ABC, abstractmethod
+from functools import wraps
 
 from time import sleep
 import datetime
 
+import numpy as np
+
 from ._visualizationNameSpace import *
 
-figsize = (4,3)
 
-class ProcessMonitorBase(ABC):
-    def __init__(self, FEMOpt):
-        self.FEMOpt = FEMOpt
-        self.picked_index = -1
-        self.plots = {}
-        self.fig, self.ax = plt.subplots(figsize=figsize)
-        self.fig.canvas.mpl_connect('pick_event', self.on_pick)
-        self.fig.canvas.mpl_connect('close_event', self.interrupt)
-        self.fig.tight_layout()
-
-    def interrupt(self, *args, **kwargs):
-        self.FEMOpt.interruption = True
-
-    @abstractmethod
-    def on_pick(self, event):
-        # self.picked = idx        
-        pass
-
-    @abstractmethod
-    def update(self):
-        # plt.pause(0.1)
-        pass
-
-
-class HypervolumeMonitor(ProcessMonitorBase):
-    
-    label_hv = 'hypervolume'
-    
-    def __init__(self, FEMOpt):
-        super().__init__(FEMOpt)
-        self.fig.suptitle('process monitor')
-        self.ax.set(
-            xlabel='試行回数',
-            ylabel='hypervolume',
-            )
-        line, = self.ax.plot([], [], label=self.label_hv)
-        text_start_time = self.ax.text(0, 0, '', fontsize=9, ha='left')
-        text_last_time = self.ax.text(0, 0, '', fontsize=9, ha='right')
-        self.plots[self.label_hv] = line
-        self.plots['start'] = text_start_time
-        self.plots['end'] = text_last_time
-
-        self.fig.tight_layout()
-
-    def update(self):
-        line = self.plots[self.label_hv]
-        text_start_time = self.plots['start']
-        text_last_time = self.plots['end']
-        
-        # data の取得
-        xdata, ydata = self.FEMOpt.history[['time', 'hypervolume']].dropna().values.T
-        if len(xdata)<=1:
-            plt.pause(1)
-            return
-
-        _xdata = range(len(xdata))
-        line.set_data(_xdata, ydata)
-        text_start_time.set_position((_xdata[0], ydata[0]))
-        text_start_time.set_text(xdata[0].strftime('%m/%d\n%H:%M'))
-        text_last_time.set_position((_xdata[-1], ydata[-1]))
-        text_last_time.set_text(xdata[-1].strftime('%m/%d\n%H:%M'))
-        
-        # lim 再設定
-        ax = self.ax
-        xmergin = (max(_xdata)-min(_xdata))*0.05
-        ymergin = (max(ydata)-min(ydata))*0.05
-
-        ax.set(
-            xlim=(min(_xdata), max(_xdata)+xmergin),
-            ylim=(min(ydata)-ymergin, max(ydata)+ymergin))
-        ax.autoscale_view(True, True, True)
-        
-        self.fig.tight_layout()
-        plt.pause(1)
-        
-    def on_pick(self, event):
-        if isinstance(event.artist, PathCollection): # scat
-            x, y = event.artist.get_offsets()[event.ind[0]]
-            print(x, y)
-        elif isinstance(event.artist, Line2D): # line
-            xdata, ydata = event.artist.get_data()
-            x, y = xdata[event.ind[0]], ydata[event.ind[0]]
-            print(x, y)
-
-            
 class SimpleProcessMonitor:
     def __init__(self, FEMOpt):
         # FEMOpt を貰う
@@ -123,7 +39,6 @@ class SimpleProcessMonitor:
         
         self.fig.tight_layout()
 
-        
     def update(self):
         objectives = self.FEMOpt.objectives
         xdata = self.FEMOpt.history['time']
@@ -173,253 +88,198 @@ class SimpleProcessMonitor:
             subLine.set_ydata(float(y))
 
 
+class HypervolumeMonitor(UpdatableFigure):
 
-class MultiobjectivePairPlot:
-    labelAll = 'the others'
-    labelNonDomi = 'non-inferior solution'
-    labelNonFit = 'out of constraints(if exists)'
-    labelSelected = 'selection'
-    
-    def __init__(self, FEMOpt):
-        self.FEMOpt = FEMOpt
-        self.g = None
-        self.picked = None # クリックされた history の idx
-        self.create() # self.g がこの中で入る
-        
-        
-    def create(self):
-        self.generateGrid() # self.g がこの中で入る
+    @wraps(UpdatableFigure.__init__)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # label の設定
+        # ！all, selected 以外は bool を持つ history の column とする
+        # ！xlabel, ylabel も history の column とする
+        self.labels['all'] = 'ハイパーボリューム'
+        self.labels['selected'] = '選択中'
+        # title の設定
+        self.text_suptitle = self.fig.suptitle('ハイパーボリュームプロット')
+        # 作図
+        self.create()
         self.update()
 
-    def getLabeledScatter(self, ax, label):
-        artists = ax.get_children()
-        for artist in artists:
-            if type(artist)==PathCollection:
-                if hasattr(artist, 'get_label')==True:
-                    if artist.get_label()==label:
-                        return artist
-
-        
-    def update(self):
-        '''FEMOpt の内容を g の scatter に反映する'''
-        # データの用意
-        history = self.FEMOpt.history
-
-        if len(history)==0:
-            plt.pause(0.5)
-            return
-
-        objectiveNames = self.FEMOpt.get_history_columns('objective')
-        constraintNames = self.FEMOpt.get_history_columns('constraint')
-        
+    def _plot(self, ax):
+        #### 空の scatter の実行
+        # 基本。灰色。
+        ax.plot([], [], label=self.labels['all'],
+                   marker='o',
+                   # markersize=5,
+                   # markerfacecolor='gray',
+                   # markeredgecolor='gray',
+                   color='gray',
+                   lw=1,
+                   zorder=1, picker=True
+                   )
+        # 選択。色なし、黄枠線。何よりも手前にあるべき。
+        ax.scatter([], [], label=self.labels['selected'],
+                   facecolors='none',
+                   edgecolors='yellow',
+                   s=60, lw=2, zorder=4, picker=True
+                   )
     
-        # ax の用意（objectives の並び順になっているはず）
-        for rName, axes in zip(objectiveNames[1:], self.g.axes):
-            for cName, ax in zip(objectiveNames[:-1], axes):
-                if ax is None:
-                    continue
-                # scatter（set_offsets）
-                # all
-                idx = history['error_message']==''
-                pdf = history[[cName, rName]][idx]
-                scat = self.getLabeledScatter(ax, label=self.labelAll)
-                if scat is not None:
-                    scat.set_offsets(pdf.values)
-                #non-dominant
-                idx = history['non_domi']==True
-                pdf = history[[cName, rName]][idx]
-                scat = self.getLabeledScatter(ax, label=self.labelNonDomi)
-                if scat is not None:
-                    scat.set_offsets(pdf.values)
-                # non-fit
-                idx = history['fit']==False
-                pdf = history[[cName, rName]][idx]
-                scat = self.getLabeledScatter(ax, label=self.labelNonFit)
-                if scat is not None:
-                    scat.set_offsets(pdf.values)
+    def create(self):
+        #### プロットを作る
+        # 配置を作る
+        gs = self.fig.add_gridspec(1, 1)
+        ax = self.fig.add_subplot(gs[0, 0])
+        self.axes = np.array([[ax]])
+        # 作図
+        self._plot(self.axes[0,0])
+        # ラベルなどの追加
+        self.axes[0,0].set(xlabel='n_trial', ylabel='hypervolume')
+        #### legend の設定
+        axleg = self.axes[0,0]
+        loc = 'upper right'
+        axleg.legend(
+            *self.axes[0,0].get_legend_handles_labels(),
+            loc=loc,
+            )
 
-                # 選択                
-                if self.picked is not None:
-                    pdf = history[[cName, rName]].loc[self.picked]
-                    scat = self.getLabeledScatter(ax, label=self.labelSelected)
-                    if scat is not None:
-                        scat.set_offsets(pdf.values.T)
-                    
-                # 視野調整
-                idx = history['error_message']==''
-                pdf = history[[cName, rName]][idx]
-                if len(pdf)==1:
-                    xlim = pdf.values.T[0].min(), pdf.values.T[0].max()
-                    xrange = 1
-                    ax.set_xlim(xlim[0] - xrange*0.1, xlim[1] + xrange*0.1)
-                    ylim = pdf.values.T[1].min(), pdf.values.T[1].max()
-                    yrange = 1
-                    ax.set_ylim(ylim[0] - yrange*0.1, ylim[1] + yrange*0.1)
+    def on_pick(self, event):
+        # ax の取得
+        ax:Axes = event.artist.axes
+        # pick されたデータの取得
+        xdata, ydata = super()._get_xydata(event)
+        # データからインデックスを取得
+        idx = int(xdata[0])
+        # picked_idx の更新
+        self.picked_idx = idx
+        # figure の更新
+        self.update()
+        plt.pause(0.1)    
 
-                elif len(pdf)==2:
-                    xlim = pdf.values.T[0].min(), pdf.values.T[0].max()
-                    ylim = pdf.values.T[1].min(), pdf.values.T[1].max()
-                    xrange = xlim[1] - xlim[0]
-                    yrange = ylim[1] - ylim[0]
-                    ax.set_xlim(xlim[0] - xrange*0.1, xlim[1] + xrange*0.1)
-                    ax.set_ylim(ylim[0] - yrange*0.1, ylim[1] + yrange*0.1)
 
-                elif len(pdf)>2:
-                    xlim = pdf.values.T[0].min(), pdf.values.T[0].max()
-                    ylim = pdf.values.T[1].min(), pdf.values.T[1].max()
-                    xrange = xlim[1] - xlim[0]
-                    yrange = ylim[1] - ylim[0]
-                    xlim = xlim[0] - xrange*0.1, xlim[1] + xrange*0.1
-                    ylim = ylim[0] - yrange*0.1, ylim[1] + yrange*0.1
-                    prevXlim = ax.get_xlim()
-                    prevYlim = ax.get_ylim()
-                    xmin = min(xlim[0], prevXlim[0])
-                    xmax = max(xlim[1], prevXlim[1])
-                    ymin = min(ylim[0], prevYlim[0])
-                    ymax = max(ylim[1], prevYlim[1])
-                    ax.set_xlim(xmin, xmax)
-                    ax.set_ylim(ymin, ymax)
-
-        nRun = len(self.FEMOpt.history)
-        if nRun==0:
-            suffix = ''
-        elif nRun==1:
-            suffix = '1 run'
-        elif nRun>1:
-            suffix = f'{nRun} runs'
-        self.g.figure.suptitle(f'solution space: {suffix}')
-        # self.g.figure.tight_layout(rect=[0,0,1,0.96])
-        plt.pause(0.01)
+class MultiobjectivePairPlot(UpdatableFigure):
     
-    def generateGrid(self):
-        # データのセットアップ
-        history = self.FEMOpt.history
+    @wraps(UpdatableFigure.__init__)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.labels['non_domi'] = '非劣解'
+        self.labels['fit'] = '拘束範囲内'
+        self.labels['all'] = 'その他'
+        self.labels['selected'] = '選択中'
+        self.text_suptitle = self.fig.suptitle('多目的ペアプロット')
+        self.create()
+        self.update()
+
+    def _plot(self, ax):
+        #### 空の scatter の実行
+        # 非劣解。色なし、赤色。拘束違反でありうる。
+        ax.scatter([], [], label=self.labels['non_domi'],
+                   facecolors='none',
+                   edgecolors='orangered',
+                   s=20, lw=1, zorder=3, picker=True
+                   )
+        # 拘束範囲内。青色、枠線無し
+        ax.scatter([], [], label=self.labels['fit'],
+                   facecolors='royalblue',
+                   edgecolors='none',
+                   s=20, lw=0, zorder=2, picker=True
+                   )
+        # 基本。灰色、枠線無し。
+        ax.scatter([], [], label=self.labels['all'],
+                   facecolors='gray',
+                   edgecolors='none',
+                   s=20, lw=0, zorder=1, picker=True
+                   )
+        # 選択。色なし、黄枠線。何よりも手前にあるべき。
+        ax.scatter([], [], label=self.labels['selected'],
+                   facecolors='none',
+                   edgecolors='yellow',
+                   s=60, lw=2, zorder=4, picker=True
+                   )
+    
+    def create(self):
+        #### 下半分のペアプロットを実行
+        # 配置を作る
         objective_names = self.FEMOpt.get_history_columns('objective')
-        
-        # 空のデータを作成
-        empty = pd.DataFrame([], columns=history.columns)
-        
-        # 空のデータで pairplot の実行
-        g = sns.pairplot(empty, vars=objective_names, diag_kind='None', corner=True)
-        g.fig.set_figheight(4)
-        g.fig.set_figwidth(6)
-        plt.tight_layout()
-
-        # pairplot の対角要素は意味を持たないので
-        # GridSpec を用意して ax の再配置を行う
         n = len(objective_names)
-        gs = gridspec.GridSpec(n-1, n-1)
-        for r in range(1,n):
-            for c in range(0,n-1):
-                if r>c:
-                    g.axes[r, c].set_position(gs[r-1, c].get_position(g.figure))
-    
-        # 対角の ax や上半分の ax を削除する
-        for r in range(n):
-            for c in range(n):
-                if r<=c:
-                    # pg.axes[r,c].set_visible(False)
-                    ax = g.axes[r,c]
-                    for _ax in g.figure.axes:
-                        if id(ax)==id(_ax):
-                            g.figure.delaxes(_ax)
-        g.axes = np.delete(g.axes, 0, axis=0)
-        g.axes = np.delete(g.axes, -1, axis=1)
-    
-        # 残っているデータに対し、空の scatter を実行する
-        for ax in g.figure.axes:
-            # 非劣解。色なし、赤枠線
-            ax.scatter([], [], label=self.labelNonDomi, facecolors='none', edgecolors='orangered', s=40, lw=1, zorder=3, picker='pick_event')
-            # 拘束を満たさない。灰色、枠線無し
-            ax.scatter([], [], label=self.labelNonFit, color='gray', edgecolors='none', s=20, zorder=2, picker='pick_event')
-            # 基本。青プロット、枠線無し。legendで最後にするためここにあるが、他より下にないといけない。
-            ax.scatter([], [], label=self.labelAll, color='royalblue', edgecolors='gray', s=20, lw=1, zorder=1, picker='pick_event')
-            # 選択。黄色プロット、青枠線。何よりも手前にあるべき。
-            ax.scatter([], [], label=self.labelSelected, color='yellow', edgecolors='royalblue', s=60, lw=2, zorder=4, picker='pick_event')
+        gs = self.fig.add_gridspec(n-1, n-1)
+        self.axes = []
+        # 下半分にプロットを行っていく
+        for r in range(n-1):
+            self.axes.append([])
+            for c in range(n-1):
+                ax = self.fig.add_subplot(gs[r, c])
+                self.axes[-1].append(ax)
+                # 下半分ならプロット
+                if r>=c:
+                    # 作図
+                    self._plot(ax)
+                    # 一番下なら xlabel を表示、そうでなければ xticklabels を非表示
+                    if r==n-2:
+                        ax.set_xlabel(objective_names[c])
+                    else:
+                        [text.set_visible(False) for text in ax.xaxis.get_ticklabels()]
+                    # 一番左なら ylabel を表示、そうでなければ yticklabels を非表示
+                    if c==0:
+                        ax.set_ylabel(objective_names[r+1])
+                    else:
+                        [text.set_visible(False) for text in ax.yaxis.get_ticklabels()]
+                # そうでなければ非表示
+                else:
+                    ax.set_visible(False)
+        self.axes = np.array(self.axes)
 
+        #### 軸の同期設定
+        # 同じ column で sharex
+        for c in range(n-1):
+            ax1 = self.axes[0,c]
+            for r in range(1,n-1):
+                ax2 = self.axes[r,c]
+                ax2.sharex(ax1)
+        # 同じ row で sharey
+        for r in range(n-1):
+            ax1 = self.axes[r,0]
+            for c in range(0, n-1):
+                ax2 = self.axes[r,c]
+                ax2.sharey(ax1)
 
-        g.fig.canvas.mpl_connect('pick_event', self.onPick)
-
-        # TODO:中断（experimental）
-        def lmd(*args, **kwargs):
-            self.FEMOpt.interruption = True
-        g.figure.canvas.mpl_connect('close_event', lmd)
-
-
-        
-        # legend を作る（位置調整のため legend 用の ax を作る）
-        if n==2:
-            gs = gridspec.GridSpec(3, 4)
-            ax_legend = plt.subplot(gs[1,-1])
+        #### legend の設定
+        # 一番右上を legend 用にする
+        axleg = self.axes[0,-1]
+        axleg.set_visible(True)
+        if id(axleg)==id(self.axes[0,0]):
+            loc = 'upper right'
         else:
-            ax_legend = plt.subplot(gs[:int((n-1)/2), int(n/2):])
-        ax_legend.axis('off') # 軸の非表示
-        # for 文の中で最後に実行された ax から label を取得（全部変わらないはずだから）
-        handles, labels = ax.get_legend_handles_labels()
-        legend = ax_legend.legend(handles, labels, loc='center') # , ncol=2
-        # 書式を決める
-        frame = legend.get_frame()
-        frame.set_facecolor('white') # 凡例の背景色を白に設定します
-        frame.set_alpha(1) # 凡例の背景の透明度を0に設定します
+            loc = 'center'
+            axleg.axis('off')
+        axleg.legend(
+            *self.axes[0,0].get_legend_handles_labels(),
+            loc=loc,
+            )
         
-        # タイトル
-        g.figure.suptitle('solution space')
-        # g.figure.tight_layout(rect=[0,0,1,0.96])
-        
-        # 登録
-        self.g = g
-        
-    def onPick(self, event):
-        # 準備
-        objectiveNames = self.FEMOpt.get_history_columns('objective')
-        n = len(objectiveNames)-1
-        ax = event.artist.axes
-        # どのデータか？
-        r, c = -1, -1
-        for _r in range(n):
-            for _c in range(n):
-                if id(self.g.axes[_r,_c])==id(ax):
-                    r = _r
-                    c = _c
-                    break
-        rName = objectiveNames[r+1] # 最初のひとつが削除されているため +1 する
-        cName = objectiveNames[c] # 最後のひとつが削除されているため何もしなくていい        
-        xydata = event.artist.get_offsets()[event.ind[0]]
-        
-        # history の 何行目か？->picked の更新
-        df = self.FEMOpt.history        
-        xydataList = df[[cName, rName]].values
-        idx = np.where(xydata==xydataList)[0][0] # 行の 1 つめと 2 つめは一致しているはずだから 0 でいい
-        self.picked = idx
-        
-        # 各 ax でデータを更新
-        self.updateSelection()
-        
-        
-        plt.pause(0.01)
+    def get_idx(self, x, y, xlabel, ylabel):
+        x, y = x[0], y[0]
+        # xdata, ydata ともに一致する idx を返す
+        xdata = self.FEMOpt.history[xlabel]
+        ydata = self.FEMOpt.history[ylabel]
+        match_idx_x, = np.where(xdata==x)
+        match_idx_y, = np.where(ydata==y)
+        match_idx = np.intersect1d(match_idx_x, match_idx_y)
+        if len(match_idx)==0:
+            return -1
+        else:
+            return match_idx[0]
 
-    def updateSelection(self):
-        # r, c を順次見ていく
-        # 準備
-        objectiveNames = self.FEMOpt.get_history_columns('objective')
-        df = self.FEMOpt.history
-        n = len(objectiveNames)-1
-        for r in range(n):
-            for c in range(n):
-                # ax が None でなければ
-                ax = self.g.axes[r, c]
-                if ax is not None:
-                    # cName, rName を取得
-                    rName = objectiveNames[r+1] # 最初のひとつが削除されているため +1 する
-                    cName = objectiveNames[c] # 最後のひとつが削除されているため何もしなくていい        
-                    # pdf を作成
-                    pdf = df[[cName, rName]].loc[self.picked]
-                    # scatter を更新
-                    scat = self.getLabeledScatter(ax, label=self.labelSelected)
-                    if scat is not None:
-                        scat.set_offsets(pdf.values.T)
-        
-        
+    def on_pick(self, event):
+        # ax の取得
+        ax:Axes = event.artist.axes
+        # pick されたデータの取得
+        xdata, ydata = super()._get_xydata(event)
+        xlabel, ylabel = self._search_xylabels_in_shared_axes(ax)
+        # データからインデックスを取得
+        idx = self.get_idx(xdata, ydata, xlabel, ylabel)
+        self.picked_idx = idx
+
+        self.update()
+        plt.pause(0.1)
 
 
 

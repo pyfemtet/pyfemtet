@@ -139,15 +139,6 @@ class FemtetOptuna(FemtetOptimizationCore):
         # sampler = optuna.samplers.NSGAIISampler(constraints_func=__constraints)
         sampler = optuna.samplers.TPESampler(constraints_func=__constraints)
 
-        # #### study があったら消す
-        # try:
-        #     optuna.delete_study(
-        #         study_name=self.study_name,
-        #         storage=self.storage_name,
-        #         )
-        # except:
-        #     pass
-
         #### study の設定
         study = optuna.create_study(
             study_name=self.study_name,
@@ -205,7 +196,7 @@ class FemtetOptuna(FemtetOptimizationCore):
                     )
             if ub is not None: # ub >= fun  <=>  fun - ub <= 0
                 self._constraints.append(
-                    functools.partial(self._createLowerBoundFun, i=i, ub=ub)
+                    functools.partial(self._createUpperBoundFun, i=i, ub=ub)
                     )
             
 
