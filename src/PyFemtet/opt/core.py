@@ -25,7 +25,7 @@ from optuna._hypervolume import WFG
 # for Femtet
 import win32com.client
 from win32com.client import Dispatch, constants
-# from ..tools.FemtetClassConst import FemtetClassName as const
+from pywintypes import com_error
 from femtetutils import util, constant
 
 
@@ -61,6 +61,24 @@ class FEMSystem(ABC):
 
 
 class Femtet(FEMSystem):
+    
+    def _catchError(self):
+        raise NotImplementedError()
+
+        # Solve returns False is an error ocured in Femtet
+        if not Femtet.Solve():
+            try:
+                # ShowLastError() raises com_error
+                # that contains the error message of Femtet
+                self.Femtet.ShowLastError()
+            except com_error as e:
+                info:tuple = e.excepinfo
+                error_message:str = info[2] # 例：'E1033 Model : モデルファイルの保存に失敗しました'
+                error_code = error_message.split(':')[0].split(' ')[0]
+                # 例えば、モデルファイルの保存は再試行したらいい。
+                # （なんで保存に失敗するかは謎...sleepしたほうがいいのか。）
+                if error_code=='E1033': # モデル保存失敗
+                    raise ModelError
     
     def setFemtet(self, strategy):
         if strategy=='catch':
