@@ -533,35 +533,26 @@ class FemtetOptimizationCore(ABC):
         if self.interruption:
             raise UserInterruption
         
-        
         # 渡された x がすでに計算されたものであれば
         # objective も constraint も更新する必要がなく
         # そのまま converted objective を返せばいい
         if not self._isCalculated(x):
-
-
-            
-            self.error_message = '' # onerror が呼ばれなければこのまま _record される
+            # メッセージの初期化
+            self.error_message = ''
             self.algorithm_message = algorithm_message
             
             # update parameters
             self.parameters['value'] = x
 
             # solve
-            try:
-                if type(self.FEM)==NoFEM:
-                    self.objectiveValues = [obj.fun() for obj in self.objectives]
-                    self.constraintValues = [obj.fun() for obj in self.constraints]
-                else:
-                    self.FEM.run(self.parameters)
-                    self.objectiveValues = [obj.fun() for obj in self.objectives]
-                    self.constraintValues = [obj.fun() for obj in self.constraints]
-                self._record()
-
-            except (ModelError, MeshError, SolveError) as e:
-                # TODO: 勾配法でもなんとかできるように何とかする（要研究）
-                self._onerror(x, e)
-
+            if type(self.FEM)==NoFEM:
+                self.objectiveValues = [obj.fun() for obj in self.objectives]
+                self.constraintValues = [obj.fun() for obj in self.constraints]
+            else:
+                self.FEM.run(self.parameters)
+                self.objectiveValues = [obj.fun() for obj in self.objectives]
+                self.constraintValues = [obj.fun() for obj in self.constraints]
+            self._record()
                 
         return [obj._convert(v) for obj, v in zip(self.objectives, self.objectiveValues)]
 

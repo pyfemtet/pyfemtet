@@ -144,7 +144,9 @@ class FemtetOptuna(FemtetOptimizationCore):
             buff = self.parameters.copy()
             self.parameters['value'] = x
 
-            # restore 関数 の準備 / この一連の処理から抜けうるところにはすべて配置
+            # restore の注意 / strict 拘束の処理から抜けうるところには
+            # すべてに以下の処理を配置すること
+            # self.parameters = buff
 
             # Femtet を新しい変数に更新
             from .core import FEMSystem, ModelError
