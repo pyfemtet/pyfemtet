@@ -66,6 +66,7 @@ class Femtet(FEMSystem):
         raise NotImplementedError()
 
         # Solve returns False is an error ocured in Femtet
+        # Gaudi.Mesh returns number of elements or 0 if error
         if not Femtet.Solve():
             try:
                 # ShowLastError() raises com_error
@@ -77,10 +78,11 @@ class Femtet(FEMSystem):
                 error_code = error_message.split(':')[0].split(' ')[0]
                 # 例えば、モデルファイルの保存は再試行したらいい。
                 # （なんで保存に失敗するかは謎...sleepしたほうがいいのか。）
+                # ただし、エラーの書式が全部":"と" "区切りかは不明
                 if error_code=='E1033': # モデル保存失敗
                     raise ModelError
     
-    def setFemtet(self, strategy):
+    def setFemtet(self, strategy='auto'):
         if strategy=='catch':
             # 既存の Femtet を探す
             self.Femtet = Dispatch('FemtetMacro.Femtet')
@@ -118,6 +120,10 @@ class Femtet(FEMSystem):
         if not Gaudi.ReExecute():
             raise ModelError('モデル再構築に失敗しました')
 
+        # インポートを含むモデルに対し ReExecute すると
+        # 結果画面のボディツリーでボディが増える対策
+        self.Femtet.Redraw()
+        
     def run(self, df):
         '''run : 渡された df に基づいて Femtet に計算を実行させる関数。
 

@@ -55,4 +55,5 @@ class NX_Femtet(Femtet):
 
         # プロジェクトの更新
         self.Femtet.Gaudi.ReExecute()
+        self.Femtet.Redraw()
 

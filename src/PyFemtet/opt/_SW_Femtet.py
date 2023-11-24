@@ -106,6 +106,7 @@ class SW_Femtet(Femtet):
 
         # ReExecute Femtet History
         self.Femtet.Gaudi.ReExecute()
+        self.Femtet.Redraw()
 
     def update_parameter(self, user_param_dict):
         # プロパティを退避

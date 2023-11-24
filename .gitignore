@@ -3,6 +3,24 @@ __pycache__/
 *$py.class
 
 *.log
+*.pdt
+*.cli
+*.fac
+*.gal
+*.gsd
+*.mes
+*.mqt
+*.pbd
+*.pgr
+*.pls
+*.pmt
+*.pmv
+*.ptr
+*.pxt
+*.tbl
+*.tdb
+*.fac
+
 db.sqlite3
 *.db
 *.csv
