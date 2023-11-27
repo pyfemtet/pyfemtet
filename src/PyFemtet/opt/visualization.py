@@ -103,6 +103,7 @@ class HypervolumeMonitor(UpdatableFigure):
         # 作図
         self.create()
         self.update()
+        plt.pause(0.1)
 
     def _plot(self, ax):
         #### 空の scatter の実行
@@ -167,6 +168,7 @@ class MultiobjectivePairPlot(UpdatableFigure):
         self.text_suptitle = self.fig.suptitle('多目的ペアプロット')
         self.create()
         self.update()
+        plt.pause(0.1)
 
     def _plot(self, ax):
         #### 空の scatter の実行

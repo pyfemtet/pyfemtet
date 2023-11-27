@@ -91,6 +91,10 @@ class UpdatableSuperFigure:
     def update(self):
         for m in self.monitors:
             m.update()
+        if self.fig.canvas.figure.stale:
+            self.fig.canvas.draw_idle()
+        self.fig.canvas.start_event_loop(1)
+
 
     def force_redraw(self, *args, **kwargs):
         self.fig.canvas.draw() # 再描画されないことがある？
@@ -223,6 +227,9 @@ class UpdatableFigure(ABC):
             #     hspace=0.05
             #     )
             self.fig.tight_layout()
+            if self.fig.canvas.figure.stale:
+                self.fig.canvas.draw_idle()
+            self.fig.canvas.start_event_loop(1)
         elif type(self.fig)==SubFigure:
             self.text_suptitle.set_y(0.85)
             self.fig.subplots_adjust(
@@ -233,7 +240,6 @@ class UpdatableFigure(ABC):
                 wspace=0.05,
                 hspace=0.05
                 )
-        plt.pause(0.1)
     
     @abstractmethod
     def create(self):
