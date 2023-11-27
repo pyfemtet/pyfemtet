@@ -135,10 +135,8 @@ class FemtetOptuna(FemtetOptimizationCore):
             trial.set_user_attr("constraint", dummy_data)
             
             #### strict 拘束の計算
-            # solve を伴わないからややこしい方法を使わなくていいか？
-            # 順序的に Gaudi にアクセスできるか？
-            # is_calcrated の前に変数をアップデートする必要があるため、
-            # 一度 buff に現在の変数を控える
+            # is_calcrated の直後まで変数をアップデートしてはいけないため
+            # 一度 buff に現在の変数を控え、処理が終わったら戻す
 
             # 退避+更新
             buff = self.parameters.copy()
@@ -158,15 +156,21 @@ class FemtetOptuna(FemtetOptimizationCore):
                     raise optuna.TrialPruned()
 
             # strict 拘束の計算
-            val_lb_ub_list = [[cns.fun(), cns.lb, cns.ub] for cns in self.constraints if cns.strict==True]
-            for val, lb, ub in val_lb_ub_list:
+            val_lb_ub_list = [[cns.fun(), cns.lb, cns.ub, cns.ptrFunc.__name__] for cns in self.constraints if cns.strict==True]
+            for val, lb, ub, fn in val_lb_ub_list:
                 if lb is not None:
                     if not (lb <= val):
+                        print(f'拘束 {fn} が満たされませんでした。')
+                        print('変数の組み合わせは以下の通りです。')
+                        print(self.parameters)
                         self.parameters = buff # Femtet は戻す必要ない、以下同文
                         raise optuna.TrialPruned()
                 if ub is not None:
                     if not (val <= ub):
                         self.parameters = buff
+                        print(f'拘束 {fn} が満たされませんでした。')
+                        print('変数の組み合わせは以下の通りです。')
+                        print(self.parameters)
                         raise optuna.TrialPruned()
             self.parameters = buff
             

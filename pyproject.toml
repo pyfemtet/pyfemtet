@@ -104,6 +104,7 @@ dependencies = [ # Optional
     "pandas",
     "openpyxl",
     "scipy",
+    "tqdm",
     "matplotlib",
     "japanize_matplotlib",
     "optuna",

@@ -379,11 +379,12 @@ class FemtetOptimizationCore(ABC):
                       ):
         
         # 変数が Femtet にあるかどうかのチェック
-        if type(self.FEM)==Femtet:
-            try:
+        if type(self.FEM)==Femtet: # 継承した NX_Femtet とかでは Femtet には変数がない
+            variable_names = self.FEM.Femtet.GetVariableNames()
+            if name in variable_names:
                 femtetValue = self.FEM.Femtet.GetVariableValue(name)
-            except:
-                raise Exception(f'Femtet から変数 {name} を取得できませんでした。Femtet で開いている解析モデルが変数 {name} を含んでいるか確認してください。')
+            else:
+                raise Exception(f'Femtet プロジェクトに変数{name}が設定されていません。現在の Femtet で登録されいてる変数は {variable_names} です。大文字・小文字の区別の注意してください。')
         
         if initial_value is None:
             initial_value = femtetValue
