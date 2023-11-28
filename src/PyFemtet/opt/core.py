@@ -75,12 +75,15 @@ class Femtet(FEMSystem):
             except com_error as e:
                 info:tuple = e.excepinfo
                 error_message:str = info[2] # 例：'E1033 Model : モデルファイルの保存に失敗しました'
-                error_code = error_message.split(':')[0].split(' ')[0]
+                error_code = error_message.split(' ')[0]
                 # 例えば、モデルファイルの保存は再試行したらいい。
                 # （なんで保存に失敗するかは謎...sleepしたほうがいいのか。）
-                # ただし、エラーの書式が全部":"と" "区切りかは不明
+                # ただし、エラーの書式が" "区切りかは不明
                 if error_code=='E1033': # モデル保存失敗
                     raise ModelError
+                elif error_code=='E4019': # Femtet が起動していません
+                    raise UnknownError # TODO:最初ならともかく、途中なら落ちたということ
+                    
     
     def setFemtet(self, strategy='auto'):
         if strategy=='catch':
