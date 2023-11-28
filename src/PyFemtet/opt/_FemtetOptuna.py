@@ -146,9 +146,9 @@ class FemtetOptuna(FemtetOptimizationCore):
             # すべてに以下の処理を配置すること
             # self.parameters = buff
 
-            # Femtet を新しい変数に更新
-            from .core import FEMSystem, ModelError
-            if isinstance(self.FEM, FEMSystem):
+            # Femtet 関係の FEM システムであれば変数を更新
+            from .core import Femtet, ModelError
+            if isinstance(self.FEM, Femtet):
                 try:
                     # ModelError が起きうる
                     self.FEM.update_model(self.parameters)

@@ -37,7 +37,7 @@ from japanize_matplotlib import japanize
 japanize()
 
 # FEMOpt class
-from .core import FemtetOptimizationCore
+from ..core import FemtetOptimizationCore
 
 
 default_supfigsize = (7, 3) # size(px) = figsize*dpi
