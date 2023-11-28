@@ -26,9 +26,18 @@ def main():
     FEMOpt.add_parameter('theta', 0, 0, 2*np.pi)
     FEMOpt.add_objective(objective_x, 'x', args=FEMOpt)
     FEMOpt.add_objective(objective_y, 'y', args=FEMOpt)
-    FEMOpt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=FEMOpt)
-    FEMOpt.set_process_monitor()
-    FEMOpt.main()
+    # FEMOpt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=FEMOpt)
+
+    # FEMOpt.set_process_monitor()
+
+    from PyFemtet.opt.visualization._dash import DashProcessMonitor
+    pm = DashProcessMonitor(FEMOpt)
+    pm.start()
+    
+
+    FEMOpt.main(n_trials=20)
+    
+    
 
 if __name__=='__main__':
     main()
