@@ -10,9 +10,7 @@ import sys
 import time
 import datetime
 import inspect
-def getCurrentMethod():
-    return inspect.currentframe().f_code.co_name
-import threading
+# from multiprocessing import Pool, Process, Manager
 import functools
 import math
 import ast
@@ -24,35 +22,49 @@ from optuna._hypervolume import WFG
 
 # for Femtet
 import win32com.client
-from win32com.client import Dispatch, constants
+from win32com.client import Dispatch, constants, CDispatch
 from pywintypes import com_error
 from femtetutils import util, constant
+from ..tools.DispatchUtils import Dispatch_Femtet_with_pid, Dispatch_Femtet_with_new_process
 
 
 
 #### Exception for Femtet error
 class ModelError(Exception):
-    _message = 'モデル作成に失敗しました。目的関数と拘束関数の値は意味を持ちません。'
+    '''FEM でのモデル更新に失敗した際のエラー'''
+    pass
 
 class MeshError(Exception):
-    _message = 'メッシュ作成に失敗しました。目的関数と拘束関数の値は意味を持ちません。'
+    '''FEM でのメッシュ生成に失敗した際のエラー'''
+    pass
 
 class SolveError(Exception):
-    _message = 'ソルブに失敗しました。目的関数と拘束関数の値は意味を持ちません。'
+    '''FEM でのソルブに失敗した際のエラー'''
+    pass
+
+class PostError(Exception):
+    '''FEM 解析前後の目的又は拘束の計算に失敗した際のエラー'''
+    pass
+
+class FEMCrash(Exception):
+    '''FEM プロセスが異常終了した際のエラー'''
+    pass
 
 class UserInterruption(Exception):
-    _message = 'ユーザー操作によって中断されました'
+    '''ユーザーによる中断'''
+    pass
 
 
 #### FEM クラス
 
 class FEMSystem(ABC):
-    '''FEM システムのクラス。
+    '''
+    FEM システムのクラス。
     このクラスを継承して具体的な FEM システムのクラスを作成し、
     そのインスタンスを FemtetOptimizationCore の FEM メンバーに割り当てる。
     '''
     @abstractmethod
-    def run(self, df)->None:
+    def update(self, df)->None:
         '''
         FEM の制御を実装して df に基づいてモデルを更新し
         objectiveValues と constraintValues を更新する
@@ -61,48 +73,154 @@ class FEMSystem(ABC):
 
 
 class Femtet(FEMSystem):
-    
-    def _catchError(self):
-        raise NotImplementedError()
+        
+    def open(self, femprj_path:str, model_name:str or None = None)->None:
+        '''
 
+        Parameters
+        ----------
+        femprj_path : str
+            .femprj ファイルのパス.
+        model_name : str or None, optional
+            解析モデルの名前. 指定しない場合、プロジェクトを最後に開いたときのモデルが使われます。
+            The default is None.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        '''
+        
+        self.femprj_path = os.path.abspath(femprj_path)
+        self.model_name = model_name
+        # 開く
+        if self.model_name is None:
+            result = self.Femtet.LoadProject(
+                self.femprj_path,
+                True
+                ) 
+        else:
+            result = self.Femtet.LoadProjectAndAnalysisModel(
+                self.femprj_path,
+                self.model_name,
+                True
+                )
+        if not result:
+            self.Femtet.ShowLastError()
+    
+        
+    def _run_with_catch_error(self, function, iferror=False)->str:
         # Solve returns False is an error ocured in Femtet
         # Gaudi.Mesh returns number of elements or 0 if error
-        if not Femtet.Solve():
+        # for example, _withcatcherror(Femtet.Solve, False), _withcatcherror(Femtet.Gaudi.Mesh, 0)
+        result = function()
+        if result==iferror:
             try:
                 # ShowLastError() raises com_error
                 # that contains the error message of Femtet
-                self.Femtet.ShowLastError()
+                self.Femtet.ShowLastError() # 必ずエラーが起こる
             except com_error as e:
                 info:tuple = e.excepinfo
                 error_message:str = info[2] # 例：'E1033 Model : モデルファイルの保存に失敗しました'
-                error_code = error_message.split(':')[0].split(' ')[0]
+                error_code = error_message.split(' ')[0]
+                # ただし、エラーの書式が全部" "区切りかは不明
+                return error_code
+                # 'E1033':モデル保存失敗
+                # 'E4019':Femtetが開いてません
                 # 例えば、モデルファイルの保存は再試行したらいい。
                 # （なんで保存に失敗するかは謎...sleepしたほうがいいのか。）
-                # ただし、エラーの書式が全部":"と" "区切りかは不明
-                if error_code=='E1033': # モデル保存失敗
-                    raise ModelError
+        else:
+            return ''
     
-    def setFemtet(self, strategy='auto'):
-        if strategy=='catch':
-            # 既存の Femtet を探す
-            self.Femtet = Dispatch('FemtetMacro.Femtet')
-        elif strategy=='new':
-            # femtetUtil を使って新しい Femtet を立てる
-            succeed = util.execute_femtet()
-            if succeed:
-                self.Femtet = Dispatch('FemtetMacro.Femtet')
-        elif strategy=='auto':
-            succeed = util.auto_execute_femtet()
-            if succeed:
-                self.Femtet = Dispatch('FemtetMacro.Femtet')
+    
+    def connect_Femtet(self, strategy:str='new')->None:
+        '''
+        Femtet プロセスとの接続を行います。
+
+        Parameters
+        ----------
+        strategy : str, optional
+            'new' or 'catch' or 'auto'. The default is 'new'.
+            'new' のとき、新しい Femtet プロセスを起動し、接続します。
+            'catch' のとき、既存の Femtet プロセスと接続します。
+            ただし、接続できる Femtet が存在しない場合、エラーを送出します。
+            この場合、既存 Femtet プロセスのどれに接続されるかは制御できません。
+            また、すでに別のPython又はExcelプロセスと接続されている Femtet との接続を行うことはできません。
+            'auto' のとき、まず 'catch' を試行し、失敗した際には 'new' で接続します。
+
+        Raises
+        ------
+        Exception
+            何らかの理由で Femtet との接続に失敗した際に例外を送出します。
+
+        Returns
+        -------
+        caught_femtet : str.
+            接続された Femtet が既存のものならば 'existing',
+            新しいものならば 'new' を返します。
+
+        '''
         
+        caught_femtet = None
+                
+        if strategy=='new':
+            # 新しい Femtet プロセスを立てて繋ぐ
+            self.Femtet, _ = Dispatch_Femtet_with_new_process()
+            caught_femtet = 'new'
+        
+        elif strategy=='catch':
+            # 既存の Femtet を探して Dispatch する。
+            self.Femtet, _ = Dispatch_Femtet_with_pid()
+            caught_femtet = 'existing'
+
+        elif strategy=='auto':
+            try:
+                # 既存の Femtet を探して Dispatch する。
+                self.Femtet, pid = Dispatch_Femtet_with_pid()
+                caught_femtet = 'existing'
+                if pid==0:
+                    # 新しい Femtet プロセスを立てて繋ぐ
+                    self.Femtet, _ = Dispatch_Femtet_with_new_process()
+                    caught_femtet = 'new'
+            except:
+                # 新しい Femtet プロセスを立てて繋ぐ
+                self.Femtet, _ = Dispatch_Femtet_with_new_process()
+                caught_femtet = 'new'
+        
+        else:
+            raise Exception(f'不明な接続方法です：{strategy}')
+        
+        # makepy しているかどうかの確認
         if not hasattr(constants, 'STATIC_C'):
             cmd = f'{sys.executable} -m win32com.client.makepy FemtetMacro'
             os.system(cmd)
             message = 'Femtet の定数を使う設定が行われていなかったので、設定を自動で実行しました。設定を反映するため、Pythonコンソールを再起動してください。'
             raise Exception(message)
+        
+        return caught_femtet
 
-    def update_model(self, df):
+
+    def update_model(self, df:pd.DataFrame)->None:
+        '''
+        Femtet の解析モデルを df に従って再構築します。
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            name, value のカラムを持つこと.
+
+        Raises
+        ------
+        ModelError
+            変数の更新またはモデル再構築に失敗した場合に送出されます。
+
+        Returns
+        -------
+        None
+
+        '''
+
         # 変数更新のための処理
         time.sleep(0.1) # Gaudi がおかしくなる時がある対策
         Gaudi = self.Femtet.Gaudi
@@ -123,40 +241,70 @@ class Femtet(FEMSystem):
         # インポートを含むモデルに対し ReExecute すると
         # 結果画面のボディツリーでボディが増える対策
         self.Femtet.Redraw()
+
         
-    def run(self, df):
-        '''run : 渡された df に基づいて Femtet に計算を実行させる関数。
+    def run(self)->None:
+        '''
+        Femtet の解析を実行します。
+
+        Raises
+        ------
+        MeshError
+        SolveError
+
+        Returns
+        -------
+        None.
 
         '''
-        self.update_model(df)
-        
-        Gaudi = self.Femtet.Gaudi
 
         # メッシュを切る
-        try:
-            Gaudi.Mesh()
-        except win32com.client.pythoncom.com_error:
-            raise MeshError('error was occured at meshing updated model')
+        error_code = self._run_with_catch_error(self.Femtet.Gaudi.Mesh)
+        if error_code!='':
+            raise MeshError('メッシュ生成に失敗しました。')
         
         # ソルブする
-        try:
-            self.Femtet.Solve()
-        except win32com.client.pythoncom.com_error:
-            raise SolveError('error was occured at solver')
+        error_code = self._run_with_catch_error(self.Femtet.Solve)
+        if error_code!='':
+            raise SolveError('ソルブに失敗しました。')
 
         # 次に呼ばれるはずのユーザー定義コスト関数の記述を簡単にするため先に解析結果を開いておく
         if not(self.Femtet.OpenCurrentResult(True)):
             self.Femtet.ShowLastError
 
+    
+    def update(self, df:pd.DataFrame)->None:
+        '''
+        update_model と run を実行します。
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            name, value のカラムを持つこと.
+
+        '''
+        self.update_model(df)
+        self.run()
+
 
 class NoFEM(FEMSystem):
+    '''
+    デバッグ用クラス。
+    '''
+    
     def __init__(self):
         self.error_regions = []
 
     def set_error_region(self, f):
+        '''
+        モデルエラーを起こすための関数 f[[np.ndarray], float] をセットする。
+        '''
         self.error_regions.append(f)
     
-    def run(self, df):
+    def update(self, df):
+        '''
+        自身にセットされたerror_regionに抵触する場合、ModelErrorを送出する。
+        '''
         for f in self.error_regions:
             if f(df['value'].values)<0:
                 raise ModelError
@@ -164,7 +312,12 @@ class NoFEM(FEMSystem):
 
 #### 周辺クラス、関数
 
-def is_access_Gaudi(f):
+def _is_access_Gaudi(f):
+    '''
+    ユーザー定義関数が Gaudi にアクセスしているかどうかを簡易的に判断する。
+    solve前に評価するstrict_constraintでsolve結果にアクセスする違反を
+    検出するためのfool-proof策。
+    '''
     # 関数fのソースコードを取得
     source = inspect.getsource(f)
     
@@ -192,6 +345,12 @@ def is_access_Gaudi(f):
 
 
 def symlog(x):
+    '''
+    定義域を負領域に拡張したlog関数です。
+    多目的最適化における目的関数同士のスケール差により
+    意図しない傾向が生ずることのの軽減策として
+    内部でsymlog処理を行います。
+    '''
     if isinstance(x, np.ndarray):
         ret = np.zeros(x.shape)
         idx = np.where(x>=0)
@@ -209,18 +368,20 @@ def symlog(x):
 
 class Objective:
     prefixForDefault = 'objective'
-    def __init__(self, fun, direction, name, opt, ptrFunc, args, kwargs):
+
+    def __init__(self, f, args, kwargs, name, direction, FEMOpt):
         
         self._checkDirection(direction)
         
-        self.fun = fun
-        self.direction = direction
-        self.name = name
-        
-        self.ptrFunc = ptrFunc
+        self.f = f
         self.args = args
         self.kwargs = kwargs
+
+        self.name = name
+        self.direction = direction
         
+        self.FEMOpt = FEMOpt
+
 
     def _checkDirection(self, direction):
         if type(direction)==float or type(direction)==int:
@@ -232,8 +393,9 @@ class Objective:
         else:
             raise Exception(f'invalid direction "{direction}" for Objective')
         
-        
+
     def _convert(self, value:float):
+        '''目的関数の値を direction を加味した内部値に変換します。'''
         ret = value
         if type(self.direction)==float or type(self.direction)==int:
             ret = abs(value - self.direction)
@@ -246,53 +408,115 @@ class Objective:
 
         return ret         
                 
+
+    def calc(self):
+        # Femtet を継承したクラスの場合第一引数は Femtet であるとする
+        if issubclass(self.FEMOpt.FEMClass, Femtet):
+            return self.f(*(self.FEMOpt.FEM.Femtet, *self.args), **self.kwargs)
+        else:
+            return self.f(*self.args, **self.kwargs)
+            
+
         
 class Constraint:
     prefixForDefault = 'constraint'
-    def __init__(self, fun, lb, ub, name, strict, opt, ptrFunc, args, kwargs):
-        self.fun = fun # partial object
-        self.lb = lb
-        self.ub = ub
-        self.name = name
-        self.strict = strict
 
-        self.ptrFunc = ptrFunc # original function
+    def __init__(self, f, args, kwargs, name, lb, ub, strict, FEMOpt):
+        self.f = f
         self.args = args
         self.kwargs = kwargs
+
+        self.name = name
+        self.lb = lb
+        self.ub = ub
+        self.strict = strict
+        
+        self.FEMOpt = FEMOpt
+
+
+    def calc(self):
+        # Femtet を継承したクラスの場合第一引数は Femtet であるとする
+        if issubclass(self.FEMOpt.FEMClass, Femtet):
+            return self.f(*(self.FEMOpt.FEM.Femtet, *self.args), **self.kwargs)
+        else:
+            return self.f(*self.args, **self.kwargs)
         
 
-#### core クラス    
+#### 主要抽象クラス
+
 class FemtetOptimizationCore(ABC):
     
-    def __init__(self, setFemtetStrategy:str or FEMSystem = 'auto'):
+    def __init__(
+            self,
+            femprj_path:str or None,
+            model_name:str or None = None,
+            result_path:str=None,
+            FEMClass:FEMSystem = Femtet,
+            ):
         
+        # 引数の処理
+        self.femprj_path = os.path.abspath(femprj_path)
+        self.model_name = model_name
+        self.history_path = result_path
+        self.FEMClass = FEMClass
 
-        # 初期化
-        self.FEM = None
+        #### Femtet に接続
+        if self.FEMClass==Femtet:
+            self.FEM = Femtet()
+            caught_femtet = self.FEM.connect_Femtet('auto') # 既存のものがあれば新しいのを開かない
+            if caught_femtet=='new':
+                # 新しい Femtet を開いたのに femprj がない場合
+                if femprj_path is None:
+                    print('-----')
+                    print('.femprj ファイルのパスを指定してください。')
+                    femprj_path = input('>>> ')
+                    self.FEM.open(femprj_path)
+                    print('-----')
+                    print('Femtet で目的の解析モデルを開き、この画面で Enter を押してください。')
+                    femprj_path = input('Enter to continue...')
+                # 新しい Femtet で指定された femprj を開く
+                else:
+                    self.FEM.open(femprj_path, model_name)
+            else: # existing の場合
+                # femprj などが指定されていない場合、existing を基にする
+                if self.femprj_path is None:
+                    self.femprj_path = os.path.abspath(self.FEM.Femtet.Project)
+                    self.model_name = self.FEM.Femtet.AnalysisModelName
+                else:
+                    # 開いている femtet の prj が指定された情報と一致しなかった場合、
+                    # プログラムを優先する...と言いたいところだが、開いている Femtet の作業内容が失われる可能性があるので
+                    # Exception を送出する
+                    if self.femprj_path!=self.FEM.Femtet.Project:
+                        raise Exception('開いている Femtet に接続しましたが、プログラムで指定されているプロジェクトとは違うプロジェクトが開かれています。正しいプロジェクトを開き、Pythonプロセスを再起動してください。PythonからはどのFemtetプロセスに接続するかを制御できないため、目的のFemtetに確実に接続するためには、目的のプロジェクトを開いている以外のFemtetプロセスをすべて終了し、そのプロセスが他のマクロプロセスに接続されていない状態にしてください。')
+                    else:
+                        if self.model_name is not None:
+                            raise Exception('開いている Femtet に接続しましたが、プログラムで指定されている解析モデルとは違うモデルが開かれています。正しい解析モデルを開き、Pythonプロセスを再起動してください。')
+                
+        else:
+            self.FEM = self.FEMClass()
+        
+        
+        #### メンバーの宣言
+        # ヒストリパスの設定
+        if self.history_path is None:
+            name = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
+            self.history_path = os.path.join(os.getcwd(), f'{name}.csv')
+        # member
         self.objectives = []
         self.constraints = []
-        self._objectives = [] # abstract member
-        self._constraints = [] # abstract member
-        self.objectiveValues = None
-        self.constraintValues = None
-        self.history = None
-        self.historyPath = None
-        self.processMonitor = None
-        self.continuation = False # 現在の結果に上書き
+        # abstract member
+        self._objectives = []
+        self._constraints = []
+        # per main()
+        self.last_execution_time = -1
+        self.process_monitor = None
         self.interruption = False
-        self.algorithm_message = ''
-        self.error_message = ''
-        
-        # 初期値
-        if type(setFemtetStrategy) is str:
-            self.FEM = Femtet()
-            self.FEM.setFemtet(setFemtetStrategy)
-        elif isinstance(setFemtetStrategy, FEMSystem):
-            self.FEM = setFemtetStrategy
-
-
-        # 初期値
-        self.parameters = pd.DataFrame(
+        self.history = None # parameter などが入ってからでないと初期化もできないので
+        # temporal variables per solve
+        self._objective_values = None
+        self._constraint_values = None
+        self._optimization_message = ''
+        self._parameter = pd.DataFrame(
             columns=[
                 'name',
                 'value',
@@ -303,7 +527,7 @@ class FemtetOptimizationCore(ABC):
             dtype=object
             )
 
-    # マルチプロセスなどで pickle するときに COM を持っていても仕方がないので消す
+    #### マルチプロセスで pickle するときに COM を持っていても仕方がないので消す
     def __getstate__(self):
         state = self.__dict__.copy()
         del state['FEM']
@@ -312,72 +536,103 @@ class FemtetOptimizationCore(ABC):
     def __setstate__(self, state):
         self.__dict__.update(state)
 
+    # 子プロセスで FEM インスタンスを作成することを想定
+    # import 元が干渉するため NX_Femtet と SW_Femtet はマルチプロセスにできない
+    # この問題さえクリアすれば、即ち femprj と x_t を分ければマルチプロセスは可能
+    # ただし SW は複数プロセスの COM 制御が不可能なのでウィンドウ単位で制御するとか工夫が必要
+    def set_FEM(self):
+        self.FEM = self.FEMClass()
+        if self.FEMClass==Femtet:
+            self.FEM.connect_Femtet('new')
+            self.FEM.open(self.femprj_path, self.model_name)
+    
 
     #### pre-processing methods
 
-
-    def add_objective(self,
-                      fun:Callable[[Any], float],
-                      name:str or None = None,
-                      direction:str or float = 'minimize',
-                      args:tuple or None = None,
-                      kwargs:dict or None = None):
-
-        f, name, args, kwargs = self._setupFunction(fun, args, kwargs, name, Objective.prefixForDefault, self.objectives)
+    def add_objective(
+            self,
+            fun:Callable[[CDispatch, Any], float],
+            name:str or None = None,
+            direction:str or float = 'minimize',
+            args:tuple or None = None,
+            kwargs:dict or None = None
+            ):
+        # 引数の処理
+        if args is None:
+            args = tuple()
+        elif type(args)!=tuple:
+            args = (args,)
+        if kwargs is None:
+            kwargs = dict()
         
-        obj = Objective(f, direction, name, self, fun, args, kwargs)
+        # name が指定されなかった場合に自動生成
+        if name is None:
+            name = self._getUniqueDefaultName(Objective.prefixForDefault, self.objectives)
 
+        # objective オブジェクトを生成
+        obj = Objective(fun, args, kwargs, name, direction, self) # サブプロセス内で引っかからないか？
+
+        # 被っているかどうかを判定し上書き or 追加
         isExisting = False
-        for i, objective in enumerate(self.objectives):
-            if objective.name==name:
+        for i, obj in enumerate(self.objectives):
+            if obj.name==name:
                 isExisting = True
-                # warn('すでに登録されている名前が追加されました。上書きされます。')
+                warn('すでに登録されている名前が追加されました。上書きされます。')
                 self.objectives[i] = obj
-        
         if not isExisting:
             self.objectives.append(obj)
 
 
-    
+    def add_constraint(
+            self,
+            fun:Callable[[CDispatch, Any], float],
+            name:str or None = None,
+            lower_bound:float or None = None,
+            upper_bound:float or None = None,
+            strict:bool = True,
+            args:tuple or None = None,
+            kwargs:dict or None = None,
+            ):
+        # 引数の処理
+        if args is None:
+            args = tuple()
+        elif type(args)!=tuple:
+            args = (args,)
+        if kwargs is None:
+            kwargs = dict()
 
-    
-    def add_constraint(self,
-                      fun:Callable[[Any], float],
-                      name:str or None = None,
-                      lower_bound:float or None = None,
-                      upper_bound:float or None = None,
-                      strict:bool = True,
-                      args:tuple or None = None,
-                      kwargs:dict or None = None,
-                      ):
-
+        # strict constraint の場合、solve 前に評価したいので Gaudi へのアクセスを禁ずる
         if strict:
-            if is_access_Gaudi(fun):
+            if _is_access_Gaudi(fun):
                 raise Exception(f'関数{fun.__name__}に Gaudi へのアクセスがあります。拘束の計算において解析結果にアクセスするには、strict = False を指定してください。')
                 
+        # name が指定されなかった場合に自動生成
+        if name is None:
+            name = self._getUniqueDefaultName(Constraint.prefixForDefault, self.constraints)
+        
+        # Constraint オブジェクトの生成
+        cns = Constraint(fun, args, kwargs, name, lower_bound, upper_bound, strict, self)
 
-        f, name, args, kwargs = self._setupFunction(fun, args, kwargs, name, Constraint.prefixForDefault, self.constraints)
-
-        obj = Constraint(f, lower_bound, upper_bound, name, strict, self, fun, args, kwargs)
-
+        # 被っているかどうかを判定し上書き or 追加
         isExisting = False
-        for i, constraint in enumerate(self.constraints):
-            if constraint.name==name:
+        for i, cns in enumerate(self.constraints):
+            if cns.name==name:
                 isExisting = True
-                # warn('すでに登録されている名前が追加されました。上書きされます。')
-                self.constraints[i] = obj
-        
+                warn('すでに登録されている名前が追加されました。上書きされます。')
+                self.constraints[i] = cns
         if not isExisting:
-            self.constraints.append(obj)
+            self.constraints.append(cns)
 
-    def add_parameter(self,
-                      name:str,
-                      initial_value:float or None = None,
-                      lower_bound:float or None = None,
-                      upper_bound:float or None = None,
-                      memo:str = ''
-                      ):
-        
+
+    def add_parameter(
+            self,
+            name:str,
+            initial_value:float or None = None,
+            lower_bound:float or None = None,
+            upper_bound:float or None = None,
+            memo:str = ''
+            ):
+  
         # 変数が Femtet にあるかどうかのチェック
         if type(self.FEM)==Femtet: # 継承した NX_Femtet とかでは Femtet には変数がない
             variable_names = self.FEM.Femtet.GetVariableNames()
@@ -398,31 +653,33 @@ class FemtetOptimizationCore(ABC):
                 }
         df = pd.DataFrame(d, index=[0], dtype=object)
         
-        if len(self.parameters)==0:
+        if len(self._parameter)==0:
             newdf = df
         else:
-            newdf = pd.concat([self.parameters, df], ignore_index=True)
+            newdf = pd.concat([self._parameter, df], ignore_index=True)
         
         if self._isDfValid(newdf):
-            self.parameters = newdf
+            self._parameter = newdf
         else:
             raise Exception('パラメータの設定が不正です。')
+
 
     def set_parameter(self, df:pd.DataFrame):
         
         if self._isDfValid(df):
-            self.parameters = df
+            self._parameter = df
         else:
             raise Exception('パラメータの設定が不正です。')
     
-    def get_parameter(self, format:str='dict'):
+
+    def get_current_parameter(self, format:str='dict'):
         '''
-        
+        現在の変数セットを返します。
 
         Parameters
         ----------
         format : str, optional
-            parameter format.  'df', 'value' or 'dict'.
+            parameter format.  'df', 'values' or 'dict'.
             The default is 'dict'.
 
         Raises
@@ -437,60 +694,27 @@ class FemtetOptimizationCore(ABC):
 
         '''
         if format=='df':
-            return self.parameters
-        elif format=='value':
-            return self.parameters.value.values
+            return self._parameter
+        elif format=='values' or format=='value':
+            return self._parameter.value.values
         elif format=='dict':
             ret = {}
-            for i, row in self.parameters.iterrows():
+            for i, row in self._parameter.iterrows():
                 ret[row['name']] = row.value
             return ret
         else:
             fname = getCurrentMethod()
-            raise Exception(f'{fname} got invalid format: {format}')
+            raise Exception('get_current_parameter() got invalid format: {format}')
 
-    def set_process_monitor(self, ProcessMonitorClass=None):
+
+    def _set_process_monitor(self):
+        # main の直前、parameter 等のセッティングが終わった後に呼ぶ
         if self.history is None:
-            self._initRecord()
+            self._init_history()
+        from .visualization._dash import DashProcessMonitor
+        self.process_monitor = DashProcessMonitor(self)
+        self.process_monitor.start()
         
-        if ProcessMonitorClass is None:
-            if len(self.objectives)==1:
-                from .visualization import SimpleProcessMonitor
-                self.processMonitor = SimpleProcessMonitor(self)
-            elif len(self.objectives)>1:
-                from .visualization import UpdatableSuperFigure
-                from .visualization import HypervolumeMonitor
-                from .visualization import MultiobjectivePairPlot
-                # self.processMonitor = HypervolumeMonitor(self)
-                self.processMonitor = UpdatableSuperFigure(
-                    self,
-                    HypervolumeMonitor,
-                    MultiobjectivePairPlot
-                    )
-        else:
-            self.processMonitor = ProcessMonitorClass(self)
-            
-
-    def _setupFunction(self, fun, args, kwargs, name, prefix, objects):
-        if args is None:
-            args = ()
-        elif type(args)!=tuple:
-            args = (args,)
-
-        if kwargs is None:
-            kwargs = {}
-
-        #### Femtetを使う場合は、第一引数に自動的に Femtet の COM オブジェクトが入っていることとする。
-        if isinstance(self.FEM, Femtet):
-            f = functools.partial(fun, *(self.FEM.Femtet, *args), **kwargs)
-        else:
-            f = functools.partial(fun, *args, *kwargs)
-            
-        
-        if name is None:
-            name = self._getUniqueDefaultName(prefix, objects)
-        
-        return f, name, args, kwargs
 
     def _isDfValid(self, df):
         # column が指定の属性をすべて有しなければ invalid
@@ -538,6 +762,7 @@ class FemtetOptimizationCore(ABC):
         
         return True
 
+
     def _getUniqueDefaultName(self, prefix, objects):
         names = [obj.name for obj in objects]
         i = 0
@@ -551,37 +776,60 @@ class FemtetOptimizationCore(ABC):
 
     #### processing methods
 
-    def f(self, x:np.ndarray, algorithm_message='')->[float]:
-        # 具象クラスの _main に呼ばれる関数
+    def f(self, x:np.ndarray, *args, **kwargs)->[float]:
+        '''
+        現在のパラメータセットを np.ndarray として受け取り、
+        FEM 計算を実行して目的関数の内部値のリストを返します。
+        この関数は具象クラスの _main、即ち最適化ライブラリの最適化関数に渡されることを想定しています。
+        内部値は、与えられた目的関数が最小化問題となるよう変換された値のsymlogです。
+
+        Parameters
+        ----------
+        x : np.ndarray
+            最適化アルゴリズムによって提案された "次の" パラメータセットです。
+            get_current_parameter('values') の値とは一致しません。
+
+        Raises
+        ------
+        UserInterruption
+            ユーザーによる中断指令があった際に送出されます。
+            その時点で実行中の解析がすべて終了した時点で最適化が終了します。
+
+        Returns
+        -------
+        [float]
+            変換された目的関数の内部値です。
+
+        '''
         
         # 中断指令があったら Exception を起こす
         if self.interruption:
-            raise UserInterruption
+            raise UserInterruption('ユーザーによって最適化が取り消されました。')
         
         # 渡された x がすでに計算されたものであれば
         # objective も constraint も更新する必要がなく
         # そのまま converted objective を返せばいい
         if not self._isCalculated(x):
-            # メッセージの初期化
-            self.error_message = ''
-            self.algorithm_message = algorithm_message
+            # メッセージの更新
+            if 'message' in list(kwargs.keys()):
+                self._optimization_message = kwargs['message']
+            else:
+                self._optimization_message = ''
             
             # update parameters
-            self.parameters['value'] = x
+            self._parameter['value'] = x
 
-            # solve
-            if type(self.FEM)==NoFEM:
-                self.objectiveValues = [obj.fun() for obj in self.objectives]
-                self.constraintValues = [obj.fun() for obj in self.constraints]
-            else:
-                self.FEM.run(self.parameters)
-                self.objectiveValues = [obj.fun() for obj in self.objectives]
-                self.constraintValues = [obj.fun() for obj in self.constraints]
+            # solve(Exception は当面 Optuna で処理する)
+            self.FEM.update(self._parameter)
+            self._objective_values = [obj.calc() for obj in self.objectives]
+            self._constraint_values = [cns.calc() for cns in self.constraints]
             self._record()
                 
-        return [obj._convert(v) for obj, v in zip(self.objectives, self.objectiveValues)]
+        return [obj._convert(v) for obj, v in zip(self.objectives, self._objective_values)]
+
 
     def _isCalculated(self, x):
+        # 提案された x が最後に計算したものと一致していれば True, ただし 1 回目の計算なら False
         #    ひとつでも違う  1回目の計算  期待
         #    True            True         False
         #    False           True         False
@@ -590,29 +838,28 @@ class FemtetOptimizationCore(ABC):
         
         # ひとつでも違う
         condition1 = False
-        for _x, _p in zip(x, self.parameters['value'].values):
+        for _x, _p in zip(x, self._parameter['value'].values):
             condition1 = condition1 or (float(_x)!=float(_p))
         # 1回目の計算
         condition2 = len(self.history)==0
         return not(condition1) and not(condition2)
 
+
     @abstractmethod
     def _main(self):
-        # 最適化を実施する
-        # f を何度も呼ぶことを想定
         pass
+    
 
-    def main(self, historyPath:str or None = None):
+    def main(self, history_path:str or None = None, n_parallel=1):
         '''
         最適化を実行する。
 
         Parameters
         ----------
-        historyPath : str or None, optional
+        history_path : str or None, optional
             実行結果を保存する csv パス.
-            None を指定した場合、以下の挙動となります。
-            1. このインスタンスで初めての最適化計算を行う場合->カレントディレクトリに実行時刻に基づくファイルを自動で生成します。
-            2. すでにこのインスタンスで計算が行われていて、再計算を行っている場合->既存のファイルを上書きします。
+        n_parallel : int
+            Femtet の並列実行数。1以上の値を指定すること。
 
         Raises
         ------
@@ -621,63 +868,42 @@ class FemtetOptimizationCore(ABC):
 
         Returns
         -------
-        result : OptimizationResult or Study
-            使用したアルゴリズムによって、最適化結果のデータ型が異なります.このクラスのメンバー history はアルゴリズムに依らず一貫したデータ型の結果を格納します。
+        None
 
         '''
-        # 一度だけ呼ばれる。何度も呼ぶのは f。
-        
-        # 実行前チェック
+        #### 最適化プロセスの実行前チェック
+        # 変数のチェック
         if ((len(self.objectives)==0)
-            or (len(self.parameters)==0)):
+            or (len(self._parameter)==0)):
             raise Exception('パラメータまたは目的関数が設定されていません。')
-        if historyPath is None:
-            if self.historyPath is None:
-                name = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
-                self.historyPath = os.path.join(os.getcwd(), f'{name}.csv')
-            else:
-                pass
-        else:
-            self.historyPath = historyPath
 
-        # 前処理
-        if not self.continuation:
-            self._initRecord()
+        # ヒストリの初期化
+        self._init_history()
+
+        # 中断指令の初期化
         self.interruption = False
+        
+        # プロセスモニタの初期化
+        # self._set_process_monitor()
 
-        # 時間測定しながら実行
-        startTime = time.time()
-        try:
-            if self.processMonitor is None:
-                # multithread する必要がない
-                self._main()
-            else:
-                # GUI と別 thread にする
-                thread = threading.Thread(target=self._main)
-                thread.start()
-                while thread.is_alive():
-                    self.processMonitor.update()
- 
-        except UserInterruption:
-            # 中断指令
-            pass
-
-        endTime = time.time()
-        self.lastExecutionTime = endTime - startTime
-
-        return
+        #### 最適化の開始        
+        start = time.time()
+        self._main()
+        end = time.time()
+        self.last_execution_time = end - start # 秒
 
 
     # post-processing methods    
 
     def _genarateHistoryColumnNames(self):
-        paramNames = [p for p in self.parameters['name'].values]
+        paramNames = [p for p in self._parameter['name'].values]
         objNames = [obj.name for obj in self.objectives]
         _consNames = [obj.name for obj in self.constraints]
         consNames = []
         for n in _consNames:
             consNames.extend([f'{n}_lower_bound', n, f'{n}_upper_bound', f'{n}_fit'])
         return paramNames, objNames, consNames
+
 
     def get_history_columns(self, kind:str='objective')->[str]:
         '''
@@ -707,7 +933,7 @@ class FemtetOptimizationCore(ABC):
         else:
             raise Exception(f'invalid kind: {kind}; kind must be "parameter", "objective" or "constraint"')
             
-    def _initRecord(self):
+    def _init_history(self):
         columns = []
         columns.append('n_trial')
         pNames, oNames, cNames = self._genarateHistoryColumnNames()
@@ -716,17 +942,17 @@ class FemtetOptimizationCore(ABC):
         columns.extend(cNames)
         columns.append('non_domi')
         columns.append('fit')
-        columns.append('algorithm_message')
-        columns.append('error_message')
         columns.append('hypervolume')
+        columns.append('optimization_message')
         columns.append('time')
         self.history = pd.DataFrame(columns=columns)
     
     def _record(self):
+        # record の計算
         row = []
-        paramValues = list(self.parameters['value'].copy().values)
-        objValues = self.objectiveValues
-        consValues = self.constraintValues
+        paramValues = list(self._parameter['value'].copy().values)
+        objValues = self._objective_values
+        consValues = self._constraint_values
         consLbList = [constraint.lb for constraint in self.constraints]
         consUbList = [constraint.ub for constraint in self.constraints]
         consData = []
@@ -742,27 +968,33 @@ class FemtetOptimizationCore(ABC):
         row.extend(consData)
         row.append(False) # non_domi, temporal data
         row.append(False) # fit, temporal data
-        row.append(self.algorithm_message)
-        row.append(self.error_message)
         row.append(np.nan) # hypervolume, temporal data
+        row.append(self._optimization_message)
         row.append(datetime.datetime.now()) # time
+
+        # list を series に変換
         pdf = pd.Series(row, index=self.history.columns)
-        # calc fit
+
+        # 拘束を満たすかどうか
         fit = self._calcConstraintFit(pdf)
         pdf['fit'] = fit
-        # add to history
+        # series を history に追加
         self.history.loc[len(self.history)] = pdf
+
+        # 履歴に依存する項目の計算
         # update non-domi(after addition to history)
         self._calcNonDomi()
         # calc hypervolume(after addition to history)
         self._calc_hypervolume()
+
         # 保存
         try:
-            self.history.to_csv(self.historyPath, index=None, encoding='shift-jis')
+            self.history.to_csv(self.history_path, index=None, encoding='shift-jis')
         except PermissionError:
             # excel で開くなど permission error が出る可能性がある。
             # その場合は単にスキップすれば、次の iteration ですべての履歴が保存される
             pass
+
             
     def _calcNonDomi(self):
         '''non-dominant 解を計算する'''
@@ -786,6 +1018,7 @@ class FemtetOptimizationCore(ABC):
 
         del _objectiveValues
         
+
     def _calcConstraintFit(self, pdf):
         '''constraint fit 解を計算する'''
 
@@ -794,6 +1027,7 @@ class FemtetOptimizationCore(ABC):
         fit = np.all(pdf[[cName for cName in cNames if '_fit' in cName]])
         
         return fit
+
 
     def _calc_hypervolume(self):
         '''

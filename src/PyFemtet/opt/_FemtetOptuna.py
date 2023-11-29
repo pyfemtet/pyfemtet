@@ -12,6 +12,8 @@ import optuna
 
 from scipy.stats.qmc import LatinHypercube
 
+from multiprocessing import Process, Manager
+
 import gc
 
 
@@ -59,45 +61,34 @@ def generate_LHS(bounds)->np.ndarray:
 # https://optuna.readthedocs.io/en/stable/index.html
 class FemtetOptuna(FemtetOptimizationCore):
 
-    def __init__(self, setFemtetStorategy=None):
-        self._constraints = []
-        if setFemtetStorategy is None:
-            super().__init__()
-        else:
-            super().__init__(setFemtetStorategy)
-
     def main(
             self,
             timeout=None,
             n_trials=None,
             study_name=None,
-            historyPath=None,
             use_init_LHS=True, # Latin Hypercube Sampling を初期値にする
+            n_parallel=1,
             ):
+        # 宣言
+        self._constraints = []
+
         # 引数の処理
         self.use_init_LHS = use_init_LHS
+        self.n_parallel = n_parallel
         
         #### study name のセットアップ
-        # csv 保存パスの設定
-        if historyPath is None:
-            if self.historyPath is None:
-                name = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
-                self.historyPath = os.path.join(os.getcwd(), f'{name}.csv')
-            else:
-                pass
-        else:
-            self.historyPath = historyPath
         # study_name（ファイル名）の設定
         if study_name is None:
-            self.study_name = os.path.splitext(os.path.basename(self.historyPath))[0] + ".db"
+            self.study_name = os.path.splitext(os.path.basename(self.history_path))[0] + ".db"
         # csv 保存パスと同じところに db ファイルを保存する
         self.study_db_path = os.path.abspath(
             os.path.join(
-                os.path.dirname(self.historyPath),
+                os.path.dirname(self.history_path),
                 self.study_name
                 )
             )
         self.storage_name = f"sqlite:///{self.study_db_path}"
+        
 
         #### timeout or n_trials の設定
         self.timeout = timeout
@@ -105,119 +96,32 @@ class FemtetOptuna(FemtetOptimizationCore):
 
         # 本番処理に移る
         super().main()
-        
-    def _main(self):
-        #### 拘束関数のセットアップ
-        self._parseConstraints()
-
-        #### 目的関数のセットアップ
-        def __objectives(trial):
-            #### 変数の設定
-            x = []
-            df = self.get_parameter('df')
-            for i, row in df.iterrows():
-                name = row['name']
-                lb = row['lbound']
-                ub = row['ubound']
-                x.append(trial.suggest_float(name, lb, ub))
-            x = np.array(x)
-
-            #### user_attribute の設定
-            # memo
-            try:
-                # あれば
-                algorithm_message = trial.user_attrs["memo"]
-            except (AttributeError, KeyError):
-                # なければ
-                algorithm_message = ''
-            # 拘束のアトリビュート（Prune などの対策、計算できたら後で上書きする）
-            dummy_data = tuple([1 for f in self._constraints])
-            trial.set_user_attr("constraint", dummy_data)
-            
-            #### strict 拘束の計算
-            # is_calcrated の直後まで変数をアップデートしてはいけないため
-            # 一度 buff に現在の変数を控え、処理が終わったら戻す
-
-            # 退避+更新
-            buff = self.parameters.copy()
-            self.parameters['value'] = x
-
-            # restore の注意 / strict 拘束の処理から抜けうるところには
-            # すべてに以下の処理を配置すること
-            # self.parameters = buff
-
-            # Femtet 関係の FEM システムであれば変数を更新
-            from .core import Femtet, ModelError
-            if isinstance(self.FEM, Femtet):
-                try:
-                    # ModelError が起きうる
-                    self.FEM.update_model(self.parameters)
-                except ModelError:
-                    raise optuna.TrialPruned()
-
-            # strict 拘束の計算
-            val_lb_ub_list = [[cns.fun(), cns.lb, cns.ub, cns.ptrFunc.__name__] for cns in self.constraints if cns.strict==True]
-            for val, lb, ub, fn in val_lb_ub_list:
-                if lb is not None:
-                    if not (lb <= val):
-                        print(f'拘束 {fn} が満たされませんでした。')
-                        print('変数の組み合わせは以下の通りです。')
-                        print(self.parameters)
-                        self.parameters = buff # Femtet は戻す必要ない、以下同文
-                        raise optuna.TrialPruned()
-                if ub is not None:
-                    if not (val <= ub):
-                        self.parameters = buff
-                        print(f'拘束 {fn} が満たされませんでした。')
-                        print('変数の組み合わせは以下の通りです。')
-                        print(self.parameters)
-                        raise optuna.TrialPruned()
-            self.parameters = buff
-            
-
-            #### 解析実行
-            # ModelError 等が起こりうる
-            from .core import ModelError, MeshError, SolveError
-            try:
-                # parameters を更新し、解析、目的関数、全ての拘束の計算
-                ojectiveValuesToMinimize = self.f(x, algorithm_message)
-            except (ModelError, MeshError, SolveError):
-                raise optuna.TrialPruned()
-            
-            #### 拘束の計算
-            constraintValuesToBeNotPositive = tuple([f(x) for f in self._constraints])
-            trial.set_user_attr("constraint", constraintValuesToBeNotPositive)
-            
-            gc.collect()
-
-            # 結果
-            return tuple(ojectiveValuesToMinimize)
 
 
-        # 拘束の設定（？）
-        def __constraints(trial):
-            return trial.user_attrs["constraint"]
-
+    def _setup_study(self):
         #### sampler の設定
-        # sampler = optuna.samplers.NSGAIISampler(constraints_func=__constraints)
+        # sampler = optuna.samplers.NSGAIISampler(constraints_func=_constraint_function)
         # sampler = optuna.samplers.NSGAIIISampler()
-        sampler = optuna.samplers.TPESampler(constraints_func=__constraints)
+        sampler = optuna.samplers.TPESampler(constraints_func=self._constraint_function)
 
-        #### study の設定
+        #### study ファイルの作成
+        # 並列計算について https://optuna.readthedocs.io/en/stable/tutorial/10_key_features/004_distributed.html
+        # 並列計算時の最大試行回数について https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.MaxTrialsCallback.html#optuna.study.MaxTrialsCallback
         study = optuna.create_study(
             study_name=self.study_name,
             storage=self.storage_name,
             load_if_exists=True,
             directions=['minimize']*len(self.objectives),
-            sampler=sampler)
+            sampler=sampler,
+            )
 
         #### 初期値の設定
-        params = self.get_parameter('dict')
+        params = self.get_current_parameter('dict')
         study.enqueue_trial(params, user_attrs={"memo": "initial"})
         
         #### LHS を初期値にする
         if self.use_init_LHS:
-            df = self.get_parameter('df')
+            df = self.get_current_parameter('df')
             names = []
             bounds = []
             for i, row in df.iterrows():
@@ -230,39 +134,161 @@ class FemtetOptuna(FemtetOptimizationCore):
                 d = {}
                 for name, v in zip(names, datum):
                     d[name] = v
-                study.enqueue_trial(d, user_attrs={"memo": "initial Latin Hypercube Sampling"})
-
-        # study の実行
-        study.optimize(__objectives, timeout=self.timeout, n_trials=self.n_trials)
-
+                study.enqueue_trial(d, user_attrs={"memo": "initial Latin Hypercube Sampling"})        
+        
         return study
 
 
-    def _createConstraintFun(self, x, i):
-        if not self._isCalculated(x):
-            self.f(x)
-        return self.constraintValues[i]
+        
 
-    def _createLowerBoundFun(self, x, i, lb):
-        return lb - self._createConstraintFun(x, i)
+    def _main(self):
+        study = self._setup_study()
+        
+        if self.n_parallel>1:
+            processes = []
+            for i in range(self.n_parallel-1):
+                p = Process(
+                    target=self._subprocess_main,
+                    args=(self,)
+                    )
+                p.start()
+                print('subprocess start')
+                processes.append(p)
 
-    def _createUpperBoundFun(self, x, i, ub):
-        return self._createConstraintFun(x, i) - ub
+        # study の実行
+        if self.n_trials is None:
+            n_trials = None
+        else:
+            n_trials = self.n_trials//self.n_parallel
+        study.optimize(
+            self._objective_function,
+            timeout=self.timeout,
+            n_trials=n_trials,
+            )
+        
+        for p in processes:
+            p.join()
+            print('subprocess end')
 
-    def _parseConstraints(self):
-        '''与えられた拘束情報を optuna 形式に変換する'''
-        self._constraints = []
-        for i, constraint in enumerate(self.constraints):
-            lb, ub = constraint.lb, constraint.ub
-            # optuna で非正拘束にするためにそれぞれ関数を作る
+        return study
+
+    #### 目的関数
+    def _objective_function(self, trial):
+        #### 変数の設定
+        x = []
+        df = self.get_current_parameter('df')
+        for i, row in df.iterrows():
+            name = row['name']
+            lb = row['lbound']
+            ub = row['ubound']
+            x.append(trial.suggest_float(name, lb, ub))
+        x = np.array(x)
+
+        #### user_attribute の設定
+        # memo
+        try:
+            # あれば
+            message = trial.user_attrs["memo"]
+        except (AttributeError, KeyError):
+            # なければ
+            message = ''
+        # 拘束のアトリビュート（Prune などの対策、計算できたら後で上書きする）
+        dummy_data = tuple([1 for f in self._constraints])
+        trial.set_user_attr("constraint", dummy_data)
+        
+        #### strict 拘束の計算
+        # is_calcrated の直後まで変数をアップデートしてはいけないため
+        # 一度 buff に現在の変数を控え、処理が終わったら戻す
+        # 退避+更新
+        buff = self._parameter.copy()
+        self._parameter['value'] = x
+        # restore の注意 / strict 拘束の処理から抜けうるところには
+        # すべてに以下の処理を配置すること
+        # self._parameter = buff
+        # Femtet 関係の FEM システムであれば変数を更新
+        from .core import Femtet, ModelError
+        if isinstance(self.FEM, Femtet):
+            try:
+                # ModelError が起きうる
+                self.FEM.update_model(self._parameter)
+            except ModelError:
+                raise optuna.TrialPruned()
+        # strict 拘束の計算
+        val_lb_ub_fn_list = [[cns.calc(), cns.lb, cns.ub, cns.f.__name__] for cns in self.constraints if cns.strict==True]
+        for val, lb, ub, fn in val_lb_ub_fn_list:
+            if lb is not None:
+                if not (lb <= val):
+                    print(f'拘束 {fn} が満たされませんでした。')
+                    print('変数の組み合わせは以下の通りです。')
+                    print(self._parameter)
+                    self._parameter = buff # Femtet は戻す必要ない、以下同文
+                    raise optuna.TrialPruned()
+            if ub is not None:
+                if not (val <= ub):
+                    self._parameter = buff
+                    print(f'拘束 {fn} が満たされませんでした。')
+                    print('変数の組み合わせは以下の通りです。')
+                    print(self._parameter)
+                    raise optuna.TrialPruned()
+        self._parameter = buff
+
+        #### 解析実行
+        # ModelError 等が起こりうる
+        from .core import ModelError, MeshError, SolveError
+        try:
+            # parameters を更新し、解析、目的関数、全ての拘束の計算
+            ojectiveValuesToMinimize = self.f(x, message)
+        except (ModelError, MeshError, SolveError):
+            raise optuna.TrialPruned()
+        
+        #### 拘束の計算
+        _constraint_values = [] # 非正なら OK
+        for i, cns in enumerate(self.constraints):
+            lb, ub = cns.lb, cns.ub
             if lb is not None: # fun >= lb  <=>  lb - fun <= 0
-                self._constraints.append(
-                    functools.partial(self._createLowerBoundFun, i=i, lb=lb)
-                    )
+                _constraint_values.append(lb - cns.calc())
             if ub is not None: # ub >= fun  <=>  fun - ub <= 0
-                self._constraints.append(
-                    functools.partial(self._createUpperBoundFun, i=i, ub=ub)
-                    )
+                _constraint_values.append(cns.calc() - ub)
+        trial.set_user_attr("constraint", _constraint_values)
+        
+        # 一応
+        gc.collect()
+
+        # 結果
+        return tuple(ojectiveValuesToMinimize)
+
+
+    #### 拘束関数(experimental)
+    def _constraint_function(self, trial):
+        return trial.user_attrs["constraint"]
+
+
+    def _subprocess_main(_, FEMOpt): # ここでは self はアクセスしたらダメ
+        # サブプロセスから呼ばれることを想定
+
+        # サブプロセス時に破棄されているはずの COM を含みうる FEM を接続
+        FEMOpt.set_FEM()
+
+        # メインプロセスで作ったはずの study に接続        
+        study = optuna.load_study(
+            study_name=FEMOpt.study_name,
+            storage=FEMOpt.storage_name
+        )
+        
+        # n_trials を指定されていた場合の処理（もう少しうまいことできる）
+        if FEMOpt.n_trials is None:
+            n_trials = None
+        else:
+            n_trials = FEMOpt.n_trials//FEMOpt.n_parallel
+
+        # 実行
+        study.optimize(
+            FEMOpt._objective_function,
+            timeout=FEMOpt.timeout,
+            n_trials=n_trials,
+            )
+
+        # TODO:この辺で新しい Femtet インスタンスを閉じる(自動で全部閉じるかも）
             
 
 

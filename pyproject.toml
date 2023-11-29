@@ -114,6 +114,7 @@ dependencies = [ # Optional
     "pywin32",
     "pywinauto",
     "femtetutils",
+    "psutil",
 ]
 
 # List additional groups of dependencies here (e.g. development
