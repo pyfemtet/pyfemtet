@@ -44,7 +44,7 @@ if __name__=='__main__':
     # overwrite constraint
     FEMOpt.add_constraint(bottom_area_2, '底面積2(mm2)', 50, args=FEMOpt)
     
-    FEMOpt.main(n_trials=6, n_parallel=2)
+    FEMOpt.main(n_trials=12, n_parallel=2)
     
     # import optuna
     # FEMOpt.

@@ -1,6 +1,8 @@
 import os
 import datetime
 import functools
+import tempfile
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -12,7 +14,7 @@ import optuna
 
 from scipy.stats.qmc import LatinHypercube
 
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Value
 
 import gc
 
@@ -139,8 +141,6 @@ class FemtetOptuna(FemtetOptimizationCore):
         return study
 
 
-        
-
     def _main(self):
         study = self._setup_study()
         
@@ -171,6 +171,53 @@ class FemtetOptuna(FemtetOptimizationCore):
             print('subprocess end')
 
         return study
+
+
+    def _subprocess_main(_, FEMOpt): # ここでは self はアクセスしたらダメ
+        # サブプロセスから呼ばれることを想定
+
+        # サブプロセス時に破棄されているはずの COM を含みうる FEM を接続
+        FEMOpt.set_FEM()
+        
+        # Femtet を継承したクラスであれば中間ファイルの干渉を避けるためプロジェクトを別名保存
+        from .core import Femtet
+        if issubclass(FEMOpt.FEMClass, Femtet):
+            # 一時ディレクトリを作成
+            td = tempfile.mkdtemp()
+            # 一時ファイルに現在のプロジェクトを保存
+            prjname = FEMOpt.FEM.Femtet.ProjectTitle
+            # prjname = "tmp"
+            tmp_femprj_path = os.path.join(td, f'{prjname}.femprj')
+            result = FEMOpt.FEM.Femtet.SaveProject(tmp_femprj_path, True)
+            if result==False:
+                FEMOpt.FEM.Femtet.ShowLastError() # raise com_error
+                
+        # メインプロセスで作ったはずの study に接続        
+        study = optuna.load_study(
+            study_name=FEMOpt.study_name,
+            storage=FEMOpt.storage_name
+        )
+        
+        # n_trials を指定されていた場合の処理（もう少しうまいことできる）
+        if FEMOpt.n_trials is None:
+            n_trials = None
+        else:
+            n_trials = FEMOpt.n_trials//FEMOpt.n_parallel
+
+        # 実行
+        study.optimize(
+            FEMOpt._objective_function,
+            timeout=FEMOpt.timeout,
+            n_trials=n_trials,
+            )
+
+        # FEM の終了
+        FEMOpt.release_FEM()
+        
+        # 一時フォルダの削除
+        if issubclass(FEMOpt.FEMClass, Femtet):
+            shutil.rmtree(td)
+
 
     #### 目的関数
     def _objective_function(self, trial):
@@ -263,32 +310,7 @@ class FemtetOptuna(FemtetOptimizationCore):
         return trial.user_attrs["constraint"]
 
 
-    def _subprocess_main(_, FEMOpt): # ここでは self はアクセスしたらダメ
-        # サブプロセスから呼ばれることを想定
 
-        # サブプロセス時に破棄されているはずの COM を含みうる FEM を接続
-        FEMOpt.set_FEM()
-
-        # メインプロセスで作ったはずの study に接続        
-        study = optuna.load_study(
-            study_name=FEMOpt.study_name,
-            storage=FEMOpt.storage_name
-        )
-        
-        # n_trials を指定されていた場合の処理（もう少しうまいことできる）
-        if FEMOpt.n_trials is None:
-            n_trials = None
-        else:
-            n_trials = FEMOpt.n_trials//FEMOpt.n_parallel
-
-        # 実行
-        study.optimize(
-            FEMOpt._objective_function,
-            timeout=FEMOpt.timeout,
-            n_trials=n_trials,
-            )
-
-        # TODO:この辺で新しい Femtet インスタンスを閉じる(自動で全部閉じるかも）
             
 
 

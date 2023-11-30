@@ -10,7 +10,7 @@ import sys
 import time
 import datetime
 import inspect
-# from multiprocessing import Pool, Process, Manager
+from multiprocessing import Value
 import functools
 import math
 import ast
@@ -25,7 +25,7 @@ import win32com.client
 from win32com.client import Dispatch, constants, CDispatch
 from pywintypes import com_error
 from femtetutils import util, constant
-from ..tools.DispatchUtils import Dispatch_Femtet_with_pid, Dispatch_Femtet_with_new_process
+from ..tools.DispatchUtils import Dispatch_Femtet_with_pid, Dispatch_Femtet_with_new_process, _get_pid
 
 
 
@@ -48,6 +48,10 @@ class PostError(Exception):
 
 class FEMCrash(Exception):
     '''FEM プロセスが異常終了した際のエラー'''
+    pass
+
+class FemtetAutomationError(Exception):
+    '''その他の Femtet 自動化エラー'''
     pass
 
 class UserInterruption(Exception):
@@ -287,6 +291,21 @@ class Femtet(FEMSystem):
         self.run()
 
 
+    def quit(self):
+        # 上書き保存しない
+        # 閉じる
+        # hwnd = self.Femtet.hWnd
+        # result = util.close_femtet(hwnd, isTerminate=True)
+        # if result==False:
+        #     raise FemtetAutomationError('Femtet の終了に失敗しました')
+
+        # 強制終了
+        Femtet = self.Femtet
+        pid = _get_pid(Femtet.hWnd)
+        util.close_process(pid)
+
+
+
 class NoFEM(FEMSystem):
     '''
     デバッグ用クラス。
@@ -510,7 +529,7 @@ class FemtetOptimizationCore(ABC):
         # per main()
         self.last_execution_time = -1
         self.process_monitor = None
-        self.interruption = False
+        self.shared_interruption_flag = Value('i', 0) # 0 or 1, FEMOpt のインスタンスをサブプロセスに渡しても共有されるフラグ
         self.history = None # parameter などが入ってからでないと初期化もできないので
         # temporal variables per solve
         self._objective_values = None
@@ -542,10 +561,13 @@ class FemtetOptimizationCore(ABC):
     # ただし SW は複数プロセスの COM 制御が不可能なのでウィンドウ単位で制御するとか工夫が必要
     def set_FEM(self):
         self.FEM = self.FEMClass()
-        if self.FEMClass==Femtet:
+        if issubclass(self.FEMClass, Femtet):
             self.FEM.connect_Femtet('new')
             self.FEM.open(self.femprj_path, self.model_name)
     
+    def release_FEM(self):
+        if self.FEMClass==Femtet:
+            self.FEM.quit()
 
     #### pre-processing methods
 
@@ -803,7 +825,7 @@ class FemtetOptimizationCore(ABC):
         '''
         
         # 中断指令があったら Exception を起こす
-        if self.interruption:
+        if self.shared_interruption_flag.value==1:
             raise UserInterruption('ユーザーによって最適化が取り消されました。')
         
         # 渡された x がすでに計算されたものであれば
@@ -881,12 +903,12 @@ class FemtetOptimizationCore(ABC):
         self._init_history()
 
         # 中断指令の初期化
-        self.interruption = False
+        self.shared_interruption_flag.value = 0
         
         # プロセスモニタの初期化
         # self._set_process_monitor()
 
-        #### 最適化の開始        
+        #### 最適化の開始
         start = time.time()
         self._main()
         end = time.time()

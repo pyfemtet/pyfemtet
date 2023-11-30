@@ -1,4 +1,5 @@
 import time
+from threading import Thread
 from multiprocessing import Process, Manager
 import psutil
 
@@ -36,15 +37,17 @@ def Dispatch_Femtet_with_pid():
     '''
     Femtet = Dispatch('FemtetMacro.Femtet') # Dispatch は「予約」
     # Dispatch が成功したことを保証する
-    timeout = 1
+    timeout = 10
     start = time.time()
+    # timeout 又は Femtet の hWnd が 0 超になるまで繰り返す
     while True:
-        duration = time.time() - start
-        if duration > timeout:
-            Exception('Femtet との紐づけに失敗しました')
-        if Femtet.hWnd>0:
+        hwnd = Femtet.hWnd
+        if hwnd>0:
             break
-    hwnd = Femtet.hWnd
+        now = time.time()
+        duration = now - start
+        if duration > timeout:
+            raise Exception('Femtet が正常に実行されていません。')
     # hwnd があれば pid が取得できることは保証されるから待たなくていい
     pid = _get_pid(hwnd)
     return Femtet, pid
@@ -111,7 +114,7 @@ def Dispatch_Femtet_with_new_process(pp=False):
     # サブプロセスで Dispatch してブロックする
     # -Femtet プロセスの列挙
     pids = _get_pids('Femtet.exe')
-    if pp: print('pids', pids)
+    if pp: print('existing pids', pids)
     # -子プロセスの準備
     with Manager() as manager:
         shared_flags = manager.list()
@@ -133,10 +136,11 @@ def Dispatch_Femtet_with_new_process(pp=False):
         # 子プロセスの準備完了を待つ
         while True:
             if pp: 
-                print('shared_flags', shared_flags[:])
                 time.sleep(1)
+                print('shared_flags', shared_flags[:])
             time.sleep(.1)
             if all(shared_flags[:-1]):
+                print('shared_flags', shared_flags[:])
                 break
         # 1.5 秒（timeout+ちょっと）待って Dispatch
         time.sleep(1.5)
@@ -151,7 +155,7 @@ def Dispatch_Femtet_with_new_process(pp=False):
 
 
 if __name__=='__main__':
-    Femtet = Dispatch_Femtet_with_new_process()
+    Femtet = Dispatch_Femtet_with_new_process(True)
     
     
     
