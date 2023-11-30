@@ -9,6 +9,10 @@ from win32com.client import Dispatch
 from femtetutils import util
 
 
+pp = True
+
+
+
 def _get_pid(hwnd):
     if hwnd>0:
         _, pid = win32process.GetWindowThreadProcessId(hwnd)
@@ -35,21 +39,32 @@ def Dispatch_Femtet_with_pid():
         process id. if error, pid = 0.
 
     '''
+
+    #### Dispatch 開始
+    if pp: print('start Dispatch')
     Femtet = Dispatch('FemtetMacro.Femtet') # Dispatch は「予約」
-    # Dispatch が成功したことを保証する
-    timeout = 10
+
+    #### Dispatch が成功したことを保証するための処理
+    timeout = 5
     start = time.time()
     # timeout 又は Femtet の hWnd が 0 超になるまで繰り返す
     while True:
         hwnd = Femtet.hWnd
         if hwnd>0:
+            if pp: print('Dispatch will finish')
             break
         now = time.time()
         duration = now - start
+        if pp: print('Dispatch duration', duration)
         if duration > timeout:
-            raise Exception('Femtet が正常に実行されていません。')
+            if pp: print('Femtet が正常に実行されていません。')
+            return Femtet, 0
+        time.sleep(0.1)
+
     # hwnd があれば pid が取得できることは保証されるから待たなくていい
+    if pp: print('Dispatch finished')
     pid = _get_pid(hwnd)
+
     return Femtet, pid
 
 
@@ -62,20 +77,29 @@ def _f(pid, subprocess_id, shared_flags):
         if all(shared_flags[:-1]):
             break
     # Dispatch して pid を調べる
+    if pp: print(f'from subp{subprocess_id}; let us start Dispatch...')
     Femtet, mypid = Dispatch_Femtet_with_pid()
+
     # pid が目的のものなら即刻開放する
     if mypid==pid:
+        if pp: print(f'from subp{subprocess_id}; my pid is hit. i will release {pid}')
         return 1
+    
+    # pid が 0 なら何にも関与しないので即刻終了する
+    elif mypid==0:
+        if pp: print(f'from subp{subprocess_id}; failed to connect Femtet. i will finish.')
+    
     # そうでなければメインプロセスが Dispatch を終えるまで解放しない
     else:
         while True:
             time.sleep(0.5)
             if shared_flags[-1]:
                 break
+        if pp: print(f'from subp{subprocess_id}; main process seems to have been Dispatched. i will finish')
         return 0
 
 
-def Dispatch_Femtet_with_new_process(pp=False):
+def Dispatch_Femtet_with_new_process():
     '''
     Dispatch Femtet する。
     femtetutils を用いて新しいプロセスを立て、
@@ -140,22 +164,26 @@ def Dispatch_Femtet_with_new_process(pp=False):
                 print('shared_flags', shared_flags[:])
             time.sleep(.1)
             if all(shared_flags[:-1]):
-                print('shared_flags', shared_flags[:])
+                if pp: print('finished: shared_flags', shared_flags[:])
                 break
-        # 1.5 秒（timeout+ちょっと）待って Dispatch
+        # timeout+ちょっと待って Dispatch
         time.sleep(1.5)
         Femtet, mypid = Dispatch_Femtet_with_pid()
+        if pp: print('finally Dispatched pid', mypid)
         # Dispatch 完了を通知
         shared_flags[-1] = True
         # サブプロセスすべての正常終了を待つ
         for p in processes:
-            p.join(timeout=10)
+            p.join()
     print(f'pid of Dispatch object of Femtet:{_get_pid(Femtet.hWnd)}')
     return Femtet, _get_pid(Femtet.hWnd)
 
-
 if __name__=='__main__':
-    Femtet = Dispatch_Femtet_with_new_process(True)
+    Femtet, pid = Dispatch_Femtet_with_new_process()
+    start = time.time()
+    Femtet.LoadProject(r'C:\Users\mm11592\Documents\myFiles2\working\1_PyFemtetOpt\PyFemtetOptDevelopment\PyFemtetPrj\tests\simple_femtet\simple.femprj', True)
+    end = time.time()
+    print(end-start)
     
     
     

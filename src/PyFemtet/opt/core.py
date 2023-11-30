@@ -10,10 +10,12 @@ import sys
 import time
 import datetime
 import inspect
-from multiprocessing import Value
+from multiprocessing import Process, Value
 import functools
 import math
 import ast
+import tempfile
+import shutil
 
 # 3rd-party modules
 import numpy as np
@@ -292,17 +294,18 @@ class Femtet(FEMSystem):
 
 
     def quit(self):
-        # 上書き保存しない
+        # 上書き保存
+        self.Femtet.SaveProject(self.Femtet.Project, True)
         # 閉じる
-        # hwnd = self.Femtet.hWnd
-        # result = util.close_femtet(hwnd, isTerminate=True)
-        # if result==False:
-        #     raise FemtetAutomationError('Femtet の終了に失敗しました')
+        hwnd = self.Femtet.hWnd
+        result = util.close_femtet(hwnd)
+        if result==False:
+            raise FemtetAutomationError('Femtet の終了に失敗しました')
 
-        # 強制終了
-        Femtet = self.Femtet
-        pid = _get_pid(Femtet.hWnd)
-        util.close_process(pid)
+        # # 強制終了
+        # Femtet = self.Femtet
+        # pid = _get_pid(Femtet.hWnd)
+        # util.close_process(pid)
 
 
 
@@ -469,14 +472,14 @@ class FemtetOptimizationCore(ABC):
             self,
             femprj_path:str or None,
             model_name:str or None = None,
-            result_path:str=None,
+            history_path:str=None,
             FEMClass:FEMSystem = Femtet,
             ):
         
         # 引数の処理
         self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
-        self.history_path = result_path
+        self.history_path = history_path
         self.FEMClass = FEMClass
 
         #### Femtet に接続
@@ -513,6 +516,7 @@ class FemtetOptimizationCore(ABC):
                 
         else:
             self.FEM = self.FEMClass()
+        self._release_FEM_on_main = caught_femtet=='new'
         
         
         #### メンバーの宣言
@@ -562,7 +566,9 @@ class FemtetOptimizationCore(ABC):
     def set_FEM(self):
         self.FEM = self.FEMClass()
         if issubclass(self.FEMClass, Femtet):
+            print('launch new Femtet...')
             self.FEM.connect_Femtet('new')
+            print('open femprj...')
             self.FEM.open(self.femprj_path, self.model_name)
     
     def release_FEM(self):
@@ -725,7 +731,6 @@ class FemtetOptimizationCore(ABC):
                 ret[row['name']] = row.value
             return ret
         else:
-            fname = getCurrentMethod()
             raise Exception('get_current_parameter() got invalid format: {format}')
 
 
@@ -870,9 +875,39 @@ class FemtetOptimizationCore(ABC):
     @abstractmethod
     def _main(self):
         pass
-    
 
-    def main(self, history_path:str or None = None, n_parallel=1):
+
+    def _subprocess_main(self, FEMOpt):
+        '''サブプロセスから呼ばれるはずの関数'''
+
+        # サブプロセス作成時に破棄されているはずの COM を含みうる FEM を接続
+        FEMOpt.set_FEM()
+        
+        # Femtet を継承したクラスであれば中間ファイルの干渉を避けるためプロジェクトを別名保存
+        from .core import Femtet
+        if issubclass(FEMOpt.FEMClass, Femtet):
+            # 一時ディレクトリを作成
+            td = tempfile.mkdtemp()
+            # 一時ファイルに現在のプロジェクトを保存
+            prjname = FEMOpt.FEM.Femtet.ProjectTitle
+            prjname = "subprocess"
+            tmp_femprj_path = os.path.join(td, f'{prjname}.femprj')
+            result = FEMOpt.FEM.Femtet.SaveProject(tmp_femprj_path, True)
+            if result==False:
+                FEMOpt.FEM.Femtet.ShowLastError() # raise com_error
+
+        # 最適化の実行
+        FEMOpt._main()
+
+        # FEM の終了
+        FEMOpt.release_FEM()
+        
+        # 一時フォルダの削除
+        if issubclass(FEMOpt.FEMClass, Femtet):
+            shutil.rmtree(td, )
+        
+
+    def main(self, n_parallel=1):
         '''
         最適化を実行する。
 
@@ -893,6 +928,9 @@ class FemtetOptimizationCore(ABC):
         None
 
         '''
+        # 引数の処理
+        self.n_parallel = n_parallel
+        
         #### 最適化プロセスの実行前チェック
         # 変数のチェック
         if ((len(self.objectives)==0)
@@ -907,9 +945,52 @@ class FemtetOptimizationCore(ABC):
         
         # プロセスモニタの初期化
         # self._set_process_monitor()
+        
+        # 変数チェックのためだけの FEM がある場合、上書き保存して落としておく
+        if self._release_FEM_on_main:
+            self.release_FEM()
 
-        #### 最適化の開始
+        #### 最適化の開始; サブプロセスを立て、自身は中断待ちを行う。
         start = time.time()
+        processes = []
+        for i in range(self.n_parallel):
+            p = Process(
+                target=self._subprocess_main,
+                args=(self,)
+                )
+            p.start()
+            print(f'subprocess {i} start')
+            processes.append(p)
+        
+        command = ''
+        while True:
+            if command!='exit':
+                # ユーザーの中断指令があればフラグを立てる
+                command = input('終了するには exit と入力してEnter を押してください。')
+
+            if command=='exit':
+                self.shared_interruption_flag.value = 1
+                now = time.time()
+                duration = now - start
+                print('現在実行中の解析がすべて終了すると最適化が終了します...')
+
+            # 全てが終了していれば break
+            if all([not p.is_alive() for p in processes]):
+                break
+            time.sleep(1)
+
+        for p in processes:
+            p.join()
+        print('all subprocesses have been ended')
+
+
+
+
+
+
+
+
+
         self._main()
         end = time.time()
         self.last_execution_time = end - start # 秒
