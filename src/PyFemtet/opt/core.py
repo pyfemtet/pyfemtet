@@ -11,11 +11,11 @@ import time
 import datetime
 import inspect
 from multiprocessing import Process, Value
-import functools
 import math
 import ast
 import tempfile
 import shutil
+import gc
 
 # 3rd-party modules
 import numpy as np
@@ -307,15 +307,7 @@ class Femtet(FEMSystem):
         self.Femtet.SaveProject(self.Femtet.Project, True)
         # 閉じる
         hwnd = self.Femtet.hWnd
-        result = util.close_femtet(hwnd)
-        if result==False:
-            raise FemtetAutomationError('Femtet の終了に失敗しました')
-
-        # # 強制終了
-        # Femtet = self.Femtet
-        # pid = _get_pid(Femtet.hWnd)
-        # util.close_process(pid)
-
+        util.close_femtet(hwnd, 10, True)
 
 
 class NoFEM(FEMSystem):
@@ -576,13 +568,9 @@ class FemtetOptimizationCore(ABC):
         self.FEM = self.FEMClass()
         if issubclass(self.FEMClass, Femtet):
             if pid is None:
-                print('launch new Femtet...')
                 self.FEM.connect_Femtet('new')
             else:
-                print('connect existing Femtet...')
                 self.FEM.connect_Femtet('catch', pid)
-                
-            print('open femprj...')
             self.FEM.open(self.femprj_path, self.model_name)
     
     def release_FEM(self):
@@ -932,7 +920,7 @@ class FemtetOptimizationCore(ABC):
             shutil.rmtree(td, )
         
 
-    def main(self, n_parallel=1):
+    def main(self, n_parallel=1, accept_console_control=True):
         '''
         最適化を実行する。
 
@@ -978,7 +966,7 @@ class FemtetOptimizationCore(ABC):
 
         #### 最適化の開始; サブプロセスを立て、自身は中断待ちを行う。
         
-        # オーバーヘッドを低減するため先に必要分の Femtet を起動しておく
+        # 先に必要分の Femtet を起動しておく
         pids = []
         for i in range(self.n_parallel):
             util.execute_femtet()
@@ -1003,36 +991,45 @@ class FemtetOptimizationCore(ABC):
             print(f'subprocess {subprocess_id} start')
             processes.append(p)
         
-        command = ''
-        while True:
-            if command!='exit':
-                # ユーザーの中断指令があればフラグを立てる
-                command = input('終了するには exit と入力してEnter を押してください。')
+        
+        # ユーザーの中断指令を console 入力で待つ
+        if accept_console_control:
+            command = ''
+            while True:
 
-            if command=='exit':
-                self.shared_interruption_flag.value = 1
-                now = time.time()
-                duration = now - start
-                print('現在実行中の解析がすべて終了すると最適化が終了します...')
+                # 全てが終了していれば break
+                if all([not p.is_alive() for p in processes]):
+                    print('最適化プロセスは終了しました。')
+                    break
 
-            # 全てが終了していれば break
-            if all([not p.is_alive() for p in processes]):
-                break
-            time.sleep(1)
+                print('----------')
+                print('最適化が実行中です。')
 
+                # ユーザーの中断指令を待つ
+                if command!='exit':
+                    print('終了するには exit と入力して Enter を押してください。')
+                    command = input('>>> ')
+
+                # 終了処理中であることを表示する
+                if command=='exit':
+                    print('現在実行中の解析がすべて終了すると')
+                    print('最適化プロセスが終了します。')
+                    print('このまま待ってください。')
+                    print('(Femtet が終了していても、サブプロセスの終了に数十秒要する場合があります。)')
+
+                time.sleep(1)
+
+        # 全てのサブプロセスの終了を待つ
         for p in processes:
             p.join()
-        print('all subprocesses have been ended')
+        
+        # 一応
+        for p in processes:
+            del p
+        del processes
+        gc.collect()
 
-
-
-
-
-
-
-
-
-        self._main()
+        print('最適化プロセスは終了しました。')
         end = time.time()
         self.last_execution_time = end - start # 秒
 
