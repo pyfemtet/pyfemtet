@@ -877,13 +877,24 @@ class FemtetOptimizationCore(ABC):
         pass
 
 
-    def _subprocess_main(self, FEMOpt):
+    def _subprocess_main(self, FEMOpt, myid, shared_allowing_id):
         '''サブプロセスから呼ばれるはずの関数'''
 
-        # サブプロセス作成時に破棄されているはずの COM を含みうる FEM を接続
+        #### サブプロセス作成時に破棄されているはずの COM を含みうる FEM を接続
+        # 排他処理なので自分の順番が来るまで待つ
+        while True:
+            if shared_allowing_id.value==myid:
+                break
+            time.sleep(1)
+        
+        # 自分の順番が来たら FEM との接続を行う、これが排他処理
         FEMOpt.set_FEM()
         
-        # Femtet を継承したクラスであれば中間ファイルの干渉を避けるためプロジェクトを別名保存
+        # 接続が終わったら次のプロセスに許可を与える
+        shared_allowing_id.value = shared_allowing_id.value + 1
+        
+        
+        # femprj の干渉を避けるための前処理
         from .core import Femtet
         if issubclass(FEMOpt.FEMClass, Femtet):
             # 一時ディレクトリを作成
@@ -950,16 +961,20 @@ class FemtetOptimizationCore(ABC):
         if self._release_FEM_on_main:
             self.release_FEM()
 
+
         #### 最適化の開始; サブプロセスを立て、自身は中断待ちを行う。
+        
+        # サブプロセスの開始
         start = time.time()
         processes = []
-        for i in range(self.n_parallel):
+        current_allowing_subprocess_id = Value('i', 0) # Femtet との接続は仕様上排他制御でないとダメ
+        for subprocess_id in range(self.n_parallel):
             p = Process(
                 target=self._subprocess_main,
-                args=(self,)
+                args=(self, subprocess_id, current_allowing_subprocess_id)
                 )
             p.start()
-            print(f'subprocess {i} start')
+            print(f'subprocess {subprocess_id} start')
             processes.append(p)
         
         command = ''
