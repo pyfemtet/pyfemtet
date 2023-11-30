@@ -40,7 +40,7 @@ def _get_pids(process_name):
 
 
 
-def Dispatch_Femtet_with_pid():
+def Dispatch_Femtet(timeout=30):
     '''
     Femtet の Dispatch を行う。
 
@@ -57,7 +57,6 @@ def Dispatch_Femtet_with_pid():
     Femtet = Dispatch('FemtetMacro.Femtet') # Dispatch は「予約」
 
     #### Dispatch が成功したことを保証するための処理
-    timeout = 30
     start = time.time()
     # timeout 又は Femtet の hWnd が 0 超になるまで繰り返す
     while True:
@@ -89,7 +88,7 @@ def _f(pid, subprocess_id, shared_flags):
 
     # Dispatch して正常な hwnd が得られるまで待ち、pid を調べる
     if pp: print(f'from subp{subprocess_id}; let us start Dispatch...')
-    Femtet, mypid = Dispatch_Femtet_with_pid()
+    Femtet, mypid = Dispatch_Femtet()
         
     # Dispatch が終了していることを通知
     shared_flags[subprocess_id] = True
@@ -163,12 +162,19 @@ def Dispatch_Femtet_with_new_process():
             if pp: print('Femtet が正常に起動されませんでした。')
             return None, 0
     
-    
+    # 目的の pid を持つ Femtet を取得
+    Femtet, mypid = Dispatch_Femtet_with_specific_pid(pid)
+
+    print(f'pid of Dispatch object of Femtet:{mypid}')
+    return Femtet, mypid
+
+
+def Dispatch_Femtet_with_specific_pid(pid):
     #### 目的の pid の Femtet を取得
     # Femtet のプロセスをすべて列挙し、目的のプロセス以外を
     # サブプロセスで Dispatch してブロックする
 
-    # Femtet プロセスの列挙
+    # 存在する Femtet プロセスの列挙
     pids = _get_pids('Femtet.exe')
     if pp: print('existing pids', pids)
 
@@ -204,7 +210,7 @@ def Dispatch_Femtet_with_new_process():
             time.sleep(1)
 
         # 子プロセスの Dispatch 完了を待って Dispatch
-        Femtet, mypid = Dispatch_Femtet_with_pid()
+        Femtet, mypid = Dispatch_Femtet()
         if pp: print('finally Dispatched pid', mypid)
 
         # Dispatch 完了を通知
@@ -213,10 +219,8 @@ def Dispatch_Femtet_with_new_process():
         # サブプロセスすべての正常終了を待つ
         for p in processes:
             p.join()
-
-    print(f'pid of Dispatch object of Femtet:{mypid}')
-    return Femtet, mypid
-
+        
+        return Femtet, mypid
 
 
 if __name__=='__main__':

@@ -27,7 +27,7 @@ import win32com.client
 from win32com.client import Dispatch, constants, CDispatch
 from pywintypes import com_error
 from femtetutils import util, constant
-from ..tools.DispatchUtils import Dispatch_Femtet_with_pid, Dispatch_Femtet_with_new_process, _get_pid
+from ..tools.DispatchUtils import Dispatch_Femtet, Dispatch_Femtet_with_new_process, Dispatch_Femtet_with_specific_pid, _get_pid
 
 
 
@@ -140,7 +140,7 @@ class Femtet(FEMSystem):
             return ''
     
     
-    def connect_Femtet(self, strategy:str='new')->None:
+    def connect_Femtet(self, strategy:str='new', pid:int or None = None)->None:
         '''
         Femtet プロセスとの接続を行います。
 
@@ -154,6 +154,10 @@ class Femtet(FEMSystem):
             この場合、既存 Femtet プロセスのどれに接続されるかは制御できません。
             また、すでに別のPython又はExcelプロセスと接続されている Femtet との接続を行うことはできません。
             'auto' のとき、まず 'catch' を試行し、失敗した際には 'new' で接続します。
+        
+        pid : int or None, optional
+            接続したい既存の Femtet のプロセス ID. The default is None.
+            strategy が catch 以外の時は無視されます。
 
         Raises
         ------
@@ -177,15 +181,20 @@ class Femtet(FEMSystem):
         
         elif strategy=='catch':
             # 既存の Femtet を探して Dispatch する。
-            self.Femtet, _ = Dispatch_Femtet_with_pid()
+            if pid is not None:
+                self.Femtet, mypid = Dispatch_Femtet(timeout=5)
+            else:
+                self.Femtet, mypid = Dispatch_Femtet_with_specific_pid(pid)
+            if mypid==0:
+                raise FemtetAutomationError('接続できる Femtet のプロセスが見つかりませんでした。')
             caught_femtet = 'existing'
 
         elif strategy=='auto':
             try:
                 # 既存の Femtet を探して Dispatch する。
-                self.Femtet, pid = Dispatch_Femtet_with_pid()
+                self.Femtet, mypid = Dispatch_Femtet(timeout=5)
                 caught_femtet = 'existing'
-                if pid==0:
+                if mypid==0:
                     # 新しい Femtet プロセスを立てて繋ぐ
                     self.Femtet, _ = Dispatch_Femtet_with_new_process()
                     caught_femtet = 'new'
@@ -563,11 +572,16 @@ class FemtetOptimizationCore(ABC):
     # import 元が干渉するため NX_Femtet と SW_Femtet はマルチプロセスにできない
     # この問題さえクリアすれば、即ち femprj と x_t を分ければマルチプロセスは可能
     # ただし SW は複数プロセスの COM 制御が不可能なのでウィンドウ単位で制御するとか工夫が必要
-    def set_FEM(self):
+    def set_FEM(self, pid=None):
         self.FEM = self.FEMClass()
         if issubclass(self.FEMClass, Femtet):
-            print('launch new Femtet...')
-            self.FEM.connect_Femtet('new')
+            if pid is None:
+                print('launch new Femtet...')
+                self.FEM.connect_Femtet('new')
+            else:
+                print('connect existing Femtet...')
+                self.FEM.connect_Femtet('catch', pid)
+                
             print('open femprj...')
             self.FEM.open(self.femprj_path, self.model_name)
     
@@ -877,7 +891,7 @@ class FemtetOptimizationCore(ABC):
         pass
 
 
-    def _subprocess_main(self, FEMOpt, myid, shared_allowing_id):
+    def _subprocess_main(self, FEMOpt, myid, shared_allowing_id, target_pid):
         '''サブプロセスから呼ばれるはずの関数'''
 
         #### サブプロセス作成時に破棄されているはずの COM を含みうる FEM を接続
@@ -888,7 +902,7 @@ class FemtetOptimizationCore(ABC):
             time.sleep(1)
         
         # 自分の順番が来たら FEM との接続を行う、これが排他処理
-        FEMOpt.set_FEM()
+        FEMOpt.set_FEM(target_pid)
         
         # 接続が終わったら次のプロセスに許可を与える
         shared_allowing_id.value = shared_allowing_id.value + 1
@@ -964,14 +978,26 @@ class FemtetOptimizationCore(ABC):
 
         #### 最適化の開始; サブプロセスを立て、自身は中断待ちを行う。
         
+        # オーバーヘッドを低減するため先に必要分の Femtet を起動しておく
+        pids = []
+        for i in range(self.n_parallel):
+            util.execute_femtet()
+            pid = util.get_last_executed_femtet_process_id()
+            pids.append(pid)
+        
         # サブプロセスの開始
         start = time.time()
         processes = []
         current_allowing_subprocess_id = Value('i', 0) # Femtet との接続は仕様上排他制御でないとダメ
-        for subprocess_id in range(self.n_parallel):
+        for subprocess_id, pid in enumerate(pids):
             p = Process(
                 target=self._subprocess_main,
-                args=(self, subprocess_id, current_allowing_subprocess_id)
+                args=(
+                    self,
+                    subprocess_id,
+                    current_allowing_subprocess_id,
+                    pid
+                    )
                 )
             p.start()
             print(f'subprocess {subprocess_id} start')
