@@ -741,12 +741,9 @@ class FemtetOptimizationCore(ABC):
 
 
     def _set_process_monitor(self):
-        # main の直前、parameter 等のセッティングが終わった後に呼ぶ
-        if self.history is None:
-            self._init_history()
         from .visualization._dash import DashProcessMonitor
-        self.process_monitor = DashProcessMonitor(self)
-        self.process_monitor.start()
+        process_monitor = DashProcessMonitor(self)
+        process_monitor.start()
         
 
     def _isDfValid(self, df):
@@ -837,6 +834,7 @@ class FemtetOptimizationCore(ABC):
         
         # 中断指令があったら Exception を起こす
         if self.shared_interruption_flag.value==1:
+            self.release_FEM()
             raise UserInterruption('ユーザーによって最適化が取り消されました。')
         
         # 渡された x がすでに計算されたものであれば
@@ -960,7 +958,7 @@ class FemtetOptimizationCore(ABC):
         # 中断指令の初期化
         self.shared_interruption_flag.value = 0
         
-        # プロセスモニタの初期化
+        # プロセスモニタの初期化（ヒストリの初期化が終わってから）
         # self._set_process_monitor()
         
         # 変数チェックのためだけの FEM がある場合、上書き保存して落としておく
@@ -1008,9 +1006,6 @@ class FemtetOptimizationCore(ABC):
         
         # dialog に渡す関数の定義
         def should_finish():
-            print(processes)
-            for p in processes:
-                print(p.is_alive())
             return self.queue.empty() and all([not p.is_alive() for p in processes])
 
         def update_history():

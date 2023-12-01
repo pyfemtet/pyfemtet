@@ -3,6 +3,11 @@ from PySide6.QtCore import QTimer, Qt
 from typing import Callable, Any
 from multiprocessing import Value # 型ヒントのためのみ
 import sys
+import webbrowser
+
+
+def open_browser():
+    webbrowser.open('http://localhost:8080')
 
 
 class SimplestDialog(QDialog):
@@ -19,8 +24,13 @@ class SimplestDialog(QDialog):
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
 
         self.layout = QVBoxLayout()
+
         self.label = QLabel("経過時間：0秒")
         self.layout.addWidget(self.label)
+
+        self.button2 = QPushButton("進行状況を開く")
+        self.button2.clicked.connect(open_browser)
+        self.layout.addWidget(self.button2)
 
         self.button = QPushButton("終了")
         self.button.clicked.connect(self.on_button_clicked)
@@ -51,8 +61,8 @@ class SimplestDialog(QDialog):
         # そうでなければ終了中ですと表示
         else:
             text = '''終了中です。
-現在の計算がすべて終了し、関連する非表示の
-プロセスがすべて終了すると最適化が終了します。'''
+  現在の計算がすべて終了し、関連する非表示の
+  プロセスがすべて終了するとこのダイアログが閉じます。'''
             self.label.setText(text)
         # 終了判定
         if self.get_close_flag is not None:

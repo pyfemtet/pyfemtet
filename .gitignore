@@ -9,7 +9,6 @@ db.sqlite3
 *.csv
 
 .spyproject
-.elemental
 
 PyFemtet.egg-info
 /src/PyFemtet/_version.py

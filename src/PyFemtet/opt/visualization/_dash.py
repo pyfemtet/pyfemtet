@@ -51,9 +51,9 @@ class DashProcessMonitor:
 
     
     def start(self):
-        self.app.run_server(debug=True, host='localhost', port=8050)
+        self.app.run_server(debug=True, host='localhost', port=8080)
         import webbrowser
-        webbrowser.open("http://localhost:8050")
+        webbrowser.open("http://localhost:8080")
 
     def update_hv(self):
         df = self.FEMOpt.history

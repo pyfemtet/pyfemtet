@@ -6,12 +6,16 @@ from PyFemtet.opt.core import NoFEM
 import numpy as np
 
 def objective_x(FEMOpt):
-    r, theta = FEMOpt.get_current_parameter('values')
-    return r * np.cos(theta)
+    sleep(1)
+    r, theta, fai = FEMOpt.get_current_parameter('values')
+    return r * np.cos(theta) * np.cos(fai)
 
 def objective_y(FEMOpt):
-    r, theta = FEMOpt.get_current_parameter('values')
-    sleep(1)
+    r, theta, fai = FEMOpt.get_current_parameter('values')
+    return r * np.cos(theta) * np.sin(fai)
+
+def objective_z(FEMOpt):
+    r, theta, fai = FEMOpt.get_current_parameter('values')
     return r * np.sin(theta)
 
 def constraint_y(FEMOpt):
@@ -21,11 +25,13 @@ def constraint_y(FEMOpt):
     
 if __name__=='__main__':
     FEMOpt = FemtetOptuna(None, FEMClass=NoFEM)
-    FEMOpt.add_parameter('r', 1, 0, 1)
+    FEMOpt.add_parameter('r', .5, 0, 1)
     FEMOpt.add_parameter('theta', np.pi/3, 0, 2*np.pi)
+    FEMOpt.add_parameter('fai', np.pi/3, -np.pi/2, np.pi/2)
     FEMOpt.add_objective(objective_x, 'x', args=FEMOpt)
     FEMOpt.add_objective(objective_y, 'y', args=FEMOpt)
-    # FEMOpt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=FEMOpt)
+    FEMOpt.add_objective(objective_z, 'z', args=FEMOpt)
+    FEMOpt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=FEMOpt)
     # print(FEMOpt.FEM)
     # print(FEMOpt.FEMClass)
     # print(FEMOpt.constraints)
@@ -41,7 +47,7 @@ if __name__=='__main__':
     # print(FEMOpt._constraint_values)
     
 
-    FEMOpt.main(n_trials=9, n_parallel=3)
+    FEMOpt.main(n_trials=15, n_parallel=3)
     
     print(len(FEMOpt.history)) # n_trials から prune を抜いた数か
 
