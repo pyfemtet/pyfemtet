@@ -1,6 +1,7 @@
 import os
 import datetime
 import functools
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -11,6 +12,8 @@ import optuna
 # optuna.logging.disable_default_handler()
 from optuna.study import MaxTrialsCallback
 # from optuna.trial import TrialState
+from optuna.exceptions import ExperimentalWarning
+optuna.logging.disable_default_handler()
 
 from scipy.stats.qmc import LatinHypercube
 
@@ -18,6 +21,10 @@ from multiprocessing import Process, Value
 
 import gc
 
+warnings.filterwarnings('ignore', category=ExperimentalWarning)
+
+
+RANDOM_SEED = 42
 
 
 def generate_LHS(bounds)->np.ndarray:
@@ -33,7 +40,7 @@ def generate_LHS(bounds)->np.ndarray:
         strength=2,
         # optimization='lloyd',
         optimization='random-cd',
-        # seed=1
+        seed=RANDOM_SEED
         )
     
     LIMIT = 100
@@ -117,7 +124,7 @@ class FemtetOptuna(FemtetOptimizationCore):
         #### sampler の設定
         # sampler = optuna.samplers.NSGAIISampler(constraints_func=_constraint_function)
         # sampler = optuna.samplers.NSGAIIISampler()
-        sampler = optuna.samplers.TPESampler(constraints_func=self._constraint_function)
+        sampler = optuna.samplers.TPESampler(seed=RANDOM_SEED, constraints_func=self._constraint_function)
 
         #### study ファイルの作成
         study = optuna.create_study(
