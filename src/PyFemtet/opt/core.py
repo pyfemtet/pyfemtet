@@ -604,17 +604,17 @@ class FemtetOptimizationCore(ABC):
             name = self._getUniqueDefaultName(Objective.prefixForDefault, self.objectives)
 
         # objective オブジェクトを生成
-        obj = Objective(fun, args, kwargs, name, direction, self) # サブプロセス内で引っかからないか？
+        new_obj = Objective(fun, args, kwargs, name, direction, self) # サブプロセス内で引っかからないか？
 
         # 被っているかどうかを判定し上書き or 追加
         isExisting = False
-        for i, obj in enumerate(self.objectives):
-            if obj.name==name:
+        for i, existing_obj in enumerate(self.objectives):
+            if new_obj.name==existing_obj.name:
                 isExisting = True
                 warn('すでに登録されている名前が追加されました。上書きされます。')
-                self.objectives[i] = obj
+                self.objectives[i] = new_obj
         if not isExisting:
-            self.objectives.append(obj)
+            self.objectives.append(new_obj)
 
 
     def add_constraint(
@@ -645,17 +645,17 @@ class FemtetOptimizationCore(ABC):
             name = self._getUniqueDefaultName(Constraint.prefixForDefault, self.constraints)
         
         # Constraint オブジェクトの生成
-        cns = Constraint(fun, args, kwargs, name, lower_bound, upper_bound, strict, self)
+        new_cns = Constraint(fun, args, kwargs, name, lower_bound, upper_bound, strict, self)
 
         # 被っているかどうかを判定し上書き or 追加
         isExisting = False
-        for i, cns in enumerate(self.constraints):
-            if cns.name==name:
+        for i, existing_cns in enumerate(self.constraints):
+            if new_cns.name==existing_cns.name:
                 isExisting = True
                 warn('すでに登録されている名前が追加されました。上書きされます。')
-                self.constraints[i] = cns
+                self.constraints[i] = new_cns
         if not isExisting:
-            self.constraints.append(cns)
+            self.constraints.append(new_cns)
 
 
     def add_parameter(
@@ -856,7 +856,8 @@ class FemtetOptimizationCore(ABC):
             self._constraint_values = [cns.calc() for cns in self.constraints]
             # self._record()
             row = self._get_current_data()
-            self.queue.put(row)
+            if hasattr(self, 'queue'):
+                self.queue.put(row)
                 
         return [obj._convert(v) for obj, v in zip(self.objectives, self._objective_values)]
 
@@ -920,6 +921,31 @@ class FemtetOptimizationCore(ABC):
         # 一時フォルダの削除
         if issubclass(FEMOpt.FEMClass, Femtet):
             shutil.rmtree(td)
+
+    
+    def should_finish(self):
+        # TODO:もし終了後呼ばれたらFalseを返すので state 設計を何とかする
+        if hasattr(self, 'processes') and hasattr(self, 'queue'):
+            return self.queue.empty() and all([not p.is_alive() for p in self.processes])
+        else:
+            if len(self.history)==0:
+                return False
+            else:
+                return True
+
+
+    def update_history(self):
+        # history の update
+        if hasattr(self, 'processes'):
+            while True:
+                # キューに何かあればサブプロセスからのデータを受け取る
+                if not self.queue.empty():
+                    row = self.queue.get()
+                    self._append_history(row)
+                # そうでなければ終了する
+                else:
+                    break
+                time.sleep(0.1)
         
 
     def main(self, n_parallel=1, accept_console_control=True):
@@ -959,7 +985,7 @@ class FemtetOptimizationCore(ABC):
         self.shared_interruption_flag.value = 0
         
         # プロセスモニタの初期化（ヒストリの初期化が終わってから）
-        # self._set_process_monitor()
+        self._set_process_monitor()
         
         # 変数チェックのためだけの FEM がある場合、上書き保存して落としておく
         if self._release_FEM_on_main:
@@ -996,6 +1022,8 @@ class FemtetOptimizationCore(ABC):
             p.start()
             print(f'subprocess {subprocess_id} start')
             processes.append(p)
+        self.processes = processes
+        
         
         #### history の update 及び ユーザーの中断指令待ち
         
@@ -1004,58 +1032,13 @@ class FemtetOptimizationCore(ABC):
         if app == None:
             app = QApplication([])
         
-        # dialog に渡す関数の定義
-        def should_finish():
-            return self.queue.empty() and all([not p.is_alive() for p in processes])
-
-        def update_history():
-            # history の update
-            while True:
-                # キューに何かあればサブプロセスからのデータを受け取る
-                if not self.queue.empty():
-                    row = self.queue.get()
-                    self._append_history(row)
-                # そうでなければ終了する
-                else:
-                    break
-                time.sleep(0.1)
-
         dialog = SimplestDialog(
             self.shared_interruption_flag,
-            get_close_flag=should_finish,
-            fun_to_update=[update_history],
+            get_close_flag=self.should_finish,
+            fun_to_update=[self.update_history],
             )
         dialog.show()
         app.exec()
-        
-
-        
-        # # ユーザーの中断指令を console 入力で待つ
-        # if accept_console_control:
-        #     command = ''
-        #     while True:
-
-        #         # 全てが終了していれば break
-        #         if all([not p.is_alive() for p in processes]):
-        #             print('最適化プロセスは終了しました。')
-        #             break
-
-        #         print('----------')
-        #         print('最適化が実行中です。')
-
-        #         # ユーザーの中断指令を待つ
-        #         if command!='exit':
-        #             print('終了するには exit と入力して Enter を押してください。')
-        #             command = input('>>> ')
-
-        #         # 終了処理中であることを表示する
-        #         if command=='exit':
-        #             print('現在実行中の解析がすべて終了すると')
-        #             print('最適化プロセスが終了します。')
-        #             print('このまま待ってください。')
-        #             print('(Femtet が終了していても、サブプロセスの終了に数十秒要する場合があります。)')
-
-        #         time.sleep(1)
 
         # 全てのサブプロセスの終了を待つ
         for p in processes:
@@ -1065,9 +1048,14 @@ class FemtetOptimizationCore(ABC):
         for p in processes:
             del p
         del processes
+        del self.queue
         gc.collect()
 
-        print('最適化プロセスは終了しました。')
+        if self.shared_interruption_flag.value==0:
+            print('最適化プロセスは終了しました。')
+        else:
+            print('最適化プロセスは中断されました。')
+            
         end = time.time()
         self.last_execution_time = end - start # 秒
 
@@ -1077,7 +1065,7 @@ class FemtetOptimizationCore(ABC):
     def _genarateHistoryColumnNames(self):
         paramNames = [p for p in self._parameter['name'].values]
         objNames = [obj.name for obj in self.objectives]
-        _consNames = [obj.name for obj in self.constraints]
+        _consNames = [cns.name for cns in self.constraints]
         consNames = []
         for n in _consNames:
             consNames.extend([f'{n}_lower_bound', n, f'{n}_upper_bound', f'{n}_fit'])
@@ -1266,6 +1254,8 @@ class FemtetOptimizationCore(ABC):
         hvs = []
         for i in range(n):
             hv = wfg.compute(parate_set[:i], reference_point)
+            if np.isnan(hv):
+                hv = 0
             hvs.append(hv)
         
         # 計算結果を履歴の一部に割り当て
@@ -1279,6 +1269,7 @@ class FemtetOptimizationCore(ABC):
                 try:
                     df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
                 except IndexError:
-                    pass # nan のままにする
+                    # pass # nan のままにする
+                    df.loc[i, 'hypervolume'] = 0
         
     

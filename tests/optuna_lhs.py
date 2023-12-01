@@ -22,6 +22,10 @@ def constraint_y(FEMOpt):
     y = objective_y(FEMOpt)
     return y
     
+def constraint_z(FEMOpt):
+    z = objective_z(FEMOpt)
+    return z
+
     
 if __name__=='__main__':
     FEMOpt = FemtetOptuna(None, FEMClass=NoFEM)
@@ -32,6 +36,7 @@ if __name__=='__main__':
     FEMOpt.add_objective(objective_y, 'y', args=FEMOpt)
     FEMOpt.add_objective(objective_z, 'z', args=FEMOpt)
     FEMOpt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=FEMOpt)
+    FEMOpt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=FEMOpt, strict=False)
     # print(FEMOpt.FEM)
     # print(FEMOpt.FEMClass)
     # print(FEMOpt.constraints)
@@ -40,19 +45,23 @@ if __name__=='__main__':
     # print(FEMOpt.history)
     # print(FEMOpt.history_path)
     # print(FEMOpt.last_execution_time)
-    # print(FEMOpt._init_history())
+    # FEMOpt._init_history()
     # print(len(FEMOpt.history))
     # print(FEMOpt.f(FEMOpt.get_current_parameter('values')))
     # print(FEMOpt._objective_values)
     # print(FEMOpt._constraint_values)
+    # row = FEMOpt._get_current_data()
+    # FEMOpt._append_history(row)
+    # FEMOpt._calc_hypervolume()
+    # FEMOpt.history['hypervolume']
     
 
-    FEMOpt.main(n_trials=15, n_parallel=3)
+    FEMOpt.main(n_trials=1000, n_parallel=3)
     
     print(len(FEMOpt.history)) # n_trials から prune を抜いた数か
 
     import optuna
-    study = optuna.load_study(FEMOpt.study_name, FEMOpt.storage_name)
+    study = optuna.load_study(study_name=FEMOpt.study_name, storage=FEMOpt.storage_name)
     df = study.trials_dataframe()
     idx = df['state']=='COMPLETE'
     print(len(df[idx]))

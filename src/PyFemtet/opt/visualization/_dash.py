@@ -1,113 +1,242 @@
+import webbrowser
+
 import dash
 from dash import dcc, html
 from dash.dependencies import Output, Input
 import plotly.graph_objs as go
 import plotly.express as px
 
+import dash_bootstrap_components as dbc
+
+import datetime
+
 import numpy as np
 import pandas as pd
+
+COLORS = dict(
+    Primary='#0d6efd', # 青
+    Secondary='#6c757d', # 灰色
+    Success='#198754', # 緑
+    Danger='#dc3545', # 赤
+    Warning='#ffc107', # 黄
+    Info='#0dcaf0', # 水色
+    Light='#f8f9fa', # 白っぽい灰色
+    Dark='#212529', # 黒っぽい灰色
+    )
+
+
+def update_scatter_matrix(FEMOpt):
+    # data
+    data = FEMOpt.history
+    parameter_names = FEMOpt.get_history_columns('parameter')
+    objective_names = FEMOpt.get_history_columns('objective')
+    # is_fit = data['fit']
+    # is_nondomi = data['non_domi']
+
+    # マウスオーバーで変数セットを表示する設定
+    text_list = []
+    for i, row in data[parameter_names].iterrows():
+        text = ''
+        for prm in row.index:
+            value = row[prm]
+            text = text + f'{prm} : {value:.3f}<br>'
+        text_list.append(text)
+
+    # nondomi と fit に基づいて書式を設定
+    linecolor_nondomi = COLORS['Warning']
+    linecolor_others = COLORS['Light']
+    color_normal = COLORS['Primary']
+    color_nonfit = COLORS['Secondary']
+    
+    marker_colors = [color_normal if fit else color_nonfit for fit in data['fit']]
+    marker_line_colors = [linecolor_nondomi if optimal else linecolor_others for optimal in data['non_domi']]
+    marker_line_width = [2 if optimal else 1 for optimal in data['non_domi']]
+
+    # 凡例用の空の scatter を作成
+    legends = []
+    legends.append(
+        go.Scatter(x=[None], y=[None], mode='markers', showlegend=True, xaxis=objective_names[0], yaxis=objective_names[1], # すでに生成されている軸を使用
+            name='非劣解',
+            marker=dict(
+                color='rgba(0,0,0,0)',
+                line=dict(
+                    color=linecolor_nondomi,
+                    width=2,
+                    ),
+                ), 
+            )
+        )
+    legends.append(
+        go.Scatter(x=[None], y=[None], mode='markers', showlegend=True, xaxis=objective_names[0], yaxis=objective_names[1], # すでに生成されている軸を使用
+            name='拘束外の解',
+            marker=dict(
+                color=color_nonfit,
+                line=dict(width=0),
+                ), 
+            )
+        )
+    legends.append(
+        go.Scatter(x=[None], y=[None], mode='markers', showlegend=True, xaxis=objective_names[0], yaxis=objective_names[1], # すでに生成されている軸を使用
+            name='その他の解',
+            marker=dict(
+                color=color_normal,
+                line=dict(width=0),
+                ), 
+            )
+        )
+
+    
+    # 設定を反映
+    trace=go.Splom(
+        dimensions=[dict(label=c, values=data[c]) for c in objective_names],
+        diagonal_visible=False,
+        showupperhalf=False,
+        text=text_list,
+        showlegend=False,
+        marker=dict(
+            color=marker_colors,
+            line=dict(
+                color=marker_line_colors,
+                width=marker_line_width
+                )
+            )
+        )
+    
+    # figure layout
+    layout = go.Layout(
+        title_text="多目的ペアプロット",
+        )
+            
+    # figure
+    fig = go.Figure(
+        data=[trace, *legends],
+        layout=layout,
+        )
+    
+    return fig    
+
+
+def update_hypervolume(FEMOpt):
+    data = FEMOpt.history
+    
+    # plot
+    trace = go.Scatter(
+        x=data['n_trial'],
+        y=data['hypervolume'],
+        mode='lines+markers',
+        text=[dt.strftime('終了時刻：%Y/%m/%d %H:%M:%S') for dt in data['time']]
+        )
+
+    # figure layout
+    layout = go.Layout(
+        title_text="ハイパーボリューム",
+        )
+            
+    # figure
+    fig = go.Figure(
+        data=trace,
+        layout=layout,
+        )
+    
+    return fig
 
 
 class DashProcessMonitor:
 
+    def start(self):
+        self.app.run(debug=True, host='localhost', port=8080)
+        webbrowser.open("http://localhost:8080")
+
+    
     def __init__(self, FEMOpt):
+
         # 引数の処理
         self.FEMOpt = FEMOpt
         
         # application の準備
-        self.app = dash.Dash(__name__)
-        graph1 = dcc.Graph(id='scatter-graph', animate=False)
-        graph2 = dcc.Graph(id='pairplot-graph', animate=False)
-        interval_component = dcc.Interval(
-            id='interval',
-            interval=2*1000,
-            n_intervals=0
-            )
-        self.app.layout = html.Div([graph1, graph2, interval_component])
+        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-        # # decolator を書き下す形で callback を設定
-        # self.app.callback(
-        #     dash.dependencies.Output('hv', 'figure'),
-        #     dash.dependencies.Input('interval', 'n_intervals')
-        #     )(self.update_hv)
-        # self.app.callback(
-        #     dash.dependencies.Output('pp', 'figure'),
-        #     dash.dependencies.Input('interval', 'n_intervals')
-        #     )(self.update_pp)
-        @self.app.callback(
-            Output('pairplot-graph', 'figure'),
-            Input('interval', 'n_intervals')
-            )
-        def update_pp(_):
-            return self.update_pp()
 
-        @self.app.callback(
-            Output('scatter-graph', 'figure'),
-            Input('interval', 'n_intervals')
+        #### component と layout の設定
+        graph_layout = dbc.Container(
+            dbc.Row(
+                [
+                    dbc.Col(dcc.Graph(id='hypervolume-graph'), md=6),
+                    dbc.Col(dcc.Graph(id='scatter-matrix-graph'), md=6),
+                    ]
+                )
             )
+        toggle_button = dbc.Button('Toggle auto-update', id='toggle-button', n_clicks=0)
+        layout = html.Div(
+            [
+                html.H1("最適化の進捗状況"),
+                html.Label(id='status-label'),
+                dcc.Interval(
+                    id='interval-component',
+                    interval=2*1000,  # in milliseconds
+                    max_intervals=0  # max number of intervals
+                    ),
+                graph_layout,
+                toggle_button,
+                ]
+            )
+
+        self.app.layout = layout
+
+
+        # callback（分割したほうが並列計算できるらしい）
+
+        # hypervolume
+        @self.app.callback(
+            Output('hypervolume-graph', 'figure'),
+            Input('interval-component', 'n_intervals'))
         def update_hv(_):
-            return self.update_hv()
+            return update_hypervolume(self.FEMOpt)
 
+        # scatter matrix
+        @self.app.callback(
+            Output('scatter-matrix-graph', 'figure'),
+            Input('interval-component', 'n_intervals'))
+        def update_sm(_):
+            return update_scatter_matrix(self.FEMOpt)
 
+        # フラグが立っていれば自動更新しない
+        @self.app.callback(
+            [
+                Output('interval-component', 'max_intervals'),
+                Output('status-label','children'),
+                Output('toggle-button', 'disabled'),
+                ],
+            [
+                Input('interval-component', 'n_intervals'),
+                ]
+            )
+        def stop_interval(_):
+            if self.FEMOpt.should_finish():
+                max_intervals = 0
+                status_text = '最適化が終了しました。'
+                toggle_button_disable = True
+            else:
+                max_intervals = -1
+                status_text = '最適化が実行中です。'
+                toggle_button_disable = False
+            return max_intervals, status_text, toggle_button_disable
+
+        # 自動更新の on / off
+        @self.app.callback(
+            [
+                Output('interval-component', 'disabled'),
+                Output('toggle-button', 'children'),
+                ],
+            [Input('toggle-button', 'n_clicks')])
+        def toggle_interval(n):
+            if n % 2 == 0:
+                return False, 'Turn off auto update'
+            else:
+                return True, 'Turn on auto update'
     
-    def start(self):
-        self.app.run_server(debug=True, host='localhost', port=8080)
-        import webbrowser
-        webbrowser.open("http://localhost:8080")
-
-    def update_hv(self):
-        df = self.FEMOpt.history
-        fig = go.Figure()
-        x = df['n_trial']
-        y = df['hypervolume']
-        fig.add_trace(go.Scatter(x=x, y=y, mode='lines'))
-        fig.update_layout(
-            xaxis_range=[0, x.max()*1.1],
-            yaxis_range=[0, y.max()*1.1],
-            )
-        return fig
-
-        
-    def update_pp(self):
-        # https://plotly.com/python/splom/
-        df = self.FEMOpt.history
-
-        obejctive_names = self.FEMOpt.get_history_columns('objective')
-        parameter_names = self.FEMOpt.get_history_columns('parameter')
-        index_vals = df['non_domi'].astype('category').cat.codes
-
-        # fig = go.Figure(
-        #     data=go.Splom(
-        #         dimensions=[dict(label=column, values=df[column]) for column in obejctive_names],
-        #         showupperhalf=False,
-        #         diagonal_visible=False,
-        #         text=df[parameter_names],
-        #         marker=dict(
-        #             color=index_vals,
-        #             showscale=False, # colors encode categorical variables
-        #             line_color='white',
-        #             line_width=0.5
-        #             )
-        #         )
-        #     )
-        # fig.update_layout(
-        #     title='pp',
-        #     # width=600,
-        #     # height=600,
-        # )
-
-        fig = px.scatter_matrix(
-            df,
-            dimensions=obejctive_names,
-            color="non_domi",
-            symbol="non_domi",
-            title="Scatter matrix",
-            )
-        fig.update_traces(
-            diagonal_visible=False,
-            showupperhalf=False,
-            )
-        return fig
+    
+    
     
 if __name__=='__main__':
     class DummyFEMOpt:
@@ -121,6 +250,10 @@ if __name__=='__main__':
                     prm1=np.random.rand(10),
                     prm2=np.random.rand(10),
                     non_domi=np.random.rand(10)>0.5,
+                    fit=np.random.rand(10)>0.5,
+                    hypervolume=np.random.rand(10),
+                    n_trial=np.arange(10),
+                    time=[datetime.datetime.now()]*10,
                     )
                 )
         def get_history_columns(self, kind):
@@ -128,5 +261,8 @@ if __name__=='__main__':
                 return ['prm1', 'prm2']
             if kind=='objective':
                 return ['obj1', 'obj2', 'obj3']
+        
+        def should_finish(self):
+            return False
     dpm = DashProcessMonitor(DummyFEMOpt())
     dpm.start()
