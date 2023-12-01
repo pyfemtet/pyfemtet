@@ -42,77 +42,79 @@ def update_scatter_matrix(FEMOpt):
             text = text + f'{prm} : {value:.3f}<br>'
         text_list.append(text)
 
-    # nondomi と fit に基づいて書式を設定
-    linecolor_nondomi = COLORS['Warning']
-    linecolor_others = COLORS['Light']
-    color_normal = COLORS['Primary']
-    color_nonfit = COLORS['Secondary']
+    # # nondomi と fit に基づいて書式を設定
+    # linecolor_nondomi = COLORS['Warning']
+    # linecolor_others = COLORS['Light']
+    # color_normal = COLORS['Primary']
+    # color_nonfit = COLORS['Secondary']
     
-    marker_colors = [color_normal if fit else color_nonfit for fit in data['fit']]
-    marker_line_colors = [linecolor_nondomi if optimal else linecolor_others for optimal in data['non_domi']]
-    marker_line_width = [2 if optimal else 1 for optimal in data['non_domi']]
+    # marker_colors = [color_normal if fit else color_nonfit for fit in data['fit']]
+    # marker_line_colors = [linecolor_nondomi if optimal else linecolor_others for optimal in data['non_domi']]
+    # marker_line_width = [2 if optimal else 1 for optimal in data['non_domi']]
 
-    # 凡例用の空の scatter を作成
-    legends = []
-    legends.append(
-        go.Scatter(x=[None], y=[None], mode='markers', showlegend=True, xaxis=objective_names[0], yaxis=objective_names[1], # すでに生成されている軸を使用
-            name='非劣解',
-            marker=dict(
-                color='rgba(0,0,0,0)',
-                line=dict(
-                    color=linecolor_nondomi,
-                    width=2,
-                    ),
-                ), 
-            )
-        )
-    legends.append(
-        go.Scatter(x=[None], y=[None], mode='markers', showlegend=True, xaxis=objective_names[0], yaxis=objective_names[1], # すでに生成されている軸を使用
-            name='拘束外の解',
-            marker=dict(
-                color=color_nonfit,
-                line=dict(width=0),
-                ), 
-            )
-        )
-    legends.append(
-        go.Scatter(x=[None], y=[None], mode='markers', showlegend=True, xaxis=objective_names[0], yaxis=objective_names[1], # すでに生成されている軸を使用
-            name='その他の解',
-            marker=dict(
-                color=color_normal,
-                line=dict(width=0),
-                ), 
-            )
+    # # 設定を反映
+    # trace=go.Splom(
+    #     dimensions=[dict(label=c, values=data[c]) for c in objective_names],
+    #     diagonal_visible=False,
+    #     showupperhalf=False,
+    #     text=text_list,
+    #     showlegend=True,
+    #     marker=dict(
+    #         color=marker_colors,
+    #         line=dict(
+    #             color=marker_line_colors,
+    #             width=marker_line_width
+    #             )
+    #         )
+    #     )
+    
+    # # legends=[
+    # #     go.Scatter(
+    # #         x=[None], y=[None], mode='markers', showlegend=True, legendgroup='非劣解',
+    # #         name='非劣解',
+    # #         marker=dict(
+    # #             color='rgba(0,0,0,0)',
+    # #             line=dict(color=linecolor_nondomi, width=2)
+    # #             ),
+    # #         ),
+        
+    # #     go.Scatter(
+    # #         x=[None], y=[None], mode='markers', showlegend=True, legendgroup='拘束外の解',
+    # #         name='拘束外の解',
+    # #         marker=dict(color=color_nonfit),
+    # #         ),
+    
+    # #     go.Scatter(
+    # #          x=[None], y=[None], mode='markers', showlegend=True, legendgroup='その他の解',
+    # #          name='その他の解',
+    # #          marker=dict(color=color_normal),
+    # #      )
+    # # ]
+    
+    # # figure layout
+    # layout = go.Layout(title_text="多目的ペアプロット")
+    
+    # # figure
+    # # fig = go.Figure(data=[trace] + legends, layout=layout)
+    # fig = go.Figure(data=[trace], layout=layout)
+
+
+
+    data['拘束'] = data['fit'].astype(str)
+    data.loc[data['fit']==True, '拘束'] = 'OK'
+    data.loc[data['fit']==False, '拘束'] = 'NG'
+
+    data['好ましい'] = data['non_domi'].astype(str)
+    data.loc[data['non_domi']==True, '好ましい'] = 'OK'
+    data.loc[data['non_domi']==False, '好ましい'] = 'NG'
+    
+    fig = px.scatter_matrix(
+        data,
+        dimensions=objective_names,
+        color="拘束",
+        symbol='好ましい',
         )
 
-    
-    # 設定を反映
-    trace=go.Splom(
-        dimensions=[dict(label=c, values=data[c]) for c in objective_names],
-        diagonal_visible=False,
-        showupperhalf=False,
-        text=text_list,
-        showlegend=False,
-        marker=dict(
-            color=marker_colors,
-            line=dict(
-                color=marker_line_colors,
-                width=marker_line_width
-                )
-            )
-        )
-    
-    # figure layout
-    layout = go.Layout(
-        title_text="多目的ペアプロット",
-        )
-            
-    # figure
-    fig = go.Figure(
-        data=[trace, *legends],
-        layout=layout,
-        )
-    
     return fig    
 
 
@@ -264,5 +266,7 @@ if __name__=='__main__':
         
         def should_finish(self):
             return False
-    dpm = DashProcessMonitor(DummyFEMOpt())
+    
+    FEMOpt = DummyFEMOpt()
+    dpm = DashProcessMonitor(FEMOpt)
     dpm.start()
