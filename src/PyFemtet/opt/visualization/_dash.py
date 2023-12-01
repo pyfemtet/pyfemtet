@@ -27,78 +27,9 @@ COLORS = dict(
 
 def update_scatter_matrix(FEMOpt):
     # data
-    data = FEMOpt.history
-    parameter_names = FEMOpt.get_history_columns('parameter')
+    data = FEMOpt.history.copy()
+    # parameter_names = FEMOpt.get_history_columns('parameter')
     objective_names = FEMOpt.get_history_columns('objective')
-    # is_fit = data['fit']
-    # is_nondomi = data['non_domi']
-
-    # マウスオーバーで変数セットを表示する設定
-    text_list = []
-    for i, row in data[parameter_names].iterrows():
-        text = ''
-        for prm in row.index:
-            value = row[prm]
-            text = text + f'{prm} : {value:.3f}<br>'
-        text_list.append(text)
-
-    # # nondomi と fit に基づいて書式を設定
-    # linecolor_nondomi = COLORS['Warning']
-    # linecolor_others = COLORS['Light']
-    # color_normal = COLORS['Primary']
-    # color_nonfit = COLORS['Secondary']
-    
-    # marker_colors = [color_normal if fit else color_nonfit for fit in data['fit']]
-    # marker_line_colors = [linecolor_nondomi if optimal else linecolor_others for optimal in data['non_domi']]
-    # marker_line_width = [2 if optimal else 1 for optimal in data['non_domi']]
-
-    # # 設定を反映
-    # trace=go.Splom(
-    #     dimensions=[dict(label=c, values=data[c]) for c in objective_names],
-    #     diagonal_visible=False,
-    #     showupperhalf=False,
-    #     text=text_list,
-    #     showlegend=True,
-    #     marker=dict(
-    #         color=marker_colors,
-    #         line=dict(
-    #             color=marker_line_colors,
-    #             width=marker_line_width
-    #             )
-    #         )
-    #     )
-    
-    # # legends=[
-    # #     go.Scatter(
-    # #         x=[None], y=[None], mode='markers', showlegend=True, legendgroup='非劣解',
-    # #         name='非劣解',
-    # #         marker=dict(
-    # #             color='rgba(0,0,0,0)',
-    # #             line=dict(color=linecolor_nondomi, width=2)
-    # #             ),
-    # #         ),
-        
-    # #     go.Scatter(
-    # #         x=[None], y=[None], mode='markers', showlegend=True, legendgroup='拘束外の解',
-    # #         name='拘束外の解',
-    # #         marker=dict(color=color_nonfit),
-    # #         ),
-    
-    # #     go.Scatter(
-    # #          x=[None], y=[None], mode='markers', showlegend=True, legendgroup='その他の解',
-    # #          name='その他の解',
-    # #          marker=dict(color=color_normal),
-    # #      )
-    # # ]
-    
-    # # figure layout
-    # layout = go.Layout(title_text="多目的ペアプロット")
-    
-    # # figure
-    # # fig = go.Figure(data=[trace] + legends, layout=layout)
-    # fig = go.Figure(data=[trace], layout=layout)
-
-
 
     data['拘束'] = data['fit'].astype(str)
     data.loc[data['fit']==True, '拘束'] = 'OK'
@@ -112,8 +43,19 @@ def update_scatter_matrix(FEMOpt):
         data,
         dimensions=objective_names,
         color="拘束",
+        color_discrete_map=dict(OK=COLORS['Primary'], NG=COLORS['Secondary']),
         symbol='好ましい',
+        symbol_map=dict(OK='circle', NG='circle-open')
         )
+    
+    fig.update_traces(
+        diagonal_visible=False,
+        showupperhalf=False,
+        )
+    
+    fig.update_layout(
+        title_text='目的ペアプロット',
+        )    
 
     return fig    
 
@@ -172,13 +114,13 @@ class DashProcessMonitor:
         layout = html.Div(
             [
                 html.H1("最適化の進捗状況"),
-                html.Label(id='status-label'),
                 dcc.Interval(
                     id='interval-component',
                     interval=2*1000,  # in milliseconds
                     max_intervals=0  # max number of intervals
                     ),
                 graph_layout,
+                html.Label(id='status-label'),
                 toggle_button,
                 ]
             )
