@@ -25,7 +25,7 @@ if __name__=='__main__':
     FEMOpt.add_parameter('theta', np.pi/3, 0, 2*np.pi)
     FEMOpt.add_objective(objective_x, 'x', args=FEMOpt)
     FEMOpt.add_objective(objective_y, 'y', args=FEMOpt)
-    FEMOpt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=FEMOpt)
+    # FEMOpt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=FEMOpt)
     # print(FEMOpt.FEM)
     # print(FEMOpt.FEMClass)
     # print(FEMOpt.constraints)
@@ -41,14 +41,21 @@ if __name__=='__main__':
     # print(FEMOpt._constraint_values)
     
 
-    FEMOpt.main(n_trials=6, n_parallel=3)
+    FEMOpt.main(n_trials=11, n_parallel=3)
     
-    
-    print(FEMOpt.storage_name)
+    print(len(FEMOpt.history)) # n_trials から prune を抜いた数か
+
     import optuna
     study = optuna.load_study(FEMOpt.study_name, FEMOpt.storage_name)
     df = study.trials_dataframe()
-    print(df.columns) 
+    idx = df['state']=='COMPLETE'
+    print(len(df[idx]))
+    
+    print(len(df[idx])==len(FEMOpt.history)) # 中身も見たが OK
+    
+    print(len(df))
+    
+    
     # ['number', 'values_0', 'values_1', 'datetime_start', 
     # 'datetime_complete',
     # 'duration', 'params_r', 'params_theta', 'user_attrs_constraint',

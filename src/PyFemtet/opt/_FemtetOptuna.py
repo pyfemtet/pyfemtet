@@ -96,11 +96,11 @@ class FemtetOptuna(FemtetOptimizationCore):
         self.storage_name = f"sqlite:///{self.study_db_path}"
 
         #### timeout or n_trials の設定
-        # self.n_trials = n_trials
-        self.optimize_callbacks = []
+        self._n_trials = n_trials
+        # self.optimize_callbacks = []
         if n_trials is not None:
-            # n_trials = FEMOpt.n_trials//FEMOpt.n_parallel
-            self.optimize_callbacks.append(MaxTrialsCallback(n_trials))
+            self._n_trials = self._n_trials//self.n_parallel
+            # self.optimize_callbacks.append(MaxTrialsCallback(n_trials)) # なぜか正常に機能しない
         self.timeout = timeout
         
         #### study の設定
@@ -161,7 +161,8 @@ class FemtetOptuna(FemtetOptimizationCore):
         study.optimize(
             self._objective_function,
             timeout=self.timeout,
-            callbacks = self.optimize_callbacks,
+            n_trials=self._n_trials,
+            # callbacks = self.optimize_callbacks,
             )
         
 

@@ -10,7 +10,7 @@ import sys
 import time
 import datetime
 import inspect
-from multiprocessing import Process, Value
+from multiprocessing import Process, Value, Queue
 import math
 import ast
 import tempfile
@@ -478,12 +478,14 @@ class FemtetOptimizationCore(ABC):
             ):
         
         # 引数の処理
-        self.femprj_path = os.path.abspath(femprj_path)
+        if femprj_path is not None:
+            self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
         self.history_path = history_path
         self.FEMClass = FEMClass
 
-        #### Femtet に接続
+        #### Femtet に接続、しかる後終了するかどうかの
+        self._release_FEM_on_main = False
         if self.FEMClass==Femtet:
             self.FEM = Femtet()
             caught_femtet = self.FEM.connect_Femtet('auto') # 既存のものがあれば新しいのを開かない
@@ -514,10 +516,9 @@ class FemtetOptimizationCore(ABC):
                     else:
                         if self.model_name is not None:
                             raise Exception('開いている Femtet に接続しましたが、プログラムで指定されている解析モデルとは違うモデルが開かれています。正しい解析モデルを開き、Pythonプロセスを再起動してください。')
-                
+            self._release_FEM_on_main = caught_femtet=='new'
         else:
             self.FEM = self.FEMClass()
-        self._release_FEM_on_main = caught_femtet=='new'
         
         
         #### メンバーの宣言
@@ -852,7 +853,9 @@ class FemtetOptimizationCore(ABC):
             self.FEM.update(self._parameter)
             self._objective_values = [obj.calc() for obj in self.objectives]
             self._constraint_values = [cns.calc() for cns in self.constraints]
-            self._record()
+            # self._record()
+            row = self._get_current_data()
+            self.queue.put(row)
                 
         return [obj._convert(v) for obj, v in zip(self.objectives, self._objective_values)]
 
@@ -890,14 +893,12 @@ class FemtetOptimizationCore(ABC):
             time.sleep(1)
         
         # 自分の順番が来たら FEM との接続を行う、これが排他処理
-        FEMOpt.set_FEM(target_pid)
+        FEMOpt.set_FEM(target_pid) # 今のところ Femtet 関係なければ 0 が与えられ、これは無視される
         
         # 接続が終わったら次のプロセスに許可を与える
         shared_allowing_id.value = shared_allowing_id.value + 1
         
-        
         # femprj の干渉を避けるための前処理
-        from .core import Femtet
         if issubclass(FEMOpt.FEMClass, Femtet):
             # 一時ディレクトリを作成
             td = tempfile.mkdtemp()
@@ -917,7 +918,7 @@ class FemtetOptimizationCore(ABC):
         
         # 一時フォルダの削除
         if issubclass(FEMOpt.FEMClass, Femtet):
-            shutil.rmtree(td, )
+            shutil.rmtree(td)
         
 
     def main(self, n_parallel=1, accept_console_control=True):
@@ -969,55 +970,75 @@ class FemtetOptimizationCore(ABC):
         # 先に必要分の Femtet を起動しておく
         pids = []
         for i in range(self.n_parallel):
-            util.execute_femtet()
-            pid = util.get_last_executed_femtet_process_id()
+            if issubclass(self.FEMClass, Femtet):
+                util.execute_femtet()
+                pid = util.get_last_executed_femtet_process_id()
+            else:
+                pid = 0
             pids.append(pid)
         
         # サブプロセスの開始
         start = time.time()
         processes = []
-        current_allowing_subprocess_id = Value('i', 0) # Femtet との接続は仕様上排他制御でないとダメ
+        shared_current_allowing_subprocess_id = Value('i', 0) # Femtet との接続は仕様上排他制御でないとダメ
+        self.queue = Queue() # 行データ受け取りのためのキュー
         for subprocess_id, pid in enumerate(pids):
             p = Process(
                 target=self._subprocess_main,
                 args=(
                     self,
                     subprocess_id,
-                    current_allowing_subprocess_id,
-                    pid
+                    shared_current_allowing_subprocess_id,
+                    pid,
                     )
                 )
             p.start()
             print(f'subprocess {subprocess_id} start')
             processes.append(p)
-        
-        
-        # ユーザーの中断指令を console 入力で待つ
-        if accept_console_control:
-            command = ''
-            while True:
 
-                # 全てが終了していれば break
-                if all([not p.is_alive() for p in processes]):
-                    print('最適化プロセスは終了しました。')
+        # history の update
+        while True:
+            
+            # サブプロセスからのデータを受け取る
+            if not self.queue.empty():
+                row = self.queue.get()
+                self._append_history(row)
+                # キューがまだ残っているかもしれないのでもう一度ループを最初から
+                continue
+            
+            # すべてのプロセスが終了していて、かつ queue が空なら break
+            if self.queue.empty() and all([not p.is_alive() for p in processes]):
                     break
 
-                print('----------')
-                print('最適化が実行中です。')
+            # 基本の更新間隔
+            time.sleep(1)
+        
+        # # ユーザーの中断指令を console 入力で待つ
+        # if accept_console_control:
+        #     command = ''
+        #     while True:
 
-                # ユーザーの中断指令を待つ
-                if command!='exit':
-                    print('終了するには exit と入力して Enter を押してください。')
-                    command = input('>>> ')
+        #         # 全てが終了していれば break
+        #         if all([not p.is_alive() for p in processes]):
+        #             print('最適化プロセスは終了しました。')
+        #             break
 
-                # 終了処理中であることを表示する
-                if command=='exit':
-                    print('現在実行中の解析がすべて終了すると')
-                    print('最適化プロセスが終了します。')
-                    print('このまま待ってください。')
-                    print('(Femtet が終了していても、サブプロセスの終了に数十秒要する場合があります。)')
+        #         print('----------')
+        #         print('最適化が実行中です。')
 
-                time.sleep(1)
+        #         # ユーザーの中断指令を待つ
+        #         if command!='exit':
+        #             print('終了するには exit と入力して Enter を押してください。')
+        #             command = input('>>> ')
+
+        #         # 終了処理中であることを表示する
+        #         if command=='exit':
+        #             print('現在実行中の解析がすべて終了すると')
+        #             print('最適化プロセスが終了します。')
+        #             print('このまま待ってください。')
+        #             print('(Femtet が終了していても、サブプロセスの終了に数十秒要する場合があります。)')
+
+        #         time.sleep(1)
 
         # 全てのサブプロセスの終了を待つ
         for p in processes:
@@ -1080,22 +1101,23 @@ class FemtetOptimizationCore(ABC):
         pNames, oNames, cNames = self._genarateHistoryColumnNames()
         columns.extend(pNames)
         columns.extend(oNames)
-        columns.extend(cNames)
+        columns.extend(cNames) # 上下限の情報も含む
         columns.append('non_domi')
         columns.append('fit')
         columns.append('hypervolume')
         columns.append('optimization_message')
         columns.append('time')
         self.history = pd.DataFrame(columns=columns)
-    
-    def _record(self):
-        # record の計算
+
+    def _get_current_data(self):
+        # history に保存する値について
+        # 現在の値に基づいて集計できるところは集計する
         row = []
         paramValues = list(self._parameter['value'].copy().values)
         objValues = self._objective_values
         consValues = self._constraint_values
-        consLbList = [constraint.lb for constraint in self.constraints]
-        consUbList = [constraint.ub for constraint in self.constraints]
+        consLbList = [cns.lb for cns in self.constraints]
+        consUbList = [cns.ub for cns in self.constraints]
         consData = []
         for v, lb, ub in zip(consValues, consLbList, consUbList):
             consData.extend([lb, v, ub])
@@ -1103,7 +1125,7 @@ class FemtetOptimizationCore(ABC):
             ub = np.inf if ub is None else ub
             fit = (lb <= v <= ub)
             consData.extend([fit])
-        row.append(len(self.history)+1)
+        row.append(-1) # temporal data
         row.extend(paramValues)
         row.extend(objValues)
         row.extend(consData)
@@ -1112,19 +1134,29 @@ class FemtetOptimizationCore(ABC):
         row.append(np.nan) # hypervolume, temporal data
         row.append(self._optimization_message)
         row.append(datetime.datetime.now()) # time
+        return row
 
+    def _append_history(self, row):
         # list を series に変換
         pdf = pd.Series(row, index=self.history.columns)
+
+        #### 履歴に依存しない項目の計算
+        # 何番目か
+        pdf['n_trial'] = len(self.history)+1
 
         # 拘束を満たすかどうか
         fit = self._calcConstraintFit(pdf)
         pdf['fit'] = fit
+
         # series を history に追加
         self.history.loc[len(self.history)] = pdf
 
-        # 履歴に依存する項目の計算
+
+        #### 履歴に依存する項目の計算
+
         # update non-domi(after addition to history)
         self._calcNonDomi()
+
         # calc hypervolume(after addition to history)
         self._calc_hypervolume()
 
@@ -1135,7 +1167,6 @@ class FemtetOptimizationCore(ABC):
             # excel で開くなど permission error が出る可能性がある。
             # その場合は単にスキップすれば、次の iteration ですべての履歴が保存される
             pass
-
             
     def _calcNonDomi(self):
         '''non-dominant 解を計算する'''
