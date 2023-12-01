@@ -13,10 +13,12 @@ def open_browser():
 class SimplestDialog(QDialog):
     def __init__(
             self,
+            FEMOpt,
             interrput_flag:Value,
             get_close_flag:Callable[[], bool] or None = None,
             fun_to_update:[Callable[[], Any]] or None = None,
             ):
+        self.FEMOpt = FEMOpt
         
         # UI の設定
         super().__init__()
@@ -28,11 +30,12 @@ class SimplestDialog(QDialog):
         self.label = QLabel("経過時間：0秒")
         self.layout.addWidget(self.label)
 
-        self.button2 = QPushButton("進行状況を開く")
+        self.button2 = QPushButton("進行状況を開く\n（1つ以上の結果が得られれば表示できます。）")
+        self.button2.setEnabled(False)
         self.button2.clicked.connect(open_browser)
         self.layout.addWidget(self.button2)
 
-        self.button = QPushButton("終了")
+        self.button = QPushButton("最適化を中断")
         self.button.clicked.connect(self.on_button_clicked)
         self.layout.addWidget(self.button)
 
@@ -55,19 +58,28 @@ class SimplestDialog(QDialog):
 
     def update_label(self):
         self.seconds += 1
+
+        # history が進行していれば進行状況表示を可能にする
+        if len(self.FEMOpt.history)>1:
+            self.button2.setEnabled(True)
+            self.button2.setText("進行状況を開く\n（ブラウザが開きますが、通信は発生しません。）")
+
         # 中断フラグが立ってなければ経過時間を表示
         if self.interrput_flag.value==0:
             self.label.setText(f"経過時間：{self.seconds}秒")
+
         # そうでなければ終了中ですと表示
         else:
             text = '''終了中です。
   現在の計算がすべて終了し、関連する非表示の
   プロセスがすべて終了するとこのダイアログが閉じます。'''
             self.label.setText(text)
+
         # 終了判定
         if self.get_close_flag is not None:
             if self.get_close_flag():
                 self.close()
+
 
     def on_button_clicked(self):
         self.button.setEnabled(False)

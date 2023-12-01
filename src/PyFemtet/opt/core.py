@@ -1033,6 +1033,7 @@ class FemtetOptimizationCore(ABC):
             app = QApplication([])
         
         dialog = SimplestDialog(
+            self,
             self.shared_interruption_flag,
             get_close_flag=self.should_finish,
             fun_to_update=[self.update_history],
@@ -1058,6 +1059,11 @@ class FemtetOptimizationCore(ABC):
             
         end = time.time()
         self.last_execution_time = end - start # 秒
+        
+        input(f'''計算時間は{self.last_execution_time}秒でした。
+進捗画面を表示するにはブラウザから localhost:8080 にアクセスしてください。
+結果を確認するには {self.history_path} を開いてください。
+終了するには Enter を押してください。''')
 
 
     # post-processing methods    

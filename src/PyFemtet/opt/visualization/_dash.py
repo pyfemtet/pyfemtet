@@ -89,7 +89,7 @@ class DashProcessMonitor:
 
     def start(self):
         self.app.run(debug=True, host='localhost', port=8080)
-        webbrowser.open("http://localhost:8080")
+        # webbrowser.open("http://localhost:8080")
 
     
     def __init__(self, FEMOpt):
@@ -110,7 +110,9 @@ class DashProcessMonitor:
                     ]
                 )
             )
+
         toggle_button = dbc.Button('Toggle auto-update', id='toggle-button', n_clicks=0)
+
         layout = html.Div(
             [
                 html.H1("最適化の進捗状況"),
@@ -144,17 +146,13 @@ class DashProcessMonitor:
         def update_sm(_):
             return update_scatter_matrix(self.FEMOpt)
 
+
         # フラグが立っていれば自動更新しない
         @self.app.callback(
-            [
-                Output('interval-component', 'max_intervals'),
-                Output('status-label','children'),
-                Output('toggle-button', 'disabled'),
-                ],
-            [
-                Input('interval-component', 'n_intervals'),
-                ]
-            )
+            [Output('interval-component', 'max_intervals'),
+            Output('status-label','children'),
+            Output('toggle-button', 'disabled'),],
+            [Input('interval-component', 'n_intervals'),])
         def stop_interval(_):
             if self.FEMOpt.should_finish():
                 max_intervals = 0
@@ -175,9 +173,9 @@ class DashProcessMonitor:
             [Input('toggle-button', 'n_clicks')])
         def toggle_interval(n):
             if n % 2 == 0:
-                return False, 'Turn off auto update'
+                return False, 'グラフの自動更新をオフ'
             else:
-                return True, 'Turn on auto update'
+                return True, 'グラフの自動更新をオン'
     
     
     
