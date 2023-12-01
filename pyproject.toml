@@ -107,10 +107,14 @@ dependencies = [ # Optional
     "tqdm",
     "matplotlib",
     "japanize_matplotlib",
+    "plotly",
+    "dash",
+    "dash-bootstrap-components",
     "optuna",
     "pywin32",
     "pywinauto",
     "femtetutils",
+    "psutil",
 ]
 
 # List additional groups of dependencies here (e.g. development
