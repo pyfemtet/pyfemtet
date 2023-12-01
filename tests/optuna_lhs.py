@@ -41,7 +41,7 @@ if __name__=='__main__':
     # print(FEMOpt._constraint_values)
     
 
-    FEMOpt.main(n_trials=11, n_parallel=3)
+    FEMOpt.main(n_trials=9, n_parallel=3)
     
     print(len(FEMOpt.history)) # n_trials から prune を抜いた数か
 

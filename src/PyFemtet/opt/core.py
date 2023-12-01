@@ -29,6 +29,9 @@ from pywintypes import com_error
 from femtetutils import util, constant
 from ..tools.DispatchUtils import Dispatch_Femtet, Dispatch_Femtet_with_new_process, Dispatch_Femtet_with_specific_pid, _get_pid
 
+# for UI
+from PySide6.QtWidgets import QApplication
+from ._SimplestUI import SimplestDialog
 
 
 #### Exception for Femtet error
@@ -883,7 +886,7 @@ class FemtetOptimizationCore(ABC):
 
 
     def _subprocess_main(self, FEMOpt, myid, shared_allowing_id, target_pid):
-        '''サブプロセスから呼ばれるはずの関数'''
+        '''サブプロセスから呼ばれる、_main 関数の worker'''
 
         #### サブプロセス作成時に破棄されているはずの COM を含みうる FEM を接続
         # 排他処理なので自分の順番が来るまで待つ
@@ -995,23 +998,42 @@ class FemtetOptimizationCore(ABC):
             p.start()
             print(f'subprocess {subprocess_id} start')
             processes.append(p)
+        
+        #### history の update 及び ユーザーの中断指令待ち
+        
+        # application の作成
+        app = QApplication.instance()
+        if app == None:
+            app = QApplication([])
+        
+        # dialog に渡す関数の定義
+        def should_finish():
+            print(processes)
+            for p in processes:
+                print(p.is_alive())
+            return self.queue.empty() and all([not p.is_alive() for p in processes])
 
-        # history の update
-        while True:
-            
-            # サブプロセスからのデータを受け取る
-            if not self.queue.empty():
-                row = self.queue.get()
-                self._append_history(row)
-                # キューがまだ残っているかもしれないのでもう一度ループを最初から
-                continue
-            
-            # すべてのプロセスが終了していて、かつ queue が空なら break
-            if self.queue.empty() and all([not p.is_alive() for p in processes]):
+        def update_history():
+            # history の update
+            while True:
+                # キューに何かあればサブプロセスからのデータを受け取る
+                if not self.queue.empty():
+                    row = self.queue.get()
+                    self._append_history(row)
+                # そうでなければ終了する
+                else:
                     break
+                time.sleep(0.1)
 
-            # 基本の更新間隔
-            time.sleep(1)
+        dialog = SimplestDialog(
+            self.shared_interruption_flag,
+            get_close_flag=should_finish,
+            fun_to_update=[update_history],
+            )
+        dialog.show()
+        app.exec()
+        
+
         
         # # ユーザーの中断指令を console 入力で待つ
         # if accept_console_control:
