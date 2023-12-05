@@ -78,7 +78,7 @@ class FemtetOptuna(FemtetOptimizationCore):
             study_name=None,
             use_init_LHS=True, # Latin Hypercube Sampling を初期値にする
             # 共通
-            n_parallel=None,
+            n_parallel=1,
             ):
         '''抽象クラスの main が実行される前に実装固有の設定を行う関数'''
 

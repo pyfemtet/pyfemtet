@@ -93,7 +93,7 @@ class UpdatableSuperFigure:
             m.update()
         if self.fig.canvas.figure.stale:
             self.fig.canvas.draw_idle()
-        self.fig.canvas.start_event_loop(1)
+        # self.fig.canvas.start_event_loop(1)
 
 
     def force_redraw(self, *args, **kwargs):
@@ -229,7 +229,7 @@ class UpdatableFigure(ABC):
             self.fig.tight_layout()
             if self.fig.canvas.figure.stale:
                 self.fig.canvas.draw_idle()
-            self.fig.canvas.start_event_loop(1)
+            # self.fig.canvas.start_event_loop(1) # pause すると画面がそのたびアクティブになって邪魔
         elif type(self.fig)==SubFigure:
             self.text_suptitle.set_y(0.85)
             self.fig.subplots_adjust(
@@ -258,7 +258,7 @@ class UpdatableFigure(ABC):
         return xdata, ydata
 
     def on_close(self, *args, **kwargs):
-        self.FEMOpt.interruption = True
+        self.FEMOpt.self.shared_interruption_flag.value = 1
         
 
 

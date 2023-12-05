@@ -10,6 +10,7 @@ def objective_x(FEMOpt):
     r, theta, fai = FEMOpt.get_current_parameter('values')
     return r * np.cos(theta) * np.cos(fai)
 
+
 def objective_y(FEMOpt):
     r, theta, fai = FEMOpt.get_current_parameter('values')
     return r * np.cos(theta) * np.sin(fai)

@@ -34,7 +34,7 @@ class SimpleProcessMonitor:
         
         # TODO:中断（experimental）
         def lmd(*args, **kwargs):
-            self.FEMOpt.interruption = True
+            self.FEMOpt.shared_interruption_flag.value = 1
         self.fig.canvas.mpl_connect('close_event', lmd)
         
         self.fig.tight_layout()
@@ -71,7 +71,9 @@ class SimpleProcessMonitor:
             else: # 指定値と見做す
                 y = objective.direction
             subLine.set_ydata(float(y))
-        plt.pause(0.01)
+        if self.fig.canvas.figure.stale:
+            self.fig.canvas.draw_idle()
+        self.fig.canvas.start_event_loop(1)
         
     def adjustDirectionPosition(self, _):
         objectives = self.FEMOpt.objectives

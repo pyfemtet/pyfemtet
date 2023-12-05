@@ -474,7 +474,7 @@ class FemtetOptimizationCore(ABC):
     
     def __init__(
             self,
-            femprj_path:str or None,
+            femprj_path:str or None = None,
             model_name:str or None = None,
             history_path:str=None,
             FEMClass:FEMSystem = Femtet,
@@ -555,10 +555,11 @@ class FemtetOptimizationCore(ABC):
             dtype=object
             )
 
-    #### マルチプロセスで pickle するときに COM を持っていても仕方がないので消す
+    #### マルチプロセスで pickle するときに COM や fig は持てないし持っていても仕方がないので消す
     def __getstate__(self):
         state = self.__dict__.copy()
         del state['FEM']
+        del state['process_monitor']
         return state
 
     def __setstate__(self, state):
@@ -741,9 +742,19 @@ class FemtetOptimizationCore(ABC):
 
 
     def _set_process_monitor(self):
-        from .visualization._dash import DashProcessMonitor
-        process_monitor = DashProcessMonitor(self)
-        process_monitor.start()
+        # from .visualization._dash import DashProcessMonitor
+        # process_monitor = DashProcessMonitor(self)
+        # process_monitor.start()
+        if len(self.objectives)==1:
+            from .visualization import SimpleProcessMonitor
+            self.process_monitor = SimpleProcessMonitor(self)
+        else:
+            # from .visualization import UpdatableSuperFigure
+            from .visualization import MultiobjectivePairPlot
+            # from .visualization import HypervolumeMonitor
+            # UpdatableSuperFigure(self, HypervolumeMonitor, MultiobjectivePairPlot)
+            self.process_monitor = MultiobjectivePairPlot(self)
+        
         
 
     def _isDfValid(self, df):
@@ -936,7 +947,7 @@ class FemtetOptimizationCore(ABC):
 
     def update_history(self):
         # history の update
-        if hasattr(self, 'processes'):
+        if hasattr(self, 'queue'):
             while True:
                 # キューに何かあればサブプロセスからのデータを受け取る
                 if not self.queue.empty():
@@ -984,7 +995,7 @@ class FemtetOptimizationCore(ABC):
         # 中断指令の初期化
         self.shared_interruption_flag.value = 0
         
-        # プロセスモニタの初期化（ヒストリの初期化が終わってから）
+        #### プロセスモニタの初期化（ヒストリの初期化が終わってから）
         self._set_process_monitor()
         
         # 変数チェックのためだけの FEM がある場合、上書き保存して落としておく
@@ -1036,7 +1047,10 @@ class FemtetOptimizationCore(ABC):
             self,
             self.shared_interruption_flag,
             get_close_flag=self.should_finish,
-            fun_to_update=[self.update_history],
+            fun_to_update=[
+                self.update_history,
+                self.process_monitor.update,
+                ],
             )
         dialog.show()
         app.exec()
@@ -1061,7 +1075,6 @@ class FemtetOptimizationCore(ABC):
         self.last_execution_time = end - start # 秒
         
         input(f'''計算時間は{self.last_execution_time}秒でした。
-進捗画面を表示するにはブラウザから localhost:8080 にアクセスしてください。
 結果を確認するには {self.history_path} を開いてください。
 終了するには Enter を押してください。''')
 
