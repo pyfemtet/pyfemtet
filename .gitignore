@@ -12,3 +12,5 @@ db.sqlite3
 
 PyFemtet.egg-info
 /src/PyFemtet/_version.py
+.vscode/launch.json
+.vscode/settings.json
