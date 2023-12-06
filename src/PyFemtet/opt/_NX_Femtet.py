@@ -14,17 +14,23 @@ class NX_Femtet(Femtet):
 
         # 引数の処理
         self.path_prt = os.path.abspath(path_prt)
-                
-        # Femtet を捕まえる
-        if strategy is None:
-            super().setFemtet()
-        else:
-            super().setFemtet(strategy)
 
-    def run(self, df):
+
+    def update(self, df)->None:
+        """Update_model_via_NX と run を実行します.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+
+        Returns
+        -------
+
+        """
         self.update_model_via_NX(df)
-        super().run(df)
-    
+        super().run()
+
+
     def update_model_via_NX(self, df):
         # run_journal を使って prt から x_t を作る
 

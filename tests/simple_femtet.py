@@ -18,7 +18,7 @@ def bottom_area_1(Femtet):
     return v * 1e6
 
 def bottom_area_2(Femtet, FEMOpt):
-    param = FEMOpt.get_current_parameter()
+    param = FEMOpt.get_parameter()
     a = param['w'] * param['d']
     return a
 

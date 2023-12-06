@@ -2,6 +2,7 @@ import re
 import os
 from time import sleep
 
+import pandas as pd
 from win32com.client import DispatchEx, Dispatch
 
 from .core import Femtet
@@ -22,40 +23,50 @@ class SolidWorksAutomationError(Exception):
 
 class SW_Femtet(Femtet):
 
-    def __init__(self, path_sldprt, strategy=None):
+    def __init__(self, path_sldprt):
         # 引数の処理
         self.path_sldprt = os.path.abspath(path_sldprt)
         
-        # SolidWroks を捕まえ、ファイルを開く
+        # SolidWorks を捕まえ、ファイルを開く
         self.swApp = DispatchEx('SLDWORKS.Application')
         self.swApp.Visible = True
+
         # open model
         self.swApp.OpenDoc(self.path_sldprt, swDocPART)
         self.swModel = self.swApp.ActiveDoc
         self.swEqnMgr = self.swModel.GetEquationMgr
-        self.nEquation = self.swEqnMgr.GetCount        
-        
-        
-        # Femtet を捕まえる
-        if strategy is None:
-            super().setFemtet()
-        else:
-            super().setFemtet(strategy)
-
-    # def __del__(self):
-    #     self.swApp.ExitApp()
+        self.nEquation = self.swEqnMgr.GetCount
 
 
-    def run(self, df):
-        # Femtet が参照しているパスの x_t をアップデートする
+    def update(self, df:pd.DataFrame) ->None:
+        """Update_model_via_SW と run を実行します.
+
+        Parameters
+        ----------
+        df
+
+        Returns
+        -------
+
+        """
+
+        # df を dict に変換
         user_param_dict = {}
         for i, row in df.iterrows():
             user_param_dict[row['name']] = row['value']
+
+        # 変数の存在チェック
         self.check_parameter(user_param_dict)
+
+        # Femtet 解析モデルを更新
         self.update_model_via_SW(user_param_dict)
-        super().run(df)
+
+        # 解析を実行する
+        super().run()
+
 
     def check_parameter(self, user_param_dict):
+        """与えられた変数セットが .sldprt ファイルに存在するか確認します."""
         swEqnMgr = self.swModel.GetEquationMgr
 
         # 指定された変数が SW に存在するかどうかをチェック
@@ -71,9 +82,10 @@ class SW_Femtet(Femtet):
             # is_in_model が False ならエラー
             if not is_in_model:
                 raise Exception(f'no such parameter in SW:{user_param_name}')
-    
+
+
     def update_model_via_SW(self, user_param_dict):
-        # SW を使って parasolid を作る
+        """SW を使って parasolid を作り, Femtet 解析モデルを更新します."""
         
         # Femtet が参照している x_t パスを取得する
         path_x_t = self.Femtet.Gaudi.LastXTPath
@@ -82,13 +94,13 @@ class SW_Femtet(Femtet):
         if os.path.isfile(path_x_t):
             os.remove(path_x_t)
 
-        # 変数の更新
-        self.update_parameter(user_param_dict)
+        # sldprt モデルの変数の更新
+        self.update_SW_parameter(user_param_dict)
 
         # export parasolid
         self.swModel.SaveAs(path_x_t)
 
-        # 30 秒待っても parasolid ができてなければエラー
+        # 30 秒待っても parasolid ができてなければエラー(COM なので)
         timeout = 30
         waiting = 0
         while True:
@@ -104,11 +116,12 @@ class SW_Femtet(Femtet):
                     # 再構築できていれば保存はできているはず
                     raise SolidWorksAutomationError('parasolid 書き出しに失敗しました')
 
-        # ReExecute Femtet History
+        # Femtet モデルの更新 by ReExecute Femtet History
         self.Femtet.Gaudi.ReExecute()
         self.Femtet.Redraw()
 
-    def update_parameter(self, user_param_dict):
+
+    def update_SW_parameter(self, user_param_dict):
         # プロパティを退避
         buffer_aso = self.swEqnMgr.AutomaticSolveOrder
         buffer_ar = self.swEqnMgr.AutomaticRebuild

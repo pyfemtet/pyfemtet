@@ -138,12 +138,12 @@ class FemtetOptuna(FemtetOptimizationCore):
             )
 
         #### 初期値の設定
-        params = self.get_current_parameter('dict')
+        params = self.get_parameter('dict')
         study.enqueue_trial(params, user_attrs={"memo": "initial"})
         
         #### LHS を初期値にする
         if self.use_init_LHS:
-            df = self.get_current_parameter('df')
+            df = self.get_parameter('df')
             names = []
             bounds = []
             for i, row in df.iterrows():
@@ -180,7 +180,7 @@ class FemtetOptuna(FemtetOptimizationCore):
 
         #### 変数の設定
         x = []
-        df = self.get_current_parameter('df')
+        df = self.get_parameter('df')
         for i, row in df.iterrows():
             name = row['name']
             lb = row['lbound']

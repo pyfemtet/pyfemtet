@@ -22,7 +22,7 @@ def parabola(FEMOpt)->float:
     float
 
     """
-    x = FEMOpt.get_current_parameter('values')
+    x = FEMOpt.get_parameter('values')
     return (x**2).sum()
 
 

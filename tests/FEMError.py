@@ -6,14 +6,14 @@ from PyFemtet.opt.core import NoFEM, ModelError, MeshError, SolveError
 np.random.seed(3)
 
 def parabora(FEMObj):
-    x = FEMObj.get_current_parameter('values')
+    x = FEMObj.get_parameter('values')
     if np.random.rand()>.5:
         return (x**2).sum()
     else:
         raise ModelError
 
 def parabora2(FEMObj):
-    x = FEMObj.get_current_parameter('values')
+    x = FEMObj.get_parameter('values')
     if np.random.rand()>.5:
         return ((x-2)**2).sum()
     else:

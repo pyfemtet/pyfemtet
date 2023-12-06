@@ -7,16 +7,16 @@ import numpy as np
 
 def objective_x(FEMOpt):
     sleep(1)
-    r, theta, fai = FEMOpt.get_current_parameter('values')
+    r, theta, fai = FEMOpt.get_parameter('values')
     return r * np.cos(theta) * np.cos(fai)
 
 
 def objective_y(FEMOpt):
-    r, theta, fai = FEMOpt.get_current_parameter('values')
+    r, theta, fai = FEMOpt.get_parameter('values')
     return r * np.cos(theta) * np.sin(fai)
 
 def objective_z(FEMOpt):
-    r, theta, fai = FEMOpt.get_current_parameter('values')
+    r, theta, fai = FEMOpt.get_parameter('values')
     return r * np.sin(theta)
 
 def constraint_y(FEMOpt):
@@ -42,13 +42,13 @@ if __name__=='__main__':
     # print(FEMOpt.FEMClass)
     # print(FEMOpt.constraints)
     # print(FEMOpt.objectives)
-    # print(FEMOpt.get_current_parameter())
+    # print(FEMOpt.get_parameter())
     # print(FEMOpt.history)
     # print(FEMOpt.history_path)
     # print(FEMOpt.last_execution_time)
     # FEMOpt._init_history()
     # print(len(FEMOpt.history))
-    # print(FEMOpt.f(FEMOpt.get_current_parameter('values')))
+    # print(FEMOpt.f(FEMOpt.get_parameter('values')))
     # print(FEMOpt._objective_values)
     # print(FEMOpt._constraint_values)
     # row = FEMOpt._get_current_data()
