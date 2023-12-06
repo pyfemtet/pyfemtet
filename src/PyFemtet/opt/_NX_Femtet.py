@@ -10,7 +10,7 @@ PATH_JOURNAL = os.path.abspath(os.path.join(here, 'update_model_parameter.py'))
 
 
 class NX_Femtet(Femtet):
-    def __init__(self, path_prt, strategy=None):
+    def __init__(self, path_prt):
 
         # 引数の処理
         self.path_prt = os.path.abspath(path_prt)
