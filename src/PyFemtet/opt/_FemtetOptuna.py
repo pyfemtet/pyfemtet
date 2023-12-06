@@ -177,9 +177,6 @@ class FemtetOptuna(FemtetOptimizationCore):
 
     #### 目的関数
     def _objective_function(self, trial):
-        #### reseed を防ぐ
-        self.sampler._rng = LazyRandomState(get_RANDOM_SEED())
-        trial.study.sampler._rng = LazyRandomState(get_RANDOM_SEED())
 
         #### 変数の設定
         x = []
