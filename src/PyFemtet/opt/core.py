@@ -90,6 +90,11 @@ class FEMSystem(ABC):
     そのインスタンスを FemtetOptimizationCore の FEM メンバーに割り当てる。
     '''
 
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+
     @abstractmethod
     def update(self, df) -> None:
         '''
@@ -324,8 +329,9 @@ class NoFEM(FEMSystem):
     デバッグ用クラス。
     '''
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.error_regions = []
+        super().__init__(*args, **kwargs)
 
     def set_error_region(self, f):
         '''
@@ -494,31 +500,33 @@ class FemtetOptimizationCore(ABC):
         #### FEM クラスのセットアップ
 
         self._FEM_args = tuple()
+        self._FEM_kwargs = dict()
 
         # None なら Femtet 系統の処理に入る
         if self.FEM is None:
 
             # associated_cad_path がなければ pure Femtet にする
             if self.associated_cad_path is None:
-                self.FEM = Femtet(self._FEM_args)
+                self.FEM = Femtet(*self._FEM_args)
 
             # associated_cad_path があればそれに応じたインスタンスを作る
             elif self.associated_cad_path.endswith('.prt'):
                 from _NX_Femtet import NX_Femtet
                 self._FEM_args = (self.associated_cad_path,)
-                self.FEM = NX_Femtet(self._FEM_args)
+                self.FEM = NX_Femtet(*self._FEM_args)
 
             elif self.associated_cad_path.endswith('.sldprt'):
                 from _SW_Femtet import SW_Femtet
                 self._FEM_args = (self.associated_cad_path,)
-                self.FEM = SW_Femtet(self._FEM_args)
+                self.FEM = SW_Femtet(*self._FEM_args)
 
             else:
                 raise Exception('対応している CAD 拡張子は .prt, .sldprt のみです.')
 
-        # FEM が指定されていれば何もしない
+        # FEM が指定されていればその引数だけ保管しておく（サブプロセスで使う）
         else:
-            pass
+            self._FEM_args = self.FEM.args
+            self._FEM_kwargs = self.FEM.kwargs
 
         # FEM がセットアップできているはずなので FEMClass を覚えておく
         self.FEMClass = type(self.FEM)
@@ -561,24 +569,28 @@ class FemtetOptimizationCore(ABC):
                     self.femprj_path = os.path.abspath(self.FEM.Femtet.Project)
                     self.model_name = self.FEM.Femtet.AnalysisModelName
 
-
-                # 開いている Femtet の prj が指定された femprj と一致しなかった場合、
-                # 上書き load すると開いている Femtet の作業内容が失われる可能性があるので
-                # Exception を送出する
+                # そうでなければ load_project する
                 else:
-
-                    # femprj からして違う場合
-                    if self.femprj_path != self.FEM.Femtet.Project:
-                        raise Exception(
-                            '開いている Femtet に接続しましたが、プログラムで指定されているプロジェクトとは違うプロジェクトが開かれています。正しいプロジェクトを開き、Pythonプロセスを再起動してください。PythonからはどのFemtetプロセスに接続するかを制御できないため、目的のFemtetに確実に接続するためには、目的のプロジェクトを開いている以外のFemtetプロセスをすべて終了し、そのプロセスが他のマクロプロセスに接続されていない状態にしてください。')
+                    self.FEM.open(self.femprj_path, self.model_name)
 
 
-                    # femprj は同じだが model が違いうる
-                    else:
-                        # model が指定されていて、かつ違う場合
-                        if self.model_name is not None:
-                            if self.FEM.Femtet.AnalysisModelName != self.model_name:
-                               raise Exception('開いている Femtet に接続しましたが、プログラムで指定されている解析モデルとは違うモデルが開かれています。正しい解析モデルを開き、Pythonプロセスを再起動してください。')
+                # # 開いている Femtet の prj が指定された femprj と一致しなかった場合、
+                # # 上書き load すると開いている Femtet の作業内容が失われる可能性があるので
+                # # Exception を送出する
+                # else:
+                #
+                #     # femprj からして違う場合
+                #     if self.femprj_path != self.FEM.Femtet.Project:
+                #         raise Exception(
+                #             '開いている Femtet に接続しましたが、プログラムで指定されているプロジェクトとは違うプロジェクトが開かれています。正しいプロジェクトを開き、Pythonプロセスを再起動してください。PythonからはどのFemtetプロセスに接続するかを制御できないため、目的のFemtetに確実に接続するためには、目的のプロジェクトを開いている以外のFemtetプロセスをすべて終了し、そのプロセスが他のマクロプロセスに接続されていない状態にしてください。')
+                #
+                #
+                #     # femprj は同じだが model が違いうる
+                #     else:
+                #         # model が指定されていて、かつ違う場合
+                #         if self.model_name is not None:
+                #             if self.FEM.Femtet.AnalysisModelName != self.model_name:
+                #                raise Exception('開いている Femtet に接続しましたが、プログラムで指定されている解析モデルとは違うモデルが開かれています。正しい解析モデルを開き、Pythonプロセスを再起動してください。')
 
 
         #### メンバーの宣言
@@ -630,7 +642,7 @@ class FemtetOptimizationCore(ABC):
         # pid は Femtet の場合に使う pid
 
         # FEMSystem インスタンスの作成
-        self.FEM = self.FEMClass(self._FEM_args)
+        self.FEM = self.FEMClass(*self._FEM_args)
 
         # Femtet 固有の処理
         if isinstance(self.FEM, Femtet):

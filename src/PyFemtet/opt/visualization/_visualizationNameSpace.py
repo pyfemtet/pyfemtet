@@ -258,7 +258,7 @@ class UpdatableFigure(ABC):
         return xdata, ydata
 
     def on_close(self, *args, **kwargs):
-        self.FEMOpt.self.shared_interruption_flag.value = 1
+        self.FEMOpt.shared_interruption_flag.value = 1
         
 
 

@@ -37,6 +37,9 @@ class SW_Femtet(Femtet):
         self.swEqnMgr = self.swModel.GetEquationMgr
         self.nEquation = self.swEqnMgr.GetCount
 
+        # 引数の保存
+        super().__init__(self.path_sldprt)
+
 
     def update(self, df:pd.DataFrame) ->None:
         """Update_model_via_SW と run を実行します.

@@ -15,6 +15,9 @@ class NX_Femtet(Femtet):
         # 引数の処理
         self.path_prt = os.path.abspath(path_prt)
 
+        # 引数の保存
+        super().__init__(self.path_prt)
+
 
     def update(self, df)->None:
         """Update_model_via_NX と run を実行します.

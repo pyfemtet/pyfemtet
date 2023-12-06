@@ -21,7 +21,7 @@ def main(prtPath:str, parameters:'dict as str', x_tPath:str = None):
     -------
     None.
 
-    '''
+    '''    
     # 保存先の設定
     prtPath = os.path.abspath(prtPath) # 一応
     if x_tPath is None:
@@ -46,7 +46,13 @@ def main(prtPath:str, parameters:'dict as str', x_tPath:str = None):
         workPart.Expressions.EditWithUnits(exp, unit_mm, str(v))
         # 式の更新を適用
         id1 = theSession.NewestVisibleUndoMark
-        nErrs1 = theSession.UpdateManager.DoUpdate(id1)
+        try:
+            nErrs1 = theSession.UpdateManager.DoUpdate(id1)
+        # 更新に失敗
+        except NXOpen.NXException as e:
+            print('  形状が破綻しました。操作を取り消します。')
+            print('---script end---')
+            return
 
 
     # parasolid のエクスポート
@@ -73,6 +79,5 @@ if __name__ == "__main__":
     print('arguments: ')
     for arg in sys.argv[1:]:
         print('  ', arg)
-
     main(*sys.argv[1:])
     print('---script end---')

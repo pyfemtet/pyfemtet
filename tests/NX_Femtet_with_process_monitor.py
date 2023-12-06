@@ -68,7 +68,7 @@ if __name__ == '__main__':
         )
 
     # 最適化の実行
-    FEMOpt.main(n_trials=10)
+    FEMOpt.main(timeout=120)
 
     # 結果
     print(FEMOpt.history)
