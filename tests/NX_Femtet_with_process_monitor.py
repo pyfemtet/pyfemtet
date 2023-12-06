@@ -33,11 +33,19 @@ def Ay_is_greater_than_By(Femtet, FEMOpt):
     return value_dict['A_y'] - value_dict['B_x']
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
+
+    # ワーキングディレクトリを設定
     here, me = os.path.split(__file__)
     os.chdir(here)
+
+    # NX-Femtet 連携クラスのインスタンス化
     FEM = NX_Femtet('NXFemtetWithProcessMonitor/NXTEST.prt') # この機能を使う際はエントリポイントをガードしてください。
-    FEMOpt = FemtetOptuna(FEM)
+
+    # 最適設計クラスのインスタンス化
+    FEMOpt = FemtetOptuna(femprj_path='NXFemtetWithProcessMonitor/NXTEST.femprj', FEM=FEM)
+
+    # 設計問題の定式化
     FEMOpt.add_parameter('A_x', 50, lower_bound=25, upper_bound=95)
     FEMOpt.add_parameter('A_y', 45, lower_bound=5, upper_bound=45)
     FEMOpt.add_parameter('B_x', 30, lower_bound=25, upper_bound=95)
@@ -59,6 +67,8 @@ if __name__=='__main__':
         args=FEMOpt
         )
 
-    FEMOpt.set_process_monitor()
-    FEMOpt.main()
-    
+    # 最適化の実行
+    FEMOpt.main(n_trials=10)
+
+    # 結果
+    print(FEMOpt.history)
