@@ -27,5 +27,5 @@ if __name__=='__main__':
     FEMOpt.add_objective(parabora, args=(FEMOpt,))
     FEMOpt.add_objective(parabora2, args=(FEMOpt,))
     FEMOpt.main(n_trials=100)
-    print(FEMOpt.history)
+    print(FEMOpt.history) # およそ 1/4 が計算されていれば OK
     
