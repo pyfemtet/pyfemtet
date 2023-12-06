@@ -51,12 +51,6 @@ class SimpleProcessMonitor:
             line.set_data(xdata, ydata)
             subLine.set_ydata(ydata[-1]) # ylim 再設定の時に邪魔になるから
             
-            # エラーの描画
-            idx = self.FEMOpt.history['error_message']!=''
-            xdata = list(self.FEMOpt.history['time'][idx])
-            ydata = list(self.FEMOpt.history[objective.name][idx])
-            scat.set_offsets(np.array([xdata, ydata]).T)
-
             # lim 再設定
             ax.set_ylabel(objective.name)
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M'))

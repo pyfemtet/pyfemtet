@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from .core import FemtetOptimizationCore
+from .core import get_RANDOM_SEED
 
 import optuna
 # optuna.logging.disable_default_handler()
@@ -24,9 +25,6 @@ import gc
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 
-RANDOM_SEED = 42
-
-
 def generate_LHS(bounds)->np.ndarray:
     '''
     d 個の変数の bounds を貰い、N 個のサンプル点を得る。
@@ -40,7 +38,7 @@ def generate_LHS(bounds)->np.ndarray:
         strength=2,
         # optimization='lloyd',
         optimization='random-cd',
-        seed=RANDOM_SEED
+        seed=get_RANDOM_SEED()
         )
     
     LIMIT = 100
@@ -124,7 +122,11 @@ class FemtetOptuna(FemtetOptimizationCore):
         #### sampler の設定
         # sampler = optuna.samplers.NSGAIISampler(constraints_func=_constraint_function)
         # sampler = optuna.samplers.NSGAIIISampler()
-        sampler = optuna.samplers.TPESampler(seed=RANDOM_SEED, constraints_func=self._constraint_function)
+        sampler = optuna.samplers.TPESampler(
+            seed=42,
+            # constraints_func=self._constraint_function
+        )
+        self.sampler = sampler
 
         #### study ファイルの作成
         study = optuna.create_study(
@@ -175,6 +177,10 @@ class FemtetOptuna(FemtetOptimizationCore):
 
     #### 目的関数
     def _objective_function(self, trial):
+        #### reseed を防ぐ
+        self.sampler._rng = LazyRandomState(get_RANDOM_SEED())
+        trial.study.sampler._rng = LazyRandomState(get_RANDOM_SEED())
+
         #### 変数の設定
         x = []
         df = self.get_current_parameter('df')
@@ -238,7 +244,7 @@ class FemtetOptuna(FemtetOptimizationCore):
         from .core import ModelError, MeshError, SolveError
         try:
             # parameters を更新し、解析、目的関数、全ての拘束の計算
-            ojectiveValuesToMinimize = self.f(x, message)
+            ojectiveValuesToMinimize = self.f(x, optimization_message=message)
         except (ModelError, MeshError, SolveError):
             raise optuna.TrialPruned()
         

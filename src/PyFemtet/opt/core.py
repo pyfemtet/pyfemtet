@@ -34,6 +34,16 @@ from PySide6.QtWidgets import QApplication
 from ._SimplestUI import SimplestDialog
 
 
+RANDOM_SEED = None
+
+def set_RANDOM_SEED(seed:int or None):
+    global RANDOM_SEED
+    RANDOM_SEED = seed
+
+def get_RANDOM_SEED():
+    return RANDOM_SEED
+
+
 #### Exception for Femtet error
 class ModelError(Exception):
     '''FEM でのモデル更新に失敗した際のエラー'''
@@ -852,9 +862,9 @@ class FemtetOptimizationCore(ABC):
         # objective も constraint も更新する必要がなく
         # そのまま converted objective を返せばいい
         if not self._isCalculated(x):
-            # メッセージの更新
-            if 'message' in list(kwargs.keys()):
-                self._optimization_message = kwargs['message']
+            # メッセージの更新（反映は後でされる）
+            if 'optimization_message' in list(kwargs.keys()):
+                self._optimization_message = kwargs['optimization_message']
             else:
                 self._optimization_message = ''
             

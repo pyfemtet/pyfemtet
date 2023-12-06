@@ -14,3 +14,9 @@ PyFemtet.egg-info
 /src/PyFemtet/_version.py
 .vscode/launch.json
 .vscode/settings.json
+.idea/.gitignore
+.idea/misc.xml
+.idea/modules.xml
+.idea/PyFemtetPrj.iml
+.idea/vcs.xml
+.idea/inspectionProfiles/profiles_settings.xml
