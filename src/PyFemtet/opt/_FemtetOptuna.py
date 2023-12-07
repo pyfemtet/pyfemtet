@@ -178,6 +178,13 @@ class FemtetOptuna(FemtetOptimizationCore):
     #### 目的関数
     def _objective_function(self, trial):
 
+        # 中断指令の処理
+        if self.shared_interruption_flag.value == 1:
+            self.release_FEM()
+            from .core import UserInterruption
+            raise UserInterruption('ユーザーによって最適化が取り消されました。')
+
+
         #### 変数の設定
         x = []
         df = self.get_parameter('df')
