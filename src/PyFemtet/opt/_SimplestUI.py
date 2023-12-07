@@ -46,8 +46,7 @@ class SimplestDialog(QDialog):
         
         # 終了判定
         self.get_close_flag = get_close_flag
-        self.interrput_flag = interrput_flag
-        
+
         # 経過時間
         self.seconds = 0
 
@@ -55,7 +54,7 @@ class SimplestDialog(QDialog):
         self.seconds += 1
 
         # 中断フラグが立ってなければ経過時間を表示
-        if self.interrput_flag.value==0:
+        if self.FEMOpt.shared_interruption_flag.value==0:
             self.label.setText(f"経過時間：{self.seconds}秒")
 
         # そうでなければ終了中ですと表示
@@ -73,7 +72,7 @@ class SimplestDialog(QDialog):
 
     def on_button_clicked(self):
         self.button.setEnabled(False)
-        self.interrput_flag.value = 1
+        self.FEMOpt.shared_interruption_flag.value = 1
 
     def closeEvent(self, event):
         super().closeEvent(event)
