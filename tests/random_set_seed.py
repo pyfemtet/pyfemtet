@@ -7,7 +7,7 @@ import os
 os.chdir(os.path.split(__file__)[0])
 import pickle
 from PyFemtet.opt import FemtetOptuna
-from PyFemtet.opt.core import NoFEM, set_RANDOM_SEED
+from PyFemtet.opt.core import NoFEM
 
 
 def parabola(FEMOpt)->float:
@@ -28,9 +28,8 @@ def parabola(FEMOpt)->float:
 
 if __name__=='__main__':
 
-    set_RANDOM_SEED(42)
-
-    FEMOpt = FemtetOptuna(FEMClass=NoFEM)
+    FEMOpt = FemtetOptuna(FEM=NoFEM())
+    FEMOpt.set_random_seed(42)
     FEMOpt.add_parameter('x', 0, 0, 1)
     FEMOpt.add_parameter('y', 0, 0, 1)
     FEMOpt.add_parameter('z', 0, 0, 1)
@@ -41,7 +40,7 @@ if __name__=='__main__':
 
     # with open('random_set_seed/random_seed_42.pkl', 'wb') as f:
     #     pickle.dump(h, f)
-        
+
     with open('random_set_seed/random_seed_42.pkl', 'rb') as f:
         ref_h = pickle.load(f)
 
