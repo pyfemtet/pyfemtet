@@ -29,7 +29,7 @@ def constraint_z(FEMOpt):
 
     
 if __name__=='__main__':
-    FEMOpt = FemtetOptuna(None, FEMClass=NoFEM)
+    FEMOpt = FemtetOptuna(None, FEM=NoFEM())
     FEMOpt.add_parameter('r', .5, 0, 1)
     FEMOpt.add_parameter('theta', np.pi/3, 0, 2*np.pi)
     FEMOpt.add_parameter('fai', np.pi/3, -np.pi/2, np.pi/2)

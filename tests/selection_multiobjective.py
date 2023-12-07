@@ -26,7 +26,5 @@ FEMOpt.add_objective(x, args=FEMOpt)
 FEMOpt.add_objective(y, args=FEMOpt)
 FEMOpt.add_objective(z, args=FEMOpt)
 
-FEMOpt.set_process_monitor()
-
 FEMOpt.main(n_trials=10)
 

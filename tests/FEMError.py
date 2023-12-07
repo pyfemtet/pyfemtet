@@ -19,13 +19,13 @@ def parabora2(FEMObj):
     else:
         raise ModelError
 
-if __name__=='__main__':
+if __name__ == '__main__':
 
-    FEMOpt = FemtetOptuna(FEMClass=NoFEM)
+    FEMOpt = FemtetOptuna(FEM=NoFEM())
 
     FEMOpt.add_parameter('x', 1, 0, 2)
     FEMOpt.add_objective(parabora, args=(FEMOpt,))
     FEMOpt.add_objective(parabora2, args=(FEMOpt,))
     FEMOpt.main(n_trials=100)
-    print(FEMOpt.history) # およそ 1/4 が計算されていれば OK
+    print(FEMOpt.history)  # およそ 1/4 が計算されていれば OK
     
