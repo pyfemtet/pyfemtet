@@ -33,17 +33,6 @@ from ..tools.DispatchUtils import Dispatch_Femtet, Dispatch_Femtet_with_new_proc
 from PySide6.QtWidgets import QApplication
 from ._SimplestUI import SimplestDialog
 
-RANDOM_SEED = None
-
-
-def set_RANDOM_SEED(seed: int or None):
-    global RANDOM_SEED
-    RANDOM_SEED = seed
-
-
-def get_RANDOM_SEED():
-    return RANDOM_SEED
-
 
 #### Exception for Femtet error
 class ModelError(Exception):
@@ -604,6 +593,7 @@ class FemtetOptimizationCore(ABC):
         # member
         self.objectives = []
         self.constraints = []
+        self.seed = None
         # abstract member
         self._objectives = []
         self._constraints = []
@@ -626,6 +616,12 @@ class FemtetOptimizationCore(ABC):
             ],
             dtype=object
         )
+
+    def set_random_seed(self, seed: int or None):
+        self.seed = seed
+
+    def get_random_seed(self):
+        return self.seed
 
     #### マルチプロセスで pickle するときに COM や fig は持てないし持っていても仕方がないので消す
     def __getstate__(self):
@@ -965,13 +961,13 @@ class FemtetOptimizationCore(ABC):
     def _main(self):
         pass
 
-    def _subprocess_main(self, FEMOpt, myid, shared_allowing_id, target_pid):
+    def _subprocess_main(self, FEMOpt, myidx, shared_allowing_idx, target_pid):
         '''サブプロセスから呼ばれる、_main 関数の worker'''
 
         #### サブプロセス作成時に破棄されているはずの COM を含みうる FEM を接続
         # 排他処理なので自分の順番が来るまで待つ
         while True:
-            if shared_allowing_id.value == myid:
+            if shared_allowing_idx.value == myidx:
                 break
             time.sleep(1)
 
@@ -979,22 +975,22 @@ class FemtetOptimizationCore(ABC):
         FEMOpt.set_FEM(target_pid)  # 今のところ Femtet 関係なければ 0 が与えられ、これは無視される
 
         # 接続が終わったら次のプロセスに許可を与える
-        shared_allowing_id.value = shared_allowing_id.value + 1
+        shared_allowing_idx.value = shared_allowing_idx.value + 1
 
         # femprj の干渉を避けるための前処理
         if issubclass(FEMOpt.FEMClass, Femtet):
             # 一時ディレクトリを作成
             td = tempfile.mkdtemp()
             # 一時ファイルに現在のプロジェクトを保存
-            prjname = FEMOpt.FEM.Femtet.ProjectTitle
-            prjname = "subprocess"
+            # prjname = FEMOpt.FEM.Femtet.ProjectTitle
+            prjname = f"subprocess{myidx}"
             tmp_femprj_path = os.path.join(td, f'{prjname}.femprj')
             result = FEMOpt.FEM.Femtet.SaveProject(tmp_femprj_path, True)
             if result == False:
                 FEMOpt.FEM.Femtet.ShowLastError()  # raise com_error
 
         # 最適化の実行
-        FEMOpt._main()
+        FEMOpt._main(myidx)
 
         # FEM の終了
         FEMOpt.release_FEM()

@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 
 from .core import FemtetOptimizationCore
-from .core import get_RANDOM_SEED
 
 import optuna
 # optuna.logging.disable_default_handler()
@@ -25,7 +24,7 @@ import gc
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 
-def generate_LHS(bounds)->np.ndarray:
+def generate_LHS(bounds, seed=None)->np.ndarray:
     '''
     d 個の変数の bounds を貰い、N 個のサンプル点を得る。
     N は d を超える最小の素数 p に対し N = p**2
@@ -38,7 +37,7 @@ def generate_LHS(bounds)->np.ndarray:
         strength=2,
         # optimization='lloyd',
         optimization='random-cd',
-        seed=get_RANDOM_SEED()
+        seed=seed,
         )
     
     LIMIT = 100
@@ -120,13 +119,9 @@ class FemtetOptuna(FemtetOptimizationCore):
 
     def _setup_study(self):
         #### sampler の設定
-        # sampler = optuna.samplers.NSGAIISampler(constraints_func=_constraint_function)
-        # sampler = optuna.samplers.NSGAIIISampler()
-        sampler = optuna.samplers.TPESampler(
-            seed=42,
-            constraints_func=self._constraint_function
-        )
-        self.sampler = sampler
+        self.sampler_class = optuna.samplers.TPESampler
+        self.sampler_kwargs = dict(constraints_func=self._constraint_function)
+
 
         #### study ファイルの作成
         study = optuna.create_study(
@@ -134,7 +129,6 @@ class FemtetOptuna(FemtetOptimizationCore):
             storage=self.storage_name,
             load_if_exists=True,
             directions=['minimize']*len(self.objectives),
-            sampler=sampler,
             )
 
         #### 初期値の設定
@@ -151,7 +145,7 @@ class FemtetOptuna(FemtetOptimizationCore):
                 lb = row['lbound']
                 ub = row['ubound']
                 bounds.append([lb, ub])
-            data = generate_LHS(bounds)        
+            data = generate_LHS(bounds, seed=self.seed)
             for datum in data:
                 d = {}
                 for name, v in zip(names, datum):
@@ -159,11 +153,20 @@ class FemtetOptuna(FemtetOptimizationCore):
                 study.enqueue_trial(d, user_attrs={"memo": "initial Latin Hypercube Sampling"})        
         
 
-    def _main(self):
-        # setup_study が生成した study に接続        
+    def _main(self, process_idx=0):
+        # setup_study が生成した study に接続
+        seed = self.seed
+        if seed is not None:
+            seed += process_idx
+        sampler = self.sampler_class(
+            seed=seed,
+            **self.sampler_kwargs,
+        )
         study = optuna.load_study(
             study_name=self.study_name,
-            storage=self.storage_name
+            storage=self.storage_name,
+            sampler=sampler
+
         )
 
         # 最適化の実行
