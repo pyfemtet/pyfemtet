@@ -491,6 +491,9 @@ class FemtetOptimizationCore(ABC):
         #### 引数の処理
         if femprj_path is not None:
             self.femprj_path = os.path.abspath(femprj_path)
+        else:
+            self.femprj_path = femprj_path
+
         self.model_name = model_name
         self.history_path = history_path
         self.associated_cad_path = associated_cad_path

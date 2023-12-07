@@ -32,7 +32,7 @@ def x_position_rule(Femtet, FEMOpt):
     diff2 = value_dict['C_x'] - value_dict['B_x']
     result = -1
     if diff1>0 and diff2>0:
-        retult = 1
+        result = 1
     return result
 
 
@@ -40,7 +40,7 @@ if __name__=='__main__':
     here, me = os.path.split(__file__)
     os.chdir(here)
     FEM = SW_Femtet(r'SWFemtetWithProcessMonitor\SWTEST.SLDPRT') # この機能を使う際はエントリポイントをガードしてください。
-    FEMOpt = FemtetOptuna(FEM)
+    FEMOpt = FemtetOptuna(femprj_path=r'SWFemtetWithProcessMonitor\SWTEST.femprj', FEM=FEM)
     FEMOpt.add_parameter('A_x', 10, lower_bound=5, upper_bound=40)
     FEMOpt.add_parameter('A_y', 10, lower_bound=5, upper_bound=25)
     FEMOpt.add_parameter('B_x', 15, lower_bound=5, upper_bound=40)
@@ -57,8 +57,5 @@ if __name__=='__main__':
         args=FEMOpt
         )
 
-    # FEMOpt.set_process_monitor() # 動かなくなる
-    FEMOpt.main()
-    
-    # FEMOpt.FEM.swApp.ExitApp()
+    FEMOpt.main(use_init_LHS=False)
     

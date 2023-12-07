@@ -14,7 +14,7 @@ import optuna
 from optuna.study import MaxTrialsCallback
 # from optuna.trial import TrialState
 from optuna.exceptions import ExperimentalWarning
-optuna.logging.disable_default_handler()
+# optuna.logging.disable_default_handler()
 
 from scipy.stats.qmc import LatinHypercube
 
@@ -124,7 +124,7 @@ class FemtetOptuna(FemtetOptimizationCore):
         # sampler = optuna.samplers.NSGAIIISampler()
         sampler = optuna.samplers.TPESampler(
             seed=42,
-            # constraints_func=self._constraint_function
+            constraints_func=self._constraint_function
         )
         self.sampler = sampler
 
