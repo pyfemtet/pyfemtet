@@ -1,9 +1,8 @@
 name: Upload Python Package via Poetry
 
 on:
-  # release:
-  #   types: [published]
-  push
+  release:
+    types: [published]
 
 # permissions:
 #   contents: read
@@ -30,6 +29,9 @@ jobs:
         poetry self add "poetry-dynamic-versioning[plugin]"
         poetry dynamic-versioning enable
         poetry config repositories.testpypi https://test.pypi.org/legacy/
-    - name: Build and publish testpypi
+    - name: Build and publish
       run: |
-        poetry publish -r testpypi --build --username __token__ --password ${{ secrets.TESTPYPI_API_TOKEN }}
+        poetry publish --build --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}        
+    # - name: Build and publish testpypi
+    #   run: |
+    #     poetry publish -r testpypi --build --username __token__ --password ${{ secrets.TESTPYPI_API_TOKEN }}
