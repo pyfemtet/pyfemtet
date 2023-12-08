@@ -1,5 +1,5 @@
-# Welcome To PyFemtet.opt !
-PyFemtet.opt は、Femtet を用いてパラメータ最適化を行うことのできる Python パッケージです。
+# Welcome To PyFemtet !
+pyfemtet.opt は、Femtet を用いてパラメータ最適化を行うことのできる Python パッケージです。
 
 ## 機能
 
@@ -7,9 +7,9 @@ Femtet を使ったシミュレーションによって、パラメータの最�
 連続変数の単目的・多目的最適化に対応しています。
 いくつかの最適化結果可視化機能を備えており、最適化結果の分析が可能です。
 
-***注意：現在、本ライブラリは α 版です！***
+***注意：現在、本ライブラリは beta 版です！***
 
-## install
+## Install
 
 インストール方法は以下の通りです。
 
@@ -17,30 +17,37 @@ Femtet を使ったシミュレーションによって、パラメータの最�
 
     [https://www.muratasoftware.com/](https://www.muratasoftware.com/)
 
+    初めての方は、試用版または個人版のご利用もご検討ください。
+
 
 1. Femtet のマクロ有効化
 
-    詳しくは、Femtet インストール後にスタートメニューから「マクロ機能を有効化する」を選択してください。
-    マクロ機能を利用するためには excel が必要です。
+    Femtet インストール後にスタートメニューから「マクロ機能を有効化する」を実行してください。
 
 1. Python のインストール
 
     [https://www.python.org/](https://www.python.org/)
 
 1. PyFemtet のインストール
-
-    ```pip install PyFemtet```
-
-1. Femtet のアンインストール
-    PyFemtet をインストールした環境で下記のコマンドを実行してください。依存ライブラリは削除されません。
+    
+    ターミナルで下記コマンドを実行してください。
     ```
-    pip uninstall PyFemtet
+    py -m pip install pyfemtet
     ```
+
+1. Femtet マクロ定数の設定
+
+    ターミナルで下記コマンドを実行してください。詳しくは Femtet マクロヘルプをご覧ください。
+    ```
+    py -m win32com.client.makepy FemtetMacro
+    ```
+
+    
 
 ## 動作するサンプルコード・サンプル解析モデル
-.zip ファイル内の以下の位置に、.py ファイルと、それと同名の .femprj ファイルが含まれています。
+pyfemtet プロジェクトの以下の相対パスに .py ファイルと、それと同名の .femprj ファイルが含まれています。
 ```
-.\src\PyFemtet\FemtetPJTSample
+.\pyfemtet\FemtetPJTSample
 ```
 このフォルダに含まれる ```.femprj``` ファイルは、変数設定済みの単純な解析モデルです。対応する同名の ```.py``` ファイルは、そのパラメータを PyFemtet を用いて最適化するサンプルコードです。 
 
@@ -61,20 +68,25 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     解析結果やモデル形状から評価したい指標を出力する処理を Femtet Python マクロを用いて記述してください。
     以下に例を示します。
     ```python
+    """Femtet の解析結果から評価指標を計算する例です."""
     from win32com.client import constants
     from win32com.client import Dispatch
+
+    # Femtet の操作のためのオブジェクトを取得
     Femtet = Dispatch("FemtetMacro.Femtet")
 
-    # マクロから解析結果を開く
+    # Femtet で解析結果を開く
     Femtet.OpenCurrentResult(True)
-    # 解析結果を取得するオブジェクトを作成
     Gogh = Femtet.Gogh
-    # 流速を取得する設定
+
+    # 流速を取得するための設定
     Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
-    # 目的の面で積分し流量を取得
+
+    # 目的の面で流速を積分し流量を取得
     _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
 
-    print(ret.Real) # 流量（次のステップでこれを評価指標にする）
+    # 流量（次のステップでこれを評価指標にする）
+    print(ret.Real)
     ```
 
 1. メインスクリプトの作成
@@ -82,52 +94,76 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     上記で定義した評価指標を含むスクリプトを書いてください。以下に例を示します。前のステップで記述した評価指標が ```get_flow``` 関数の中に記述されています。
 
     ```python
-    from PyFemtet.opt import FemtetScipy
+    """pyfemtet を用いてパラメータ最適化を行う最小限のコードの例です.
+
+    h, r という変数を有する解析モデルで簡易流体解析を行い, ある面の流量を 0.3 にしたい場合を想定しています.
+    """
+
+    from pyfemtet.opt import FemtetOptuna
     from win32com.client import constants
-    # from win32com.client import Dispatch
-    # Femtet = Dispatch("FemtetMacro.Femtet") # このスクリプトでは使用しません
 
-    '''h, r という変数を有する解析モデルで簡易流体解析を行い、ある面の流量を 0.3 にしたい場合を想定したスクリプト'''
 
-    # 解析結果から流量を取得する関数
     def get_flow(Femtet):
-        # この関数は、第一引数に Femtet のインスタンスを取るようにしてください。
-        # Femtet.OpenCurrentResult(True) # この処理はあってもいいですが、不要です
+        """解析結果から流量を取得します.
+        
+        pyfemtet で定義する評価関数は、
+        第一引数に Femtet の COM オブジェクトを
+        設定する必要があります.
+        """
         Gogh = Femtet.Gogh
         Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
         _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
         flow = ret.Real
         return flow
 
-    # 最適化処理を行うオブジェクトを用意
-    FEMOpt = FemtetScipy()
 
-    # 解析モデルで登録された変数
-    FEMOpt.add_parameter("h", 10, memo='高さ')
-    FEMOpt.add_parameter("r", 5, memo='半径')
+    if __name__ == '__main__':
 
-    # 流量が 0.3 に近づくようにゴールを設定する
-    FEMOpt.add_objective(get_flow, name='流量', direction=0.3)
+        # 最適化処理を行うオブジェクトを用意
+        FEMOpt = FemtetOptuna('example.femprj')
 
-    # 最適化実行中にその収束状況を表示する(experimental)
-    FEMOpt.set_process_monitor()
+        # 解析モデルで登録された変数
+        FEMOpt.add_parameter("h", 10, lbound=1, ubound=20, memo='高さ')
+        FEMOpt.add_parameter("r", 5, lbound=1, ubound=10, memo='半径')
 
-    # 最適化の実行 ※実行すると、csv ファイルでの最適化過程の保存が始まります。
-    FEMOpt.main()
+        # 流量が 0.3 に近づくようにゴールを設定する
+        FEMOpt.add_objective(get_flow, name='流量', direction=0.3)
 
-    # 最適化過程の一覧表示（最適化終了時点での csv ファイルの内容と同じです）
-    print(FEMOpt.history)
+        # 最適化の実行（csv ファイルに最適化計算の過程が保存されます）
+        FEMOpt.main(n_trial=30)
+
+        # 最適化結果の表示（最適化終了時点での csv ファイルの内容と同じです）
+        print(FEMOpt.history)
 
     ```
-    注意：Femtet 内で数式を設定した変数に対し ```add_parameter``` を行わないでください。数式が失われます。
+    注意：Femtet 内で数式を設定した変数に対し ```add_parameter()``` を行わないでください。数式が失われます。
 
-1. ***Femtet で問題の解析モデルを開いた状態で***、スクリプトを実行します。
 
-    - ***最適化を止めるには、計算中の Femtet を終了するか、スクリプトを実行している python プロセスを終了してください。*** それまでの最適化の過程は csv に保存されており、失われません。
+1. スクリプトを実行します。
+
     
-1. 出力された最適化過程の一覧を確認します。一覧は表形式の構造を持っています。列は *変数、目的、拘束（設定した場合）、非劣解、拘束を満たすかどうか、解析終了時刻* です。各行は、その変数の組み合わせで FEM シミュレーションを行った結果の評価指標の値、拘束の値などを示しています。詳細は、以下も参考にしてください。
+1. 出力された最適化過程の一覧を csv ファイルで確認します。
+
+    csv ファイルの各行は一回の解析試行結果を示しています。各列の形式は以下の通りです。
+
+    列名 | 説明
+    --- | ---
+    n_trial | 解析を行った回数
+    [param] | スクリプト中で設定した変数。変数の数だけ列が増える。
+    [objective] | スクリプト中で設定した評価関数。評価関数の数だけ列が増える。
+    [constraint] | スクリプト中で設定した拘束関数。拘束関数の数だけ列が増える。
+    non_domi | 非劣解であるかどうか。
+    fit | 拘束関数を満たすかどうか。
+    optimization_message | 最適化アルゴリズムによる注記。
+    hypervolume | その試行時点でのハイパーボリューム。
+    time | その試行が完了した日時。
+
     - 拘束：ある数式が任意の範囲内にあるようにすることです。具体的な記述方法は**動作するサンプルコード**も参考にしてください。
     - 非劣解：劣解とは、解集合の中で、その解よりも全ての評価指標が好ましい解が存在する解のことです。非劣解とは、劣解ではない解のことです。単一の評価指標のみを持つ最適化問題の場合、非劣解は最適解です。
+
+
+## API reference
+作成中です。
 
 
 ---
@@ -136,6 +172,6 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
 We're sorry, this section is under constructing.
 
 ---
-Copyright (C) 2023 kn514 <kazuma.naito@murata.com>  
-Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
+Copyright (C) 2023 Murata Manufacturing Co., Ltd. All Rights Reserved.
+
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.

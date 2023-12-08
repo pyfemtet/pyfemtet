@@ -17,6 +17,3 @@ PyFemtet.egg-info
 /dist
 /.venv
 /build
-/__pyproject.toml
-/_pyproject.toml
-/.python-version
