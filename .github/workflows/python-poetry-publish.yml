@@ -1,12 +1,8 @@
 name: Upload Python Package via Poetry
 
-# on:
-#   release:
-#     types: [published]
 on:
-  push:
-    # tags:
-    #   - '*'
+  release:
+    types: [published]
 
 # permissions:
 #   contents: read
@@ -14,17 +10,16 @@ on:
 jobs:
   deploy:
 
+    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
+
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: Load .python-version config
-      run: |
-        export PYTHON_VERSION=$(cat .python-project)
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: '3.11'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
