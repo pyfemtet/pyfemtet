@@ -14,3 +14,9 @@ db.sqlite3
 
 PyFemtet.egg-info
 /src/PyFemtet/_version.py
+/dist
+/.venv
+/build
+/__pyproject.toml
+/_pyproject.toml
+/.python-version
