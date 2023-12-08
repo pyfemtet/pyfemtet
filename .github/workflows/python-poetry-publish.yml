@@ -23,4 +23,4 @@ jobs:
         python -m pip install --upgrade pip
         pip install poetry poetry-dynamic-versioning
     - name: Build and publish
-      run: poetry publish --build --username __token__ --password ${{ secrets.PYPI_PASSWORD }}
+      run: poetry publish --build --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}
