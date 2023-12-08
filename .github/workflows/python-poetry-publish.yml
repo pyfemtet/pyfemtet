@@ -1,11 +1,12 @@
 name: Upload Python Package via Poetry
 
 on:
-  release:
-    types: [published]
+  # release:
+  #   types: [published]
+  push
 
-permissions:
-  contents: read
+# permissions:
+#   contents: read
 
 jobs:
   deploy:
