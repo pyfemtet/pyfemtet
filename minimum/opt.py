@@ -1,10 +1,14 @@
 import os
-here, me = os.path.split(__file__)
+from threading import Thread
 import numpy as np
 import pandas as pd
+from abc import ABC, abstractmethod
 
 
-class OptimizerBase:
+here, me = os.path.split(__file__)
+
+
+class OptimizerBase(ABC):
 
     def __init__(self):
         self.history = History()
@@ -25,12 +29,18 @@ class OptimizerBase:
         self.history.record(x, objective_values)
         return objective_values
 
-    def _setup_main(self):
+    @abstractmethod
+    def _main(self):
+        pass
+
+    def main(self, n_trials=10, method='TPE'):
         self.history.init(
             self.parameters.keys(),
             self.objectives.keys()
         )
-        # optimize(objectives, parameters)
+        t = Thread(target=self._main, args=(n_trials, method))
+        t.start()
+        t.join()
 
 
 class History:

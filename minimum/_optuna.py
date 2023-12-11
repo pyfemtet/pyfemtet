@@ -13,9 +13,7 @@ class OptimizerOptuna(OptimizerBase):
         obj_values = self.f(x)
         return tuple(obj_values)
 
-    def main(self, n_trials=10, method='TPE'):
-
-        super()._setup_main()
+    def _main(self, n_trials=10, method='TPE'):
 
         sampler = optuna.samplers.TPESampler(
             n_startup_trials=5,
