@@ -1,6 +1,7 @@
 import os
 from time import time, sleep
 from threading import Thread
+from multiprocessing import Process, Manager
 import numpy as np
 import pandas as pd
 from abc import ABC, abstractmethod
@@ -22,6 +23,14 @@ class OptimizerBase(ABC):
         self.objectives = dict()
         self.state = 'ready'
         self.monitor = None
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['monitor']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def set_state(self, state):
         print(f'---{state}---')
@@ -50,7 +59,10 @@ class OptimizerBase(ABC):
     def _main(self):
         pass
 
-    def main(self, n_trials=10, method='TPE'):
+    def _setup_main(self, *args, **kwargs):
+        pass
+
+    def main(self, n_trials=10, n_parallel=3, method='TPE'):
 
         self.set_state('preparing')
 
@@ -59,8 +71,10 @@ class OptimizerBase(ABC):
             self.objectives.keys()
         )
 
+        self._setup_main(method)
+
         # 計算スレッドとそれを止めるためのイベント
-        t = Thread(target=self._main, args=(n_trials, method))
+        t = Thread(target=self._main, args=(n_trials,))
         t.start()
         self.set_state('processing')
 
@@ -69,12 +83,18 @@ class OptimizerBase(ABC):
         tm = Thread(target=self.monitor.start_server)
         tm.start()
 
+        # 追加の計算プロセス
+        processes = []
+        for subprocess_idx in range(n_parallel-1):
+            p = Process(target=self._main, args=(n_trials, subprocess_idx))
+            p.start()
+            processes.append(p)
+
         start = time()
         while True:
-            should_terminate = [
-                not t.is_alive(),
-            ]
-            if any(should_terminate):
+            should_terminate = [not t.is_alive()]
+            should_terminate.extend([not p.is_alive() for p in processes])
+            if all(should_terminate):  # all(not alive)
                 break
             sleep(1)
             print(f'  duration:{time()-start} sec.')

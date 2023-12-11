@@ -1,6 +1,9 @@
 import os
 
 import optuna
+from optuna.study import MaxTrialsCallback
+from optuna.trial import TrialState
+
 from .opt import OptimizerBase
 
 
@@ -13,31 +16,43 @@ class OptimizerOptuna(OptimizerBase):
         obj_values = self.f(x)
         return tuple(obj_values)
 
-    def _main(self, n_trials=10, method='TPE'):
-
-        sampler = optuna.samplers.TPESampler(
+    def _setup_main(self, method):
+        # sampler の設定
+        self.sampler_kwargs = dict(
             n_startup_trials=5,
         )
+        self.sampler_class = optuna.samplers.TPESampler
         if method == 'botorch':
-            sampler = optuna.integration.BoTorchSampler(
-                n_startup_trials=5,
-            )
+            self.sampler_class = optuna.integration.BoTorchSampler
 
+        # storage の設定
         storage_path = self.history.path.replace(".csv", ".db")
-
         if os.path.exists(storage_path):
             os.remove(storage_path)
-
-        study = optuna.create_study(
+        optuna.create_study(
             study_name='test',
             storage=f'sqlite:///{storage_path}',
-            sampler=sampler,
             directions=['minimize']*len(self.objectives)
         )
 
+    def _main(self, n_trials=10, subprocess_idx=0):
+
+        # sampler の restore
+        sampler = self.sampler_class(seed=42+subprocess_idx, **self.sampler_kwargs)
+
+        # storage の restore
+        storage_path = self.history.path.replace(".csv", ".db")
+        study = optuna.load_study(
+            study_name='test',
+            storage=f'sqlite:///{storage_path}',
+            sampler=sampler,
+        )
+
+        # run
         study.optimize(
             self._objective,
             n_trials=n_trials,
+            callbacks=[MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,))],
         )
 
         return study
