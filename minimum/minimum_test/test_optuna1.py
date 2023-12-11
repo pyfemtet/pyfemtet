@@ -14,6 +14,6 @@ if __name__ == '__main__':
     opt.add_parameter('z', .5, -1, 1)
     opt.add_objective('parabola', parabola)
 
-    study = opt.main(n_trials=30)
+    study = opt.main(n_trials=60, n_parallel=1)
 
     print(opt.history.data)
