@@ -2,8 +2,9 @@ import ray
 
 ray.init()
 
+
 @ray.remote
-class GlobalVarActor:
+class NameSpace:
     def __init__(self):
         self.global_var = 3
 
@@ -13,15 +14,20 @@ class GlobalVarActor:
     def get_global_var(self):
         return self.global_var
 
-@ray.remote
-class Actor:
-    def __init__(self, global_var_actor):
-        self.global_var_actor = global_var_actor
 
-    def f(self):
-        return 3 + ray.get(self.global_var_actor.get_global_var.remote())
+class NameSpaceWrapper:
+    def __init__(self):
+        self.ns = NameSpace.remote()
+
+    def get_global_var(self):
+        return ray.get(self.ns.get_global_var.remote())
+
+    def set_global_var(self, var):
+        self.ns.get_global_var.remote(var)
 
 
-global_var_actor = GlobalVarActor.remote()
-actor = Actor.remote(global_var_actor)
-ray.get(actor.f.remote())
+# ns = NameSpace.remote()
+# ray.get(ns.get_global_var.remote())  # これを ns.get_global_var() にしたい
+
+nsw = NameSpaceWrapper()
+nsw.get_global_var()

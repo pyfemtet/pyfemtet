@@ -64,7 +64,7 @@ class Monitor(object):
         def interrupt(_):
             print("---------------", _)
             if _ is not None:
-                self.opt.pdata.set_state.remote('interrupted')
+                self.opt.pdata.set_state('interrupted')
             return ''
 
         # scatter matrix

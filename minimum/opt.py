@@ -15,11 +15,8 @@ class UserInterruption(Exception):
     pass
 
 
-
-
-
 @ray.remote
-class ParallelVariableNamespace:
+class _ParallelVariableNamespace:
 
     def __init__(self):
         self.state = 'undefined'
@@ -38,6 +35,24 @@ class ParallelVariableNamespace:
         return self.history
 
 
+class ParallelVariableNamespace:
+
+    def __init__(self):
+        self.ns = _ParallelVariableNamespace.remote()
+
+    def set_state(self, state):
+        self.ns.set_state.remote(state)
+
+    def get_state(self):
+        return ray.get(self.ns.get_state.remote())
+
+    def append_history(self, row):
+        self.ns.append_history.remote(row)
+
+    def get_history(self):
+        return ray.get(self.ns.get_history.remote())
+
+
 class OptimizerBase(ABC):
 
     def __init__(self):
@@ -45,7 +60,7 @@ class OptimizerBase(ABC):
         self.parameters = dict()
         self.objectives = dict()
         self.monitor = None
-        self.pdata = ParallelVariableNamespace.remote()
+        self.pdata = ParallelVariableNamespace()
         self.history = History(self.pdata)
 
     def __getstate__(self):
@@ -63,7 +78,7 @@ class OptimizerBase(ABC):
         self.objectives[name] = (fun, args, kwargs)
 
     def f(self, x):
-        if ray.get(self.pdata.get_state.remote()) == 'interrupted':
+        if self.pdata.get_state() == 'interrupted':
             raise UserInterruption
         x = np.array(x)
         objective_values = []
@@ -81,7 +96,7 @@ class OptimizerBase(ABC):
 
     def main(self, n_trials=10, n_parallel=3, method='TPE'):
 
-        self.pdata.set_state.remote('preparing')
+        self.pdata.set_state('preparing')
         self.history.init(
             self.parameters.keys(),
             self.objectives.keys()
@@ -91,7 +106,7 @@ class OptimizerBase(ABC):
         # 計算スレッドとそれを止めるためのイベント
         t = Thread(target=self._main, args=(n_trials,))
         t.start()
-        self.pdata.set_state.remote('processing')
+        self.pdata.set_state('processing')
 
         # モニタースレッド
         self.monitor = Monitor(self)
@@ -113,9 +128,8 @@ class OptimizerBase(ABC):
             if all(should_terminate):  # all tasks are killed
                 break
             sleep(1)
-            print(f'  duration:{time()-start} sec.')
 
-        self.pdata.set_state.remote('terminated')
+        self.pdata.set_state('terminated')
 
         t.join()
         ray.wait(processes)
@@ -143,8 +157,8 @@ class History:
         row = []
         row.extend(x)
         row.extend(obj_values)
-        self.pdata.append_history.remote(row)
-        data = ray.get(self.pdata.get_history.remote())
+        self.pdata.append_history(row)
+        data = self.pdata.get_history()
         self.data = pd.DataFrame(
             data,
             columns=self._data_columns,
