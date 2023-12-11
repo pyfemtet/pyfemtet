@@ -1,7 +1,9 @@
+from time import sleep
 from minimum import OptimizerOptuna
 
 
 def parabola(x):
+    sleep(1)
     return (x ** 2).sum()
 
 
