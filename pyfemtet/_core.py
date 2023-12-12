@@ -30,7 +30,7 @@ class UserInterruption(Exception):
 
 
 @ray.remote
-class _ParallelVariableNamespace:
+class _InterprocessVariables:
 
     def __init__(self):
         self.state = 'undefined'
@@ -49,10 +49,10 @@ class _ParallelVariableNamespace:
         return self.history
 
 
-class ParallelVariableNamespace:
+class InterprocessVariables:
 
     def __init__(self):
-        self.ns = _ParallelVariableNamespace.remote()
+        self.ns = _InterprocessVariables.remote()
 
     def set_state(self, state):
         self.ns.set_state.remote(state)
