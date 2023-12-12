@@ -1,5 +1,5 @@
 from pyfemtet.opt import OptimizerBase
-from pyfemtet.interface import Femtet
+from pyfemtet.opt.interface import Femtet
 
 
 fem = Femtet()

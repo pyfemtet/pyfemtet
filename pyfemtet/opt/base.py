@@ -4,6 +4,7 @@ import os
 import datetime
 import inspect
 import ast
+import math
 from time import time, sleep
 from threading import Thread
 
@@ -12,14 +13,8 @@ import pandas as pd
 from optuna._hypervolume import WFG
 import ray
 
-import win32com.client
-from win32com.client import Dispatch, constants, CDispatch
-from pywintypes import com_error
-from femtetutils import util, constant
-from .tools.DispatchUtils import Dispatch_Femtet, Dispatch_Femtet_with_new_process, Dispatch_Femtet_with_specific_pid, _get_pid
-
-from ._core import *
-from .interface import *
+from .core import InterprocessVariables, UserInterruption
+from .interface import FEMIF, Femtet
 from .monitor import Monitor
 
 
@@ -155,10 +150,10 @@ class Constraint:
 
 class History:
 
-    def __init__(self, history_path, fem_opt):
+    def __init__(self, history_path, femopt):
         self.path = history_path
-        self.fem_opt = fem_opt
-        self.iv = self.fem_opt.iv
+        self.femopt = femopt
+        self.ipv = self.femopt.ipv
         self.data = pd.DataFrame()
         self.param_names = []
         self.obj_names = []
@@ -188,29 +183,30 @@ class History:
 
         # create row
         row = list()
-        row.append(len(self.data))
+        row.append(-1)  # dummy trial index
         row.extend(parameters['value'].values)
-        for obj, obj_value in zip(objectives, obj_values):  # objectives, direction
+        for (name, obj), obj_value in zip(objectives.items(), obj_values):  # objectives, direction
             row.extend([obj_value, obj.direction])
         row.append(False)  # dummy non_domi
         feasible_list = []
-        for cns, cns_value in zip(constraints, cns_values):  # cns, lb, ub
+        for (name, cns), cns_value in zip(constraints.items(), cns_values):  # cns, lb, ub
             row.extend([cns_value, cns.lb, cns.ub])
             feasible_list.append(_is_feasible(cns_value, cns.lb, cns.ub))
         row.append(all(feasible_list))
-        row.append(0)  # dummy hypervolume
+        row.append(0.)  # dummy hypervolume
         row.append(message)  # message
         row.append(datetime.datetime.now())  # time
 
         # append
-        self.iv.append_history(row)
-        data = self.iv.get_history()
+        self.ipv.append_history(row)
+        data = self.ipv.get_history()
         self.data = pd.DataFrame(
             data,
             columns=self._data_columns,
         )
 
         # calc
+        self.data['trial'] = np.arange(len(self.data))
         self._calc_non_domi()
         self._calc_hypervolume()
 
@@ -220,7 +216,7 @@ class History:
         solution_set = self.data[self.obj_names].copy()
 
         # 最小化問題の座標空間に変換する
-        for name, objective in self.fem_opt.objectives.items():
+        for name, objective in self.femopt.objectives.items():
             solution_set[name] = solution_set[name].map(objective._convert)
 
             # 非劣解の計算
@@ -250,7 +246,7 @@ class History:
         if n <= 1:
             return np.nan
         # 最小化問題に convert
-        for i, (name, objective) in enumerate(self.fem_opt.objectives.items()):
+        for i, (name, objective) in enumerate(self.femopt.objectives.items()):
             for j in range(n):
                 pareto_set[j, i] = objective._convert(pareto_set[j, i])
                 #### reference point の計算[1]
@@ -314,13 +310,15 @@ class OptimizerBase(ABC):
         self.history_path = os.path.abspath(history_path)
         if fem is None:
             self.fem = Femtet()
+        else:
+            self.fem = fem
 
         # メンバーの宣言
         self.ipv = InterprocessVariables()
         self.parameters = pd.DataFrame()
         self.objectives = dict()
         self.constraints = dict()
-        self.history = History(history_path, self.ipv)
+        self.history = History(history_path, self)
         self.monitor: Monitor = None
         self.seed: int or None = None
         self.message = ''
@@ -488,17 +486,20 @@ class OptimizerBase(ABC):
         #    True            False        False
         #    False           False        True
 
+
+        # 1 回目の計算
+        if len(self.history.data) == 0:
+            return False
+
         # ひとつでも違う
         param_names = self.history.param_names
         last_x = self.history.data[param_names].iloc[-1].values
-        condition1 = False
+        condition = False
         for _x, _last_x in zip(x, last_x):
-            condition1 = condition1 or (float(_x) != float(_last_x))
+            condition = condition or (float(_x) != float(_last_x))
 
-        # 1 回目の計算
-        condition2 = len(self.history.data) == 0
+        return not condition
 
-        return (not condition1) and condition2
 
     def f(self, x, message=''):
 
@@ -535,7 +536,7 @@ class OptimizerBase(ABC):
     def _setup_main(self, *args, **kwargs):
         pass
 
-    def main(self, n_trials, n_parallel, timeout, method, **setup_kwargs):
+    def main(self, n_trials=None, n_parallel=1, timeout=None, method='TPE', **setup_kwargs):
         # 共通引数
         self.n_trials = n_trials
         self.n_parallel = n_parallel
@@ -545,7 +546,7 @@ class OptimizerBase(ABC):
         # setup
         self.ipv.set_state('preparing')
         self.history.init(
-            list(self.parameters.keys()),
+            self.parameters['name'].to_list(),
             list(self.objectives.keys()),
             list(self.constraints.keys()),
         )
@@ -564,6 +565,7 @@ class OptimizerBase(ABC):
         # 追加の計算プロセス
         @ray.remote
         def _main_remote(subprocess_idx):
+            self.set_fem()  # プロセス化されたときに monitor と fem を落としている
             self._main(subprocess_idx)
         processes = []
         for subprocess_idx in range(self.n_parallel-1):
@@ -577,11 +579,9 @@ class OptimizerBase(ABC):
                 break
             sleep(1)
         end = time()
-        print(f'execution time is {end - start} sec.')
-
-        self.ipv.set_state('terminated')
 
         t.join()
         ray.wait(processes)
 
-        self.ipv.set_state('ready')
+        print(f'Optimization finished. Elapsed time is {end - start} sec.')
+        self.ipv.set_state('terminated')

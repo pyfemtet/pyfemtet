@@ -1,14 +1,20 @@
 import os
 import gc
+import warnings
 
 import numpy as np
 from scipy.stats.qmc import LatinHypercube
 import optuna
 from optuna.study import MaxTrialsCallback
 from optuna.trial import TrialState
+from optuna.exceptions import ExperimentalWarning
+# optuna.logging.disable_default_handler()
 
-from ._core import UserInterruption, ModelError, MeshError, SolveError
-from .opt import OptimizerBase
+from .core import UserInterruption, ModelError, MeshError, SolveError
+from .base import OptimizerBase
+
+
+warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 
 def generate_lhs(bounds, seed=None) -> np.ndarray:
@@ -60,23 +66,24 @@ class OptimizerOptuna(OptimizerBase):
         if self.ipv.get_state() == 'interrupted':
             raise UserInterruption
 
-        # x の生成
-        x = []
-        for i, row in self.parameters.iterrows():
-            x.append(trial.suggest_float(row['name'], row['lb'], row['ub']))
-
         # message の設定
         try:
             message = trial.user_attrs["message"]  # あれば
         except (AttributeError, KeyError):
             message = ''  # なければ
 
+        # x の生成
+        x = []
+        for i, row in self.parameters.iterrows():
+            x.append(trial.suggest_float(row['name'], row['lb'], row['ub']))
+        x = np.array(x)
+
         # strict 拘束の計算で Prune することになったとき
         # constraint attr がないとエラーになるのでダミーを置いておく
-        dummy_data = tuple([1 for _ in range(len(self.constraints))])
-        trial.set_user_attr("constraint", dummy_data)
+        trial.set_user_attr("constraint", (1.,))  # 非正が feasible 扱い
 
         # strict 拘束の計算
+        self.parameters['value'] = x
         tmp = [[cns.calc(), cns.lb, cns.ub, name] for name, cns in self.constraints.items() if cns.strict]
         for val, lb, ub, name in tmp:
             if lb is not None:
@@ -121,6 +128,7 @@ class OptimizerOptuna(OptimizerBase):
         # sampler の設定
         self.sampler_kwargs = dict(
             # n_startup_trials=5,
+            constraints_func=self._constraint_function
         )
         self.sampler_class = optuna.samplers.TPESampler
         if self.method == 'botorch':
@@ -185,7 +193,6 @@ class OptimizerOptuna(OptimizerBase):
         # run
         study.optimize(
             self._objective,
-            n_trials=self.n_trials,
             timeout=self.timeout,
             callbacks=[MaxTrialsCallback(self.n_trials, states=(TrialState.COMPLETE,))],
         )

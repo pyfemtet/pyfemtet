@@ -62,9 +62,8 @@ class Monitor(object):
             Output('dummy', 'value'),
             Input('interrupt-button', 'n_clicks'))
         def interrupt(_):
-            print("---------------", _)
             if _ is not None:
-                self.opt.pdata.set_state('interrupted')
+                self.opt.ipv.set_state('interrupted')
             return ''
 
         # scatter matrix
@@ -73,6 +72,22 @@ class Monitor(object):
             Input('interval-component', 'n_intervals'))
         def update_sm(_):
             return update_scatter_matrix(self.opt)
+
+        # 終了していたら更新をやめる、中断ボタンを disable にする
+        @self.app.callback(
+            [Output('interval-component', 'max_intervals'),
+             Output('interrupt-button', 'disabled'),],
+            [Input('interval-component', 'n_intervals'),])
+        def stop_interval(_):
+            state = self.opt.ipv.get_state()
+            if state == 'interrupted' or state == 'terminated':
+                max_intervals = 0
+                button_disable = True
+            else:
+                max_intervals = -1
+                button_disable = False
+            return max_intervals, button_disable
+
 
     def start_server(self):
         webbrowser.open('http://localhost:8080')

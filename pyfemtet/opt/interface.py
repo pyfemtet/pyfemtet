@@ -7,8 +7,17 @@ from time import sleep
 from win32com.client import constants
 from femtetutils import util
 
-from ._core import *
-from .tools.DispatchUtils import Dispatch_Femtet, Dispatch_Femtet_with_specific_pid, Dispatch_Femtet_with_new_process
+from .core import (
+    FemtetAutomationError,
+    ModelError,
+    MeshError,
+    SolveError,
+)
+from pyfemtet.tools.DispatchUtils import (
+    Dispatch_Femtet,
+    Dispatch_Femtet_with_specific_pid,
+    Dispatch_Femtet_with_new_process
+)
 
 
 class FEMIF(ABC):
@@ -23,7 +32,7 @@ class FEMIF(ABC):
         pass
 
     @abstractmethod
-    def update(self, parameter: 'pd.DataFrame') -> None:
+    def update(self, parameters: 'pd.DataFrame') -> None:
         """
         dict に基づいて FEM モデルを更新し
         FEM 解析を行うことで
@@ -224,7 +233,7 @@ class NoFEM(FEMIF):
     def update(self, parameters):
         pass
 
-    def check_param_value(self):
+    def check_param_value(self, param_name):
         pass
 
     def quit(self):

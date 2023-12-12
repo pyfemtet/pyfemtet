@@ -55,6 +55,7 @@ class InterprocessVariables:
         self.ns = _InterprocessVariables.remote()
 
     def set_state(self, state):
+        print(f'---{state}---')
         self.ns.set_state.remote(state)
 
     def get_state(self):

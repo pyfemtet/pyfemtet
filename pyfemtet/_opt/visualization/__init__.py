@@ -1,2 +1,0 @@
-from ._visualization import SimpleProcessMonitor, HypervolumeMonitor, MultiobjectivePairPlot
-from ._visualizationNameSpace import UpdatableSuperFigure
