@@ -72,25 +72,25 @@ from ._SimplestUI import SimplestDialog
 
 #### FEM クラス
 
-class FEMSystem(ABC):
-    '''
-    FEM システムのクラス。
-    このクラスを継承して具体的な FEM システムのクラスを作成し、
-    そのインスタンスを FemtetOptimizationCore の FEM メンバーに割り当てる。
-    '''
-
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-
-
-    @abstractmethod
-    def update(self, df) -> None:
-        '''
-        FEM の制御を実装して df に基づいてモデルを更新し
-        objectiveValues と constraintValues を更新する
-        '''
-        pass
+# class FEMSystem(ABC):
+#     '''
+#     FEM システムのクラス。
+#     このクラスを継承して具体的な FEM システムのクラスを作成し、
+#     そのインスタンスを FemtetOptimizationCore の FEM メンバーに割り当てる。
+#     '''
+#
+#     def __init__(self, *args, **kwargs):
+#         self.args = args
+#         self.kwargs = kwargs
+#
+#
+#     @abstractmethod
+#     def update(self, df) -> None:
+#         '''
+#         FEM の制御を実装して df に基づいてモデルを更新し
+#         objectiveValues と constraintValues を更新する
+#         '''
+#         pass
 
 
 # class Femtet(FEMSystem):
@@ -339,58 +339,58 @@ class FEMSystem(ABC):
 
 #### 周辺クラス、関数
 
-def _is_access_Gaudi(f):
-    '''
-    ユーザー定義関数が Gaudi にアクセスしているかどうかを簡易的に判断する。
-    solve前に評価するstrict_constraintでsolve結果にアクセスする違反を
-    検出するためのfool-proof策。
-    '''
-    # 関数fのソースコードを取得
-    source = inspect.getsource(f)
-
-    # ソースコードを抽象構文木（AST）に変換
-    tree = ast.parse(source)
-
-    # 関数定義を見つける
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef):
-            # 関数の第一引数の名前を取得
-            first_arg_name = node.args.args[0].arg
-
-            # 関数内の全ての属性アクセスをチェック
-            for sub_node in ast.walk(node):
-                if isinstance(sub_node, ast.Attribute):
-                    # 第一引数に対して 'Gogh' へのアクセスがあるかチェック
-                    if (
-                            isinstance(sub_node.value, ast.Name)
-                            and sub_node.value.id == first_arg_name
-                            and sub_node.attr == 'Gogh'
-                    ):
-                        return True
-            # ここまできてもなければアクセスしてない
-            return False
-
-
-def symlog(x):
-    '''
-    定義域を負領域に拡張したlog関数です。
-    多目的最適化における目的関数同士のスケール差により
-    意図しない傾向が生ずることのの軽減策として
-    内部でsymlog処理を行います。
-    '''
-    if isinstance(x, np.ndarray):
-        ret = np.zeros(x.shape)
-        idx = np.where(x >= 0)
-        ret[idx] = np.log10(x[idx] + 1)
-        idx = np.where(x < 0)
-        ret[idx] = -np.log10(1 - x[idx])
-    else:
-        if x >= 0:
-            ret = np.log10(x + 1)
-        else:
-            ret = -np.log10(1 - x)
-
-    return ret
+# def _is_access_Gaudi(f):
+#     '''
+#     ユーザー定義関数が Gaudi にアクセスしているかどうかを簡易的に判断する。
+#     solve前に評価するstrict_constraintでsolve結果にアクセスする違反を
+#     検出するためのfool-proof策。
+#     '''
+#     # 関数fのソースコードを取得
+#     source = inspect.getsource(f)
+#
+#     # ソースコードを抽象構文木（AST）に変換
+#     tree = ast.parse(source)
+#
+#     # 関数定義を見つける
+#     for node in ast.walk(tree):
+#         if isinstance(node, ast.FunctionDef):
+#             # 関数の第一引数の名前を取得
+#             first_arg_name = node.args.args[0].arg
+#
+#             # 関数内の全ての属性アクセスをチェック
+#             for sub_node in ast.walk(node):
+#                 if isinstance(sub_node, ast.Attribute):
+#                     # 第一引数に対して 'Gogh' へのアクセスがあるかチェック
+#                     if (
+#                             isinstance(sub_node.value, ast.Name)
+#                             and sub_node.value.id == first_arg_name
+#                             and sub_node.attr == 'Gogh'
+#                     ):
+#                         return True
+#             # ここまできてもなければアクセスしてない
+#             return False
+#
+#
+# def symlog(x):
+#     '''
+#     定義域を負領域に拡張したlog関数です。
+#     多目的最適化における目的関数同士のスケール差により
+#     意図しない傾向が生ずることのの軽減策として
+#     内部でsymlog処理を行います。
+#     '''
+#     if isinstance(x, np.ndarray):
+#         ret = np.zeros(x.shape)
+#         idx = np.where(x >= 0)
+#         ret[idx] = np.log10(x[idx] + 1)
+#         idx = np.where(x < 0)
+#         ret[idx] = -np.log10(1 - x[idx])
+#     else:
+#         if x >= 0:
+#             ret = np.log10(x + 1)
+#         else:
+#             ret = -np.log10(1 - x)
+#
+#     return ret
 
 
 # class Objective:
@@ -623,15 +623,15 @@ class FemtetOptimizationCore(ABC):
     # def get_random_seed(self):
     #     return self.seed
 
-    #### マルチプロセスで pickle するときに COM や fig は持てないし持っていても仕方がないので消す
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        del state['FEM']
-        del state['process_monitor']
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
+    # #### マルチプロセスで pickle するときに COM や fig は持てないし持っていても仕方がないので消す
+    # def __getstate__(self):
+    #     state = self.__dict__.copy()
+    #     del state['FEM']
+    #     del state['process_monitor']
+    #     return state
+    #
+    # def __setstate__(self, state):
+    #     self.__dict__.update(state)
 
     # 子プロセスで FEM インスタンスを作成することを想定
     # import 元が干渉するため NX_Femtet と SW_Femtet は現状マルチプロセスにできない
@@ -660,229 +660,229 @@ class FemtetOptimizationCore(ABC):
 
     #### pre-processing methods
 
-    def add_objective(
-            self,
-            fun: Callable[[CDispatch, Any], float],
-            name: str or None = None,
-            direction: str or float = 'minimize',
-            args: tuple or None = None,
-            kwargs: dict or None = None
-    ):
-        # 引数の処理
-        if args is None:
-            args = tuple()
-        elif type(args) != tuple:
-            args = (args,)
-        if kwargs is None:
-            kwargs = dict()
+    # def add_objective(
+    #         self,
+    #         fun: Callable[[CDispatch, Any], float],
+    #         name: str or None = None,
+    #         direction: str or float = 'minimize',
+    #         args: tuple or None = None,
+    #         kwargs: dict or None = None
+    # ):
+    #     # 引数の処理
+    #     if args is None:
+    #         args = tuple()
+    #     elif type(args) != tuple:
+    #         args = (args,)
+    #     if kwargs is None:
+    #         kwargs = dict()
+    #
+    #     # name が指定されなかった場合に自動生成
+    #     if name is None:
+    #         name = self._getUniqueDefaultName(Objective.prefixForDefault, self.objectives)
+    #
+    #     # objective オブジェクトを生成
+    #     new_obj = Objective(fun, args, kwargs, name, direction, self)  # サブプロセス内で引っかからないか？
+    #
+    #     # 被っているかどうかを判定し上書き or 追加
+    #     isExisting = False
+    #     for i, existing_obj in enumerate(self.objectives):
+    #         if new_obj.name == existing_obj.name:
+    #             isExisting = True
+    #             warn('すでに登録されている名前が追加されました。上書きされます。')
+    #             self.objectives[i] = new_obj
+    #     if not isExisting:
+    #         self.objectives.append(new_obj)
 
-        # name が指定されなかった場合に自動生成
-        if name is None:
-            name = self._getUniqueDefaultName(Objective.prefixForDefault, self.objectives)
+    # def add_constraint(
+    #         self,
+    #         fun: Callable[[CDispatch, Any], float],
+    #         name: str or None = None,
+    #         lower_bound: float or None = None,
+    #         upper_bound: float or None = None,
+    #         strict: bool = True,
+    #         args: tuple or None = None,
+    #         kwargs: dict or None = None,
+    # ):
+    #     # 引数の処理
+    #     if args is None:
+    #         args = tuple()
+    #     elif type(args) != tuple:
+    #         args = (args,)
+    #     if kwargs is None:
+    #         kwargs = dict()
+    #
+    #     # strict constraint の場合、solve 前に評価したいので Gaudi へのアクセスを禁ずる
+    #     if strict:
+    #         if _is_access_Gaudi(fun):
+    #             raise Exception(
+    #                 f'関数{fun.__name__}に Gaudi へのアクセスがあります。拘束の計算において解析結果にアクセスするには、strict = False を指定してください。')
+    #
+    #     # name が指定されなかった場合に自動生成
+    #     if name is None:
+    #         name = self._getUniqueDefaultName(Constraint.prefixForDefault, self.constraints)
+    #
+    #     # Constraint オブジェクトの生成
+    #     new_cns = Constraint(fun, args, kwargs, name, lower_bound, upper_bound, strict, self)
+    #
+    #     # 被っているかどうかを判定し上書き or 追加
+    #     isExisting = False
+    #     for i, existing_cns in enumerate(self.constraints):
+    #         if new_cns.name == existing_cns.name:
+    #             isExisting = True
+    #             warn('すでに登録されている名前が追加されました。上書きされます。')
+    #             self.constraints[i] = new_cns
+    #     if not isExisting:
+    #         self.constraints.append(new_cns)
 
-        # objective オブジェクトを生成
-        new_obj = Objective(fun, args, kwargs, name, direction, self)  # サブプロセス内で引っかからないか？
+    # def add_parameter(
+    #         self,
+    #         name: str,
+    #         initial_value: float or None = None,
+    #         lower_bound: float or None = None,
+    #         upper_bound: float or None = None,
+    #         memo: str = ''
+    # ):
+    #
+    #     # 変数が Femtet にあるかどうかのチェック
+    #     if type(self.FEM) == Femtet:  # 継承した NX_Femtet とかでは Femtet には変数がない
+    #         variable_names = self.FEM.Femtet.GetVariableNames()
+    #         if name in variable_names:
+    #             femtetValue = self.FEM.Femtet.GetVariableValue(name)
+    #         else:
+    #             raise Exception(
+    #                 f'Femtet プロジェクトに変数{name}が設定されていません。現在の Femtet で登録されいてる変数は {variable_names} です。大文字・小文字の区別の注意してください。')
+    #
+    #     if initial_value is None:
+    #         initial_value = femtetValue
+    #
+    #     d = {
+    #         'name': name,
+    #         'value': initial_value,
+    #         'lbound': lower_bound,
+    #         'ubound': upper_bound,
+    #         'memo': memo,
+    #     }
+    #     df = pd.DataFrame(d, index=[0], dtype=object)
+    #
+    #     if len(self._parameter) == 0:
+    #         newdf = df
+    #     else:
+    #         newdf = pd.concat([self._parameter, df], ignore_index=True)
+    #
+    #     if self._isDfValid(newdf):
+    #         self._parameter = newdf
+    #     else:
+    #         raise Exception('パラメータの設定が不正です。')
 
-        # 被っているかどうかを判定し上書き or 追加
-        isExisting = False
-        for i, existing_obj in enumerate(self.objectives):
-            if new_obj.name == existing_obj.name:
-                isExisting = True
-                warn('すでに登録されている名前が追加されました。上書きされます。')
-                self.objectives[i] = new_obj
-        if not isExisting:
-            self.objectives.append(new_obj)
+    # def set_parameter(self, df: pd.DataFrame):
+    #
+    #     if self._isDfValid(df):
+    #         self._parameter = df
+    #     else:
+    #         raise Exception('パラメータの設定が不正です。')
 
-    def add_constraint(
-            self,
-            fun: Callable[[CDispatch, Any], float],
-            name: str or None = None,
-            lower_bound: float or None = None,
-            upper_bound: float or None = None,
-            strict: bool = True,
-            args: tuple or None = None,
-            kwargs: dict or None = None,
-    ):
-        # 引数の処理
-        if args is None:
-            args = tuple()
-        elif type(args) != tuple:
-            args = (args,)
-        if kwargs is None:
-            kwargs = dict()
+    # def get_parameter(self, format: str = 'dict'):
+    #     """
+    #     現在の変数セットを返します。
+    #
+    #     Parameters
+    #     ----------
+    #     format : str, optional
+    #         parameter format.  'df', 'values' or 'dict'.
+    #         The default is 'dict'.
+    #
+    #     Raises
+    #     ------
+    #     Exception
+    #         DESCRIPTION.
+    #
+    #     Returns
+    #     -------
+    #     TYPE
+    #         DESCRIPTION.
+    #
+    #     """
+    #     if format == 'df':
+    #         return self._parameter
+    #     elif format == 'values' or format == 'value':
+    #         return self._parameter.value.values
+    #     elif format == 'dict':
+    #         ret = {}
+    #         for i, row in self._parameter.iterrows():
+    #             ret[row['name']] = row.value
+    #         return ret
+    #     else:
+    #         raise Exception('get_parameter() got invalid format: {format}')
 
-        # strict constraint の場合、solve 前に評価したいので Gaudi へのアクセスを禁ずる
-        if strict:
-            if _is_access_Gaudi(fun):
-                raise Exception(
-                    f'関数{fun.__name__}に Gaudi へのアクセスがあります。拘束の計算において解析結果にアクセスするには、strict = False を指定してください。')
+    # def _set_process_monitor(self):
+    #     # from .visualization._dash import DashProcessMonitor
+    #     # process_monitor = DashProcessMonitor(self)
+    #     # process_monitor.start()
+    #     if len(self.objectives) == 1:
+    #         from .visualization import SimpleProcessMonitor
+    #         self.process_monitor = SimpleProcessMonitor(self)
+    #     else:
+    #         # from .visualization import UpdatableSuperFigure
+    #         from .visualization import MultiobjectivePairPlot
+    #         # from .visualization import HypervolumeMonitor
+    #         # UpdatableSuperFigure(self, HypervolumeMonitor, MultiobjectivePairPlot)
+    #         self.process_monitor = MultiobjectivePairPlot(self)
 
-        # name が指定されなかった場合に自動生成
-        if name is None:
-            name = self._getUniqueDefaultName(Constraint.prefixForDefault, self.constraints)
+    # def _isDfValid(self, df):
+    #     # # column が指定の属性をすべて有しなければ invalid
+    #     # if not all([name in df.columns for name in ['name', 'value', 'ubound', 'lbound']]):
+    #     #     return False
+    #
+    #     # # value が float でなければ invalid
+    #     # for value in df.value.values:
+    #     #     try:
+    #     #         float(value)
+    #     #     except:
+    #     #         return False
+    #
+    #     # # ubound または lbound が float 又は None でなければ invalid
+    #     # for value in df.ubound.values:
+    #     #     if value is None:
+    #     #         continue
+    #     #     try:
+    #     #         float(value)
+    #     #     except:
+    #     #         return False
+    #
+    #     # for value in df.lbound.values:
+    #     #     if value is None:
+    #     #         continue
+    #     #     try:
+    #     #         float(value)
+    #     #     except:
+    #     #         return False
+    #
+    #     # # value, ubound と lbound の上下関係がおかしければ invalid
+    #     # for i, row in df.iterrows():
+    #     #     v = row['value']
+    #     #     l = row['lbound']
+    #     #     u = row['ubound']
+    #     #
+    #     #     if l is None:
+    #     #         l = v - 1
+    #     #
+    #     #     if u is None:
+    #     #         u = v + 1
+    #     #
+    #     #     if not (l <= v <= u):
+    #     #         return False
+    #
+    #     return True
 
-        # Constraint オブジェクトの生成
-        new_cns = Constraint(fun, args, kwargs, name, lower_bound, upper_bound, strict, self)
-
-        # 被っているかどうかを判定し上書き or 追加
-        isExisting = False
-        for i, existing_cns in enumerate(self.constraints):
-            if new_cns.name == existing_cns.name:
-                isExisting = True
-                warn('すでに登録されている名前が追加されました。上書きされます。')
-                self.constraints[i] = new_cns
-        if not isExisting:
-            self.constraints.append(new_cns)
-
-    def add_parameter(
-            self,
-            name: str,
-            initial_value: float or None = None,
-            lower_bound: float or None = None,
-            upper_bound: float or None = None,
-            memo: str = ''
-    ):
-
-        # 変数が Femtet にあるかどうかのチェック
-        if type(self.FEM) == Femtet:  # 継承した NX_Femtet とかでは Femtet には変数がない
-            variable_names = self.FEM.Femtet.GetVariableNames()
-            if name in variable_names:
-                femtetValue = self.FEM.Femtet.GetVariableValue(name)
-            else:
-                raise Exception(
-                    f'Femtet プロジェクトに変数{name}が設定されていません。現在の Femtet で登録されいてる変数は {variable_names} です。大文字・小文字の区別の注意してください。')
-
-        if initial_value is None:
-            initial_value = femtetValue
-
-        d = {
-            'name': name,
-            'value': initial_value,
-            'lbound': lower_bound,
-            'ubound': upper_bound,
-            'memo': memo,
-        }
-        df = pd.DataFrame(d, index=[0], dtype=object)
-
-        if len(self._parameter) == 0:
-            newdf = df
-        else:
-            newdf = pd.concat([self._parameter, df], ignore_index=True)
-
-        if self._isDfValid(newdf):
-            self._parameter = newdf
-        else:
-            raise Exception('パラメータの設定が不正です。')
-
-    def set_parameter(self, df: pd.DataFrame):
-
-        if self._isDfValid(df):
-            self._parameter = df
-        else:
-            raise Exception('パラメータの設定が不正です。')
-
-    def get_parameter(self, format: str = 'dict'):
-        """
-        現在の変数セットを返します。
-
-        Parameters
-        ----------
-        format : str, optional
-            parameter format.  'df', 'values' or 'dict'.
-            The default is 'dict'.
-
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
-        """
-        if format == 'df':
-            return self._parameter
-        elif format == 'values' or format == 'value':
-            return self._parameter.value.values
-        elif format == 'dict':
-            ret = {}
-            for i, row in self._parameter.iterrows():
-                ret[row['name']] = row.value
-            return ret
-        else:
-            raise Exception('get_parameter() got invalid format: {format}')
-
-    def _set_process_monitor(self):
-        # from .visualization._dash import DashProcessMonitor
-        # process_monitor = DashProcessMonitor(self)
-        # process_monitor.start()
-        if len(self.objectives) == 1:
-            from .visualization import SimpleProcessMonitor
-            self.process_monitor = SimpleProcessMonitor(self)
-        else:
-            # from .visualization import UpdatableSuperFigure
-            from .visualization import MultiobjectivePairPlot
-            # from .visualization import HypervolumeMonitor
-            # UpdatableSuperFigure(self, HypervolumeMonitor, MultiobjectivePairPlot)
-            self.process_monitor = MultiobjectivePairPlot(self)
-
-    def _isDfValid(self, df):
-        # column が指定の属性をすべて有しなければ invalid
-        if not all([name in df.columns for name in ['name', 'value', 'ubound', 'lbound']]):
-            return False
-
-        # value が float でなければ invalid
-        for value in df.value.values:
-            try:
-                float(value)
-            except:
-                return False
-
-        # ubound または lbound が float 又は None でなければ invalid
-        for value in df.ubound.values:
-            if value is None:
-                continue
-            try:
-                float(value)
-            except:
-                return False
-
-        for value in df.lbound.values:
-            if value is None:
-                continue
-            try:
-                float(value)
-            except:
-                return False
-
-        # value, ubound と lbound の上下関係がおかしければ invalid
-        for i, row in df.iterrows():
-            v = row['value']
-            l = row['lbound']
-            u = row['ubound']
-
-            if l is None:
-                l = v - 1
-
-            if u is None:
-                u = v + 1
-
-            if not (l <= v <= u):
-                return False
-
-        return True
-
-    def _getUniqueDefaultName(self, prefix, objects):
-        names = [obj.name for obj in objects]
-        i = 0
-        while True:
-            name = f'{prefix}_{i}'
-            if not (name in names):
-                break
-            i += 1
-        return name
+    # def _getUniqueDefaultName(self, prefix, objects):
+    #     names = [obj.name for obj in objects]
+    #     i = 0
+    #     while True:
+    #         name = f'{prefix}_{i}'
+    #         if not (name in names):
+    #             break
+    #         i += 1
+    #     return name
 
     #### processing methods
 
@@ -941,21 +941,21 @@ class FemtetOptimizationCore(ABC):
 
         return [obj._convert(v) for obj, v in zip(self.objectives, self._objective_values)]
 
-    def _isCalculated(self, x):
-        # 提案された x が最後に計算したものと一致していれば True, ただし 1 回目の計算なら False
-        #    ひとつでも違う  1回目の計算  期待
-        #    True            True         False
-        #    False           True         False
-        #    True            False        False
-        #    False           False        True
-
-        # ひとつでも違う
-        condition1 = False
-        for _x, _p in zip(x, self._parameter['value'].values):
-            condition1 = condition1 or (float(_x) != float(_p))
-        # 1回目の計算
-        condition2 = len(self.history) == 0
-        return not (condition1) and not (condition2)
+    # def _isCalculated(self, x):
+    #     # 提案された x が最後に計算したものと一致していれば True, ただし 1 回目の計算なら False
+    #     #    ひとつでも違う  1回目の計算  期待
+    #     #    True            True         False
+    #     #    False           True         False
+    #     #    True            False        False
+    #     #    False           False        True
+    #
+    #     # ひとつでも違う
+    #     condition1 = False
+    #     for _x, _p in zip(x, self._parameter['value'].values):
+    #         condition1 = condition1 or (float(_x) != float(_p))
+    #     # 1回目の計算
+    #     condition2 = len(self.history) == 0
+    #     return not (condition1) and not (condition2)
 
     @abstractmethod
     def _main(self):

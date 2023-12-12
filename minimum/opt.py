@@ -54,14 +54,14 @@ here, me = os.path.split(__file__)
 
 
 class OptimizerBase(ABC):
-
-    def __init__(self):
-        ray.init()  # (ignore_reinit_error=True)
-        self.parameters = dict()
-        self.objectives = dict()
-        self.monitor = None
-        self.pdata = ParallelVariableNamespace()
-        self.history = History(self.pdata)
+    #
+    # def __init__(self):
+    #     ray.init()  # (ignore_reinit_error=True)
+    #     self.parameters = dict()
+    #     self.objectives = dict()
+    #     self.monitor = None
+    #     self.pdata = ParallelVariableNamespace()
+    #     self.history = History(self.pdata)
 
     # def __getstate__(self):
     #     state = self.__dict__.copy()
@@ -71,21 +71,21 @@ class OptimizerBase(ABC):
     # def __setstate__(self, state):
     #     self.__dict__.update(state)
 
-    def add_parameter(self, name, init, lb, ub):
-        self.parameters[name] = (init, lb, ub)
+    # def add_parameter(self, name, init, lb, ub):
+    #     self.parameters[name] = (init, lb, ub)
+    #
+    # def add_objective(self, name, fun, *args, **kwargs):
+    #     self.objectives[name] = (fun, args, kwargs)
 
-    def add_objective(self, name, fun, *args, **kwargs):
-        self.objectives[name] = (fun, args, kwargs)
-
-    def f(self, x):
-        if self.pdata.get_state() == 'interrupted':
-            raise UserInterruption
-        x = np.array(x)
-        objective_values = []
-        for name, (fun, args, kwargs) in self.objectives.items():
-            objective_values.append(fun(x, *args, **kwargs))
-        self.history.record(x, objective_values)
-        return objective_values
+    # def f(self, x):
+    #     if self.pdata.get_state() == 'interrupted':
+    #         raise UserInterruption
+    #     x = np.array(x)
+    #     objective_values = []
+    #     for name, (fun, args, kwargs) in self.objectives.items():
+    #         objective_values.append(fun(x, *args, **kwargs))
+    #     self.history.record(x, objective_values)
+    #     return objective_values
 
     @abstractmethod
     def _main(self, *args, **kwargs):

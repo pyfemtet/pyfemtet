@@ -99,7 +99,7 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     h, r という変数を有する解析モデルで簡易流体解析を行い, ある面の流量を 0.3 にしたい場合を想定しています.
     """
 
-    from pyfemtet.opt import FemtetOptuna
+    from pyfemtet._opt import FemtetOptuna
     from win32com.client import constants
 
 

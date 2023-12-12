@@ -37,7 +37,7 @@ class FemtetScipy(FemtetOptimizationCore):
 
         Returns
         -------
-        opt : OptimizeResult
+        _opt : OptimizeResult
             for detail, see Scipy documentation.
             https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
 

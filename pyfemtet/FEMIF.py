@@ -13,12 +13,13 @@ from .tools.DispatchUtils import Dispatch_Femtet, Dispatch_Femtet_with_specific_
 
 class FEMIF(ABC):
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         # サブプロセスで FEM を restore するときに必要
+        self.args = args
         self.kwargs = kwargs
 
     @abstractmethod
-    def check_param(self, param_name):
+    def check_param_value(self, param_name):
         pass
 
     @abstractmethod
@@ -48,15 +49,15 @@ class Femtet(FEMIF):
         self.Femtet: 'IPyDispatch' = None
 
         # femprj が指定されている
-        if femprj_path is not None
+        if femprj_path is not None:
             # auto でも connect_femtet でもいいが、その後違ったら open する
             self.connect_femtet(connect_method)
             # プロジェクトの相違をチェック
-            if self.Femtet.ProjectPath!=self.femprj_path:
+            if self.Femtet.ProjectPath != self.femprj_path:
                 self.open(self.femprj_path, self.model_name)
             # モデルが指定されていればその相違もチェック
             if self.model_name is not None:
-                if self.Femtet.AnalysisModelName!=self.model_name:
+                if self.Femtet.AnalysisModelName != self.model_name:
                     self.open(self.femprj_path, self.model_name)
 
         # femprj が指定されていない
@@ -87,13 +88,13 @@ class Femtet(FEMIF):
             raise FemtetAutomationError('接続できる Femtet のプロセスが見つかりませんでした。')
         self.connected_femtet = 'existing'
 
-    def connect_femtet(self, connect_method: str = 'new', pid: int or None = None) -> str:
+    def connect_femtet(self, connect_method: str = 'new', pid: int or None = None):
         """
         Femtet プロセスとの接続を行い、メンバー変数 Femtet にインスタンスをセットします。
 
         Parameters
         ----------
-        strategy : str, optional
+        connect_method : str, optional
             'new' or 'catch' or 'auto'. The default is 'new'.
             'new' のとき、新しい Femtet プロセスを起動し、接続します。
             'catch' のとき、既存の Femtet プロセスと接続します。
@@ -137,9 +138,22 @@ class Femtet(FEMIF):
         if not hasattr(constants, 'STATIC_C'):
             cmd = f'{sys.executable} -m win32com.client.makepy FemtetMacro'
             os.system(cmd)
-            raise Exception('Femtet python マクロ定数の設定が完了してないことを検出しました。次のコマンドにより、設定は自動で行われました（python  -m win32com.client.makepy FemtetMacro）。インタープリタを再起動してください。')
+            message = 'Femtet python マクロ定数の設定が完了してないことを検出しました.'
+            message += '次のコマンドにより、設定は自動で行われました（python  -m win32com.client.makepy FemtetMacro）.'
+            message += 'インタープリタを再起動してください.'
+            raise Exception(message)
 
-    def open(self, femprj_path: str, model_name: str or None = None ) -> None:
+    def check_param_value(self, param_name):
+        variable_names = self.Femtet.GetVariableNames()
+        if param_name in variable_names:
+            return self.Femtet.GetVariableValue(param_name)
+        else:
+            message = f'Femtet 解析モデルに変数 {param_name} がありません.'
+            message += f'現在のモデルに設定されている変数は {variable_names} です.'
+            message += '大文字・小文字の区別に注意してください.'
+            raise Exception(message)
+
+    def open(self, femprj_path: str, model_name: str or None = None) -> None:
         # 引数の処理
         self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
@@ -157,8 +171,6 @@ class Femtet(FEMIF):
             )
         if not result:
             self.Femtet.ShowLastError()
-
-
 
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
@@ -213,5 +225,8 @@ class NoFEM(FEMIF):
     def update(self, parameters):
         pass
 
+    def check_param_value(self):
+        pass
 
-
+    def quit(self):
+        pass

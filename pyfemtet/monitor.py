@@ -10,7 +10,7 @@ def update_scatter_matrix(opt):
     data = opt.history.data
 
     trace = go.Splom(
-        dimensions=[dict(label=c, values=data[c]) for c in opt.history.data.columns],
+        dimensions=[dict(label=c, values=data[c]) for c in opt.history.obj_names],
         diagonal_visible=False,
         showupperhalf=False,
     )
