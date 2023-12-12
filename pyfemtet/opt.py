@@ -19,7 +19,7 @@ from femtetutils import util, constant
 from .tools.DispatchUtils import Dispatch_Femtet, Dispatch_Femtet_with_new_process, Dispatch_Femtet_with_specific_pid, _get_pid
 
 from ._core import *
-from .FEMIF import *
+from .interface import *
 from .monitor import Monitor
 
 
@@ -500,13 +500,12 @@ class OptimizerBase(ABC):
 
         return (not condition1) and condition2
 
-    def f(self, x, message):
+    def f(self, x, message=''):
 
         x = np.array(x)
 
         # 中断指令の処理
         if self.ipv.get_state() == 'interrupted':
-            self.fem.quit()
             raise UserInterruption
 
         # アルゴリズムの関係で、すでに計算しているのにもう一度計算しようとする場合は
@@ -536,7 +535,12 @@ class OptimizerBase(ABC):
     def _setup_main(self, *args, **kwargs):
         pass
 
-    def main(self, n_trials, n_parallel, method):
+    def main(self, n_trials, n_parallel, timeout, method, **setup_kwargs):
+        # 共通引数
+        self.n_trials = n_trials
+        self.n_parallel = n_parallel
+        self.timeout = timeout
+        self.method = method
 
         # setup
         self.ipv.set_state('preparing')
@@ -545,10 +549,10 @@ class OptimizerBase(ABC):
             list(self.objectives.keys()),
             list(self.constraints.keys()),
         )
-        self._setup_main(method)
+        self._setup_main(**setup_kwargs)  # 具象クラス固有のメソッド
 
         # 計算スレッドとそれを止めるためのイベント
-        t = Thread(target=self._main, args=(n_trials,))
+        t = Thread(target=self._main, args=(self.n_trials,))
         t.start()
         self.ipv.set_state('processing')
 
@@ -559,11 +563,11 @@ class OptimizerBase(ABC):
 
         # 追加の計算プロセス
         @ray.remote
-        def _main_remote(*args, **kwargs):
-            self._main(*args, **kwargs)
+        def _main_remote(subprocess_idx):
+            self._main(subprocess_idx)
         processes = []
-        for subprocess_idx in range(n_parallel-1):
-            p = _main_remote.remote(n_trials, subprocess_idx)
+        for subprocess_idx in range(self.n_parallel-1):
+            p = _main_remote.remote(subprocess_idx)
             processes.append(p)
 
         start = time()

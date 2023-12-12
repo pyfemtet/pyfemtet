@@ -41,7 +41,7 @@ class Femtet(FEMIF):
 
     def __init__(self, femprj_path=None, model_name=None, connect_method='auto', pid=None):
         self.connected_femtet = 'unconnected'
-        if self.femprj_path is None:
+        if femprj_path is None:
             self.femprj_path = None
         else:
             self.femprj_path = os.path.abspath(femprj_path)
@@ -65,7 +65,7 @@ class Femtet(FEMIF):
             # new だと解析すべき femprj がわからない
             if connect_method == 'new':
                 Exception('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
-
+            print('femprj_path が指定されていないため、開いている Femtet との接続を試行します。')
             self.connect_femtet('catch', pid)
             # 接続した Femtet インスタンスのプロジェクト名などを保管する
             self.femprj_path = self.Femtet.ProjectPath
@@ -81,9 +81,9 @@ class Femtet(FEMIF):
     def _connect_existing_femtet(self, pid: int or None = None):
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
-            self.Femtet, my_pid = Dispatch_Femtet_with_specific_pid(pid)
-        else:
             self.Femtet, my_pid = Dispatch_Femtet(timeout=5)
+        else:
+            self.Femtet, my_pid = Dispatch_Femtet_with_specific_pid(pid)
         if my_pid == 0:
             raise FemtetAutomationError('接続できる Femtet のプロセスが見つかりませんでした。')
         self.connected_femtet = 'existing'
@@ -171,7 +171,6 @@ class Femtet(FEMIF):
             )
         if not result:
             self.Femtet.ShowLastError()
-
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
         # 変数更新のための処理
