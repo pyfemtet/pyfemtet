@@ -302,7 +302,7 @@ class History:
 
 class OptimizerBase(ABC):
 
-    def __init__(fem: FEMIF = None, self, history_path=None):
+    def __init__(self, fem: FEMIF = None, history_path=None):
 
         print('---initialize---')
 
