@@ -156,10 +156,9 @@ class Constraint:
 
 class History:
 
-    def __init__(self, history_path, femopt):
+    def __init__(self, history_path, ipv):
         self.path = history_path  # .csv
-        self.femopt = femopt
-        self.ipv = self.femopt.ipv
+        self.ipv = ipv
         self.data = pd.DataFrame()
         self.param_names = []
         self.obj_names = []
@@ -213,8 +212,8 @@ class History:
 
         # calc
         self.data['trial'] = np.arange(len(self.data))
-        self._calc_non_domi()
-        self._calc_hypervolume()
+        self._calc_non_domi(objectives)
+        self._calc_hypervolume(objectives)
 
         # serialize
         try:
@@ -222,13 +221,13 @@ class History:
         except PermissionError:
             print(f'warning: {self.path} がロックされています。データはロック解除後に保存されます。')
 
-    def _calc_non_domi(self):
+    def _calc_non_domi(self, objectives):
 
         # 目的関数の履歴を取り出してくる
         solution_set = self.data[self.obj_names].copy()
 
         # 最小化問題の座標空間に変換する
-        for name, objective in self.femopt.objectives.items():
+        for name, objective in objectives.items():
             solution_set[name] = solution_set[name].map(objective._convert)
 
             # 非劣解の計算
@@ -241,7 +240,7 @@ class History:
 
         del solution_set
 
-    def _calc_hypervolume(self):
+    def _calc_hypervolume(self, objectives):
         """
         hypervolume 履歴を更新する
         ※ reference point が変わるたびに hypervolume を計算しなおす必要がある
@@ -258,7 +257,7 @@ class History:
         if n <= 1:
             return np.nan
         # 最小化問題に convert
-        for i, (name, objective) in enumerate(self.femopt.objectives.items()):
+        for i, (name, objective) in enumerate(objectives.items()):
             for j in range(n):
                 pareto_set[j, i] = objective._convert(pareto_set[j, i])
                 #### reference point の計算[1]
@@ -308,13 +307,13 @@ class History:
                     df.loc[i, 'hypervolume'] = 0
 
 
-class OptimizerBase(ABC):
+class OptimizerBase:
 
     def __init__(self, fem: FEMIF = None, history_path=None):
 
         print('---initialize---')
 
-        ray.init()  # (ignore_reinit_error=True)
+        ray.init(ignore_reinit_error=True)
 
         # 引数の処理
         if history_path is None:
@@ -330,7 +329,7 @@ class OptimizerBase(ABC):
         self.parameters = pd.DataFrame()
         self.objectives = dict()
         self.constraints = dict()
-        self.history = History(history_path, self)
+        self.history = History(history_path, self.ipv)
         self.monitor: Monitor = None
         self.seed: int or None = None
         self.message = ''
@@ -541,8 +540,8 @@ class OptimizerBase(ABC):
         # minimize
         return [obj._convert(v) for (_, obj), v in zip(self.objectives.items(), self.obj_values)]
 
-    @abstractmethod
-    def _main(self, *args, **kwargs):
+
+    def _main(self):
         pass
 
     def _setup_main(self, *args, **kwargs):
@@ -565,7 +564,7 @@ class OptimizerBase(ABC):
         self._setup_main(**setup_kwargs)  # 具象クラス固有のメソッド
 
         # 計算スレッドとそれを止めるためのイベント
-        t = Thread(target=self._main, args=(self.n_trials,))
+        t = Thread(target=self._main)
         t.start()
         self.ipv.set_state('processing')
 
@@ -579,6 +578,8 @@ class OptimizerBase(ABC):
         def _main_remote(subprocess_idx):
             self.set_fem()  # プロセス化されたときに monitor と fem を落としている
             self._main(subprocess_idx)
+            # self.fem.quit()
+            # del self.fem
         obj_refs = []
         for subprocess_idx in range(self.n_parallel-1):
             obj_ref = _main_remote.remote(subprocess_idx)

@@ -47,10 +47,10 @@ if __name__ == '__main__':
     femopt.add_objective(volume, '体積(mm3)')
 
     # add non-strict constraint
-    femopt.add_constraint(bottom_area_1, '底面積1(mm2)', 100, strict=False)
+    # femopt.add_constraint(bottom_area_1, '底面積1(mm2)', 100, strict=False)
 
     # add strict constraint
-    femopt.add_constraint(bottom_area_2, '底面積2(mm2)', 99, args=femopt)
+    # femopt.add_constraint(bottom_area_2, '底面積2(mm2)', 99, args=femopt)
 
     # overwrite constraint
     femopt.add_constraint(bottom_area_2, '底面積2(mm2)', 50, args=femopt)
@@ -60,8 +60,8 @@ if __name__ == '__main__':
 
 
     # femopt.main(n_trials=3)  # 動くか
-    femopt.main(n_trials=20)  # monitor 及び 中断が効くか
-    # femopt.main(n_trials=12, n_parallel=3)  # 並列が動くか
+    # femopt.main(n_trials=20)  # monitor 及び 中断が効くか
+    femopt.main(n_trials=30, n_parallel=3)  # 並列が動くか
 
 
     print(femopt.history.data)

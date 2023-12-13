@@ -10,24 +10,45 @@ def update_scatter_matrix(femopt):
     data = femopt.history.data
     obj_names = femopt.history.obj_names
 
-    if len(data) == 0:
+    if len(obj_names) == 0:
         return go.Figure()
-
-    print('-----monitor-----')
-    print(data)
-    print(obj_names)
-    print([dict(label=c, values=data[c]) for c in obj_names])
-
-    trace = go.Splom(
-        dimensions=[dict(label=c, values=data[c]) for c in obj_names],
-        diagonal_visible=False,
-        showupperhalf=False,
-    )
-
-    # figure layout
-    layout = go.Layout(
-        title_text="多目的ペアプロット",
-    )
+    elif len(obj_names) == 1:
+        trace = go.Scatter(
+            x=tuple(range(len(obj_names[0]))),
+            y=data[obj_names[0]],
+            mode='markers+lines',
+        )
+        layout = go.Layout(
+            dict(
+                title_text="単目的ペアプロット",
+                xaxis_title="解析実行回数(回)",
+                yaxis_title=obj_names[0],
+            )
+        )
+    elif len(obj_names) == 2:
+        trace = go.Scatter(
+            x=data[obj_names[0]],
+            y=data[obj_names[1]],
+            mode='markers',
+        )
+        layout = go.Layout(
+            dict(
+                title_text="多目的ペアプロット",
+                xaxis_title=obj_names[0],
+                yaxis_title=obj_names[1],
+            )
+        )
+    elif len(obj_names) >= 3:
+        trace = go.Splom(
+            dimensions=[dict(label=c, values=data[c]) for c in obj_names],
+            diagonal_visible=False,
+            showupperhalf=False,
+        )
+        layout = go.Layout(
+            dict(
+                title_text="多目的ペアプロット",
+            )
+        )
 
     # figure
     fig = go.Figure(
@@ -59,7 +80,7 @@ class Monitor(object):
                     dcc.Interval(
                         id='interval-component',
                         interval=1*1000,  # in milliseconds
-                        n_intervals=0
+                        n_intervals=0,
                     ),
                     html.Button('中断', id='interrupt-button')
                 ]
