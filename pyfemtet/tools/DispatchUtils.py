@@ -107,7 +107,7 @@ def Dispatch_Femtet(timeout=10, subprocess_idx=None):
         if subprocess_idx is not None:
             print(f'  from subprocess{subprocess_idx};  pid of connected Femtet is {pid}')
         else:
-            print(f'pid of connected Femtet is {pid}')
+            print(f'★ pid of connected Femtet is {pid}')
 
     return Femtet, pid
 
@@ -174,7 +174,7 @@ def Dispatch_Femtet_with_new_process():
     pid = util.get_last_executed_femtet_process_id()
     if pid==0:
         raise Exception('起動された Femtet の認識に失敗しました')
-    if pp: print('target pid', pid)
+    if pp: print('target pid is', pid)
     
     # ウィンドウが出てくるまで待つ
     timeout = 30
@@ -212,7 +212,7 @@ def Dispatch_Femtet_with_specific_pid(pid):
         shared_flags = manager.list()
         for _ in range(len(pids)+1): # [-1]は自プロセス用のフラグ
             shared_flags.append(False)
-        if pp: print('initial shared_flags', shared_flags[:])
+        if pp: print(f'(initial shared_flags are {shared_flags[:]})', )
 
         # プロセスの準備
         processes = []
@@ -234,7 +234,7 @@ def Dispatch_Femtet_with_specific_pid(pid):
             if all(shared_flags[:-1]):
                 if pp: print('All subprocesses seem to be connected or finished.')
                 break
-            if pp: print('shared_flags', shared_flags[:])
+            if pp: print(f'(shared_flags are {shared_flags[:]} ; wait for signals from subprocess...')
             time.sleep(1)
 
         # 子プロセスの Dispatch 完了を待って Dispatch

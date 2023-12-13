@@ -61,7 +61,7 @@ def _check_lb_ub(lb, ub, name=None):
             raise Exception(message)
 
 
-def _is_access_gaudi(fun):
+def _is_access_gogh(fun):
 
     # 関数fのソースコードを取得
     source = inspect.getsource(fun)
@@ -98,6 +98,12 @@ def _is_feasible(value, lb, ub):
         return lb < value < ub
     else:
         return True
+
+
+def _ray_are_alive(refs):
+    ready_refs, remaining_refs = ray.wait(refs, num_returns=1, timeout=0)
+    return len(remaining_refs) > 0
+
 
 class Objective:
 
@@ -151,7 +157,7 @@ class Constraint:
 class History:
 
     def __init__(self, history_path, femopt):
-        self.path = history_path
+        self.path = history_path  # .csv
         self.femopt = femopt
         self.ipv = self.femopt.ipv
         self.data = pd.DataFrame()
@@ -209,6 +215,12 @@ class History:
         self.data['trial'] = np.arange(len(self.data))
         self._calc_non_domi()
         self._calc_hypervolume()
+
+        # serialize
+        try:
+            self.data.to_csv(self.path)
+        except PermissionError:
+            print(f'warning: {self.path} がロックされています。データはロック解除後に保存されます。')
 
     def _calc_non_domi(self):
 
@@ -448,10 +460,10 @@ class OptimizerBase(ABC):
                     break
             name = candidate
 
-        # strict constraint の場合、solve 前に評価したいので Gaudi へのアクセスを禁ずる
+        # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
         if strict:
-            if _is_access_gaudi(fun):
-                message = f'関数 {fun.__name__} に Gaudi （Femtet 解析結果）へのアクセスがあります.'
+            if _is_access_gogh(fun):
+                message = f'関数 {fun.__name__} に Gogh （Femtet 解析結果）へのアクセスがあります.'
                 message += 'デフォルトでは constraint は解析前に評価され, 条件を満たさない場合解析を行いません.'
                 message += '拘束に解析結果を含めたい場合は, strict=False を設定してください.'
                 raise Exception(message)
@@ -567,21 +579,22 @@ class OptimizerBase(ABC):
         def _main_remote(subprocess_idx):
             self.set_fem()  # プロセス化されたときに monitor と fem を落としている
             self._main(subprocess_idx)
-        processes = []
+        obj_refs = []
         for subprocess_idx in range(self.n_parallel-1):
-            p = _main_remote.remote(subprocess_idx)
-            processes.append(p)
+            obj_ref = _main_remote.remote(subprocess_idx)
+            obj_refs.append(obj_ref)
 
         start = time()
         while True:
-            should_terminate = [not t.is_alive()]
+            should_terminate = [not t.is_alive(), not _ray_are_alive(obj_refs)]
             if all(should_terminate):  # all tasks are killed
                 break
             sleep(1)
         end = time()
 
+        # 一応
         t.join()
-        ray.wait(processes)
+        ray.wait(obj_refs)
 
         print(f'Optimization finished. Elapsed time is {end - start} sec.')
         self.ipv.set_state('terminated')

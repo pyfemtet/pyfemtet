@@ -5,12 +5,21 @@ from dash.dependencies import Output, Input
 import plotly.graph_objs as go
 
 
-def update_scatter_matrix(opt):
+def update_scatter_matrix(femopt):
     # data
-    data = opt.history.data
+    data = femopt.history.data
+    obj_names = femopt.history.obj_names
+
+    if len(data) == 0:
+        return go.Figure()
+
+    print('-----monitor-----')
+    print(data)
+    print(obj_names)
+    print([dict(label=c, values=data[c]) for c in obj_names])
 
     trace = go.Splom(
-        dimensions=[dict(label=c, values=data[c]) for c in opt.history.obj_names],
+        dimensions=[dict(label=c, values=data[c]) for c in obj_names],
         diagonal_visible=False,
         showupperhalf=False,
     )
@@ -31,11 +40,11 @@ def update_scatter_matrix(opt):
 
 class Monitor(object):
 
-    def __init__(self, opt):
+    def __init__(self, femopt):
 
-        self.opt = opt
+        self.femopt = femopt
 
-        log_path = self.opt.history.path.replace('.csv', '.uilog')
+        log_path = self.femopt.history.path.replace('.csv', '.uilog')
         l = logging.getLogger()
         l.addHandler(logging.FileHandler(log_path))
 
@@ -63,7 +72,7 @@ class Monitor(object):
             Input('interrupt-button', 'n_clicks'))
         def interrupt(_):
             if _ is not None:
-                self.opt.ipv.set_state('interrupted')
+                self.femopt.ipv.set_state('interrupted')
             return ''
 
         # scatter matrix
@@ -71,7 +80,7 @@ class Monitor(object):
             Output('scatter-matrix-graph', 'figure'),
             Input('interval-component', 'n_intervals'))
         def update_sm(_):
-            return update_scatter_matrix(self.opt)
+            return update_scatter_matrix(self.femopt)
 
         # 終了していたら更新をやめる、中断ボタンを disable にする
         @self.app.callback(
@@ -79,7 +88,7 @@ class Monitor(object):
              Output('interrupt-button', 'disabled'),],
             [Input('interval-component', 'n_intervals'),])
         def stop_interval(_):
-            state = self.opt.ipv.get_state()
+            state = self.femopt.ipv.get_state()
             if state == 'interrupted' or state == 'terminated':
                 max_intervals = 0
                 button_disable = True

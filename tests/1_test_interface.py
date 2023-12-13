@@ -1,10 +1,14 @@
+import os
 from pyfemtet.opt.interface import Femtet, NoFEM
+
+
+here, me = os.path.split(__file__)
 
 
 if __name__ == '__main__':
     fem1 = NoFEM()
 
-    path = r'C:\Users\mm11592\Documents\myFiles2\working\1_PyFemtetOpt\pyFemtetDev2\PyFemtet\tests\some_project.femprj'
+    path = os.path.join(here, f'{me.replace(".py", "")}/some_project.femprj')
 
     # fem2 = Femtet(femprj_path=None, model_name=None, connect_method='auto')
     # fem4 = Femtet(femprj_path=path, model_name=None, connect_method='catch')

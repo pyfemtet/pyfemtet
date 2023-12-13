@@ -20,14 +20,17 @@ def objective_y(femopt):
     r, theta, fai = femopt.get_parameter('values')
     return r * np.cos(theta) * np.sin(fai)
 
+
 def objective_z(femopt):
     r, theta, fai = femopt.get_parameter('values')
     return r * np.sin(theta)
 
+
 def constraint_y(femopt):
     y = objective_y(femopt)
     return y
-    
+
+
 def constraint_z(femopt):
     z = objective_z(femopt)
     return z
@@ -39,9 +42,9 @@ if __name__ == '__main__':
     femopt.add_parameter('r', .5, 0, 1)
     femopt.add_parameter('theta', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
     femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
-    femopt.add_objective(objective_x, 'x', args=femopt)
-    femopt.add_objective(objective_y, 'y', args=femopt)
-    femopt.add_objective(objective_z, 'z', args=femopt)
+    femopt.add_objective(objective_x, 'x(mm)', args=femopt)
+    femopt.add_objective(objective_y, 'y(mm)', args=femopt)
+    femopt.add_objective(objective_z, 'z(mm)', args=femopt)
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)
     # femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
     # print(femopt.FEM)
@@ -80,12 +83,12 @@ if __name__ == '__main__':
     print(femopt.history.data)
 
 
-    # optuna db との比較
-    import optuna
-    study = optuna.load_study(study_name=femopt.study_name, storage=femopt.storage)
-    df = study.trials_dataframe()
-    idx = df['state'] == 'COMPLETE'
-    print(len(df[idx]))
+    # # optuna db との比較
+    # import optuna
+    # study = optuna.load_study(study_name=femopt.study_name, storage=femopt.storage)
+    # df = study.trials_dataframe()
+    # idx = df['state'] == 'COMPLETE'
+    # print(len(df[idx]))
 
 
 
