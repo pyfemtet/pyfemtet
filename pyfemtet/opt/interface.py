@@ -128,13 +128,14 @@ class Femtet(FEMIF):
             print('Start to connect femtet. This process is exclusive.')
             while True:
                 print(f'My subprocess_idx is {subprocess_idx}')
-                print(f'Allowed idx is {ipv.get_allowed_idx()}')
-                if subprocess_idx == ipv.get_allowed_idx():
+                print(f'Allowed idx is {self.ipv.get_allowed_idx()}')
+                if subprocess_idx == self.ipv.get_allowed_idx():
                     break
                 print(f'Wait to be permitted.')
                 sleep(1)
+            print(f'Permitted.')
             self.connect_and_open_femtet()
-            ipv.set_allowed_idx(subprocess_idx+1)
+            self.ipv.set_allowed_idx(subprocess_idx+1)
 
         # restore するための情報保管なので上記処理結果を反映する
         super().__init__(
@@ -327,7 +328,8 @@ class Femtet(FEMIF):
         try:
             # Femtet プロセスを終了する（自動保存しないよう保存する）
             print(f'try to close Femtet.exe')
-            self.quit()
+            self.Femtet.SaveProjectIgnoreHistory(self.Femtet.Project, True)  # 動いてない？？
+            util.close_femtet(self.Femtet.hWnd)
 
             # 一時ファイルを削除する
             sleep(1)

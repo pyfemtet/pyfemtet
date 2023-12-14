@@ -563,7 +563,7 @@ class OptimizerBase(ABC):
 
         # 計算スレッドとそれを止めるためのイベント
         t = Thread(target=self._main)
-        t.start()
+        t.start()  # Exception が起きてもここでは検出できないし、メインスレッドは落ちない
         self.ipv.set_state('processing')
 
         # モニタースレッド
@@ -582,7 +582,10 @@ class OptimizerBase(ABC):
             print('Start to setup parallel process.')
             self.fem.parallel_setup(_subprocess_idx)
             print('Start parallel optimization.')
-            self._main(_subprocess_idx)
+            try:
+                self._main(_subprocess_idx)
+            except UserInterruption:
+                pass
             print('Finish parallel optimization.')
             self.fem.parallel_terminate()
             print('Finish parallel process.')
