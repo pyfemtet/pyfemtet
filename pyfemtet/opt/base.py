@@ -131,8 +131,15 @@ class Objective:
 
         return ret
 
-    def calc(self):
-        return self.fun(*self.args, **self.kwargs)
+    def calc(self, fem):
+
+        args = self.args
+
+        # Femtet 特有の処理
+        if isinstance(fem, Femtet):
+            args = (fem.Femtet, *args)
+
+        return self.fun(*args, **self.kwargs)
 
 
 class Constraint:
@@ -150,8 +157,15 @@ class Constraint:
         self.ub = ub
         self.strict = strict
 
-    def calc(self):
-        return self.fun(*self.args, **self.kwargs)
+    def calc(self, fem):
+
+        args = self.args
+
+        # Femtet 特有の処理
+        if isinstance(fem, Femtet):
+            args = (fem.Femtet, *args)
+
+        return self.fun(*args, **self.kwargs)
 
 
 class History:
@@ -352,6 +366,8 @@ class OptimizerBase:
         state = self.__dict__.copy()
         del state['fem']
         del state['monitor']
+        del state['objectives']
+        del state['constraints']
         return state
 
     def __setstate__(self, state):
@@ -425,9 +441,10 @@ class OptimizerBase:
                     break
             name = candidate
 
-        # Femtet 特有の処理
-        if isinstance(self.fem, Femtet):
-            args = (self.fem.Femtet, *args)
+        # 以下の処理はここで行うと object インスタンスが unserializable になる
+        # # Femtet 特有の処理
+        # if isinstance(self.fem, Femtet):
+        #     args = (self.fem.Femtet, *args)
 
         self.objectives[name] = Objective(fun, name, direction, args, kwargs)
 
@@ -466,10 +483,6 @@ class OptimizerBase:
                 message += 'デフォルトでは constraint は解析前に評価され, 条件を満たさない場合解析を行いません.'
                 message += '拘束に解析結果を含めたい場合は, strict=False を設定してください.'
                 raise Exception(message)
-
-        # Femtet 特有の処理
-        if isinstance(self.fem, Femtet):
-            args = (self.fem.Femtet, *args)
 
         self.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
 
@@ -531,8 +544,8 @@ class OptimizerBase:
             self.fem.update(self.parameters)
 
             # 計算
-            self.obj_values = [obj.calc() for _, obj in self.objectives.items()]
-            self.cns_values = [cns.calc() for _, cns in self.constraints.items()]
+            self.obj_values = [obj.calc(self.fem) for _, obj in self.objectives.items()]
+            self.cns_values = [cns.calc(self.fem) for _, cns in self.constraints.items()]
 
             # 記録
             self.history.record(self.parameters, self.objectives, self.constraints, self.obj_values, self.cns_values, message)

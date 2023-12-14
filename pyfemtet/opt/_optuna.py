@@ -84,7 +84,7 @@ class OptimizerOptuna(OptimizerBase):
 
         # strict 拘束の計算
         self.parameters['value'] = x
-        tmp = [[cns.calc(), cns.lb, cns.ub, name] for name, cns in self.constraints.items() if cns.strict]
+        tmp = [[cns.calc(self.fem), cns.lb, cns.ub, name] for name, cns in self.constraints.items() if cns.strict]
         for val, lb, ub, name in tmp:
             if lb is not None:
                 if not (lb <= val):
