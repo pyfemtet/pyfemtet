@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 import os
 import sys
 from time import sleep
+import tempfile
+import shutil
 
 from win32com.client import constants
 from femtetutils import util
@@ -22,33 +24,80 @@ from pyfemtet.tools.DispatchUtils import (
 
 class FEMIF(ABC):
 
-    def __init__(self, *args, **kwargs):
-        # サブプロセスで FEM を restore するときに必要
-        self.args = args
+    def __init__(self, **kwargs):
+        """サブプロセスで FEM を restore するときに必要な情報.
+
+        ユーザーが指定した args, kwargs を保存する.
+        具象クラスでは super().__init__ にすべての引数を
+        キーワード付きで保存すること.
+
+        """
         self.kwargs = kwargs
 
     @abstractmethod
-    def check_param_value(self, param_name):
+    def check_param_value(self, param_name) -> float:
+        """
+
+        Parameters
+        ----------
+        param_name : str
+
+        Raises
+        ----------
+        Exception
+            param_name が FEM に存在しない
+
+        Returns
+        -------
+        value : float
+
+        """
         pass
 
     @abstractmethod
     def update(self, parameters: 'pd.DataFrame') -> None:
-        """
-        dict に基づいて FEM モデルを更新し
-        FEM 解析を行うことで
-        self.obj_values と self.cns_values を更新する
+        """提案された parameters に基づいて FEM 解析を更新する
+
+        Parameters
+        ----------
+        parameters : pd.DataFrame
+            最低でも name, value を有する.
+
+        Raises
+        ----------
+        ModelError, MeshError, SolveError
+            モデルの更新, 解析に失敗した場合.
+
+        Returns
+        -------
+        None
+
+
         """
         pass
 
-    @abstractmethod
-    def quit(self):
+    def quit(self, *args, **kwargs):
+        """デストラクタ."""
         pass
 
+    def parallel_setup(self, subprocess_idx, *args, **kwargs):
+        """サブプロセスで呼ばれた場合のコンストラクタ."""
+        pass
+
+    def parallel_terminate(self, *args, **kwargs):
+        """サブプロセスで呼ばれた場合のデストラクタ."""
+        pass
 
 
 class Femtet(FEMIF):
 
-    def __init__(self, femprj_path=None, model_name=None, connect_method='auto', pid=None):
+    def __init__(
+            self,
+            femprj_path=None,
+            model_name=None,
+            connect_method='auto',
+            pid=None
+    ):
         self.connected_femtet = 'unconnected'
         if femprj_path is None:
             self.femprj_path = None
@@ -80,8 +129,12 @@ class Femtet(FEMIF):
             self.femprj_path = self.Femtet.ProjectPath
             self.model_name = self.Femtet.AnalysisModelName
 
-        # 次にこのインスタンスを作るときはこういったことを気にしなくていいようにする
-        super().__init__(self.femprj_path, self.model_name, 'auto')  # pid は登録してはダメ
+        super().__init__(
+            femprj_path=femprj_path,
+            model_name=model_name,
+            connect_method=connect_method,
+            pid=pid,
+        )
 
     def _connect_new_femtet(self):
         self.Femtet, _ = Dispatch_Femtet_with_new_process()
@@ -221,11 +274,34 @@ class Femtet(FEMIF):
         self.solve()
 
     def quit(self):
-        # 上書き保存
         self.Femtet.SaveProject(self.Femtet.Project, True)
-        # 閉じる
-        hwnd = self.Femtet.hWnd
-        util.close_femtet(hwnd, 10, True)
+        util.close_femtet(self.Femtet.hWnd)
+
+    def parallel_setup(self, subprocess_idx):
+        # .Result の干渉を回避するため、
+        # サブプロセスならばプロジェクトを別名保存する
+        self.td = tempfile.mkdtemp()
+        print(self.td)
+        name = f'subprocess{subprocess_idx}'
+        femprj_path = os.path.join(self.td, f'{name}.femprj')
+        result = self.Femtet.SaveProject(femprj_path, True)
+        if not result:
+            self.Femtet.ShowLastError()
+
+    def parallel_terminate(self):
+        try:
+            # Femtet プロセスを終了する（自動保存しないよう保存する）
+            print(f'try to close Femtet.exe')
+            self.quit()
+
+            # 一時ファイルを削除する
+            sleep(1)
+            try:
+                shutil.rmtree(self.td)
+            except PermissionError:
+                pass  # 諦める
+        except:
+            pass  # 何かがあってもプロセス全体が正常終了することを優先
 
 
 class NoFEM(FEMIF):

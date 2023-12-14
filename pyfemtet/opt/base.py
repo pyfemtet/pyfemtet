@@ -310,7 +310,7 @@ class History:
                     df.loc[i, 'hypervolume'] = 0
 
 
-class OptimizerBase:
+class OptimizerBase(ABC):
 
     def __init__(self, fem: FEMIF = None, history_path=None):
 
@@ -339,8 +339,7 @@ class OptimizerBase:
         self.obj_values: [float] = []
         self.cns_values: [float] = []
         self._fem_class = type(self.fem)
-        self._fem_args = self.fem.args
-        self._fem_kwargs = self.fem.kwargs
+        self._fem_kwargs = self.fem.kwargs.copy()
 
         # 初期化
         self.parameters = pd.DataFrame(
@@ -361,12 +360,10 @@ class OptimizerBase:
         self.__dict__.update(state)
 
     def set_fem(self, **extra_kwargs):
-        if extra_kwargs is not None:
-            self._fem_kwargs.update(extra_kwargs)
-
+        fem_kwargs = self._fem_kwargs.copy()
+        fem_kwargs.update(extra_kwargs)
         self.fem = self._fem_class(
-            *self._fem_args,
-            **self._fem_kwargs,
+            **fem_kwargs,
         )
 
     def set_random_seed(self, seed: int):
@@ -541,7 +538,8 @@ class OptimizerBase:
         return [obj._convert(v) for (_, obj), v in zip(self.objectives.items(), self.obj_values)]
 
 
-    def _main(self):
+    @abstractmethod
+    def _main(self, *args, **kwargs):
         pass
 
     def _setup_main(self, *args, **kwargs):
@@ -573,13 +571,15 @@ class OptimizerBase:
         tm = Thread(target=self.monitor.start_server)
         tm.start()
 
-        # 追加の計算プロセス
+        # 追加の計算プロセスが行う処理の定義
         @ray.remote
-        def _main_remote(subprocess_idx):
+        def _main_remote(_subprocess_idx):
             self.set_fem()  # プロセス化されたときに monitor と fem を落としている
-            self._main(subprocess_idx)
-            # self.fem.quit()
-            # del self.fem
+            self.fem.parallel_setup(_subprocess_idx)
+            self._main(_subprocess_idx)
+            self.fem.parallel_terminate()
+
+        # 追加の計算プロセス
         obj_refs = []
         for subprocess_idx in range(self.n_parallel-1):
             obj_ref = _main_remote.remote(subprocess_idx)
@@ -599,3 +599,5 @@ class OptimizerBase:
 
         print(f'Optimization finished. Elapsed time is {end - start} sec.')
         self.ipv.set_state('terminated')
+        print('計算が終了しました. ウィンドウを閉じると終了します.')
+        print(f'結果は{self.history.path}を確認してください.')
