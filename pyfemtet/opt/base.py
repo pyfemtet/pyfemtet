@@ -575,7 +575,10 @@ class OptimizerBase(ABC):
         @ray.remote
         def parallel_process(_subprocess_idx):
             print('Start to re-initialize fem object.')
-            self.set_fem()  # プロセス化されたときに monitor と fem を落としている
+            self.set_fem(
+                subprocess_idx=_subprocess_idx,
+                ipv=self.ipv,
+            )  # プロセス化されたときに monitor と fem を落としている
             print('Start to setup parallel process.')
             self.fem.parallel_setup(_subprocess_idx)
             print('Start parallel optimization.')

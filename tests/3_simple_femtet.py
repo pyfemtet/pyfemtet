@@ -31,7 +31,8 @@ def bottom_area_2(Femtet, femopt):
 if __name__ == '__main__':
 
     path = os.path.join(here, f'{me.replace(".py", "")}/simple.femprj')
-    fem = Femtet(femprj_path=path, model_name=None, connect_method='auto')
+    # fem = Femtet(femprj_path=path, model_name=None, connect_method='auto')
+    fem = Femtet()  # 開いている Femtet を捕まえる
 
     femopt = OptimizerOptuna(fem)
 
@@ -61,7 +62,7 @@ if __name__ == '__main__':
 
     # femopt.main(n_trials=3)  # 動くか
     # femopt.main(n_trials=20)  # monitor 及び 中断が効くか
-    femopt.main(n_trials=30, n_parallel=2)  # 並列が動くか
+    femopt.main(n_trials=30, n_parallel=3)  # 並列が動くか
 
 
     print(femopt.history.data)

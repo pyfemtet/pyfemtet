@@ -35,6 +35,7 @@ class _InterprocessVariables:
     def __init__(self):
         self.state = 'undefined'
         self.history = []
+        self.allowed_idx = 0
 
     def set_state(self, state):
         self.state = state
@@ -47,6 +48,12 @@ class _InterprocessVariables:
 
     def get_history(self) -> 'ObjectRef':
         return self.history
+
+    def set_allowed_idx(self, idx):
+        self.allowed_idx = idx
+
+    def get_allowed_idx(self):
+        return self.allowed_idx
 
 
 class InterprocessVariables:
@@ -66,5 +73,11 @@ class InterprocessVariables:
 
     def get_history(self):
         return ray.get(self.ns.get_history.remote())
+
+    def set_allowed_idx(self, idx):
+        self.ns.set_allowed_idx.remote(idx)
+
+    def get_allowed_idx(self):
+        return ray.get(self.ns.get_allowed_idx.remote())
 
 

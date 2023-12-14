@@ -14,6 +14,7 @@ from .core import (
     ModelError,
     MeshError,
     SolveError,
+    InterprocessVariables,
 )
 from pyfemtet.tools.DispatchUtils import (
     Dispatch_Femtet,
@@ -24,9 +25,10 @@ from pyfemtet.tools.DispatchUtils import (
 
 class FEMIF(ABC):
 
-    def __init__(self, **kwargs):
-        """サブプロセスで FEM を restore するときに必要な情報.
+    def __init__(self, subprocess_idx: int = None, ipv: InterprocessVariables = None, **kwargs):
+        """サブプロセス等で FEM を restore するときに必要な情報.
 
+        具象クラスでは最低でも subprocess_idx, ipv を引数にとること.
         ユーザーが指定した args, kwargs を保存する.
         具象クラスでは super().__init__ にすべての引数を
         キーワード付きで保存すること.
@@ -96,44 +98,51 @@ class Femtet(FEMIF):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            pid=None
+            pid=None,
+            subprocess_idx=None,
+            ipv=None,
     ):
-        self.connected_femtet = 'unconnected'
+        # 引数の処理
         if femprj_path is None:
             self.femprj_path = None
         else:
             self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
+        self.connect_method = connect_method
+        self.pid = pid
+        self.subprocess_idx = subprocess_idx
+        self.ipv = ipv
+
+        # その他の初期化
         self.Femtet: 'IPyDispatch' = None
+        self.connected_femtet = 'unconnected'
 
-        # femprj が指定されている
-        if femprj_path is not None:
-            # auto でも connect_femtet でもいいが、その後違ったら open する
-            self.connect_femtet(connect_method)
-            # プロジェクトの相違をチェック
-            if self.Femtet.ProjectPath != self.femprj_path:
-                self.open(self.femprj_path, self.model_name)
-            # モデルが指定されていればその相違もチェック
-            if self.model_name is not None:
-                if self.Femtet.AnalysisModelName != self.model_name:
-                    self.open(self.femprj_path, self.model_name)
+        # サブプロセスでなければ何も考えず Femtet と接続する
+        if subprocess_idx is None:
+            self.connect_and_open_femtet()
 
-        # femprj が指定されていない
+        # サブプロセスから呼ばれているならば新しい Femtet と接続する。
+        # connect_and_open_femtet は排他処理で行う。
         else:
-            # new だと解析すべき femprj がわからない
-            if connect_method == 'new':
-                Exception('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
-            print('femprj_path が指定されていないため、開いている Femtet との接続を試行します。')
-            self.connect_femtet('catch', pid)
-            # 接続した Femtet インスタンスのプロジェクト名などを保管する
-            self.femprj_path = self.Femtet.ProjectPath
-            self.model_name = self.Femtet.AnalysisModelName
+            self.connect_method = 'new'
+            print('Start to connect femtet. This process is exclusive.')
+            while True:
+                print(f'My subprocess_idx is {subprocess_idx}')
+                print(f'Allowed idx is {ipv.get_allowed_idx()}')
+                if subprocess_idx == ipv.get_allowed_idx():
+                    break
+                print(f'Wait to be permitted.')
+                sleep(1)
+            self.connect_and_open_femtet()
+            ipv.set_allowed_idx(subprocess_idx+1)
 
+        # restore するための情報保管なので上記処理結果を反映する
         super().__init__(
-            femprj_path=femprj_path,
-            model_name=model_name,
-            connect_method=connect_method,
-            pid=pid,
+            femprj_path=self.femprj_path,
+            model_name=self.model_name,
+            connect_method=self.connect_method,
+            pid=self.pid,
+            subprocess_idx=subprocess_idx,
         )
 
     def _connect_new_femtet(self):
@@ -205,16 +214,6 @@ class Femtet(FEMIF):
             message += 'インタープリタを再起動してください.'
             raise Exception(message)
 
-    def check_param_value(self, param_name):
-        variable_names = self.Femtet.GetVariableNames()
-        if param_name in variable_names:
-            return self.Femtet.GetVariableValue(param_name)
-        else:
-            message = f'Femtet 解析モデルに変数 {param_name} がありません.'
-            message += f'現在のモデルに設定されている変数は {variable_names} です.'
-            message += '大文字・小文字の区別に注意してください.'
-            raise Exception(message)
-
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
         # 引数の処理
         self.femprj_path = os.path.abspath(femprj_path)
@@ -233,6 +232,42 @@ class Femtet(FEMIF):
             )
         if not result:
             self.Femtet.ShowLastError()
+
+    def connect_and_open_femtet(self):
+
+        print(f'try to open {self.model_name} of {self.femprj_path}')
+
+        # femprj が指定されている
+        if self.femprj_path is not None:
+            # auto でも connect_femtet でもいいが、その後違ったら open する
+            self.connect_femtet(self.connect_method)
+            # プロジェクトの相違をチェック
+            if self.Femtet.ProjectPath != self.femprj_path:
+                self.open(self.femprj_path, self.model_name)
+            # モデルが指定されていればその相違もチェック
+            if self.model_name is not None:
+                if self.Femtet.AnalysisModelName != self.model_name:
+                    self.open(self.femprj_path, self.model_name)
+        # femprj が指定されていない
+        else:
+            # new だと解析すべき femprj がわからない
+            if self.connect_method == 'new':
+                Exception('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
+            print('femprj_path が指定されていないため、開いている Femtet との接続を試行します。')
+            self.connect_femtet('catch', self.pid)
+            # 接続した Femtet インスタンスのプロジェクト名などを保管する
+            self.femprj_path = self.Femtet.Project
+            self.model_name = self.Femtet.AnalysisModelName
+
+    def check_param_value(self, param_name):
+        variable_names = self.Femtet.GetVariableNames()
+        if param_name in variable_names:
+            return self.Femtet.GetVariableValue(param_name)
+        else:
+            message = f'Femtet 解析モデルに変数 {param_name} がありません.'
+            message += f'現在のモデルに設定されている変数は {variable_names} です.'
+            message += '大文字・小文字の区別に注意してください.'
+            raise Exception(message)
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
         # 変数更新のための処理
@@ -274,7 +309,7 @@ class Femtet(FEMIF):
         self.solve()
 
     def quit(self):
-        self.Femtet.SaveProject(self.Femtet.Project, True)
+        self.Femtet.SaveProject(self.Femtet.Project, True)  # 動いてない？？
         util.close_femtet(self.Femtet.hWnd)
 
     def parallel_setup(self, subprocess_idx):
