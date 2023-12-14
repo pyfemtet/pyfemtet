@@ -101,7 +101,7 @@ def _is_feasible(value, lb, ub):
 
 
 def _ray_are_alive(refs):
-    ready_refs, remaining_refs = ray.wait(refs, num_returns=1, timeout=0)
+    ready_refs, remaining_refs = ray.wait(refs, num_returns=len(refs), timeout=0)
     return len(remaining_refs) > 0
 
 
@@ -573,16 +573,21 @@ class OptimizerBase(ABC):
 
         # 追加の計算プロセスが行う処理の定義
         @ray.remote
-        def _main_remote(_subprocess_idx):
+        def parallel_process(_subprocess_idx):
+            print('Start to re-initialize fem object.')
             self.set_fem()  # プロセス化されたときに monitor と fem を落としている
+            print('Start to setup parallel process.')
             self.fem.parallel_setup(_subprocess_idx)
+            print('Start parallel optimization.')
             self._main(_subprocess_idx)
+            print('Finish parallel optimization.')
             self.fem.parallel_terminate()
+            print('Finish parallel process.')
 
         # 追加の計算プロセス
         obj_refs = []
         for subprocess_idx in range(self.n_parallel-1):
-            obj_ref = _main_remote.remote(subprocess_idx)
+            obj_ref = parallel_process.remote(subprocess_idx)
             obj_refs.append(obj_ref)
 
         start = time()

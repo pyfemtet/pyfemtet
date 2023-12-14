@@ -11,7 +11,7 @@ should_sleep = False
 
 def objective_x(femopt):
     if should_sleep:
-        sleep(1)
+        sleep(3)
     r, theta, fai = femopt.get_parameter('values')
     return r * np.cos(theta) * np.cos(fai)
 
@@ -78,7 +78,8 @@ if __name__ == '__main__':
     # should_sleep = False
     # femopt.main(n_trials=5)  # 拘束が動くか（pruned されない結果が 5 個）
     should_sleep = True
-    femopt.main(n_trials=30, n_parallel=3)  # 拘束が動くか（pruned されない結果が 30 個）
+    femopt.main(timeout=10, n_parallel=3)  # 拘束が動くか（pruned されない結果が 30 個）
+    # femopt.main(n_trials=30, n_parallel=3)  # 拘束が動くか（pruned されない結果が 30 個）
 
     print(femopt.history.data)
 

@@ -191,10 +191,13 @@ class OptimizerOptuna(OptimizerBase):
         )
 
         # run
+        callbacks = []
+        if self.n_trials is not None:
+            callbacks.append(MaxTrialsCallback(self.n_trials, states=(TrialState.COMPLETE,)))
         study.optimize(
             self._objective,
             timeout=self.timeout,
-            callbacks=[MaxTrialsCallback(self.n_trials, states=(TrialState.COMPLETE,))],
+            callbacks=callbacks,
         )
 
         return study
