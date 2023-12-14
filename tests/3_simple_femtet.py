@@ -1,12 +1,12 @@
 import os
-from pyfemtet.opt import OptimizerOptuna, Femtet
+from pyfemtet.opt import OptimizerOptuna, FemtetInterface
 
 here, me = os.path.split(__file__)
 
 
 # from win32com.client import Dispatch
-# Femtet = Dispatch('FemtetMacro.Femtet')
-# Femtet.OpenCurrentResult(True)
+# FemtetInterface = Dispatch('FemtetMacro.FemtetInterface')
+# FemtetInterface.OpenCurrentResult(True)
 def max_displacement(Femtet):
     dy = Femtet.Gogh.Galileo.GetMaxDisplacement_py()[1]
     return dy * 1000
@@ -31,10 +31,10 @@ def bottom_area_2(Femtet, femopt):
 if __name__ == '__main__':
 
     path = os.path.join(here, f'{me.replace(".py", "")}/simple.femprj')
-    # fem = Femtet(femprj_path=path, model_name=None, connect_method='auto')
-    fem = Femtet()  # 開いている Femtet を捕まえる
 
-    femopt = OptimizerOptuna(fem)
+    fem = FemtetInterface(femprj_path=path, model_name=None, connect_method='auto')
+    # femopt = OptimizerOptuna(fem)
+    femopt = OptimizerOptuna()  # 開いている Femtet と接続する
 
     # add_parameter
     femopt.add_parameter('w', 10, 5, 20)

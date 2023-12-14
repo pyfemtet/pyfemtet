@@ -99,7 +99,7 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
     h, r という変数を有する解析モデルで簡易流体解析を行い, ある面の流量を 0.3 にしたい場合を想定しています.
     """
 
-    from pyfemtet._opt import FemtetOptuna
+    from pyfemtet.opt import FemtetInterface, OptimizerOptuna
     from win32com.client import constants
 
 
@@ -118,30 +118,30 @@ Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応�
 
 
     if __name__ == '__main__':
+   
+        # Femtet 制御オブジェクトを用意
+        fem = FemtetInterface('example.femprj')
 
         # 最適化処理を行うオブジェクトを用意
-        FEMOpt = FemtetOptuna('example.femprj')
+        femopt = OptimizerOptuna(fem)
 
         # 解析モデルで登録された変数
-        FEMOpt.add_parameter("h", 10, lbound=1, ubound=20, memo='高さ')
-        FEMOpt.add_parameter("r", 5, lbound=1, ubound=10, memo='半径')
+        femopt.add_parameter("h", 10, lower_bound=1, upper_bound=20, memo='高さ')
+        femopt.add_parameter("r", 5, lower_bound=1, upper_bound=10, memo='半径')
 
         # 流量が 0.3 に近づくようにゴールを設定する
-        FEMOpt.add_objective(get_flow, name='流量', direction=0.3)
+        femopt.add_objective(get_flow, name='流量', direction=0.3)
 
         # 最適化の実行（csv ファイルに最適化計算の過程が保存されます）
-        FEMOpt.main(n_trial=30)
+        femopt.main(n_trial=30)
 
         # 最適化結果の表示（最適化終了時点での csv ファイルの内容と同じです）
-        print(FEMOpt.history)
-
+        print(femopt.history.data)
     ```
     注意：Femtet 内で数式を設定した変数に対し ```add_parameter()``` を行わないでください。数式が失われます。
 
-
 1. スクリプトを実行します。
-
-    
+ 
 1. 出力された最適化過程の一覧を csv ファイルで確認します。
 
     csv ファイルの各行は一回の解析試行結果を示しています。各列の形式は以下の通りです。

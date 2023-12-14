@@ -1,8 +1,8 @@
 from pyfemtet.opt import OptimizerBase
-from pyfemtet.opt.interface import Femtet
+from pyfemtet.opt.interface import FemtetInterface
 
 
-fem = Femtet()
+fem = FemtetInterface()
 femopt = OptimizerBase(fem)
 
 

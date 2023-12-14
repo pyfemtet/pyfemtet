@@ -23,7 +23,7 @@ from pyfemtet.tools.DispatchUtils import (
 )
 
 
-class FEMIF(ABC):
+class FEMInterface(ABC):
 
     def __init__(self, subprocess_idx: int = None, ipv: InterprocessVariables = None, **kwargs):
         """サブプロセス等で FEM を restore するときに必要な情報.
@@ -91,7 +91,7 @@ class FEMIF(ABC):
         pass
 
 
-class Femtet(FEMIF):
+class FemtetInterface(FEMInterface):
 
     def __init__(
             self,
@@ -341,7 +341,7 @@ class Femtet(FEMIF):
             pass  # 何かがあってもプロセス全体が正常終了することを優先
 
 
-class NoFEM(FEMIF):
+class NoFEM(FEMInterface):
 
     def update(self, parameters):
         pass

@@ -14,7 +14,7 @@ from optuna._hypervolume import WFG
 import ray
 
 from .core import InterprocessVariables, UserInterruption
-from .interface import FEMIF, Femtet
+from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 
 
@@ -116,7 +116,7 @@ class Function:
     def calc(self, fem):
         args = self.args
         # Femtet 特有の処理
-        if isinstance(fem, Femtet):
+        if isinstance(fem, FemtetInterface):
             args = (fem.Femtet, *args)
         return self.fun(*args, **self.kwargs)
 
@@ -312,7 +312,7 @@ class History:
 
 class OptimizerBase(ABC):
 
-    def __init__(self, fem: FEMIF = None, history_path=None):
+    def __init__(self, fem: FEMInterface = None, history_path=None):
 
         print('---initialize---')
 
@@ -323,7 +323,7 @@ class OptimizerBase(ABC):
             history_path = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M.csv')
         self.history_path = os.path.abspath(history_path)
         if fem is None:
-            self.fem = Femtet()
+            self.fem = FemtetInterface()
         else:
             self.fem = fem
 
@@ -424,11 +424,6 @@ class OptimizerBase(ABC):
                 if not is_existing:
                     break
             name = candidate
-
-        # 以下の処理はここで行うと object インスタンスが unserializable になる
-        # # Femtet 特有の処理
-        # if isinstance(self.fem, Femtet):
-        #     args = (self.fem.Femtet, *args)
 
         self.objectives[name] = Objective(fun, name, direction, args, kwargs)
 
