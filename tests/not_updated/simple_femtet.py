@@ -47,7 +47,7 @@ if __name__=='__main__':
     FEMOpt.main(n_trials=12, n_parallel=3)
     
     # import optuna
-    # FEMOpt.
+    # femopt.
 
     
     

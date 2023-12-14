@@ -12,7 +12,7 @@ from win32com.client import Dispatch
 from femtetutils import util
 
 
-pp = False
+pp = True
 
 
 
@@ -40,7 +40,7 @@ def _get_pids(process_name):
 
 
 
-def Dispatch_Femtet(timeout=30):
+def Dispatch_Femtet(timeout=10, subprocess_idx=None):
     '''
     Femtet の Dispatch を行う。
 
@@ -53,8 +53,12 @@ def Dispatch_Femtet(timeout=30):
     '''
 
     #### Dispatch 開始
-    if pp: print('start Dispatch')
-    Femtet = Dispatch('FemtetMacro.Femtet') # Dispatch は「予約」
+    if pp:
+        if subprocess_idx is not None:
+            print(f'  from subprocess{subprocess_idx}; Start to connect Femtet. timeout is {timeout} sec.')
+        else:
+            print(f'Start to connect Femtet. timeout is {timeout} sec.')
+    Femtet = Dispatch('FemtetMacro.Femtet')  # Dispatch は「予約」
 
     #### Dispatch が成功したことを保証するための処理
     start = time.time()
@@ -64,22 +68,46 @@ def Dispatch_Femtet(timeout=30):
         hwnd = Femtet.hWnd
         
         # 0 超なら OK
-        if hwnd>0:
-            if pp: print('Dispatch finished successfully')
+        if hwnd > 0:
+            if pp:
+                if subprocess_idx is not None:
+                    print(f'  from subprocess{subprocess_idx}; Successfully connected.')
+                else:
+                    print('Successfully connected.')
             break
         
         # そうでなければタイムアウトの判定
         duration = time.time() - start
-        if pp: print('Dispatch duration', duration)
+        if pp:
+            if subprocess_idx is not None:
+                print(
+                    f'  from subprocess{subprocess_idx}; search Femtet ... duration:{int(duration)} < timeout({timeout})')
+            else:
+                print(f'search Femtet ... duration:{int(duration)} < timeout({timeout})')
+
         if duration > timeout:
-            if pp: print('Femtet が正常に実行されていません。')
+            if pp:
+                if subprocess_idx is not None:
+                    print(f'  from subprocess{subprocess_idx}; Femtet が正常に実行されていません。')
+                else:
+                    print('Femtet が正常に実行されていません。')
             return None, 0
 
         time.sleep(1)
 
     # hwnd があれば pid が取得できることは保証されるから待たなくていい
-    if pp: print('Dispatch finished')
+    if pp:
+        if subprocess_idx is not None:
+            print(f'  from subprocess{subprocess_idx};  Connection process finished.')
+        else:
+            print('Connection process finished.')
+
     pid = _get_pid(hwnd)
+    if pp:
+        if subprocess_idx is not None:
+            print(f'  from subprocess{subprocess_idx};  pid of connected Femtet is {pid}')
+        else:
+            print(f'★ pid of connected Femtet is {pid}')
 
     return Femtet, pid
 
@@ -87,20 +115,20 @@ def Dispatch_Femtet(timeout=30):
 def _f(pid, subprocess_id, shared_flags):
 
     # Dispatch して正常な hwnd が得られるまで待ち、pid を調べる
-    if pp: print(f'from subp{subprocess_id}; let us start Dispatch...')
-    Femtet, mypid = Dispatch_Femtet()
+    if pp: print(f'  from subprocess{subprocess_id}; Start to connect.')
+    Femtet, mypid = Dispatch_Femtet(subprocess_idx=subprocess_id)
         
     # Dispatch が終了していることを通知
     shared_flags[subprocess_id] = True
 
     # pid が目的のものなら即刻開放する
     if mypid==pid:
-        if pp: print(f'from subp{subprocess_id}; my pid is hit. i will release {pid}')
+        if pp: print(f'  from subprocess{subprocess_id}; My pid is it. I will release {pid} and be terminated.')
         return 0
     
     # pid が 0 なら何にも関与しないので即刻終了する
     elif mypid==0:
-        if pp: print(f'from subp{subprocess_id}; failed to connect Femtet. i will finish.')
+        if pp: print(f'  from subprocess{subprocess_id}; Failed to connect Femtet. I will be terminated.')
         return 0
     
     # そうでなければメインプロセスが Dispatch を終えるまで解放しない
@@ -109,7 +137,7 @@ def _f(pid, subprocess_id, shared_flags):
             if shared_flags[-1]:
                 break
             time.sleep(1)
-        if pp: print(f'from subp{subprocess_id}; main process seems to have been Dispatched. i will finish')
+        if pp: print(f'  from subprocess{subprocess_id}; Main process seems to be connected or finished. I will be terminated.')
         return 1
 
 
@@ -146,7 +174,7 @@ def Dispatch_Femtet_with_new_process():
     pid = util.get_last_executed_femtet_process_id()
     if pid==0:
         raise Exception('起動された Femtet の認識に失敗しました')
-    if pp: print('pid', pid)
+    if pp: print('target pid is', pid)
     
     # ウィンドウが出てくるまで待つ
     timeout = 30
@@ -165,7 +193,7 @@ def Dispatch_Femtet_with_new_process():
     # 目的の pid を持つ Femtet を取得
     Femtet, mypid = Dispatch_Femtet_with_specific_pid(pid)
 
-    print(f'pid of Dispatch object of Femtet:{mypid}')
+    # if pp: print(f'pid of connected Femtet is {pid}')
     return Femtet, mypid
 
 
@@ -176,7 +204,7 @@ def Dispatch_Femtet_with_specific_pid(pid):
 
     # 存在する Femtet プロセスの列挙
     pids = _get_pids('Femtet.exe')
-    if pp: print('existing pids', pids)
+    if pp: print('existing Femtet pids', pids)
 
     # 子プロセスの準備
     with Manager() as manager:
@@ -184,7 +212,7 @@ def Dispatch_Femtet_with_specific_pid(pid):
         shared_flags = manager.list()
         for _ in range(len(pids)+1): # [-1]は自プロセス用のフラグ
             shared_flags.append(False)
-        if pp: print('initial shared_flags', shared_flags[:])
+        if pp: print(f'(initial shared_flags are {shared_flags[:]})', )
 
         # プロセスの準備
         processes = []
@@ -204,14 +232,13 @@ def Dispatch_Femtet_with_specific_pid(pid):
         while True:
             # 全てが True していれば次に
             if all(shared_flags[:-1]):
-                if pp: print('finished: shared_flags', shared_flags[:])
+                if pp: print('All subprocesses seem to be connected or finished.')
                 break
-            if pp: print('shared_flags', shared_flags[:])
+            if pp: print(f'(shared_flags are {shared_flags[:]} ; wait for signals from subprocess...')
             time.sleep(1)
 
         # 子プロセスの Dispatch 完了を待って Dispatch
         Femtet, mypid = Dispatch_Femtet()
-        if pp: print('finally Dispatched pid', mypid)
 
         # Dispatch 完了を通知
         shared_flags[-1] = True
@@ -219,7 +246,8 @@ def Dispatch_Femtet_with_specific_pid(pid):
         # サブプロセスすべての正常終了を待つ
         for p in processes:
             p.join()
-        
+
+        # if pp: print(f'pid of connected Femtet is {mypid}')
         return Femtet, mypid
 
 

@@ -51,7 +51,6 @@ class OptimizerOptuna(OptimizerBase):
         # run
         study.optimize(
             self._objective,
-            n_trials=n_trials,
             callbacks=[MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,))],
         )
 

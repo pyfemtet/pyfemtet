@@ -62,7 +62,6 @@ class Monitor(object):
             Output('dummy', 'value'),
             Input('interrupt-button', 'n_clicks'))
         def interrupt(_):
-            print("---------------", _)
             if _ is not None:
                 self.opt.pdata.set_state('interrupted')
             return ''

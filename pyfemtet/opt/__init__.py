@@ -1,2 +1,2 @@
-from ._FemtetOptuna import FemtetOptuna
-from ._FemtetScipy import FemtetScipy
+from ._optuna import OptimizerOptuna
+from .interface import Femtet, NoFEM

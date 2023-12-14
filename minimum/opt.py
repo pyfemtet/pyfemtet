@@ -62,9 +62,11 @@ class OptimizerBase(ABC):
         self.monitor = None
         self.pdata = ParallelVariableNamespace()
         self.history = History(self.pdata)
+        self.app = None
 
     def __getstate__(self):
         state = self.__dict__.copy()
+        del state['app']
         del state['monitor']
         return state
 
@@ -94,7 +96,7 @@ class OptimizerBase(ABC):
     def _setup_main(self, *args, **kwargs):
         pass
 
-    def main(self, n_trials=10, n_parallel=3, method='TPE'):
+    def main(self, n_trials=10, n_parallel=1, method='TPE'):
 
         self.pdata.set_state('preparing')
         self.history.init(
