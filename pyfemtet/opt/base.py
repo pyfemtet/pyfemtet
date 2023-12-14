@@ -105,17 +105,30 @@ def _ray_are_alive(refs):
     return len(remaining_refs) > 0
 
 
-class Objective:
+class Function:
+
+    def __init__(self, fun, name, args, kwargs):
+        self.fun = fun
+        self.name = name
+        self.args = args
+        self.kwargs = kwargs
+
+    def calc(self, fem):
+        args = self.args
+        # Femtet 特有の処理
+        if isinstance(fem, Femtet):
+            args = (fem.Femtet, *args)
+        return self.fun(*args, **self.kwargs)
+
+
+class Objective(Function):
 
     default_name = 'obj'
 
     def __init__(self, fun, name, direction, args, kwargs):
         _check_direction(direction)
-        self.fun = fun
-        self.args = args
-        self.kwargs = kwargs
         self.direction = direction
-        self.name = name
+        super().__init__(fun, name, args, kwargs)
 
     def _convert(self, value: float):
         # 評価関数（direction 任意）を目的関数（minimize, symlog）に変換する
@@ -131,41 +144,17 @@ class Objective:
 
         return ret
 
-    def calc(self, fem):
 
-        args = self.args
-
-        # Femtet 特有の処理
-        if isinstance(fem, Femtet):
-            args = (fem.Femtet, *args)
-
-        return self.fun(*args, **self.kwargs)
-
-
-class Constraint:
+class Constraint(Function):
 
     default_name = 'cns'
 
     def __init__(self, fun, name, lb, ub, strict, args, kwargs):
         _check_lb_ub(lb, ub)
-        self.fun = fun
-        self.args = args
-        self.kwargs = kwargs
-
-        self.name = name
         self.lb = lb
         self.ub = ub
         self.strict = strict
-
-    def calc(self, fem):
-
-        args = self.args
-
-        # Femtet 特有の処理
-        if isinstance(fem, Femtet):
-            args = (fem.Femtet, *args)
-
-        return self.fun(*args, **self.kwargs)
+        super().__init__(fun, name, args, kwargs)
 
 
 class History:
@@ -366,8 +355,6 @@ class OptimizerBase:
         state = self.__dict__.copy()
         del state['fem']
         del state['monitor']
-        del state['objectives']
-        del state['constraints']
         return state
 
     def __setstate__(self, state):
