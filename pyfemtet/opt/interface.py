@@ -4,8 +4,10 @@ import os
 import sys
 from time import sleep
 import tempfile
-import shutil
+import json
+import subprocess
 
+import shutil
 from pywintypes import com_error
 from win32com.client import constants
 from femtetutils import util
@@ -23,6 +25,8 @@ from pyfemtet.tools.DispatchUtils import (
     Dispatch_Femtet_with_new_process,
     _get_pid
 )
+
+here, me = os.path.split(__file__)
 
 
 class FEMInterface(ABC):
@@ -561,7 +565,90 @@ class NoFEM(FEMInterface):
     def quit(self):
         pass
 
+
 # TODO: NX-Femtet 再実装
+class FemtetWithNXInterface(FemtetInterface):
+
+    PATH_JOURNAL = os.path.abspath(os.path.join(here, '_FemtetWithNX/update_model.py'))
+
+    def __init__(
+            self,
+            prt_path,
+            femprj_path=None,
+            model_name=None,
+            connect_method='auto',
+            subprocess_idx=None,
+            ipv=None,
+            pid=None,
+
+    ):
+        self.prt_path = prt_path
+        super().__init__(
+            femprj_path=None,
+            model_name=None,
+            connect_method='auto',
+            subprocess_idx=None,
+            ipv=None,
+            pid=None,
+        )
+
+    def update_model(self, parameters: 'pd.DataFrame') -> None:
+        self.parameters = parameters.copy()
+
+        # 変数更新のための処理
+        sleep(0.1)  # Gaudi がおかしくなる時がある対策
+        self.call_femtet_api(
+            self.Femtet.Gaudi.Activate,
+            True,  # 戻り値を持たないのでここは無意味で None 以外なら何でもいい
+            Exception,  # 生きてるのに開けない場合
+            error_message='解析モデルが開かれていません',
+        )
+
+        # Femtet が参照している x_t パスを取得する
+        x_t_path = self.Femtet.Gaudi.LastXTPath
+
+        # 前のが存在するならば消しておく
+        if os.path.isfile(x_t_path):
+            os.remove(x_t_path)
+
+        # 変数の json 文字列を作る
+        tmp_dict = {}
+        for i, row in parameters.iterrows():
+            tmp_dict[row['name']] = row['value']
+        str_json = json.dumps(tmp_dict)
+
+        # NX journal を使ってモデルを編集する
+        exe = r'%UGII_BASE_DIR%\NXBIN\run_journal.exe'
+        env = os.environ.copy()
+        subprocess.run(
+            [exe, self.PATH_JOURNAL, '-args', self.prt_path, str_json, x_t_path],
+            env=env,
+            shell=True,
+            cwd=os.path.dirname(self.prt_path)
+        )
+
+        # この時点で x_t ファイルがなければ NX がモデル更新に失敗しているはず
+        if not os.path.isfile(x_t_path):
+            raise ModelError
+
+        # 設計変数に従ってモデルを再構築
+        self.call_femtet_api(
+            self.Femtet.Gaudi.ReExecute,
+            False,
+            ModelError,  # 生きてるのに失敗した場合
+            error_message=f'モデル再構築に失敗しました.',
+            is_Gaudi_method=True,
+        )
+
+        # 処理を確定
+        self.call_femtet_api(
+            self.Femtet.Redraw,
+            False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
+            ModelError,  # 生きてるのに失敗した場合
+            error_message=f'モデル再構築に失敗しました.',
+            is_Gaudi_method=True,
+        )
+
 
 # TODO: SW-Femtet 再実装
 
