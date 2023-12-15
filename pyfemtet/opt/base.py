@@ -160,6 +160,8 @@ class Constraint(Function):
 class History:
 
     def __init__(self, history_path, ipv):
+
+        # 引数の処理
         self.path = history_path  # .csv
         self.ipv = ipv
         self.data = pd.DataFrame()
@@ -167,6 +169,10 @@ class History:
         self.obj_names = []
         self.cns_names = []
         self._data_columns = []
+
+        # path が存在すれば dataframe を読み込む
+        if os.path.isfile(self.path):
+            self.data = pd.read_csv(self.path)
 
     def init(self, param_names, obj_names, cns_names):
         self.param_names = param_names
@@ -332,7 +338,7 @@ class OptimizerBase(ABC):
         self.parameters = pd.DataFrame()
         self.objectives = dict()
         self.constraints = dict()
-        self.history = History(history_path, self.ipv)
+        self.history = History(self.history_path, self.ipv)
         self.monitor: Monitor = None
         self.seed: int or None = None
         self.message = ''

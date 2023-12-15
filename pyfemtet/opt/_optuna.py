@@ -140,8 +140,6 @@ class OptimizerOptuna(OptimizerBase):
         self.storage = f"sqlite:///{self.storage_path}"
 
         # storage の設定
-        if os.path.exists(self.storage_path):
-            os.remove(self.storage_path)
         study = optuna.create_study(
             study_name=self.study_name,
             storage=self.storage,
