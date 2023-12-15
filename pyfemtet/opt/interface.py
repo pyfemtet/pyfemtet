@@ -6,6 +6,7 @@ from time import sleep
 import tempfile
 import shutil
 
+from pywintypes import com_error
 from win32com.client import constants
 from femtetutils import util
 
@@ -19,7 +20,8 @@ from .core import (
 from pyfemtet.tools.DispatchUtils import (
     Dispatch_Femtet,
     Dispatch_Femtet_with_specific_pid,
-    Dispatch_Femtet_with_new_process
+    Dispatch_Femtet_with_new_process,
+    _get_pid
 )
 
 
@@ -126,6 +128,9 @@ class FemtetInterface(FEMInterface):
         # その他の初期化
         self.Femtet: 'IPyDispatch' = None
         self.connected_method = 'unconnected'
+        self.parameters = None
+        self.max_api_retry = 3
+        self.pp = False
 
         # サブプロセスでなければ何も考えず Femtet と接続する
         if subprocess_idx is None:
@@ -226,6 +231,145 @@ class FemtetInterface(FEMInterface):
         if self.Femtet is None:
             raise Exception('Femtet との接続に失敗しました.')
 
+    def call_femtet_api(
+            self,
+            fun,
+            ret_if_failed,
+            if_error,
+            error_message,
+            is_Gaudi_method=False,
+            ret_for_check_idx=None,
+            args=None,
+            kwargs=None,
+            recourse_depth=0,
+            print_indent=0,
+    ):
+        """
+
+        Parameters
+        ----------
+        fun : Callable
+            Femtet マクロの API
+        ret_if_failed : Any
+            API が失敗した時の戻り値
+        if_error : Type
+            エラーが発生していたときに送出したい Exception
+        error_message : str
+            上記 Exception に記載したいメッセージ
+        is_Gaudi_method : bool
+            API 実行前に Femtet.Gaudi.Activate() を行うか
+        ret_for_check_idx : int or None
+            API の戻り値が配列の時, 失敗したかを判定するために
+            チェックすべき値のインデックス.
+            デフォルト：None. None の場合, API の戻り値そのものをチェックする.
+        args
+            API の引数
+        kwargs
+            API の名前付き引数
+        recourse_depth
+            そのメソッドを再起動してリトライしている回数
+        print_indent
+            デバッグ用.
+        Returns
+        -------
+
+        """
+        if args is None:
+            args = tuple()
+        if kwargs is None:
+            kwargs = dict()
+
+        # 処理の失敗には 2 パターンある.
+        # 1. 結果に関わらず戻り値が None で API 実行時に com_error を送出する
+        # 2. API 実行時に成功失敗を示す戻り値を返し、ShowLastError で例外にアクセスできる状態になる
+
+        # Gaudi コマンドなら Gaudi.Activate する
+        if self.pp: print(' '*print_indent, 'コマンド', fun.__name__, args, kwargs)
+        if is_Gaudi_method:  # Optimizer は Gogh に触らないので全部にこれをつけてもいい気がする
+            try:
+                self.call_femtet_api(
+                    self.Femtet.Gaudi.Activate,
+                    False,  # None 以外なら何でもいい
+                    Exception,
+                    '解析モデルのオープンに失敗しました',
+                    print_indent=print_indent+1
+                )
+            except com_error:
+                # Gaudi へのアクセスだけで com_error が生じうる
+                # そういう場合は次の API 実行で間違いなくエラーになるので放っておく
+                pass
+
+        # API を実行
+        try:
+            returns = fun(*args, **kwargs)
+        except com_error:
+            # パターン 2 エラーが生じたことは確定なのでエラーが起こるよう returns を作る
+            if ret_for_check_idx is None:
+                returns = ret_if_failed
+            else:
+                returns = [ret_if_failed]*(ret_for_check_idx+1)
+        if self.pp: print(' '*print_indent, 'コマンド結果', returns)
+
+        # チェックすべき値の抽出
+        if ret_for_check_idx is None:
+            ret_for_check = returns
+        else:
+            ret_for_check = returns[ret_for_check_idx]
+
+        # エラーのない場合は戻り値を return する
+        if ret_for_check != ret_if_failed:
+            return returns
+
+        # エラーがある場合は Femtet の生死をチェックし,
+        # 死んでいるなら再起動してコマンドを実行させる.
+        else:
+            # そもそもまだ生きているかチェックする
+            if self.femtet_is_alive():
+                # 生きていてもここにきているなら
+                # 指定された Exception を送出する
+                if self.pp: print(' '*print_indent, error_message)
+                raise if_error(error_message)
+
+            # 死んでいるなら再起動
+            else:
+                # 再起動試行回数の上限に達していたら諦める
+                if self.pp: print(' '*print_indent, '現在の Femtet 再起動回数：', recourse_depth)
+                if recourse_depth >= self.max_api_retry:
+                    raise Exception('Femtet のプロセスが異常終了し、正常に再起動できませんでした.')
+
+                # 再起動
+                if self.pp: print(' '*print_indent, 'Femtet プロセスの異常終了が検知されました. 再起動を試みます.')
+                print('Femtet プロセスの異常終了が検知されました. 回復を試みます.')
+                self.connect_femtet(connect_method='new')
+                self.open(self.femprj_path, self.model_name)
+
+                # 状態を復元するために一度変数を渡して解析を行う（fun.__name__がSolveなら2度手間だが）
+                if self.pp: print(' '*print_indent, f'再起動されました. コマンド{fun.__name__}の再試行のため、解析を行います.')
+                self.update(self.parameters)
+
+                # 与えられた API の再帰的再試行
+                if self.pp: print(' '*print_indent, f'回復されました. コマンド{fun.__name__}の再試行を行います.')
+                print('回復されました.')
+                return self.call_femtet_api(
+                    fun,
+                    ret_if_failed,
+                    if_error,
+                    error_message,
+                    is_Gaudi_method,
+                    ret_for_check_idx,
+                    args,
+                    kwargs,
+                    recourse_depth+1,
+                    print_indent+1
+                )
+
+
+
+    def femtet_is_alive(self) -> bool:
+        return _get_pid(self.Femtet.hWnd) > 0
+
+
+
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
         # 引数の処理
         self.femprj_path = os.path.abspath(femprj_path)
@@ -282,41 +426,79 @@ class FemtetInterface(FEMInterface):
             raise Exception(message)
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
+        self.parameters = parameters.copy()
+
         # 変数更新のための処理
         sleep(0.1)  # Gaudi がおかしくなる時がある対策
-        self.Femtet.Gaudi.Activate()
+        self.call_femtet_api(
+            self.Femtet.Gaudi.Activate,
+            True,  # 戻り値を持たないのでここは無意味で None 以外なら何でもいい
+            Exception,  # 生きてるのに開けない場合
+            error_message='解析モデルが開かれていません',
+        )
 
         # Femtet の設計変数の更新
         for i, row in parameters.iterrows():
             name = row['name']
             value = row['value']
-            if not (self.Femtet.UpdateVariable(name, value)):
-                raise ModelError('変数の更新に失敗しました：変数{name}, 値{value}')
+            self.call_femtet_api(
+                fun=self.Femtet.UpdateVariable,
+                ret_if_failed=False,
+                if_error=ModelError,  # 生きてるのに失敗した場合
+                error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
+                is_Gaudi_method=True,
+                args=(name, value),
+            )
 
         # 設計変数に従ってモデルを再構築
-        if not self.Femtet.Gaudi.ReExecute():
-            raise ModelError('モデル再構築に失敗しました')
+        self.call_femtet_api(
+            self.Femtet.Gaudi.ReExecute,
+            False,
+            ModelError,  # 生きてるのに失敗した場合
+            error_message=f'モデル再構築に失敗しました.',
+            is_Gaudi_method=True,
+        )
 
         # 処理を確定
-        self.Femtet.Redraw()
+        self.call_femtet_api(
+            self.Femtet.Redraw,
+            False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
+            ModelError,  # 生きてるのに失敗した場合
+            error_message=f'モデル再構築に失敗しました.',
+            is_Gaudi_method=True,
+        )
 
     def solve(self) -> None:
-        # メッシュを切る
-        n_mesh = self.Femtet.Gaudi.Mesh()
-        if n_mesh == 0:
-            raise MeshError('メッシュ生成に失敗しました。')
+        # # メッシュを切る
+        self.call_femtet_api(
+            self.Femtet.Gaudi.Mesh,
+            0,
+            MeshError,
+            'メッシュ生成に失敗しました',
+            is_Gaudi_method=True,
+        )
 
-        # ソルブする
-        result = self.Femtet.Solve()
-        if not result:
-            raise SolveError('ソルブに失敗しました。')
+        # # ソルブする
+        self.call_femtet_api(
+            self.Femtet.Solve,
+            False,
+            SolveError,
+            'ソルブに失敗しました',
+            is_Gaudi_method=True,
+        )
 
         # 次に呼ばれるはずのユーザー定義コスト関数の記述を簡単にするため先に解析結果を開いておく
-        result = self.Femtet.OpenCurrentResult(True)
-        if not result:
-            raise FemtetAutomationError('解析結果のオープンの失敗しました。')
+        self.call_femtet_api(
+            self.Femtet.OpenCurrentResult,
+            False,
+            SolveError,  # 生きてるのに開けない場合
+            error_message='解析結果のオープンに失敗しました',
+            is_Gaudi_method=True,
+            args=(True,),
+        )
 
     def update(self, parameters: 'pd.DataFrame') -> None:
+        self.parameters = parameters.copy()
         self.update_model(parameters)
         self.solve()
 
@@ -346,8 +528,8 @@ class FemtetInterface(FEMInterface):
         self.td = tempfile.mkdtemp()
         print(self.td)
         name = f'subprocess{subprocess_idx}'
-        femprj_path = os.path.join(self.td, f'{name}.femprj')
-        result = self.Femtet.SaveProject(femprj_path, True)
+        self.femprj_path = os.path.join(self.td, f'{name}.femprj')
+        result = self.Femtet.SaveProject(self.femprj_path, True)
         if not result:
             self.Femtet.ShowLastError()
 
