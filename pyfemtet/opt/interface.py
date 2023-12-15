@@ -421,13 +421,13 @@ class FemtetInterface(FEMInterface):
 
     def check_param_value(self, param_name):
         variable_names = self.Femtet.GetVariableNames()
-        if param_name in variable_names:
-            return self.Femtet.GetVariableValue(param_name)
-        else:
-            message = f'Femtet 解析モデルに変数 {param_name} がありません.'
-            message += f'現在のモデルに設定されている変数は {variable_names} です.'
-            message += '大文字・小文字の区別に注意してください.'
-            raise Exception(message)
+        if variable_names is not None:
+            if param_name in variable_names:
+                return self.Femtet.GetVariableValue(param_name)
+        message = f'Femtet 解析モデルに変数 {param_name} がありません.'
+        message += f'現在のモデルに設定されている変数は {variable_names} です.'
+        message += '大文字・小文字の区別に注意してください.'
+        raise Exception(message)
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
         self.parameters = parameters.copy()
@@ -582,15 +582,19 @@ class FemtetWithNXInterface(FemtetInterface):
             pid=None,
 
     ):
-        self.prt_path = prt_path
+        self.prt_path = os.path.abspath(prt_path)
         super().__init__(
-            femprj_path=None,
-            model_name=None,
-            connect_method='auto',
-            subprocess_idx=None,
-            ipv=None,
-            pid=None,
+            femprj_path=femprj_path,
+            model_name=model_name,
+            connect_method=connect_method,
+            subprocess_idx=subprocess_idx,
+            ipv=ipv,
+            pid=pid,
         )
+
+    def check_param_value(self, name):
+        return None
+
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
         self.parameters = parameters.copy()

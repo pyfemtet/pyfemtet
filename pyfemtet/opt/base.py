@@ -384,7 +384,10 @@ class OptimizerBase(ABC):
         _check_lb_ub(lower_bound, upper_bound, name)
         value = self.fem.check_param_value(name)
         if initial_value is None:
-            initial_value = value
+            if value is not None:
+                initial_value = value
+            else:
+                raise Exception('initial_value を指定してください.')
 
         d = {
             'name': name,
