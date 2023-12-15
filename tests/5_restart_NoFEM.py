@@ -50,10 +50,12 @@ if __name__ == '__main__':
     femopt.add_objective(objective_x, 'x(mm)', args=femopt)
     femopt.add_objective(objective_y, 'y(mm)', args=femopt)
     femopt.add_objective(objective_z, 'z(mm)', args=femopt)
+    femopt.add_objective(objective_z, 'z2(mm)', args=femopt)  # 3 回目
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)
 
     # femopt.main(n_trials=20, n_parallel=3)  # 1 回目
-    femopt.main(n_trials=40, n_parallel=3)  # 1 回目
+    # femopt.main(n_trials=40, n_parallel=3)  # 2 回目
+    femopt.main(n_trials=60, n_parallel=3)  # 3 回目
 
     print(femopt.history.data)
 

@@ -193,6 +193,18 @@ class History:
         columns.append('time')
         self._data_columns = columns
 
+        # restart ならば前のデータとの整合を確認
+        if len(self.data.columns) > 0:
+            # 読み込んだ columns が生成した columns と違っていればエラー
+            try:
+                if self.data.columns != self._data_columns:
+                    raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.data.columns)}\n\n現在の設定:\n{self._data_columns}')
+                else:
+                    # 同じであっても目的と拘束の上下限や direction が違えばエラー
+                    pass
+            except ValueError:
+                raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.data.columns)}\n\n現在の設定:\n{self._data_columns}')
+
     def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
 
         # create row
@@ -226,7 +238,7 @@ class History:
 
         # serialize
         try:
-            self.data.to_csv(self.path)
+            self.data.to_csv(self.path, index=None)
         except PermissionError:
             print(f'warning: {self.path} がロックされています。データはロック解除後に保存されます。')
 
