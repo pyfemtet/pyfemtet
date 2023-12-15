@@ -166,9 +166,11 @@ def Dispatch_Femtet_with_new_process():
     '''
 
     # Femtet 起動
+
+    if pp: print('Femtet の起動を試行します')
     succeed = util.execute_femtet()
     if not succeed:
-        raise Exception('femtetutils を用いた Femtet の起動に失敗しました')
+        raise Exception('Femtet の起動に失敗しました')
 
     # pid 取得
     pid = util.get_last_executed_femtet_process_id()
@@ -205,6 +207,10 @@ def Dispatch_Femtet_with_specific_pid(pid):
     # 存在する Femtet プロセスの列挙
     pids = _get_pids('Femtet.exe')
     if pp: print('existing Femtet pids', pids)
+
+    if pid is not None:
+        if not (pid in pids):
+            raise Exception('指定された pid の Femtet がありません。')
 
     # 子プロセスの準備
     with Manager() as manager:

@@ -25,13 +25,19 @@ from pyfemtet.tools.DispatchUtils import (
 
 class FEMInterface(ABC):
 
-    def __init__(self, subprocess_idx: int = None, ipv: InterprocessVariables = None, **kwargs):
-        """サブプロセス等で FEM を restore するときに必要な情報.
+    def __init__(
+            self,
+            subprocess_idx: int or None = None,
+            ipv: InterprocessVariables or None = None,
+            pid: int or None = None,
+            **kwargs
+    ):
+        """サブプロセスで FEM を restore するときに必要な情報を保管する.
 
-        具象クラスでは最低でも subprocess_idx, ipv を引数にとること.
-        ユーザーが指定した args, kwargs を保存する.
-        具象クラスでは super().__init__ にすべての引数を
-        キーワード付きで保存すること.
+        具象クラスでは最低でも subprocess_idx, ipv, pid を引数にとること.
+        使わないなら **kwargs にしても構わない.
+        具象クラスではサブプロセス時に指定したい変数を引数にして
+        super().__init__ を呼ぶこと.
 
         """
         self.kwargs = kwargs
@@ -82,11 +88,15 @@ class FEMInterface(ABC):
         """デストラクタ."""
         pass
 
-    def parallel_setup(self, subprocess_idx, *args, **kwargs):
+    def before_parallel_setup(self, femopt):
+        """サブプロセスを起動する前の前処理."""
+        pass
+
+    def parallel_setup(self, subprocess_idx):
         """サブプロセスで呼ばれた場合のコンストラクタ."""
         pass
 
-    def parallel_terminate(self, *args, **kwargs):
+    def parallel_terminate(self):
         """サブプロセスで呼ばれた場合のデストラクタ."""
         pass
 
@@ -98,9 +108,9 @@ class FemtetInterface(FEMInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            pid=None,
             subprocess_idx=None,
             ipv=None,
+            pid=None,
     ):
         # 引数の処理
         if femprj_path is None:
@@ -115,16 +125,16 @@ class FemtetInterface(FEMInterface):
 
         # その他の初期化
         self.Femtet: 'IPyDispatch' = None
-        self.connected_femtet = 'unconnected'
+        self.connected_method = 'unconnected'
 
         # サブプロセスでなければ何も考えず Femtet と接続する
         if subprocess_idx is None:
             self.connect_and_open_femtet()
 
-        # サブプロセスから呼ばれているならば新しい Femtet と接続する。
-        # connect_and_open_femtet は排他処理で行う。
+        # サブプロセスから呼ばれているならば
+        # before_parallel_setup で起動されているはずの Femtet と接続する.
+        # connect_and_open_femtet は排他処理で行う.
         else:
-            self.connect_method = 'new'
             print('Start to connect femtet. This process is exclusive.')
             while True:
                 print(f'My subprocess_idx is {subprocess_idx}')
@@ -134,21 +144,21 @@ class FemtetInterface(FEMInterface):
                 print(f'Wait to be permitted.')
                 sleep(1)
             print(f'Permitted.')
-            self.connect_and_open_femtet()
+            self.connect_femtet('existing', self.pid)
             self.ipv.set_allowed_idx(subprocess_idx+1)
+            self.open(self.femprj_path, self.model_name)
 
-        # restore するための情報保管なので上記処理結果を反映する
+        # restore するための情報保管なので上記処理結果を反映する.
+        # 抽象クラスに書いている引数はサブプロセス開始時に上書きされるので不要.
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
             connect_method=self.connect_method,
-            pid=self.pid,
-            subprocess_idx=subprocess_idx,
         )
 
     def _connect_new_femtet(self):
         self.Femtet, _ = Dispatch_Femtet_with_new_process()
-        self.connected_femtet = 'new'
+        self.connected_method = 'new'
 
     def _connect_existing_femtet(self, pid: int or None = None):
         # 既存の Femtet を探して Dispatch する。
@@ -158,7 +168,7 @@ class FemtetInterface(FEMInterface):
             self.Femtet, my_pid = Dispatch_Femtet_with_specific_pid(pid)
         if my_pid == 0:
             raise FemtetAutomationError('接続できる Femtet のプロセスが見つかりませんでした。')
-        self.connected_femtet = 'existing'
+        self.connected_method = 'existing'
 
     def connect_femtet(self, connect_method: str = 'new', pid: int or None = None):
         """
@@ -167,34 +177,32 @@ class FemtetInterface(FEMInterface):
         Parameters
         ----------
         connect_method : str, optional
-            'new' or 'catch' or 'auto'. The default is 'new'.
+            'new' or 'existing' or 'auto'. The default is 'new'.
             'new' のとき、新しい Femtet プロセスを起動し、接続します。
-            'catch' のとき、既存の Femtet プロセスと接続します。
+
+            'existing' のとき、既存の Femtet プロセスと接続します。
             ただし、接続できる Femtet が存在しない場合、エラーを送出します。
             この場合、既存 Femtet プロセスのどれに接続されるかは制御できません。
-            また、すでに別のPython又はExcelプロセスと接続されている Femtet との接続を行うことはできません。
-            'auto' のとき、まず 'catch' を試行し、失敗した際には 'new' で接続します。
+            ただし、pid が既知の場合、pid を指定することができます。
+            また、すでに別の Python 又は Excel プロセスと接続されている
+            Femtet との接続を行うことはできません。
+
+            'auto' のとき、まず 'existing' を試行し、失敗した際には 'new' で接続します。
 
         pid : int or None, optional
             接続したい既存の Femtet のプロセス ID. The default is None.
-            strategy が catch 以外の時は無視されます。
+            connect_method が existing 以外の時は無視されます。
 
         Raises
         ------
         Exception
             何らかの理由で Femtet との接続に失敗した際に例外を送出します。
 
-        Returns
-        -------
-        connected_femtet : str.
-            接続された Femtet が既存のものならば 'existing',
-            新しいものならば 'new' を返します。
-
         """
         if connect_method == 'new':
             self._connect_new_femtet()
 
-        elif connect_method == 'catch':
+        elif connect_method == 'existing':
             self._connect_existing_femtet(pid)
 
         elif connect_method == 'auto':
@@ -204,7 +212,7 @@ class FemtetInterface(FEMInterface):
                 self._connect_new_femtet()
 
         else:
-            raise Exception(f'定義されていない femtet 接続方法です：{connect_method}')
+            raise Exception(f'{connect_method} は定義されていない接続方法です')
 
         # ensure makepy
         if not hasattr(constants, 'STATIC_C'):
@@ -214,6 +222,9 @@ class FemtetInterface(FEMInterface):
             message += '次のコマンドにより、設定は自動で行われました（python  -m win32com.client.makepy FemtetMacro）.'
             message += 'インタープリタを再起動してください.'
             raise Exception(message)
+
+        if self.Femtet is None:
+            raise Exception('Femtet との接続に失敗しました.')
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
         # 引数の処理
@@ -240,7 +251,7 @@ class FemtetInterface(FEMInterface):
 
         # femprj が指定されている
         if self.femprj_path is not None:
-            # auto でも connect_femtet でもいいが、その後違ったら open する
+            # auto でいいが、その後違ったら open する
             self.connect_femtet(self.connect_method)
             # プロジェクトの相違をチェック
             if self.Femtet.ProjectPath != self.femprj_path:
@@ -255,7 +266,7 @@ class FemtetInterface(FEMInterface):
             if self.connect_method == 'new':
                 Exception('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
             print('femprj_path が指定されていないため、開いている Femtet との接続を試行します。')
-            self.connect_femtet('catch', self.pid)
+            self.connect_femtet('existing', self.pid)
             # 接続した Femtet インスタンスのプロジェクト名などを保管する
             self.femprj_path = self.Femtet.Project
             self.model_name = self.Femtet.AnalysisModelName
@@ -313,6 +324,22 @@ class FemtetInterface(FEMInterface):
         self.Femtet.SaveProject(self.Femtet.Project, True)  # 動いてない？？
         util.close_femtet(self.Femtet.hWnd)
 
+    def before_parallel_setup(self, femopt) -> list:
+        """サブプロセスを起動する前に必要数の Femtet を立てておく."""
+        pids = []
+        for i in range(femopt.n_parallel - 1):
+
+            # Femtet 起動
+            if not util.execute_femtet():
+                raise Exception('femtetutils を用いた Femtet の起動に失敗しました')
+
+            # pid 取得
+            pid = util.get_last_executed_femtet_process_id()
+            if pid == 0:
+                raise Exception('起動された Femtet の認識に失敗しました')
+            pids.append(pid)
+        return pids
+
     def parallel_setup(self, subprocess_idx):
         # .Result の干渉を回避するため、
         # サブプロセスならばプロジェクトを別名保存する
@@ -351,3 +378,9 @@ class NoFEM(FEMInterface):
 
     def quit(self):
         pass
+
+# TODO: NX-Femtet 再実装
+
+# TODO: SW-Femtet 再実装
+
+

@@ -32,7 +32,6 @@ class SimpleProcessMonitor:
         # 登録したイベントピッカーを接続する
         self.fig.canvas.mpl_connect('draw_event', self.adjustDirectionPosition)
         
-        # TODO:中断（experimental）
         def lmd(*args, **kwargs):
             self.FEMOpt.shared_interruption_flag.value = 1
         self.fig.canvas.mpl_connect('close_event', lmd)
