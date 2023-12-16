@@ -632,4 +632,8 @@ class OptimizerBase(ABC):
         print('計算が終了しました. ウィンドウを閉じると終了します.')
         print(f'結果は{self.history.path}を確認してください.')
 
+        # shutdown 前に ray remote actor を消しておく
+        ray.kill(self.ipv.ns)
+        del self.ipv.ns
+
         ray.shutdown()
