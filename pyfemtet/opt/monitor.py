@@ -109,8 +109,12 @@ class Monitor(object):
              Output('interrupt-button', 'disabled'),],
             [Input('interval-component', 'n_intervals'),])
         def stop_interval(_):
-            state = self.femopt.ipv.get_state()
-            if state == 'interrupted' or state == 'terminated':
+            try:
+                state = self.femopt.ipv.get_state()
+                should_stop = (state == 'interrupted') or (state == 'terminated')
+            except AttributeError:
+                should_stop = True
+            if should_stop:
                 max_intervals = 0
                 button_disable = True
             else:

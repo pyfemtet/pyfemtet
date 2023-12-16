@@ -635,5 +635,7 @@ class OptimizerBase(ABC):
         # shutdown 前に ray remote actor を消しておく
         ray.kill(self.ipv.ns)
         del self.ipv.ns
+        for obj in obj_refs:
+            del obj
 
         ray.shutdown()
