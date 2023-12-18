@@ -160,6 +160,8 @@ class Constraint(Function):
 class History:
 
     def __init__(self, history_path, ipv):
+
+        # 引数の処理
         self.path = history_path  # .csv
         self.ipv = ipv
         self.data = pd.DataFrame()
@@ -167,6 +169,10 @@ class History:
         self.obj_names = []
         self.cns_names = []
         self._data_columns = []
+
+        # path が存在すれば dataframe を読み込む
+        if os.path.isfile(self.path):
+            self.data = pd.read_csv(self.path)
 
     def init(self, param_names, obj_names, cns_names):
         self.param_names = param_names
@@ -186,6 +192,18 @@ class History:
         columns.append('message')
         columns.append('time')
         self._data_columns = columns
+
+        # restart ならば前のデータとの整合を確認
+        if len(self.data.columns) > 0:
+            # 読み込んだ columns が生成した columns と違っていればエラー
+            try:
+                if self.data.columns != self._data_columns:
+                    raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.data.columns)}\n\n現在の設定:\n{self._data_columns}')
+                else:
+                    # 同じであっても目的と拘束の上下限や direction が違えばエラー
+                    pass
+            except ValueError:
+                raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.data.columns)}\n\n現在の設定:\n{self._data_columns}')
 
     def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
 
@@ -220,7 +238,7 @@ class History:
 
         # serialize
         try:
-            self.data.to_csv(self.path)
+            self.data.to_csv(self.path, index=None)
         except PermissionError:
             print(f'warning: {self.path} がロックされています。データはロック解除後に保存されます。')
 
@@ -332,7 +350,7 @@ class OptimizerBase(ABC):
         self.parameters = pd.DataFrame()
         self.objectives = dict()
         self.constraints = dict()
-        self.history = History(history_path, self.ipv)
+        self.history = History(self.history_path, self.ipv)
         self.monitor: Monitor = None
         self.seed: int or None = None
         self.message = ''
@@ -616,5 +634,11 @@ class OptimizerBase(ABC):
         self.ipv.set_state('terminated')
         print('計算が終了しました. ウィンドウを閉じると終了します.')
         print(f'結果は{self.history.path}を確認してください.')
+
+        # shutdown 前に ray remote actor を消しておく
+        ray.kill(self.ipv.ns)
+        del self.ipv.ns
+        for obj in obj_refs:
+            del obj
 
         ray.shutdown()
