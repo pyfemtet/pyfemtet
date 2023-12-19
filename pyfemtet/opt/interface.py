@@ -566,7 +566,6 @@ class NoFEM(FEMInterface):
         pass
 
 
-# TODO: NX-Femtet 再実装
 class FemtetWithNXInterface(FemtetInterface):
 
     PATH_JOURNAL = os.path.abspath(os.path.join(here, '_FemtetWithNX/update_model.py'))
