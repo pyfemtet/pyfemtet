@@ -26,6 +26,7 @@ plotly = "^5.18.0"
 pip-licenses = "^4.3.3"
 sphinx = "==7.2.6"
 myst-parser = "^2.0.0"
+sphinx-rtd-theme = "^2.0.0"
 
 [tool.poetry-dynamic-versioning]
 enable = true
