@@ -21,15 +21,8 @@ concurrency:
 
 
 jobs:
-  deploy:
-
-    environment:
-      name: github-pages
-      url: "https://pyfemtet.github.io/pyfemtet/"
-      
-    name: sphinx-on-windows
+  build:
     runs-on: windows-latest
-    
     steps:
     
     - name: Checkout
@@ -65,6 +58,20 @@ jobs:
         # Upload entire repository
         path: '.\docs'
 
+
+  deploy:
+
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+      - name: Deploy artifact
+        id: deployment
+        uses: actions/deploy-pages@v1
     
 
   
