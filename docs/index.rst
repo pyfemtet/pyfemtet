@@ -1,5 +1,3 @@
-.. include:: ../README.md
-
 Welcome to Lumache's documentation!
 ===================================
 
@@ -23,3 +21,4 @@ Contents
    Home <self>
    usage
    api
+   README.md
