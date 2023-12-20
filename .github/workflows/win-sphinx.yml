@@ -29,6 +29,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install poetry poetry-dynamic-versioning
+
+    - name: Check bat file
+      run: |
+        tesst-path .\update_apidoc.bat
+    
+    
     - name: Poetry settings and Install dependencies
       run: |
         poetry config virtualenvs.create false
@@ -38,9 +44,11 @@ jobs:
 
     - name: Build and make html to docs/_build
       run: |
-        Get-Location
-        Get-Childitem .
-        cmd /c .\update-apidoc.bat
+        # Get-Location
+        # Get-Childitem .
+        .\update_apidoc.bat
+
+    
 
   
   
