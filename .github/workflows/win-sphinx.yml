@@ -22,11 +22,13 @@ concurrency:
 
 jobs:
   deploy:
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
     name: sphinx-on-windows
     runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: [3.11] # [3.5, 3.6, 3.7, 3.8]
     
     steps:
     - uses: actions/checkout@v3
