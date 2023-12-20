@@ -13,6 +13,9 @@ db.sqlite3
 .vscode
 .idea
 
+/docs/*
+!/docs/index.html
+
 PyFemtet.egg-info
 /src/PyFemtet/_version.py
 /dist
