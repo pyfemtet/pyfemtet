@@ -38,7 +38,7 @@ jobs:
 
     - name: Build and make html to docs/_build
       run: |
-        .\update-apidoc.bat
+        cmd /c .\update-apidoc.bat
 
   
   
