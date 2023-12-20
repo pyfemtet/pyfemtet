@@ -1,17 +1,19 @@
-Welcome to Lumache's documentation!
+Welcome to PyFemtet's documentation!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+**pyfemtet** はマルチフィジックス有限要素法解析ソフト
+`Femtet <https://www.muratasoftware.com/>`_ において
+まとまった機能の Python インターフェースを提供するパッケージです。
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
+現在 **pyfemtet** の唯一のサブパッケージ **opt** は
+設計のパラメータ最適化を行う *シンプルな* API を提供します。
+
+詳細は :doc:`usage` セクションを確認してください。
 
 .. note::
 
    This project is under active development.
+
 
 Contents
 --------
@@ -19,6 +21,9 @@ Contents
 .. toctree::
 
    Home <self>
-   usage
+   usage.md
    api
-   README.md
+
+
+Copyright (C) 2023 Murata Manufacturing Co., Ltd. All Rights Reserved.
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.

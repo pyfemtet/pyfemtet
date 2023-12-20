@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to Lumache’s documentation! &mdash; Basic Sphinx Example Project  documentation</title>
+  <title>Welcome to PyFemtet’s documentation! &mdash; Basic Sphinx Example Project  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="&lt;no title&gt;" href="usage.html" /> 
+    <link rel="next" title="Usage" href="usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,8 +45,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="README.html">Welcome To PyFemtet !</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
 </ul>
 
         </div>
@@ -63,7 +63,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to Lumache’s documentation!</li>
+      <li class="breadcrumb-item active">Welcome to PyFemtet’s documentation!</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -73,14 +73,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-lumache-s-documentation">
-<h1>Welcome to Lumache’s documentation!<a class="headerlink" href="#welcome-to-lumache-s-documentation" title="Link to this heading"></a></h1>
-<p><strong>Lumache</strong> (/lu’make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the <a class="reference external" href="https://world.openfoodfacts.org/">Open Food Facts database</a>
-and offers a <em>simple</em> and <em>intuitive</em> API.</p>
-<p>Check out the <a class="reference internal" href="usage.html"><span class="doc">&lt;no title&gt;</span></a> section for further information, including
-how to <span class="xref std std-ref">installation</span> the project.</p>
+  <section id="welcome-to-pyfemtet-s-documentation">
+<h1>Welcome to PyFemtet’s documentation!<a class="headerlink" href="#welcome-to-pyfemtet-s-documentation" title="Link to this heading"></a></h1>
+<p><strong>pyfemtet</strong> はマルチフィジックス有限要素法解析ソフト
+<a class="reference external" href="https://www.muratasoftware.com/">Femtet</a> において
+まとまった機能の Python インターフェースを提供するパッケージです。</p>
+<p>現在 <strong>pyfemtet</strong> の唯一のサブパッケージ <strong>opt</strong> は
+設計のパラメータ最適化を行う <em>シンプルな</em> API を提供します。</p>
+<p>詳細は <a class="reference internal" href="usage.html"><span class="doc">Usage</span></a> セクションを確認してください。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development.</p>
@@ -90,7 +90,13 @@ how to <span class="xref std std-ref">installation</span> the project.</p>
 <div class="toctree-wrapper compound">
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#id1">動作するサンプルコード・サンプル解析モデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#id2">最適化の実行</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/modules.html">pyfemtet</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="modules/pyfemtet.html">pyfemtet package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="modules/pyfemtet.html#subpackages">Subpackages</a><ul>
@@ -237,17 +243,10 @@ how to <span class="xref std std-ref">installation</span> the project.</p>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="README.html">Welcome To PyFemtet !</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="README.html#id1">機能</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#install">Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#id2">動作するサンプルコード・サンプル解析モデル</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#id3">使い方</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#api-reference">API reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#english-version-of-this-document">English version of this document</a></li>
-</ul>
-</li>
 </ul>
 </div>
+<p>Copyright (C) 2023 Murata Manufacturing Co., Ltd. All Rights Reserved.
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.</p>
 </section>
 </section>
 
@@ -255,7 +254,7 @@ how to <span class="xref std std-ref">installation</span> the project.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="usage.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
