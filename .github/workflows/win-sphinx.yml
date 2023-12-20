@@ -32,7 +32,7 @@ jobs:
 
     - name: Check bat file
       run: |
-        tesst-path .\update_apidoc.bat
+        test-path .\update_apidoc.bat
     
     
     - name: Poetry settings and Install dependencies
