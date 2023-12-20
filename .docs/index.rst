@@ -1,5 +1,5 @@
 Welcome to PyFemtet's documentation!
-===================================
+====================================
 
 **pyfemtet** はマルチフィジックス有限要素法解析ソフト
 `Femtet <https://www.muratasoftware.com/>`_ において
@@ -7,6 +7,9 @@ Welcome to PyFemtet's documentation!
 
 現在 **pyfemtet** の唯一のサブパッケージ **opt** は
 設計のパラメータ最適化を行う *シンプルな* API を提供します。
+
+:download:`this example script <opt_sample.femprj>`.
+
 
 詳細は :doc:`usage` セクションを確認してください。
 
