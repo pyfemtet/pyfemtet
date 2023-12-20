@@ -68,7 +68,7 @@ html_theme = "sphinx_rtd_theme"
 
 
 
-def setup(_):  # 勝手に走る関数らしい
+def _setup(_):  # 勝手に走る関数らしい
     # sphinx-apidoc -f -o docs pyfemtet
     docs_path = os.path.split(__file__)[0]
     out_path = os.path.join(docs_path, "modules")
@@ -81,5 +81,5 @@ def setup(_):  # 勝手に走る関数らしい
 
     shutil.copy2(source_file, destination_file)
 
-
-# setup()
+def setup(app):
+    app.connect('builder-inited', _setup)
