@@ -47,6 +47,7 @@ def Dispatch_Femtet(timeout=10, subprocess_idx=None):
     Returns
     -------
     Femtet : pyIDispatch
+        
     pid : int
         process id. if error, pid = 0.
 
@@ -160,6 +161,7 @@ def Dispatch_Femtet_with_new_process():
     Returns
     -------
     Femtet : pyIDispatch
+        
     pid : int
         process id. if error, pid = 0.
 
