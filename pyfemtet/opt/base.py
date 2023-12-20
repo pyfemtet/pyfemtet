@@ -444,6 +444,8 @@ class OptimizerBase(ABC):
                 is_existing = candidate in list(self.objectives.keys())
                 if not is_existing:
                     break
+                else:
+                    i += 1
             name = candidate
 
         self.objectives[name] = Objective(fun, name, direction, args, kwargs)
@@ -474,6 +476,8 @@ class OptimizerBase(ABC):
                 is_existing = candidate in list(self.objectives.keys())
                 if not is_existing:
                     break
+                else:
+                    i += 1
             name = candidate
 
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
