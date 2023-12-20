@@ -13,7 +13,7 @@ on:
           - '**.md'
 jobs:
   deploy:
-    name: MSBuild
+    name: sphinx-on-windows
     runs-on: windows-latest
     strategy:
       matrix:
@@ -25,11 +25,11 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.11'
-    - name: Install dependencies
+    - name: Install poetry
       run: |
         python -m pip install --upgrade pip
         pip install poetry poetry-dynamic-versioning
-    - name: Poetry settings
+    - name: Poetry settings and Install dependencies
       run: |
         poetry config virtualenvs.create false
         poetry self add "poetry-dynamic-versioning[plugin]"
@@ -38,6 +38,8 @@ jobs:
 
     - name: Build and make html to docs/_build
       run: |
+        Get-Location
+        Get-Childitem .
         cmd /c .\update-apidoc.bat
 
   
