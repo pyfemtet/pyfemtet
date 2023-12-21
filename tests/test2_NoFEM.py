@@ -1,111 +1,75 @@
-import os
-import subprocess
-from time import sleep
-import psutil
+import numpy as np
+import pandas as pd
 import ray
-from pyfemtet.tools.DispatchUtils import _get_pid
-from pyfemtet.opt import OptimizerOptuna ,FemtetInterface
+from pyfemtet.opt import OptimizerOptuna, NoFEM
 
 
-here, me = os.path.split(__file__)
-os.chdir(here)
-
-FEMTET_EXE_PATH = r'C:\Program Files\Femtet_Ver2023_64bit_inside\Program\Femtet.exe'
-
-
-# 後片付け
-def _destruct(pids):
-    ray.shutdown()
-    for pid in pids:
-        psutil.Process(pid).terminate()
+def objective_x(femopt):
+    r, theta, fai = femopt.get_parameter('values')
+    return r * np.cos(theta) * np.cos(fai)
 
 
-def _lunch_femtet(femprj='test1/test1.femprj'):
-    # 後片付けのために Femtet の pid を取得する
-    pid_list_before = [p.pid for p in psutil.process_iter(attrs=["name"]) if p.info["name"] == 'Femtet.exe']
-
-    # Femtet の起動, 普通に起動するのと同じやり方でやらないと ProjectPath が '' になる
-    subprocess.Popen([FEMTET_EXE_PATH, os.path.abspath(femprj)], cwd=os.path.dirname(FEMTET_EXE_PATH))
-
-    # pid_list の差から起動した Femtet の pid を取得する
-    pid_list_after = [p.pid for p in psutil.process_iter(attrs=["name"]) if p.info["name"] == 'Femtet.exe']
-    mypid = [x for x in pid_list_after if x not in pid_list_before][-1]
-
-    # 一応 Femtet の起動を待つ
-    sleep(5)
-
-    return mypid
+def objective_y(femopt):
+    r, theta, fai = femopt.get_parameter('values')
+    return r * np.cos(theta) * np.sin(fai)
 
 
-def test_1_1():
+def objective_z(femopt):
+    r, theta, fai = femopt.get_parameter('values')
+    return r * np.sin(theta)
+
+
+def constraint_y(femopt):
+    y = objective_y(femopt)
+    return y
+
+
+def constraint_z(femopt):
+    z = objective_z(femopt)
+    return z
+
+
+def test_2_1():
     """
     テストしたい状況
-        ユーザーが希望の Femtet を開いており、
-        Optimizer() によって接続する
+        FEM なしで一通りの機能が動くか
     パラメータ
-        Femtet
-            ユーザーが正しいプロジェクト・モデルを起動
-        プロジェクト
-            指定しない
-        モデル
-            指定しない
-        接続方法
-            指定しない
+        手法
     結果
-        起動した Femtet と接続する。
+        結果が保存したものと一致するか
     """
-    # Femtet 起動
-    mypid = _lunch_femtet()
 
-    # 接続を試みる
-    femopt = OptimizerOptuna()
-
-    # ちゃんと接続できているか確認
-    try:
-        assert femopt.fem.Femtet.Project == os.path.abspath('test1/test1.femprj')
-        assert femopt.fem.Femtet.AnalysisModelName=='test1'
-    except AssertionError as e:
-        _destruct([mypid])
-        raise e
-    else:
-        _destruct([mypid])
-
-def test_1_2():
-    """
-    テストしたい状況
-        ユーザーは既存の Femtet を開いているが、
-        FemtetInterface(femprj, name, 'new') によって処理を始めたい
-    パラメータ
-        Femtet
-            ユーザーが異なるプロジェクト・モデルを起動
-        プロジェクト
-            指定する
-        モデル
-            指定する
-        接続方法
-            指定する
-    結果
-        起動した Femtet と接続する。
-    """
-    # Femtet 起動
-    mypid = _lunch_femtet('test1/test1_another.femprj')
-
-    # 接続を試みる（これは相対パスで指定できたほうが便利）
-    fem = FemtetInterface(
-        'test1/test1.femprj',
-        'test1',
-        'new'
-    )
+    fem = NoFEM()
     femopt = OptimizerOptuna(fem)
+    femopt.set_random_seed(42)
+    femopt.add_parameter('r', .5, 0, 1)
+    femopt.add_parameter('theta', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
+    femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
+    femopt.add_objective(objective_x, args=femopt)  # 名前なし目的変数（obj_0 になる）
+    femopt.add_objective(objective_x, args=femopt)  # 名前なし目的変数（obj_1 になる）
+    femopt.add_objective(objective_y, 'y(mm)', args=femopt)
+    femopt.add_objective(objective_y, 'y(mm)', args=femopt, direction='maximize')  # 上書きかつ direction 指定
+    femopt.add_objective(objective_z, 'z(mm)', args=femopt, direction=-1)  # direction 数値指定
+    femopt.add_constraint(constraint_y, 'y<=0', upper_bound=-1, args=femopt)
+    femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
+    femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
+    femopt.main(n_trials=30, n_parallel=3)
 
-    pid = _get_pid(femopt.fem.Femtet.hWnd)
+    # データの取得
+    ref_df = pd.read_csv('test2/test2.csvdata')
+    def_df = femopt.history.data
 
-    # ちゃんと接続できているか確認
-    try:
-        assert femopt.fem.Femtet.Project == os.path.abspath('test1/test1.femprj')
-        assert femopt.fem.Femtet.AnalysisModelName=='test1'
-    except AssertionError as e:
-        _destruct([mypid, pid])
-        raise e
-    else:
-        _destruct([mypid, pid])
+    # 並べ替え（並列しているから順番は違いうる）
+    ref_df = ref_df.sort_values('r').select_dtypes(include='number')  # nan は除きたい
+    def_df = def_df.sort_values('r')
+
+    assert ref_df == def_df
+
+    # ray.shutdown()
+
+
+
+if __name__ == '__main__':
+    test_2_1()
+
+
