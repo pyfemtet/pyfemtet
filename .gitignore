@@ -14,10 +14,10 @@ db.sqlite3
 .idea
 
 /docs/*
-!/docs/index.html
 
 PyFemtet.egg-info
 /src/PyFemtet/_version.py
 /dist
 /.venv
 /build
+docs/index.html
