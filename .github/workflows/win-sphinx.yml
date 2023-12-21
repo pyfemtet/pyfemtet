@@ -1,10 +1,12 @@
 name: sphinx-build-on-windows
 
+# on:
+#   push:
+#     branches: ["main"]
+#   workflow_dispatch:
 on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
-
+  release:
+    types: [published]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
