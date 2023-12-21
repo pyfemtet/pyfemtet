@@ -1,7 +1,5 @@
-import gc
 import numpy as np
 import pandas as pd
-import ray
 from pyfemtet.opt import OptimizerOptuna, NoFEM
 
 
@@ -30,7 +28,7 @@ def constraint_z(femopt):
     return z
 
 
-def test_2_1():
+def test_2_1(method):
     """
     テストしたい状況
         FEM なしで一通りの機能が動くか
@@ -58,7 +56,7 @@ def test_2_1():
     femopt.terminate_monitor()
 
     # データの取得
-    ref_df = pd.read_csv('test2/test2.csvdata').replace(np.nan, None)
+    ref_df = pd.read_csv(f'test2/test2_TPE.csvdata').replace(np.nan, None)
     def_df = femopt.history.data.copy()
 
     # 並べ替え（並列しているから順番は違いうる）

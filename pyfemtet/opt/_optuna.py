@@ -133,6 +133,9 @@ class OptimizerOptuna(OptimizerBase):
         self.sampler_class = optuna.samplers.TPESampler
         if self.method == 'botorch':
             self.sampler_class = optuna.integration.BoTorchSampler
+            if self.n_parallel != 1:
+                warnings.warn('botorch method cannot be parallelized. n_parallel is set to 1.', RuntimeWarning)
+                self.n_parallel = 1
 
         # study name の設定
         self.study_name = os.path.splitext(os.path.basename(self.history.path))[0]
