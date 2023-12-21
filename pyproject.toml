@@ -21,6 +21,7 @@ psutil = "^5.9.6"
 ray = "^2.8.1"
 dash = "^2.14.2"
 plotly = "^5.18.0"
+dash-bootstrap-components = "^1.5.0"
 
 [tool.poetry.group.dev.dependencies]
 pip-licenses = "^4.3.3"
