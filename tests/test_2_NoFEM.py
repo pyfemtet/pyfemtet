@@ -1,3 +1,4 @@
+import gc
 import numpy as np
 import pandas as pd
 import ray
@@ -54,18 +55,18 @@ def test_2_1():
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
     femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
     femopt.main(n_trials=30, n_parallel=3)
+    femopt.terminate_monitor()
 
     # データの取得
-    ref_df = pd.read_csv('test2/test2.csvdata')
-    def_df = femopt.history.data
+    ref_df = pd.read_csv('test2/test2.csvdata').replace(np.nan, None)
+    def_df = femopt.history.data.copy()
 
     # 並べ替え（並列しているから順番は違いうる）
-    ref_df = ref_df.sort_values('r').select_dtypes(include='number')  # nan は除きたい
-    def_df = def_df.sort_values('r')
+    ref_df = ref_df.iloc[:, 1:].sort_values('r').sort_values('theta').sort_values('fai').select_dtypes(include='number')
+    def_df = def_df.iloc[:, 1:].sort_values('r').sort_values('theta').sort_values('fai').select_dtypes(include='number')
 
-    assert ref_df == def_df
+    assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.001
 
-    # ray.shutdown()
 
 
 

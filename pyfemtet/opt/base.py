@@ -13,7 +13,7 @@ import pandas as pd
 from optuna._hypervolume import WFG
 import ray
 
-from .core import InterprocessVariables, UserInterruption
+from .core import InterprocessVariables, UserInterruption, TerminatableThread
 from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 
@@ -588,8 +588,8 @@ class OptimizerBase(ABC):
 
         # モニタースレッド
         self.monitor = Monitor(self)
-        tm = Thread(target=self.monitor.start_server)
-        tm.start()
+        self.tm = TerminatableThread(target=self.monitor.start_server)
+        self.tm.start()
 
         # 追加の計算プロセスが行う処理の定義
         @ray.remote
@@ -646,3 +646,6 @@ class OptimizerBase(ABC):
             del obj
 
         ray.shutdown()
+
+    def terminate_monitor(self):
+        self.tm.force_terminate()
