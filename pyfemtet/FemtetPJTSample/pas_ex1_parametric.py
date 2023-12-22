@@ -10,7 +10,7 @@ p：空気の速度ポテンシャル
 """
 import os
 from pyfemtet.opt import FemtetInterface, OptimizerOptuna
-from win32com.client import constants
+
 
 
 # os.chdir(os.path.dirname(__file__))
@@ -18,7 +18,12 @@ from win32com.client import constants
 
 # 目的関数（流量）の定義
 def flow(Femtet):
-    """pas_ex1_parametric.femprj の結果から流量を取得します。"""
+    """pas_ex1_parametric.femprj の結果から流量を取得します。
+
+    目的関数または拘束関数内で constants を用いる場合、
+    その関数内に import 文を記述する必要があります。
+    """
+    from win32com.client import constants
     Gogh = Femtet.Gogh
     Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
     _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)

@@ -34,24 +34,20 @@ class FEMInterface(ABC):
     def __init__(
             self,
             subprocess_idx: int or None = None,
-            ipv: InterprocessVariables or None = None,
-            subprocess_setup_object: int or None = None,
+            subprocess_setup: 'Any' or None = None,
             **kwargs
     ):
         """サブプロセスで FEM を restore するときに必要な情報を保管する.
 
-        具象クラスでは最低でも subprocess_idx, ipv, pid を引数にとること.
-        使わないなら **kwargs にしても構わない.
-        具象クラスではサブプロセス時に指定したい変数を引数にして
+        具象クラスでは restore 時に指定したい変数を引数にして
         super().__init__ を呼ぶこと.
 
         """
+        # restore のための情報保管
         self.kwargs = kwargs
+        # base が呼ぶので attr があったほうがいい
         self.subprocess_idx = subprocess_idx
-        self.ipv = ipv
-        self.subprocess_setup_object = subprocess_setup_object
 
-    @abstractmethod
     def check_param_value(self, param_name) -> float:
         """
 
@@ -97,12 +93,11 @@ class FEMInterface(ABC):
         """デストラクタ."""
         pass
 
-    def before_parallel_setup(self, femopt) -> list:
-        """サブプロセスを起動する前の前処理.サブプロセスに渡されるオブジェクトを生成すること."""
-        subprocess_setup_object = None
-        return [subprocess_setup_object for _ in range(femopt.n_parallel - 1)]
+    def create_subprocess_setup(self, femopt) -> 'Any':
+        """サブプロセスを起動する前の前処理"""
+        pass  # return subprocess_setup
 
-    def parallel_setup(self, subprocess_idx):
+    def parallel_setup(self):
         """サブプロセスで呼ばれた場合のコンストラクタ."""
         pass
 
@@ -119,8 +114,7 @@ class FemtetInterface(FEMInterface):
             model_name=None,
             connect_method='auto',
             subprocess_idx=None,
-            ipv=None,
-            pid=None,
+            subprocess_setup=None,
     ):
         # 引数の処理
         if femprj_path is None:
@@ -129,9 +123,10 @@ class FemtetInterface(FEMInterface):
             self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
         self.connect_method = connect_method
-        self.pid = pid
-        self.subprocess_idx = subprocess_idx
-        self.ipv = ipv
+        # 引数の処理（サブプロセス時）
+        self.ipv = None if subprocess_setup is None else subprocess_setup['ipv']  # 排他処理に使う
+        self.subprocess_idx = None if subprocess_setup is None else subprocess_setup['subprocess_idx']  # 排他処理に使う
+        self.target_pid = None if subprocess_setup is None else subprocess_setup['pids'][self.subprocess_idx]  # before_parallel で立てた Femtet への接続に使う
 
         # その他の初期化
         self.Femtet: 'IPyDispatch' = None
@@ -140,8 +135,8 @@ class FemtetInterface(FEMInterface):
         self.max_api_retry = 3
         self.pp = False
 
-        # サブプロセスでなければ何も考えず Femtet と接続する
-        if subprocess_idx is None:
+        # サブプロセスでなければルールに従って Femtet と接続する
+        if self.subprocess_idx is None:
             self.connect_and_open_femtet()
 
         # サブプロセスから呼ばれているならば
@@ -150,25 +145,23 @@ class FemtetInterface(FEMInterface):
         else:
             print('Start to connect femtet. This process is exclusive.')
             while True:
-                print(f'My subprocess_idx is {subprocess_idx}')
-                print(f'Allowed idx is {self.ipv.get_allowed_idx()}')
-                if subprocess_idx == self.ipv.get_allowed_idx():
+                print(f'My subprocess_idx is {self.subprocess_idx}')
+                print(f'Connection allowed idx is {self.ipv.get_allowed_idx()}')
+                if self.subprocess_idx == self.ipv.get_allowed_idx():
                     break
-                print(f'Wait to be permitted.')
+                print(f'Wait to be allowed.')
                 sleep(1)
-            print(f'Permitted.')
-            self.connect_femtet('existing', self.pid)
-            self.ipv.set_allowed_idx(subprocess_idx+1)
+            print(f'Allowed.')
+            self.connect_femtet('existing', self.target_pid)
+            self.ipv.set_allowed_idx(self.subprocess_idx + 1)  # 次の idx に許可を出す
             self.open(self.femprj_path, self.model_name)
 
-        # restore するための情報保管なので上記処理結果を反映する.
+        # restore するための情報保管
+        # パスなどは connect_and_open_femtet での処理結果を反映し
+        # メインで開いた解析モデルが確実に開かれるようにする
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
-            connect_method=self.connect_method,
-            subprocess_idx=subprocess_idx,
-            ipv=ipv,
-            pid=pid,
         )
 
     def _connect_new_femtet(self):
@@ -373,12 +366,8 @@ class FemtetInterface(FEMInterface):
                     print_indent+1
                 )
 
-
-
     def femtet_is_alive(self) -> bool:
         return _get_pid(self.Femtet.hWnd) > 0
-
-
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
         # 引数の処理
@@ -541,45 +530,51 @@ class FemtetInterface(FEMInterface):
             if pid == 0:
                 raise Exception('起動された Femtet の認識に失敗しました')
             pids.append(pid)
-        return pids
 
-    def parallel_setup(self, subprocess_idx):
+        subprocess_setup = dict(
+            pids = pids,
+            ipv = femopt.ipv,
+
+        )
+
+
+        return
+
+    def parallel_setup(self):
         # .Result の干渉を回避するため、
         # サブプロセスならばプロジェクトを別名保存する
         self.td = tempfile.mkdtemp()
-        print(self.td)
-        name = f'subprocess{subprocess_idx}'
+        name = f'subprocess{self.subprocess_idx}'
         self.femprj_path = os.path.join(self.td, f'{name}.femprj')
         result = self.Femtet.SaveProject(self.femprj_path, True)
+        print(f'subprocess{self.subprocess_idx} は {self.femprj_path} に一時ファイルを保存します。')
         if not result:
             self.Femtet.ShowLastError()
 
     def parallel_terminate(self):
+        # 何かがあってもあとは終わるだけなので
+        # プロセス終了 print が出るようにする。
         try:
             # Femtet プロセスを終了する（自動保存しないよう保存する）
             print(f'try to close Femtet.exe')
             self.Femtet.SaveProjectIgnoreHistory(self.Femtet.Project, True)  # 動いてない？？
+            sleep(3)
             util.close_femtet(self.Femtet.hWnd)
+            sleep(1)
 
             # 一時ファイルを削除する
-            sleep(1)
             try:
                 shutil.rmtree(self.td)
             except PermissionError:
                 pass  # 諦める
+
         except:
-            pass  # 何かがあってもプロセス全体が正常終了することを優先
+            pass
 
 
 class NoFEM(FEMInterface):
 
     def update(self, parameters):
-        pass
-
-    def check_param_value(self, param_name):
-        pass
-
-    def quit(self):
         pass
 
 

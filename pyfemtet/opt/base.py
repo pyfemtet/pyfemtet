@@ -608,17 +608,15 @@ class OptimizerBase(ABC):
 
         # 追加の計算プロセスが行う処理の定義
         @ray.remote
-        def parallel_process(_subprocess_idx, _parallel_setting):
+        def parallel_process(_subprocess_idx, _subprocess_setup):
             print('Start to re-initialize fem object.')
+            # プロセス化されたときに del した fem を restore する
             self.set_fem(
                 subprocess_idx=_subprocess_idx,
-                ipv=self.ipv,
-                pid=_parallel_setting[_subprocess_idx]
-            )  # プロセス化されたときに monitor と fem を落としている
-            print('Start to setup parallel process.')
-            self.fem.parallel_setup(
-                _subprocess_idx,
+                subprocess_setup=_subprocess_setup
             )
+            print('Start to setup parallel process.')
+            self.fem.parallel_setup()
             print('Start parallel optimization.')
             try:
                 self._main(_subprocess_idx)
@@ -629,7 +627,7 @@ class OptimizerBase(ABC):
             print('Finish parallel process.')
 
         # 追加の計算プロセスを立てる前の前処理
-        parallel_setting = self.fem.before_parallel_setup(self)
+        parallel_setting = self.fem.create_subprocess_setup(self)
 
         # 追加の計算プロセス
         obj_refs = []
