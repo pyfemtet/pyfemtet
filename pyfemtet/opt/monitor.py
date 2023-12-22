@@ -13,12 +13,6 @@ def update_scatter_matrix(femopt):
 
     # create figure
     fig = go.Figure()
-    fig.update_layout(
-        dict(
-            width=800,
-            height=600,
-        )
-    )
 
     # graphs setting dependent on n_objectives
     if len(obj_names) == 0:
@@ -131,11 +125,12 @@ class Monitor(object):
 
         content = html.Div(id="page-content", style=CONTENT_STYLE)
         self.app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+        self.interrupt_n_clicks = 0
+        self.toggle_n_clicks = 0
 
         #### settings for multiobjective pairplot
         self.home = self.setup_home()
         self.multi_pairplot_layout = self.setup_page1()
-
 
         # sidebar によるページ遷移のための callback
         @self.app.callback(Output("page-content", "children"), [Input("url", "pathname")])
@@ -156,16 +151,6 @@ class Monitor(object):
                 className="p-3 bg-light rounded-3",
             )
 
-
-        # 中断の設定
-        @self.app.callback(
-            Output('dummy', 'value'),
-            Input('interrupt-button', 'n_clicks'))
-        def interrupt(_):
-            if _ is not None:
-                self.femopt.ipv.set_state('interrupted')
-            return ''
-
         # scatter matrix
         @self.app.callback(
             Output('scatter-matrix-graph', 'figure'),
@@ -173,24 +158,64 @@ class Monitor(object):
         def update_sm(_):
             return update_scatter_matrix(self.femopt)
 
-        # 終了していたら更新をやめる、中断ボタンを disable にする
+        # 1. 中断ボタンを押したら / 更新をやめる and 中断ボタンを disable にする
+        # 2. メイン処理が中断 or 終了していたら / 更新をやめ and 中断ボタンを disable にする
+        # 3. toggle_button が押されていたら / 更新を切り替える
         @self.app.callback(
-            [Output('interval-component', 'max_intervals'),
-             Output('interrupt-button', 'disabled'),],
-            [Input('interval-component', 'n_intervals'),])
-        def stop_interval(_):
+            [
+                Output('interval-component', 'max_intervals'),
+                Output('interrupt-button', 'disabled'),
+                Output('toggle-update-button', 'disabled'),
+                Output('toggle-update-button', 'children'),
+            ],
+            [
+                Input('interval-component', 'n_intervals'),
+                Input('toggle-update-button', 'n_clicks'),
+                Input('interrupt-button', 'n_clicks'),
+            ]
+        )
+        def stop_interval(_, toggle_n_clicks, interrupt_n_clicks):
+            # 引数の処理
+            toggle_n_clicks = 0 if toggle_n_clicks is None else toggle_n_clicks
+            interrupt_n_clicks = 0 if interrupt_n_clicks is None else interrupt_n_clicks
+
+            # 下記を基本に戻り値を上書きしていく（優先のものほど下に来る）
+            # 最後にクリック数を更新するので途中で抜けるのは好ましくない
+            max_intervals = -1  # enable
+            button_disable = False
+            toggle_text = 'グラフの自動更新を一時停止する'
+
+            # toggle_button が奇数なら interval を disable にする
+            if toggle_n_clicks % 2 == 1:
+                max_intervals = 0  # disable
+                button_disable = False
+                toggle_text = 'グラフの自動更新を再開する'
+
+            # 中断又は終了なら interval とボタンを disable にする
+            should_stop = False
             try:
                 state = self.femopt.ipv.get_state()
                 should_stop = (state == 'interrupted') or (state == 'terminated')
             except AttributeError:
                 should_stop = True
-            if should_stop:
-                max_intervals = 0
+            finally:
+                if should_stop:
+                    max_intervals = 0  # disable
+                    button_disable = True
+                    toggle_text = 'グラフの更新は行われません'
+
+            # 中断ボタンが押されたなら interval とボタンを disable にして femopt の状態を set する
+            if interrupt_n_clicks > self.interrupt_n_clicks:
+                max_intervals = 0  # disable
                 button_disable = True
-            else:
-                max_intervals = -1
-                button_disable = False
-            return max_intervals, button_disable
+                toggle_text = 'グラフの更新は行われません'
+                self.femopt.ipv.set_state('interrupted')
+
+            # クリック回数を更新する
+            self.interrupt_n_clicks = interrupt_n_clicks
+            self.toggle_n_clicks = toggle_n_clicks
+
+            return max_intervals, button_disable, button_disable, toggle_text
 
     def setup_home(self):
         # components の設定
@@ -202,9 +227,7 @@ class Monitor(object):
 - ブラウザによる進捗状況確認機能ですが、インターネット通信は行いません。
 - このページを閉じても最適化は進行します。再びこのページを開くには、ブラウザのアドレスバーに __localhost:8080__ と入力してください。
         ''')
-
         return text
-
 
     def setup_page1(self):
         # components の設定
@@ -217,6 +240,7 @@ class Monitor(object):
         )
         header = html.H1("最適化の進行状況"),
         graph = dcc.Graph(id='scatter-matrix-graph')
+        toggle_update_button = dbc.Button('グラフの自動更新の一時停止', id='toggle-update-button')
         interrupt_button = dbc.Button('最適化を中断', id='interrupt-button', color='danger')
 
         # layout の設定
@@ -224,8 +248,8 @@ class Monitor(object):
             dbc.Row([dbc.Col(dummy), dbc.Col(interval)]),
             dbc.Row([dbc.Col(header)]),
             dbc.Row([dbc.Col(graph)]),
-            dbc.Row([dbc.Col(interrupt_button)], justify="center",),
-        ])
+            dbc.Row([dbc.Col(toggle_update_button), dbc.Col(interrupt_button)], justify="center",),
+        ], fluid=True)
         return layout
 
 
@@ -244,30 +268,46 @@ class Monitor(object):
 
 
 if __name__ == '__main__':
+    from time import sleep
+    from threading import Thread
     import numpy as np
     import pandas as pd
+
+
     class IPV:
         def __init__(self):
             self.state = 'running'
+
         def get_state(self):
             return self.state
+
         def set_state(self, state):
             self.state = state
+
+
     class History:
         def __init__(self):
             self.obj_names = 'A B C D E'.split()
-            self.data = pd.DataFrame(
-                np.random.rand(5, len(self.obj_names)),
-                columns=self.obj_names,
-            )
             self.path = 'tmp.csv'
+            t = Thread(target=self.update)
+            t.start()
+
+        def update(self):
+            while True:
+                self.data = pd.DataFrame(
+                    np.random.rand(5, len(self.obj_names)),
+                    columns=self.obj_names,
+                )
+                sleep(1)
+
+
     class FEMOPT:
         def __init__(self, history, ipv):
             self.history = history
             self.ipv = ipv
 
-    history = History()
     ipv = IPV()
+    history = History()
     femopt = FEMOPT(history, ipv)
     monitor = Monitor(femopt)
     monitor.start_server()

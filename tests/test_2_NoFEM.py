@@ -1,9 +1,13 @@
+from time import sleep
 import numpy as np
 import pandas as pd
 from pyfemtet.opt import OptimizerOptuna, NoFEM
 
 
+should_sleep = False
+
 def objective_x(femopt):
+    if should_sleep: sleep(1)
     r, theta, fai = femopt.get_parameter('values')
     return r * np.cos(theta) * np.cos(fai)
 
