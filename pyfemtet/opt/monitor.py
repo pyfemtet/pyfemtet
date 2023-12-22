@@ -79,8 +79,13 @@ class Monitor(object):
 
         self.app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+        # settings for each page
+        self.interrupt_n_clicks = 0
+        self.toggle_n_clicks = 0
+        self.home = self.setup_home()
+        # self.multi_pairplot_layout = self.setup_page1()
 
-        #### simple sidebar app
+        # setup sidebar
         # https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
 
         # the style arguments for the sidebar. We use position:fixed and a fixed width
@@ -101,8 +106,6 @@ class Monitor(object):
             "margin-right": "2rem",
             "padding": "2rem 1rem",
         }
-
-        # setup sidebar
         sidebar = html.Div(
             [
                 html.H2("Sidebar", className="display-4"),
@@ -113,7 +116,7 @@ class Monitor(object):
                 dbc.Nav(
                     [
                         dbc.NavLink("Home", href="/", active="exact"),
-                        dbc.NavLink("ペアプロット", href="/page-1", active="exact"),
+                        # dbc.NavLink("ペアプロット", href="/page-1", active="exact"),
                         # dbc.NavLink("Page 2", href="/page-2", active="exact"),
                     ],
                     vertical=True,
@@ -122,23 +125,16 @@ class Monitor(object):
             ],
             style=SIDEBAR_STYLE,
         )
-
         content = html.Div(id="page-content", style=CONTENT_STYLE)
         self.app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
-        self.interrupt_n_clicks = 0
-        self.toggle_n_clicks = 0
-
-        #### settings for multiobjective pairplot
-        self.home = self.setup_home()
-        self.multi_pairplot_layout = self.setup_page1()
 
         # sidebar によるページ遷移のための callback
         @self.app.callback(Output("page-content", "children"), [Input("url", "pathname")])
         def render_page_content(pathname):
             if pathname == "/":
                 return self.home
-            elif pathname == "/page-1":
-                return self.multi_pairplot_layout
+            # elif pathname == "/page-1":
+            #     return self.multi_pairplot_layout
             # elif pathname == "/page-2":
             #     return html.P("Oh cool, this is page 2!")
             # If the user tries to reach a different page, return a 404 message
@@ -219,18 +215,6 @@ class Monitor(object):
 
     def setup_home(self):
         # components の設定
-        text = dcc.Markdown('''
-# 最適化の進行状況モニター
----
-#### 左のサイドバーから、可視化方法を選択してください
-- このページでは、最適化の進捗状況を見ることができます。
-- ブラウザによる進捗状況確認機能ですが、インターネット通信は行いません。
-- このページを閉じても最適化は進行します。再びこのページを開くには、ブラウザのアドレスバーに __localhost:8080__ と入力してください。
-        ''')
-        return text
-
-    def setup_page1(self):
-        # components の設定
         # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
         dummy = html.Div('', id='dummy')
         interval = dcc.Interval(
@@ -242,15 +226,49 @@ class Monitor(object):
         graph = dcc.Graph(id='scatter-matrix-graph')
         toggle_update_button = dbc.Button('グラフの自動更新の一時停止', id='toggle-update-button')
         interrupt_button = dbc.Button('最適化を中断', id='interrupt-button', color='danger')
+        status_text = dcc.Markdown(f'''
+---
+- このページでは、最適化の進捗状況を見ることができます。
+- このページを閉じても最適化は進行します。
+- この機能はブラウザによる状況確認機能ですが、インターネット通信は行いません。
+- 再びこのページを開くには、ブラウザのアドレスバーに __localhost:8080__ と入力してください。
+    - ※ 特定のホスト名及びポートを指定するには、OptimizerBase.main() の実行前に
+    OptimizerBase.set_monitor_server() を実行してください。
+        ''')
 
         # layout の設定
         layout = dbc.Container([
             dbc.Row([dbc.Col(dummy), dbc.Col(interval)]),
             dbc.Row([dbc.Col(header)]),
             dbc.Row([dbc.Col(graph)]),
-            dbc.Row([dbc.Col(toggle_update_button), dbc.Col(interrupt_button)], justify="center",),
+            dbc.Row([dbc.Col(toggle_update_button), dbc.Col(interrupt_button)]),
+            dbc.Row([dbc.Col(status_text)]),
         ], fluid=True)
+
         return layout
+
+    # def setup_page1(self):
+    #     # components の設定
+    #     # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
+    #     dummy = html.Div('', id='dummy')
+    #     interval = dcc.Interval(
+    #         id='interval-component',
+    #         interval=1*1000,  # in milliseconds
+    #         n_intervals=0,
+    #     )
+    #     header = html.H1("最適化の進行状況"),
+    #     graph = dcc.Graph(id='scatter-matrix-graph')
+    #     toggle_update_button = dbc.Button('グラフの自動更新の一時停止', id='toggle-update-button')
+    #     interrupt_button = dbc.Button('最適化を中断', id='interrupt-button', color='danger')
+    #
+    #     # layout の設定
+    #     layout = dbc.Container([
+    #         dbc.Row([dbc.Col(dummy), dbc.Col(interval)]),
+    #         dbc.Row([dbc.Col(header)]),
+    #         dbc.Row([dbc.Col(graph)]),
+    #         dbc.Row([dbc.Col(toggle_update_button), dbc.Col(interrupt_button)], justify="center",),
+    #     ], fluid=True)
+    #     return layout
 
 
     def start_server(self, host='localhost', port=8080):
