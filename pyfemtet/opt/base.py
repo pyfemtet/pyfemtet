@@ -574,7 +574,6 @@ class OptimizerBase(ABC):
             port=port
         )
 
-
     def main(self, n_trials=None, n_parallel=1, timeout=None, method='TPE', **setup_kwargs):
         # 共通引数
         self.n_trials = n_trials
@@ -603,8 +602,6 @@ class OptimizerBase(ABC):
             kwargs=self.monitor_server_kwargs
         )
         self.monitor_thread.start()
-
-
 
         # 追加の計算プロセスが行う処理の定義
         @ray.remote
