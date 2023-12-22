@@ -643,6 +643,9 @@ class FemtetWithNXInterface(FemtetInterface):
             is_Gaudi_method=True,
         )
 
+        # femprj モデルの変数も更新
+        super().update_model(parameters)
+
         # 処理を確定
         self.call_femtet_api(
             self.Femtet.Redraw,

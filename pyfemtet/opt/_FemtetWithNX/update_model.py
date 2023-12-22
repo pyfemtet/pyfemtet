@@ -42,7 +42,12 @@ def main(prtPath:str, parameters:'dict as str', x_tPath:str = None):
     # 式を更新
     unit_mm = workPart.UnitCollection.FindObject("MilliMeter")
     for k, v in parameters.items():
-        exp = workPart.Expressions.FindObject(k)
+        try:
+            exp = workPart.Expressions.FindObject(k)
+        except NXOpen.NXException:
+            print(f'変数{k}は .prt ファイルに含まれていません。無視されます。')
+            continue
+
         workPart.Expressions.EditWithUnits(exp, unit_mm, str(v))
         # 式の更新を適用
         id1 = theSession.NewestVisibleUndoMark
