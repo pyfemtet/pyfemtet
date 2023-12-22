@@ -550,8 +550,8 @@ class OptimizerBase(ABC):
             self.fem.update(self.parameters)
 
             # 計算
-            self.obj_values = [obj.calc(self.fem) for _, obj in self.objectives.items()]
-            self.cns_values = [cns.calc(self.fem) for _, cns in self.constraints.items()]
+            self.obj_values = [float(obj.calc(self.fem)) for _, obj in self.objectives.items()]
+            self.cns_values = [float(cns.calc(self.fem)) for _, cns in self.constraints.items()]
 
             # 記録
             self.history.record(self.parameters, self.objectives, self.constraints, self.obj_values, self.cns_values, message)
