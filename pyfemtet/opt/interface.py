@@ -442,17 +442,28 @@ class FemtetInterface(FEMInterface):
         )
 
         # Femtet の設計変数の更新
+        existing_variable_names = self.call_femtet_api(
+                    fun=self.Femtet.GetVariableNames_py,
+                    ret_if_failed=False,  # 意味がない
+                    if_error=ModelError,  # 生きてるのに失敗した場合
+                    error_message=f'GetVariableNames_py に失敗しました。',
+                    is_Gaudi_method=True,
+                )
+
         for i, row in parameters.iterrows():
             name = row['name']
             value = row['value']
-            self.call_femtet_api(
-                fun=self.Femtet.UpdateVariable,
-                ret_if_failed=False,
-                if_error=ModelError,  # 生きてるのに失敗した場合
-                error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
-                is_Gaudi_method=True,
-                args=(name, value),
-            )
+            if name in existing_variable_names:
+                self.call_femtet_api(
+                    fun=self.Femtet.UpdateVariable,
+                    ret_if_failed=False,
+                    if_error=ModelError,  # 生きてるのに失敗した場合
+                    error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
+                    is_Gaudi_method=True,
+                    args=(name, value),
+                )
+            else:
+                print(f'変数 {name} は .femprj に含まれていません。無視されます。')
 
         # 設計変数に従ってモデルを再構築
         self.call_femtet_api(
