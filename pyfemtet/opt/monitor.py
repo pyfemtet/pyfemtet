@@ -229,9 +229,18 @@ class Monitor(object):
         return layout
 
 
-    def start_server(self):
-        webbrowser.open('http://localhost:8080')
-        self.app.run(debug=False, host='localhost', port=8080)
+    def start_server(self, host='localhost', port=8080):
+
+        if host is None:
+            host = 'localhost'
+        if port is None:
+            port = 8080
+
+        if host == '0.0.0.0':
+            webbrowser.open(f'http://localhost:{str(port)}')
+        else:
+            webbrowser.open(f'http://{host}:{str(port)}')
+        self.app.run(debug=False, host=host, port=port)
 
 
 if __name__ == '__main__':

@@ -353,6 +353,7 @@ class OptimizerBase(ABC):
         self.history = History(self.history_path, self.ipv)
         self.monitor: Monitor = None
         self.monitor_thread = None
+        self.monitor_server_kwargs = dict()
         self.seed: int or None = None
         self.message = ''
         self.obj_values: [float] = []
@@ -567,6 +568,13 @@ class OptimizerBase(ABC):
     def _setup_main(self, *args, **kwargs):
         pass
 
+    def setup_monitor_server(self, host, port=None):
+        self.monitor_server_kwargs = dict(
+            host=host,
+            port=port
+        )
+
+
     def main(self, n_trials=None, n_parallel=1, timeout=None, method='TPE', **setup_kwargs):
         # 共通引数
         self.n_trials = n_trials
@@ -590,8 +598,13 @@ class OptimizerBase(ABC):
 
         # モニタースレッド
         self.monitor = Monitor(self)
-        self.monitor_thread = TerminatableThread(target=self.monitor.start_server)
+        self.monitor_thread = TerminatableThread(
+            target=self.monitor.start_server,
+            kwargs=self.monitor_server_kwargs
+        )
         self.monitor_thread.start()
+
+
 
         # 追加の計算プロセスが行う処理の定義
         @ray.remote
