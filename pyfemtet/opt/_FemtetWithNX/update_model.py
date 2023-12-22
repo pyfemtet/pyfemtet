@@ -51,7 +51,6 @@ def main(prtPath:str, parameters:'dict as str', x_tPath:str = None):
         # 更新に失敗
         except NXOpen.NXException as e:
             print('  形状が破綻しました。操作を取り消します。')
-            print('---script end---')
             return
 
 
