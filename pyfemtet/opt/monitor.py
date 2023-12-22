@@ -21,8 +21,8 @@ def update_scatter_matrix(femopt):
     elif len(obj_names) == 1:
         fig.add_trace(
             go.Scatter(
-                x=tuple(range(len(obj_names[0]))),
-                y=data[obj_names[0]],
+                x=tuple(range(len(data[obj_names[0]].values))),
+                y=data[obj_names[0]].values,
                 mode='markers+lines',
             )
         )
