@@ -4,7 +4,7 @@ import pandas as pd
 from pyfemtet.opt import OptimizerOptuna, NoFEM
 
 
-should_sleep = False
+should_sleep = True
 
 def objective_x(femopt):
     if should_sleep: sleep(1)
@@ -71,8 +71,26 @@ def test_2_1():
 
 
 
+def simple():
+    """シンプルな動作確認用"""
+
+    fem = NoFEM()
+    femopt = OptimizerOptuna(fem)
+    femopt.set_random_seed(42)
+    femopt.add_parameter('r', .5, 0, 1)
+    femopt.add_parameter('theta', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
+    femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
+    femopt.add_objective(objective_x, args=femopt)
+    femopt.add_objective(objective_y, args=femopt)
+    femopt.add_objective(objective_z, args=femopt)
+    femopt.main(n_trials=90, n_parallel=3)
+    femopt.terminate_monitor()
+
+
+
+
 
 if __name__ == '__main__':
-    test_2_1()
+    simple()
 
 

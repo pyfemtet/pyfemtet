@@ -1,66 +1,46 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 対応する解析モデル：pas_ex1_parametric.femprj
-この解析モデルでは、円柱状の障害物を有する円筒管内に流体を流す解析を行います。
+円柱状の障害物を有する円筒管内を流れる空気についての簡易流体解析です。
 設計パラメータは以下の通りです。
 r：障害物の半径
 h：障害物の長さ
-p：流体を流すための速度ポテンシャル
+p：空気の速度ポテンシャル
 流量を特定の値にするために最適な r, h, p を求めます。
-'''
-
-from PyFemtet.opt import FemtetScipy
+"""
+import os
+from pyfemtet.opt import FemtetInterface, OptimizerOptuna
 from win32com.client import constants
 
 
-#### 問題の設定
+# os.chdir(os.path.dirname(__file__))
 
-# 評価指標の定義（今回は流量）
+
+# 目的関数（流量）の定義
 def flow(Femtet):
-    '''評価指標を定義する関数は、第一引数に Femtet のインスタンスを取るようにしてください。'''
+    """pas_ex1_parametric.femprj の結果から流量を取得します。"""
     Gogh = Femtet.Gogh
     Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
     _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
     flow = ret.Real
     return flow
 
-# 拘束の定義（今回は障害物の体積）
-def volume(Femtet):
-    '''拘束を定義する関数は、第一引数に Femtet のインスタンスを取るようにしてください。'''
-    r = Femtet.GetVariableValue('r')
-    h = Femtet.GetVariableValue('h')
-    return 3.14 * r**2 * h
 
+if __name__ == '__main__':
 
-#### processing
+    # Femtet との接続を行います。
+    fem = FemtetInterface(os.path.join(os.path.dirname(__file__), 'pas_ex1_parametric.femprj'), connect_method='auto')
 
-# 最適化連携オブジェクトの準備
-FEMOpt = FemtetScipy() # ここで起動している Femtet が紐づけされます
+    # 最適化用オブジェクトに Femtet インターフェースを関連付けます。
+    femopt = OptimizerOptuna(fem)
 
-#### 最適化の設定
-FEMOpt.add_parameter('r', initial_value=50, lower_bound=0, upper_bound=99)
-FEMOpt.add_parameter('h', lower_bound=0, upper_bound=290)
-FEMOpt.add_parameter('p', lower_bound=0)
-FEMOpt.add_objective(flow, direction=0.3, name='流量')
-FEMOpt.add_constraint(volume, name='障害物の体積',
-                      lower_bound=0, upper_bound=3.14 * 80**2 * 150)
+    # 最適化の設定を行います。
+    femopt.add_parameter('r', lower_bound=1, upper_bound=99)
+    femopt.add_parameter('h', lower_bound=1, upper_bound=290)
+    femopt.add_parameter('p', lower_bound=0.01, upper_bound=1)
+    femopt.add_objective(flow, direction=0.05, name='流量(m3/s)')
+    femopt.add_objective(flow, direction=0.05, name='流量(m3/s)')
 
-# 進行状況の表示
-# 一度画面を閉じると再表示できません。
-FEMOpt.set_process_monitor()
-
-# 最適化の実行
-opt = FEMOpt.main()
-
-
-#### 結果表示
-# 実行時間表示
-print(f'実行時間は約 {int(FEMOpt.lastExecutionTime)//60} 分でした。')
-# 結果履歴表示
-print(FEMOpt.history)
-
-
-
-
-
-
+    # 最適化の実行
+    # femopt.set_random_seed(42)
+    opt = femopt.main(n_trials=30, n_parallel=3, method='TPE', use_lhs_init=False)

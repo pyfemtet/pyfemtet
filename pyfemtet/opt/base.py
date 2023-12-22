@@ -338,7 +338,7 @@ class OptimizerBase(ABC):
 
         # 引数の処理
         if history_path is None:
-            history_path = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M.csv')
+            history_path = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S.csv')
         self.history_path = os.path.abspath(history_path)
         if fem is None:
             self.fem = FemtetInterface()
@@ -517,7 +517,6 @@ class OptimizerBase(ABC):
         #    True            False        False
         #    False           False        True
 
-
         # 1 回目の計算
         if len(self.history.data) == 0:
             return False
@@ -555,6 +554,8 @@ class OptimizerBase(ABC):
             self.cns_values = [float(cns.calc(self.fem)) for _, cns in self.constraints.items()]
 
             # 記録
+            if self.fem.subprocess_idx is not None:
+                message = message + f'; by subprocess{self.fem.subprocess_idx}'
             self.history.record(self.parameters, self.objectives, self.constraints, self.obj_values, self.cns_values, message)
 
         # minimize
@@ -593,6 +594,8 @@ class OptimizerBase(ABC):
         # 計算スレッドとそれを止めるためのイベント
         t = Thread(target=self._main)
         t.start()  # Exception が起きてもここでは検出できないし、メインスレッドは落ちない
+
+        # 計算開始
         self.ipv.set_state('processing')
 
         # モニタースレッド

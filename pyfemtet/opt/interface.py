@@ -35,7 +35,7 @@ class FEMInterface(ABC):
             self,
             subprocess_idx: int or None = None,
             ipv: InterprocessVariables or None = None,
-            pid: int or None = None,
+            subprocess_setup_object: int or None = None,
             **kwargs
     ):
         """サブプロセスで FEM を restore するときに必要な情報を保管する.
@@ -47,6 +47,9 @@ class FEMInterface(ABC):
 
         """
         self.kwargs = kwargs
+        self.subprocess_idx = subprocess_idx
+        self.ipv = ipv
+        self.subprocess_setup_object = subprocess_setup_object
 
     @abstractmethod
     def check_param_value(self, param_name) -> float:
@@ -94,9 +97,10 @@ class FEMInterface(ABC):
         """デストラクタ."""
         pass
 
-    def before_parallel_setup(self, femopt):
-        """サブプロセスを起動する前の前処理."""
-        pass
+    def before_parallel_setup(self, femopt) -> list:
+        """サブプロセスを起動する前の前処理.サブプロセスに渡されるオブジェクトを生成すること."""
+        subprocess_setup_object = None
+        return [subprocess_setup_object for _ in range(femopt.n_parallel - 1)]
 
     def parallel_setup(self, subprocess_idx):
         """サブプロセスで呼ばれた場合のコンストラクタ."""
@@ -158,11 +162,13 @@ class FemtetInterface(FEMInterface):
             self.open(self.femprj_path, self.model_name)
 
         # restore するための情報保管なので上記処理結果を反映する.
-        # 抽象クラスに書いている引数はサブプロセス開始時に上書きされるので不要.
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
             connect_method=self.connect_method,
+            subprocess_idx=subprocess_idx,
+            ipv=ipv,
+            pid=pid,
         )
 
     def _connect_new_femtet(self):
