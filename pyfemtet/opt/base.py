@@ -352,6 +352,7 @@ class OptimizerBase(ABC):
         self.constraints = dict()
         self.history = History(self.history_path, self.ipv)
         self.monitor: Monitor = None
+        self.monitor_thread = None
         self.seed: int or None = None
         self.message = ''
         self.obj_values: [float] = []
@@ -372,6 +373,7 @@ class OptimizerBase(ABC):
         state = self.__dict__.copy()
         del state['fem']
         del state['monitor']
+        del state['monitor_thread']
         return state
 
     def __setstate__(self, state):
@@ -588,8 +590,8 @@ class OptimizerBase(ABC):
 
         # モニタースレッド
         self.monitor = Monitor(self)
-        self.tm = TerminatableThread(target=self.monitor.start_server)
-        self.tm.start()
+        self.monitor_thread = TerminatableThread(target=self.monitor.start_server)
+        self.monitor_thread.start()
 
         # 追加の計算プロセスが行う処理の定義
         @ray.remote
@@ -648,4 +650,4 @@ class OptimizerBase(ABC):
         ray.shutdown()
 
     def terminate_monitor(self):
-        self.tm.force_terminate()
+        self.monitor_thread.force_terminate()
