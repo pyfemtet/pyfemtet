@@ -28,7 +28,7 @@ def constraint_z(femopt):
     return z
 
 
-def test_2_1(method):
+def test_2_1():
     """
     テストしたい状況
         FEM なしで一通りの機能が動くか
