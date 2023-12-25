@@ -117,6 +117,8 @@ def _f(pid, subprocess_id, shared_flags):
 
     # Dispatch して正常な hwnd が得られるまで待ち、pid を調べる
     if pp: print(f'  from subprocess{subprocess_id}; Start to connect.')
+    import numpy as np
+    time.sleep(np.random.rand())  # TODO:排他処理にする
     Femtet, mypid = Dispatch_Femtet(subprocess_idx=subprocess_id)
         
     # Dispatch が終了していることを通知

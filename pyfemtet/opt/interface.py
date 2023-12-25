@@ -162,7 +162,7 @@ class FemtetInterface(FEMInterface):
             print(f'Allowed.')
             self.connect_femtet('existing', self.target_pid)
             self.ipv.set_allowed_idx(self.subprocess_idx + 1)  # 次の idx に許可を出す
-            self.open(self.femprj_path, self.model_name)
+            self.open(self.femprj_path, self.model_name)  # TODO:ここを、ファイルをコピーしてから開くようにする
 
         # restore するための情報保管
         # パスなどは connect_and_open_femtet での処理結果を反映し

@@ -106,6 +106,9 @@ class OptimizerOptuna(OptimizerBase):
         try:
             obj_values = self.f(x, message)  # obj_val と cns_val の更新
         except (ModelError, MeshError, SolveError):
+            print('FEM 解析に失敗しました。')
+            print('変数の組み合わせは以下の通りです。')
+            print(self.parameters)
             raise optuna.TrialPruned()
 
         # 拘束 attr の更新
@@ -136,6 +139,11 @@ class OptimizerOptuna(OptimizerBase):
         self.sampler_class = optuna.samplers.TPESampler
         if self.method == 'botorch':
             self.sampler_class = optuna.integration.BoTorchSampler
+            # self.sampler_kwargs.update(
+            #     dict(
+            #         consider_running_trials=True
+            #     )
+            # )
 
         # study name の設定
         self.study_name = os.path.splitext(os.path.basename(self.history.path))[0]
@@ -171,12 +179,13 @@ class OptimizerOptuna(OptimizerBase):
                 study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
 
 
-    def _main(self, subprocess_idx=0):
+    def _main(self, subprocess_idx=None):
 
         # 乱数シードをプロセス固有にする
         seed = self.seed
         if seed is not None:
-            seed = seed + (1 + subprocess_idx)  # main process と subprocess0 が重複する
+            if subprocess_idx is not None:
+                seed = seed + (1 + subprocess_idx)  # main process と subprocess0 が重複する
 
         # sampler の restore
         sampler = self.sampler_class(
