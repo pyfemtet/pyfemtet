@@ -2,9 +2,24 @@ import os
 import threading
 import ctypes
 import ray
+from win32com.client import constants
 
 
 os.environ['RAY_DEDUP_LOGS'] = '0'
+
+
+class Scapegoat:
+    # constants を含む関数を並列化するために
+    # メイン処理で一時的に constants への参照を
+    # このオブジェクトにして、後で restore する
+    pass
+
+
+def restore_constants_from_scapegoat(function: 'Function'):
+    fun = function.fun
+    for varname in fun.__globals__:
+        if isinstance(fun.__globals__[varname], Scapegoat):
+            fun.__globals__[varname] = constants
 
 
 class TerminatableThread(threading.Thread):

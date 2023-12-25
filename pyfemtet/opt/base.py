@@ -13,7 +13,9 @@ import pandas as pd
 from optuna._hypervolume import WFG
 import ray
 
-from .core import InterprocessVariables, UserInterruption, TerminatableThread
+from win32com.client import Constants
+
+from .core import InterprocessVariables, UserInterruption, TerminatableThread, Scapegoat, restore_constants_from_scapegoat
 from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 
@@ -108,6 +110,10 @@ def _ray_are_alive(refs):
 class Function:
 
     def __init__(self, fun, name, args, kwargs):
+        # unserializable な COM 定数を parallelize するための処理
+        for varname in fun.__globals__:
+            if isinstance(fun.__globals__[varname], Constants):
+                fun.__globals__[varname] = Scapegoat()
         self.fun = fun
         self.name = name
         self.args = args
@@ -548,6 +554,22 @@ class OptimizerBase(ABC):
 
             # fem のソルブ
             self.fem.update(self.parameters)
+
+            # constants への参照を復帰させる
+            # parallel_process の中でこれを実行するとメインプロセスで restore されなくなるし、
+            # main の中 parallel_process の前にこれを実行すると unserializability に引っかかる
+            # メンバー変数の列挙
+            for attr_name in dir(self):
+                if attr_name.startswith('__'):
+                    continue
+                # メンバー変数の取得
+                attr_value = getattr(self, attr_name)
+                # メンバー変数が辞書なら
+                if isinstance(attr_value, dict):
+                    for _, value in attr_value.items():
+                        # 辞書の value が Function なら
+                        if isinstance(value, Function):
+                            restore_constants_from_scapegoat(value)
 
             # 計算
             self.obj_values = [float(obj.calc(self.fem)) for _, obj in self.objectives.items()]

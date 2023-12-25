@@ -9,11 +9,8 @@ p：空気の速度ポテンシャル
 流量を特定の値にするために最適な r, h, p を求めます。
 """
 import os
+from win32com.client import constants
 from pyfemtet.opt import FemtetInterface, OptimizerOptuna
-
-
-
-# os.chdir(os.path.dirname(__file__))
 
 
 # 目的関数（流量）の定義
@@ -23,12 +20,10 @@ def flow(Femtet):
     目的関数または拘束関数内で constants を用いる場合、
     その関数内に import 文を記述する必要があります。
     """
-    from win32com.client import constants
     Gogh = Femtet.Gogh
     Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
     _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
-    flow = ret.Real
-    return flow
+    return ret.Real
 
 
 if __name__ == '__main__':
@@ -44,8 +39,7 @@ if __name__ == '__main__':
     femopt.add_parameter('h', lower_bound=1, upper_bound=290)
     femopt.add_parameter('p', lower_bound=0.01, upper_bound=1)
     femopt.add_objective(flow, direction=0.05, name='流量(m3/s)')
-    femopt.add_objective(flow, direction=0.05, name='流量(m3/s)')
 
     # 最適化の実行
-    # femopt.set_random_seed(42)
-    opt = femopt.main(n_trials=30, n_parallel=3, method='TPE', use_lhs_init=False)
+    femopt.set_random_seed(42)
+    opt = femopt.main(n_trials=30, n_parallel=3, method='botorch', use_lhs_init=False)
