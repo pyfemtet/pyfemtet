@@ -7,7 +7,7 @@ from pyfemtet.opt import OptimizerOptuna, NoFEM
 should_sleep = True
 
 def objective_x(femopt):
-    if should_sleep: sleep(1)
+    if should_sleep: sleep(np.random.rand()*5)
     r, theta, fai = femopt.get_parameter('values')
     return r * np.cos(theta) * np.cos(fai)
 
