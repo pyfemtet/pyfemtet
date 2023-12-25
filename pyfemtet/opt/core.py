@@ -1,6 +1,10 @@
+import os
 import threading
 import ctypes
 import ray
+
+
+os.environ['RAY_DEDUP_LOGS'] = '0'
 
 
 class TerminatableThread(threading.Thread):
@@ -26,8 +30,6 @@ class TerminatableThread(threading.Thread):
                 ctypes.c_long(self.get_id()),
                 0
             )
-
-
 
 
 class ModelError(Exception):
@@ -63,7 +65,7 @@ class _InterprocessVariables:
 
     def __init__(self):
         self.state = 'undefined'
-        self.history = []
+        self.history = []  # #16295
         self.allowed_idx = 0
 
     def set_state(self, state):

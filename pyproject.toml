@@ -31,6 +31,7 @@ myst-parser = "==2.0.0"
 sphinx-rtd-theme = "==2.0.0"
 sphinx-autobuild = "==2021.3.14"
 pytest = "^7.4.3"
+ray = {extras = ["default"], version = "^2.9.0"}
 
 [tool.pytest.ini_options]
 filterwarnings = [

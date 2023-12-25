@@ -34,7 +34,7 @@ class FEMInterface(ABC):
     def __init__(
             self,
             subprocess_idx: int or None = None,
-            subprocess_setup: 'Any' or None = None,
+            subprocess_settings: 'Any' or None = None,  # 具象クラスで引数に取ることが必須
             **kwargs
     ):
         """サブプロセスで FEM を restore するときに必要な情報を保管する.
@@ -45,8 +45,9 @@ class FEMInterface(ABC):
         """
         # restore のための情報保管
         self.kwargs = kwargs
-        # base が呼ぶので attr があったほうがいい
-        self.subprocess_idx = subprocess_idx
+        # base record 時にが呼ぶので attr があったほうがいい
+        if not hasattr(self, 'subprocess_idx'):
+            self.subprocess_idx = subprocess_idx
 
     def check_param_value(self, param_name) -> float:
         """
@@ -93,9 +94,9 @@ class FEMInterface(ABC):
         """デストラクタ."""
         pass
 
-    def create_subprocess_setup(self, femopt) -> 'Any':
+    def settings_before_parallel(self, femopt) -> 'Any':
         """サブプロセスを起動する前の前処理"""
-        pass  # return subprocess_setup
+        pass  # return subprocess_settings
 
     def parallel_setup(self):
         """サブプロセスで呼ばれた場合のコンストラクタ."""
@@ -114,7 +115,7 @@ class FemtetInterface(FEMInterface):
             model_name=None,
             connect_method='auto',
             subprocess_idx=None,
-            subprocess_setup=None,
+            subprocess_settings=None,
     ):
         # 引数の処理
         if femprj_path is None:
@@ -124,9 +125,9 @@ class FemtetInterface(FEMInterface):
         self.model_name = model_name
         self.connect_method = connect_method
         # 引数の処理（サブプロセス時）
-        self.ipv = None if subprocess_setup is None else subprocess_setup['ipv']  # 排他処理に使う
-        self.subprocess_idx = None if subprocess_setup is None else subprocess_setup['subprocess_idx']  # 排他処理に使う
-        self.target_pid = None if subprocess_setup is None else subprocess_setup['pids'][self.subprocess_idx]  # before_parallel で立てた Femtet への接続に使う
+        self.subprocess_idx = subprocess_idx
+        self.ipv = None if subprocess_settings is None else subprocess_settings['ipv']  # 排他処理に使う
+        self.target_pid = None if subprocess_settings is None else subprocess_settings['pids'][subprocess_idx]  # before_parallel で立てた Femtet への接続に使う
 
         # その他の初期化
         self.Femtet: 'IPyDispatch' = None
@@ -136,11 +137,11 @@ class FemtetInterface(FEMInterface):
         self.pp = False
 
         # サブプロセスでなければルールに従って Femtet と接続する
-        if self.subprocess_idx is None:
+        if subprocess_idx is None:
             self.connect_and_open_femtet()
 
         # サブプロセスから呼ばれているならば
-        # before_parallel_setup で起動されているはずの Femtet と接続する.
+        # settings_before_parallel で起動されているはずの Femtet と接続する.
         # connect_and_open_femtet は排他処理で行う.
         else:
             print('Start to connect femtet. This process is exclusive.')
@@ -516,7 +517,7 @@ class FemtetInterface(FEMInterface):
         self.Femtet.SaveProject(self.Femtet.Project, True)  # 動いてない？？
         util.close_femtet(self.Femtet.hWnd)
 
-    def before_parallel_setup(self, femopt) -> list:
+    def settings_before_parallel(self, femopt) -> dict:
         """サブプロセスを起動する前に必要数の Femtet を立てておく."""
         pids = []
         for i in range(femopt.n_parallel - 1):
@@ -531,14 +532,12 @@ class FemtetInterface(FEMInterface):
                 raise Exception('起動された Femtet の認識に失敗しました')
             pids.append(pid)
 
-        subprocess_setup = dict(
-            pids = pids,
-            ipv = femopt.ipv,
-
+        subprocess_settings = dict(
+            ipv=femopt.ipv,
+            pids=pids,
         )
 
-
-        return
+        return subprocess_settings
 
     def parallel_setup(self):
         # .Result の干渉を回避するため、
