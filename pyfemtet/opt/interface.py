@@ -135,6 +135,7 @@ class FemtetInterface(FEMInterface):
         self.subprocess_idx = subprocess_idx
         self.ipv = None if subprocess_settings is None else subprocess_settings['ipv']  # 排他処理に使う
         self.target_pid = None if subprocess_settings is None else subprocess_settings['pids'][subprocess_idx]  # before_parallel で立てた Femtet への接続に使う
+        self.femprj_path = self.femprj_path if subprocess_settings is None else subprocess_settings['new_femprj_path'][subprocess_idx]
 
         # その他の初期化
         self.Femtet: 'IPyDispatch' = None
@@ -534,8 +535,9 @@ class FemtetInterface(FEMInterface):
         util.close_femtet(self.Femtet.hWnd)
 
     def settings_before_parallel(self, femopt) -> dict:
-        """サブプロセスを起動する前に必要数の Femtet を立てておく."""
+        """サブプロセスを起動する前に必要数の Femtet を立てておき, femprj を一時ファイルにコピーする"""
         pids = []
+        new_femprj_pathes = []
         for i in range(femopt.n_parallel - 1):
 
             # Femtet 起動
@@ -548,23 +550,20 @@ class FemtetInterface(FEMInterface):
                 raise Exception('起動された Femtet の認識に失敗しました')
             pids.append(pid)
 
+            # 一時フォルダ生成、ファイルをコピー
+            td = tempfile.mkdtemp()
+            name = 'subprocess'
+            new_femprj_path = os.path.join(td, f'{name}.femprj')
+            shutil.copy(self.femprj_path, new_femprj_path)
+            new_femprj_pathes.append(new_femprj_path)
+
         subprocess_settings = dict(
             ipv=femopt.ipv,
             pids=pids,
+            new_femprj_path=new_femprj_pathes,
         )
 
         return subprocess_settings
-
-    def parallel_setup(self):
-        # .Result の干渉を回避するため、
-        # サブプロセスならばプロジェクトを別名保存する
-        self.td = tempfile.mkdtemp()
-        name = f'subprocess{self.subprocess_idx}'
-        self.femprj_path = os.path.join(self.td, f'{name}.femprj')
-        result = self.Femtet.SaveProject(self.femprj_path, True)
-        print(f'subprocess{self.subprocess_idx} は {self.femprj_path} に一時ファイルを保存します。')
-        if not result:
-            self.Femtet.ShowLastError()
 
     def parallel_terminate(self):
         # 何かがあってもあとは終わるだけなので
