@@ -108,10 +108,10 @@ class Monitor(object):
         }
         sidebar = html.Div(
             [
-                html.H2("Sidebar", className="display-4"),
+                html.H2("PyFemtet Monitor", className="display-4"),
                 html.Hr(),
                 html.P(
-                    "最適化の進捗の可視化手法を選択できます.", className="lead"
+                    "最適化の進捗を可視化できます.", className="lead"
                 ),
                 dbc.Nav(
                     [

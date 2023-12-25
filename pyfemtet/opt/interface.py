@@ -90,6 +90,13 @@ class FEMInterface(ABC):
         """
         pass
 
+    def update_parameter(self, parameters: 'pd.DataFrame'):
+        """Femtet の GetVariableValue などで変数を取得できる、FEM の変数のみを更新する。
+
+        Function にする args に femopt を取って get_parameter すればいいので実装しなくてもいい。
+        """
+        pass
+
     def quit(self, *args, **kwargs):
         """デストラクタ."""
         pass
@@ -410,7 +417,7 @@ class FemtetInterface(FEMInterface):
             if self.connect_method == 'new':
                 Exception('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
             print('femprj_path が指定されていないため、開いている Femtet との接続を試行します。')
-            self.connect_femtet('existing', self.pid)
+            self.connect_femtet('existing', self.target_pid)
             # 接続した Femtet インスタンスのプロジェクト名などを保管する
             self.femprj_path = self.Femtet.Project
             self.model_name = self.Femtet.AnalysisModelName
@@ -425,7 +432,7 @@ class FemtetInterface(FEMInterface):
         message += '大文字・小文字の区別に注意してください.'
         raise Exception(message)
 
-    def update_model(self, parameters: 'pd.DataFrame') -> None:
+    def update_parameter(self, parameters: 'pd.DataFrame'):
         self.parameters = parameters.copy()
 
         # 変数更新のための処理
@@ -460,6 +467,15 @@ class FemtetInterface(FEMInterface):
                 )
             else:
                 print(f'変数 {name} は .femprj に含まれていません。無視されます。')
+
+        # ここでは ReExecute しない
+        pass
+
+    def update_model(self, parameters: 'pd.DataFrame') -> None:
+        self.parameters = parameters.copy()
+
+        # 変数の更新
+        self.update_parameter(parameters)
 
         # 設計変数に従ってモデルを再構築
         self.call_femtet_api(

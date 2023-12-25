@@ -280,10 +280,13 @@ class History:
         pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数
         m = len(pareto_set.T)  # 目的変数数
-        # 長さが 2 以上でないと計算できない
+        # 多目的でないと計算できない
+        if m <= 1:
+            return None
         if n <= 1:
-            return np.nan
+            return None
         # 最小化問題に convert
+        # 長さが 2 以上でないと計算できない
         for i, (name, objective) in enumerate(objectives.items()):
             for j in range(n):
                 pareto_set[j, i] = objective._convert(pareto_set[j, i])

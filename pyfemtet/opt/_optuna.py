@@ -77,13 +77,16 @@ class OptimizerOptuna(OptimizerBase):
         for i, row in self.parameters.iterrows():
             x.append(trial.suggest_float(row['name'], row['lb'], row['ub']))
         x = np.array(x)
+        self.parameters['value'] = x
 
         # strict 拘束の計算で Prune することになったとき
         # constraint attr がないとエラーになるのでダミーを置いておく
         trial.set_user_attr("constraint", (1.,))  # 非正が feasible 扱い
 
+        # GetVariableValue 経由で変数にアクセスするなどの場合
+        self.fem.update_parameter(self.parameters)
+
         # strict 拘束の計算
-        self.parameters['value'] = x
         tmp = [[cns.calc(self.fem), cns.lb, cns.ub, name] for name, cns in self.constraints.items() if cns.strict]
         for val, lb, ub, name in tmp:
             if lb is not None:
