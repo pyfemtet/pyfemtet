@@ -78,12 +78,13 @@ def simple():
     femopt = OptimizerOptuna(fem)
     femopt.set_random_seed(42)
     femopt.add_parameter('r', .5, 0, 1)
-    femopt.add_parameter('theta', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
+    femopt.add_parameter('theta', -np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
     femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
-    femopt.add_objective(objective_x, args=femopt)
-    femopt.add_objective(objective_y, args=femopt)
-    femopt.add_objective(objective_z, args=femopt)
-    femopt.main(n_trials=90, n_parallel=3)
+    femopt.add_objective(objective_x, 'x', args=femopt)
+    femopt.add_objective(objective_y, 'y', args=femopt)
+    femopt.add_objective(objective_z, 'z', args=femopt)
+    femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt)
+    femopt.main(n_trials=30, n_parallel=3)
     femopt.terminate_monitor()
 
 
