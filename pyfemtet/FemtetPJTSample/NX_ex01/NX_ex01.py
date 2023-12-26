@@ -1,6 +1,5 @@
 import os
-import numpy as np
-from pyfemtet.opt import OptimizerOptuna, FemtetWithNXInterface
+from pyfemtet.opt import FemtetWithNXInterface, OptimizerOptuna
 
 
 here, me = os.path.split(__file__)
@@ -13,24 +12,38 @@ def disp(Femtet):
 
 
 def volume(Femtet):
-    Gogh = Femtet.Gogh
-    _, ret = Gogh.CalcVolume_py([0])
+    _, ret = Femtet.Gogh.CalcVolume_py([0])
     return ret
 
 
+def C_minus_B(_, femopt):
+    A, B, C = femopt.get_parameter('values')
+    return C - B
+
+
 if __name__ == '__main__':
-    fem = FemtetWithNXInterface('NX_ex01.prt')
+
+    # NX-Femtet 連携クラスのインスタンス化
+    fem = FemtetWithNXInterface(
+        prt_path='NX_ex01.prt',
+        femprj_path='NX_ex01.femprj',
+    )
+
+    # 最適設計クラスのインスタンス化
     femopt = OptimizerOptuna(fem)
 
-    femopt.add_parameter('A_x', 50, lower_bound=25, upper_bound=95)
-    femopt.add_parameter('A_y', 45, lower_bound=5, upper_bound=45)
-    femopt.add_parameter('B_x', 30, lower_bound=25, upper_bound=95)
-    femopt.add_parameter('B_y', 12, lower_bound=5, upper_bound=45)
-    femopt.add_parameter('C_x', 90, lower_bound=25, upper_bound=95)
-    femopt.add_parameter('C_y', 45, lower_bound=5, upper_bound=45)
-    femopt.add_parameter('Cut_x', 10, lower_bound=5, upper_bound=45)
-    femopt.add_parameter('Cut_y', 20, lower_bound=5, upper_bound=45)
-    femopt.add_objective(disp, direction=0)
-    femopt.add_objective(volume, direction='minimize')
+    # 乱数シードの設定
+    femopt.set_random_seed(42)
 
-    femopt.main(n_trials=3, use_lhs_init=False)
+    # 変数設定
+    femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
+    femopt.add_parameter('B', 10, lower_bound=1, upper_bound=40)
+    femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)
+    femopt.add_constraint(C_minus_B, 'C>B', lower_bound=1, args=femopt)
+
+    # 目的関数設定
+    femopt.add_objective(disp, name='変位', direction=0)
+    femopt.add_objective(volume, name='体積', direction='minimize')
+
+    # 最適化の実行
+    femopt.main(n_trials=20, use_lhs_init=False)
