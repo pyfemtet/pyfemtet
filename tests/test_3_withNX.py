@@ -6,7 +6,8 @@ from pyfemtet.opt import FemtetWithNXInterface, OptimizerOptuna
 from femtetutils import util
 
 
-overwrtie = False
+here, me = os.path.split(__file__)
+record = False
 
 
 def disp(Femtet):
@@ -31,14 +32,10 @@ def C_minus_B(_, femopt):
 
 def test_3_1():
 
-    # ワーキングディレクトリを設定
-    here, me = os.path.split(__file__)
-    os.chdir(here)
-
     # NX-Femtet 連携クラスのインスタンス化
     fem = FemtetWithNXInterface(
-        prt_path='test3/test3.prt',
-        femprj_path='test3/test3.femprj',
+        prt_path=os.path.join(here, 'test3/test3.prt'),
+        femprj_path=os.path.join(here, 'test3/test3.femprj'),
         connect_method='new'
     )
 
@@ -63,23 +60,19 @@ def test_3_1():
     femopt.terminate_monitor()
 
     # Femtet 終了
-    tmppath = os.path.abspath('test3tmpfile.femprj')
+    tmppath = os.path.join(here, 'tmp.femprj')
     femopt.fem.Femtet.SaveProjectIgnoreHistory(tmppath, True)
     sleep(10)
     util.close_femtet(femopt.fem.Femtet.hWnd)
     os.remove(tmppath)
 
-    if overwrtie:
-        femopt.history.data.to_csv()
+    if record:
+        femopt.history.data.to_csv(os.path.join('test3/test3.csvdata'), index=None)
 
     else:
         # データの取得
         ref_df = pd.read_csv(f'test3/test3.csvdata').replace(np.nan, None)
-        def_df = femopt.history.data.to_csv(os.path.abspath('test3/test3.csvdata'), index=None)
-
-        # 並べ替え（並列しているから順番は違いうる）
-        ref_df = ref_df.iloc[:, 1:].sort_values('A').sort_values('B').sort_values('C').select_dtypes(include='number')
-        def_df = def_df.iloc[:, 1:].sort_values('A').sort_values('B').sort_values('C').select_dtypes(include='number')
+        def_df = femopt.history.data.copy()
 
         assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.001
 

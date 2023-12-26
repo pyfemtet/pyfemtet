@@ -4,8 +4,8 @@ import pandas as pd
 from pyfemtet.opt import OptimizerOptuna, FemtetInterface
 
 
-os.chdir(os.path.dirname(__file__))
-record = True
+here, me = os.path.split(__file__)
+record = False
 
 
 def max_disp(Femtet):
@@ -30,8 +30,11 @@ def test_simple_femtet():
     結果
         結果が保存したものと一致するか
     """
+    femprj = os.path.join(here, f'{me.replace(".py", ".femprj")}')
+    csvdata = os.path.join(here, f'{me.replace(".py", ".csvdata")}')
+    csv = os.path.join(here, f'{me.replace(".py", "_specified_history.csv")}')
 
-    fem = FemtetInterface('test_5_simple_femtet.femprj')
+    fem = FemtetInterface(femprj)
     femopt = OptimizerOptuna(fem)
     femopt.set_random_seed(42)
     femopt.add_parameter('d', 5, 1, 10)
@@ -47,11 +50,11 @@ def test_simple_femtet():
 
     if record:
         # データの保存
-        femopt.history.data.to_csv('test_5.csvdata')
+        femopt.history.data.to_csv(csvdata)
 
     else:
         # データの取得
-        ref_df = pd.read_csv('test_5.csvdata').replace(np.nan, None)
+        ref_df = pd.read_csv(csvdata).replace(np.nan, None)
         def_df = femopt.history.data.copy()
 
         # 並べ替え（並列しているから順番は違いうる）
@@ -77,7 +80,6 @@ def simple():
     femopt.add_constraint(bottom_surface, '底面積<=20', upper_bound=30, args=femopt)
     femopt.main(n_trials=30, n_parallel=3)
     femopt.terminate_monitor()
-
 
 
 if __name__ == '__main__':

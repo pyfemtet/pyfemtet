@@ -181,22 +181,24 @@ class History:
 
         # 引数の処理
         self.path = history_path  # .csv
-        self.actor_data = HistoryDfCore.remote(pd.DataFrame())
+        self._actor_data = HistoryDfCore.remote(pd.DataFrame())
+        self.data = pd.DataFrame()
         self.param_names = []
         self.obj_names = []
         self.cns_names = []
 
         # path が存在すれば dataframe を読み込む
         if os.path.isfile(self.path):
+            self.actor_data = pd.read_csv(self.path)
             self.data = pd.read_csv(self.path)
 
     @property
-    def data(self):
-        return ray.get(self.actor_data.get_df.remote())
+    def actor_data(self):
+        return ray.get(self._actor_data.get_df.remote())
 
-    @data.setter
-    def data(self, df):
-        self.actor_data.set_df.remote(df)
+    @actor_data.setter
+    def actor_data(self, df):
+        self._actor_data.set_df.remote(df)
 
     def init(self, param_names, obj_names, cns_names):
         self.param_names = param_names
@@ -217,25 +219,25 @@ class History:
         columns.append('time')
 
         # restart ならば前のデータとの整合を確認
-        if len(self.data.columns) > 0:
+        if len(self.actor_data.columns) > 0:
             # 読み込んだ columns が生成した columns と違っていればエラー
             try:
-                if self.data.columns != columns:
-                    raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.data.columns)}\n\n現在の設定:\n{columns}')
+                if list(self.actor_data.columns) != columns:
+                    raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.actor_data.columns)}\n\n現在の設定:\n{columns}')
                 else:
                     # 同じであっても目的と拘束の上下限や direction が違えばエラー
                     pass
             except ValueError:
-                raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.data.columns)}\n\n現在の設定:\n{columns}')
+                raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.actor_data.columns)}\n\n現在の設定:\n{columns}')
 
         else:
-            # data は actor 経由の getter property なので self.data[column] = ... とやっても
+            # actor_data は actor 経由の getter property なので self.data[column] = ... とやっても
             # actor には変更が反映されない. 以下同様
-            tmp = self.data
+            tmp = self.actor_data
             for column in columns:
                 tmp[column] = None
-            self.data = tmp
-
+            self.actor_data = tmp
+            self.data = self.actor_data.copy()
 
     def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
 
@@ -256,30 +258,36 @@ class History:
         row.append(datetime.datetime.now())  # time
 
         # append
-        if len(self.data) == 0:
-            self.data = pd.DataFrame([row], columns=self.data.columns)
+        if len(self.actor_data) == 0:
+            self.actor_data = pd.DataFrame([row], columns=self.actor_data.columns)
         else:
-            tmp = self.data
+            tmp = self.actor_data
             tmp.loc[len(tmp)] = row
-            self.data = tmp
+            self.actor_data = tmp
 
         # calc
-        tmp = self.data
-        tmp['trial'] = np.arange(len(tmp))
-        self.data = tmp
-        self._calc_non_domi(objectives)
-        self._calc_hypervolume(objectives)
+        try:
+            tmp = self.actor_data
+            tmp['trial'] = np.arange(len(tmp))
+            self.actor_data = tmp
+            self._calc_non_domi(objectives)
+            self._calc_hypervolume(objectives)
+        except (ValueError, pd.errors.IndexingError):  # 計算中に別のプロセスが append した場合、そちらに処理を任せる
+            pass
 
         # serialize
         try:
-            self.data.to_csv(self.path, index=None)
+            self.actor_data.to_csv(self.path, index=None)
         except PermissionError:
             print(f'warning: {self.path} がロックされています。データはロック解除後に保存されます。')
+
+        # unparallelize
+        self.data = self.actor_data.copy()
 
     def _calc_non_domi(self, objectives):
 
         # 目的関数の履歴を取り出してくる
-        solution_set = self.data[self.obj_names].copy()
+        solution_set = self.actor_data[self.obj_names].copy()
 
         # 最小化問題の座標空間に変換する
         for name, objective in objectives.items():
@@ -291,9 +299,9 @@ class History:
             non_domi.append((row > solution_set).product(axis=1).sum(axis=0) == 0)
 
         # 非劣解の登録
-        tmp = self.data
+        tmp = self.actor_data
         tmp['non_domi'] = non_domi
-        self.data = tmp
+        self.actor_data = tmp
 
         del solution_set
 
@@ -305,8 +313,8 @@ class History:
         """
         #### 前準備
         # パレート集合の抽出
-        idx = self.data['non_domi']
-        pdf = self.data[idx]
+        idx = self.actor_data['non_domi']
+        pdf = self.actor_data[idx]
         pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数
         m = len(pareto_set.T)  # 目的変数数
@@ -353,7 +361,7 @@ class History:
             hvs.append(hv)
 
         # 計算結果を履歴の一部に割り当て
-        df = pd.DataFrame(self.data.to_dict())  # read-only error 回避
+        df = pd.DataFrame(self.actor_data.to_dict())  # read-only error 回避
         df.loc[idx, 'hypervolume'] = np.array(hvs)
 
         # dominated の行に対して、上に見ていって
@@ -365,7 +373,7 @@ class History:
                 except IndexError:
                     # pass # nan のままにする
                     df.loc[i, 'hypervolume'] = 0
-        self.data = df
+        self.actor_data = df
 
 
 class OptimizerBase(ABC):

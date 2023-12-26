@@ -8,7 +8,7 @@ from pyfemtet.opt import OptimizerOptuna ,FemtetInterface
 
 
 here, me = os.path.split(__file__)
-os.chdir(here)
+# os.chdir(here)  # テストでは効かない？
 
 FEMTET_EXE_PATH = r'C:\Program Files\Femtet_Ver2023_64bit_inside\Program\Femtet.exe'
 
@@ -55,20 +55,21 @@ def test_1_1():
         起動した Femtet と接続する。
     """
     # Femtet 起動
-    mypid = _lunch_femtet()
+    mypid = _lunch_femtet(os.path.join(here, 'test1/test1.femprj'))
 
     # 接続を試みる
     femopt = OptimizerOptuna()
 
     # ちゃんと接続できているか確認
     try:
-        assert femopt.fem.Femtet.Project == os.path.abspath('test1/test1.femprj')
-        assert femopt.fem.Femtet.AnalysisModelName=='test1'
+        assert femopt.fem.Femtet.Project == os.path.abspath(os.path.join(here, 'test1/test1.femprj'))
+        assert femopt.fem.Femtet.AnalysisModelName == 'test1'
     except AssertionError as e:
         _destruct([mypid])
         raise e
     else:
         _destruct([mypid])
+
 
 def test_1_2():
     """
@@ -88,13 +89,13 @@ def test_1_2():
         起動した Femtet と接続する。
     """
     # Femtet 起動
-    mypid = _lunch_femtet('test1/test1_another.femprj')
+    mypid = _lunch_femtet(os.path.join(here, 'test1/test1_another.femprj'))
 
     # 接続を試みる（これは相対パスで指定できたほうが便利）
     fem = FemtetInterface(
-        'test1/test1.femprj',
+        os.path.join(here, 'test1/test1.femprj'),
         'test1',
-        'new'
+        connect_method='new'
     )
     femopt = OptimizerOptuna(fem)
 
@@ -102,10 +103,14 @@ def test_1_2():
 
     # ちゃんと接続できているか確認
     try:
-        assert femopt.fem.Femtet.Project == os.path.abspath('test1/test1.femprj')
-        assert femopt.fem.Femtet.AnalysisModelName=='test1'
+        assert femopt.fem.Femtet.Project == os.path.abspath(os.path.join(here, 'test1/test1.femprj'))
+        assert femopt.fem.Femtet.AnalysisModelName == 'test1'
     except AssertionError as e:
         _destruct([mypid, pid])
         raise e
     else:
         _destruct([mypid, pid])
+
+
+if __name__ == '__main__':
+    test_1_2()
