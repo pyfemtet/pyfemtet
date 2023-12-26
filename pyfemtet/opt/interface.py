@@ -603,9 +603,7 @@ class FemtetWithNXInterface(FemtetInterface):
             model_name=None,
             connect_method='auto',
             subprocess_idx=None,
-            ipv=None,
-            pid=None,
-
+            subprocess_settings=None,
     ):
         self.prt_path = os.path.abspath(prt_path)
         super().__init__(
@@ -613,8 +611,7 @@ class FemtetWithNXInterface(FemtetInterface):
             model_name=model_name,
             connect_method=connect_method,
             subprocess_idx=subprocess_idx,
-            ipv=ipv,
-            pid=pid,
+            subprocess_settings=subprocess_settings,
         )
 
     def check_param_value(self, name):
