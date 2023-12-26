@@ -1,4 +1,5 @@
-from PyFemtet.opt import FemtetScipy
+from pyfemtet.opt import OptimizerOptuna
+
 
 def L(Femtet):
     # L の取得
@@ -9,26 +10,25 @@ def L(Femtet):
     return Gogh.Gauss.GetL(cName, cName)
 
 
-# 最適化処理を行うオブジェクトを用意
-FEMOpt = FemtetScipy()
+if __name__ == '__main__':
 
-# 解析モデルで登録された変数
-FEMOpt.add_parameter("h", 3, 1.5, memo='1巻きピッチ')
-FEMOpt.add_parameter("r", 5, 3, memo='コイル半径')
-FEMOpt.add_parameter("n", 5, 1, 20, memo='コイル半径')
+    # 最適化処理を行うオブジェクトを用意
+    femopt = OptimizerOptuna()
 
-# インダクタンスが 0.44 uF に近づくようにゴールを設定する
-FEMOpt.add_objective(
-    L,
-    name='自己インダクタンス',
-    direction=4.4e-07
-    )
+    # 解析モデルで登録された変数
+    femopt.add_parameter("h", 3, 1.5, 6, memo='1巻きピッチ')
+    femopt.add_parameter("r", 5, 3, 12, memo='コイル半径')
+    femopt.add_parameter("n", 5, 1, 20, memo='コイル半径')
 
-# 最適化実行中にその収束状況を表示する(experimental)
-FEMOpt.set_process_monitor()
+    # インダクタンスが 0.44 uF に近づくようにゴールを設定する
+    femopt.add_objective(
+        L,
+        name='自己インダクタンス',
+        direction=4.4e-07
+        )
 
-# 最適化の実行 ※実行すると、csv ファイルでの最適化過程の保存が始まります。
-FEMOpt.main()
+    # 最適化の実行
+    femopt.main(n_trials=30, method='botorch', n_parallel=2)
 
-# 最適化過程の一覧表示（最適化終了時点での csv ファイルの内容と同じです）
-print(FEMOpt.history)
+    # プロセスモニターを終了
+    femopt.terminate_monitor()
