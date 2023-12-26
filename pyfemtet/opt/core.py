@@ -1,6 +1,25 @@
+import os
 import threading
 import ctypes
 import ray
+from win32com.client import constants
+
+
+os.environ['RAY_DEDUP_LOGS'] = '0'
+
+
+class Scapegoat:
+    # constants を含む関数を並列化するために
+    # メイン処理で一時的に constants への参照を
+    # このオブジェクトにして、後で restore する
+    pass
+
+
+def restore_constants_from_scapegoat(function: 'Function'):
+    fun = function.fun
+    for varname in fun.__globals__:
+        if isinstance(fun.__globals__[varname], Scapegoat):
+            fun.__globals__[varname] = constants
 
 
 class TerminatableThread(threading.Thread):
@@ -26,8 +45,6 @@ class TerminatableThread(threading.Thread):
                 ctypes.c_long(self.get_id()),
                 0
             )
-
-
 
 
 class ModelError(Exception):
@@ -63,7 +80,7 @@ class _InterprocessVariables:
 
     def __init__(self):
         self.state = 'undefined'
-        self.history = []
+        self.history = []  # #16295
         self.allowed_idx = 0
 
     def set_state(self, state):
@@ -71,12 +88,6 @@ class _InterprocessVariables:
 
     def get_state(self) -> 'ObjectRef':
         return self.state
-
-    def append_history(self, row):
-        self.history.append(row)
-
-    def get_history(self) -> 'ObjectRef':
-        return self.history
 
     def set_allowed_idx(self, idx):
         self.allowed_idx = idx

@@ -77,13 +77,16 @@ class OptimizerOptuna(OptimizerBase):
         for i, row in self.parameters.iterrows():
             x.append(trial.suggest_float(row['name'], row['lb'], row['ub']))
         x = np.array(x)
+        self.parameters['value'] = x
 
         # strict 拘束の計算で Prune することになったとき
         # constraint attr がないとエラーになるのでダミーを置いておく
         trial.set_user_attr("constraint", (1.,))  # 非正が feasible 扱い
 
+        # GetVariableValue 経由で変数にアクセスするなどの場合
+        self.fem.update_parameter(self.parameters)
+
         # strict 拘束の計算
-        self.parameters['value'] = x
         tmp = [[cns.calc(self.fem), cns.lb, cns.ub, name] for name, cns in self.constraints.items() if cns.strict]
         for val, lb, ub, name in tmp:
             if lb is not None:
@@ -103,6 +106,9 @@ class OptimizerOptuna(OptimizerBase):
         try:
             obj_values = self.f(x, message)  # obj_val と cns_val の更新
         except (ModelError, MeshError, SolveError):
+            print('FEM 解析に失敗しました。')
+            print('変数の組み合わせは以下の通りです。')
+            print(self.parameters)
             raise optuna.TrialPruned()
 
         # 拘束 attr の更新
@@ -133,9 +139,11 @@ class OptimizerOptuna(OptimizerBase):
         self.sampler_class = optuna.samplers.TPESampler
         if self.method == 'botorch':
             self.sampler_class = optuna.integration.BoTorchSampler
-            if self.n_parallel != 1:
-                warnings.warn('botorch method cannot be parallelized. n_parallel is set to 1.', RuntimeWarning)
-                self.n_parallel = 1
+            # self.sampler_kwargs.update(
+            #     dict(
+            #         consider_running_trials=True
+            #     )
+            # )
 
         # study name の設定
         self.study_name = os.path.splitext(os.path.basename(self.history.path))[0]
@@ -151,32 +159,35 @@ class OptimizerOptuna(OptimizerBase):
             )
 
         # 初期値の設定
-        params = self.get_parameter('dict')
-        study.enqueue_trial(params, user_attrs={"message": "initial"})
+        if len(study.trials) == 0:  # リスタートでなければ
+            # ユーザーの指定した初期値
+            params = self.get_parameter('dict')
+            study.enqueue_trial(params, user_attrs={"message": "initial"})
 
-        # LHS を初期値にする
-        if use_lhs_init:
-            names = []
-            bounds = []
-            for i, row in self.parameters.iterrows():
-                names.append(row['name'])
-                lb = row['lb']
-                ub = row['ub']
-                bounds.append([lb, ub])
-            data = generate_lhs(bounds, seed=self.seed)
-            for datum in data:
-                d = {}
-                for name, v in zip(names, datum):
-                    d[name] = v
-                study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
+            # LHS を初期値にする
+            if use_lhs_init:
+                names = []
+                bounds = []
+                for i, row in self.parameters.iterrows():
+                    names.append(row['name'])
+                    lb = row['lb']
+                    ub = row['ub']
+                    bounds.append([lb, ub])
+                data = generate_lhs(bounds, seed=self.seed)
+                for datum in data:
+                    d = {}
+                    for name, v in zip(names, datum):
+                        d[name] = v
+                    study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
 
 
-    def _main(self, subprocess_idx=0):
+    def _main(self, subprocess_idx=None):
 
         # 乱数シードをプロセス固有にする
         seed = self.seed
         if seed is not None:
-            seed = seed + (1 + subprocess_idx)  # main process と subprocess0 が重複する
+            if subprocess_idx is not None:
+                seed = seed + (1 + subprocess_idx)  # main process と subprocess0 が重複する
 
         # sampler の restore
         sampler = self.sampler_class(
@@ -191,10 +202,14 @@ class OptimizerOptuna(OptimizerBase):
             sampler=sampler,
         )
 
-        # run
+        # 最大実行回数の指定
         callbacks = []
+        n_existing_trials = len(self.history.data)
         if self.n_trials is not None:
-            callbacks.append(MaxTrialsCallback(self.n_trials, states=(TrialState.COMPLETE,)))
+            n_trials = n_existing_trials + self.n_trials
+            callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))
+
+        # run
         study.optimize(
             self._objective,
             timeout=self.timeout,

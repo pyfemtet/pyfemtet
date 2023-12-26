@@ -2,18 +2,18 @@
 import time
 from threading import Thread
 from multiprocessing import Process, Manager
+
+import numpy as np
 import psutil
 
 import win32process
 import win32gui
 from win32com.client import Dispatch
 
-
 from femtetutils import util
 
 
 pp = True
-
 
 
 def _get_hwnds(pid):
@@ -117,6 +117,7 @@ def _f(pid, subprocess_id, shared_flags):
 
     # Dispatch して正常な hwnd が得られるまで待ち、pid を調べる
     if pp: print(f'  from subprocess{subprocess_id}; Start to connect.')
+    time.sleep(np.random.rand())  # TODO:排他処理にする
     Femtet, mypid = Dispatch_Femtet(subprocess_idx=subprocess_id)
         
     # Dispatch が終了していることを通知
