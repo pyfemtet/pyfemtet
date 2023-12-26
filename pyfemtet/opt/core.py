@@ -89,12 +89,6 @@ class _InterprocessVariables:
     def get_state(self) -> 'ObjectRef':
         return self.state
 
-    def append_history(self, row):
-        self.history.append(row)
-
-    def get_history(self) -> 'ObjectRef':
-        return self.history
-
     def set_allowed_idx(self, idx):
         self.allowed_idx = idx
 

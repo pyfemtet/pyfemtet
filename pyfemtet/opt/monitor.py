@@ -147,22 +147,17 @@ class Monitor(object):
                 className="p-3 bg-light rounded-3",
             )
 
-        # scatter matrix
-        @self.app.callback(
-            Output('scatter-matrix-graph', 'figure'),
-            Input('interval-component', 'n_intervals'))
-        def update_sm(_):
-            return update_scatter_matrix(self.femopt)
-
         # 1. 中断ボタンを押したら / 更新をやめる and 中断ボタンを disable にする
         # 2. メイン処理が中断 or 終了していたら / 更新をやめ and 中断ボタンを disable にする
         # 3. toggle_button が押されていたら / 更新を切り替える
+        # 4. すべての発火ケースにおいて、まず（最後の） femopt の更新を行う
         @self.app.callback(
             [
                 Output('interval-component', 'max_intervals'),
                 Output('interrupt-button', 'disabled'),
                 Output('toggle-update-button', 'disabled'),
                 Output('toggle-update-button', 'children'),
+                Output('scatter-matrix-graph', 'figure'),
             ],
             [
                 Input('interval-component', 'n_intervals'),
@@ -211,7 +206,7 @@ class Monitor(object):
             self.interrupt_n_clicks = interrupt_n_clicks
             self.toggle_n_clicks = toggle_n_clicks
 
-            return max_intervals, button_disable, button_disable, toggle_text
+            return max_intervals, button_disable, button_disable, toggle_text, update_scatter_matrix(self.femopt)
 
     def setup_home(self):
         # components の設定
