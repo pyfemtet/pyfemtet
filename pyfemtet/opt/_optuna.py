@@ -159,24 +159,26 @@ class OptimizerOptuna(OptimizerBase):
             )
 
         # 初期値の設定
-        params = self.get_parameter('dict')
-        study.enqueue_trial(params, user_attrs={"message": "initial"})
+        if len(study.trials) == 0:  # リスタートでなければ
+            # ユーザーの指定した初期値
+            params = self.get_parameter('dict')
+            study.enqueue_trial(params, user_attrs={"message": "initial"})
 
-        # LHS を初期値にする
-        if use_lhs_init:
-            names = []
-            bounds = []
-            for i, row in self.parameters.iterrows():
-                names.append(row['name'])
-                lb = row['lb']
-                ub = row['ub']
-                bounds.append([lb, ub])
-            data = generate_lhs(bounds, seed=self.seed)
-            for datum in data:
-                d = {}
-                for name, v in zip(names, datum):
-                    d[name] = v
-                study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
+            # LHS を初期値にする
+            if use_lhs_init:
+                names = []
+                bounds = []
+                for i, row in self.parameters.iterrows():
+                    names.append(row['name'])
+                    lb = row['lb']
+                    ub = row['ub']
+                    bounds.append([lb, ub])
+                data = generate_lhs(bounds, seed=self.seed)
+                for datum in data:
+                    d = {}
+                    for name, v in zip(names, datum):
+                        d[name] = v
+                    study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
 
 
     def _main(self, subprocess_idx=None):
@@ -200,10 +202,14 @@ class OptimizerOptuna(OptimizerBase):
             sampler=sampler,
         )
 
-        # run
+        # 最大実行回数の指定
         callbacks = []
+        n_existing_trials = len(self.history.data)
         if self.n_trials is not None:
-            callbacks.append(MaxTrialsCallback(self.n_trials, states=(TrialState.COMPLETE,)))
+            n_trials = n_existing_trials + self.n_trials
+            callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))
+
+        # run
         study.optimize(
             self._objective,
             timeout=self.timeout,
