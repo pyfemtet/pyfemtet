@@ -36,7 +36,6 @@ def test_simple_femtet():
 
     fem = FemtetInterface(femprj)
     femopt = OptimizerOptuna(fem)
-    femopt.set_random_seed(42)
     femopt.add_parameter('d', 5, 1, 10)
     femopt.add_parameter('h', 5, 1, 10)
     femopt.add_parameter('w', 5, 1, 10)
@@ -45,8 +44,15 @@ def test_simple_femtet():
     femopt.add_objective(volume, 'volume(mm3)', args=femopt)
     femopt.add_objective(volume, 'volume(mm3)', args=femopt)  # 上書き
     femopt.add_constraint(bottom_surface, 'surf<=20', upper_bound=20, args=femopt)
+
+    femopt.set_random_seed(42)
     femopt.main(n_trials=30, n_parallel=1)
+
     femopt.terminate_monitor()
+    try:
+        femopt.fem.quit()
+    except:
+        pass
 
     if record:
         # データの保存

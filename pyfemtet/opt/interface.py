@@ -454,6 +454,10 @@ class FemtetInterface(FEMInterface):
                     is_Gaudi_method=True,
                 )
 
+        # 変数を含まないプロジェクトである場合
+        if existing_variable_names is None:
+            return
+
         for i, row in parameters.iterrows():
             name = row['name']
             value = row['value']
