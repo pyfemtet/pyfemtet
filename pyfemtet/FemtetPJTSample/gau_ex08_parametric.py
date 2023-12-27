@@ -33,13 +33,14 @@ if __name__ == '__main__':
 
     # 設計変数の登録
     femopt.add_parameter("h", 3, lower_bound=1.5, upper_bound=6, memo='1巻きピッチ')
-    femopt.add_parameter("r", 5, lower_bound=3, upper_bound=12, memo='コイル半径')
-    femopt.add_parameter("n", 5, lower_bound=1, upper_bound=20, memo='コイル巻き数')
+    femopt.add_parameter("r", 5, lower_bound=1, upper_bound=10, memo='コイル半径')
+    femopt.add_parameter("n", 3, lower_bound=1, upper_bound=5, memo='コイル巻き数')
 
     # インダクタンスが 0.44 uF に近づくようにゴールを設定
     femopt.add_objective(
-        inductance, name='自己インダクタンス', direction=4.4e-07
+        inductance, name='自己インダクタンス', direction=0.1e-06
         )
 
     # 最適化の実行
-    femopt.main(n_trials=30, method='botorch', n_parallel=2)
+    femopt.set_random_seed(42)
+    femopt.main(n_trials=20, method='botorch', use_lhs_init=False)

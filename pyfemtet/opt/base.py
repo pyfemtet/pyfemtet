@@ -268,7 +268,7 @@ class History:
         # calc
         try:
             tmp = self.actor_data
-            tmp['trial'] = np.arange(len(tmp))
+            tmp['trial'] = np.arange(len(tmp)) + 1  # 1 始まり
             self.actor_data = tmp
             self._calc_non_domi(objectives)
             self._calc_hypervolume(objectives)

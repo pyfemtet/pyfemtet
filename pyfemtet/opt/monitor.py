@@ -21,14 +21,14 @@ def update_scatter_matrix(femopt):
     elif len(obj_names) == 1:
         fig.add_trace(
             go.Scatter(
-                x=tuple(range(len(data[obj_names[0]].values))),
+                x=data['trial'],
                 y=data[obj_names[0]].values,
                 mode='markers+lines',
             )
         )
         fig.update_layout(
             dict(
-                title_text="単目的ペアプロット",
+                title_text="単目的プロット",
                 xaxis_title="解析実行回数(回)",
                 yaxis_title=obj_names[0],
             )

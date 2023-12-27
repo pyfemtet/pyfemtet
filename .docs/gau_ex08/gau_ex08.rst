@@ -9,14 +9,14 @@ Femtet の磁場解析ソルバーを用い、有限長ソレノイドコイル�
 -----
 .. note::
 
-   サンプルプロジェクトを Femtet で開き、サンプルコードを実行してください。
-
    :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.femprj>`
+   を Femtet で開き、
    :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>`
+   を実行してください。
 
 .. note::
 
-   FEM 問題の詳細については、FemtetHelp / 例題集 / 磁場解析 / 例題8 を参照してください。
+FEM 問題としての詳細については、FemtetHelp / 例題集 / 磁場解析 / 例題8 を参照してください。
 
 
 設計変数
@@ -24,6 +24,8 @@ Femtet の磁場解析ソルバーを用い、有限長ソレノイドコイル�
 
 .. figure:: gau_ex08_model.png
    
+   モデルの外観
+
 ====== ======
 変数名 説明
 ====== ======
@@ -52,6 +54,13 @@ n      コイルの巻き数
 -----
 
 .. figure:: gau_ex08_result.png
+   :width: 300
 
-横軸が試行回数、縦軸が自己インダクタンスです。20 回の試行で自己インダクタンスは　に収束しています。   
+   gau_ex08_parametric.py の実行結果。
+   横軸が試行回数、縦軸が自己インダクタンスです。
 
+20 回目の試行の結果、自己インダクタンスは 0.103 μF となります。
+
+.. note::
+
+   Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。
