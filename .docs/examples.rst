@@ -37,4 +37,27 @@
 
 CAD 連携
 -----
+.. grid:: 2
 
+    .. grid-item-card:: 外部 CAD (NX) 連携
+        :link: ./NX_ex01/NX_ex01
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ./NX_ex01/NX_ex01.png
+            :scale: 50
+        +++
+        CAD(NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。
+
+
+    .. grid-item-card:: 円形パッチアンテナの共振周波数
+        :link: ./her_ex40/her_ex40
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ./her_ex40/her_ex40.png
+            :scale: 50
+        +++
+        Femtet の電磁波解析ソルバーを用い、
+        円形パッチアンテナの共振周波数を
+        特定の値にする例題を解説します。
