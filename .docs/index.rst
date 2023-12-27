@@ -1,18 +1,28 @@
 Welcome to PyFemtet's documentation!
 ====================================
 
-**pyfemtet** はマルチフィジックス有限要素法解析ソフト
-`Femtet <https://www.muratasoftware.com/>`_ において
-まとまった機能の Python インターフェースを提供するパッケージです。
+pyfemtet は有限要素法解析ソフト `Femtet <https://www.muratasoftware.com/>`_ の Python インターフェースのパッケージです。
 
-現在 **pyfemtet** の唯一のサブパッケージ **opt** は
-設計のパラメータ最適化を行う *シンプルな* API を提供します。
+**pyfemtet は BSD-3 ライセンスの下で公開されているオープンソースライブラリです。
+pyfemtet は Femtet 本体の機能およびライセンスを変更することなく
+Femtet の商用利用可能な拡張機能を無償で提供します。**
+
+現在の pyfemtet の唯一の主要なサブパッケージ pyfemtet.opt は
+設計のパラメータ最適化を行うシンプルな API を提供します。
+
+
+pyfemtet.opt の主要機能
+----------------------------
+- 単目的および多目的の最適化に対応
+- プロセスモニタによるリアルタイム進行状況の表示
+- 複数の Femtet インスタンスによる並列計算
+- Excel 等で分析が容易な csv 形式での結果出力
 
 
 シンプルな API
---------------
+----------------------------
 
-下記の短いスクリプトにより多目的最適化が実行され、進行状況を表すモニターが起動します。
+下記は多目的最適化の実施例です。
 
 .. code-block:: python
 
@@ -39,39 +49,49 @@ Welcome to PyFemtet's documentation!
 
 .. note::
 
-   :download:`サンプル（opt_sample.femprj） <opt_sample.femprj>` をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。
+   このサンプルを動かすためには:download:`サンプル プロジェクト<files/opt_sample.femprj>` をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。
+
+使用方法の詳細は使い方セクションを確認してください。
 
 
+実施例
+-----
 
-.. image:: ./opt_sample.png
-   :scale: 50%
-最適化する問題。図の下端が固定、上端が固定値の荷重。
+.. grid:: 2
 
-設計変数：対面の幅（w）及び奥行（d）。
+    .. grid-item-card:: ソレノイドコイルのインダクタンス
+        :link: ./gau_ex08/gau_ex08
+        :link-type: doc
+        :text-align: center
 
-目的関数：最大変位が 0 に近いこと、及び体積が最小に近いこと。
-
-
-実行結果
---------------
-.. image:: ./多目的ペアプロット.png
-最適化結果。
-
-体積が小さいほど変位が大きくなり、2 つの目的関数はトレードオフの関係にあることがわかる。
+        .. image:: ./gau_ex08/gau_ex08.png
+            :scale: 50
+        +++
+        磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にするための寸法を探索します。
 
 
+    .. grid-item-card:: 鐘の共振周波数
+        :link: ./gal_ex11/gal_ex11
+        :link-type: ref
+        :text-align: center
+
+        .. image:: ./gal_ex11/gal_ex11.png
+            :scale: 50
+        +++
+        応力調和解析で鐘の共振周波数を特定の値にするための寸法を探索します。
+
+パッケージの `FemtetPjtSample <https://github.com/pyfemtet/pyfemtet/tree/main/pyfemtet/FemtetPJTSample>`_ により多くの実施例があります。
 
 
-詳細は :doc:`usage` セクションを確認してください。
-
-Contents
+目次
 --------
 
 .. toctree::
+    :maxdepth: 2
 
-   Home <self>
-   usage.md
-   api
+    ホーム（このページ） <self>
+    usage.md
+    api
 
 
 Copyright (C) 2023 Murata Manufacturing Co., Ltd. All Rights Reserved.

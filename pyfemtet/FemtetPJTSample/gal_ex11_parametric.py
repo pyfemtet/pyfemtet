@@ -1,24 +1,55 @@
-from pyfemtet.opt import OptimizerOptuna
+"""鐘の応力調和解析
 
-from win32com.client import constants
+gal_ex11_parametric.femprj に対し応力調和解析を行い、
+第一共振振動数を特定の値にする鐘の寸法を探索します。
+"""
+
+from pyfemtet.opt import OptimizerOptuna
 
 
 def fundamental_resonance(Femtet):
-    """mode[0] の共振周波数の取得"""
+    """Femmtet の解析結果から共振周波数を取得します。
+
+    Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
+        目的関数は第一引数に Femtet インスタンスを取る必要があります。
+
+    freq : 計算された共振周波数（複素数）です。Real プロパティにより実数に変換します。
+        目的関数は単一の float を返す必要があります。
+
+    """
     Femtet.Gogh.Galileo.Mode = 0
     freq = Femtet.Gogh.Galileo.GetFreq()  # CComplex
     return freq.Real  # Hz
 
 
 def volume(Femtet):
-    return Femtet.Gogh.CalcVolume_py([0])[1]  # m3
+    """Femmtet の解析結果からモデル体積を取得します。
+
+    Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
+        目的関数は第一引数に Femtet インスタンスを取る必要があります。
+
+    v : 計算されたモデル体積です。
+        目的関数は単一の float を返す必要があります。
+
+    """
+    v = Femtet.Gogh.CalcVolume_py([0])[1]  # m3
+    return v
 
 
 def thickness(Femtet):
+    """変数の組み合わせから鐘の厚みを計算します。
+
+    Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
+        拘束関数は第一引数に Femtet インスタンスを取る必要があります。
+
+    t : 計算された鐘モデルの厚みです。
+        拘束関数は単一の float を返す必要があります。
+
+    """
     external_r = Femtet.GetVariableValue('external_r')
     internal_r = Femtet.GetVariableValue('internal_r')
-    # Femtet.Gogh
-    return external_r - internal_r
+    t = external_r - internal_r
+    return t
     
 
 if __name__ == '__main__':

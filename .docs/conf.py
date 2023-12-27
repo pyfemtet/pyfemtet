@@ -20,13 +20,12 @@ sys.path.insert(0, project_root_path)
 
 # -- Project information -----------------------------------------------------
 
-project = "Basic Sphinx Example Project"
-copyright = "2022, Read the Docs core team"
-author = "Read the Docs core team"
+project = "PyFemtet Project"
+copyright = "2023, Murata Manufacturing Co., Ltd"
+author = "Kazuma Naito"
 
 
 # -- General configuration ---------------------------------------------------
-# -- General configuration
 
 extensions = [
     "sphinx.ext.duration",
@@ -35,13 +34,17 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "myst_parser",
+    "sphinx_design",
 ]
+
+myst_enable_extensions = ["colon_fence"]
 
 intersphinx_mapping = {
     "rtd": ("https://docs.readthedocs.io/en/stable/", None),
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
 }
+
 intersphinx_disabled_domains = ["std"]
 
 templates_path = ["_templates"]

@@ -32,6 +32,7 @@ sphinx-rtd-theme = "==2.0.0"
 sphinx-autobuild = "==2021.3.14"
 pytest = "^7.4.3"
 ray = {extras = ["default"], version = "^2.9.0"}
+sphinx-design = "^0.5.0"
 
 [tool.pytest.ini_options]
 filterwarnings = [
