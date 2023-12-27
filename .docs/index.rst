@@ -49,7 +49,7 @@ pyfemtet.opt の主要機能
 
 .. note::
 
-   このサンプルを動かすためには :download:`サンプル プロジェクト <./files/opt_sample.femprj>` をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。
+   このサンプルを実施するためには :download:`サンプル プロジェクト <./files/opt_sample.femprj>` をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。
 
 使用方法の詳細は :doc:`usage` セクションを確認してください。
 
@@ -72,7 +72,7 @@ pyfemtet.opt の主要機能
 
     .. grid-item-card:: 鐘の共振周波数
         :link: ./gal_ex11/gal_ex11
-        :link-type: ref
+        :link-type: doc
         :text-align: center
 
         .. image:: ./gal_ex11/gal_ex11.png
@@ -80,7 +80,7 @@ pyfemtet.opt の主要機能
         +++
         応力調和解析で鐘の共振周波数を特定の値にするための寸法を探索します。
 
-パッケージの `FemtetPjtSample <https://github.com/pyfemtet/pyfemtet/tree/main/pyfemtet/FemtetPJTSample>`_ により多くの実施例があります。
+:doc:`examples` セクションにより多くの実施例があります。
 
 
 目次

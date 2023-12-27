@@ -22,14 +22,14 @@
 
 4. pyfemtet のインストール
 
-    ターミナルで下記コマンドを実行してください。::
+    コマンドプロンプトで下記コマンドを実行してください。::
 
         py -m pip install pyfemtet
 
 
 5. Femtet マクロ定数の設定
 
-    ターミナルで下記コマンドを実行してください。::
+    コマンドプロンプトで下記コマンドを実行してください。::
 
         py -m win32com.client.makepy FemtetMacro
 
