@@ -4,9 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to PyFemtet’s documentation! &mdash; Basic Sphinx Example Project  documentation</title>
+  <title>Welcome to PyFemtet’s documentation! &mdash; PyFemtet Project  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
   
   <!--[if lt IE 9]>
@@ -18,10 +19,11 @@
         <script src="_static/documentation_options.js?v=5929fcd5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/design-tabs.js?v=36754332"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage" href="usage.html" /> 
+    <link rel="next" title="使い方" href="usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -33,7 +35,7 @@
           
           
           <a href="#" class="icon icon-home">
-            Basic Sphinx Example Project
+            PyFemtet Project
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -44,8 +46,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ホーム（このページ）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
 </ul>
 
@@ -55,7 +57,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">Basic Sphinx Example Project</a>
+          <a href="#">PyFemtet Project</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -75,172 +77,96 @@
              
   <section id="welcome-to-pyfemtet-s-documentation">
 <h1>Welcome to PyFemtet’s documentation!<a class="headerlink" href="#welcome-to-pyfemtet-s-documentation" title="Link to this heading"></a></h1>
-<p><strong>pyfemtet</strong> はマルチフィジックス有限要素法解析ソフト
-<a class="reference external" href="https://www.muratasoftware.com/">Femtet</a> において
-まとまった機能の Python インターフェースを提供するパッケージです。</p>
-<p>現在 <strong>pyfemtet</strong> の唯一のサブパッケージ <strong>opt</strong> は
-設計のパラメータ最適化を行う <em>シンプルな</em> API を提供します。</p>
-<p>詳細は <a class="reference internal" href="usage.html"><span class="doc">Usage</span></a> セクションを確認してください。</p>
+<p>pyfemtet は有限要素法解析ソフト <a class="reference external" href="https://www.muratasoftware.com/">Femtet</a> の Python インターフェースのパッケージです。</p>
+<p><strong>pyfemtet は BSD-3 ライセンスの下で公開されているオープンソースライブラリです。
+pyfemtet は Femtet 本体の機能およびライセンスを変更することなく
+Femtet の商用利用可能な拡張機能を無償で提供します。</strong></p>
+<p>現在の pyfemtet の唯一の主要なサブパッケージ pyfemtet.opt は
+設計のパラメータ最適化を行うシンプルな API を提供します。</p>
+<section id="pyfemtet-opt">
+<h2>pyfemtet.opt の主要機能<a class="headerlink" href="#pyfemtet-opt" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>単目的および多目的の最適化に対応</p></li>
+<li><p>プロセスモニタによるリアルタイム進行状況の表示</p></li>
+<li><p>複数の Femtet インスタンスによる並列計算</p></li>
+<li><p>Excel 等で分析が容易な csv 形式での結果出力</p></li>
+</ul>
+</section>
+<section id="api">
+<h2>シンプルな API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
+<p>下記は多目的最適化の実施例です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">OptimizerOptuna</span>
+
+<span class="k">def</span> <span class="nf">max_displacement</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">dy</span>
+
+<span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">h</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">femopt</span> <span class="o">=</span> <span class="n">OptimizerOptuna</span><span class="p">()</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_displacement</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;最大変位&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;体積&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This project is under active development.</p>
+<p>このサンプルを動かすためには:download:<cite>サンプル プロジェクト&lt;files/opt_sample.femprj&gt;</cite> をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。</p>
 </div>
-<section id="contents">
-<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h2>
+<p>使用方法の詳細は使い方セクションを確認してください。</p>
+</section>
+<section id="id1">
+<h2>実施例<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+ソレノイドコイルのインダクタンス</div>
+<a class="reference internal image-reference" href="_images/gau_ex08.png"><img alt="_images/gau_ex08.png" src="_images/gau_ex08.png" style="width: 150.0px; height: 150.0px;" /></a>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にするための寸法を探索します。</p>
+</div>
+<a class="sd-stretched-link reference internal" href="gau_ex08/gau_ex08.html"><span class="doc"></span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+鐘の共振周波数</div>
+<a class="reference internal image-reference" href="_images/gal_ex11.png"><img alt="_images/gal_ex11.png" src="_images/gal_ex11.png" style="width: 150.0px; height: 150.0px;" /></a>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">応力調和解析で鐘の共振周波数を特定の値にするための寸法を探索します。</p>
+</div>
+<span class="sd-stretched-link"></span></div>
+</div>
+</div>
+</div>
+<p>パッケージの <a class="reference external" href="https://github.com/pyfemtet/pyfemtet/tree/main/pyfemtet/FemtetPJTSample">FemtetPjtSample</a> により多くの実施例があります。</p>
+</section>
+<section id="id2">
+<h2>目次<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#id1">動作するサンプルコード・サンプル解析モデル</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#id2">最適化の実行</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ホーム（このページ）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">使い方</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#id2">インストール</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#pyfemtet">pyfemtet を用いた最適化の実行手順</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules/modules.html">pyfemtet</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="modules/pyfemtet.html">pyfemtet package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="modules/pyfemtet.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="modules/pyfemtet.opt.html">pyfemtet.opt package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.opt.html#submodules">Submodules</a></li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.opt.html#module-pyfemtet.opt.base">pyfemtet.opt.base module</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.Constraint"><code class="docutils literal notranslate"><span class="pre">Constraint</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.Constraint.default_name"><code class="docutils literal notranslate"><span class="pre">Constraint.default_name</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.Function"><code class="docutils literal notranslate"><span class="pre">Function</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.Function.calc"><code class="docutils literal notranslate"><span class="pre">Function.calc()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.History"><code class="docutils literal notranslate"><span class="pre">History</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.History.init"><code class="docutils literal notranslate"><span class="pre">History.init()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.History.record"><code class="docutils literal notranslate"><span class="pre">History.record()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.Objective"><code class="docutils literal notranslate"><span class="pre">Objective</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.Objective.default_name"><code class="docutils literal notranslate"><span class="pre">Objective.default_name</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase"><code class="docutils literal notranslate"><span class="pre">OptimizerBase</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.add_constraint"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.add_constraint()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.add_objective"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.add_objective()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.add_parameter"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.add_parameter()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.f"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.f()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.get_parameter"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.get_parameter()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.get_random_seed"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.get_random_seed()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.is_calculated"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.is_calculated()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.main"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.main()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.set_fem"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.set_fem()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.OptimizerBase.set_random_seed"><code class="docutils literal notranslate"><span class="pre">OptimizerBase.set_random_seed()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.base.symlog"><code class="docutils literal notranslate"><span class="pre">symlog()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.opt.html#module-pyfemtet.opt.core">pyfemtet.opt.core module</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.FEMCrash"><code class="docutils literal notranslate"><span class="pre">FEMCrash</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.FemtetAutomationError"><code class="docutils literal notranslate"><span class="pre">FemtetAutomationError</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.InterprocessVariables"><code class="docutils literal notranslate"><span class="pre">InterprocessVariables</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.InterprocessVariables.append_history"><code class="docutils literal notranslate"><span class="pre">InterprocessVariables.append_history()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.InterprocessVariables.get_allowed_idx"><code class="docutils literal notranslate"><span class="pre">InterprocessVariables.get_allowed_idx()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.InterprocessVariables.get_history"><code class="docutils literal notranslate"><span class="pre">InterprocessVariables.get_history()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.InterprocessVariables.get_state"><code class="docutils literal notranslate"><span class="pre">InterprocessVariables.get_state()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.InterprocessVariables.set_allowed_idx"><code class="docutils literal notranslate"><span class="pre">InterprocessVariables.set_allowed_idx()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.InterprocessVariables.set_state"><code class="docutils literal notranslate"><span class="pre">InterprocessVariables.set_state()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.MeshError"><code class="docutils literal notranslate"><span class="pre">MeshError</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.ModelError"><code class="docutils literal notranslate"><span class="pre">ModelError</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.PostError"><code class="docutils literal notranslate"><span class="pre">PostError</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.SolveError"><code class="docutils literal notranslate"><span class="pre">SolveError</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.core.UserInterruption"><code class="docutils literal notranslate"><span class="pre">UserInterruption</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.opt.html#module-pyfemtet.opt.interface">pyfemtet.opt.interface module</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FEMInterface"><code class="docutils literal notranslate"><span class="pre">FEMInterface</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FEMInterface.before_parallel_setup"><code class="docutils literal notranslate"><span class="pre">FEMInterface.before_parallel_setup()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FEMInterface.check_param_value"><code class="docutils literal notranslate"><span class="pre">FEMInterface.check_param_value()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FEMInterface.parallel_setup"><code class="docutils literal notranslate"><span class="pre">FEMInterface.parallel_setup()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FEMInterface.parallel_terminate"><code class="docutils literal notranslate"><span class="pre">FEMInterface.parallel_terminate()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FEMInterface.quit"><code class="docutils literal notranslate"><span class="pre">FEMInterface.quit()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FEMInterface.update"><code class="docutils literal notranslate"><span class="pre">FEMInterface.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface"><code class="docutils literal notranslate"><span class="pre">FemtetInterface</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.before_parallel_setup"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.before_parallel_setup()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.call_femtet_api"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.call_femtet_api()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.check_param_value"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.check_param_value()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.connect_and_open_femtet"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.connect_and_open_femtet()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.connect_femtet"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.connect_femtet()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.femtet_is_alive"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.femtet_is_alive()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.open"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.open()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.parallel_setup"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.parallel_setup()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.parallel_terminate"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.parallel_terminate()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.quit"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.quit()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.solve"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.solve()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.update"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.update()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetInterface.update_model"><code class="docutils literal notranslate"><span class="pre">FemtetInterface.update_model()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetWithNXInterface"><code class="docutils literal notranslate"><span class="pre">FemtetWithNXInterface</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetWithNXInterface.PATH_JOURNAL"><code class="docutils literal notranslate"><span class="pre">FemtetWithNXInterface.PATH_JOURNAL</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetWithNXInterface.check_param_value"><code class="docutils literal notranslate"><span class="pre">FemtetWithNXInterface.check_param_value()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.FemtetWithNXInterface.update_model"><code class="docutils literal notranslate"><span class="pre">FemtetWithNXInterface.update_model()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.NoFEM"><code class="docutils literal notranslate"><span class="pre">NoFEM</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.NoFEM.check_param_value"><code class="docutils literal notranslate"><span class="pre">NoFEM.check_param_value()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.NoFEM.quit"><code class="docutils literal notranslate"><span class="pre">NoFEM.quit()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.interface.NoFEM.update"><code class="docutils literal notranslate"><span class="pre">NoFEM.update()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.opt.html#module-pyfemtet.opt.monitor">pyfemtet.opt.monitor module</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.monitor.Monitor"><code class="docutils literal notranslate"><span class="pre">Monitor</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.monitor.Monitor.setup_home"><code class="docutils literal notranslate"><span class="pre">Monitor.setup_home()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.monitor.Monitor.setup_page1"><code class="docutils literal notranslate"><span class="pre">Monitor.setup_page1()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.monitor.Monitor.start_server"><code class="docutils literal notranslate"><span class="pre">Monitor.start_server()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.opt.html#pyfemtet.opt.monitor.update_scatter_matrix"><code class="docutils literal notranslate"><span class="pre">update_scatter_matrix()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.opt.html#module-pyfemtet.opt">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l5"><a class="reference internal" href="modules/pyfemtet.tools.html">pyfemtet.tools package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.tools.html#submodules">Submodules</a></li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.tools.html#module-pyfemtet.tools.DispatchUtils">pyfemtet.tools.DispatchUtils module</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.DispatchUtils.Dispatch_Femtet"><code class="docutils literal notranslate"><span class="pre">Dispatch_Femtet()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.DispatchUtils.Dispatch_Femtet_with_new_process"><code class="docutils literal notranslate"><span class="pre">Dispatch_Femtet_with_new_process()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.DispatchUtils.Dispatch_Femtet_with_specific_pid"><code class="docutils literal notranslate"><span class="pre">Dispatch_Femtet_with_specific_pid()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.tools.html#module-pyfemtet.tools.FemtetClassConst">pyfemtet.tools.FemtetClassConst module</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.FemtetClassConst.FemtetClassName"><code class="docutils literal notranslate"><span class="pre">FemtetClassName</span></code></a><ul>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.FemtetClassConst.FemtetClassName.CComplex"><code class="docutils literal notranslate"><span class="pre">FemtetClassName.CComplex</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.FemtetClassConst.FemtetClassName.CFemtet"><code class="docutils literal notranslate"><span class="pre">FemtetClassName.CFemtet</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.FemtetClassConst.FemtetClassName.CGaudiPlane"><code class="docutils literal notranslate"><span class="pre">FemtetClassName.CGaudiPlane</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.FemtetClassConst.FemtetClassName.CGaudiPoint"><code class="docutils literal notranslate"><span class="pre">FemtetClassName.CGaudiPoint</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.FemtetClassConst.FemtetClassName.CGaudiVector"><code class="docutils literal notranslate"><span class="pre">FemtetClassName.CGaudiVector</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.FemtetClassConst.FemtetClassName.CSYZMatrix"><code class="docutils literal notranslate"><span class="pre">FemtetClassName.CSYZMatrix</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="modules/pyfemtet.tools.html#module-pyfemtet.tools">Module contents</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="modules/pyfemtet.tools.html#pyfemtet.tools.activateFemtetPythonMacro"><code class="docutils literal notranslate"><span class="pre">activateFemtetPythonMacro()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="modules/pyfemtet.html#module-pyfemtet">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="modules/modules.html">pyfemtet</a></li>
 </ul>
 </li>
 </ul>
@@ -254,13 +180,13 @@ Everyone is permitted to copy and distribute verbatim copies of this license doc
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="usage.html" class="btn btn-neutral float-right" title="使い方" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Read the Docs core team.</p>
+    <p>&#169; Copyright 2023, Murata Manufacturing Co., Ltd.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

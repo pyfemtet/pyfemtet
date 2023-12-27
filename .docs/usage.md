@@ -1,6 +1,6 @@
-# Usage
+# 使い方
 
-## Installation
+## インストール
 
 pyfemtet は windows OS にのみ対応しています。
 インストール方法は以下の通りです。
@@ -22,12 +22,13 @@ pyfemtet は windows OS にのみ対応しています。
     [https://www.python.org/](https://www.python.org/)
 
 
-1. PyFemtet のインストール
+1. pyfemtet のインストール
     
     ターミナルで下記コマンドを実行してください。
     ```
     py -m pip install pyfemtet
     ```
+
 
 1. Femtet マクロ定数の設定
 
@@ -37,129 +38,83 @@ pyfemtet は windows OS にのみ対応しています。
     ```
 
 
-## 最適化の概要
-### 単目的最適化
-### 多目的最適化
-
-
-
 ## pyfemtet を用いた最適化の実行手順
 
 基本的な使い方は以下の通りです。
 
-1. Femtet プロジェクトの作成
+1. __Femtet プロジェクトの作成__
 
     Femtet 上で解析モデルを作成します。最適化したいパラメータを変数として登録してください。
 
-1. 評価指標の設定
+1. __評価指標の設定__
 
-    解析結果やモデル形状から評価したい指標を出力する処理を Femtet Python マクロを用いて記述してください。
-    以下に例を示します。
-    ```python
-    """Femtet の解析結果から評価指標を計算する例です."""
-    from win32com.client import constants
-    from win32com.client import Dispatch
-
-    # Femtet の操作のためのオブジェクトを取得
-    Femtet = Dispatch("FemtetMacro.Femtet")
-
-    # Femtet で解析結果を開く
-    Femtet.OpenCurrentResult(True)
-    Gogh = Femtet.Gogh
-
-    # 流速を取得するための設定
-    Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
-
-    # 目的の面で流速を積分し流量を取得
-    _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
-
-    # 流量（次のステップでこれを評価指標にする）
-    print(ret.Real)
-    ```
-
-1. メインスクリプトの作成
-
-    上記で定義した評価指標を含むスクリプトを書いてください。以下に例を示します。前のステップで記述した評価指標が ```get_flow``` 関数の中に記述されています。
-
-    ```python
-    """pyfemtet を用いてパラメータ最適化を行う最小限のコードの例です.
-
-    h, r という変数を有する解析モデルで簡易流体解析を行い, ある面の流量を 0.3 にしたい場合を想定しています.
-    """
-
-    from pyfemtet.opt import FemtetInterface, OptimizerOptuna
-    from win32com.client import constants
-
-
-    def get_flow(Femtet):
-        """解析結果から流量を取得します.
-        
-        pyfemtet で定義する評価関数は、
-        第一引数に Femtet の COM オブジェクトを
-        設定する必要があります.
-        """
-        Gogh = Femtet.Gogh
-        Gogh.Pascal.Vector = constants.PASCAL_VELOCITY_C
-        _, ret = Gogh.SimpleIntegralVectorAtFace_py([2], [0], constants.PART_VEC_Y_PART_C)
-        flow = ret.Real
-        return flow
-
-
-    if __name__ == '__main__':
+   解析結果やモデル形状から評価したい指標を出力する処理を Femtet Python マクロを用いて記述してください。
+   以下に例を示します。
+   ```python
+   """Femtet の解析結果から評価指標を計算する例です。"""
+   from win32com.client import Dispatch
    
-        # Femtet 制御オブジェクトを用意
-        fem = FemtetInterface('example.femprj')
-
-        # 最適化処理を行うオブジェクトを用意
-        femopt = OptimizerOptuna(fem)
-
-        # 解析モデルで登録された変数
-        femopt.add_parameter("h", 10, lower_bound=1, upper_bound=20, memo='高さ')
-        femopt.add_parameter("r", 5, lower_bound=1, upper_bound=10, memo='半径')
-
-        # 流量が 0.3 に近づくようにゴールを設定する
-        femopt.add_objective(get_flow, name='流量', direction=0.3)
-
-        # 最適化の実行（csv ファイルに最適化計算の過程が保存されます）
-        femopt.main(n_trial=30)
-
-        # 最適化結果の表示（最適化終了時点での csv ファイルの内容と同じです）
-        print(femopt.history.data)
-    ```
-    注意：Femtet 内で数式を設定した変数に対し ```add_parameter()``` を行わないでください。数式が失われます。
+   # Femtet の操作のためのオブジェクトを取得
+   Femtet = Dispatch("FemtetMacro.Femtet")
+   
+   # Femtet で解析結果を開く
+   Femtet.OpenCurrentResult(True)
+   Gogh = Femtet.Gogh
+   
+   # （例）応力解析結果からモデルの最大変位を取得
+   dx, dy, dz = Gogh.Galileo.GetMaxDisplacement()
+   ```
 
 
-1. スクリプトを実行します。
+1. __メインスクリプトの作成__
 
- 
-1. 出力された最適化過程の一覧を csv ファイルで確認します。
+   上記で定義した評価指標を含むスクリプトを書いてください。以下に例を示します。
+   
+   ```python
+   """pyfemtet を用いてパラメータ最適化を行う最小限のコードの例です。"""
+   
+   from pyfemtet.opt import OptimizerOptuna
+   
+   def max_displacement(Femtet):
+       Gogh = Femtet.Gogh
+       dx, dy, dz = Gogh.Galileo.GetMaxDisplacement()
+       return dy
+      
+   if __name__ == '__main__':
+       # 最適化を行うオブジェクトの準備
+       femopt = OptimizerOptuna()
 
-    csv ファイルの各行は一回の解析試行結果を示しています。各列の形式は以下の通りです。
+       # 設計変数の設定
+       femopt.add_parameter('w', 10, 2, 20)
+       femopt.add_parameter('d', 10, 2, 20)
 
-    列名 | 説明
-    --- | ---
-    n_trial | 解析を行った回数
-    [param] | スクリプト中で設定した変数。変数の数だけ列が増える。
-    [objective] | スクリプト中で設定した評価関数。評価関数の数だけ列が増える。
-    [constraint] | スクリプト中で設定した拘束関数。拘束関数の数だけ列が増える。
-    non_domi | 非劣解であるかどうか。
-    fit | 拘束関数を満たすかどうか。
-    optimization_message | 最適化アルゴリズムによる注記。
-    hypervolume | その試行時点でのハイパーボリューム。
-    time | その試行が完了した日時。
+       # 目的関数の設定
+       femopt.add_objective(max_displacement, direction=0)
 
-    - 拘束：ある数式が任意の範囲内にあるようにすることです。具体的な記述方法は**動作するサンプルコード**も参考にしてください。
-    - 非劣解：劣解とは、解集合の中で、その解よりも全ての評価指標が好ましい解が存在する解のことです。非劣解とは、劣解ではない解のことです。単一の評価指標のみを持つ最適化問題の場合、非劣解は最適解です。
+       # 最適化の実行
+       femopt.main()
+   ```
+
+   注意：Femtet 内で数式を設定した変数に対し ```add_parameter()``` を行わないでください。数式が失われます。
 
 
+1. __スクリプトを実行します。__
 
+   スクリプトが実行されると、進捗および結果が csv ファイルに保存されます。
+   csv ファイルの各行は一回の解析試行結果を示しています。各列の意味は以下の通りです。
 
-## サンプル集
-pyfemtet プロジェクトの以下の相対パスに .py ファイルと、それと同名の .femprj ファイルが含まれています。
-```
-.\pyfemtet\FemtetPJTSample
-```
-このフォルダに含まれる ```.femprj``` ファイルは、変数設定済みの単純な解析モデルです。対応する同名の ```.py``` ファイルは、そのパラメータを PyFemtet を用いて最適化するサンプルコードです。 
+| 列                 | 意味                                   |
+|-------------------|--------------------------------------|
+| trial             | その試行が何度目の試行であるか                      |
+| <変数名>             | スクリプトで指定した変数の値                       |
+| <目的関数名>           | スクリプトで指定した目的関数の計算結果                  |
+| <目的関数名>_direction | スクリプトで指定した目的関数の目標                    |
+| <拘束関数名>           | スクリプトで指定した拘束関数の計算結果                  |
+| <拘束関数名>_lb        | スクリプトで指定した拘束関数の下限                    |
+| <拘束関数名>_ub        | スクリプトで指定した拘束関数の上限                    |
+| feasible          | その試行がすべての拘束を満たすか                     |
+| hypervolume       | （目的関数が 2 以上の場合のみ）その試行までの hypervolume |
+| message           | 最適化プロセスによる特記事項                       |
+| time              | 試行が完了した時刻                            |
 
-Femtet でいずれかの ```.femprj``` ファイルを開き、その後対応する ```.py``` ファイルを実行してください。
-
+<> で囲まれた文字はスクリプトでに応じて内容と数が変化することを示しています。
