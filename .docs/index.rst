@@ -67,18 +67,18 @@ pyfemtet.opt の主要機能
         .. image:: ./gau_ex08/gau_ex08.png
             :scale: 50
         +++
-        磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にするための寸法を探索します。
+        磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。
 
 
-    .. grid-item-card:: 鐘の共振周波数
-        :link: ./gal_ex11/gal_ex11
+    .. grid-item-card:: 円形パッチアンテナの共振周波数
+        :link: ./her_ex40/her_ex40
         :link-type: doc
         :text-align: center
 
-        .. image:: ./gal_ex11/gal_ex11.png
+        .. image:: ./her_ex40/her_ex40.png
             :scale: 50
         +++
-        応力調和解析で鐘の共振周波数を特定の値にするための寸法を探索します。
+        電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。
 
 :doc:`examples` セクションにより多くの実施例があります。
 
