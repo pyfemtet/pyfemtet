@@ -7,11 +7,11 @@
 .. grid:: 2
 
     .. grid-item-card:: ソレノイドコイルのインダクタンス
-        :link: ./gau_ex08/gau_ex08
+        :link: gau_ex08/gau_ex08
         :link-type: doc
         :text-align: center
 
-        .. image:: ./gau_ex08/gau_ex08.png
+        .. image:: gau_ex08/gau_ex08.png
             :scale: 50
         +++
         磁場解析で
@@ -20,11 +20,11 @@
 
 
     .. grid-item-card:: 円形パッチアンテナの共振周波数
-        :link: ./her_ex40/her_ex40
+        :link: her_ex40/her_ex40
         :link-type: doc
         :text-align: center
 
-        .. image:: ./her_ex40/her_ex40.png
+        .. image:: her_ex40/her_ex40.png
             :scale: 50
         +++
         電磁波解析で
@@ -44,11 +44,11 @@
 .. grid:: 2
 
     .. grid-item-card:: 基板上の発熱体
-        :link: ./wat_ex14/wat_ex14
+        :link: wat_ex14/wat_ex14
         :link-type: doc
         :text-align: center
 
-        .. image:: ./wat_ex14/wat_ex14.png
+        .. image:: wat_ex14/wat_ex14.png
             :scale: 50
         +++
         熱伝導解析で
@@ -59,7 +59,7 @@
     :titlesonly:
     :hidden:
 
-    ./wat_ex14/wat_ex14
+    wat_ex14/wat_ex14
 
 
 並列計算
@@ -71,7 +71,7 @@
         :link-type: doc
         :text-align: center
 
-        .. image:: ./wat_ex14_parallel/wat_ex14.png
+        .. image:: wat_ex14_parallel/wat_ex14.png
             :scale: 50
         +++
         「基板上の発熱体」を複数 Femtet の並列計算により高速化します。
@@ -92,7 +92,7 @@ CAD 連携
         :link-type: doc
         :text-align: center
 
-        .. image:: ./NX_ex01/NX_ex01.png
+        .. image:: NX_ex01/NX_ex01.png
             :scale: 50
         +++
         CAD(NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。
