@@ -1,9 +1,9 @@
 import os
 import subprocess
 from time import sleep
-import numpy as np
-import pandas as pd
 import psutil
+
+from femtetutils import util
 
 from pyfemtet.opt import OptimizerOptuna, FemtetInterface
 
@@ -81,10 +81,13 @@ def test_restart_femtet():
         femopt.main(n_trials=5)
 
         femopt.terminate_monitor()
-        try:
-            femopt.fem.quit()
-        except:
-            pass
+
+        util.close_femtet(femopt.fem.Femtet.hWnd, 5, True)
+
+        # try:
+        #     femopt.fem.quit()
+        # except:
+        #     pass
     #
     # if record:
     #     # データの保存
