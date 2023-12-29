@@ -30,6 +30,7 @@ here, me = os.path.split(__file__)
 
 
 class FEMInterface(ABC):
+    """Abstract base class for the interface with FEM software."""
 
     def __init__(
             self,
@@ -37,10 +38,14 @@ class FEMInterface(ABC):
             subprocess_settings: 'Any' or None = None,  # 具象クラスで引数に取ることが必須
             **kwargs
     ):
-        """サブプロセスで FEM を restore するときに必要な情報を保管する.
+        """Stores information necessary to restore FEMInterface instance in a subprocess.
 
-        具象クラスでは restore 時に指定したい変数を引数にして
-        super().__init__ を呼ぶこと.
+        The concrete class should call super().__init__() with the desired arguments when restoring.
+
+        Args:
+            subprocess_idx (int or None, optional): The index of the subprocess. Defaults to None.
+            subprocess_settings ('Any' or None, optional): Additional settings for the subprocess. Defaults to None.
+            **kwargs: keyword arguments for FEMInterface constructor.
 
         """
         # restore のための情報保管
@@ -50,71 +55,68 @@ class FEMInterface(ABC):
             self.subprocess_idx = subprocess_idx
 
     def check_param_value(self, param_name) -> float:
-        """
+        """Checks the value of a parameter in the FEM model.
 
-        Parameters
-        ----------
-        param_name : str
+        Args:
+            param_name (str): The name of the parameter.
 
-        Raises
-        ----------
-        Exception
-            param_name が FEM に存在しない
+        Raises:
+            Exception: If param_name does not exist in the FEM model.
 
-        Returns
-        -------
-        value : float
+        Returns:
+            float: The value of the parameter.
 
         """
         pass
 
     @abstractmethod
     def update(self, parameters: 'pd.DataFrame') -> None:
-        """提案された parameters に基づいて FEM 解析を更新する
+        """Updates the FEM analysis based on the proposed parameters.
 
-        Parameters
-        ----------
-        parameters : pd.DataFrame
-            最低でも name, value を有する.
+        Args:
+            parameters (pd.DataFrame): The parameters to be updated. Must have at least 'name' and 'value'.
 
-        Raises
-        ----------
-        ModelError, MeshError, SolveError
-            モデルの更新, 解析に失敗した場合.
+         Raises:
+            ModelError, MeshError, SolveError: If there are errors in updating or analyzing the model.
 
-        Returns
-        -------
-        None
+         Returns:
+            None
 
-
-        """
+         """
         pass
 
     def update_parameter(self, parameters: 'pd.DataFrame'):
-        """Femtet の GetVariableValue などで変数を取得できる、FEM の変数のみを更新する。
+        """Updates only FEM variables that can be obtained with Femtet.GetVariableValue and similar functions.
 
-        Function にする args に femopt を取って get_parameter すればいいので実装しなくてもいい。
+        If users define a function to be passed to add_objective etc. to take OptimizerBase as an argument,
+        and access the variable by calling OptimizerBase.get_parameter() within the function,
+        there is no need to implement this method in the concrete class of FEMInterface.
+
+        Args:
+         parameters (pd.DataFrame): The parameters to be updated.
+
         """
         pass
 
     def quit(self, *args, **kwargs):
-        """デストラクタ."""
+        """Destructor."""
         pass
 
     def settings_before_parallel(self, femopt) -> 'Any':
-        """サブプロセスを起動する前の前処理"""
+        """Preprocessing before launching a subprocess."""
         pass  # return subprocess_settings
 
     def parallel_setup(self):
-        """サブプロセスで呼ばれた場合のコンストラクタ."""
+        """Constructor called in a subprocess."""
         pass
 
     def parallel_terminate(self):
-        """サブプロセスで呼ばれた場合のデストラクタ."""
+        """Destructor called in a subprocess."""
         pass
 
 
 class FemtetInterface(FEMInterface):
+    """Concrete class for the interface with Femtet software."""    
 
     def __init__(
             self,
@@ -124,6 +126,20 @@ class FemtetInterface(FEMInterface):
             subprocess_idx=None,
             subprocess_settings=None,
     ):
+        """Initializes the FemtetInterface.
+
+        Args:
+            femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
+            model_name (str or None, optional): The name of the analysis model. Defaults to None.
+            connect_method (str, optional): The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
+            subprocess_idx (int or None, optional): The index of the subprocess. Defaults to None.
+            subprocess_settings ('Any' or None, optional): Additional settings for the subprocess. Defaults to None.
+
+        Tip:
+            If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
+
+        """
+
         # 引数の処理
         if femprj_path is None:
             self.femprj_path = None
@@ -188,34 +204,25 @@ class FemtetInterface(FEMInterface):
         self.connected_method = 'existing'
 
     def connect_femtet(self, connect_method: str = 'new', pid: int or None = None):
-        """
-        Femtet プロセスとの接続を行い、メンバー変数 Femtet にインスタンスをセットします。
+        """Connects to a Femtet process.
+        Args:
+            connect_method (str, optional): The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'new'.
+            pid (int or None, optional): The process ID of an existing Femtet process. Only used when `connect_method` is set as `'existing'`. Defaults to `None`.
 
-        Parameters
-        ----------
-        connect_method : str, optional
-            'new' or 'existing' or 'auto'. The default is 'new'.
-            'new' のとき、新しい Femtet プロセスを起動し、接続します。
+        When connect_method is 'new', starts a new Femtet process and connects to it.
 
-            'existing' のとき、既存の Femtet プロセスと接続します。
-            ただし、接続できる Femtet が存在しない場合、エラーを送出します。
-            この場合、既存 Femtet プロセスのどれに接続されるかは制御できません。
-            ただし、pid が既知の場合、pid を指定することができます。
-            また、すでに別の Python 又は Excel プロセスと接続されている
-            Femtet との接続を行うことはできません。
+        When 'existing', connect to an existing Femtet process.
+        However, if there are no Femtets to which it can connect, it will throw an error.
+        In this case, you cannot control which of the existing Femtet processes is connected.
+        
+        When 'existing', you can specify the pid if it is known.
+        Also, if it is already connected to another Python or Excel process.
+        Connections cannot be made with Femtet.
 
-            'auto' のとき、まず 'existing' を試行し、失敗した際には 'new' で接続します。
-
-        pid : int or None, optional
-            接続したい既存の Femtet のプロセス ID. The default is None.
-            connect_method が existing 以外の時は無視されます。
-
-        Raises
-        ------
-        Exception
-            何らかの理由で Femtet との接続に失敗した際に例外を送出します。
+        When set to 'auto', first tries 'existing', and if that fails, connects with 'new'.        
 
         """
+
         if connect_method == 'new':
             self._connect_new_femtet()
 
@@ -243,7 +250,7 @@ class FemtetInterface(FEMInterface):
         if self.Femtet is None:
             raise Exception('Femtet との接続に失敗しました.')
 
-    def call_femtet_api(
+    def _call_femtet_api(
             self,
             fun,
             ret_if_failed,
@@ -256,12 +263,12 @@ class FemtetInterface(FEMInterface):
             recourse_depth=0,
             print_indent=0,
     ):
-        """
+        """Internal method. Call Femtet API with error handling.
 
         Parameters
         ----------
         fun : Callable
-            Femtet マクロの API
+            Femtet API
         ret_if_failed : Any
             API が失敗した時の戻り値
         if_error : Type
@@ -299,7 +306,7 @@ class FemtetInterface(FEMInterface):
         if self.pp: print(' '*print_indent, 'コマンド', fun.__name__, args, kwargs)
         if is_Gaudi_method:  # Optimizer は Gogh に触らないので全部にこれをつけてもいい気がする
             try:
-                self.call_femtet_api(
+                self._call_femtet_api(
                     self.Femtet.Gaudi.Activate,
                     False,  # None 以外なら何でもいい
                     Exception,
@@ -362,7 +369,7 @@ class FemtetInterface(FEMInterface):
                 # 与えられた API の再帰的再試行
                 if self.pp: print(' '*print_indent, f'回復されました. コマンド{fun.__name__}の再試行を行います.')
                 print('回復されました.')
-                return self.call_femtet_api(
+                return self._call_femtet_api(
                     fun,
                     ret_if_failed,
                     if_error,
@@ -379,6 +386,8 @@ class FemtetInterface(FEMInterface):
         return _get_pid(self.Femtet.hWnd) > 0
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
+        """Open specific analysis model with connected Femtet."""
+
         # 引数の処理
         self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
@@ -398,6 +407,17 @@ class FemtetInterface(FEMInterface):
             self.Femtet.ShowLastError()
 
     def connect_and_open_femtet(self):
+        """Connects to a Femtet process and open the femprj.
+
+        This function is for establishing a connection with Femtet and opening the specified femprj file.
+
+        At the beginning of the function, we check if femprj_path is specified.
+
+        If femprj_path is specified, first connect to Femtet using the specified connection method. Then, if the project path of the connected Femtet is different from the specified femprj_path, open the project using the open function. Also, if model_name is specified, the project will be opened using the open function even if the Femtet analysis model name is different from the specified model_name.
+
+        On the other hand, if femprj_path is not specified, an error message will be displayed stating that femprj_path must be specified in order to use the "new" connection method. If the connection method is not "new", it will try to connect to an existing Femtet instance. If the connection is successful, the project path and analysis model name of the Femtet instance will be stored as femprj_path and model_name.
+
+        """
 
         print(f'try to open {self.model_name} of {self.femprj_path}')
 
@@ -424,6 +444,7 @@ class FemtetInterface(FEMInterface):
             self.model_name = self.Femtet.AnalysisModelName
 
     def check_param_value(self, param_name):
+        """See :func:`FEMInterface.check_param_value`"""
         variable_names = self.Femtet.GetVariableNames()
         if variable_names is not None:
             if param_name in variable_names:
@@ -434,11 +455,12 @@ class FemtetInterface(FEMInterface):
         raise Exception(message)
 
     def update_parameter(self, parameters: 'pd.DataFrame'):
+        """See :func:`FEMInterface.update_parameter`"""
         self.parameters = parameters.copy()
 
         # 変数更新のための処理
         sleep(0.1)  # Gaudi がおかしくなる時がある対策
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Gaudi.Activate,
             True,  # 戻り値を持たないのでここは無意味で None 以外なら何でもいい
             Exception,  # 生きてるのに開けない場合
@@ -446,7 +468,7 @@ class FemtetInterface(FEMInterface):
         )
 
         # Femtet の設計変数の更新
-        existing_variable_names = self.call_femtet_api(
+        existing_variable_names = self._call_femtet_api(
                     fun=self.Femtet.GetVariableNames_py,
                     ret_if_failed=False,  # 意味がない
                     if_error=ModelError,  # 生きてるのに失敗した場合
@@ -462,7 +484,7 @@ class FemtetInterface(FEMInterface):
             name = row['name']
             value = row['value']
             if name in existing_variable_names:
-                self.call_femtet_api(
+                self._call_femtet_api(
                     fun=self.Femtet.UpdateVariable,
                     ret_if_failed=False,
                     if_error=ModelError,  # 生きてるのに失敗した場合
@@ -477,13 +499,15 @@ class FemtetInterface(FEMInterface):
         pass
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
+        """Updates the analysis model only."""
+
         self.parameters = parameters.copy()
 
         # 変数の更新
         self.update_parameter(parameters)
 
         # 設計変数に従ってモデルを再構築
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Gaudi.ReExecute,
             False,
             ModelError,  # 生きてるのに失敗した場合
@@ -492,7 +516,7 @@ class FemtetInterface(FEMInterface):
         )
 
         # 処理を確定
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Redraw,
             False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
             ModelError,  # 生きてるのに失敗した場合
@@ -501,8 +525,9 @@ class FemtetInterface(FEMInterface):
         )
 
     def solve(self) -> None:
+        """Execute FEM analysis (with updated model)."""
         # # メッシュを切る
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Gaudi.Mesh,
             0,
             MeshError,
@@ -511,7 +536,7 @@ class FemtetInterface(FEMInterface):
         )
 
         # # ソルブする
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Solve,
             False,
             SolveError,
@@ -520,7 +545,7 @@ class FemtetInterface(FEMInterface):
         )
 
         # 次に呼ばれるはずのユーザー定義コスト関数の記述を簡単にするため先に解析結果を開いておく
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.OpenCurrentResult,
             False,
             SolveError,  # 生きてるのに開けない場合
@@ -530,15 +555,18 @@ class FemtetInterface(FEMInterface):
         )
 
     def update(self, parameters: 'pd.DataFrame') -> None:
+        """See :func:`FEMInterface.update`"""
         self.parameters = parameters.copy()
         self.update_model(parameters)
         self.solve()
 
     def quit(self, timeout=1, force=True):
+        """Force to terminate connected Femtet."""
         util.close_femtet(self.Femtet.hWnd, timeout, force)
 
     def settings_before_parallel(self, femopt) -> dict:
-        """サブプロセスを起動する前に必要数の Femtet を立てておき, femprj を一時ファイルにコピーする"""
+        """Before starting the subprocess, create the required number of Femtet and copy femprj to a temporary file."""
+
         pids = []
         new_femprj_pathes = []
         for i in range(femopt.n_parallel - 1):
@@ -569,6 +597,7 @@ class FemtetInterface(FEMInterface):
         return subprocess_settings
 
     def parallel_terminate(self):
+        """Terminate Femtet instances started by settings_before_parallel."""
         # 何かがあってもあとは終わるだけなので
         # プロセス終了 print が出るようにする。
         try:
@@ -576,7 +605,7 @@ class FemtetInterface(FEMInterface):
             print(f'try to close Femtet.exe')
             self.Femtet.SaveProjectIgnoreHistory(self.Femtet.Project, True)  # 動いてない？？
             sleep(3)
-            util.close_femtet(self.Femtet.hWnd)
+            self.quit()
             sleep(1)
 
             # 一時ファイルを削除する
@@ -590,6 +619,7 @@ class FemtetInterface(FEMInterface):
 
 
 class NoFEM(FEMInterface):
+    """Interface with no FEM for debug."""
 
     def update(self, parameters):
         pass
@@ -608,6 +638,21 @@ class FemtetWithNXInterface(FemtetInterface):
             subprocess_idx=None,
             subprocess_settings=None,
     ):
+        """
+        Initializes the FemtetWithNXInterface class.
+
+        Args:
+            prt_path: The path to the prt file.
+            femprj_path: The path to the femprj file (optional).
+            model_name: The name of the model (optional).
+            connect_method: The connection method (default 'auto').
+            subprocess_idx: The subprocess index (optional).
+            subprocess_settings: The subprocess settings (optional).
+
+        Returns:
+            None
+        """
+
         self.prt_path = os.path.abspath(prt_path)
         super().__init__(
             femprj_path=femprj_path,
@@ -618,15 +663,16 @@ class FemtetWithNXInterface(FemtetInterface):
         )
 
     def check_param_value(self, name):
+        # desable FemtetInterface.check_param_value()
+        # because the parameter can be registerd to not only .femprj but also .prt.
         return None
-
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
         self.parameters = parameters.copy()
 
         # 変数更新のための処理
         sleep(0.1)  # Gaudi がおかしくなる時がある対策
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Gaudi.Activate,
             True,  # 戻り値を持たないのでここは無意味で None 以外なら何でもいい
             Exception,  # 生きてるのに開けない場合
@@ -661,7 +707,7 @@ class FemtetWithNXInterface(FemtetInterface):
             raise ModelError
 
         # 設計変数に従ってモデルを再構築
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Gaudi.ReExecute,
             False,
             ModelError,  # 生きてるのに失敗した場合
@@ -673,7 +719,7 @@ class FemtetWithNXInterface(FemtetInterface):
         super().update_model(parameters)
 
         # 処理を確定
-        self.call_femtet_api(
+        self._call_femtet_api(
             self.Femtet.Redraw,
             False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
             ModelError,  # 生きてるのに失敗した場合
