@@ -41,16 +41,16 @@ def _get_pids(process_name):
 
 
 def Dispatch_Femtet(timeout=10, subprocess_idx=None):
-    '''
-    Femtet の Dispatch を行う。
+    '''Connect to existing Femtet.
 
-    Returns
-    -------
-    Femtet : pyIDispatch
+    Args:
+        timeout (float): wait second to connect Femtet. 
+        subprocess_idx (int or None, optional): subprocess index when called by subprocess. Default to None.
+
+    Returns:
+        Femtet (IPyDispatch): COM object of Femtet.
+        pid (int): process id of connected Femtet. If error, returns 0.
         
-    pid : int
-        process id. if error, pid = 0.
-
     '''
 
     #### Dispatch 開始
@@ -114,6 +114,7 @@ def Dispatch_Femtet(timeout=10, subprocess_idx=None):
 
 
 def _f(pid, subprocess_id, shared_flags):
+    """サブプロセスに渡す関数.存在する Femtet と同数の Process が立てられており、この中で Dispatch_Femtet を呼ぶ。"""
 
     # Dispatch して正常な hwnd が得られるまで待ち、pid を調べる
     if pp: print(f'  from subprocess{subprocess_id}; Start to connect.')
@@ -144,41 +145,31 @@ def _f(pid, subprocess_id, shared_flags):
 
 
 def Dispatch_Femtet_with_new_process():
-    '''
-    Dispatch Femtet する。
-    femtetutils を用いて新しいプロセスを立て、
-    そのプロセスと繋ぐことを保証する。
+    """Connect Femtet with new process.
 
-    Parameters
-    ----------
-    pp : TYPE, optional
-        print_progress, if True, show progress info. The default is False.
+    First, launch new Femtet process and get the pid.
+    Next, connect to the launched Femtet using exclusively parallel processing (by Dispatch_Femtet_with_specific_pid).
+    Then, 
 
-    Raises
-    ------
-    Exception
-        何らかの失敗
+    Raises:
+        RuntimeError: Error raised to be failed to launch Femtet or recognize launched Femtet.
+    
+    Returns:
+        Femtet (IPyDispatch): COM object of Femtet.
+        pid (int): process id of connected Femtet. If error, returns 0.
 
-    Returns
-    -------
-    Femtet : pyIDispatch
-        
-    pid : int
-        process id. if error, pid = 0.
-
-    '''
+    """
 
     # Femtet 起動
-
     if pp: print('Femtet の起動を試行します')
     succeed = util.execute_femtet()
     if not succeed:
-        raise Exception('Femtet の起動に失敗しました')
+        raise RuntimeError('Femtet の起動に失敗しました')
 
     # pid 取得
     pid = util.get_last_executed_femtet_process_id()
     if pid==0:
-        raise Exception('起動された Femtet の認識に失敗しました')
+        raise RuntimeError('起動された Femtet の認識に失敗しました')
     if pp: print('target pid is', pid)
     
     # ウィンドウが出てくるまで待つ
@@ -203,6 +194,25 @@ def Dispatch_Femtet_with_new_process():
 
 
 def Dispatch_Femtet_with_specific_pid(pid):
+    """Connect existing Femtet with specific pid.
+
+    Start Process instances whose number is same to the number of existing Femtet.
+    Set the target pid to each Process, and each Process try to connect Femtet.
+    The pid of connected Femtet is the target pid, the Process will terminate Immediately.
+    Finally, the released Femtet is connected by main process.
+
+    Args:
+        pid (int): process id of existing Femtet.
+    
+    Raises:
+        RuntimeError: Error raised to be failed to launch Femtet or recognize launched Femtet.
+    
+    Returns:
+        Femtet (IPyDispatch): COM object of Femtet.
+        pid (int): process id of connected Femtet. If error, returns 0.
+
+    """
+
     #### 目的の pid の Femtet を取得
     # Femtet のプロセスをすべて列挙し、目的のプロセス以外を
     # サブプロセスで Dispatch してブロックする
@@ -258,14 +268,3 @@ def Dispatch_Femtet_with_specific_pid(pid):
 
         # if pp: print(f'pid of connected Femtet is {mypid}')
         return Femtet, mypid
-
-
-if __name__=='__main__':
-    Femtet, pid = Dispatch_Femtet_with_new_process()
-    start = time.time()
-    Femtet.LoadProject(r'C:\Users\mm11592\Documents\myFiles2\working\1_PyFemtetOpt\PyFemtetOptDevelopment\PyFemtetPrj\tests\simple_femtet\simple.femprj', True)
-    end = time.time()
-    print(end-start)
-    
-    
-    
