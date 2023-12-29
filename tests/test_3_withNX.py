@@ -60,11 +60,7 @@ def test_3_1():
     femopt.terminate_monitor()
 
     # Femtet 終了
-    tmppath = os.path.join(here, 'tmp.femprj')
-    femopt.fem.Femtet.SaveProjectIgnoreHistory(tmppath, True)
-    sleep(10)
-    util.close_femtet(femopt.fem.Femtet.hWnd)
-    os.remove(tmppath)
+    util.close_femtet(femopt.fem.Femtet.hWnd, 10, True)
 
 
 if __name__ == '__main__':
