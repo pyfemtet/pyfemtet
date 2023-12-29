@@ -147,12 +147,7 @@ class Function:
 
 
 class Objective(Function):
-    """Class for registering user-defined objective function.
-
-    Attributes:
-        default_name (str): The default name prefix for the objective function.
-        
-    """
+    """Class for registering user-defined objective function."""
 
     default_name = 'obj'
 
@@ -207,12 +202,7 @@ class Objective(Function):
 
 
 class Constraint(Function):
-    """Class for registering user-defined constraint function.
-
-    Attributes:
-        default_name (str): The default name prefix for the objective function.
-        
-    """
+    """Class for registering user-defined constraint function."""
 
     default_name = 'cns'
 
@@ -898,8 +888,9 @@ class OptimizerBase(ABC):
         Tip:
             If host is ``0.0.0.0``, a server will be set up
             that is visible from the local network.
+            Start a browser on another machine
+            and type ``<ip_address_or_hostname>:<port>`` in the address bar.
 
-        Warning:
             However, please note that in this case,
             it will be visible to all users on the local network.
 

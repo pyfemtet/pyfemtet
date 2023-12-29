@@ -19,6 +19,38 @@ pyfemtet.opt の主要機能
 - Excel 等で分析が容易な csv 形式での結果出力
 
 
+実施例
+--------
+
+.. grid:: 2
+
+    .. grid-item-card:: ソレノイドコイルのインダクタンス
+        :link: gau_ex08/gau_ex08
+        :link-type: doc
+        :text-align: center
+
+        .. image:: gau_ex08/gau_ex08.png
+            :scale: 50
+        +++
+        磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。
+
+
+    .. grid-item-card:: 円形パッチアンテナの共振周波数
+        :link: her_ex40/her_ex40
+        :link-type: doc
+        :text-align: center
+
+        .. image:: her_ex40/her_ex40.png
+            :scale: 50
+        +++
+        電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。
+
+
+.. tip::
+    
+    :doc:`examples` セクションにより多くの実施例があります。
+
+
 シンプルな API
 ----------------------------
 
@@ -52,38 +84,6 @@ pyfemtet.opt の主要機能
    このサンプルを実施するためには :download:`サンプル プロジェクト <files/opt_sample.femprj>` をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。
 
 使用方法の詳細は :doc:`usage` セクションを確認してください。
-
-
-実施例
------
-
-.. grid:: 2
-
-    .. grid-item-card:: ソレノイドコイルのインダクタンス
-        :link: gau_ex08/gau_ex08
-        :link-type: doc
-        :text-align: center
-
-        .. image:: gau_ex08/gau_ex08.png
-            :scale: 50
-        +++
-        磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。
-
-
-    .. grid-item-card:: 円形パッチアンテナの共振周波数
-        :link: her_ex40/her_ex40
-        :link-type: doc
-        :text-align: center
-
-        .. image:: her_ex40/her_ex40.png
-            :scale: 50
-        +++
-        電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。
-
-
-.. tip::
-    
-    :doc:`examples` セクションにより多くの実施例があります。
 
 
 目次

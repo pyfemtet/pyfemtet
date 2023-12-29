@@ -1,5 +1,5 @@
 基板上の発熱体
-===== 
+===============
 
 Femtet の熱伝導解析ソルバーを用い
 基板上の IC チップの最高温度を最小にしつつ
@@ -8,7 +8,7 @@ Femtet の熱伝導解析ソルバーを用い
 
 
 サンプルファイル
------
+--------------------
 .. note::
 
    :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
@@ -22,7 +22,7 @@ Femtet の熱伝導解析ソルバーを用い
 
 
 設計変数
------
+---------------
 
 .. figure:: wat_ex14_model.png
    
@@ -37,7 +37,7 @@ substrate_d  基板の奥行き
 
 
 目的関数
------
+---------------
 
 - メインチップの最高温度（最小にする）
 - サブチップの最高温度（最小にする）
@@ -45,7 +45,7 @@ substrate_d  基板の奥行き
 
 
 サンプルコード
------
+---------------
 
 .. literalinclude:: ../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py
    :language: python
@@ -54,7 +54,7 @@ substrate_d  基板の奥行き
 
 
 サンプルコードの実行結果
------
+-------------------------
 
 .. figure:: wat_ex14_result.png
    :width: 300

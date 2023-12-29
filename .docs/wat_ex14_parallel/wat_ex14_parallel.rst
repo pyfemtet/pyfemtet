@@ -1,5 +1,5 @@
 基板上の発熱体（並列計算）
-=====
+==============================
 
 
 wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します。
@@ -7,7 +7,7 @@ wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します�
 
 
 サンプルファイル
------
+------------------------------
 .. note::
 
    :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
@@ -21,7 +21,7 @@ wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します�
 
 
 設計変数
------
+------------------------------
 
 .. figure:: wat_ex14_model.png
    
@@ -36,7 +36,7 @@ substrate_d  基板の奥行き
 
 
 目的関数
------
+------------------------------
 
 - メインチップの最高温度（最小にする）
 - サブチップの最高温度（最小にする）
@@ -44,7 +44,7 @@ substrate_d  基板の奥行き
 
 
 サンプルコード
------
+------------------------------
 
 .. literalinclude:: ../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py
    :language: python
@@ -58,7 +58,7 @@ substrate_d  基板の奥行き
 
 
 サンプルコードの実行結果
------
+------------------------------
 
 実行環境
 

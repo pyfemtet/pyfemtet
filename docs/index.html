@@ -93,37 +93,6 @@ Femtet の商用利用可能な拡張機能を無償で提供します。</stron
 <li><p>Excel 等で分析が容易な csv 形式での結果出力</p></li>
 </ul>
 </section>
-<section id="api">
-<h2>シンプルな API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
-<p>下記は多目的最適化の実施例です。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">OptimizerOptuna</span>
-
-<span class="k">def</span> <span class="nf">max_displacement</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
-    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">dy</span>
-
-<span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
-    <span class="n">w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
-    <span class="n">h</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">h</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">femopt</span> <span class="o">=</span> <span class="n">OptimizerOptuna</span><span class="p">()</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_displacement</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;最大変位&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;体積&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>このサンプルを実施するためには <a class="reference download internal" download="" href="_downloads/433c542984f7686c6cc46bb8120756e3/opt_sample.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプル</span> <span class="pre">プロジェクト</span></code></a> をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。</p>
-</div>
-<p>使用方法の詳細は <a class="reference internal" href="usage.html"><span class="doc">使い方</span></a> セクションを確認してください。</p>
-</section>
 <section id="id1">
 <h2>実施例<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
@@ -158,6 +127,37 @@ Femtet の商用利用可能な拡張機能を無償で提供します。</stron
 <p class="admonition-title">Tip</p>
 <p><a class="reference internal" href="examples.html"><span class="doc">実施例</span></a> セクションにより多くの実施例があります。</p>
 </div>
+</section>
+<section id="api">
+<h2>シンプルな API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
+<p>下記は多目的最適化の実施例です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">OptimizerOptuna</span>
+
+<span class="k">def</span> <span class="nf">max_displacement</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">dy</span>
+
+<span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">h</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">femopt</span> <span class="o">=</span> <span class="n">OptimizerOptuna</span><span class="p">()</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_displacement</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;最大変位&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;体積&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>このサンプルを実施するためには <a class="reference download internal" download="" href="_downloads/433c542984f7686c6cc46bb8120756e3/opt_sample.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプル</span> <span class="pre">プロジェクト</span></code></a> をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。</p>
+</div>
+<p>使用方法の詳細は <a class="reference internal" href="usage.html"><span class="doc">使い方</span></a> セクションを確認してください。</p>
 </section>
 <section id="id2">
 <h2>目次<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
