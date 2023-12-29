@@ -534,9 +534,8 @@ class FemtetInterface(FEMInterface):
         self.update_model(parameters)
         self.solve()
 
-    def quit(self):
-        self.Femtet.SaveProject(self.Femtet.Project, True)  # 動いてない？？
-        util.close_femtet(self.Femtet.hWnd)
+    def quit(self, timeout=1, force=True):
+        util.close_femtet(self.Femtet.hWnd, timeout, force)
 
     def settings_before_parallel(self, femopt) -> dict:
         """サブプロセスを起動する前に必要数の Femtet を立てておき, femprj を一時ファイルにコピーする"""
