@@ -46,24 +46,6 @@ if __name__ == '__main__':
     femopt.add_objective(objective_y, 'y(mm)', args=femopt)
     femopt.add_objective(objective_z, 'z(mm)', args=femopt)
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)
-    # femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
-    # print(femopt.FEM)
-    # print(femopt.FEMClass)
-    # print(femopt.constraints)
-    # print(femopt.objectives)
-    # print(femopt.get_parameter())
-    # print(femopt.history)
-    # print(femopt.history_path)
-    # print(femopt.last_execution_time)
-    # femopt._init_history()
-    # print(len(femopt.history))
-    # print(femopt.f(femopt.get_parameter('values')))
-    # print(femopt._objective_values)
-    # print(femopt._constraint_values)
-    # row = femopt._get_current_data()
-    # femopt._append_history(row)
-    # femopt._calc_hypervolume()
-    # femopt.history['hypervolume']
 
 
     # 拘束なし

@@ -9,6 +9,7 @@ os.environ['RAY_DEDUP_LOGS'] = '0'
 
 
 class Scapegoat:
+    """Helper class for parallelize Femtet."""
     # constants を含む関数を並列化するために
     # メイン処理で一時的に constants への参照を
     # このオブジェクトにして、後で restore する
@@ -16,6 +17,7 @@ class Scapegoat:
 
 
 def restore_constants_from_scapegoat(function: 'Function'):
+    """Helper function for parallelize Femtet."""
     fun = function.fun
     for varname in fun.__globals__:
         if isinstance(fun.__globals__[varname], Scapegoat):
@@ -23,6 +25,8 @@ def restore_constants_from_scapegoat(function: 'Function'):
 
 
 class TerminatableThread(threading.Thread):
+    """A terminatable class that inherits from :class:`threading.Thread`."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._run = self.run
@@ -48,30 +52,47 @@ class TerminatableThread(threading.Thread):
 
 
 class ModelError(Exception):
+    """Exception raised for errors in the model update.
+    
+    If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible.
+
+    """
     pass
 
 
 class MeshError(Exception):
+    """Exception raised for errors in the meshing.
+    
+    If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible.
+
+    """
     pass
 
 
 class SolveError(Exception):
+    """Exception raised for errors in the solve.
+    
+    If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible.
+
+    """
     pass
 
 
-class PostError(Exception):
-    pass
+# class PostError(Exception):
+#     pass
 
 
-class FEMCrash(Exception):
-    pass
+# class FEMCrash(Exception):
+#     pass
 
 
 class FemtetAutomationError(Exception):
+    """Exception raised for errors in automating Femtet."""
     pass
 
 
 class UserInterruption(Exception):
+    """Exception raised for errors in interruption by user."""
     pass
 
 
@@ -97,27 +118,26 @@ class _InterprocessVariables:
 
 
 class InterprocessVariables:
+    """An interface for variables shared between parallel processes."""
 
     def __init__(self):
         self.ns = _InterprocessVariables.remote()
 
     def set_state(self, state):
+        """Sets the state of entire optimization processes."""
         print(f'---{state}---')
         self.ns.set_state.remote(state)
 
     def get_state(self):
+        """Gets the state of entire optimization processes."""
         return ray.get(self.ns.get_state.remote())
 
-    def append_history(self, row):
-        self.ns.append_history.remote(row)
-
-    def get_history(self):
-        return ray.get(self.ns.get_history.remote())
-
     def set_allowed_idx(self, idx):
+        """Sets the allowed subprocess index for exclusive process."""
         self.ns.set_allowed_idx.remote(idx)
 
     def get_allowed_idx(self):
+        """Gets the allowed subprocess index for exclusive process."""
         return ray.get(self.ns.get_allowed_idx.remote())
 
 

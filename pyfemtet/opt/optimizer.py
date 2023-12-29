@@ -17,11 +17,22 @@ from .base import OptimizerBase
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 
-def generate_lhs(bounds, seed=None) -> np.ndarray:
+def generate_lhs(bounds: list[list[float]], seed: int | None = None) -> np.ndarray:
+    """Latin Hypercube Sampling from given design parameter bounds.
+
+    If the number of parameters is d, 
+    sampler returns (N, d) shape ndarray.
+    N equals p**2, p is the minimum prime number over d.
+    For example, when d=3, then p=5 and N=25.
+
+    Args:
+        bounds (list[list[float]]): List of [lower_bound, upper_bound] of parameters.
+        seed (int | None, optional): Random seed. Defaults to None.
+
+    Returns:
+        np.ndarray: (N, d) shape ndarray.
     """
-    d 個の変数の bounds を貰い、N 個のサンプル点を得る。
-    N は d を超える最小の素数 p に対し N = p**2
-    """
+
     d = len(bounds)
 
     sampler = LatinHypercube(
@@ -59,6 +70,9 @@ def generate_lhs(bounds, seed=None) -> np.ndarray:
 
 
 class OptimizerOptuna(OptimizerBase):
+    """Optimizer class using Optuna.
+    
+    """
 
     def _objective(self, trial):
 
@@ -129,7 +143,15 @@ class OptimizerOptuna(OptimizerBase):
     def _constraint_function(self, trial):
         return trial.user_attrs["constraint"]
 
-    def _setup_main(self, use_lhs_init=True):
+    def setup_concrete_main(self, use_lhs_init=True):
+        """Performs the setup for the optimization using Optuna.
+
+        Do sampler settings, study creation or loading and initial trials settings.
+
+        Args:
+            use_lhs_init (bool, optional): Flag indicating whether to use Latin Hypercube Sampling for initializing trials. Defaults to True.
+
+        """
 
         # sampler の設定
         self.sampler_kwargs = dict(
@@ -180,8 +202,8 @@ class OptimizerOptuna(OptimizerBase):
                         d[name] = v
                     study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
 
-
-    def _main(self, subprocess_idx=None):
+    def concrete_main(self, subprocess_idx=None):
+        """Optimization using Optuna."""
 
         # 乱数シードをプロセス固有にする
         seed = self.seed

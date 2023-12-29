@@ -20,13 +20,20 @@ from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 
 
-def symlog(x):
-    """
-    定義域を負領域に拡張したlog関数です。
-    多目的最適化における目的関数同士のスケール差により
-    意図しない傾向が生ずることのの軽減策として
-    内部でsymlog処理を行います。
-    """
+def symlog(x: float | np.ndarray):
+    """Log function whose domain is extended to the negative region.
+
+    Symlog processing is performed internally as a measure to reduce
+    unintended trends caused by scale differences
+    between objective functions in multi-objective optimization.
+
+    Args:
+        x (float | np.ndarray)
+
+    Returns:
+        float
+    """    
+
     if isinstance(x, np.ndarray):
         ret = np.zeros(x.shape)
         idx = np.where(x >= 0)
@@ -49,9 +56,9 @@ def _check_direction(direction):
         pass
     elif isinstance(direction, str):
         if (direction != 'minimize') and (direction != 'maximize'):
-            raise Exception(message)
+            raise ValueError(message)
     else:
-        raise Exception(message)
+        raise ValueError(message)
 
 
 def _check_lb_ub(lb, ub, name=None):
@@ -60,7 +67,7 @@ def _check_lb_ub(lb, ub, name=None):
         message = f'{name}に対して' + message
     if (lb is not None) and (ub is not None):
         if lb > ub:
-            raise Exception(message)
+            raise ValueError(message)
 
 
 def _is_access_gogh(fun):
@@ -108,6 +115,7 @@ def _ray_are_alive(refs):
 
 
 class Function:
+    """Base class for Objective and Constraint."""
 
     def __init__(self, fun, name, args, kwargs):
         # unserializable な COM 定数を parallelize するための処理
@@ -119,7 +127,18 @@ class Function:
         self.args = args
         self.kwargs = kwargs
 
-    def calc(self, fem):
+    def calc(self, fem: FEMInterface):
+        """Execute user-defined fun.
+
+        If fem is a FemtetInterface,
+        the 1st argument of fun is set to fem automatically.
+
+        Args:
+            fem (FEMInterface)
+
+        Returns:
+            float
+        """        
         args = self.args
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
@@ -128,15 +147,51 @@ class Function:
 
 
 class Objective(Function):
+    """Class for registering user-defined objective function.
+
+    Attributes:
+        default_name (str): The default name prefix for the objective function.
+        
+    """
 
     default_name = 'obj'
 
     def __init__(self, fun, name, direction, args, kwargs):
+        """Initializes an Objective instance.
+
+        Args:
+            fun: The user-defined objective function.
+            name (str): The name of the objective function.
+            direction (str or float or int): The direction of optimization.
+            args: Additional arguments for the objective function.
+            kwargs: Additional keyword arguments for the objective function.
+
+        Raises:
+            ValueError: If the direction is not valid.
+
+        """
         _check_direction(direction)
         self.direction = direction
         super().__init__(fun, name, args, kwargs)
 
-    def _convert(self, value: float):
+    def convert(self, value: float):
+        """Converts an evaluation value to the value of user-defined objective function based on the specified direction.
+
+        When direction is `'minimize'`, ``value`` is calculated.
+        When direction is `'maximize'`, ``-value`` is calculated.
+        When direction is float, ``abs(value - direction)`` is calculated.
+        Finally, the calculated value is passed to the symlog function.
+
+        ``value`` is the return value of the user-defined function.
+
+        Args:
+            value (float): The evaluation value to be converted.
+
+        Returns:
+            float: The converted objective value.
+
+        """
+
         # 評価関数（direction 任意）を目的関数（minimize, symlog）に変換する
         ret = value
         if isinstance(self.direction, float) or isinstance(self.direction, int):
@@ -152,10 +207,32 @@ class Objective(Function):
 
 
 class Constraint(Function):
+    """Class for registering user-defined constraint function.
+
+    Attributes:
+        default_name (str): The default name prefix for the objective function.
+        
+    """
 
     default_name = 'cns'
 
     def __init__(self, fun, name, lb, ub, strict, args, kwargs):
+        """Initializes a Constraint instance.
+
+        Args:
+            fun: The user-defined constraint function.
+            name (str): The name of the constraint function.
+            lb: The lower bound of the constraint.
+            ub: The upper bound of the constraint.
+            strict (bool): Whether to enforce strict inequality for the bounds.
+            args: Additional arguments for the constraint function.
+            kwargs: Additional keyword arguments for the constraint function.
+
+        Raises:
+            ValueError: If the lower bound is greater than or equal to the upper bound.
+
+        """
+
         _check_lb_ub(lb, ub)
         self.lb = lb
         self.ub = ub
@@ -165,6 +242,8 @@ class Constraint(Function):
 
 @ray.remote
 class HistoryDfCore:
+    """Class for managing a DataFrame object in a distributed manner."""
+
     def __init__(self, df):
         self.df = df
 
@@ -176,8 +255,24 @@ class HistoryDfCore:
 
 
 class History:
+    """Class for managing the history of optimization results.
 
-    def __init__(self, history_path, ipv):
+    Attributes:
+        path (str): The path to the history file.
+        _actor_data (HistoryDfCore): The distributed DataFrame object for storing actor data.
+        data (pd.DataFrame): The DataFrame object for storing the entire history.
+        param_names (list): The names of the parameters in the study.
+        obj_names (list): The names of the objectives in the study.
+        cns_names (list): The names of the constraints in the study.
+
+    """
+    def __init__(self, history_path):
+        """Initializes a History instance.
+
+        Args:
+            history_path (str): The path to the history file.
+
+        """
 
         # 引数の処理
         self.path = history_path  # .csv
@@ -201,6 +296,14 @@ class History:
         self._actor_data.set_df.remote(df)
 
     def init(self, param_names, obj_names, cns_names):
+        """Initializes the parameter, objective, and constraint names in the History instance.
+
+        Args:
+            param_names (list): The names of parameters in optimization.
+            obj_names (list): The names of objectives in optimization.
+            cns_names (list): The names of constraints in optimization.
+
+        """
         self.param_names = param_names
         self.obj_names = obj_names
         self.cns_names = cns_names
@@ -240,6 +343,17 @@ class History:
             self.data = self.actor_data.copy()
 
     def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
+        """Records the optimization results in the history.
+
+        Args:
+            parameters (dict): The parameter values.
+            objectives (dict): The objective functions.
+            constraints (dict): The constraint functions.
+            obj_values (list): The objective values.
+            cns_values (list): The constraint values.
+            message (str): Additional information or messages related to the optimization results.
+
+        """
 
         # create row
         row = list()
@@ -291,7 +405,7 @@ class History:
 
         # 最小化問題の座標空間に変換する
         for name, objective in objectives.items():
-            solution_set[name] = solution_set[name].map(objective._convert)
+            solution_set[name] = solution_set[name].map(objective.convert)
 
         # 非劣解の計算
         non_domi = []
@@ -306,11 +420,6 @@ class History:
         del solution_set
 
     def _calc_hypervolume(self, objectives):
-        """
-        hypervolume 履歴を更新する
-        ※ reference point が変わるたびに hypervolume を計算しなおす必要がある
-        [1]Hisao Ishibuchi et al. "Reference Point Specification in Hypercolume Calculation for Fair Comparison and Efficient Search"
-        """
         #### 前準備
         # パレート集合の抽出
         idx = self.actor_data['non_domi']
@@ -327,11 +436,13 @@ class History:
         # 最小化問題に convert
         for i, (name, objective) in enumerate(objectives.items()):
             for j in range(n):
-                pareto_set[j, i] = objective._convert(pareto_set[j, i])
+                pareto_set[j, i] = objective.convert(pareto_set[j, i])
                 #### reference point の計算[1]
         # 逆正規化のための範囲計算
         maximum = pareto_set.max(axis=0)
         minimum = pareto_set.min(axis=0)
+
+        # # [1]Hisao Ishibuchi et al. "Reference Point Specification in Hypercolume Calculation for Fair Comparison and Efficient Search"
         # # (H+m-1)C(m-1) <= n <= (m-1)C(H+m) になるような H を探す[1]
         # H = 0
         # while True:
@@ -348,6 +459,7 @@ class History:
         #     # r を計算
         #     r = 1 + 1. / H
         r = 1.01
+
         # r を逆正規化
         reference_point = r * (maximum - minimum) + minimum
 
@@ -377,9 +489,33 @@ class History:
 
 
 class OptimizerBase(ABC):
+    """Base class for optimization algorithms.
+
+    Attributes:
+        fem (FEMInterface): The finite element method interface.
+        history_path (str): The path to the history (.csv) file .
+        ipv (InterprocessVariables): The interprocess variables.
+        parameters (pd.DataFrame): The DataFrame object for storing the parameters.
+        objectives (dict): The dictionary of objective functions.
+        constraints (dict): The dictionary of constraint functions.
+        history (History): The history of optimization results.
+        monitor (Monitor): The monitor object for visualization and monitoring.
+        monitor_thread: Thread object for monitor server.
+        seed (int or None): The random seed for reproducibility.
+        message(str) : Additional information or messages related to the optimization process
+        obj_values ([float]): A list to store objective values during optimization
+        cns_values ([float]): A list to store constraint values during optimization
+
+    """
 
     def __init__(self, fem: FEMInterface = None, history_path=None):
+        """Initializes an OptimizerBase instance.
 
+        Args:
+            fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automattically set to FemtetInterface.
+            history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
+
+        """
         print('---initialize---')
 
         ray.init(ignore_reinit_error=True)
@@ -398,7 +534,7 @@ class OptimizerBase(ABC):
         self.parameters = pd.DataFrame()
         self.objectives = dict()
         self.constraints = dict()
-        self.history = History(self.history_path, self.ipv)
+        self.history = History(self.history_path)
         self.monitor: Monitor = None
         self.monitor_thread = None
         self.monitor_server_kwargs = dict()
@@ -429,6 +565,12 @@ class OptimizerBase(ABC):
         self.__dict__.update(state)
 
     def set_fem(self, **extra_kwargs):
+        """Sets or resets the finite element method interface.
+
+        Args:
+            **extra_kwargs: Additional keyword arguments to be passed to the FEMInterface constructor.
+
+        """
         fem_kwargs = self._fem_kwargs.copy()
         fem_kwargs.update(extra_kwargs)
         self.fem = self._fem_class(
@@ -436,9 +578,21 @@ class OptimizerBase(ABC):
         )
 
     def set_random_seed(self, seed: int):
+        """Sets the random seed for reproducibility.
+
+        Args:
+            seed (int): The random seed value to be set.
+
+        """
         self.seed = seed
 
     def get_random_seed(self):
+        """Returns the current random seed value.
+
+        Returns:
+            int: The current random seed value.
+
+        """
         return self.seed
 
     def add_parameter(
@@ -449,6 +603,18 @@ class OptimizerBase(ABC):
             upper_bound: float or None = None,
             memo: str = ''
     ):
+        """Adds a parameter to the optimization problem.
+        
+        Args:
+            name (str): The name of the parameter.
+            initial_value (float or None, optional): The initial value of the parameter. Defaults to None. If None, try to get inittial value from FEMInterface.
+            lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
+            upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
+            memo (str, optional): Additional information about the parameter. Defaults to ''.
+        Raises:
+            ValueError: If initial_value is not specified and the value for the given name is also not specified.
+
+        """
 
         _check_lb_ub(lower_bound, upper_bound, name)
         value = self.fem.check_param_value(name)
@@ -456,7 +622,7 @@ class OptimizerBase(ABC):
             if value is not None:
                 initial_value = value
             else:
-                raise Exception('initial_value を指定してください.')
+                raise ValueError('initial_value を指定してください.')
 
         d = {
             'name': name,
@@ -480,6 +646,23 @@ class OptimizerBase(ABC):
             args: tuple or None = None,
             kwargs: dict or None = None
     ):
+        """Adds an objective to the optimization problem.
+
+        Args:
+            fun (callable): The objective function.
+            name (str or None, optional): The name of the objective. Defaults to None.
+            direction (str or float, optional): The optimization direction. Defaults to 'minimize'.
+            args (tuple or None, optional): Additional arguments for the objective function. Defaults to None.
+            kwargs (dict or None, optional): Additional keyword arguments for the objective function. Defaults to None.
+        
+        Note:
+            If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.
+        
+        Tip:
+            If name is None, name is a string with the prefix `"obj_"` followed by a sequential number.
+
+        """
+
         # 引数の処理
         if args is None:
             args = tuple()
@@ -512,6 +695,24 @@ class OptimizerBase(ABC):
             args: tuple or None = None,
             kwargs: dict or None = None,
     ):
+        """Adds a constraint to the optimization problem.
+
+        Args：
+            fun (callable): The constraint function.
+            name (str or None, optional): The name of the constraint. Defaults to None.
+            lower_bound (float or Non, optional): The lower bound of the constraint. Defaults to None.
+            upper_bound (float or Non, optional): The upper bound of the constraint. Defaults to None.
+            strict (bool, optional): Flag indicating if it is a strict constraint. Defaults to True.
+            args (tuple or None, optional): Additional arguments for the constraint function. Defaults toNone.
+
+        Note:
+            If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.
+
+        Tip:
+            If name is None, name is a string with the prefix `"cns_"` followed by a sequential number.
+
+        """
+
         # 引数の処理
         if args is None:
             args = tuple()
@@ -541,9 +742,19 @@ class OptimizerBase(ABC):
 
         self.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
 
-
-
     def get_parameter(self, format='dict'):
+        """Returns the parameters in the specified format.
+
+        Args:
+            format (str, optional): The desired format of the parameters. Can be 'df' (DataFrame), 'values', or 'dict'. Defaults to 'dict'.
+
+        Returns:
+            object: The parameters in the specified format.
+
+        Raises:
+            ValueError: If an invalid format is provided.
+
+        """
         if format == 'df':
             return self.parameters
         elif format == 'values' or format == 'value':
@@ -554,9 +765,19 @@ class OptimizerBase(ABC):
                 ret[row['name']] = row.value
             return ret
         else:
-            raise Exception('get_parameter() got invalid format: {format}')
+            raise ValueError('get_parameter() got invalid format: {format}')
 
     def is_calculated(self, x):
+        """Checks if the proposed x is the last calculated value.
+
+        Args:
+            x (iterable): The proposed x value.
+
+        Returns:
+            bool: True if the proposed x is the last calculated value, False otherwise.
+
+        """
+
         # 提案された x が最後に計算したものと一致していれば True
         # ただし 1 回目の計算なら False
         #    ひとつでも違う  1回目の計算  期待
@@ -580,6 +801,24 @@ class OptimizerBase(ABC):
 
 
     def f(self, x, message=''):
+        """Calculates the objective function values for the given parameter values.
+
+        Args:
+            x (iterable): The parameter values.
+            message (str, optional): Additional information about the calculation. Defaults to ''.
+
+        Raises:
+            UserInterruption: If the calculation is interrupted.
+
+        Returns:
+            list: The converted objective function values.
+        
+        Note:
+            The return value is not the return value of a user-defined function,
+            but the converted value when reconsidering the optimization problem to be minimize problem.
+            See :func:`Objective.convert` for detail.
+
+        """
 
         x = np.array(x)
 
@@ -623,23 +862,79 @@ class OptimizerBase(ABC):
             self.history.record(self.parameters, self.objectives, self.constraints, self.obj_values, self.cns_values, message)
 
         # minimize
-        return [obj._convert(v) for (_, obj), v in zip(self.objectives.items(), self.obj_values)]
+        return [obj.convert(v) for (_, obj), v in zip(self.objectives.items(), self.obj_values)]
 
 
     @abstractmethod
-    def _main(self, *args, **kwargs):
+    def concrete_main(self, *args, **kwargs):
+        """The main function for the concrete class to implement.
+
+        if ``n_trials`` >= 2, this method will be called by a parallel process.
+        
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         pass
 
-    def _setup_main(self, *args, **kwargs):
+    def setup_concrete_main(self, *args, **kwargs):
+        """Performs the setup for the concrete class.
+        
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         pass
 
     def setup_monitor_server(self, host, port=None):
+        """Sets up the monitor server with the specified host and port.
+
+        Args:
+            host (str): The hostname or IP address of the monitor server.
+            port (int or None, optional): The port number of the monitor server. If None, ``8080`` will be used. Defaults to None.
+
+        Tip:
+            If host is ``0.0.0.0``, a server will be set up
+            that is visible from the local network.
+
+        Warning:
+            However, please note that in this case,
+            it will be visible to all users on the local network.
+
+        """
         self.monitor_server_kwargs = dict(
             host=host,
             port=port
         )
 
     def main(self, n_trials=None, n_parallel=1, timeout=None, method='TPE', **setup_kwargs):
+        """Runs the main optimization process.
+
+        Args:
+            n_trials (int or None): The number of trials. Defaults to None.
+            n_parallel (int): The number of parallel processes. Defaults to 1.
+            timeout (float or None): The maximum amount of time in seconds that each trial can run. Defaults to None.
+            method (str): The optimization method to use. Defaults to 'TPE'.
+            **setup_kwargs: Additional keyword arguments for setting up the optimization process.
+        
+        Tip:
+            If setup_monitor_server() is not executed, a local server for monitoring will be started at localhost:8080.
+
+        Note:
+            If ``n_trials`` and ``timeout`` are both None, it will calculate repeatedly until interrupted by the user.
+        
+        Note:
+            If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.
+
+        Note:
+            Currently, supported methods are 'TPE' and 'botorch'.
+            For detail, see https://optuna.readthedocs.io/en/stable/reference/samplers/index.html.
+
+
+        """
+
         # 共通引数
         self.n_trials = n_trials
         self.n_parallel = n_parallel
@@ -653,10 +948,10 @@ class OptimizerBase(ABC):
             list(self.objectives.keys()),
             list(self.constraints.keys()),
         )
-        self._setup_main(**setup_kwargs)  # 具象クラス固有のメソッド
+        self.setup_concrete_main(**setup_kwargs)  # 具象クラス固有のメソッド
 
         # 計算スレッドとそれを止めるためのイベント
-        t = Thread(target=self._main)
+        t = Thread(target=self.concrete_main)
         t.start()  # Exception が起きてもここでは検出できないし、メインスレッドは落ちない
 
         # 計算開始
@@ -683,7 +978,7 @@ class OptimizerBase(ABC):
             self.fem.parallel_setup()
             print('Start parallel optimization.')
             try:
-                self._main(_subprocess_idx)
+                self.concrete_main(_subprocess_idx)
             except UserInterruption:
                 pass
             print('Finish parallel optimization.')
@@ -725,4 +1020,5 @@ class OptimizerBase(ABC):
         ray.shutdown()
 
     def terminate_monitor(self):
+        """Forcefully terminates the monitor thread."""
         self.monitor_thread.force_terminate()

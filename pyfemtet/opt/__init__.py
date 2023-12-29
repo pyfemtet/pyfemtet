@@ -1,4 +1,4 @@
-from ._optuna import OptimizerOptuna
+from .optimizer import OptimizerOptuna
 from .interface import (
     NoFEM,
     FemtetInterface,

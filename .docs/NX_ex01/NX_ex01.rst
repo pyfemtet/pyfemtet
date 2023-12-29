@@ -24,7 +24,6 @@ Femtet の応力解析ソルバーを用いて
    :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>`
    を実行してください。
 
-.. note::
 
 FEM 問題としての詳細
 -----
