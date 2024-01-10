@@ -112,11 +112,11 @@ def simple():
     femopt.set_random_seed(42)
     femopt.main(n_trials=30, n_parallel=2)
 
-    femopt.terminate_monitor()
+    # femopt.terminate_monitor()
 
 
 if __name__ == '__main__':
-    random_max_sleep_sec = 0.1
-    min_sleep_sec = 0.1
+    random_max_sleep_sec = 1
+    min_sleep_sec = 1
     record = False
     simple()

@@ -412,7 +412,7 @@ class History:
     def _calc_hypervolume(self, objectives):
         #### 前準備
         # パレート集合の抽出
-        idx = self.actor_data['non_domi']
+        idx = self.actor_data['non_domi'].values
         pdf = self.actor_data[idx]
         pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数

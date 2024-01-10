@@ -1,7 +1,6 @@
 import webbrowser
 import logging
-from dash import Dash, html, dcc
-from dash.dependencies import Output, Input
+from dash import Dash, html, dcc, ctx, Output, Input
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 import plotly.express as px
@@ -12,7 +11,7 @@ def update_hypervolume_plot(femopt):
     df = femopt.history.data
 
     # create figure
-    fig = px.line(df, x="n_trial", y="hypervolume", markers=True)
+    fig = px.line(df, x="trial", y="hypervolume", markers=True)
 
     return fig
 
@@ -89,14 +88,13 @@ def setup_home():
         n_intervals=0,
     )
     header = html.H1("最適化の進行状況"),
-
     graphs = dbc.Card(
         [
             dbc.CardHeader(
                 dbc.Tabs(
                     [
-                        dbc.Tab(label="Tab 1", tab_id="tab-1"),
-                        dbc.Tab(label="Tab 2", tab_id="tab-2"),
+                        dbc.Tab(label="目的プロット", tab_id="tab-1"),
+                        dbc.Tab(label="Hypervolume", tab_id="tab-2"),
                     ],
                     id="card-tabs",
                     active_tab="tab-1",
@@ -105,7 +103,6 @@ def setup_home():
             dbc.CardBody(html.P(id="card-content", className="card-text")),
         ]
     )
-
     toggle_update_button = dbc.Button('グラフの自動更新の一時停止', id='toggle-update-button')
     interrupt_button = dbc.Button('最適化を中断', id='interrupt-button', color='danger')
     status_text = dcc.Markdown(f'''
@@ -146,8 +143,6 @@ class Monitor(object):
         self.app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         # ページの components と layout の設定
-        self.interrupt_n_clicks = 0
-        self.toggle_n_clicks = 0
         self.home = setup_home()
 
         # setup sidebar
@@ -211,23 +206,24 @@ class Monitor(object):
                 className="p-3 bg-light rounded-3",
             )
 
-        # 1. 中断ボタンを押したら / 更新をやめる and 中断ボタンを disable にする
-        # 2. メイン処理が中断 or 終了していたら / 更新をやめ and 中断ボタンを disable にする
-        # 3. toggle_button が押されていたら / 更新を切り替える
-        # 4. すべての発火ケースにおいて、まず（最後の） femopt の更新を行う
+        # 1. 一定時間ごとに ==> 自動更新が有効なら figure を更新する
+        # 2. 中断ボタンを押したら ==> 更新を無効にする and 中断を無効にする
+        # 3. メイン処理が中断 or 終了していたら ==> 更新を無効にする and 中断を無効にする
+        # 4. toggle_button が押されたら ==> 更新を有効にする or 更新を無効にする
+        # 5. タブを押したら ==> グラフの種類を切り替える
         @self.app.callback(
             [
-                Output('interval-component', 'max_intervals'),
-                Output('interrupt-button', 'disabled'),
-                Output('toggle-update-button', 'disabled'),
-                Output('toggle-update-button', 'children'),
-                Output('card-content', 'children'),
+                Output('interval-component', 'max_intervals'),  # 2 3 4
+                Output('interrupt-button', 'disabled'),  # 2 3
+                Output('toggle-update-button', 'disabled'),  # 2 3 4
+                Output('toggle-update-button', 'children'),  # 2 3 4
+                Output('card-content', 'children'),  # 1 5
             ],
             [
-                Input('interval-component', 'n_intervals'),
-                Input('toggle-update-button', 'n_clicks'),
-                Input('interrupt-button', 'n_clicks'),
-                Input("card-tabs", "active_tab"),
+                Input('interval-component', 'n_intervals'),  # 1 3
+                Input('toggle-update-button', 'n_clicks'),  # 4
+                Input('interrupt-button', 'n_clicks'),  # 2
+                Input("card-tabs", "active_tab"),  # 5
             ]
         )
         def control(
@@ -241,10 +237,10 @@ class Monitor(object):
             interrupt_n_clicks = 0 if interrupt_n_clicks is None else interrupt_n_clicks
 
             # 下記を基本に戻り値を上書きしていく（優先のものほど下に来る）
-            # 最後にクリック数を更新するので途中で抜けるのは好ましくない
             max_intervals = -1  # enable
             button_disable = False
             toggle_text = 'グラフの自動更新を一時停止する'
+            graph = None
 
             # toggle_button が奇数なら interval を disable にする
             if toggle_n_clicks % 2 == 1:
@@ -266,28 +262,21 @@ class Monitor(object):
                     toggle_text = 'グラフの更新は行われません'
 
             # 中断ボタンが押されたなら interval とボタンを disable にして femopt の状態を set する
-            if interrupt_n_clicks > self.interrupt_n_clicks:
+            button_id = ctx.triggered_id if not None else 'No clicks yet'
+            if button_id == 'interrupt-button':
                 max_intervals = 0  # disable
                 button_disable = True
                 toggle_text = 'グラフの更新は行われません'
                 self.femopt.ipv.set_state('interrupted')
 
-            # クリック回数を更新する
-            self.interrupt_n_clicks = interrupt_n_clicks
-            self.toggle_n_clicks = toggle_n_clicks
-
             # グラフを更新する
             if active_tab_id is not None:
                 if active_tab_id == "tab-1":
-                    tab_content = dcc.Graph(figure=update_scatter_matrix(self.femopt))
+                    graph = dcc.Graph(figure=update_scatter_matrix(self.femopt))
                 elif active_tab_id == "tab-2":
-                    tab_content = dcc.Graph(figure=update_hypervolume_plot(self.femopt))
-                else:
-                    tab_content = None
-            else:
-                tab_content = None
+                    graph = dcc.Graph(figure=update_hypervolume_plot(self.femopt))
 
-            return max_intervals, button_disable, button_disable, toggle_text, tab_content
+            return max_intervals, button_disable, button_disable, toggle_text, graph
 
     def start_server(self, host='localhost', port=8080):
 
@@ -300,7 +289,7 @@ class Monitor(object):
             webbrowser.open(f'http://localhost:{str(port)}')
         else:
             webbrowser.open(f'http://{host}:{str(port)}')
-        self.app.run(debug=True, host=host, port=port)
+        self.app.run(debug=False, host=host, port=port)
 
 
 if __name__ == '__main__':
@@ -333,7 +322,7 @@ if __name__ == '__main__':
         def update(self):
 
             d = dict(
-                n_trial=range(5),
+                trial=range(5),
                 hypervolume=np.random.rand(5),
                 time=[datetime.datetime(year=2000, month=1, day=1, second=s) for s in range(5)]
             )
