@@ -5,7 +5,8 @@ pyfemtet は有限要素法解析ソフト `Femtet <https://www.muratasoftware.c
 
 **pyfemtet は BSD-3 ライセンスの下で公開されているオープンソースライブラリです。
 pyfemtet は Femtet 本体の機能およびライセンスを変更することなく
-Femtet の商用利用可能な拡張機能を無償で提供します。**
+Femtet の商用利用可能な拡張機能を無償で提供します。
+詳しくは、ライセンスをご確認ください。**
 
 現在の pyfemtet の唯一の主要なサブパッケージ pyfemtet.opt は
 設計のパラメータ最適化を行うシンプルな API を提供します。
@@ -54,7 +55,7 @@ pyfemtet.opt の主要機能
 シンプルな API
 ----------------------------
 
-下記は多目的最適化の実施例です。
+下記は多目的最適化の実施例です。使用方法の詳細は :doc:`usage` セクションを確認してください。
 
 .. code-block:: python
 
@@ -76,14 +77,57 @@ pyfemtet.opt の主要機能
        femopt.add_parameter('d', 10, 2, 20)
        femopt.add_objective(max_displacement, name='最大変位', direction=0)
        femopt.add_objective(volume, name='体積', direction='minimize')
-       femopt.set_random_seed(42)
        femopt.main(n_trials=20)
 
 .. note::
 
    このサンプルを実施するためには :download:`サンプル プロジェクト <files/opt_sample.femprj>` をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。
 
-使用方法の詳細は :doc:`usage` セクションを確認してください。
+
+インストール
+---------------
+
+.. note:: pyfemtet は windows にのみ対応しています。
+
+1. `Femtet（2023.1 以降）のインストール <https://www.muratasoftware.com/>`_
+    
+    初めての方は、試用版または個人版のご利用をご検討ください。
+
+    
+2. Femtet のマクロ有効化
+
+    Femtet インストール後にスタートメニューから
+    「マクロ機能を有効化する」を実行してください。
+
+
+3. `Python（3.11 以降）のインストール <https://www.python.org/>`_
+
+    リンク先のダウンロード表示から 3.11 以降のバージョンの
+    インストーラをダウンロードし、実行してください。
+
+    .. tip::
+        手順 4 以降の py コマンドを実行するには、
+        インストールウィザードにて py launcher に
+        チェックがあることを確認してください。
+    
+    .. figure:: py_launcher.png
+
+
+4. pyfemtet のインストール
+
+    コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。::
+
+        py -m pip install pyfemtet
+
+
+5. Femtet マクロ定数の設定
+
+    コマンドプロンプトで下記コマンドを実行してください。::
+
+        py -m win32com.client.makepy FemtetMacro
+
+
+以上で終了です。動作確認には、はじめに :doc:`/examples` のサンプルを閲覧いただくことをお勧めします。
 
 
 目次
@@ -96,7 +140,8 @@ pyfemtet.opt の主要機能
     examples
     usage
     api
+    LICENSE
 
 
-Copyright (C) 2023 Murata Manufacturing Co., Ltd. All Rights Reserved.
+Copyright (C) 2024 Kazuma NAITO All Rights Reserved.
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
