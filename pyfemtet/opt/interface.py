@@ -653,6 +653,11 @@ class FemtetWithNXInterface(FemtetInterface):
             None
         """
 
+        # check NX installation
+        exe = r'%UGII_BASE_DIR%\NXBIN\run_journal.exe'
+        if not os.path.isfile(exe):
+            raise Exception(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
+
         self.prt_path = os.path.abspath(prt_path)
         super().__init__(
             femprj_path=femprj_path,
