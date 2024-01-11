@@ -6,7 +6,7 @@ pyfemtet は有限要素法解析ソフト `Femtet <https://www.muratasoftware.c
 **pyfemtet は BSD-3 ライセンスの下で公開されているオープンソースライブラリです。
 pyfemtet は Femtet 本体の機能およびライセンスを変更することなく
 Femtet の商用利用可能な拡張機能を無償で提供します。
-詳しくは、ライセンスをご確認ください。**
+詳しくは** :doc:`LICENSE` **をご確認ください。**
 
 現在の pyfemtet の唯一の主要なサブパッケージ pyfemtet.opt は
 設計のパラメータ最適化を行うシンプルな API を提供します。
@@ -89,6 +89,14 @@ pyfemtet.opt の主要機能
 
 .. note:: pyfemtet は windows にのみ対応しています。
 
+.. note::
+    
+    Python 及び Femtet がインストールされ
+    Femtet のマクロが有効化されている環境では
+    単に ``pip install pyfemtet`` を実行してください。
+    以下の手順は、Python 及び Femtet のフルセットアップの手順です。
+
+
 1. `Femtet（2023.1 以降）のインストール <https://www.muratasoftware.com/>`_
     
     初めての方は、試用版または個人版のご利用をご検討ください。
@@ -98,6 +106,7 @@ pyfemtet.opt の主要機能
 
     Femtet インストール後にスタートメニューから
     「マクロ機能を有効化する」を実行してください。
+    この手順には管理者権限が必要です。
 
 
 3. `Python（3.11 以降）のインストール <https://www.python.org/>`_
@@ -107,7 +116,7 @@ pyfemtet.opt の主要機能
 
     .. tip::
         手順 4 以降の py コマンドを実行するには、
-        インストールウィザードにて py launcher に
+        インストールウィザードにて "pip" 及び "py launcher" に
         チェックがあることを確認してください。
     
     .. figure:: py_launcher.png
@@ -141,7 +150,3 @@ pyfemtet.opt の主要機能
     usage
     api
     LICENSE
-
-
-Copyright (C) 2024 Kazuma NAITO All Rights Reserved.
-Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
