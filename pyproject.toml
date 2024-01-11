@@ -23,6 +23,8 @@ dash = "^2.14.2"
 plotly = "^5.18.0"
 dash-bootstrap-components = "^1.5.0"
 botorch = "^0.9.5"
+dask = "^2023.12.1"
+distributed = "^2023.12.1"
 
 [tool.poetry.group.dev.dependencies]
 pip-licenses = "^4.3.3"
