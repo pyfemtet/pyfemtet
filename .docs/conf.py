@@ -21,7 +21,7 @@ sys.path.insert(0, project_root_path)
 # -- Project information -----------------------------------------------------
 
 project = "PyFemtet Project"
-copyright = "2023, Murata Manufacturing Co., Ltd"
+copyright = "2023, Kazuma Naito"
 author = "Kazuma Naito"
 
 
