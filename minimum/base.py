@@ -1,85 +1,52 @@
+import sys
+import datetime
 from threading import Thread
 from time import sleep
 import numpy as np
 import pandas as pd
 import optuna
+from pythoncom import CoInitialize, CoUninitialize
+
 from minimum.core import OptimizationState, History
 from minimum.monitor import Monitor
-from dask.distributed import Client
+from minimum.fem import Femtet
+from dask.distributed import Client, LocalCluster
+from concurrent.futures._base import CancelledError
 
 
-class OptimizationBase:
+class OptimizationMethodBase:
 
     def __init__(self):
+        self.fem = None
         self.parameters = pd.DataFrame()
         self.objectives = dict()
-        self.fem = None
-        self.history = History()  # actor にする
-        self.monitor = Monitor(self)
-        self.state = OptimizationState()  # TODO: actor にする
-        self.state.state = 'ready'
-
-    def set_parameters(self, d):
-        self.parameters = pd.DataFrame(d)
-
-    def set_objective(self, fun, name, *args):
-        self.objectives[name] = [fun, args]
-
-    def set_fem(self, fem):
-        self.fem = fem
+        self.state = None  # shared
+        self.history = None  # shared
 
     def f(self, x):
-        if self.state.state == 'interrupted':
-            raise Exception('interrupted')
-
         self.parameters['value'] = x
         self.fem.update(self.parameters)
         y = []
         for name, [fun, args] in self.objectives.items():
             y.append(fun(x, *args))
-        self.history.record(x, y, cns_values=[])
+        self.history.record(x, y, []).result()
         return np.array(y)
 
-    def setup_main(self):
-        pass
+    def set_fem(self):
+        CoInitialize()
+        self.fem = Femtet()
 
-    def concrete_main(self):
-        pass
-
-    def main(self):
-        # before parallel
-        self.state.state = 'setup'
-        self.history.init(self.parameters['name'].values, list(self.objectives.keys()))
-        self.setup_main()
-
-        # monitor
-        t_monitor = Thread(target=self.monitor.start_server)
-        t_monitor.start()
-
-        # parallel
-        self.state.state = 'running'
-        t = Thread(target=self.concrete_main)
-        t.start()
-
-        # await
-        while True:
-            if not t.is_alive():
-                break
-            sleep(1)
-        t.join()
-
-        # finalize
-        self.state.state = 'terminated'
+    # def __del__(self):
+    #     CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
 
-
-class OptimizationOptuna(OptimizationBase):
+class OptimizationMethod(OptimizationMethodBase):
 
     def __init__(self):
+        super().__init__()
+        self.storage = None
         self.sampler = None
         self.study = None
-        self.storage = None
-        super().__init__()
 
     def _objective(self, trial):
         # x の作成
@@ -89,27 +56,37 @@ class OptimizationOptuna(OptimizationBase):
             x.append(v)
         x = np.array(x)
 
-        # FEM の実行
-        return tuple(self.f(x))
+        # 計算
+        y = self.f(x)
 
-    def setup_main(self):
+        # 中断有無
+        state = self.state.get_state().result()
+        if state == 'interrupted':
+            trial.study.stop()  # 現在実行中の trial を最後にする
+
+        # 結果
+        return tuple(y)
+
+    def setup_before_parallel(self):
         """Main process から呼ばれる関数"""
 
         # storage
-        self.storage = 'sqlite:///' + self.history.path.replace('.csv', '.db')
-
-        # sampler
-        self.sampler = optuna.samplers.TPESampler()  # TODO: actor にする必要があるかどうかの調査
+        self.storage = datetime.datetime.now().strftime('sqlite:///%Y%m%d_%H%M%S.db')
 
         # study
         self.study = optuna.create_study(
             storage=self.storage,
-            sampler=self.sampler,
             directions=['minimize'] * len(self.objectives),
         )
 
-    def concrete_main(self):
+    def main(self, subprocess_idx):
         """Dask worker から呼ばれる関数"""
+        print(subprocess_idx, 'started')
+        self.set_fem()
+
+        if subprocess_idx == 2:
+            sleep(10)
+            self.state.set_state('interrupted').result()
 
         # study
         study = optuna.load_study(study_name=None, storage=self.storage)
@@ -118,4 +95,44 @@ class OptimizationOptuna(OptimizationBase):
         study.optimize(self._objective, n_trials=30)
 
 
+class OptimizationBase:
 
+    def __init__(self):
+        self.parameters = pd.DataFrame()
+        self.objectives = dict()
+        self.opt = None
+
+        # parallel setup
+        cluster = LocalCluster(processes=True, threads_per_worker=1)
+        self.client = Client(cluster, direct_to_workers=False)
+        self.state = self.client.submit(OptimizationState, actor=True).result()
+        self.state.set_state('ready').result()
+        self.history = self.client.submit(History, actor=True).result()
+
+    def set_parameters(self, d):
+        self.parameters = pd.DataFrame(d)
+
+    def set_objective(self, fun, name, *args):
+        self.objectives[name] = [fun, args]
+
+    def set_opt(self, opt):
+        self.opt = opt
+
+    def main(self, n_parallel=3):
+        # before parallel
+        self.state.set_state('setup').result()
+        self.set_opt(OptimizationMethod())
+        self.opt.objectives = self.objectives
+        self.opt.parameters = self.parameters
+        self.opt.state = self.state
+        self.history.init(prm_names=self.parameters['name'], obj_names=list(self.objectives.keys())).result()
+        self.opt.history = self.history
+        self.opt.setup_before_parallel()
+
+        # state
+        self.state.set_state('running').result()
+
+        # parallel fem
+        calc_futures = self.client.map(self.opt.main, list(range(n_parallel)))
+
+        self.client.gather(calc_futures)

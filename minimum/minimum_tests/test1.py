@@ -1,6 +1,6 @@
 import os
-from minimum.base import OptimizationOptuna
-from minimum.fem import FEM, Femtet
+from minimum.base import OptimizationBase
+# from minimum.fem import FEM, Femtet
 
 
 os.chdir(os.path.dirname(__file__))
@@ -15,7 +15,7 @@ def parabola(x):
 
 
 if __name__ == '__main__':
-    femopt = OptimizationOptuna()
+    femopt = OptimizationBase()
 
     parameters = dict(
         name=['x', 'y', 'z'],
@@ -24,7 +24,6 @@ if __name__ == '__main__':
         ub=[1, 1, 1]
     )
 
-    femopt.set_fem(Femtet())
     femopt.set_parameters(parameters)
     femopt.set_objective(plane, '平面(最小最小)')
     femopt.set_objective(parabola, '放物線(原点最小)')

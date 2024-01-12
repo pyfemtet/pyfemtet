@@ -7,12 +7,10 @@ class OptimizationState:
     def __init__(self):
         self._state = 'undefined'
 
-    @property
-    def state(self):
+    def get_state(self):
         return self._state
 
-    @state.setter
-    def state(self, value):
+    def set_state(self, value):
         print(f'---{value}---')
         self._state = value
 
@@ -36,4 +34,7 @@ class History:
         row.extend(obj_values)
         row.extend(cns_values)
         self.df.loc[len(self.df)] = row
-        self.df.to_csv(self.path)
+        try:
+            self.df.to_csv(self.path, encoding='shift-jis')
+        except PermissionError:
+            pass
