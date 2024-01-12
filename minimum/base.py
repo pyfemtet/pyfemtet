@@ -71,7 +71,8 @@ class OptimizationMethod(OptimizationMethodBase):
         """Main process から呼ばれる関数"""
 
         # storage
-        self.storage = datetime.datetime.now().strftime('sqlite:///%Y%m%d_%H%M%S.db')
+        # self.storage = datetime.datetime.now().strftime('sqlite:///%Y%m%d_%H%M%S.db')
+        self.storage = optuna.integration.dask.DaskStorage(datetime.datetime.now().strftime('sqlite:///%Y%m%d_%H%M%S.db'))
 
         # study
         self.study = optuna.create_study(
