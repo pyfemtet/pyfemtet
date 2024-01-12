@@ -103,8 +103,10 @@ class OptimizationBase:
         self.opt = None
 
         # parallel setup
-        cluster = LocalCluster(processes=True, threads_per_worker=1)
-        self.client = Client(cluster, direct_to_workers=False)
+        scheduler = 'tcp://xxxx.xxxx.xxxx.xxxx:xxxx'
+        self.client = Client(scheduler)
+        # cluster = LocalCluster(processes=True, threads_per_worker=1)
+        # self.client = Client(cluster, direct_to_workers=False)
         self.state = self.client.submit(OptimizationState, actor=True).result()
         self.state.set_state('ready').result()
         self.history = self.client.submit(History, actor=True).result()
