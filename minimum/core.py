@@ -17,10 +17,11 @@ class OptimizationState:
 
 class History:
     """Dask worker 間で共有すべき history"""
+    path = ''
+    df = None
 
     def __init__(self):
         self.path = datetime.datetime.now().strftime('%Y%m%d_%H%M%S.csv')
-        self.df = None
 
     def init(self, prm_names, obj_names):
         columns = []

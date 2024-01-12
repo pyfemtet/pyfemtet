@@ -129,6 +129,11 @@ class OptimizationBase:
         self.opt.history = self.history
         self.opt.setup_before_parallel()
 
+        # monitor
+        monitor = Monitor(self)
+        t = Thread(target=monitor.start_server)
+        t.start()
+
         # state
         self.state.set_state('running').result()
 
@@ -136,3 +141,4 @@ class OptimizationBase:
         calc_futures = self.client.map(self.opt.main, list(range(n_parallel)))
 
         self.client.gather(calc_futures)
+        self.state.set_state('terminated').result()
