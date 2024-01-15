@@ -20,7 +20,7 @@ from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 
 
-def symlog(x: float | np.ndarray):
+def symlog(x: float or np.ndarray):
     """Log function whose domain is extended to the negative region.
 
     Symlog processing is performed internally as a measure to reduce
@@ -28,7 +28,7 @@ def symlog(x: float | np.ndarray):
     between objective functions in multi-objective optimization.
 
     Args:
-        x (float | np.ndarray)
+        x (float or np.ndarray)
 
     Returns:
         float

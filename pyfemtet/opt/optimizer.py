@@ -17,7 +17,7 @@ from .base import OptimizerBase
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 
-def generate_lhs(bounds: list[list[float]], seed: int | None = None) -> np.ndarray:
+def generate_lhs(bounds: list[list[float]], seed: int or None = None) -> np.ndarray:
     """Latin Hypercube Sampling from given design parameter bounds.
 
     If the number of parameters is d, 
@@ -27,7 +27,7 @@ def generate_lhs(bounds: list[list[float]], seed: int | None = None) -> np.ndarr
 
     Args:
         bounds (list[list[float]]): List of [lower_bound, upper_bound] of parameters.
-        seed (int | None, optional): Random seed. Defaults to None.
+        seed (int or None, optional): Random seed. Defaults to None.
 
     Returns:
         np.ndarray: (N, d) shape ndarray.
