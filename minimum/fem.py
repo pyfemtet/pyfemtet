@@ -1,3 +1,5 @@
+from time import sleep
+import numpy as np
 from win32com.client import Dispatch
 
 
@@ -10,6 +12,7 @@ class FEM:
 class Femtet(FEM):
 
     def __init__(self):
+        sleep(np.random.rand())  # 簡易排他処理
         self.Femtet = Dispatch('FemtetMacro.Femtet')
 
     def update(self, parameters):

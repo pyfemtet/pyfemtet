@@ -28,6 +28,6 @@ if __name__ == '__main__':
     femopt.set_objective(plane, '平面(最小最小)')
     femopt.set_objective(parabola, '放物線(原点最小)')
 
-    femopt.main()
+    femopt.main(n_parallel=3)
 
 

@@ -85,10 +85,6 @@ class OptimizationMethod(OptimizationMethodBase):
         print(subprocess_idx, 'started')
         self.set_fem()
 
-        if subprocess_idx == 2:
-            sleep(10)
-            self.state.set_state('interrupted').result()
-
         # study
         study = optuna.load_study(study_name=None, storage=self.storage)
 
