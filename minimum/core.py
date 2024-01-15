@@ -1,5 +1,6 @@
 import datetime
 import pandas as pd
+from win32com.client import constants
 
 
 class OptimizationState:
@@ -39,3 +40,18 @@ class History:
             self.df.to_csv(self.path, encoding='shift-jis')
         except PermissionError:
             pass
+
+
+class Scapegoat:
+    """Helper class for parallelize Femtet."""
+    # constants を含む関数を並列化するために
+    # メイン処理で一時的に constants への参照を
+    # このオブジェクトにして、後で restore する
+    pass
+
+
+def restore_constants(fun):
+    """Helper function for parallelize Femtet."""
+    for varname in fun.__globals__:
+        if isinstance(fun.__globals__[varname], Scapegoat):
+            fun.__globals__[varname] = constants

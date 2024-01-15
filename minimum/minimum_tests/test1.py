@@ -1,4 +1,5 @@
 import os
+from win32com.client import constants
 from minimum.base import OptimizationBase
 # from minimum.fem import FEM, Femtet
 
@@ -7,6 +8,7 @@ os.chdir(os.path.dirname(__file__))
 
 
 def plane(x):
+    print(constants.STATIC_C)
     return x.sum()
 
 

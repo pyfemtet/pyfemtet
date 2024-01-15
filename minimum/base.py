@@ -13,6 +13,9 @@ from minimum.fem import Femtet
 from dask.distributed import Client, LocalCluster
 from concurrent.futures._base import CancelledError
 
+from win32com.client import Constants
+from minimum.core import Scapegoat, restore_constants
+
 
 class OptimizationMethodBase:
 
@@ -35,6 +38,10 @@ class OptimizationMethodBase:
     def set_fem(self):
         CoInitialize()
         self.fem = Femtet()
+
+        # COM 定数の restore
+        for name, [fun, args] in self.objectives.items():
+            restore_constants(fun)
 
     # def __del__(self):
     #     CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
@@ -112,6 +119,12 @@ class OptimizationBase:
         self.parameters = pd.DataFrame(d)
 
     def set_objective(self, fun, name, *args):
+
+        # unserializable な COM 定数を parallelize するための処理
+        for varname in fun.__globals__:
+            if isinstance(fun.__globals__[varname], Constants):
+                fun.__globals__[varname] = Scapegoat()
+
         self.objectives[name] = [fun, args]
 
     def set_opt(self, opt):
