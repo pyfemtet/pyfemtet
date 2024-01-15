@@ -152,5 +152,22 @@ class OptimizationBase:
         # parallel fem
         calc_futures = self.client.map(self.opt.main, list(range(n_parallel)))
 
+        # 手元に history を保存する
+        def save_history():
+            while True:
+                sleep(2)
+                try:
+                    self.history.df.to_csv(self.history.path, encoding='shift-jis')
+                except PermissionError:
+                    pass
+                if self.state.get_state().result() == 'terminated':
+                    break
+
+        t_save_history = Thread(target=save_history)
+        t_save_history.start()
+
+        # 終了を待つ
         self.client.gather(calc_futures)
         self.state.set_state('terminated').result()
+
+        t_save_history.join()

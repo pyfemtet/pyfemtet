@@ -36,10 +36,6 @@ class History:
         row.extend(obj_values)
         row.extend(cns_values)
         self.df.loc[len(self.df)] = row
-        try:
-            self.df.to_csv(self.path, encoding='shift-jis')
-        except PermissionError:
-            pass
 
 
 class Scapegoat:
