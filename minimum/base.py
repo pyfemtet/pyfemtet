@@ -1,3 +1,4 @@
+import os
 import sys
 import datetime
 from threading import Thread
@@ -11,7 +12,6 @@ from minimum.core import OptimizationState, History
 from minimum.monitor import Monitor
 from minimum.fem import Femtet
 from dask.distributed import Client, LocalCluster
-from concurrent.futures._base import CancelledError
 
 from win32com.client import Constants
 from minimum.core import Scapegoat, restore_constants
@@ -35,9 +35,9 @@ class OptimizationMethodBase:
         self.history.record(x, y, []).result()
         return np.array(y)
 
-    def set_fem(self):
+    def set_fem(self, *fem_args):
         CoInitialize()
-        self.fem = Femtet()
+        self.fem = Femtet(*fem_args)
 
         # COM 定数の restore
         for name, [fun, args] in self.objectives.items():
@@ -54,6 +54,7 @@ class OptimizationMethod(OptimizationMethodBase):
         self.storage = None
         self.sampler = None
         self.study = None
+        self.fem_args = tuple()
 
     def _objective(self, trial):
         # x の作成
@@ -78,8 +79,9 @@ class OptimizationMethod(OptimizationMethodBase):
         """Main process から呼ばれる関数"""
 
         # storage
-        # self.storage = datetime.datetime.now().strftime('sqlite:///%Y%m%d_%H%M%S.db')
-        self.storage = optuna.integration.dask.DaskStorage(datetime.datetime.now().strftime('sqlite:///%Y%m%d_%H%M%S.db'))
+        self.storage = optuna.integration.dask.DaskStorage(
+            datetime.datetime.now().strftime('sqlite:///%Y%m%d_%H%M%S.db')  # scheduler の working dir に保存される
+        )
 
         # study
         self.study = optuna.create_study(
@@ -90,7 +92,7 @@ class OptimizationMethod(OptimizationMethodBase):
     def main(self, subprocess_idx):
         """Dask worker から呼ばれる関数"""
         print(subprocess_idx, 'started')
-        self.set_fem()
+        self.set_fem(*self.fem_args)
 
         # study
         study = optuna.load_study(study_name=None, storage=self.storage)
@@ -107,13 +109,14 @@ class OptimizationBase:
         self.opt = None
 
         # parallel setup
-        scheduler = 'tcp://xxxx.xxxx.xxxx.xxxx:xxxx'
+        scheduler = 'tcp://xxx.xxx.xxx.xxx:xxxx'
         self.client = Client(scheduler)
         # cluster = LocalCluster(processes=True, threads_per_worker=1)
         # self.client = Client(cluster, direct_to_workers=False)
         self.state = self.client.submit(OptimizationState, actor=True).result()
         self.state.set_state('ready').result()
         self.history = self.client.submit(History, actor=True).result()
+        self.fem_args = tuple()
 
     def set_parameters(self, d):
         self.parameters = pd.DataFrame(d)
@@ -131,11 +134,24 @@ class OptimizationBase:
         self.opt = opt
 
     def main(self, n_parallel=3):
-        # before parallel
+        femprj = 'test1.femprj'
+
         self.state.set_state('setup').result()
+
+        # before parallel (fem specific)
+        # C:~~\\AppData\\Local\\Temp\\dask-scratch-space\\worker-4u_ik9_v のようなディレクトリに保存される。
+        # フォルダ構造は引き継がれず、この space 直下にファイルが保存される。
+        # worker が削除されるときにフォルダごと削除される。
+        #   その際別の（例えば FEM）プロセスがそのファイルを掴んでいると permission error で削除できなくなる
+        # 同名のファイルを同じ worker にアップロードした場合は無断で上書きする
+        self.client.upload_file(femprj, False)
+        self.fem_args = (femprj,)
+
+        # before parallel (method specific)
         self.set_opt(OptimizationMethod())
         self.opt.objectives = self.objectives
         self.opt.parameters = self.parameters
+        self.opt.fem_args = self.fem_args
         self.opt.state = self.state
         self.history.init(prm_names=self.parameters['name'], obj_names=list(self.objectives.keys())).result()
         self.opt.history = self.history
