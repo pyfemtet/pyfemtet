@@ -6,7 +6,6 @@ from time import sleep
 import numpy as np
 import pandas as pd
 import optuna
-from pythoncom import CoInitialize, CoUninitialize
 
 from minimum.core import OptimizationState, History
 from minimum.monitor import Monitor
@@ -21,6 +20,8 @@ class OptimizationMethodBase:
 
     def __init__(self):
         self.fem = None
+        self.fem_class = object
+        self.fem_kwargs = dict()
         self.parameters = pd.DataFrame()
         self.objectives = dict()
         self.state = None  # shared
@@ -35,26 +36,21 @@ class OptimizationMethodBase:
         self.history.record(x, y, []).result()
         return np.array(y)
 
-    def set_fem(self, *fem_args):
-        CoInitialize()
-        self.fem = Femtet(*fem_args)
+    def set_fem(self):
+        self.fem = self.fem_class(**self.fem_kwargs)
 
         # COM 定数の restore
         for name, [fun, args] in self.objectives.items():
             restore_constants(fun)
 
-    # def __del__(self):
-    #     CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
-
-class OptimizationMethod(OptimizationMethodBase):
+class OptimizationOptuna(OptimizationMethodBase):
 
     def __init__(self):
         super().__init__()
         self.storage = None
         self.sampler = None
         self.study = None
-        self.fem_args = tuple()
 
     def _objective(self, trial):
         # x の作成
@@ -92,7 +88,7 @@ class OptimizationMethod(OptimizationMethodBase):
     def main(self, subprocess_idx):
         """Dask worker から呼ばれる関数"""
         print(subprocess_idx, 'started')
-        self.set_fem(*self.fem_args)
+        self.set_fem()
 
         # study
         study = optuna.load_study(study_name=None, storage=self.storage)
@@ -106,7 +102,8 @@ class OptimizationBase:
     def __init__(self):
         self.parameters = pd.DataFrame()
         self.objectives = dict()
-        self.opt = None
+        self.opt = OptimizationOptuna()
+        self.fem = Femtet('test1.femprj')
 
         # parallel setup
         scheduler = 'tcp://xxx.xxx.xxx.xxx:xxxx'
@@ -116,7 +113,6 @@ class OptimizationBase:
         self.state = self.client.submit(OptimizationState, actor=True).result()
         self.state.set_state('ready').result()
         self.history = self.client.submit(History, actor=True).result()
-        self.fem_args = tuple()
 
     def set_parameters(self, d):
         self.parameters = pd.DataFrame(d)
@@ -130,30 +126,21 @@ class OptimizationBase:
 
         self.objectives[name] = [fun, args]
 
-    def set_opt(self, opt):
-        self.opt = opt
-
     def main(self, n_parallel=3):
-        femprj = 'test1.femprj'
 
+        # before parallel
         self.state.set_state('setup').result()
+        self.history.init(prm_names=self.parameters['name'], obj_names=list(self.objectives.keys())).result()
 
         # before parallel (fem specific)
-        # C:~~\\AppData\\Local\\Temp\\dask-scratch-space\\worker-4u_ik9_v のようなディレクトリに保存される。
-        # フォルダ構造は引き継がれず、この space 直下にファイルが保存される。
-        # worker が削除されるときにフォルダごと削除される。
-        #   その際別の（例えば FEM）プロセスがそのファイルを掴んでいると permission error で削除できなくなる
-        # 同名のファイルを同じ worker にアップロードした場合は無断で上書きする
-        self.client.upload_file(femprj, False)
-        self.fem_args = (femprj,)
+        self.fem.setup_before_parallel(self.client)
 
         # before parallel (method specific)
-        self.set_opt(OptimizationMethod())
         self.opt.objectives = self.objectives
         self.opt.parameters = self.parameters
-        self.opt.fem_args = self.fem_args
+        self.opt.fem_class = type(self.fem)
+        self.opt.fem_kwargs = self.fem.kwargs
         self.opt.state = self.state
-        self.history.init(prm_names=self.parameters['name'], obj_names=list(self.objectives.keys())).result()
         self.opt.history = self.history
         self.opt.setup_before_parallel()
 
