@@ -12,9 +12,9 @@ Femtet の熱伝導解析ソルバーを用い
 .. note::
 
    :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
-   を Femtet で開き、
+   を Femtet で開いたまま、
    :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py>`
-   を実行してください。
+   をダブルクリックして実行してください。
 
 .. note::
 

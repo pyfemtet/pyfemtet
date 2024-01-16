@@ -10,9 +10,9 @@ Femtet の磁場解析ソルバーを用い、有限長ソレノイドコイル�
 .. note::
 
    :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.femprj>`
-   を Femtet で開き、
+   を Femtet で開いたまま、
    :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>`
-   を実行してください。
+   をダブルクリックして実行してください。
 
 .. note::
 

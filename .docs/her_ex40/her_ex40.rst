@@ -11,9 +11,9 @@ Femtet の電磁波解析ソルバーを用い、
 .. note::
 
    :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/her_ex40_parametric.femprj>`
-   を Femtet で開き、
+   を Femtet で開いたまま、
    :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py>`
-   を実行してください。
+   をダブルクリックして実行してください。
 
 .. note::
 
