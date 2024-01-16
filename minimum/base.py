@@ -20,7 +20,7 @@ class OptimizationMethodBase:
 
     def __init__(self):
         self.fem = None
-        self.fem_class = object
+        self.fem_class = None
         self.fem_kwargs = dict()
         self.parameters = pd.DataFrame()
         self.objectives = dict()
@@ -96,6 +96,9 @@ class OptimizationOptuna(OptimizationMethodBase):
         # run
         study.optimize(self._objective, n_trials=30)
 
+        # finalize
+        del self.fem
+
 
 class OptimizationBase:
 
@@ -106,10 +109,10 @@ class OptimizationBase:
         self.fem = Femtet('test1.femprj')
 
         # parallel setup
-        scheduler = 'tcp://xxx.xxx.xxx.xxx:xxxx'
-        self.client = Client(scheduler)
-        # cluster = LocalCluster(processes=True, threads_per_worker=1)
-        # self.client = Client(cluster, direct_to_workers=False)
+        # scheduler = 'tcp://xxx.xxx.xxx.xxx:xxxx'
+        # self.client = Client(scheduler)
+        cluster = LocalCluster(processes=True, threads_per_worker=1)
+        self.client = Client(cluster, direct_to_workers=False)
         self.state = self.client.submit(OptimizationState, actor=True).result()
         self.state.set_state('ready').result()
         self.history = self.client.submit(History, actor=True).result()

@@ -1,10 +1,8 @@
-from time import sleep
-import numpy as np
-from win32com.client import Dispatch
 from femtetutils import util
 from dask.distributed import get_worker
 import os
 from pythoncom import CoInitialize, CoUninitialize
+from minimum.dispatch_extension import launch_and_dispatch_femtet
 
 
 
@@ -27,13 +25,8 @@ class Femtet(FEM):
         # win32com の初期化
         CoInitialize()
 
-        # femtet 起動
-        util.execute_femtet()
-        sleep(15)
-
-        # 接続
-        sleep(np.random.rand())  # 簡易排他処理
-        self.Femtet = Dispatch('FemtetMacro.Femtet')
+        # femtet 起動, 接続
+        self.Femtet, self.pid = launch_and_dispatch_femtet()
 
         # ファイルを開く
         try:
@@ -65,5 +58,6 @@ class Femtet(FEM):
         )
 
 
-    # def __del__(self):
-    #     CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
+    def __del__(self):
+        util.close_femtet(self.Femtet.hWnd, 1, True)
+        # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
