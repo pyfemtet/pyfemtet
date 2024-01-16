@@ -57,7 +57,9 @@ class Femtet(FEM):
             False
         )
 
-
     def __del__(self):
-        util.close_femtet(self.Femtet.hWnd, 1, True)
+        try:
+            util.close_femtet(self.Femtet.hWnd, 1, True)
+        except AttributeError:
+            pass
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
