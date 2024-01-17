@@ -103,6 +103,11 @@ def setup_home():
             dbc.CardBody(html.P(id="card-content", className="card-text")),
         ]
     )
+    status = dbc.Alert(
+        children=[html.H4("optimization status here", className="alert-heading"),],
+        color="primary",
+        id='status-alert'
+    )
     toggle_update_button = dbc.Button('グラフの自動更新の一時停止', id='toggle-update-button')
     interrupt_button = dbc.Button('最適化を中断', id='interrupt-button', color='danger')
     status_text = dcc.Markdown(f'''
@@ -120,6 +125,7 @@ OptimizerBase.set_monitor_server() を実行してください。
         dbc.Row([dbc.Col(dummy), dbc.Col(interval)]),
         dbc.Row([dbc.Col(header)]),
         dbc.Row([dbc.Col(graphs)]),
+        dbc.Row([dbc.Col(status)]),
         dbc.Row([dbc.Col(toggle_update_button), dbc.Col(interrupt_button)]),
         dbc.Row([dbc.Col(status_text)]),
     ], fluid=True)
@@ -211,6 +217,7 @@ class Monitor(object):
         # 3. メイン処理が中断 or 終了していたら ==> 更新を無効にする and 中断を無効にする
         # 4. toggle_button が押されたら ==> 更新を有効にする or 更新を無効にする
         # 5. タブを押したら ==> グラフの種類を切り替える
+        # 6. state に応じて  を切り替える
         @self.app.callback(
             [
                 Output('interval-component', 'max_intervals'),  # 2 3 4
@@ -218,6 +225,8 @@ class Monitor(object):
                 Output('toggle-update-button', 'disabled'),  # 2 3 4
                 Output('toggle-update-button', 'children'),  # 2 3 4
                 Output('card-content', 'children'),  # 1 5
+                Output('status-alert', 'children'),  # 6
+                Output('status-alert', 'color'),  # 6
             ],
             [
                 Input('interval-component', 'n_intervals'),  # 1 3
@@ -241,6 +250,8 @@ class Monitor(object):
             button_disable = False
             toggle_text = 'グラフの自動更新を一時停止する'
             graph = None
+            status_children = None
+            status_color = 'primary'
 
             # toggle_button が奇数なら interval を disable にする
             if toggle_n_clicks % 2 == 1:
@@ -253,7 +264,8 @@ class Monitor(object):
             try:
                 state = self.femopt.ipv.get_state()
                 should_stop = (state == 'interrupted') or (state == 'terminated')
-            except AttributeError:
+            except AttributeError:  # after ray.shutdown
+                state = 'terminated'
                 should_stop = True
             finally:
                 if should_stop:
@@ -268,6 +280,7 @@ class Monitor(object):
                 button_disable = True
                 toggle_text = 'グラフの更新は行われません'
                 self.femopt.ipv.set_state('interrupted')
+                state = 'interrupted'
 
             # グラフを更新する
             if active_tab_id is not None:
@@ -276,7 +289,14 @@ class Monitor(object):
                 elif active_tab_id == "tab-2":
                     graph = dcc.Graph(figure=update_hypervolume_plot(self.femopt))
 
-            return max_intervals, button_disable, button_disable, toggle_text, graph
+            # status を更新する
+            status_children = [html.H4('optimization status: ' + state, className="alert-heading"), ]
+            if state == 'interrupted':
+                status_color = 'dark'
+            if state == 'terminated':
+                status_color = 'dark'
+
+            return max_intervals, button_disable, button_disable, toggle_text, graph, status_children, status_color
 
     def start_server(self, host='localhost', port=8080):
 

@@ -381,7 +381,7 @@ class History:
 
         # serialize
         try:
-            self.actor_data.to_csv(self.path, index=None)
+            self.actor_data.to_csv(self.path, index=None, encoding='shift-jis')
         except PermissionError:
             print(f'warning: {self.path} がロックされています。データはロック解除後に保存されます。')
 

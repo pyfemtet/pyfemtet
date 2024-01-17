@@ -36,7 +36,7 @@ if __name__ == '__main__':
     femopt.add_parameter("r", 5, lower_bound=1, upper_bound=10, memo='コイル半径')
     femopt.add_parameter("n", 3, lower_bound=1, upper_bound=5, memo='コイル巻き数')
 
-    # インダクタンスが 0.44 uF に近づくようにゴールを設定
+    # インダクタンスが 0.1 uF に近づくようにゴールを設定
     femopt.add_objective(
         inductance, name='自己インダクタンス', direction=0.1e-06
         )
