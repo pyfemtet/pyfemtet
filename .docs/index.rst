@@ -1,19 +1,35 @@
 Welcome to PyFemtet's documentation!
 ====================================
 
-pyfemtet は有限要素法解析ソフト `Femtet <https://www.muratasoftware.com/>`_ の Python インターフェースのパッケージです。
+.. |Femtet| raw:: html
 
-**pyfemtet は BSD-3 ライセンスの下で公開されているオープンソースライブラリです。
-pyfemtet は Femtet 本体の機能およびライセンスを変更することなく
-Femtet の商用利用可能な拡張機能を無償で提供します。
-詳しくは** :doc:`LICENSE` **をご確認ください。**
+    <a href="https://www.muratasoftware.com/" target="_blank">muratasoftware.com</a>
 
-現在の pyfemtet の唯一の主要なサブパッケージ pyfemtet.opt は
-設計のパラメータ最適化を行うシンプルな API を提供します。
+.. |Python| raw:: html
+
+    <a href="https://www.python.org/" target="_blank">python.org</a>
 
 
-pyfemtet.opt の主要機能
+概要
+----------
+
+**pyfemtet は ムラタソフトウェア製 CAE ソフト Femtet の拡張機能を提供します。**
+
+- pyfemtet はオープンソースライブラリであり、無償かつ商用利用可能です。
+- Femtet 本体の使用にはライセンスが必要です。pyfemtet は Femtet 本体のライセンスを一切変更しません。
+- 評価のための試用版 Femtet は ムラタソフトウェア にお問い合わせください。
+
+    - ➡ |Femtet|
+
+
+pyfemtet の主要機能
 ----------------------------
+
+pyfemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。
+現在、 **pyfemtet の唯一の機能は設計パラメータの最適化** であり、pyfemtet.opt サブパッケージとして実装されています。
+
+pyfemtet.opt による最適化機能は、以下の特徴を有します。
+
 - 単目的および多目的の最適化
 - プロセスモニタによるリアルタイム進行状況の表示
 - 複数の Femtet インスタンスによる並列計算
@@ -97,22 +113,22 @@ pyfemtet.opt の主要機能
     以下の手順は、Python 及び Femtet のフルセットアップの手順です。
 
 
-1. `Femtet（2023.1 以降）のインストール <https://www.muratasoftware.com/>`_
+1. **Femtet（2023.1 以降）のインストール**
     
-    初めての方は、試用版または個人版のご利用をご検討ください。
+    初めての方は、試用版または個人版のご利用をご検討ください。➡ |Femtet|
 
     
-2. Femtet のマクロ有効化
+2. **Femtet のマクロ有効化**
 
     Femtet インストール後にスタートメニューから
     「マクロ機能を有効化する」を実行してください。
     この手順には管理者権限が必要です。
 
 
-3. `Python（3.9 以上 3.11 以下）のインストール <https://www.python.org/>`_
+3. **Python（3.9 以上 3.11 以下）のインストール**
 
     リンク先のダウンロード表示から **バージョン 3.9 ~ 3.11** の
-    インストーラをダウンロードし、実行してください。
+    インストーラをダウンロードし、実行してください。➡ |Python|
 
     .. note::
 
@@ -129,37 +145,46 @@ pyfemtet.opt の主要機能
         このスクリーンショットでは、64 bit 版 windows 向け python 3.11.7 のインストーラへの
         リンクの場所の例を示しています。
 
-    .. tip::
-        手順 4 以降の py コマンドを実行するには、
-        インストールウィザードにて "pip" 及び "py launcher" に
-        チェックがあることを確認してください。
-    
-    .. figure:: py_launcher.png
+    .. figure:: python_install.png
 
 
-4. pyfemtet のインストール
+4. **pyfemtet のインストール**
 
-    コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。
-    環境によりますが、インストールには 5 分程度を要します。::
+    コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。::
 
         py -m pip install pyfemtet --no-warn-script-location 
+    
+    インストールが終了すると、"Successfully installed " の表示の後、コマンドプロンプトの制御が戻ります。
 
+    .. figure:: pip_while_install.png
 
-5. Femtet マクロ定数の設定
+        インストール中
+
+    .. figure:: pip_complete_install.png
+
+        インストール終了
+
+    .. note::
+
+        環境によりますが、インストールには 5 分程度を要します。
+
+    .. note::
+
+        インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、
+        エラーではなく、無視しても問題ありません。
+
+5. **Femtet マクロ定数の設定**
 
     コマンドプロンプトで下記コマンドを実行してください。::
 
         py -m win32com.client.makepy FemtetMacro
 
 
-以上で終了です。動作確認には、はじめに :doc:`/examples` のサンプルを閲覧いただくことをお勧めします。
+以上で終了です。
 
 .. tip::
-
-    動作確認で .py ファイルがダブルクリックで実行できない場合、コマンドプロンプトで下記のコマンドを使用してください。
-    ``.pyファイルのフルパス`` は、コマンドプロンプトにファイルをドラッグアンドドロップすることでも入力できます。::
-        py .pyファイルのフルパス
-
+    
+    動作確認には、はじめに :doc:`/examples` のサンプルを閲覧いただくことをお勧めします。
 
 
 

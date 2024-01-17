@@ -69,21 +69,3 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ["_static"]
-
-
-
-# def _setup(_):  # 勝手に走る関数らしい
-#     # sphinx-apidoc -f -o docs pyfemtet
-#     docs_path = os.path.split(__file__)[0]
-#     out_path = os.path.join(docs_path, "modules")
-#     package_root_path = os.path.join(project_root_path, 'pyfemtet')
-#     subprocess.run(['sphinx-apidoc', '-f', '-o', out_path, package_root_path])  # , cwd=
-
-
-#     source_file = os.path.join(project_root_path, "README.md")
-#     destination_file = os.path.join(docs_path, "README.md")
-
-#     shutil.copy2(source_file, destination_file)
-
-# def setup(app):
-#     app.connect('builder-inited', _setup)
