@@ -525,6 +525,10 @@ class AbstractOptimizer(ABC):
         self.is_cluster = False
 
     def f(self, x):
+
+        if self.status.get().result() == 'launching':
+            self.status.set('first FEM running').result()
+
         # x の更新
         self.parameters['value'] = x
 
@@ -552,7 +556,8 @@ class AbstractOptimizer(ABC):
             self.message
         )
 
-        if self.status.get().result() == 'launching':
+        status = self.status.get().result()
+        if status == 'first FEM running':
             self.status.set('running').result()
 
         logger.debug('history.record end')

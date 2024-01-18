@@ -418,8 +418,8 @@ class FemtetInterface(FEMInterface):
         """
 
         logger.info('Try to connect Femtet.')
-        logger.info(f'│ femprj: {self.femprj_path}')
-        logger.info(f'│ model: {self.model_name}')
+        logger.info(f'│ femprj: {self.femprj_path if self.femprj_path is not None else "not specified."}')
+        logger.info(f'│ model: {self.model_name if self.femprj_path is not None else "not specified."}')
 
         # femprj が指定されている
         if self.femprj_path is not None:

@@ -3,8 +3,9 @@ from time import sleep
 import numpy as np
 from scipy.signal import find_peaks
 from tqdm import tqdm
+from optuna.integration.botorch import BoTorchSampler
 
-from pyfemtet.opt import OptimizerOptuna
+from pyfemtet.opt import OptunaOptimizer, OptimizationManager
 
 
 
@@ -49,8 +50,8 @@ class SParameterCalculator:
         """S に対して最初のピークを与える freq を計算します。"""
         x = -np.array(self.S)
         peaks, _ = find_peaks(x, height=None, threshold=None, distance=None, prominence=0.5, width=None, wlen=None, rel_height=0.5, plateau_size=None)
-        from pyfemtet.opt.core import SolveError
-        if len(peaks)==0:
+        from pyfemtet.core import SolveError
+        if len(peaks) == 0:
             raise SolveError('ピークが検出されませんでした。')
         self.resonance_frequency = self.freq[peaks[0]]
         self.minimum_S = self.S[peaks[0]]
@@ -71,7 +72,7 @@ class SParameterCalculator:
         return f  # GHz
         
 
-def anntena_is_smaller_than_substrate(Femtet):
+def antenna_is_smaller_than_substrate(Femtet):
     """アンテナのサイズと基板のサイズの関係を計算します。
 
     Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
@@ -86,7 +87,7 @@ def anntena_is_smaller_than_substrate(Femtet):
     return Sx/2 - ant_r
 
 
-def port_is_inside_anntena(Femtet):
+def port_is_inside_antenna(Femtet):
     """給電ポートの位置とアンテナのサイズの関係を計算します。
 
     Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
@@ -101,12 +102,23 @@ def port_is_inside_anntena(Femtet):
     return ant_r - xf
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     # S パラメータ計算用クラス
     s = SParameterCalculator()
+
+    # 最適化手法を定義するオブジェクトを用意
+    opt = OptunaOptimizer(
+        sampler_class=BoTorchSampler,
+        sampler_kwargs=dict(
+            consider_running_trials=True,
+            n_startup_trials=5,
+        )
+    )
     
     # 最適化処理を行うオブジェクトを用意
-    femopt = OptimizerOptuna()  # ここで起動している Femtet が紐づけされます
+    femopt = OptimizationManager(
+        opt=opt,
+    )  # ここで起動している Femtet が紐づけされます
     
     # 設計変数の設定
     femopt.add_parameter('ant_r', 10, 5, 20, memo='円形アンテナの半径')
@@ -114,11 +126,11 @@ if __name__=='__main__':
     femopt.add_parameter('xf', 5, 1, 20, memo='給電ポートの偏心量')
 
     # 拘束の設定
-    femopt.add_constraint(anntena_is_smaller_than_substrate, 'アンテナサイズ', lower_bound=1)
-    femopt.add_constraint(port_is_inside_anntena, 'ポート位置', lower_bound=1)
+    femopt.add_constraint(antenna_is_smaller_than_substrate, 'アンテナサイズ', lower_bound=1)
+    femopt.add_constraint(port_is_inside_antenna, 'ポート位置', lower_bound=1)
 
     # 目的の設定
     femopt.add_objective(s.get_resonance_frequency, '第一共振周波数（GHz）', direction=3.0)
 
     femopt.set_random_seed(42)
-    femopt.main(method='botorch', n_trials=20)
+    femopt.main(n_trials=20)
