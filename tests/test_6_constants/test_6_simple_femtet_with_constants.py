@@ -67,9 +67,8 @@ def simple():
 
     femprj_path = os.path.join(here, f'{me.replace(".py", ".femprj")}')
 
-    # fem = FemtetInterface(femprj_path)
-    # femopt = Optimizer(fem)
-    femopt = Optimizer()
+    fem = FemtetInterface(femprj_path)
+    femopt = Optimizer(fem=fem, scheduler_address=None)
     femopt.opt.seed = 42
     femopt.add_parameter('d', 5, 1, 10)
     femopt.add_parameter('h', 5, 1, 10)
@@ -78,7 +77,7 @@ def simple():
     femopt.add_objective(volume, '体積(mm3)', args=femopt.opt)
     femopt.add_objective(mises, 'mises 応力()')
     femopt.add_constraint(bottom_surface, '底面積<=30', upper_bound=30, args=femopt.opt)
-    femopt.main(n_trials=30, n_parallel=1)
+    femopt.main(n_trials=30, n_parallel=3)
 
 
 if __name__ == '__main__':

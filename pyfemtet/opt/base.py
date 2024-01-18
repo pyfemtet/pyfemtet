@@ -522,6 +522,7 @@ class OptimizerBase(ABC):
         self.seed = None
         self.timeout = None
         self.n_trials = None
+        self.is_cluster = False
 
     def f(self, x):
         # x の更新
@@ -677,9 +678,9 @@ class OptimizerOptuna(OptimizerBase):
         """Main process から呼ばれる関数"""
 
         # create storage
-        storage_path = os.path.basename(self.history.path).replace('.csv', '.db')  # scheduler の working dir に保存
-        if os.path.isdir(os.path.dirname(self.history.path)):  # history が存在するノードである = LocalCluster ならば
-            storage_path = self.history.path.replace('.csv', '.db')  # history と同じところに保存
+        storage_path = self.history.path.replace('.csv', '.db')  # history と同じところに保存
+        if self.is_cluster:  # remote cluster なら scheduler の working dir に保存
+            storage_path = os.path.basename(self.history.path).replace('.csv', '.db')
         self.storage = optuna.integration.dask.DaskStorage(
             datetime.datetime.now().strftime(f'sqlite:///{storage_path}')
         )
@@ -779,13 +780,16 @@ class Optimizer:
             self,
             fem: FEMInterface = None,
             opt: OptimizerBase = None,
-            history_path=None
+            history_path: str = None,
+            scheduler_address: str = None
     ):
         """Initializes an OptimizerBase instance.
 
         Args:
             fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automattically set to FemtetInterface.
+            opt (OptimizerBase):
             history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
+            scheduler_address (str or None): If cluster processing, set this parameter like ``"tcp://xxx.xxx.xxx.xxx:xxxx"``.
 
         """
         # 引数の処理
@@ -804,10 +808,12 @@ class Optimizer:
             self.opt = opt
 
         # dask メンバーの設定
-        # scheduler = 'tcp://xxx.xxx.xxx.xxx:xxxx'
-        # self.client = Client(scheduler)
-        cluster = LocalCluster(processes=True, threads_per_worker=1)
-        self.client = Client(cluster, direct_to_workers=False)
+        self.opt.is_cluster = scheduler_address is not None
+        if self.opt.is_cluster:
+            self.client = Client(scheduler_address)
+        else:
+            cluster = LocalCluster(processes=True, threads_per_worker=1)
+            self.client = Client(cluster, direct_to_workers=False)
 
         # actor の設定
         self.status = self.client.submit(OptimizationStatus, actor=True).result()
