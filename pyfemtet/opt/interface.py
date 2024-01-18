@@ -3,6 +3,7 @@ import sys
 from time import sleep
 import json
 import subprocess
+import logging
 
 import pandas as pd
 from pywintypes import com_error
@@ -11,7 +12,7 @@ from win32com.client import constants
 from dask.distributed import get_worker
 from femtetutils import util
 
-from .core import (
+from ..core import (
     FemtetAutomationError,
     ModelError,
     MeshError,
@@ -23,6 +24,14 @@ from ..dispatch_extensions import (
     launch_and_dispatch_femtet,
     _get_pid,
 )
+
+
+logger = logging.getLogger('fem_interface_log')
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('[pid %(process)d] %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 here, me = os.path.split(__file__)
 
@@ -176,10 +185,12 @@ class FemtetInterface(FEMInterface):
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
     def _connect_new_femtet(self):
+        logger.info('└ Try to launch and connect new Femtet process.')
         self.Femtet, _ = launch_and_dispatch_femtet()
         self.connected_method = 'new'
 
     def _connect_existing_femtet(self, pid: int or None = None):
+        logger.info('└ Try to connect existing Femtet process.')
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
             self.Femtet, my_pid = dispatch_femtet(timeout=5)
@@ -208,6 +219,7 @@ class FemtetInterface(FEMInterface):
         When set to 'auto', first tries 'existing', and if that fails, connects with 'new'.        
 
         """
+
 
         if connect_method == 'new':
             self._connect_new_femtet()
@@ -405,7 +417,9 @@ class FemtetInterface(FEMInterface):
 
         """
 
-        print(f'try to open {self.model_name} of {self.femprj_path}')
+        logger.info('Try to connect Femtet.')
+        logger.info(f'│ femprj: {self.femprj_path}')
+        logger.info(f'│ model: {self.model_name}')
 
         # femprj が指定されている
         if self.femprj_path is not None:
@@ -429,7 +443,6 @@ class FemtetInterface(FEMInterface):
             if self.connect_method == 'new':
                 RuntimeError('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
             # 開いている Femtet と接続する
-            print('femprj_path が指定されていないため、開いている Femtet との接続を試行します。')
             self.connect_femtet('existing')
 
         # 最終的に接続した Femtet の femprj_path と model を インスタンスに戻す

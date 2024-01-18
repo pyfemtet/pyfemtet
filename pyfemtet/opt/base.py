@@ -19,7 +19,7 @@ from optuna._hypervolume import WFG
 from dask.distributed import LocalCluster, Client
 from win32com.client import constants, Constants
 
-from .core import ModelError, MeshError, SolveError
+from ..core import ModelError, MeshError, SolveError
 from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 
@@ -493,7 +493,7 @@ class History:
 class OptimizationStatus:
     """Optimization status.
 
-    undefined -> initialize -> launching -> running (-> interrupted) -> terminated
+    undefined -> initialize -> launching -> running (-> interrupting) -> terminated
 
     """
     def __init__(self):
@@ -507,7 +507,7 @@ class OptimizationStatus:
         self._state = value
 
 
-class OptimizerBase(ABC):
+class AbstractOptimizer(ABC):
 
     def __init__(self):
         self.fem = None
@@ -592,6 +592,10 @@ class OptimizerBase(ABC):
         else:
             raise ValueError('get_parameter() got invalid format: {format}')
 
+    def _main(self, subprocess_idx):
+        self.set_fem()
+        self.main(subprocess_idx)
+
     @abstractmethod
     def main(self, subprocess_idx: int):
         """Called from dask worker."""
@@ -603,7 +607,7 @@ class OptimizerBase(ABC):
         pass
 
 
-class OptimizerOptuna(OptimizerBase):
+class OptunaOptimizer(AbstractOptimizer):
 
     def __init__(self, sampler_class=None, sampler_kwargs=None):
         super().__init__()
@@ -615,7 +619,7 @@ class OptimizerOptuna(OptimizerBase):
     def _objective(self, trial):
 
         # 中断の確認 (FAIL loop に陥る対策)
-        if self.status.get().result() == 'interrupted':
+        if self.status.get().result() == 'interrupting':
             trial.study.stop()  # 現在実行中の trial を最後にする
 
         # candidate x
@@ -651,7 +655,11 @@ class OptimizerOptuna(OptimizerBase):
             _, _y, c = self.f(x)
         except (ModelError, MeshError, SolveError):
             print('FEM 解析に失敗しました.')
-            # raise optuna.TrialPruned()
+
+            # 中断の確認 (解析中に interrupt されている場合対策)
+            if self.status.get().result() == 'interrupting':
+                trial.study.stop()  # 現在実行中の trial を最後にする
+
             return None  # set TrialState FAIL
 
         # 拘束 attr の更新
@@ -665,7 +673,7 @@ class OptimizerOptuna(OptimizerBase):
         trial.set_user_attr('constraint', _c)
 
         # 中断の確認 (解析中に interrupt されている場合対策)
-        if self.status.get().result() == 'interrupted':
+        if self.status.get().result() == 'interrupting':
             trial.study.stop()  # 現在実行中の trial を最後にする
 
         # 結果
@@ -716,13 +724,12 @@ class OptimizerOptuna(OptimizerBase):
 
     def main(self, subprocess_idx):
         """Dask worker から呼ばれる関数"""
-        self.set_fem()
 
         # (re)set random seed
         seed = self.seed
         if seed is not None:
             if subprocess_idx is not None:
-                seed = seed + (1 + subprocess_idx)  # main process と subprocess0 が重複する
+                seed += subprocess_idx
 
         # restore sampler
         sampler = self.sampler_class(
@@ -756,7 +763,7 @@ class OptimizerOptuna(OptimizerBase):
         del self.fem
 
 
-class Optimizer:
+class OptimizationManager:
     """Base class for optimization algorithms.
 
     Attributes:
@@ -779,15 +786,15 @@ class Optimizer:
     def __init__(
             self,
             fem: FEMInterface = None,
-            opt: OptimizerBase = None,
+            opt: AbstractOptimizer = None,
             history_path: str = None,
             scheduler_address: str = None
     ):
-        """Initializes an OptimizerBase instance.
+        """Initializes an OptimizationManager instance.
 
         Args:
             fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automattically set to FemtetInterface.
-            opt (OptimizerBase):
+            opt (AbstractOptimizer):
             history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
             scheduler_address (str or None): If cluster processing, set this parameter like ``"tcp://xxx.xxx.xxx.xxx:xxxx"``.
 
@@ -803,7 +810,7 @@ class Optimizer:
             self.fem = fem
 
         if opt is None:
-            self.opt = OptimizerOptuna()
+            self.opt = OptunaOptimizer()
         else:
             self.opt = opt
 
@@ -1044,7 +1051,7 @@ class Optimizer:
             If setup_monitor_server() is not executed, a local server for monitoring will be started at localhost:8080.
 
         Note:
-            If ``n_trials`` and ``timeout`` are both None, it will calculate repeatedly until interrupted by the user.
+            If ``n_trials`` and ``timeout`` are both None, it will calculate repeatedly until interrupting by the user.
         
         Note:
             If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.
@@ -1072,6 +1079,7 @@ class Optimizer:
 
         # fem
         self.fem.setup_before_parallel(self.client)
+        self.fem.quit_when_destruct = False  # ユーザーが立てたかもしれないので勝手に落とさないようにする
 
         # opt
         self.opt.fem_class = type(self.fem)
@@ -1085,10 +1093,20 @@ class Optimizer:
         t = Thread(target=monitor.start_server, kwargs=self.monitor_server_kwargs)
         t.start()
 
-        # 計算開始
+        # クラスターでの計算開始
         self.status.set('launching').result()
         start = time()
-        calc_futures = self.client.map(self.opt.main, list(range(n_parallel)))
+        subprocess_indices = list(range(n_parallel))
+        if self.opt.is_cluster:
+            calc_futures = self.client.map(self.opt._main, subprocess_indices)
+        else:
+            # ローカルなら既存の fem をひとつ使う
+            calc_futures = self.client.map(self.opt._main, subprocess_indices[1:])
+
+            # ローカルプロセスでの計算開始
+            self.opt.fem = self.fem
+            t_main = Thread(target=self.opt.main, args=(subprocess_indices[0],))
+            t_main.start()
 
         # save history
         def save_history():
@@ -1106,6 +1124,8 @@ class Optimizer:
 
         # 終了を待つ
         self.client.gather(calc_futures)
+        if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
+            t_main.join()
         self.status.set('terminated').result()
         end = time()
 

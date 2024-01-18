@@ -192,7 +192,7 @@ class Monitor(object):
 
             # 中断又は終了なら interval とボタンを disable にする
             state = self.femopt.state.get_state().result()
-            # should_stop = (state == 'interrupted') or (state == 'terminated')
+            # should_stop = (state == 'interrupting') or (state == 'terminated')
             should_stop = state == 'terminated'
             if should_stop:
                 max_intervals = 0  # disable
@@ -205,7 +205,7 @@ class Monitor(object):
                 max_intervals = 0  # disable
                 button_disable = True
                 toggle_text = 'グラフの更新は行われません'
-                self.femopt.state.set_state('interrupted').result()
+                self.femopt.state.set_state('interrupting').result()
 
             # グラフを更新する
             if active_tab_id is not None:

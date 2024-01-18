@@ -65,7 +65,7 @@ class OptimizationOptuna(OptimizationMethodBase):
 
         # 中断有無
         state = self.state.get_state().result()
-        if state == 'interrupted':
+        if state == 'interrupting':
             trial.study.stop()  # 現在実行中の trial を最後にする
 
         # 結果

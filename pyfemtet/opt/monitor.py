@@ -16,7 +16,6 @@ def update_hypervolume_plot(femopt):
     return fig
 
 
-
 def update_scatter_matrix(femopt):
     # data setting
     data = femopt.history.actor_data
@@ -213,17 +212,17 @@ class Monitor(object):
             )
 
         # 1. 一定時間ごとに ==> 自動更新が有効なら figure を更新する
-        # 2. 中断ボタンを押したら ==> 更新を無効にする and 中断を無効にする
-        # 3. メイン処理が中断 or 終了していたら ==> 更新を無効にする and 中断を無効にする
+        # 2. 中断ボタンを押したら ==> interrupt をセットする
+        # 3. メイン処理が終了していたら ==> 更新を無効にする and 中断を無効にする
         # 4. toggle_button が押されたら ==> 更新を有効にする or 更新を無効にする
         # 5. タブを押したら ==> グラフの種類を切り替える
         # 6. state に応じて  を切り替える
         @self.app.callback(
             [
-                Output('interval-component', 'max_intervals'),  # 2 3 4
-                Output('interrupt-button', 'disabled'),  # 2 3
-                Output('toggle-update-button', 'disabled'),  # 2 3 4
-                Output('toggle-update-button', 'children'),  # 2 3 4
+                Output('interval-component', 'max_intervals'),  # 3 4
+                Output('interrupt-button', 'disabled'),  # 3
+                Output('toggle-update-button', 'disabled'),  # 3 4
+                Output('toggle-update-button', 'children'),  # 3 4
                 Output('card-content', 'children'),  # 1 5
                 Output('status-alert', 'children'),  # 6
                 Output('status-alert', 'color'),  # 6
@@ -250,7 +249,6 @@ class Monitor(object):
             button_disable = False
             toggle_text = 'グラフの自動更新を一時停止する'
             graph = None
-            status_children = None
             status_color = 'primary'
 
             # toggle_button が奇数なら interval を disable にする
@@ -259,13 +257,13 @@ class Monitor(object):
                 button_disable = False
                 toggle_text = 'グラフの自動更新を再開する'
 
-            # 中断又は終了なら interval とボタンを disable にする
+            # 終了なら interval とボタンを disable にする
             should_stop = False
             try:
-                state = self.femopt.status.get().result()
-                should_stop = (state == 'interrupted') or (state == 'terminated')
+                status = self.femopt.status.get().result()
+                should_stop = status == 'terminated'
             except AttributeError:  # after ray.shutdown
-                state = 'terminated'
+                status = 'terminated'
                 should_stop = True
             finally:
                 if should_stop:
@@ -276,11 +274,11 @@ class Monitor(object):
             # 中断ボタンが押されたなら interval とボタンを disable にして femopt の状態を set する
             button_id = ctx.triggered_id if not None else 'No clicks yet'
             if button_id == 'interrupt-button':
-                max_intervals = 0  # disable
-                button_disable = True
-                toggle_text = 'グラフの更新は行われません'
-                self.femopt.status.set('interrupted').result()
-                state = 'interrupted'
+                # max_intervals = 0  # disable
+                # button_disable = True
+                # toggle_text = 'グラフの更新は行われません'
+                self.femopt.status.set('interrupting').result()
+                status = 'interrupting'
 
             # グラフを更新する
             if active_tab_id is not None:
@@ -290,10 +288,10 @@ class Monitor(object):
                     graph = dcc.Graph(figure=update_hypervolume_plot(self.femopt))
 
             # status を更新する
-            status_children = [html.H4('optimization status: ' + state, className="alert-heading"), ]
-            if state == 'interrupted':
-                status_color = 'dark'
-            if state == 'terminated':
+            status_children = [html.H4('optimization status: ' + status, className="alert-heading"), ]
+            if status == 'interrupting':
+                status_color = 'warning'
+            if status == 'terminated':
                 status_color = 'dark'
 
             return max_intervals, button_disable, button_disable, toggle_text, graph, status_children, status_color
