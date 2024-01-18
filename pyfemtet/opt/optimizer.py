@@ -226,7 +226,7 @@ class OptimizerOptuna(OptimizerBase):
 
         # 最大実行回数の指定
         callbacks = []
-        n_existing_trials = len(self.history.data)
+        n_existing_trials = len(self.history.actor_data)
         if self.n_trials is not None:
             n_trials = n_existing_trials + self.n_trials
             callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))

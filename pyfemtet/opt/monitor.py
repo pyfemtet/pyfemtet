@@ -8,7 +8,7 @@ import plotly.express as px
 
 def update_hypervolume_plot(femopt):
     # data setting
-    df = femopt.history.data
+    df = femopt.history.actor_data
 
     # create figure
     fig = px.line(df, x="trial", y="hypervolume", markers=True)
@@ -19,7 +19,7 @@ def update_hypervolume_plot(femopt):
 
 def update_scatter_matrix(femopt):
     # data setting
-    data = femopt.history.data
+    data = femopt.history.actor_data
     obj_names = femopt.history.obj_names
 
     # create figure
@@ -117,7 +117,7 @@ def setup_home():
 - この機能はブラウザによる状況確認機能ですが、インターネット通信は行いません。
 - 再びこのページを開くには、ブラウザのアドレスバーに __localhost:8080__ と入力してください。
 - ※ 特定のホスト名及びポートを指定するには、OptimizerBase.main() の実行前に
-OptimizerBase.set_monitor_server() を実行してください。
+OptimizerBase.set_monitor_host() を実行してください。
     ''')
 
     # layout の設定
@@ -262,7 +262,7 @@ class Monitor(object):
             # 中断又は終了なら interval とボタンを disable にする
             should_stop = False
             try:
-                state = self.femopt.ipv.get_state()
+                state = self.femopt.status.get().result()
                 should_stop = (state == 'interrupted') or (state == 'terminated')
             except AttributeError:  # after ray.shutdown
                 state = 'terminated'
@@ -279,7 +279,7 @@ class Monitor(object):
                 max_intervals = 0  # disable
                 button_disable = True
                 toggle_text = 'グラフの更新は行われません'
-                self.femopt.ipv.set_state('interrupted')
+                self.femopt.status.set('interrupted').result()
                 state = 'interrupted'
 
             # グラフを更新する
