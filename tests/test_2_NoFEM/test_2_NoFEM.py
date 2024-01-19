@@ -13,7 +13,6 @@ random_max_sleep_sec = 0.1
 min_sleep_sec = 0.1
 record = False
 
-
 def objective_x(opt):
     sleep(min_sleep_sec+np.random.rand()*random_max_sleep_sec)
     r, theta, fai = opt.get_parameter('values')
@@ -40,38 +39,44 @@ def constraint_z(opt):
     return z
 
 
-# def test_2_1():
-#     """
-#     テストしたい状況
-#         一通りの機能（ランダム含む、並列含まず）
-#     """
-#     fem = NoFEM()
-#     opt = OptunaOptimizer()
-#     femopt = OptimizationManager(fem, opt)
-#     femopt.set_random_seed(42)
-#     femopt.add_parameter('r（半径）', .5, 0, 1)
-#     femopt.add_parameter('theta（角度1）', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
-#     femopt.add_parameter('fai（角度2）', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
-#     femopt.add_objective(objective_x, args=femopt)  # 自動の名前付け
-#     femopt.add_objective(objective_y, 'y(mm)', args=femopt)
-#     femopt.add_objective(objective_z, 'z(mm)', args=femopt, direction=-1)
-#     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
-#     femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
-#     femopt.main(n_trials=20)
-#
-#     if record:
-#         femopt.history.data.to_csv(os.path.join(here, f'test2/test2_TPE.csvdata'), index=None)
-#
-#     else:
-#         # データの取得
-#         ref_df = pd.read_csv(os.path.join(here, f'test2/test2_TPE.csvdata')).replace(np.nan, None)
-#         def_df = femopt.history.data.copy()
-#
-#         # 並べ替え（並列しているから順番は違いうる）
-#         ref_df = ref_df.iloc[:, 1:].sort_values('r').sort_values('theta').sort_values('fai').select_dtypes(include='number')
-#         def_df = def_df.iloc[:, 1:].sort_values('r').sort_values('theta').sort_values('fai').select_dtypes(include='number')
-#
-#         assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.001
+def test_2_NoFEM_random_seed():
+    """
+    テストしたい状況
+        一通りの機能（ランダムシードの機能）
+    """
+    os.chdir(here)
+    csv_path = me + '.csv'
+
+    fem = NoFEM()
+    opt = OptunaOptimizer()
+    femopt = OptimizationManager(fem, opt)
+    femopt.set_random_seed(42)
+    femopt.add_parameter('r（半径）', .5, 0, 1)
+    femopt.add_parameter('theta（角度1）', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
+    femopt.add_parameter('fai（角度2）', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
+    femopt.add_objective(objective_x, 'x(mm)', args=femopt)
+    femopt.add_objective(objective_y, 'y(mm)', args=femopt)
+    femopt.add_objective(objective_z, 'z(mm)', args=femopt, direction=-1)
+    femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
+    femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
+    femopt.main(n_trials=20)
+
+    if record:
+        femopt.history.actor_data.to_csv(
+            csv_path,
+            encoding='shift-jis',
+            index=None
+        )
+        femopt.terminate_all()
+
+    else:
+        # データの取得
+        ref_df = pd.read_csv(csv_path, encoding='shift-jis').replace(np.nan, None).select_dtypes(include='number')
+        def_df = femopt.history.actor_data.copy().select_dtypes(include='number')
+
+        femopt.terminate_all()
+
+        assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.001
 #
 #
 # def test_2_2():
@@ -113,11 +118,13 @@ def simple():
     femopt.add_objective(objective_x, 'x', args=femopt.opt)
     femopt.add_objective(objective_y, 'y', args=femopt.opt)
     femopt.add_objective(objective_z, 'z', args=femopt.opt)
-    femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
+    # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
     femopt.set_random_seed(42)
-    femopt.main(n_trials=3, n_parallel=1)
+    femopt.main(n_trials=30, n_parallel=3)
     femopt.terminate_all()
 
 
 if __name__ == '__main__':
     simple()
+    # record = True
+    # test_2_NoFEM_random_seed()
