@@ -17,6 +17,8 @@ from optuna.trial import TrialState
 from optuna.exceptions import ExperimentalWarning
 from optuna._hypervolume import WFG
 from dask.distributed import LocalCluster, Client
+from dask.distributed import Lock
+
 from win32com.client import constants, Constants
 
 from ..core import ModelError, MeshError, SolveError
@@ -382,23 +384,21 @@ class History:
         row.append(message)  # message
         row.append(datetime.datetime.now())  # time
 
-        # append
-        if len(self.actor_data) == 0:
-            self.actor_data = pd.DataFrame([row], columns=self.actor_data.columns)
-        else:
-            tmp = self.actor_data
-            tmp.loc[len(tmp)] = row
-            self.actor_data = tmp
+        with Lock('calc-history'):
+            # append
+            if len(self.actor_data) == 0:
+                self.actor_data = pd.DataFrame([row], columns=self.actor_data.columns)
+            else:
+                tmp = self.actor_data
+                tmp.loc[len(tmp)] = row
+                self.actor_data = tmp
 
-        # calc
-        try:
+            # calc
             tmp = self.actor_data
             tmp['trial'] = np.arange(len(tmp)) + 1  # 1 始まり
             self.actor_data = tmp
             self._calc_non_domi(objectives)
             self._calc_hypervolume(objectives)
-        except (ValueError, pd.errors.IndexingError):  # 計算中に別のプロセスが append した場合、そちらに処理を任せる
-            pass
 
     def _calc_non_domi(self, objectives):
 
@@ -422,10 +422,12 @@ class History:
         del solution_set
 
     def _calc_hypervolume(self, objectives):
-        #### 前準備
+        # プロセス間の競合を避けるためローカルにコピーする
+        df = self.actor_data.copy()
+
         # パレート集合の抽出
-        idx = self.actor_data['non_domi'].values
-        pdf = self.actor_data[idx]
+        idx = df['non_domi'].values
+        pdf = df[idx]
         pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数
         m = len(pareto_set.T)  # 目的変数数
@@ -475,7 +477,6 @@ class History:
             hvs.append(hv)
 
         # 計算結果を履歴の一部に割り当て
-        df = pd.DataFrame(self.actor_data.to_dict())  # read-only error 回避
         df.loc[idx, 'hypervolume'] = np.array(hvs)
 
         # dominated の行に対して、上に見ていって
@@ -485,8 +486,9 @@ class History:
                 try:
                     df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
                 except IndexError:
-                    # pass # nan のままにする
                     df.loc[i, 'hypervolume'] = 0
+
+        # ローカルの df を worker に戻す
         self.actor_data = df
 
 
