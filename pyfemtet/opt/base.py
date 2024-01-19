@@ -833,6 +833,7 @@ class OptimizationManager:
         self.history = History(self.history_path, self.client)
 
         # メンバーの宣言
+        self.monitor_thread = None
         self.monitor_server_kwargs = dict()
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
@@ -1095,8 +1096,8 @@ class OptimizationManager:
 
         # monitor
         monitor = Monitor(self)
-        t = Thread(target=monitor.start_server, kwargs=self.monitor_server_kwargs)
-        t.start()
+        self.monitor_thread = Thread(target=monitor.start_server, kwargs=self.monitor_server_kwargs)
+        self.monitor_thread.start()
 
         # クラスターでの計算開始
         self.status.set('launching').result()
@@ -1140,3 +1141,8 @@ class OptimizationManager:
         print(f'Optimization finished. Elapsed time is {end - start} sec.')
         print('計算が終了しました. ウィンドウを閉じると終了します.')
         print(f'結果は{self.history.path}を確認してください.')
+
+    def terminate_all(self):
+        self.status.set('terminate_all').result()
+        self.monitor_thread.join()
+        self.client.shutdown()

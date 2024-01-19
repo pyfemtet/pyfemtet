@@ -1,9 +1,12 @@
 import webbrowser
 import logging
-from dash import Dash, html, dcc, ctx, Output, Input
-import dash_bootstrap_components as dbc
+from time import sleep
+from threading import Thread
+
 import plotly.graph_objs as go
 import plotly.express as px
+from dash import Dash, html, dcc, ctx, Output, Input
+import dash_bootstrap_components as dbc
 
 
 def update_hypervolume_plot(femopt):
@@ -262,9 +265,6 @@ class Monitor(object):
             try:
                 status = self.femopt.status.get().result()
                 should_stop = status == 'terminated'
-            except AttributeError:  # after ray.shutdown
-                status = 'terminated'
-                should_stop = True
             finally:
                 if should_stop:
                     max_intervals = 0  # disable
@@ -296,24 +296,48 @@ class Monitor(object):
 
             return max_intervals, button_disable, button_disable, toggle_text, graph, status_children, status_color
 
-    def start_server(self, host='localhost', port=8080):
+    def _start_server_forever(self, app, host, port):
+        # to terminate server, call this method by daemon thread.
+        app.run(debug=False, host=host, port=port)  # serve forever
 
+    def start_server(self, host='localhost', port=8080):
+        # 引数の処理
         if host is None:
             host = 'localhost'
         if port is None:
             port = 8080
 
+        # ブラウザを起動
         if host == '0.0.0.0':
             webbrowser.open(f'http://localhost:{str(port)}')
         else:
             webbrowser.open(f'http://{host}:{str(port)}')
-        self.app.run(debug=False, host=host, port=port)
+
+        # dash app server を起動
+        server_thread = Thread(
+            target=self._start_server_forever,
+            args=(
+                self.app,
+                host,
+                port,
+            ),
+            daemon=True,
+        )
+        server_thread.start()
+
+        # wait for terminate signal
+        while True:
+            try:
+                status = self.femopt.status.get().result()
+            except ValueError:  # 強制終了などで status にアクセスできない場合
+                status = 'terminate_all'
+            if status == 'terminate_all':
+                return 0  # take server down with me
+            sleep(1)
 
 
 if __name__ == '__main__':
     import datetime
-    from time import sleep
-    from threading import Thread
     import numpy as np
     import pandas as pd
 
