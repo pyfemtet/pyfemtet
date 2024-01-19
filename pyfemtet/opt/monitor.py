@@ -261,15 +261,14 @@ class Monitor(object):
                 toggle_text = 'グラフの自動更新を再開する'
 
             # 終了なら interval とボタンを disable にする
-            should_stop = False
-            try:
-                status = self.femopt.status.get().result()
-                should_stop = status == 'terminated'
-            finally:
-                if should_stop:
-                    max_intervals = 0  # disable
-                    button_disable = True
-                    toggle_text = 'グラフの更新は行われません'
+            # TODO: if restart, raises ValueError: Worker holding Actor was lost. Status: cancelled
+            status = self.femopt.status.get().result()
+
+            should_stop = status == 'terminated'
+            if should_stop:
+                max_intervals = 0  # disable
+                button_disable = True
+                toggle_text = 'グラフの更新は行われません'
 
             # 中断ボタンが押されたなら interval とボタンを disable にして femopt の状態を set する
             button_id = ctx.triggered_id if not None else 'No clicks yet'

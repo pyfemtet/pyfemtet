@@ -292,7 +292,8 @@ class History:
 
         # 引数の処理
         self.path = history_path  # .csv
-        self._actor_data = client.submit(HistoryDfCore, actor=True).result()
+        self._future = client.submit(HistoryDfCore, actor=True)
+        self._actor_data = self._future.result()
         self.param_names = []
         self.obj_names = []
         self.cns_names = []
@@ -618,6 +619,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
     def __init__(self, sampler_class=None, sampler_kwargs=None):
         super().__init__()
+        self.study_name = None
         self.storage = None
         self.study = None
         self.sampler_class = optuna.samplers.TPESampler if sampler_class is None else sampler_class
@@ -693,25 +695,33 @@ class OptunaOptimizer(AbstractOptimizer):
         """Main process から呼ばれる関数"""
 
         # create storage
+        self.study_name = os.path.basename(self.history.path)
         storage_path = self.history.path.replace('.csv', '.db')  # history と同じところに保存
         if self.is_cluster:  # remote cluster なら scheduler の working dir に保存
             storage_path = os.path.basename(self.history.path).replace('.csv', '.db')
-        self.storage = optuna.integration.dask.DaskStorage(
-            datetime.datetime.now().strftime(f'sqlite:///{storage_path}')
-        )
 
-        # create study
-        self.study = optuna.create_study(
-            storage=self.storage,
-            load_if_exists=True,
-            directions=['minimize'] * len(self.objectives),
-        )
+        # create study if storage is not exists
+        if not os.path.exists(storage_path):
 
-        # 初期値の設定
-        if len(self.study.trials) == 0:  # リスタートでなければ
-            # ユーザーの指定した初期値
-            params = self.get_parameter('dict')
-            self.study.enqueue_trial(params, user_attrs={"message": "initial"})
+            self.storage = optuna.integration.dask.DaskStorage(
+                datetime.datetime.now().strftime(f'sqlite:///{storage_path}'),
+            )
+
+            self.study = optuna.create_study(
+                study_name=self.study_name,
+                storage=self.storage,
+                load_if_exists=True,
+                directions=['minimize'] * len(self.objectives),
+            )
+
+            # 初期値の設定
+            if len(self.study.trials) == 0:  # リスタートでなければ
+                # ユーザーの指定した初期値
+                params = self.get_parameter('dict')
+                self.study.enqueue_trial(params, user_attrs={"message": "initial"})
+
+        else:
+            self.storage = f'sqlite:///{storage_path}'
 
         # # LHS を初期値にする
         # if use_lhs_init:
@@ -747,9 +757,9 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # load study
         study = optuna.load_study(
-            study_name=None,
+            study_name=self.study_name,
             storage=self.storage,
-            sampler=sampler
+            sampler=sampler,
         )
 
         # callback to terminate
@@ -830,7 +840,8 @@ class OptimizationManager:
             self.client = Client(cluster, direct_to_workers=False)
 
         # actor の設定
-        self.status = self.client.submit(OptimizationStatus, actor=True).result()
+        self._status_future = self.client.submit(OptimizationStatus, actor=True)
+        self.status = self._status_future.result()
         self.status.set('initialize').result()
         self.history = History(self.history_path, self.client)
 
@@ -1145,6 +1156,7 @@ class OptimizationManager:
         print(f'結果は{self.history.path}を確認してください.')
 
     def terminate_all(self):
+        sleep(3)
         self.status.set('terminate_all').result()
         self.monitor_thread.join()
         self.client.shutdown()
