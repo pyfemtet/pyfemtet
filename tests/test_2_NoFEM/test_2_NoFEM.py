@@ -92,9 +92,9 @@ def sub():
     femopt.add_objective(objective_x, 'x(mm)', args=femopt)
     femopt.add_objective(objective_y, 'y(mm)', args=femopt)
     femopt.add_objective(objective_z, 'z(mm)', args=femopt, direction=-1)
-    # femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
-    # femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
-    femopt.main(n_trials=3)
+    femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
+    femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
+    femopt.main(n_trials=5)
     femopt.terminate_all()
 
 
@@ -103,18 +103,13 @@ def test_2_2_restart():
     テストしたい状況
         restart
     """
-    python = sys.executable
-    option = '-c'
-    this = os.path.splitext(os.path.basename(__file__))[0]
-    f = 'sub'
-    command = f'"import {this}; {this}.{f}();"'
-    print([python, option, command])
-    run([python, option, command])  # デバッグモードならかなり時間はかかるが動く
-    run([python, option, command])
-
-
-
-
+    csv_path = 'test_2_2_restart.csv'
+    if os.path.exists(csv_path):
+        os.remove(csv_path)
+    sub()
+    sub()
+    df = pd.read_csv(csv_path, encoding='shift-jis')
+    assert len(df) == 10
 
 
 def simple():

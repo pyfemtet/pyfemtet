@@ -9,20 +9,16 @@ from dash import Dash, html, dcc, ctx, Output, Input
 import dash_bootstrap_components as dbc
 
 
-def update_hypervolume_plot(femopt):
-    # data setting
-    df = femopt.history.actor_data
-
+def update_hypervolume_plot(history, df):
     # create figure
     fig = px.line(df, x="trial", y="hypervolume", markers=True)
 
     return fig
 
 
-def update_scatter_matrix(femopt):
+def update_scatter_matrix(history, data):
     # data setting
-    data = femopt.history.actor_data
-    obj_names = femopt.history.obj_names
+    obj_names = history.obj_names
 
     # create figure
     fig = go.Figure()
@@ -112,7 +108,7 @@ def setup_home():
     )
     toggle_update_button = dbc.Button('グラフの自動更新の一時停止', id='toggle-update-button')
     interrupt_button = dbc.Button('最適化を中断', id='interrupt-button', color='danger')
-    status_text = dcc.Markdown(f'''
+    note_text = dcc.Markdown(f'''
 ---
 - このページでは、最適化の進捗状況を見ることができます。
 - このページを閉じても最適化は進行します。
@@ -129,7 +125,7 @@ OptimizerBase.set_monitor_host() を実行してください。
         dbc.Row([dbc.Col(graphs)]),
         dbc.Row([dbc.Col(status)]),
         dbc.Row([dbc.Col(toggle_update_button), dbc.Col(interrupt_button)]),
-        dbc.Row([dbc.Col(status_text)]),
+        dbc.Row([dbc.Col(note_text)]),
     ], fluid=True)
 
     return layout
@@ -137,13 +133,19 @@ OptimizerBase.set_monitor_host() を実行してください。
 
 class Monitor(object):
 
-    def __init__(self, femopt):
+    def __init__(self, history, status):
+
+        from .base import OptimizationStatus
 
         # 引数の処理
-        self.femopt = femopt
+        self.history = history
+        self.status = status
+        self.current_status_int = self.status.get()
+        self.current_status = self.status.get_text()
+        self.df = self.history.actor_data.copy()
 
         # ログファイルの保存場所
-        log_path = self.femopt.history.path.replace('.csv', '.uilog')
+        log_path = self.history.path.replace('.csv', '.uilog')
         l = logging.getLogger()
         l.addHandler(logging.FileHandler(log_path))
 
@@ -261,45 +263,45 @@ class Monitor(object):
                 toggle_text = 'グラフの自動更新を再開する'
 
             # 終了なら interval とボタンを disable にする
-            # TODO: if restart, raises ValueError: Worker holding Actor was lost. Status: cancelled
-            status = self.femopt.status.get().result()
-
-            should_stop = status == 'terminated'
-            if should_stop:
+            if self.current_status_int == OptimizationStatus.TERMINATED:
                 max_intervals = 0  # disable
                 button_disable = True
                 toggle_text = 'グラフの更新は行われません'
 
-            # 中断ボタンが押されたなら interval とボタンを disable にして femopt の状態を set する
+            # 中断ボタンが押されたなら中断状態にする
             button_id = ctx.triggered_id if not None else 'No clicks yet'
             if button_id == 'interrupt-button':
-                # max_intervals = 0  # disable
-                # button_disable = True
-                # toggle_text = 'グラフの更新は行われません'
-                self.femopt.status.set('interrupting').result()
-                status = 'interrupting'
+                self.current_status_int = OptimizationStatus.INTERRUPTING
+                self.current_status = OptimizationStatus.const_to_str(OptimizationStatus.INTERRUPTING)
 
             # グラフを更新する
             if active_tab_id is not None:
                 if active_tab_id == "tab-1":
-                    graph = dcc.Graph(figure=update_scatter_matrix(self.femopt))
+                    graph = dcc.Graph(figure=update_scatter_matrix(self.history, self.df))
                 elif active_tab_id == "tab-2":
-                    graph = dcc.Graph(figure=update_hypervolume_plot(self.femopt))
+                    graph = dcc.Graph(figure=update_hypervolume_plot(self.history, self.df))
 
             # status を更新する
-            status_children = [html.H4('optimization status: ' + status, className="alert-heading"), ]
-            if status == 'interrupting':
+            status_children = [
+                html.H4(
+                    'optimization status: ' + self.current_status,
+                    className="alert-heading"
+                ),
+            ]
+            if self.current_status_int == OptimizationStatus.INTERRUPTING:
                 status_color = 'warning'
-            if status == 'terminated':
+            if self.current_status_int == OptimizationStatus.TERMINATED:
                 status_color = 'dark'
 
             return max_intervals, button_disable, button_disable, toggle_text, graph, status_children, status_color
 
-    def _start_server_forever(self, app, host, port):
-        # to terminate server, call this method by daemon thread.
-        app.run(debug=False, host=host, port=port)  # serve forever
+    def _run_server_forever(self, app, host, port):
+        app.run(debug=False, host=host, port=port)
 
     def start_server(self, host='localhost', port=8080):
+
+        from .base import OptimizationStatus
+
         # 引数の処理
         if host is None:
             host = 'localhost'
@@ -312,77 +314,86 @@ class Monitor(object):
         else:
             webbrowser.open(f'http://{host}:{str(port)}')
 
-        # dash app server を起動
+        # dash app server を daemon thread で起動
         server_thread = Thread(
-            target=self._start_server_forever,
-            args=(
-                self.app,
-                host,
-                port,
-            ),
+            target=self._run_server_forever,
+            args=(self.app, host, port,),
             daemon=True,
         )
         server_thread.start()
 
-        # wait for terminate signal
+        # dash app (=flask server) の callback で dask の actor にアクセスすると
+        # おかしくなることがあるので、ここで必要な情報のみやり取りする
         while True:
-            try:
-                status = self.femopt.status.get().result()
-            except ValueError:  # 強制終了などで status にアクセスできない場合
-                status = 'terminate_all'
-            if status == 'terminate_all':
+            # running 以前に monitor が current status を interrupting にしていれば actor に反映
+            if (
+                    (self.status.get() <= OptimizationStatus.RUNNING)  # メインプロセスが RUNNING 以前である
+                    and
+                    (self.current_status_int == OptimizationStatus.INTERRUPTING)  # monitor の status が INTERRUPT である
+            ):
+                self.status.set(OptimizationStatus.INTERRUPTING)
+
+            # current status と df を actor から monitor に反映する
+            self.current_status_int = self.status.get()
+            self.current_status = self.status.get_text()
+            self.df = self.history.actor_data.copy()
+
+            # terminate_all 指令があれば monitor server をホストするプロセスごと終了する
+            if self.status.get() == OptimizationStatus.TERMINATE_ALL:
                 return 0  # take server down with me
+
+            # interval
             sleep(1)
 
-
-if __name__ == '__main__':
-    import datetime
-    import numpy as np
-    import pandas as pd
-
-
-    class IPV:
-        def __init__(self):
-            self.state = 'running'
-
-        def get_state(self):
-            return self.state
-
-        def set_state(self, state):
-            self.state = state
-
-
-    class History:
-        def __init__(self):
-            self.obj_names = 'A B C D E'.split()
-            self.path = 'tmp.csv'
-            self.data = None
-            t = Thread(target=self.update)
-            t.start()
-
-        def update(self):
-
-            d = dict(
-                trial=range(5),
-                hypervolume=np.random.rand(5),
-                time=[datetime.datetime(year=2000, month=1, day=1, second=s) for s in range(5)]
-            )
-            for obj_name in self.obj_names:
-                d[obj_name] = np.random.rand(5)
-
-            while True:
-                self.data = pd.DataFrame(d)
-                sleep(1)
-
-
-    class FEMOPT:
-        def __init__(self, history, ipv):
-            self.history = history
-            self.ipv = ipv
-
-
-    _ipv = IPV()
-    _history = History()
-    _femopt = FEMOPT(_history, _ipv)
-    monitor = Monitor(_femopt)
-    monitor.start_server()
+#
+# if __name__ == '__main__':
+#     import datetime
+#     import numpy as np
+#     import pandas as pd
+#
+#
+#     class IPV:
+#         def __init__(self):
+#             self.state = 'running'
+#
+#         def get_state(self):
+#             return self.state
+#
+#         def set_state(self, state):
+#             self.state = state
+#
+#
+#     class History:
+#         def __init__(self):
+#             self.obj_names = 'A B C D E'.split()
+#             self.path = 'tmp.csv'
+#             self.data = None
+#             t = Thread(target=self.update)
+#             t.start()
+#
+#         def update(self):
+#
+#             d = dict(
+#                 trial=range(5),
+#                 hypervolume=np.random.rand(5),
+#                 time=[datetime.datetime(year=2000, month=1, day=1, second=s) for s in range(5)]
+#             )
+#             for obj_name in self.obj_names:
+#                 d[obj_name] = np.random.rand(5)
+#
+#             while True:
+#                 self.data = pd.DataFrame(d)
+#                 sleep(1)
+#
+#
+#     class FEMOPT:
+#         def __init__(self, history, ipv):
+#             self.history = history
+#             self.ipv = ipv
+#
+#
+#     _ipv = IPV()
+#     _history = History()
+#     _femopt = FEMOPT(_history, _ipv)
+#     monitor = Monitor(_femopt)
+#     monitor.start_server()

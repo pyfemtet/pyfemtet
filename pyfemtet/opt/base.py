@@ -6,6 +6,7 @@ import inspect
 import ast
 from time import time, sleep
 from threading import Thread
+from subprocess import Popen
 import warnings
 import logging
 
@@ -16,8 +17,7 @@ from optuna.study import MaxTrialsCallback
 from optuna.trial import TrialState
 from optuna.exceptions import ExperimentalWarning
 from optuna._hypervolume import WFG
-from dask.distributed import LocalCluster, Client
-from dask.distributed import Lock
+from dask.distributed import LocalCluster, Client, Lock, get_worker
 
 from win32com.client import constants, Constants
 
@@ -30,7 +30,7 @@ logger = logging.getLogger('optimization-main')
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('[%(process)d] %(message)s'))
 logger.addHandler(handler)
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)  # TODO: optuna, dask の logger の書式を統一する
 
 
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
@@ -493,21 +493,59 @@ class History:
         self.actor_data = df
 
 
+class OptimizationStatusActor:
+    status_int = -1
+    status = 'undefined'
+
+    def set(self, value, text):
+        self.status_int = value
+        self.status = text
+
+
 class OptimizationStatus:
     """Optimization status.
 
-    undefined -> initialize -> launching -> running (-> interrupting) -> terminated
+    undefined -> setting up -> launching -> running (-> interrupting) -> terminated
 
     """
-    def __init__(self):
-        self._state = 'undefined'
+    UNDEFINED = -1
+    INITIALIZING = 0
+    SETTING_UP = 10
+    LAUNCHING = 20
+    WAIT_1ST = 25
+    RUNNING = 30
+    INTERRUPTING = 40
+    TERMINATED = 50
+    TERMINATE_ALL = 60
+
+    def __init__(self, client):
+        self._future = client.submit(OptimizationStatusActor, actor=True)
+        self._actor = self._future.result()
+        self.set(self.INITIALIZING)
+
+    @classmethod
+    def const_to_str(self, status_const):
+        if status_const == self.UNDEFINED: return 'Undefined'
+        if status_const == self.INITIALIZING: return 'Initializing'
+        if status_const == self.SETTING_UP: return 'Setting up'
+        if status_const == self.LAUNCHING: return 'Launching FEM processes'
+        if status_const == self.WAIT_1ST: return 'Running and waiting for 1st FEM result.'
+        if status_const == self.RUNNING: return 'Running'
+        if status_const == self.INTERRUPTING: return 'Interrupting'
+        if status_const == self.TERMINATED: return 'Terminated'
+        if status_const == self.TERMINATE_ALL: return 'Terminate_all'
+
+    def set(self, status_const):
+        # self._actor.status_int = status_const
+        # self._actor.status = self.const_to_str(status_const)
+        self._actor.set(status_const, self.const_to_str(status_const)).result()
+        print(f'---{self.const_to_str(status_const)}---')
 
     def get(self):
-        return self._state
+        return self._actor.status_int
 
-    def set(self, value):
-        print(f'---{value}---')
-        self._state = value
+    def get_text(self):
+        return self._actor.status
 
 
 class AbstractOptimizer(ABC):
@@ -529,8 +567,8 @@ class AbstractOptimizer(ABC):
 
     def f(self, x):
 
-        if self.status.get().result() == 'launching':
-            self.status.set('first FEM running').result()
+        if self.status.get() == OptimizationStatus.LAUNCHING:
+            self.status.set(OptimizationStatus.WAIT_1ST)
 
         # x の更新
         self.parameters['value'] = x
@@ -559,9 +597,8 @@ class AbstractOptimizer(ABC):
             self.message
         )
 
-        status = self.status.get().result()
-        if status == 'first FEM running':
-            self.status.set('running').result()
+        if self.status.get() == OptimizationStatus.WAIT_1ST:
+            self.status.set(OptimizationStatus.RUNNING)
 
         logger.debug('history.record end')
         return np.array(y), np.array(_y), np.array(c)
@@ -628,7 +665,7 @@ class OptunaOptimizer(AbstractOptimizer):
     def _objective(self, trial):
 
         # 中断の確認 (FAIL loop に陥る対策)
-        if self.status.get().result() == 'interrupting':
+        if self.status.get() == OptimizationStatus.INTERRUPTING:
             trial.study.stop()  # 現在実行中の trial を最後にする
 
         # candidate x
@@ -666,7 +703,7 @@ class OptunaOptimizer(AbstractOptimizer):
             print('FEM 解析に失敗しました.')
 
             # 中断の確認 (解析中に interrupt されている場合対策)
-            if self.status.get().result() == 'interrupting':
+            if self.status.get() == OptimizationStatus.INTERRUPTING:
                 trial.study.stop()  # 現在実行中の trial を最後にする
 
             return None  # set TrialState FAIL
@@ -682,7 +719,7 @@ class OptunaOptimizer(AbstractOptimizer):
         trial.set_user_attr('constraint', _c)
 
         # 中断の確認 (解析中に interrupt されている場合対策)
-        if self.status.get().result() == 'interrupting':
+        if self.status.get() == OptimizationStatus.INTERRUPTING:
             trial.study.stop()  # 現在実行中の trial を最後にする
 
         # 結果
@@ -816,10 +853,14 @@ class OptimizationManager:
             scheduler_address (str or None): If cluster processing, set this parameter like ``"tcp://xxx.xxx.xxx.xxx:xxxx"``.
 
         """
+
+        logger.info('Initialize Manager')
+
         # 引数の処理
         if history_path is None:
             history_path = datetime.datetime.now().strftime('%Y%m%d_%H%M%S.csv')
         self.history_path = os.path.abspath(history_path)
+        self.scheduler_address = scheduler_address
 
         if fem is None:
             self.fem = FemtetInterface()
@@ -831,21 +872,11 @@ class OptimizationManager:
         else:
             self.opt = opt
 
-        # dask メンバーの設定
-        self.opt.is_cluster = scheduler_address is not None
-        if self.opt.is_cluster:
-            self.client = Client(scheduler_address)
-        else:
-            cluster = LocalCluster(processes=True, threads_per_worker=1)
-            self.client = Client(cluster, direct_to_workers=False)
-
-        # actor の設定
-        self._status_future = self.client.submit(OptimizationStatus, actor=True)
-        self.status = self._status_future.result()
-        self.status.set('initialize').result()
-        self.history = History(self.history_path, self.client)
-
         # メンバーの宣言
+        self.client = None
+        self.status = None
+        self.history = None
+        self.monitor_process_future = None
         self.monitor_thread = None
         self.monitor_server_kwargs = dict()
 
@@ -1082,19 +1113,47 @@ class OptimizationManager:
 
         """
 
-        # 共通引数
-        self.opt.n_trials = n_trials
-        self.opt.timeout = timeout
 
-        # setup
-        self.status.set('setup').result()
+        # dask メンバーの設定
+        self.opt.is_cluster = self.scheduler_address is not None
+        if self.opt.is_cluster:
+            # 既存のクラスターに接続
+            logger.info('Connecting to existing cluster.')
+            self.client = Client(self.scheduler_address)
 
-        # actor
+        else:
+            logger.info('Launching single machine cluster. This may take tens of seconds.')
+            cluster = LocalCluster(processes=True, threads_per_worker=1)
+            self.client = Client(cluster, direct_to_workers=False)
+            self.scheduler_address = self.client.scheduler.address
+
+        # monitor 用 worker を起動
+        logger.info('Launching monitor server. This may take a few seconds.')
+        cmd = f'dask worker {self.client.scheduler.address} --name monitor-server-process --no-nanny'
+        worker_addresses = list(self.client.has_what().keys())
+        Popen(cmd, shell=True)  #, stdout=PIPE) --> cause stream error
+
+        # monitor 用 worker が増えるまで待つ
+        while not (len(self.client.has_what()) > len(worker_addresses)):
+            sleep(1)
+        new_worker_addresses = list(self.client.has_what().keys())
+        launched_worker_addresses = [w_adrs for w_adrs in new_worker_addresses if not w_adrs in worker_addresses]
+        assert len(new_worker_addresses) == 1
+        launched_worker_address = launched_worker_addresses[0]
+
+        # actor の設定
+        self.status = OptimizationStatus(self.client)
+        self.status.set(OptimizationStatus.SETTING_UP)
+        self.history = History(self.history_path, self.client)
         self.history.init(
             self.opt.parameters['name'].to_list(),
             list(self.opt.objectives.keys()),
             list(self.opt.constraints.keys()),
         )
+
+        # 共通引数
+        self.opt.n_trials = n_trials
+        self.opt.timeout = timeout
 
         # fem
         self.fem.setup_before_parallel(self.client)
@@ -1107,17 +1166,31 @@ class OptimizationManager:
         self.opt.history = self.history
         self.opt.setup_before_parallel()
 
-        # monitor
-        monitor = Monitor(self)
-        self.monitor_thread = Thread(target=monitor.start_server, kwargs=self.monitor_server_kwargs)
-        self.monitor_thread.start()
+        # launch monitor
+        self.monitor_process_future = self.client.submit(
+            start_monitor_server_forever,
+            self.history, self.status,  # args
+            **self.monitor_server_kwargs,  # kwargs
+            workers=launched_worker_address,  # if invalid arg,
+            allow_other_workers=False
+        )
 
         # クラスターでの計算開始
-        self.status.set('launching').result()
+        self.status.set(OptimizationStatus.LAUNCHING)
         start = time()
         subprocess_indices = list(range(n_parallel))
+
         if self.opt.is_cluster:
-            calc_futures = self.client.map(self.opt._main, subprocess_indices)
+            # FIXME: monitor-server-process には割り当てないようにする
+            worker_addresses = list(self.client.nthreads().keys())
+            worker_addresses.remove(launched_worker_address)
+            calc_futures = self.client.map(
+                self.opt._main,
+                subprocess_indices,
+                workers=worker_addresses,
+                allow_other_workers=False,
+            )
+
         else:
             # ローカルなら既存の fem をひとつ使う
             calc_futures = self.client.map(self.opt._main, subprocess_indices[1:])
@@ -1135,7 +1208,7 @@ class OptimizationManager:
                     self.history.actor_data.to_csv(self.history.path, index=None, encoding='shift-jis')
                 except PermissionError:
                     pass
-                if self.status.get().result() == 'terminated':
+                if self.status.get() == OptimizationStatus.TERMINATED:
                     break
         t_save_history = Thread(target=save_history)
         t_save_history.start()
@@ -1145,7 +1218,7 @@ class OptimizationManager:
         self.client.gather(calc_futures)
         if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
             t_main.join()
-        self.status.set('terminated').result()
+        self.status.set(OptimizationStatus.TERMINATED)
         end = time()
 
         # 一応
@@ -1156,7 +1229,44 @@ class OptimizationManager:
         print(f'結果は{self.history.path}を確認してください.')
 
     def terminate_all(self):
+        # terminate monitor process
+        self.status.set(OptimizationStatus.TERMINATE_ALL)
+        print(self.monitor_process_future.result())
+        sleep(1)
+
+        # terminate actors
+        self.client.cancel(self.history._future, force=True)
+        self.client.cancel(self.status._future, force=True)
+        print('Terminate actors.')
+        sleep(1)
+
+        # terminate monitor worker
+        n_workers = len(self.client.nthreads())
+        self.client.retire_workers(
+            names=['monitor-server-process'],
+            close_workers=True,
+            remove=True,
+        )
+        while n_workers == len(self.client.nthreads()):
+            sleep(1)
+        print('Terminate monitor processes worker.')
+        sleep(1)
+
+        # close scheduler, other workers(, cluster)
+        self.client.close()
+        while self.client.scheduler is not None:
+            sleep(1)
+        print('Terminate client.')
+
+        # terminate dask relative processes.
+        if not self.opt.is_cluster:
+            self.client.shutdown()
+            print('Terminate all relative processes.')
         sleep(3)
-        self.status.set('terminate_all').result()
-        self.monitor_thread.join()
-        self.client.shutdown()
+
+
+def start_monitor_server_forever(history, status, host='localhost', port=8080):
+    monitor = Monitor(history, status)
+    monitor.start_server(host, port)
+    return 'Exit monitor server process gracefully'
+
