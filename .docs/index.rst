@@ -164,7 +164,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
     .. figure:: pip_complete_install.png
 
-        インストール終了
+        インストール終了後
 
     .. note::
 
@@ -180,6 +180,13 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
     コマンドプロンプトで下記コマンドを実行してください。::
 
         py -m win32com.client.makepy FemtetMacro
+
+    インストールが終了すると、コマンドプロンプトの制御が戻ります。
+
+    .. figure:: complete_makepy.png
+
+        makepy 終了後
+
 
 
 以上で終了です。
