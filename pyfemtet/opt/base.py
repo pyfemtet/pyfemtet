@@ -667,6 +667,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # 中断の確認 (FAIL loop に陥る対策)
         if self.status.get() == OptimizationStatus.INTERRUPTING:
             trial.study.stop()  # 現在実行中の trial を最後にする
+            return None  # set TrialState FAIL
 
         # candidate x
         x = []
@@ -705,8 +706,9 @@ class OptunaOptimizer(AbstractOptimizer):
             # 中断の確認 (解析中に interrupt されている場合対策)
             if self.status.get() == OptimizationStatus.INTERRUPTING:
                 trial.study.stop()  # 現在実行中の trial を最後にする
+                return None  # set TrialState FAIL
 
-            return None  # set TrialState FAIL
+            raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 拘束 attr の更新
         _c = []  # 非正なら OK
@@ -721,6 +723,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # 中断の確認 (解析中に interrupt されている場合対策)
         if self.status.get() == OptimizationStatus.INTERRUPTING:
             trial.study.stop()  # 現在実行中の trial を最後にする
+            return None  # set TrialState FAIL
 
         # 結果
         return tuple(_y)
