@@ -741,7 +741,7 @@ class OptunaOptimizer(AbstractOptimizer):
         if not os.path.exists(storage_path):
 
             self.storage = optuna.integration.dask.DaskStorage(
-                datetime.datetime.now().strftime(f'sqlite:///{storage_path}'),
+                f'sqlite:///{storage_path}',
             )
 
             self.study = optuna.create_study(
@@ -758,7 +758,10 @@ class OptunaOptimizer(AbstractOptimizer):
                 self.study.enqueue_trial(params, user_attrs={"message": "initial"})
 
         else:
-            self.storage = f'sqlite:///{storage_path}'
+
+            self.storage = optuna.integration.dask.DaskStorage(
+                f'sqlite:///{storage_path}',
+            )
 
         # # LHS を初期値にする
         # if use_lhs_init:
