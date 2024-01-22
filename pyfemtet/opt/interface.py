@@ -167,6 +167,9 @@ class FemtetInterface(FEMInterface):
         # 開かれたモデルに応じて femprj_path と model を更新する
         self.connect_and_open_femtet()
 
+        # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
+        self.quit_when_destruct = self.connected_method == 'existing'
+
         # restore するための情報保管
         # パスなどは connect_and_open_femtet での処理結果を反映し
         # メインで開いた解析モデルが確実に開かれるようにする
@@ -417,7 +420,7 @@ class FemtetInterface(FEMInterface):
 
         """
 
-        logger.info('Try to connect Femtet.')
+        logger.info(f'Try to connect Femtet (method: "{self.connect_method}").')
         logger.info(f'│ femprj: {self.femprj_path if self.femprj_path is not None else "not specified."}')
         logger.info(f'│ model: {self.model_name if self.femprj_path is not None else "not specified."}')
 

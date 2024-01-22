@@ -137,15 +137,26 @@ class Function:
     """Base class for Objective and Constraint."""
 
     def __init__(self, fun, name, args, kwargs):
-        # serializable でない COM 定数を parallelize するための処理
-        for varname in fun.__globals__:
-            if isinstance(fun.__globals__[varname], Constants):
-                fun.__globals__[varname] = _Scapegoat()
-
         self.fun = fun
         self.name = name
         self.args = args
         self.kwargs = kwargs
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        _fun = state['fun']
+
+        # serializable でない COM 定数を parallelize するため
+        # COM 定数を一度 _Scapegoat 型のオブジェクトにする
+        for varname in _fun.__globals__:
+            if isinstance(_fun.__globals__[varname], Constants):
+                _fun.__globals__[varname] = _Scapegoat()
+
+        state['fun'] = _fun
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def calc(self, fem: FEMInterface):
         """Execute user-defined fun.
@@ -695,7 +706,7 @@ class OptunaOptimizer(AbstractOptimizer):
             if not feasible:
                 print(f'以下の変数で拘束 {cns.name} が満たされませんでした。')
                 print(self.get_parameter('dict'))
-                return None  # set TrialState FAIL
+                raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
         try:
@@ -860,7 +871,7 @@ class OptimizationManager:
 
         """
 
-        logger.info('Initialize Manager')
+        logger.info('Initialize OptimizationManager')
 
         # 引数の処理
         if history_path is None:
@@ -1163,7 +1174,6 @@ class OptimizationManager:
 
         # fem
         self.fem.setup_before_parallel(self.client)
-        self.fem.quit_when_destruct = False  # ユーザーが立てたかもしれないので勝手に落とさないようにする
 
         # opt
         self.opt.fem_class = type(self.fem)
@@ -1202,6 +1212,12 @@ class OptimizationManager:
             calc_futures = self.client.map(self.opt._main, subprocess_indices[1:])
 
             # ローカルプロセスでの計算開始
+            # constants の restore （map の後なら大丈夫）
+            # TODO: 最適化中に cluster を scale する場合はここに気を付ける
+            for obj in self.opt.objectives.values():
+                obj._restore_constants()
+            for cns in self.opt.constraints.values():
+                cns._restore_constants()
             self.opt.fem = self.fem
             t_main = Thread(target=self.opt.main, args=(subprocess_indices[0],))
             t_main.start()
@@ -1235,6 +1251,10 @@ class OptimizationManager:
         print(f'結果は{self.history.path}を確認してください.')
 
     def terminate_all(self):
+
+        # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
+        sleep(1)
+
         # terminate monitor process
         self.status.set(OptimizationStatus.TERMINATE_ALL)
         print(self.monitor_process_future.result())

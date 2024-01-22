@@ -11,8 +11,8 @@ def max_disp(Femtet):
     return Femtet.Gogh.Galileo.GetMaxDisplacement_py()[1]
 
 
-def volume(Femtet, femopt):
-    d, h, _ = femopt.get_parameter('values')
+def volume(Femtet, opt):
+    d, h, _ = opt.get_parameter('values')
     w = Femtet.GetVariableValue('w')
     return d * h * w
 
@@ -25,8 +25,8 @@ def mises(Femtet):
     return value
 
 
-def bottom_surface(_, femopt):
-    d, h, w = femopt.get_parameter('values')
+def bottom_surface(_, opt):
+    d, h, w = opt.get_parameter('values')
     return d * w
 
 
