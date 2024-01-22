@@ -292,6 +292,8 @@ class Monitor(object):
                 status_color = 'warning'
             if self.current_status_int == OptimizationStatus.TERMINATED:
                 status_color = 'dark'
+            if self.current_status_int == OptimizationStatus.TERMINATE_ALL:
+                status_color = 'dark'
 
             return max_intervals, button_disable, button_disable, toggle_text, graph, status_children, status_color
 

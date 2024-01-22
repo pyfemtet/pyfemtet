@@ -877,7 +877,6 @@ class OptimizationManager:
         self.status = None
         self.history = None
         self.monitor_process_future = None
-        self.monitor_thread = None
         self.monitor_server_kwargs = dict()
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
@@ -1129,7 +1128,8 @@ class OptimizationManager:
 
         # monitor 用 worker を起動
         logger.info('Launching monitor server. This may take a few seconds.')
-        cmd = f'dask worker {self.client.scheduler.address} --name monitor-server-process --no-nanny'
+        self.monitor_process_worker_name = datetime.datetime.now().strftime("monitor-server-process-%Y%m%d%H%M%S")
+        cmd = f'dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
         worker_addresses = list(self.client.has_what().keys())
         Popen(cmd, shell=True)  #, stdout=PIPE) --> cause stream error
 
@@ -1138,7 +1138,7 @@ class OptimizationManager:
             sleep(1)
         new_worker_addresses = list(self.client.has_what().keys())
         launched_worker_addresses = [w_adrs for w_adrs in new_worker_addresses if not w_adrs in worker_addresses]
-        assert len(new_worker_addresses) == 1
+        assert len(launched_worker_addresses) == 1
         launched_worker_address = launched_worker_addresses[0]
 
         # actor の設定
@@ -1243,7 +1243,7 @@ class OptimizationManager:
         # terminate monitor worker
         n_workers = len(self.client.nthreads())
         self.client.retire_workers(
-            names=['monitor-server-process'],
+            names=[self.monitor_process_worker_name],
             close_workers=True,
             remove=True,
         )
