@@ -130,7 +130,8 @@ class _Scapegoat:
     # constants を含む関数を並列化するために
     # メイン処理で一時的に constants への参照を
     # このオブジェクトにして、後で restore する
-    pass
+    def __init__(self, ignore=False):
+        self._ignore_when_restore_constants = ignore
 
 
 class Function:
@@ -172,7 +173,8 @@ class Function:
         fun = self.fun
         for varname in fun.__globals__:
             if isinstance(fun.__globals__[varname], _Scapegoat):
-                fun.__globals__[varname] = constants
+                if not fun.__globals__[varname]._ignore_when_restore_constants:
+                    fun.__globals__[varname] = constants
 
 
 class Objective(Function):
