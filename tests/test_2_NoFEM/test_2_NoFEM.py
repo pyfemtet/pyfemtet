@@ -5,7 +5,7 @@ import os
 from time import sleep
 import numpy as np
 import pandas as pd
-from pyfemtet.opt import OptimizationManager, OptunaOptimizer, NoFEM
+from pyfemtet.opt import FEMOpt, OptunaOptimizer, NoFEM
 
 
 here, me = os.path.split(__file__)
@@ -49,7 +49,7 @@ def test_2_NoFEM_random_seed():
 
     fem = NoFEM()
     opt = OptunaOptimizer()
-    femopt = OptimizationManager(fem, opt)
+    femopt = FEMOpt(fem, opt)
     femopt.set_random_seed(42)
     femopt.add_parameter('r（半径）', .5, 0, 1)
     femopt.add_parameter('theta（角度1）', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
@@ -83,7 +83,7 @@ def sub():
     csv_path = 'test_2_2_restart.csv'
     fem = NoFEM()
     opt = OptunaOptimizer()
-    femopt = OptimizationManager(fem, opt, history_path=csv_path)
+    femopt = FEMOpt(fem, opt, history_path=csv_path)
     femopt.set_random_seed(42)
     femopt.add_parameter('r（半径）', .5, 0, 1)
     femopt.add_parameter('theta（角度1）', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
@@ -118,7 +118,7 @@ def simple():
 
     fem = NoFEM()
     opt = OptunaOptimizer()
-    femopt = OptimizationManager(fem, opt, scheduler_address=None)
+    femopt = FEMOpt(fem, opt, scheduler_address=None)
 
     femopt.add_parameter('r', .5, 0, 1)
     femopt.add_parameter('theta', -np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角

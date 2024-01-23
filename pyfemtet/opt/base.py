@@ -828,8 +828,8 @@ class OptunaOptimizer(AbstractOptimizer):
         del self.fem
 
 
-class OptimizationManager:
-    """Base class for optimization algorithms.
+class FEMOpt:
+    """Base class to control FEM interface and optimizer.
 
     Attributes:
         fem (FEMInterface): The finite element method interface.
@@ -855,7 +855,7 @@ class OptimizationManager:
             history_path: str = None,
             scheduler_address: str = None
     ):
-        """Initializes an OptimizationManager instance.
+        """Initializes an FEMOpt instance.
 
         Args:
             fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automattically set to FemtetInterface.
@@ -865,7 +865,7 @@ class OptimizationManager:
 
         """
 
-        logger.info('Initialize OptimizationManager')
+        logger.info('Initialize FEMOpt')
 
         # 引数の処理
         if history_path is None:

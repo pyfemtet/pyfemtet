@@ -1,2 +1,2 @@
-from .base import OptimizationManager, OptunaOptimizer
+from .base import FEMOpt, OptunaOptimizer
 from .interface import FemtetInterface, NoFEM

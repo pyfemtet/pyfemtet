@@ -1,6 +1,6 @@
 import os
 from win32com.client import constants
-from pyfemtet.opt.base import OptimizationManager
+from pyfemtet.opt.base import FEMOpt
 from pyfemtet.opt.interface import FemtetInterface
 
 here, me = os.path.split(__file__)
@@ -66,7 +66,7 @@ def test_simple_femtet_with_constants():
     femprj_path = os.path.join(here, f'{me.replace(".py", ".femprj")}')
 
     fem = FemtetInterface(femprj_path, connect_method='new')
-    femopt = OptimizationManager(fem=fem, scheduler_address=None)
+    femopt = FEMOpt(fem=fem, scheduler_address=None)
     femopt.opt.seed = 42
     femopt.add_parameter('d', 5, 1, 10)
     femopt.add_parameter('h', 5, 1, 10)

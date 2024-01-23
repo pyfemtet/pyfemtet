@@ -5,7 +5,7 @@ gau_ex08_parametric.femprj に対し磁場解析を行い、
 有限長さソレノイドコイルの寸法を探索します。
 """
 from optuna.integration.botorch import BoTorchSampler
-from pyfemtet.opt import OptimizationManager, OptunaOptimizer
+from pyfemtet.opt import FEMOpt, OptunaOptimizer
 
 
 def inductance(Femtet):
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     )
 
     # 最適化処理を行うオブジェクトを用意
-    femopt = OptimizationManager(opt=opt)  # ここで起動している Femtet が紐づけされます
+    femopt = FEMOpt(opt=opt)  # ここで起動している Femtet が紐づけされます
 
     # 設計変数の登録
     femopt.add_parameter("h", 3, lower_bound=1.5, upper_bound=6, memo='1巻きピッチ')

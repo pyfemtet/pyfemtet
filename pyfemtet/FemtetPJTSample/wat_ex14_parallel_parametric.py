@@ -6,7 +6,7 @@ wat_ex14_parametric.femprj に対し熱伝導解析を行い、
 基板寸法・チップ配置寸法を探索します。
 """
 
-from pyfemtet.opt import OptimizationManager
+from pyfemtet.opt import FEMOpt
 
 
 def max_temperature(Femtet, body_name):
@@ -45,7 +45,7 @@ def substrate_size(Femtet):
 if __name__ == '__main__':
 
     # 最適化処理を行うオブジェクトを用意
-    femopt = OptimizationManager()
+    femopt = FEMOpt()
 
     # 設計変数の設定
     femopt.add_parameter("substrate_w", 40, lower_bound=22, upper_bound=40, memo='基板サイズ X')

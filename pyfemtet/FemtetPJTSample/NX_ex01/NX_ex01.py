@@ -10,7 +10,7 @@ Femtet にインポートして最適化を行います。
 """
 
 import os
-from pyfemtet.opt import OptimizationManager, OptunaOptimizer
+from pyfemtet.opt import FEMOpt, OptunaOptimizer
 from pyfemtet.opt.interface import FemtetWithNXInterface
 
 
@@ -45,7 +45,7 @@ def C_minus_B(_, opt):
         A = Femtet.GetVariableValue('A')
 
     pyfemtet.opt では目的関数・拘束関数の第二引数以降に任意の変数を設定できます。
-    この例では、第二引数に OptimizationManager のメンバー変数 opt を取り、
+    この例では、第二引数に FEMOpt のメンバー変数 opt を取り、
     そのメソッド get_parameter() を用いて設計変数を取得しています。
 
     """
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     )
 
     # 最適化処理を行うオブジェクトに連携オブジェクトを紐づけ
-    femopt = OptimizationManager(fem=fem, opt=opt)
+    femopt = FEMOpt(fem=fem, opt=opt)
 
     # 設計変数の設定
     femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)

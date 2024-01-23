@@ -5,7 +5,7 @@ from scipy.signal import find_peaks
 from tqdm import tqdm
 from optuna.integration.botorch import BoTorchSampler
 
-from pyfemtet.opt import OptunaOptimizer, OptimizationManager
+from pyfemtet.opt import OptunaOptimizer, FEMOpt
 
 
 
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     )
     
     # 最適化処理を行うオブジェクトを用意
-    femopt = OptimizationManager(
+    femopt = FEMOpt(
         opt=opt,
     )  # ここで起動している Femtet が紐づけされます
     
