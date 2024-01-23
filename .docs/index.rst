@@ -79,7 +79,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
 .. code-block:: python
 
-   from pyfemtet.opt import OptimizationManager
+   from pyfemtet.opt import FEMOpt
 
    def max_displacement(Femtet):
 
@@ -93,7 +93,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
        return w * d * h
 
    if __name__ == '__main__':
-       femopt = OptimizationManager()
+       femopt = FEMOpt()
        femopt.add_parameter('w', 10, 2, 20)
        femopt.add_parameter('d', 10, 2, 20)
        femopt.add_objective(max_displacement, name='最大変位', direction=0)
