@@ -48,7 +48,13 @@ def test_2_NoFEM_random_seed():
     csv_path = me + '.csv'
 
     fem = NoFEM()
-    opt = OptunaOptimizer()
+    opt = OptunaOptimizer(add_init_method='LHS')
+    opt.add_init_parameter([0, 0, 0])
+    d = dict()
+    d['r（半径）'] = 1
+    d['theta（角度1）'] = 0
+    d['fai（角度2）'] = 0
+    opt.add_init_parameter(d)
     femopt = FEMOpt(fem, opt)
     femopt.set_random_seed(42)
     femopt.add_parameter('r（半径）', .5, 0, 1)
@@ -59,7 +65,7 @@ def test_2_NoFEM_random_seed():
     femopt.add_objective(objective_z, 'z(mm)', args=femopt, direction=-1)
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
     femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
-    femopt.main(n_trials=20)
+    femopt.main(n_trials=30)
 
     if record:
         femopt.history.actor_data.to_csv(
@@ -76,7 +82,7 @@ def test_2_NoFEM_random_seed():
 
         femopt.terminate_all()
 
-        assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.001
+        assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.0001
 
 
 def sub():
@@ -134,6 +140,6 @@ def simple():
 
 if __name__ == '__main__':
     # simple()
-    test_2_2_restart()
-    # record = True
-    # test_2_NoFEM_random_seed()
+    # test_2_2_restart()
+    record = False
+    test_2_NoFEM_random_seed()

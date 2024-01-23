@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Callable, List, Tuple, Iterable, Any
 
 import os
 import datetime
@@ -12,6 +13,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+from scipy.stats.qmc import LatinHypercube
 import optuna
 from optuna.study import MaxTrialsCallback
 from optuna.trial import TrialState
@@ -34,6 +36,58 @@ logger.setLevel(logging.INFO)  # TODO: optuna, dask の logger の書式を統�
 
 
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
+
+
+def generate_lhs(bounds: List[List[float]], seed: int or None = None) -> np.ndarray:
+    """Latin Hypercube Sampling from given design parameter bounds.
+
+    If the number of parameters is d,
+    sampler returns (N, d) shape ndarray.
+    N equals p**2, p is the minimum prime number over d.
+    For example, when d=3, then p=5 and N=25.
+
+    Args:
+        bounds (list[list[float]]): List of [lower_bound, upper_bound] of parameters.
+        seed (int or None, optional): Random seed. Defaults to None.
+
+    Returns:
+        np.ndarray: (N, d) shape ndarray.
+    """
+
+    d = len(bounds)
+
+    sampler = LatinHypercube(
+        d,
+        scramble=False,
+        strength=2,
+        # optimization='lloyd',
+        optimization='random-cd',
+        seed=seed,
+    )
+
+    LIMIT = 100
+
+    def is_prime(p):
+        for i in range(2, p):
+            if p % i == 0:
+                return False
+        return True
+
+    def get_prime(minimum):
+        for p in range(minimum, LIMIT):
+            if is_prime(p):
+                return p
+
+    n = get_prime(d + 1) ** 2
+    data = sampler.random(n)  # [0,1)
+
+    for i, (data_range, datum) in enumerate(zip(bounds, data.T)):
+        minimum, maximum = data_range
+        band = maximum - minimum
+        converted_datum = datum * band + minimum
+        data[:, i] = converted_datum
+
+    return data  # data.shape = (N, d)
 
 
 def symlog(x: float or np.ndarray):
@@ -658,13 +712,21 @@ class AbstractOptimizer(ABC):
 
 class OptunaOptimizer(AbstractOptimizer):
 
-    def __init__(self, sampler_class=None, sampler_kwargs=None):
+    def __init__(
+            self,
+            sampler_class: optuna.samplers.BaseSampler or None = None,
+            sampler_kwargs: dict or None = None,
+            add_init_method: str or Iterable[str] or None = None
+    ):
         super().__init__()
         self.study_name = None
         self.storage = None
         self.study = None
         self.sampler_class = optuna.samplers.TPESampler if sampler_class is None else sampler_class
         self.sampler_kwargs = dict() if sampler_kwargs is None else sampler_kwargs
+        self.additional_initial_parameter = []
+        self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
+
 
     def _objective(self, trial):
 
@@ -765,27 +827,56 @@ class OptunaOptimizer(AbstractOptimizer):
                 params = self.get_parameter('dict')
                 self.study.enqueue_trial(params, user_attrs={"message": "initial"})
 
+                # add_initial_parameter で追加された初期値
+                for prm, prm_set_name in self.additional_initial_parameter:
+                    self.study.enqueue_trial(
+                        prm,
+                        user_attrs={"message": prm_set_name}
+                    )
+
+                # add_init で指定された方法による初期値
+                if 'LHS' in self.additional_initial_methods:
+                    names = []
+                    bounds = []
+                    for i, row in self.parameters.iterrows():
+                        names.append(row['name'])
+                        lb = row['lb']
+                        ub = row['ub']
+                        bounds.append([lb, ub])
+                    data = generate_lhs(bounds, seed=self.seed)
+                    for datum in data:
+                        d = {}
+                        for name, v in zip(names, datum):
+                            d[name] = v
+                        self.study.enqueue_trial(
+                            d, user_attrs={"message": "additional initial (Latin Hypercube Sampling)"}
+                        )
+
         else:
 
             self.storage = optuna.integration.dask.DaskStorage(
                 f'sqlite:///{storage_path}',
             )
 
-        # # LHS を初期値にする
-        # if use_lhs_init:
-        #     names = []
-        #     bounds = []
-        #     for i, row in self.parameters.iterrows():
-        #         names.append(row['name'])
-        #         lb = row['lb']
-        #         ub = row['ub']
-        #         bounds.append([lb, ub])
-        #     data = generate_lhs(bounds, seed=self.seed)
-        #     for datum in data:
-        #         d = {}
-        #         for name, v in zip(names, datum):
-        #             d[name] = v
-        #         study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
+    def add_init_parameter(
+            self,
+            parameter: dict or Iterable,
+            name: str or None = None,
+    ):
+        """Add additional initial parameter for evaluate.
+
+        The parameter set is ignored if the main() is continued.
+
+        Args:
+            parameter (dict or Iterable): Parameter to evaluate before run optimization algorithm.
+            name (str or None): Optional. If specified, the name is saved in the history row. Default to None.
+
+        """
+        if name is None:
+            name = 'additional initial'
+        else:
+            name = f'additional initial ({name})'
+        self.additional_initial_parameter.append([parameter, name])
 
     def main(self, subprocess_idx):
         """Dask worker から呼ばれる関数"""
