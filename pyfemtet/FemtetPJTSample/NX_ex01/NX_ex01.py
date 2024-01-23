@@ -10,7 +10,8 @@ Femtet にインポートして最適化を行います。
 """
 
 import os
-from pyfemtet.opt import FemtetWithNXInterface, OptimizerOptuna
+from pyfemtet.opt import OptimizationManager, OptunaOptimizer
+from pyfemtet.opt.interface import FemtetWithNXInterface
 
 
 here, me = os.path.split(__file__)
@@ -33,7 +34,7 @@ def volume(Femtet):
     return ret
 
 
-def C_minus_B(_, femopt):
+def C_minus_B(_, opt):
     """C 寸法と B 寸法の差を計算します。
 
     拘束関数の第一引数は Femtet インスタンスである必要がありますが、
@@ -44,11 +45,11 @@ def C_minus_B(_, femopt):
         A = Femtet.GetVariableValue('A')
 
     pyfemtet.opt では目的関数・拘束関数の第二引数以降に任意の変数を設定できます。
-    この例では、第二引数に OptimizerOptuna クラスのオブジェクトを取り、
+    この例では、第二引数に OptimizationManager のメンバー変数 opt を取り、
     そのメソッド get_parameter() を用いて設計変数を取得しています。
 
     """
-    A, B, C = femopt.get_parameter('values')
+    A, B, C = opt.get_parameter('values')
     return C - B
 
 
@@ -61,8 +62,14 @@ if __name__ == '__main__':
         femprj_path='NX_ex01.femprj',
     )
 
+    opt = OptunaOptimizer(
+        sampler_kwargs=dict(
+            n_startup_trials=5,
+        )
+    )
+
     # 最適化処理を行うオブジェクトに連携オブジェクトを紐づけ
-    femopt = OptimizerOptuna(fem)
+    femopt = OptimizationManager(fem)
 
     # 設計変数の設定
     femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
@@ -78,4 +85,4 @@ if __name__ == '__main__':
 
     # 最適化の実行
     femopt.set_random_seed(42)
-    femopt.main(n_trials=20, use_lhs_init=False)
+    femopt.main(n_trials=20, n_parallel=3)

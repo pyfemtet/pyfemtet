@@ -581,113 +581,123 @@ class NoFEM(FEMInterface):
     """Interface with no FEM for debug."""
     pass
 
-#
-# class FemtetWithNXInterface(FemtetInterface):
-#
-#     PATH_JOURNAL = os.path.abspath(os.path.join(here, '_FemtetWithNX/update_model.py'))
-#
-#     def __init__(
-#             self,
-#             prt_path,
-#             femprj_path=None,
-#             model_name=None,
-#             connect_method='auto',
-#             subprocess_idx=None,
-#             subprocess_settings=None,
-#     ):
-#         """
-#         Initializes the FemtetWithNXInterface class.
-#
-#         Args:
-#             prt_path: The path to the prt file.
-#             femprj_path: The path to the femprj file (optional).
-#             model_name: The name of the model (optional).
-#             connect_method: The connection method (default 'auto').
-#             subprocess_idx: The subprocess index (optional).
-#             subprocess_settings: The subprocess settings (optional).
-#
-#         Returns:
-#             None
-#         """
-#
-#         # check NX installation
-#         exe = r'%UGII_BASE_DIR%\NXBIN\run_journal.exe'
-#         if not os.path.isfile(exe):
-#             raise Exception(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
-#
-#         self.prt_path = os.path.abspath(prt_path)
-#         super().__init__(
-#             femprj_path=femprj_path,
-#             model_name=model_name,
-#             connect_method=connect_method,
-#             subprocess_idx=subprocess_idx,
-#             subprocess_settings=subprocess_settings,
-#         )
-#
-#     def check_param_value(self, name):
-#         # desable FemtetInterface.check_param_value()
-#         # because the parameter can be registerd to not only .femprj but also .prt.
-#         return None
-#
-#     def update_model(self, parameters: 'pd.DataFrame') -> None:
-#         self.parameters = parameters.copy()
-#
-#         # 変数更新のための処理
-#         sleep(0.1)  # Gaudi がおかしくなる時がある対策
-#         self._call_femtet_api(
-#             self.Femtet.Gaudi.Activate,
-#             True,  # 戻り値を持たないのでここは無意味で None 以外なら何でもいい
-#             Exception,  # 生きてるのに開けない場合
-#             error_message='解析モデルが開かれていません',
-#         )
-#
-#         # Femtet が参照している x_t パスを取得する
-#         x_t_path = self.Femtet.Gaudi.LastXTPath
-#
-#         # 前のが存在するならば消しておく
-#         if os.path.isfile(x_t_path):
-#             os.remove(x_t_path)
-#
-#         # 変数の json 文字列を作る
-#         tmp_dict = {}
-#         for i, row in parameters.iterrows():
-#             tmp_dict[row['name']] = row['value']
-#         str_json = json.dumps(tmp_dict)
-#
-#         # NX journal を使ってモデルを編集する
-#         exe = r'%UGII_BASE_DIR%\NXBIN\run_journal.exe'
-#         env = os.environ.copy()
-#         subprocess.run(
-#             [exe, self.PATH_JOURNAL, '-args', self.prt_path, str_json, x_t_path],
-#             env=env,
-#             shell=True,
-#             cwd=os.path.dirname(self.prt_path)
-#         )
-#
-#         # この時点で x_t ファイルがなければ NX がモデル更新に失敗しているはず
-#         if not os.path.isfile(x_t_path):
-#             raise ModelError
-#
-#         # 設計変数に従ってモデルを再構築
-#         self._call_femtet_api(
-#             self.Femtet.Gaudi.ReExecute,
-#             False,
-#             ModelError,  # 生きてるのに失敗した場合
-#             error_message=f'モデル再構築に失敗しました.',
-#             is_Gaudi_method=True,
-#         )
-#
-#         # femprj モデルの変数も更新
-#         super().update_model(parameters)
-#
-#         # 処理を確定
-#         self._call_femtet_api(
-#             self.Femtet.Redraw,
-#             False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
-#             ModelError,  # 生きてるのに失敗した場合
-#             error_message=f'モデル再構築に失敗しました.',
-#             is_Gaudi_method=True,
-#         )
+
+class FemtetWithNXInterface(FemtetInterface):
+
+    JOURNAL_PATH = os.path.abspath(os.path.join(here, '_FemtetWithNX/update_model.py'))
+
+    def __init__(
+            self,
+            prt_path,
+            femprj_path=None,
+            model_name=None,
+            connect_method='auto',
+    ):
+        """
+        Initializes the FemtetWithNXInterface class.
+
+        Args:
+            prt_path: The path to the prt file.
+            femprj_path: The path to the femprj file (optional).
+            model_name: The name of the model (optional).
+            connect_method: The connection method (default 'auto').
+            subprocess_idx: The subprocess index (optional).
+            subprocess_settings: The subprocess settings (optional).
+
+        Returns:
+            None
+        """
+
+        # check NX installation
+        self.run_journal_path = os.path.join(os.environ.get('UGII_BASE_DIR'), 'NXBIN', 'run_journal.exe')
+        if not os.path.isfile(self.run_journal_path):
+            raise FileNotFoundError(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
+
+        # 引数の処理
+        self.prt_path = os.path.abspath(prt_path)
+
+        # FemtetInterface の設定 (femprj_path, model_name の更新など)
+        super().__init__(
+            femprj_path=femprj_path,
+            model_name=model_name,
+            connect_method=connect_method,
+        )
+
+        # restore 情報の上書き
+        # FIXIME: super().super() not work
+        super().super().__init__(
+            femprj_path=self.femprj_path,
+            model_name=self.model_name,
+            prt_path=self.prt_path,
+        )
+
+    def check_param_value(self, name):
+        # desable FemtetInterface.check_param_value()
+        # because the parameter can be registered to not only .femprj but also .prt.
+        return None
+
+    def setup_before_parallel(self, client):
+        client.upload_file(
+            self.kwargs['femprj_path'],
+            False
+        )
+        client.upload_file(
+            self.kwargs['prt_path'],
+            False
+        )
+
+    def update_model(self, parameters: 'pd.DataFrame') -> None:
+        """Update .x_t file before FemtetInterface.update_model()"""
+
+        self.parameters = parameters.copy()
+
+        # Femtet が参照している x_t パスを取得する
+        x_t_path = self.Femtet.Gaudi.LastXTPath
+
+        # 前のが存在するならば消しておく
+        if os.path.isfile(x_t_path):
+            os.remove(x_t_path)
+
+        # 変数の json 文字列を作る
+        tmp_dict = {}
+        for i, row in parameters.iterrows():
+            tmp_dict[row['name']] = row['value']
+        str_json = json.dumps(tmp_dict)
+
+        # NX journal を使ってモデルを編集する
+        env = os.environ.copy()
+        subprocess.run(
+            [self.run_journal_path, self.JOURNAL_PATH, '-args', self.prt_path, str_json, x_t_path],
+            env=env,
+            shell=True,
+            cwd=os.path.dirname(self.prt_path)
+        )
+
+        # この時点で x_t ファイルがなければ NX がモデル更新に失敗しているはず
+        if not os.path.isfile(x_t_path):
+            raise ModelError
+
+        # モデルの再インポート
+        self._call_femtet_api(
+            self.Femtet.Gaudi.ReExecute,
+            False,
+            ModelError,  # 生きてるのに失敗した場合
+            error_message=f'モデル再構築に失敗しました.',
+            is_Gaudi_method=True,
+        )
+
+        # 処理を確定
+        self._call_femtet_api(
+            self.Femtet.Redraw,
+            False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
+            ModelError,  # 生きてるのに失敗した場合
+            error_message=f'モデル再構築に失敗しました.',
+            is_Gaudi_method=True,
+        )
+
+        # femprj モデルの変数も更新
+        super().update_model(parameters)
+
 
 
 # TODO: SW-Femtet 再実装
