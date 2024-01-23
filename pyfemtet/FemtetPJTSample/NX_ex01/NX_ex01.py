@@ -69,7 +69,7 @@ if __name__ == '__main__':
     )
 
     # 最適化処理を行うオブジェクトに連携オブジェクトを紐づけ
-    femopt = OptimizationManager(fem)
+    femopt = OptimizationManager(fem=fem, opt=opt)
 
     # 設計変数の設定
     femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)
 
     # 拘束関数の設定
-    femopt.add_constraint(C_minus_B, 'C>B', lower_bound=1, args=femopt)
+    femopt.add_constraint(C_minus_B, 'C>B', lower_bound=1, args=femopt.opt)
 
     # 目的関数の設定
     femopt.add_objective(disp, name='変位', direction=0)

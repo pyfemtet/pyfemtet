@@ -121,6 +121,7 @@ class FemtetInterface(FEMInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
+            **kwargs
     ):
         """Initializes the FemtetInterface.
 
@@ -173,6 +174,7 @@ class FemtetInterface(FEMInterface):
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
+            **kwargs
         )
 
     def __del__(self):
@@ -617,19 +619,14 @@ class FemtetWithNXInterface(FemtetInterface):
         self.prt_path = os.path.abspath(prt_path)
 
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
+        # + restore 情報の上書き
         super().__init__(
             femprj_path=femprj_path,
             model_name=model_name,
             connect_method=connect_method,
+            prt_path = os.path.basename(prt_path)  # upload_file でアップロードされたファイルへのパスになる
         )
 
-        # restore 情報の上書き
-        # FIXIME: super().super() not work
-        super().super().__init__(
-            femprj_path=self.femprj_path,
-            model_name=self.model_name,
-            prt_path=self.prt_path,
-        )
 
     def check_param_value(self, name):
         # desable FemtetInterface.check_param_value()
