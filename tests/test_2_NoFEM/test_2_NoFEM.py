@@ -80,7 +80,6 @@ def test_2_NoFEM_random_seed():
 
 
 def sub():
-    os.chdir(here)
     csv_path = 'test_2_2_restart.csv'
     fem = NoFEM()
     opt = OptunaOptimizer()
@@ -103,12 +102,14 @@ def test_2_2_restart():
     テストしたい状況
         restart
     """
-    csv_path = 'test_2_2_restart.csv'
-    if os.path.exists(csv_path):
-        os.remove(csv_path)
+    os.chdir(here)
+    if os.path.exists('test_2_2_restart.csv'):
+        os.remove('test_2_2_restart.csv')
+        os.remove('test_2_2_restart.db')
+        os.remove('test_2_2_restart.uilog')
     sub()
     sub()
-    df = pd.read_csv(csv_path, encoding='shift-jis')
+    df = pd.read_csv('test_2_2_restart.csv', encoding='shift-jis')
     assert len(df) == 10
 
 

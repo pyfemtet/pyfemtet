@@ -1,3 +1,3 @@
 cd %~dp0\..
-poetry run pytest
+poetry run pytest -s
 pause

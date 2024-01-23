@@ -137,26 +137,17 @@ class Function:
     """Base class for Objective and Constraint."""
 
     def __init__(self, fun, name, args, kwargs):
+
+        # serializable でない COM 定数を parallelize するため
+        # COM 定数を一度 _Scapegoat 型のオブジェクトにする
+        for varname in fun.__globals__:
+            if isinstance(fun.__globals__[varname], Constants):
+                fun.__globals__[varname] = _Scapegoat()
+
         self.fun = fun
         self.name = name
         self.args = args
         self.kwargs = kwargs
-
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        _fun = state['fun']
-
-        # serializable でない COM 定数を parallelize するため
-        # COM 定数を一度 _Scapegoat 型のオブジェクトにする
-        for varname in _fun.__globals__:
-            if isinstance(_fun.__globals__[varname], Constants):
-                _fun.__globals__[varname] = _Scapegoat()
-
-        state['fun'] = _fun
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
     def calc(self, fem: FEMInterface):
         """Execute user-defined fun.

@@ -65,7 +65,7 @@ def test_simple_femtet_with_constants():
 
     femprj_path = os.path.join(here, f'{me.replace(".py", ".femprj")}')
 
-    fem = FemtetInterface(femprj_path)
+    fem = FemtetInterface(femprj_path, connect_method='new')
     femopt = OptimizationManager(fem=fem, scheduler_address=None)
     femopt.opt.seed = 42
     femopt.add_parameter('d', 5, 1, 10)

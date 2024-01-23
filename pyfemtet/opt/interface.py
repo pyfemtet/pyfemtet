@@ -6,6 +6,7 @@ import subprocess
 import logging
 
 import pandas as pd
+import psutil
 from pywintypes import com_error
 from pythoncom import CoInitialize, CoUninitialize
 from win32com.client import constants
@@ -13,7 +14,6 @@ from dask.distributed import get_worker
 from femtetutils import util
 
 from ..core import (
-    FemtetAutomationError,
     ModelError,
     MeshError,
     SolveError,
@@ -23,6 +23,7 @@ from ..dispatch_extensions import (
     dispatch_specific_femtet,
     launch_and_dispatch_femtet,
     _get_pid,
+    DispatchExtensionException,
 )
 
 
@@ -159,7 +160,6 @@ class FemtetInterface(FEMInterface):
             # worker なら femprj_path が None でないはず
             self.femprj_path = os.path.join(space, os.path.basename(self.femprj_path))
             self.connect_method = 'new'
-            self.quit_when_destruct = True
         except ValueError:  # get_worker に失敗した場合
             pass
 
@@ -168,7 +168,7 @@ class FemtetInterface(FEMInterface):
         self.connect_and_open_femtet()
 
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
-        self.quit_when_destruct = self.connected_method == 'existing'
+        self.quit_when_destruct = self.connected_method == 'new'
 
         # restore するための情報保管
         # パスなどは connect_and_open_femtet での処理結果を反映し
@@ -182,8 +182,14 @@ class FemtetInterface(FEMInterface):
         if self.quit_when_destruct:
             try:
                 # 強制終了 TODO: 自動保存を回避する
-                util.close_femtet(self.Femtet.hWnd, 1, True)
-            except AttributeError:
+                hwnd = self.Femtet.hWnd
+                pid = _get_pid(hwnd)
+                util.close_femtet(hwnd, 1, True)
+                while psutil.pid_exists(pid):
+                    sleep(1)
+                sleep(1)
+
+            except AttributeError:  # already dead
                 pass
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
@@ -196,33 +202,30 @@ class FemtetInterface(FEMInterface):
         logger.info('└ Try to connect existing Femtet process.')
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
-            self.Femtet, my_pid = dispatch_femtet(timeout=5)
+            self.Femtet, _ = dispatch_femtet(timeout=5)
         else:
-            self.Femtet, my_pid = dispatch_specific_femtet(pid)
-        if my_pid == 0:
-            raise FemtetAutomationError('接続できる Femtet のプロセスが見つかりませんでした。')
+            self.Femtet, _ = dispatch_specific_femtet(pid, timeout=5)
         self.connected_method = 'existing'
 
     def connect_femtet(self, connect_method: str = 'auto', pid: int or None = None):
         """Connects to a Femtet process.
         Args:
             connect_method (str, optional): The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'new'.
-            pid (int or None, optional): The process ID of an existing Femtet process. Only used when `connect_method` is set as `'existing'`. Defaults to `None`.
+            pid (int or None, optional): The process ID of an existing Femtet process and wanted to connect.
 
         When connect_method is 'new', starts a new Femtet process and connects to it.
+        **`pid` will be ignored.**
 
         When 'existing', connect to an existing Femtet process.
-        However, if there are no Femtets to which it can connect, it will throw an error.
-        In this case, you cannot control which of the existing Femtet processes is connected.
-        
-        When 'existing', you can specify the pid if it is known.
-        Also, if it is already connected to another Python or Excel process.
-        Connections cannot be made with Femtet.
+        However, if there are no Femtets to which it can connect
+        (i.e. already connected to another Python or Excel process),
+        it throws an exception.
 
-        When set to 'auto', first tries 'existing', and if that fails, connects with 'new'.        
+        When set to 'auto', first tries 'existing', and if that fails, connects with 'new'.
+        If `pid` is specified and failed to connect,
+        it will not try existing another Femtet process.
 
         """
-
 
         if connect_method == 'new':
             self._connect_new_femtet()
@@ -233,7 +236,7 @@ class FemtetInterface(FEMInterface):
         elif connect_method == 'auto':
             try:
                 self._connect_existing_femtet(pid)
-            except FemtetAutomationError:
+            except DispatchExtensionException:
                 self._connect_new_femtet()
 
         else:
