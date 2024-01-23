@@ -702,7 +702,8 @@ class OptunaOptimizer(AbstractOptimizer):
         # 計算
         try:
             _, _y, c = self.f(x)
-        except (ModelError, MeshError, SolveError):
+        except (ModelError, MeshError, SolveError) as e:
+            print(str(type(e)).split("'")[1].split('.')[-1], e)
             print('FEM 解析に失敗しました.')
 
             # 中断の確認 (解析中に interrupt されている場合対策)
