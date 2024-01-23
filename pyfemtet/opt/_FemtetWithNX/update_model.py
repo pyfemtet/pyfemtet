@@ -45,7 +45,7 @@ def main(prtPath:str, parameters:'dict as str', x_tPath:str = None):
         try:
             exp = workPart.Expressions.FindObject(k)
         except NXOpen.NXException:
-            print(f'変数{k}は .prt ファイルに含まれていません。無視されます。')
+            print(f'├ 変数{k}は .prt ファイルに含まれていません。無視されます。')
             continue
 
         workPart.Expressions.EditWithUnits(exp, unit_mm, str(v))
@@ -55,33 +55,40 @@ def main(prtPath:str, parameters:'dict as str', x_tPath:str = None):
             nErrs1 = theSession.UpdateManager.DoUpdate(id1)
         # 更新に失敗
         except NXOpen.NXException as e:
-            print('  形状が破綻しました。操作を取り消します。')
-            return
+            print('└ 形状が破綻しました。操作を取り消します。')
+            return None
 
+    print('│ model 更新に成功しました。')
 
-    # parasolid のエクスポート
-    parasolidExporter1 = theSession.DexManager.CreateParasolidExporter()
+    try:
+        # parasolid のエクスポート
+        parasolidExporter1 = theSession.DexManager.CreateParasolidExporter()
 
-    parasolidExporter1.ObjectTypes.Curves = False
-    parasolidExporter1.ObjectTypes.Surfaces = False
-    parasolidExporter1.ObjectTypes.Solids = True
-    
-    parasolidExporter1.InputFile = prtPath
-    parasolidExporter1.ParasolidVersion = NXOpen.ParasolidExporter.ParasolidVersionOption.Current
-    parasolidExporter1.OutputFile = x_tPath
-    
-    parasolidExporter1.Commit()
+        parasolidExporter1.ObjectTypes.Curves = False
+        parasolidExporter1.ObjectTypes.Surfaces = False
+        parasolidExporter1.ObjectTypes.Solids = True
 
-    parasolidExporter1.Destroy()
-    
+        parasolidExporter1.InputFile = prtPath
+        parasolidExporter1.ParasolidVersion = NXOpen.ParasolidExporter.ParasolidVersionOption.Current
+        parasolidExporter1.OutputFile = x_tPath
+
+        parasolidExporter1.Commit()
+
+        parasolidExporter1.Destroy()
+    except:
+        print('└ parasolid 更新に失敗しました。')
+        return None
+
+    print('└ parasolid 更新が正常に終了しました。')
+    return None
 
 
 
 if __name__ == "__main__":
-    print('---script started---')
+    print('---NX started---')
     print('current directory: ', os.getcwd())
     print('arguments: ')
     for arg in sys.argv[1:]:
-        print('  ', arg)
+        print('│ ', arg)
     main(*sys.argv[1:])
-    print('---script end---')
+    print('---NX end---')

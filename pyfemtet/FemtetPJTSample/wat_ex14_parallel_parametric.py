@@ -6,10 +6,10 @@ wat_ex14_parametric.femprj に対し熱伝導解析を行い、
 基板寸法・チップ配置寸法を探索します。
 """
 
-from pyfemtet.opt import OptimizerOptuna
+from pyfemtet.opt import OptimizationManager
 
 
-def maxtemp(Femtet, body_name):
+def max_temperature(Femtet, body_name):
     """Femtet の解析結果からチップの最高温度を取得します。
 
     Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
@@ -21,9 +21,9 @@ def maxtemp(Femtet, body_name):
     """
     Gogh = Femtet.Gogh
 
-    maxtemp, _, _ = Gogh.Watt.GetTemp_py(body_name)
+    temp, _, _ = Gogh.Watt.GetTemp_py(body_name)
 
-    return maxtemp  # degree
+    return temp  # degree
 
 
 def substrate_size(Femtet):
@@ -45,15 +45,15 @@ def substrate_size(Femtet):
 if __name__ == '__main__':
 
     # 最適化処理を行うオブジェクトを用意
-    femopt = OptimizerOptuna()
+    femopt = OptimizationManager()
 
     # 設計変数の設定
     femopt.add_parameter("substrate_w", 40, lower_bound=22, upper_bound=40, memo='基板サイズ X')
     femopt.add_parameter("substrate_d", 60, lower_bound=33, upper_bound=60, memo='基板サイズ Y')
 
     # 目的関数の設定
-    femopt.add_objective(maxtemp, name='メインチップ温度', args=('MAINCHIP',))
-    femopt.add_objective(maxtemp, name='サブチップ温度', args=('SUBCHIP',))
+    femopt.add_objective(max_temperature, name='メインチップ温度', args=('MAINCHIP',))
+    femopt.add_objective(max_temperature, name='サブチップ温度', args=('SUBCHIP',))
     femopt.add_objective(substrate_size, name='基板サイズ')
 
     # 最適化の実行

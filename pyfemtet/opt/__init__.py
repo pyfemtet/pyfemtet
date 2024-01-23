@@ -1,6 +1,2 @@
-from .optimizer import OptimizerOptuna
-from .interface import (
-    NoFEM,
-    FemtetInterface,
-    FemtetWithNXInterface,
-)
+from .base import OptimizationManager, OptunaOptimizer
+from .interface import FemtetInterface, NoFEM

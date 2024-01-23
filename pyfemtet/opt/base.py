@@ -4,20 +4,36 @@ import os
 import datetime
 import inspect
 import ast
-import math
 from time import time, sleep
 from threading import Thread
+from subprocess import Popen
+import warnings
+import logging
 
 import numpy as np
 import pandas as pd
+import optuna
+from optuna.study import MaxTrialsCallback
+from optuna.trial import TrialState
+from optuna.exceptions import ExperimentalWarning
 from optuna._hypervolume import WFG
-import ray
+from dask.distributed import LocalCluster, Client, Lock, get_worker
 
-from win32com.client import Constants
+from win32com.client import constants, Constants
 
-from .core import InterprocessVariables, UserInterruption, TerminatableThread, Scapegoat, restore_constants_from_scapegoat
+from ..core import ModelError, MeshError, SolveError
 from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
+
+
+logger = logging.getLogger('optimization-main')
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('[%(process)d] %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)  # TODO: optuna, dask の logger の書式を統一する
+
+
+warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 
 def symlog(x: float or np.ndarray):
@@ -109,19 +125,26 @@ def _is_feasible(value, lb, ub):
         return True
 
 
-def _ray_are_alive(refs):
-    ready_refs, remaining_refs = ray.wait(refs, num_returns=len(refs), timeout=0)
-    return len(remaining_refs) > 0
+class _Scapegoat:
+    """Helper class for parallelize Femtet."""
+    # constants を含む関数を並列化するために
+    # メイン処理で一時的に constants への参照を
+    # このオブジェクトにして、後で restore する
+    def __init__(self, ignore=False):
+        self._ignore_when_restore_constants = ignore
 
 
 class Function:
     """Base class for Objective and Constraint."""
 
     def __init__(self, fun, name, args, kwargs):
-        # unserializable な COM 定数を parallelize するための処理
+
+        # serializable でない COM 定数を parallelize するため
+        # COM 定数を一度 _Scapegoat 型のオブジェクトにする
         for varname in fun.__globals__:
             if isinstance(fun.__globals__[varname], Constants):
-                fun.__globals__[varname] = Scapegoat()
+                fun.__globals__[varname] = _Scapegoat()
+
         self.fun = fun
         self.name = name
         self.args = args
@@ -144,6 +167,14 @@ class Function:
         if isinstance(fem, FemtetInterface):
             args = (fem.Femtet, *args)
         return self.fun(*args, **self.kwargs)
+
+    def _restore_constants(self):
+        """Helper function for parallelize Femtet."""
+        fun = self.fun
+        for varname in fun.__globals__:
+            if isinstance(fun.__globals__[varname], _Scapegoat):
+                if not fun.__globals__[varname]._ignore_when_restore_constants:
+                    fun.__globals__[varname] = constants
 
 
 class Objective(Function):
@@ -230,12 +261,11 @@ class Constraint(Function):
         super().__init__(fun, name, args, kwargs)
 
 
-@ray.remote
 class HistoryDfCore:
     """Class for managing a DataFrame object in a distributed manner."""
 
-    def __init__(self, df):
-        self.df = df
+    def __init__(self):
+        self.df = pd.DataFrame()
 
     def set_df(self, df):
         self.df = df
@@ -256,7 +286,7 @@ class History:
         cns_names (list): The names of the constraints in the study.
 
     """
-    def __init__(self, history_path):
+    def __init__(self, history_path, client):
         """Initializes a History instance.
 
         Args:
@@ -266,24 +296,23 @@ class History:
 
         # 引数の処理
         self.path = history_path  # .csv
-        self._actor_data = HistoryDfCore.remote(pd.DataFrame())
-        self.data = pd.DataFrame()
+        self._future = client.submit(HistoryDfCore, actor=True)
+        self._actor_data = self._future.result()
         self.param_names = []
         self.obj_names = []
         self.cns_names = []
 
         # path が存在すれば dataframe を読み込む
         if os.path.isfile(self.path):
-            self.actor_data = pd.read_csv(self.path)
-            self.data = pd.read_csv(self.path)
+            self.actor_data = pd.read_csv(self.path, encoding='shift-jis')
 
     @property
     def actor_data(self):
-        return ray.get(self._actor_data.get_df.remote())
+        return self._actor_data.get_df().result()
 
     @actor_data.setter
     def actor_data(self, df):
-        self._actor_data.set_df.remote(df)
+        self._actor_data.set_df(df).result()
 
     def init(self, param_names, obj_names, cns_names):
         """Initializes the parameter, objective, and constraint names in the History instance.
@@ -330,13 +359,12 @@ class History:
             for column in columns:
                 tmp[column] = None
             self.actor_data = tmp
-            self.data = self.actor_data.copy()
 
     def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
         """Records the optimization results in the history.
 
         Args:
-            parameters (dict): The parameter values.
+            parameters (pd.DataFrame): The parameter values.
             objectives (dict): The objective functions.
             constraints (dict): The constraint functions.
             obj_values (list): The objective values.
@@ -361,32 +389,21 @@ class History:
         row.append(message)  # message
         row.append(datetime.datetime.now())  # time
 
-        # append
-        if len(self.actor_data) == 0:
-            self.actor_data = pd.DataFrame([row], columns=self.actor_data.columns)
-        else:
-            tmp = self.actor_data
-            tmp.loc[len(tmp)] = row
-            self.actor_data = tmp
+        with Lock('calc-history'):
+            # append
+            if len(self.actor_data) == 0:
+                self.actor_data = pd.DataFrame([row], columns=self.actor_data.columns)
+            else:
+                tmp = self.actor_data
+                tmp.loc[len(tmp)] = row
+                self.actor_data = tmp
 
-        # calc
-        try:
+            # calc
             tmp = self.actor_data
             tmp['trial'] = np.arange(len(tmp)) + 1  # 1 始まり
             self.actor_data = tmp
             self._calc_non_domi(objectives)
             self._calc_hypervolume(objectives)
-        except (ValueError, pd.errors.IndexingError):  # 計算中に別のプロセスが append した場合、そちらに処理を任せる
-            pass
-
-        # serialize
-        try:
-            self.actor_data.to_csv(self.path, index=None, encoding='shift-jis')
-        except PermissionError:
-            print(f'warning: {self.path} がロックされています。データはロック解除後に保存されます。')
-
-        # unparallelize
-        self.data = self.actor_data.copy()
 
     def _calc_non_domi(self, objectives):
 
@@ -410,10 +427,12 @@ class History:
         del solution_set
 
     def _calc_hypervolume(self, objectives):
-        #### 前準備
+        # プロセス間の競合を避けるためローカルにコピーする
+        df = self.actor_data.copy()
+
         # パレート集合の抽出
-        idx = self.actor_data['non_domi'].values
-        pdf = self.actor_data[idx]
+        idx = df['non_domi'].values
+        pdf = df[idx]
         pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数
         m = len(pareto_set.T)  # 目的変数数
@@ -463,7 +482,6 @@ class History:
             hvs.append(hv)
 
         # 計算結果を履歴の一部に割り当て
-        df = pd.DataFrame(self.actor_data.to_dict())  # read-only error 回避
         df.loc[idx, 'hypervolume'] = np.array(hvs)
 
         # dominated の行に対して、上に見ていって
@@ -473,12 +491,344 @@ class History:
                 try:
                     df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
                 except IndexError:
-                    # pass # nan のままにする
                     df.loc[i, 'hypervolume'] = 0
+
+        # ローカルの df を worker に戻す
         self.actor_data = df
 
 
-class OptimizerBase(ABC):
+class OptimizationStatusActor:
+    status_int = -1
+    status = 'undefined'
+
+    def set(self, value, text):
+        self.status_int = value
+        self.status = text
+
+
+class OptimizationStatus:
+    """Optimization status.
+
+    undefined -> setting up -> launching -> running (-> interrupting) -> terminated
+
+    """
+    UNDEFINED = -1
+    INITIALIZING = 0
+    SETTING_UP = 10
+    LAUNCHING = 20
+    WAIT_1ST = 25
+    RUNNING = 30
+    INTERRUPTING = 40
+    TERMINATED = 50
+    TERMINATE_ALL = 60
+
+    def __init__(self, client):
+        self._future = client.submit(OptimizationStatusActor, actor=True)
+        self._actor = self._future.result()
+        self.set(self.INITIALIZING)
+
+    @classmethod
+    def const_to_str(self, status_const):
+        if status_const == self.UNDEFINED: return 'Undefined'
+        if status_const == self.INITIALIZING: return 'Initializing'
+        if status_const == self.SETTING_UP: return 'Setting up'
+        if status_const == self.LAUNCHING: return 'Launching FEM processes'
+        if status_const == self.WAIT_1ST: return 'Running and waiting for 1st FEM result.'
+        if status_const == self.RUNNING: return 'Running'
+        if status_const == self.INTERRUPTING: return 'Interrupting'
+        if status_const == self.TERMINATED: return 'Terminated'
+        if status_const == self.TERMINATE_ALL: return 'Terminate_all'
+
+    def set(self, status_const):
+        # self._actor.status_int = status_const
+        # self._actor.status = self.const_to_str(status_const)
+        self._actor.set(status_const, self.const_to_str(status_const)).result()
+        print(f'---{self.const_to_str(status_const)}---')
+
+    def get(self):
+        return self._actor.status_int
+
+    def get_text(self):
+        return self._actor.status
+
+
+class AbstractOptimizer(ABC):
+
+    def __init__(self):
+        self.fem = None
+        self.fem_class = None
+        self.fem_kwargs = dict()
+        self.parameters = pd.DataFrame()
+        self.objectives = dict()
+        self.constraints = dict()
+        self.status = None  # shared
+        self.history = None  # shared
+        self.message = ''
+        self.seed = None
+        self.timeout = None
+        self.n_trials = None
+        self.is_cluster = False
+
+    def f(self, x):
+
+        if self.status.get() == OptimizationStatus.LAUNCHING:
+            self.status.set(OptimizationStatus.WAIT_1ST)
+
+        # x の更新
+        self.parameters['value'] = x
+
+        # FEM の更新
+        logger.debug('fem.update() start')
+        self.fem.update(self.parameters)
+
+        # y, _y, c の更新
+        logger.debug('calculate y start')
+        y = [obj.calc(self.fem) for obj in self.objectives.values()]
+
+        logger.debug('calculate _y start')
+        _y = [obj.convert(value) for obj, value in zip(self.objectives.values(), y)]
+
+        logger.debug('calculate c start')
+        c = [cns.calc(self.fem) for cns in self.constraints.values()]
+
+        logger.debug('history.record start')
+        self.history.record(
+            self.parameters,
+            self.objectives,
+            self.constraints,
+            y,
+            c,
+            self.message
+        )
+
+        if self.status.get() == OptimizationStatus.WAIT_1ST:
+            self.status.set(OptimizationStatus.RUNNING)
+
+        logger.debug('history.record end')
+        return np.array(y), np.array(_y), np.array(c)
+
+    def set_fem(self):
+        self.fem = self.fem_class(**self.fem_kwargs)
+
+        # COM 定数の restore
+        for obj in self.objectives.values():
+            obj._restore_constants()
+        for cns in self.constraints.values():
+            cns._restore_constants()
+
+    def get_parameter(self, format='dict'):
+        """Returns the parameters in the specified format.
+
+        Args:
+            format (str, optional): The desired format of the parameters. Can be 'df' (DataFrame), 'values', or 'dict'. Defaults to 'dict'.
+
+        Returns:
+            object: The parameters in the specified format.
+
+        Raises:
+            ValueError: If an invalid format is provided.
+
+        """
+        if format == 'df':
+            return self.parameters
+        elif format == 'values' or format == 'value':
+            return self.parameters.value.values
+        elif format == 'dict':
+            ret = {}
+            for i, row in self.parameters.iterrows():
+                ret[row['name']] = row.value
+            return ret
+        else:
+            raise ValueError('get_parameter() got invalid format: {format}')
+
+    def _main(self, subprocess_idx):
+        self.set_fem()
+        self.main(subprocess_idx)
+
+    @abstractmethod
+    def main(self, subprocess_idx: int):
+        """Called from dask worker."""
+        pass
+
+    @abstractmethod
+    def setup_before_parallel(self, *args, **kwargs):
+        """Preprocessing for dask parallel workers."""
+        pass
+
+
+class OptunaOptimizer(AbstractOptimizer):
+
+    def __init__(self, sampler_class=None, sampler_kwargs=None):
+        super().__init__()
+        self.study_name = None
+        self.storage = None
+        self.study = None
+        self.sampler_class = optuna.samplers.TPESampler if sampler_class is None else sampler_class
+        self.sampler_kwargs = dict() if sampler_kwargs is None else sampler_kwargs
+
+    def _objective(self, trial):
+
+        # 中断の確認 (FAIL loop に陥る対策)
+        if self.status.get() == OptimizationStatus.INTERRUPTING:
+            trial.study.stop()  # 現在実行中の trial を最後にする
+            return None  # set TrialState FAIL
+
+        # candidate x
+        x = []
+        for i, row in self.parameters.iterrows():
+            v = trial.suggest_float(row['name'], row['lb'], row['ub'])
+            x.append(v)
+        x = np.array(x).astype(float)
+
+        # message の設定
+        self.message = trial.user_attrs['message'] if 'message' in trial.user_attrs.keys() else ''
+
+        # fem や opt 経由で変数を取得して constraint を計算する時のためにアップデート
+        self.parameters['value'] = x
+        self.fem.update_parameter(self.parameters)
+
+        # strict 拘束
+        strict_constraints = [cns for cns in self.constraints.values() if cns.strict]
+        for cns in strict_constraints:
+            feasible = True
+            cns_value = cns.calc(self.fem)
+            if cns.lb is not None:
+                feasible = feasible and (cns_value >= cns.lb)
+            if cns.ub is not None:
+                feasible = feasible and (cns.ub >= cns_value)
+            if not feasible:
+                print(f'以下の変数で拘束 {cns.name} が満たされませんでした。')
+                print(self.get_parameter('dict'))
+                raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
+
+        # 計算
+        try:
+            _, _y, c = self.f(x)
+        except (ModelError, MeshError, SolveError) as e:
+            print(str(type(e)).split("'")[1].split('.')[-1], e)
+            print('FEM 解析に失敗しました.')
+
+            # 中断の確認 (解析中に interrupt されている場合対策)
+            if self.status.get() == OptimizationStatus.INTERRUPTING:
+                trial.study.stop()  # 現在実行中の trial を最後にする
+                return None  # set TrialState FAIL
+
+            raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
+
+        # 拘束 attr の更新
+        _c = []  # 非正なら OK
+        for (name, cns), c_value in zip(self.constraints.items(), c):
+            lb, ub = cns.lb, cns.ub
+            if lb is not None:  # fun >= lb  <=>  lb - fun <= 0
+                _c.append(lb - c_value)
+            if ub is not None:  # ub >= fun  <=>  fun - ub <= 0
+                _c.append(c_value - ub)
+        trial.set_user_attr('constraint', _c)
+
+        # 中断の確認 (解析中に interrupt されている場合対策)
+        if self.status.get() == OptimizationStatus.INTERRUPTING:
+            trial.study.stop()  # 現在実行中の trial を最後にする
+            return None  # set TrialState FAIL
+
+        # 結果
+        return tuple(_y)
+
+    def _constraint(self, trial):
+        return trial.user_attrs['constraint'] if 'constraint' in trial.user_attrs.keys() else (1,)  # infeasible
+
+    def setup_before_parallel(self):
+        """Main process から呼ばれる関数"""
+
+        # create storage
+        self.study_name = os.path.basename(self.history.path)
+        storage_path = self.history.path.replace('.csv', '.db')  # history と同じところに保存
+        if self.is_cluster:  # remote cluster なら scheduler の working dir に保存
+            storage_path = os.path.basename(self.history.path).replace('.csv', '.db')
+
+        # create study if storage is not exists
+        if not os.path.exists(storage_path):
+
+            self.storage = optuna.integration.dask.DaskStorage(
+                f'sqlite:///{storage_path}',
+            )
+
+            self.study = optuna.create_study(
+                study_name=self.study_name,
+                storage=self.storage,
+                load_if_exists=True,
+                directions=['minimize'] * len(self.objectives),
+            )
+
+            # 初期値の設定
+            if len(self.study.trials) == 0:  # リスタートでなければ
+                # ユーザーの指定した初期値
+                params = self.get_parameter('dict')
+                self.study.enqueue_trial(params, user_attrs={"message": "initial"})
+
+        else:
+
+            self.storage = optuna.integration.dask.DaskStorage(
+                f'sqlite:///{storage_path}',
+            )
+
+        # # LHS を初期値にする
+        # if use_lhs_init:
+        #     names = []
+        #     bounds = []
+        #     for i, row in self.parameters.iterrows():
+        #         names.append(row['name'])
+        #         lb = row['lb']
+        #         ub = row['ub']
+        #         bounds.append([lb, ub])
+        #     data = generate_lhs(bounds, seed=self.seed)
+        #     for datum in data:
+        #         d = {}
+        #         for name, v in zip(names, datum):
+        #             d[name] = v
+        #         study.enqueue_trial(d, user_attrs={"message": "initial Latin Hypercube Sampling"})
+
+    def main(self, subprocess_idx):
+        """Dask worker から呼ばれる関数"""
+
+        # (re)set random seed
+        seed = self.seed
+        if seed is not None:
+            if subprocess_idx is not None:
+                seed += subprocess_idx
+
+        # restore sampler
+        sampler = self.sampler_class(
+            seed=seed,
+            constraints_func=self._constraint,
+            **self.sampler_kwargs
+        )
+
+        # load study
+        study = optuna.load_study(
+            study_name=self.study_name,
+            storage=self.storage,
+            sampler=sampler,
+        )
+
+        # callback to terminate
+        callbacks = []
+        n_existing_trials = len(self.history.actor_data)
+        if self.n_trials is not None:
+            n_trials = n_existing_trials + self.n_trials
+            callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))
+
+        # run
+        study.optimize(
+            self._objective,
+            timeout=self.timeout,
+            callbacks=callbacks,
+        )
+
+        # finalize
+        del self.fem
+
+
+class OptimizationManager:
     """Base class for optimization algorithms.
 
     Attributes:
@@ -498,74 +848,56 @@ class OptimizerBase(ABC):
 
     """
 
-    def __init__(self, fem: FEMInterface = None, history_path=None):
-        """Initializes an OptimizerBase instance.
+    def __init__(
+            self,
+            fem: FEMInterface = None,
+            opt: AbstractOptimizer = None,
+            history_path: str = None,
+            scheduler_address: str = None
+    ):
+        """Initializes an OptimizationManager instance.
 
         Args:
             fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automattically set to FemtetInterface.
+            opt (AbstractOptimizer):
             history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
+            scheduler_address (str or None): If cluster processing, set this parameter like ``"tcp://xxx.xxx.xxx.xxx:xxxx"``.
 
         """
-        print('---initialize---')
 
-        ray.init(ignore_reinit_error=True)
+        logger.info('Initialize OptimizationManager')
 
         # 引数の処理
         if history_path is None:
-            history_path = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S.csv')
+            history_path = datetime.datetime.now().strftime('%Y%m%d_%H%M%S.csv')
         self.history_path = os.path.abspath(history_path)
+        self.scheduler_address = scheduler_address
+
         if fem is None:
             self.fem = FemtetInterface()
         else:
             self.fem = fem
 
+        if opt is None:
+            self.opt = OptunaOptimizer()
+        else:
+            self.opt = opt
+
         # メンバーの宣言
-        self.ipv = InterprocessVariables()
-        self.parameters = pd.DataFrame()
-        self.objectives = dict()
-        self.constraints = dict()
-        self.history = History(self.history_path)
-        self.monitor: Monitor = None
-        self.monitor_thread = None
+        self.client = None
+        self.status = None
+        self.history = None
+        self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
-        self.seed: int or None = None
-        self.message = ''
-        self.obj_values: [float] = []
-        self.cns_values: [float] = []
-        self._fem_class = type(self.fem)
-        self._fem_kwargs = self.fem.kwargs.copy()
-
-        # 初期化
-        self.parameters = pd.DataFrame(
-            columns=['name', 'value', 'lb', 'ub', 'memo'],
-            dtype=object,
-        )
-
-        self.ipv.set_state('ready')
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
         state = self.__dict__.copy()
         del state['fem']
-        del state['monitor']
-        del state['monitor_thread']
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-
-    def set_fem(self, **extra_kwargs):
-        """Sets or resets the finite element method interface.
-
-        Args:
-            **extra_kwargs: Additional keyword arguments to be passed to the FEMInterface constructor.
-
-        """
-        fem_kwargs = self._fem_kwargs.copy()
-        fem_kwargs.update(extra_kwargs)
-        self.fem = self._fem_class(
-            **fem_kwargs,
-        )
 
     def set_random_seed(self, seed: int):
         """Sets the random seed for reproducibility.
@@ -574,16 +906,7 @@ class OptimizerBase(ABC):
             seed (int): The random seed value to be set.
 
         """
-        self.seed = seed
-
-    def get_random_seed(self):
-        """Returns the current random seed value.
-
-        Returns:
-            int: The current random seed value.
-
-        """
-        return self.seed
+        self.opt.seed = seed
 
     def add_parameter(
             self,
@@ -616,17 +939,17 @@ class OptimizerBase(ABC):
 
         d = {
             'name': name,
-            'value': initial_value,
-            'lb': lower_bound,
-            'ub': upper_bound,
+            'value': float(initial_value),
+            'lb': float(lower_bound),
+            'ub': float(upper_bound),
             'memo': memo,
         }
         pdf = pd.DataFrame(d, index=[0], dtype=object)
 
-        if len(self.parameters) == 0:
-            self.parameters = pdf
+        if len(self.opt.parameters) == 0:
+            self.opt.parameters = pdf
         else:
-            self.parameters = pd.concat([self.parameters, pdf], ignore_index=True)
+            self.opt.parameters = pd.concat([self.opt.parameters, pdf], ignore_index=True)
 
     def add_objective(
             self,
@@ -665,14 +988,14 @@ class OptimizerBase(ABC):
             i = 0
             while True:
                 candidate = f'{prefix}_{str(int(i))}'
-                is_existing = candidate in list(self.objectives.keys())
+                is_existing = candidate in list(self.opt.objectives.keys())
                 if not is_existing:
                     break
                 else:
                     i += 1
             name = candidate
 
-        self.objectives[name] = Objective(fun, name, direction, args, kwargs)
+        self.opt.objectives[name] = Objective(fun, name, direction, args, kwargs)
 
 
     def add_constraint(
@@ -715,7 +1038,7 @@ class OptimizerBase(ABC):
             i = 0
             while True:
                 candidate = f'{prefix}_{str(int(i))}'
-                is_existing = candidate in list(self.objectives.keys())
+                is_existing = candidate in list(self.opt.constraints.keys())
                 if not is_existing:
                     break
                 else:
@@ -730,7 +1053,7 @@ class OptimizerBase(ABC):
                 message += '拘束に解析結果を含めたい場合は, strict=False を設定してください.'
                 raise Exception(message)
 
-        self.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
+        self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
 
     def get_parameter(self, format='dict'):
         """Returns the parameters in the specified format.
@@ -745,140 +1068,9 @@ class OptimizerBase(ABC):
             ValueError: If an invalid format is provided.
 
         """
-        if format == 'df':
-            return self.parameters
-        elif format == 'values' or format == 'value':
-            return self.parameters.value.values
-        elif format == 'dict':
-            ret = {}
-            for i, row in self.parameters.iterrows():
-                ret[row['name']] = row.value
-            return ret
-        else:
-            raise ValueError('get_parameter() got invalid format: {format}')
+        return self.opt.get_parameter(format)
 
-    def is_calculated(self, x):
-        """Checks if the proposed x is the last calculated value.
-
-        Args:
-            x (iterable): The proposed x value.
-
-        Returns:
-            bool: True if the proposed x is the last calculated value, False otherwise.
-
-        """
-
-        # 提案された x が最後に計算したものと一致していれば True
-        # ただし 1 回目の計算なら False
-        #    ひとつでも違う  1回目の計算  期待
-        #    True            True         False
-        #    False           True         False
-        #    True            False        False
-        #    False           False        True
-
-        # 1 回目の計算
-        if len(self.history.data) == 0:
-            return False
-
-        # ひとつでも違う
-        param_names = self.history.param_names
-        last_x = self.history.data[param_names].iloc[-1].values
-        condition = False
-        for _x, _last_x in zip(x, last_x):
-            condition = condition or (float(_x) != float(_last_x))
-
-        return not condition
-
-
-    def f(self, x, message=''):
-        """Calculates the objective function values for the given parameter values.
-
-        Args:
-            x (iterable): The parameter values.
-            message (str, optional): Additional information about the calculation. Defaults to ''.
-
-        Raises:
-            UserInterruption: If the calculation is interrupted.
-
-        Returns:
-            list: The converted objective function values.
-        
-        Note:
-            The return value is not the return value of a user-defined function,
-            but the converted value when reconsidering the optimization problem to be minimize problem.
-            See :func:`Objective.convert` for detail.
-
-        """
-
-        x = np.array(x)
-
-        # 中断指令の処理
-        if self.ipv.get_state() == 'interrupted':
-            raise UserInterruption
-
-        # アルゴリズムの関係で、すでに計算しているのにもう一度計算しようとする場合は
-        # FEM 解析を飛ばす
-        if not self.is_calculated(x):
-
-            # parameter の update
-            self.parameters['value'] = x
-
-            # fem のソルブ
-            self.fem.update(self.parameters)
-
-            # constants への参照を復帰させる
-            # parallel_process の中でこれを実行するとメインプロセスで restore されなくなるし、
-            # main の中 parallel_process の前にこれを実行すると unserializability に引っかかる
-            # メンバー変数の列挙
-            for attr_name in dir(self):
-                if attr_name.startswith('__'):
-                    continue
-                # メンバー変数の取得
-                attr_value = getattr(self, attr_name)
-                # メンバー変数が辞書なら
-                if isinstance(attr_value, dict):
-                    for _, value in attr_value.items():
-                        # 辞書の value が Function なら
-                        if isinstance(value, Function):
-                            restore_constants_from_scapegoat(value)
-
-            # 計算
-            self.obj_values = [float(obj.calc(self.fem)) for _, obj in self.objectives.items()]
-            self.cns_values = [float(cns.calc(self.fem)) for _, cns in self.constraints.items()]
-
-            # 記録
-            if self.fem.subprocess_idx is not None:
-                message = message + f'; by subprocess{self.fem.subprocess_idx}'
-            self.history.record(self.parameters, self.objectives, self.constraints, self.obj_values, self.cns_values, message)
-
-        # minimize
-        return [obj.convert(v) for (_, obj), v in zip(self.objectives.items(), self.obj_values)]
-
-
-    @abstractmethod
-    def concrete_main(self, *args, **kwargs):
-        """The main function for the concrete class to implement.
-
-        if ``n_trials`` >= 2, this method will be called by a parallel process.
-        
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
-        pass
-
-    def setup_concrete_main(self, *args, **kwargs):
-        """Performs the setup for the concrete class.
-        
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
-        pass
-
-    def setup_monitor_server(self, host, port=None):
+    def set_monitor_host(self, host='localhost', port=None):
         """Sets up the monitor server with the specified host and port.
 
         Args:
@@ -900,7 +1092,12 @@ class OptimizerBase(ABC):
             port=port
         )
 
-    def main(self, n_trials=None, n_parallel=1, timeout=None, method='TPE', **setup_kwargs):
+    def main(
+            self,
+            n_trials=None,
+            n_parallel=1,
+            timeout=None,
+    ):
         """Runs the main optimization process.
 
         Args:
@@ -914,7 +1111,7 @@ class OptimizerBase(ABC):
             If setup_monitor_server() is not executed, a local server for monitoring will be started at localhost:8080.
 
         Note:
-            If ``n_trials`` and ``timeout`` are both None, it will calculate repeatedly until interrupted by the user.
+            If ``n_trials`` and ``timeout`` are both None, it will calculate repeatedly until interrupting by the user.
         
         Note:
             If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.
@@ -926,90 +1123,170 @@ class OptimizerBase(ABC):
 
         """
 
-        # 共通引数
-        self.n_trials = n_trials
-        self.n_parallel = n_parallel
-        self.timeout = timeout
-        self.method = method
 
-        # setup
-        self.ipv.set_state('preparing')
-        self.history.init(
-            self.parameters['name'].to_list(),
-            list(self.objectives.keys()),
-            list(self.constraints.keys()),
-        )
-        self.setup_concrete_main(**setup_kwargs)  # 具象クラス固有のメソッド
+        # dask メンバーの設定
+        self.opt.is_cluster = self.scheduler_address is not None
+        if self.opt.is_cluster:
+            # 既存のクラスターに接続
+            logger.info('Connecting to existing cluster.')
+            self.client = Client(self.scheduler_address)
 
-        # 計算スレッドとそれを止めるためのイベント
-        t = Thread(target=self.concrete_main)
-        t.start()  # Exception が起きてもここでは検出できないし、メインスレッドは落ちない
+        else:
+            logger.info('Launching single machine cluster. This may take tens of seconds.')
+            cluster = LocalCluster(processes=True, threads_per_worker=1)
+            self.client = Client(cluster, direct_to_workers=False)
+            self.scheduler_address = self.client.scheduler.address
 
-        # 計算開始
-        self.ipv.set_state('processing')
+        # monitor 用 worker を起動
+        logger.info('Launching monitor server. This may take a few seconds.')
+        self.monitor_process_worker_name = datetime.datetime.now().strftime("monitor-server-process-%Y%m%d%H%M%S")
+        cmd = f'dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
+        worker_addresses = list(self.client.has_what().keys())
+        Popen(cmd, shell=True)  #, stdout=PIPE) --> cause stream error
 
-        # モニタースレッド
-        self.monitor = Monitor(self)
-        self.monitor_thread = TerminatableThread(
-            target=self.monitor.start_server,
-            kwargs=self.monitor_server_kwargs
-        )
-        self.monitor_thread.start()
-
-        # 追加の計算プロセスが行う処理の定義
-        @ray.remote
-        def parallel_process(_subprocess_idx, _subprocess_settings):
-            print('Start to re-initialize fem object.')
-            # プロセス化されたときに del した fem を restore する
-            self.set_fem(
-                subprocess_idx=_subprocess_idx,
-                subprocess_settings=_subprocess_settings
-            )
-            print('Start to setup parallel process.')
-            self.fem.parallel_setup()
-            print('Start parallel optimization.')
-            try:
-                self.concrete_main(_subprocess_idx)
-            except UserInterruption:
-                pass
-            print('Finish parallel optimization.')
-            self.fem.parallel_terminate()
-            print('Finish parallel process.')
-
-        # 追加の計算プロセスを立てる前の前処理
-        subprocess_settings = self.fem.settings_before_parallel(self)
-
-        # 追加の計算プロセス
-        obj_refs = []
-        for subprocess_idx in range(self.n_parallel-1):
-            obj_ref = parallel_process.remote(subprocess_idx, subprocess_settings)
-            obj_refs.append(obj_ref)
-
-        start = time()
-        while True:
-            should_terminate = [not t.is_alive(), not _ray_are_alive(obj_refs)]
-            if all(should_terminate):  # all tasks are killed
-                break
+        # monitor 用 worker が増えるまで待つ
+        while not (len(self.client.has_what()) > len(worker_addresses)):
             sleep(1)
+        new_worker_addresses = list(self.client.has_what().keys())
+        launched_worker_addresses = [w_adrs for w_adrs in new_worker_addresses if not w_adrs in worker_addresses]
+        assert len(launched_worker_addresses) == 1
+        launched_worker_address = launched_worker_addresses[0]
+
+        # actor の設定
+        self.status = OptimizationStatus(self.client)
+        self.status.set(OptimizationStatus.SETTING_UP)
+        self.history = History(self.history_path, self.client)
+        self.history.init(
+            self.opt.parameters['name'].to_list(),
+            list(self.opt.objectives.keys()),
+            list(self.opt.constraints.keys()),
+        )
+
+        # 共通引数
+        self.opt.n_trials = n_trials
+        self.opt.timeout = timeout
+
+        # fem
+        self.fem.setup_before_parallel(self.client)
+
+        # opt
+        self.opt.fem_class = type(self.fem)
+        self.opt.fem_kwargs = self.fem.kwargs
+        self.opt.status = self.status
+        self.opt.history = self.history
+        self.opt.setup_before_parallel()
+
+        # launch monitor
+        self.monitor_process_future = self.client.submit(
+            start_monitor_server_forever,
+            self.history, self.status,  # args
+            **self.monitor_server_kwargs,  # kwargs
+            workers=launched_worker_address,  # if invalid arg,
+            allow_other_workers=False
+        )
+
+        # クラスターでの計算開始
+        self.status.set(OptimizationStatus.LAUNCHING)
+        start = time()
+        subprocess_indices = list(range(n_parallel))
+
+        if self.opt.is_cluster:
+            # FIXME: monitor-server-process には割り当てないようにする
+            worker_addresses = list(self.client.nthreads().keys())
+            worker_addresses.remove(launched_worker_address)
+            calc_futures = self.client.map(
+                self.opt._main,
+                subprocess_indices,
+                workers=worker_addresses,
+                allow_other_workers=False,
+            )
+
+        else:
+            # ローカルなら既存の fem をひとつ使う
+            calc_futures = self.client.map(self.opt._main, subprocess_indices[1:])
+
+            # ローカルプロセスでの計算開始
+            # constants の restore （map の後なら大丈夫）
+            # TODO: 最適化中に cluster を scale する場合はここに気を付ける
+            for obj in self.opt.objectives.values():
+                obj._restore_constants()
+            for cns in self.opt.constraints.values():
+                cns._restore_constants()
+            self.opt.fem = self.fem
+            t_main = Thread(target=self.opt.main, args=(subprocess_indices[0],))
+            t_main.start()
+
+        # save history
+        def save_history():
+            while True:
+                sleep(2)
+                try:
+                    self.history.actor_data.to_csv(self.history.path, index=None, encoding='shift-jis')
+                except PermissionError:
+                    pass
+                if self.status.get() == OptimizationStatus.TERMINATED:
+                    break
+        t_save_history = Thread(target=save_history)
+        t_save_history.start()
+
+
+        # 終了を待つ
+        self.client.gather(calc_futures)
+        if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
+            t_main.join()
+        self.status.set(OptimizationStatus.TERMINATED)
         end = time()
 
         # 一応
-        t.join()
-        ray.wait(obj_refs)
+        t_save_history.join()
 
         print(f'Optimization finished. Elapsed time is {end - start} sec.')
-        self.ipv.set_state('terminated')
         print('計算が終了しました. ウィンドウを閉じると終了します.')
         print(f'結果は{self.history.path}を確認してください.')
 
-        # shutdown 前に ray remote actor を消しておく
-        ray.kill(self.ipv.ns)
-        del self.ipv.ns
-        for obj in obj_refs:
-            del obj
+    def terminate_all(self):
 
-        ray.shutdown()
+        # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
+        sleep(1)
 
-    def terminate_monitor(self):
-        """Forcefully terminates the monitor thread."""
-        self.monitor_thread.force_terminate()
+        # terminate monitor process
+        self.status.set(OptimizationStatus.TERMINATE_ALL)
+        print(self.monitor_process_future.result())
+        sleep(1)
+
+        # terminate actors
+        self.client.cancel(self.history._future, force=True)
+        self.client.cancel(self.status._future, force=True)
+        print('Terminate actors.')
+        sleep(1)
+
+        # terminate monitor worker
+        n_workers = len(self.client.nthreads())
+        self.client.retire_workers(
+            names=[self.monitor_process_worker_name],
+            close_workers=True,
+            remove=True,
+        )
+        while n_workers == len(self.client.nthreads()):
+            sleep(1)
+        print('Terminate monitor processes worker.')
+        sleep(1)
+
+        # close scheduler, other workers(, cluster)
+        self.client.close()
+        while self.client.scheduler is not None:
+            sleep(1)
+        print('Terminate client.')
+
+        # terminate dask relative processes.
+        if not self.opt.is_cluster:
+            self.client.shutdown()
+            print('Terminate all relative processes.')
+        sleep(3)
+
+
+def start_monitor_server_forever(history, status, host='localhost', port=8080):
+    monitor = Monitor(history, status)
+    monitor.start_server(host, port)
+    return 'Exit monitor server process gracefully'
+

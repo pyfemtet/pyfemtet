@@ -15,6 +15,17 @@ Femtet の電磁波解析ソルバーを用い、
    :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py>`
    をダブルクリックして実行してください。
 
+.. warning::
+
+   この事例の実施には `BoTorch` ライブラリが必要です。
+   下記いずれかのコマンドで `BoTorch` ライブラリのインストールを行ってから
+   実施してください。
+   ``py -m pip install botorch`` 又は 
+   ``py -m pip install pyfemtet[all_methods]``
+
+   BoTorch ライブラリを使用しない場合は、プログラム内のコメントに従って
+   一部を修正してください。ただし、収束が遅くなる場合があります。
+
 .. note::
 
    FEM 問題としての詳細については、FemtetHelp / 例題集 / 電磁波解析 / 例題40 を参照してください。
