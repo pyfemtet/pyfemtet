@@ -71,13 +71,18 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 シンプルな API
 ----------------------------
 
-下記は多目的最適化の実施例です。使用方法の詳細は :doc:`usage` セクションを確認してください。
+下記は多目的最適化の実施例です。
+``add_parameter()`` と ``add_objective()`` で問題を設定し、
+``main()`` で実施することができます。
+それ以外はあなたの Femtet のマクロスクリプトを流用できます。
+詳細な実施例は :doc:`usage` セクションを確認してください。
 
 .. code-block:: python
 
-   from pyfemtet.opt import OptimizerOptuna
+   from pyfemtet.opt import OptimizationManager
 
    def max_displacement(Femtet):
+
        dx, dy, dz = Femtet.Gogh.Galileo.GetMaxDisplacement()
        return dy
 
@@ -88,16 +93,12 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
        return w * d * h
 
    if __name__ == '__main__':
-       femopt = OptimizerOptuna()
+       femopt = OptimizationManager()
        femopt.add_parameter('w', 10, 2, 20)
        femopt.add_parameter('d', 10, 2, 20)
        femopt.add_objective(max_displacement, name='最大変位', direction=0)
        femopt.add_objective(volume, name='体積', direction='minimize')
        femopt.main(n_trials=20)
-
-.. note::
-
-   このサンプルを実施するためには :download:`サンプル プロジェクト <files/opt_sample.femprj>` をダウンロードし、Femtet で開いた状態で上記スクリプトを実行してください。
 
 
 インストール
@@ -132,13 +133,13 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
     .. note::
 
-        pyfemtet は バージョン 3.9 ~ 3.12 の Python に対応していますが、
-        最適化手法の一部は 3.12 に対応していないライブラリに依存しています。
+        2024 年 1 月現在、pyfemtet は バージョン 3.9 ~ 3.12 の Python で動作します。
+        ただし、:doc:`/examples` にも使用している ``BoTorch`` ライブラリはバージョン 3.12 に対応していません。
+        すべての最適化手法を実施できるため、現在のところ、Python バージョンは 3.11 を推奨します。
 
     .. tip::
 
-        実施例の最適化手法のすべてを使うには、バージョン 3.11 以下の Python が必要です。
-        最新版でないバージョンの python をダウンロードするには
+        最新版でないバージョンの Python をダウンロードするには
         下記のスクリーンショットを参考に
         ご自身の環境に応じたインストーラをダウンロードしてください。
 
@@ -157,10 +158,16 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
 4. **pyfemtet のインストール**
 
-    コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。::
+    **（python 3.11 以前の場合）** コマンドプロンプトで下記コマンドを実行してください。
+    ライブラリのダウンロード及びインストールが始まります。::
+
+        py -m pip install pyfemtet[all_methods] --no-warn-script-location 
+
+    **（python 3.12 の場合）** コマンドプロンプトで下記コマンドを実行してください。
+    ライブラリのダウンロード及びインストールが始まります。::
 
         py -m pip install pyfemtet --no-warn-script-location 
-    
+
     インストールが終了すると、"Successfully installed " の表示の後、コマンドプロンプトの制御が戻ります。
 
     .. figure:: pip_while_install.png
