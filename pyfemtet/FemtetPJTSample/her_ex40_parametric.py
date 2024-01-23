@@ -107,6 +107,8 @@ if __name__ == '__main__':
     s = SParameterCalculator()
 
     # 最適化手法を定義するオブジェクトを用意
+    # BoTorch ライブラリを使わない場合、このブロックをコメントアウトし、
+    # opt = None としてください。
     opt = OptunaOptimizer(
         sampler_class=BoTorchSampler,
         sampler_kwargs=dict(

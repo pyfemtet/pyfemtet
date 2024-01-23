@@ -14,6 +14,17 @@ Femtet の磁場解析ソルバーを用い、有限長ソレノイドコイル�
    :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>`
    をダブルクリックして実行してください。
 
+.. warning::
+
+   この事例の実施には `BoTorch` ライブラリが必要です。
+   下記いずれかのコマンドで `BoTorch` ライブラリのインストールを行ってから
+   実施してください。
+   ``py -m pip install botorch`` 又は 
+   ``py -m pip install pyfemtet[all_methods]``
+
+   BoTorch ライブラリを使用しない場合は、プログラム内のコメントに従って
+   一部を修正してください。ただし、収束が遅くなる場合があります。
+
 .. note::
 
    FEM 問題としての詳細については、FemtetHelp / 例題集 / 磁場解析 / 例題8 を参照してください。
