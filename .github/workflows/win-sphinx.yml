@@ -52,7 +52,7 @@ jobs:
 
     - name: Build and make html to docs/_build
       run: |
-        .\.docs\update_apidoc.bat
+        .\.docs\build.bat
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v2
