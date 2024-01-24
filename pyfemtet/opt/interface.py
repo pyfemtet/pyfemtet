@@ -1,9 +1,10 @@
 import os
 import sys
-from time import sleep
+from time import sleep, time
 import json
 import subprocess
 import logging
+import signal
 
 import pandas as pd
 import psutil
@@ -187,7 +188,11 @@ class FemtetInterface(FEMInterface):
                 hwnd = self.Femtet.hWnd
                 pid = _get_pid(hwnd)
                 util.close_femtet(hwnd, 1, True)
+                start = time()
                 while psutil.pid_exists(pid):
+                    if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
+                        os.kill(pid, signal.SIGKILL)
+                        break
                     sleep(1)
                 sleep(1)
 
@@ -365,6 +370,7 @@ class FemtetInterface(FEMInterface):
                 # 再起動
                 # if self.pp: print(' '*print_indent, 'Femtet プロセスの異常終了が検知されました. 再起動を試みます.')
                 print('Femtet プロセスの異常終了が検知されました. 回復を試みます.')
+                CoInitialize()
                 self.connect_femtet(connect_method='new')
                 self.open(self.femprj_path, self.model_name)
 

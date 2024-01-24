@@ -350,6 +350,7 @@ class History:
 
         # 引数の処理
         self.path = history_path  # .csv
+        self.is_restart = False
         self._future = client.submit(HistoryDfCore, actor=True)
         self._actor_data = self._future.result()
         self.param_names = []
@@ -359,6 +360,7 @@ class History:
         # path が存在すれば dataframe を読み込む
         if os.path.isfile(self.path):
             self.actor_data = pd.read_csv(self.path, encoding='shift-jis')
+            self.is_restart = True
 
     @property
     def actor_data(self):
@@ -905,7 +907,9 @@ class OptunaOptimizer(AbstractOptimizer):
         callbacks = []
         n_existing_trials = len(self.history.actor_data)
         if self.n_trials is not None:
-            n_trials = n_existing_trials + self.n_trials
+            n_trials = self.n_trials
+            if self.history.is_restat:
+                n_trials += n_existing_trials  # FIXME: 恐らく restart かつ Nanny process のリスタート時に加算されてしまう
             callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))
 
         # run
