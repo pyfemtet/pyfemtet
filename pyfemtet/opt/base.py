@@ -724,6 +724,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.study_name = None
         self.storage = None
         self.study = None
+        self.optimize_callbacks = []
         self.sampler_class = optuna.samplers.TPESampler if sampler_class is None else sampler_class
         self.sampler_kwargs = dict() if sampler_kwargs is None else sampler_kwargs
         self.additional_initial_parameter = []
@@ -809,8 +810,19 @@ class OptunaOptimizer(AbstractOptimizer):
         if self.is_cluster:  # remote cluster なら scheduler の working dir に保存
             storage_path = os.path.basename(self.history.path).replace('.csv', '.db')
 
-        # create study if storage is not exists
-        if not os.path.exists(storage_path):
+        # callback to terminate
+        if self.n_trials is not None:
+            n_trials = self.n_trials
+
+            # restart である場合、追加 N 回と見做す
+            if self.history.is_restart:
+                n_existing_trials = len(self.history.actor_data)
+                n_trials += n_existing_trials
+
+            self.optimize_callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))
+
+        # if not restart, create study if storage is not exists
+        if not self.history.is_restart:
 
             self.storage = optuna.integration.dask.DaskStorage(
                 f'sqlite:///{storage_path}',
@@ -854,11 +866,16 @@ class OptunaOptimizer(AbstractOptimizer):
                             d, user_attrs={"message": "additional initial (Latin Hypercube Sampling)"}
                         )
 
+        # if is_restart, load study
         else:
-
+            if not os.path.exists(storage_path):
+                raise FileNotFoundError(f'{storage_path} が見つかりません。.db ファイルは .csv ファイルと同じフォルダに生成されます。クラスター解析の場合は、スケジューラを起動したフォルダに生成されます。')
             self.storage = optuna.integration.dask.DaskStorage(
                 f'sqlite:///{storage_path}',
             )
+
+
+
 
     def add_init_parameter(
             self,
@@ -903,20 +920,11 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler=sampler,
         )
 
-        # callback to terminate
-        callbacks = []
-        n_existing_trials = len(self.history.actor_data)
-        if self.n_trials is not None:
-            n_trials = self.n_trials
-            if self.history.is_restat:
-                n_trials += n_existing_trials  # FIXME: 恐らく restart かつ Nanny process のリスタート時に加算されてしまう
-            callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))
-
         # run
         study.optimize(
             self._objective,
             timeout=self.timeout,
-            callbacks=callbacks,
+            callbacks=self.optimize_callbacks,
         )
 
         # finalize

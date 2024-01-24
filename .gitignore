@@ -12,6 +12,7 @@ db.sqlite3
 .spyproject
 .vscode
 .idea
+sandbox
 
 /docs/*
 
