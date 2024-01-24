@@ -23,7 +23,7 @@ logger = logging.getLogger('dispatch_log')
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('[%(process)d] %(message)s'))
 logger.addHandler(handler)
-# logger.setLevel(logging.INFO)
+logger.setLevel(logging.INFO)
 
 
 DISPATCH_TIMEOUT = 60
@@ -285,13 +285,12 @@ def _block_other_femtets(
         start = time()
         while True:
             if connection_flags[-1]:
-                break
+                logger.debug(f'{_log_prefix()}Main process seems to connect target Femtet. Exit immediately.')
+                return 1
             if time()-start > timeout_main_wait_for_us:
                 logger.error(f'{_log_prefix()}Timed out while waiting for the main process.')
                 return -1
             sleep(1)
-        logger.debug(f'{_log_prefix()}Main process seems to connect target Femtet. Exit immediately.')
-        return 1
 
 
 def dispatch_specific_femtet(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
@@ -323,7 +322,7 @@ def dispatch_specific_femtet(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, in
     return dispatch_specific_femtet_core(pid, timeout)  # for logger, out of except.
 
 
-def dispatch_specific_femtet_core(pid, timeout=10) -> Tuple[IFemtet, int]:
+def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     """Connect Femtet whose process id is specified.
 
     Warnings:
@@ -394,6 +393,7 @@ def dispatch_specific_femtet_core(pid, timeout=10) -> Tuple[IFemtet, int]:
 
     # 子プロセスの準備
     # with Manager() as manager:
+    start = time()
     from multiprocessing.managers import SyncManager
     m = SyncManager(ctx=_NestableSpawnContext())
     m.start()
@@ -423,11 +423,18 @@ def dispatch_specific_femtet_core(pid, timeout=10) -> Tuple[IFemtet, int]:
             processes.append(p)
 
         # 子プロセスの Dispatch 完了を待つ
-        start = time()
         while True:
             if all(connection_flags[:-1]):
                 break
-            if time()-start > 10:
+            if time()-start > timeout:
+                # 子プロセスを終了する
+                for p in processes:
+                    p.terminate()
+                    p.join()
+                try:
+                    lock_inter_subproc.release()
+                except RuntimeError:
+                    pass
                 raise FemtetConnectionTimeoutError(f'Connect trial with specific Femtet (pid = {pid}) is timed out in {timeout} sec')
             sleep(1)
 
@@ -458,5 +465,5 @@ def dispatch_specific_femtet_core(pid, timeout=10) -> Tuple[IFemtet, int]:
 
 
 if __name__ == '__main__':
-    _Femtet, _my_pid = launch_and_dispatch_femtet()
+    _Femtet, _my_pid = launch_and_dispatch_femtet(5)
     # _Femtet, _my_pid = dispatch_specific_femtet(pid=26124)
