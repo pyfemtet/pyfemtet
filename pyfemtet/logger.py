@@ -21,9 +21,14 @@ def _get_worker_name_as_prefix():
 
 class DaskLogRecord(logging.LogRecord):
     """Generate a log message with dask worker name."""
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.worker = _get_worker_name_as_prefix()
+
     def getMessage(self):
         """Add worker name to loggin message.
-        
+
         This function is originated from logging.LogRecord.
 
             # Copyright (C) 2001-2022 Vinay Sajip. All Rights Reserved.
@@ -60,7 +65,8 @@ def _color_supported() -> bool:
 
 def _create_formatter() -> logging.Formatter:
     """Create a formatter."""
-    header = f"[pyfemtet %(name)s] %(levelname).4s"
+    # header = f"[pyfemtet %(name)s] %(levelname).4s %(worker)s]"
+    header = f"[pyfemtet %(name)s %(levelname).4s]"
     message = "%(message)s"
 
     formatter = ColoredFormatter(
