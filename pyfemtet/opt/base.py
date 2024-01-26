@@ -19,9 +19,7 @@ from optuna.study import MaxTrialsCallback
 from optuna.trial import TrialState
 from optuna.exceptions import ExperimentalWarning
 from optuna._hypervolume import WFG
-from dask.distributed import LocalCluster, Client, Lock, Worker
-from dask import config as cfg
-cfg.set({'distributed.scheduler.worker-ttl': None})
+from dask.distributed import LocalCluster, Client, Lock, get_worker
 
 from win32com.client import constants, Constants
 
