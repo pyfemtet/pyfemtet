@@ -19,7 +19,9 @@ from optuna.study import MaxTrialsCallback
 from optuna.trial import TrialState
 from optuna.exceptions import ExperimentalWarning
 from optuna._hypervolume import WFG
-from dask.distributed import LocalCluster, Client, Lock, get_worker
+from dask.distributed import LocalCluster, Client, Lock, Worker
+from dask import config as cfg
+cfg.set({'distributed.scheduler.worker-ttl': None})
 
 from win32com.client import constants, Constants
 
@@ -27,12 +29,10 @@ from ..core import ModelError, MeshError, SolveError
 from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 
-
-logger = logging.getLogger('optimization-main')
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('[%(process)d] %(message)s'))
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)  # TODO: optuna, dask の logger の書式を統一する
+import logging
+from ..logger import get_logger
+logger = get_logger('opt')
+logger.setLevel(logging.INFO)
 
 
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
@@ -599,7 +599,7 @@ class OptimizationStatus:
         # self._actor.status_int = status_const
         # self._actor.status = self.const_to_str(status_const)
         self._actor.set(status_const, self.const_to_str(status_const)).result()
-        print(f'---{self.const_to_str(status_const)}---')
+        logger.info(f'---{self.const_to_str(status_const)}---')
 
     def get(self):
         return self._actor.status_int
@@ -762,7 +762,7 @@ class OptunaOptimizer(AbstractOptimizer):
             if cns.ub is not None:
                 feasible = feasible and (cns.ub >= cns_value)
             if not feasible:
-                print(f'以下の変数で拘束 {cns.name} が満たされませんでした。')
+                logger.info(f'以下の変数で拘束 {cns.name} が満たされませんでした。')
                 print(self.get_parameter('dict'))
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
@@ -770,8 +770,9 @@ class OptunaOptimizer(AbstractOptimizer):
         try:
             _, _y, c = self.f(x)
         except (ModelError, MeshError, SolveError) as e:
-            print(str(type(e)).split("'")[1].split('.')[-1], e)
-            print('FEM 解析に失敗しました.')
+            logger.info(str(type(e)).split("'")[1].split('.')[-1], e)
+            logger.info('以下の変数で FEM 解析に失敗しました。')
+            print(self.get_parameter('dict'))
 
             # 中断の確認 (解析中に interrupt されている場合対策)
             if self.status.get() == OptimizationStatus.INTERRUPTING:
@@ -1236,13 +1237,13 @@ class FEMOpt:
 
         else:
             logger.info('Launching single machine cluster. This may take tens of seconds.')
-            cluster = LocalCluster(processes=True, threads_per_worker=1)
+            cluster = LocalCluster(processes=True)  # FIXME: worker_class が Nanny だと勝手にリスタートするがそれに対応できてない。しかし Worker だとなんか不安定になる？
             self.client = Client(cluster, direct_to_workers=False)
             self.scheduler_address = self.client.scheduler.address
 
         # monitor 用 worker を起動
         logger.info('Launching monitor server. This may take a few seconds.')
-        self.monitor_process_worker_name = datetime.datetime.now().strftime("monitor-server-process-%Y%m%d%H%M%S")
+        self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
         cmd = f'dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
         worker_addresses = list(self.client.has_what().keys())
         Popen(cmd, shell=True)  #, stdout=PIPE) --> cause stream error
@@ -1343,9 +1344,8 @@ class FEMOpt:
         # 一応
         t_save_history.join()
 
-        print(f'Optimization finished. Elapsed time is {end - start} sec.')
-        print('計算が終了しました. ウィンドウを閉じると終了します.')
-        print(f'結果は{self.history.path}を確認してください.')
+        logger.info(f'計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.')
+        logger.info(f'結果は{self.history.path}を確認してください.')
 
     def terminate_all(self):
 
@@ -1354,13 +1354,13 @@ class FEMOpt:
 
         # terminate monitor process
         self.status.set(OptimizationStatus.TERMINATE_ALL)
-        print(self.monitor_process_future.result())
+        logger.info(self.monitor_process_future.result())
         sleep(1)
 
         # terminate actors
         self.client.cancel(self.history._future, force=True)
         self.client.cancel(self.status._future, force=True)
-        print('Terminate actors.')
+        logger.info('Terminate actors.')
         sleep(1)
 
         # terminate monitor worker
@@ -1372,19 +1372,23 @@ class FEMOpt:
         )
         while n_workers == len(self.client.nthreads()):
             sleep(1)
-        print('Terminate monitor processes worker.')
+        logger.info('Terminate monitor processes worker.')
         sleep(1)
 
         # close scheduler, other workers(, cluster)
         self.client.close()
         while self.client.scheduler is not None:
             sleep(1)
-        print('Terminate client.')
+        logger.info('Terminate client.')
+
+        # close FEM (if specified to quit when deconstruct)
+        del self.fem
+        logger.info('Terminate FEM.')
 
         # terminate dask relative processes.
         if not self.opt.is_cluster:
             self.client.shutdown()
-            print('Terminate all relative processes.')
+            logger.info('Terminate all relative processes.')
         sleep(3)
 
 

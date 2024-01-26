@@ -3,7 +3,6 @@ from typing import Tuple
 import os
 from time import time, sleep
 from multiprocessing import current_process
-import logging
 import warnings
 
 import psutil
@@ -18,15 +17,13 @@ from femtetutils import util
 from multiprocessing.context import BaseContext, SpawnProcess, _concrete_contexts
 from multiprocessing.process import _children, _cleanup
 
-
-logger = logging.getLogger('dispatch_log')
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('[%(process)d] %(message)s'))
-logger.addHandler(handler)
+import logging
+from .logger import get_logger
+logger = get_logger('dispatch')
 logger.setLevel(logging.INFO)
 
 
-DISPATCH_TIMEOUT = 60
+DISPATCH_TIMEOUT = 120
 
 
 class DispatchExtensionException(Exception):
@@ -114,11 +111,6 @@ _concrete_contexts.update(
 )
 
 
-def _log_prefix():
-    prefix = current_process().name + ' : '
-    return prefix
-
-
 def _get_hwnds(pid):
     """Proces ID から window handle を取得します."""
     def callback(hwnd, _hwnds):
@@ -160,7 +152,6 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     Returns:
         Tuple[IFemtet, int]:
     """
-
     util.execute_femtet()
     pid = util.get_last_executed_femtet_process_id()
     logger.debug(f'Target pid is {pid}.')
@@ -169,7 +160,7 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     return Femtet, pid
 
 
-def dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
+def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple[IFemtet, int]:
     """Connect to existing Femtet process.
 
     Args:
@@ -181,11 +172,13 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     Returns:
         Tuple[IFemtet, int]:
     """
-
     # Dispatch
-    logger.debug(f'{_log_prefix()}Try to connect Femtet.')
+    if subprocess_log_prefix:
+        logger.debug('%s'+'Try to connect Femtet.', subprocess_log_prefix)
+    else:
+        logger.info('Try to connect Femtet.')
     Femtet = Dispatch('FemtetMacro.Femtet')
-    logger.debug(f'{_log_prefix()}Dispatched.')
+    logger.debug('%s'+'Dispatch finished.', subprocess_log_prefix)
 
     # timeout 秒以内に接続が確立するか
     start = time()
@@ -194,25 +187,29 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
 
         # 接続が確立
         if hwnd > 0:
-            logger.debug(f'{_log_prefix()}Current hwnd is {hwnd}.')
+            logger.debug('%s'+f'Dispatched hwnd is {hwnd} and its pid is {_get_pid(hwnd)}. Connection established.', subprocess_log_prefix)
             break
         else:
-            logger.debug(f'{_log_prefix()}Current hwnd is {hwnd}. Wait for established connection.')
+            logger.debug('%s'+f'Dispatched hwnd is {hwnd}. Waiting for establishing connection.', subprocess_log_prefix)
 
         # 接続がタイムアウト
         if time()-start > timeout:
-            raise FemtetConnectionTimeoutError(f'Connect trial with Femtet is timed out in {timeout} sec')
+            raise FemtetConnectionTimeoutError(f'Connection trial with Femtet is timed out in {timeout} sec')
 
         sleep(1)
 
     # pid を取得
     pid = _get_pid(hwnd)
-    logger.info(f'{_log_prefix()}hwnd is {hwnd} and pid is {pid} of connected Femtet.')
-
-    if ('MainProcess' in _log_prefix()) or 'Dask Worker Process' in _log_prefix():
-        print(f'INFO: Process id of connected Femtet = {pid}')
+    if subprocess_log_prefix:
+        logger.debug('%s'+f'Successfully connected. The pid of Femtet is {pid}.', subprocess_log_prefix)
+    else:
+        logger.info(f'Successfully connected. The pid of Femtet is {pid}.')
 
     return Femtet, pid
+
+
+def _get_subprocess_log_prefix():
+    return f'({current_process().name}) '
 
 
 def _block_other_femtets(
@@ -239,9 +236,10 @@ def _block_other_femtets(
     else:
         lock_inter_subproc.acquire()
         try:
-            logger.debug(f'{_log_prefix()}Try to block Femtet.')
-            _, my_pid = dispatch_femtet(2)
+            logger.debug('%s'+f'Subprocess started.', _get_subprocess_log_prefix())
+            _, my_pid = dispatch_femtet(2, _get_subprocess_log_prefix())
         except DispatchExtensionException:
+            logger.debug('%s'+f'Connection failed. The other subprocesses will skip.', _get_subprocess_log_prefix())
             my_pid = 0
             # ひとつでもここに来れば、それ以降は探しても無駄なのでスキップフラグを立てる
             for i in range(len(connection_flags)-1):
@@ -251,8 +249,6 @@ def _block_other_femtets(
 
     # # target なら Dispatch の終了を通知する前に main を lock する
     # if my_pid == target_pid:
-    #     logger.info(f'{_log_prefix()}Connected to {my_pid}. This is the target.')
-    #     logger.info(f'{_log_prefix()}Start to block main process.')
     #     lock_main.acquire()
 
     # Dispatch の終了を通知
@@ -266,29 +262,30 @@ def _block_other_femtets(
         #     if all(connection_flags[:-1]):
         #         break
         #     if time()-start > timeout_main_wait_for_us:
-        #         logger.error(f'{_log_prefix()}Timed out while waiting for other subprocesses.')
         #         return -1
         #     sleep(1)
-        # logger.debug(f'{_log_prefix()}All subprocesses seems to finish connection. Release {my_pid} and main.')
-        logger.debug(f'{_log_prefix()}Release {my_pid}.')
+        logger.debug('%s'+f'Release {my_pid}.', _get_subprocess_log_prefix())
         # lock_main.release()
         return 0
 
     # my_pid が非正なら何にも関与しないので即刻終了する
     elif my_pid <= 0:
-        logger.debug(f'{_log_prefix()}Failed or timed out to connect Femtet. Exit immediately.')
+        logger.debug('%s'+'Failed or timed out to connect Femtet.', _get_subprocess_log_prefix())
         return 1
 
     # そうでなければメインプロセスが Dispatch を終えるまで解放しない
     else:
-        logger.debug(f'{_log_prefix()}Connected to {my_pid}. Keep connection to block.')
+        logger.debug('%s'+f'Connected to {my_pid}. Keep connection to block.', _get_subprocess_log_prefix())
         start = time()
         while True:
             if connection_flags[-1]:
-                logger.debug(f'{_log_prefix()}Main process seems to connect target Femtet. Exit immediately.')
+                logger.debug('%s'+'Main process seems to connect target Femtet.', _get_subprocess_log_prefix())
                 return 1
             if time()-start > timeout_main_wait_for_us:
-                logger.error(f'{_log_prefix()}Timed out while waiting for the main process.')
+                logger.warning(
+                    '%s'+f'Timed out to wait for the main process to {timeout_main_wait_for_us}',
+                    _get_subprocess_log_prefix()
+                )
                 return -1
             sleep(1)
 
@@ -379,7 +376,6 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
     Returns:
         Tuple[IFemtet, int]:
     """
-
     # TODO: 安定性を見て lock_main を復活させるか決める
 
     if timeout < 5:
@@ -387,13 +383,12 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
 
     # 存在する Femtet プロセスの列挙
     pids = _get_pids('Femtet.exe')
-    logger.info(f'{_log_prefix()}PID of existing Femtet processes: {pids}')
+    logger.info(f'PID of existing Femtet processes: {pids}')
     if not (pid in pids):
         raise FemtetNotFoundException(f"Femtet (pid = {pid}) doesn't exist.")
 
     # 子プロセスの準備
     # with Manager() as manager:
-    start = time()
     from multiprocessing.managers import SyncManager
     m = SyncManager(ctx=_NestableSpawnContext())
     m.start()
@@ -406,6 +401,7 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
             connection_flags.append(False)
 
         # 目的以外の Femtet をブロックする子プロセスを開始
+        logger.debug('Start subprocess to block Femtet other than target pid.')
         processes = []
         for subprocess_id in range(len(pids)):
             p = _NestableSpawnProcess(
@@ -423,6 +419,7 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
             processes.append(p)
 
         # 子プロセスの Dispatch 完了を待つ
+        start = time()
         while True:
             if all(connection_flags[:-1]):
                 break
@@ -443,7 +440,7 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
 
         # 子プロセスによるブロックが終了しているので Dispatch する
         try:
-            logger.debug(f'{_log_prefix()}All Femtets except to target seem to be blocked. Try Dispatch.')
+            logger.debug('Block process seems to be finished. Try Dispatch.')
             Femtet, my_pid = dispatch_femtet()
         except DispatchExtensionException as e:
             # lock_main.release()
@@ -458,8 +455,9 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
 
     if my_pid != pid:  # pid の結果が違う場合
         txt = f'Target pid is {pid}, but connected pid is {my_pid}. '
-        txt += f'The common reason is that this python process once connected {pid}.'
-        warnings.warn(txt)
+        txt += f'The common reason is that THIS python process once connected {pid}.'
+        logger.warn(txt)
+        # warnings.warn(txt)
 
     return Femtet, my_pid
 

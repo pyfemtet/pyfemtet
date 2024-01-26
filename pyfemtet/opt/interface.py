@@ -3,7 +3,6 @@ import sys
 from time import sleep, time
 import json
 import subprocess
-import logging
 import signal
 
 import pandas as pd
@@ -27,13 +26,10 @@ from ..dispatch_extensions import (
     DispatchExtensionException,
 )
 
-
-logger = logging.getLogger('fem_interface_log')
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('[pid %(process)d] %(message)s'))
-logger.addHandler(handler)
+import logging
+from ..logger import get_logger
+logger = get_logger('FEM')
 logger.setLevel(logging.INFO)
-
 
 here, me = os.path.split(__file__)
 
@@ -304,6 +300,10 @@ class FemtetInterface(FEMInterface):
         -------
 
         """
+
+        # FIXME: Gaudi へのアクセスなど、self.Femtet.Gaudi.somefunc() のような場合、この関数を呼び出す前に Gaudi へのアクセスの時点で com_error が起こる
+        # FIXME: => 文字列で渡して eval() すればよい。
+
         if args is None:
             args = tuple()
         if kwargs is None:
@@ -314,7 +314,7 @@ class FemtetInterface(FEMInterface):
         # 2. API 実行時に成功失敗を示す戻り値を返し、ShowLastError で例外にアクセスできる状態になる
 
         # Gaudi コマンドなら Gaudi.Activate する
-        # if self.pp: print(' '*print_indent, 'コマンド', fun.__name__, args, kwargs)
+        logger.debug(' '*print_indent + f'Femtet API:{fun.__name__}, args:{args}, kwargs:{kwargs}')
         if is_Gaudi_method:  # Optimizer は Gogh に触らないので全部にこれをつけてもいい気がする
             try:
                 self._call_femtet_api(
@@ -338,7 +338,7 @@ class FemtetInterface(FEMInterface):
                 returns = ret_if_failed
             else:
                 returns = [ret_if_failed]*(ret_for_check_idx+1)
-        # if self.pp: print(' '*print_indent, 'コマンド結果', returns)
+        logger.debug(' '*print_indent + f'Femtet API result:{returns}')
 
         # チェックすべき値の抽出
         if ret_for_check_idx is None:
@@ -357,30 +357,28 @@ class FemtetInterface(FEMInterface):
             if self.femtet_is_alive():
                 # 生きていてもここにきているなら
                 # 指定された Exception を送出する
-                # if self.pp: print(' '*print_indent, error_message)
+                logger.debug(' ' * print_indent + error_message)
                 raise if_error(error_message)
 
             # 死んでいるなら再起動
             else:
                 # 再起動試行回数の上限に達していたら諦める
-                # if self.pp: print(' '*print_indent, '現在の Femtet 再起動回数：', recourse_depth)
+                logger.debug(' ' * print_indent + f'現在の Femtet 再起動回数: {recourse_depth}')
                 if recourse_depth >= self.max_api_retry:
                     raise Exception('Femtet のプロセスが異常終了し、正常に再起動できませんでした.')
 
                 # 再起動
-                # if self.pp: print(' '*print_indent, 'Femtet プロセスの異常終了が検知されました. 再起動を試みます.')
-                print('Femtet プロセスの異常終了が検知されました. 回復を試みます.')
+                logger.warn('Femtet プロセスの異常終了が検知されました. 回復を試みます.')
                 CoInitialize()
                 self.connect_femtet(connect_method='new')
                 self.open(self.femprj_path, self.model_name)
 
                 # 状態を復元するために一度変数を渡して解析を行う（fun.__name__がSolveなら2度手間だが）
-                # if self.pp: print(' '*print_indent, f'再起動されました. コマンド{fun.__name__}の再試行のため、解析を行います.')
+                logger.info(' ' * print_indent + f'Femtet が再起動されました。解析を行い、状態回復を試みます。')
                 self.update(self.parameters)
 
                 # 与えられた API の再帰的再試行
-                # if self.pp: print(' '*print_indent, f'回復されました. コマンド{fun.__name__}の再試行を行います.')
-                print('回復されました.')
+                logger.info(' ' * print_indent + f'Femtet が回復されました。コマンド {fun.__name__} を再試行します。')
                 return self._call_femtet_api(
                     fun,
                     ret_if_failed,
@@ -513,7 +511,7 @@ class FemtetInterface(FEMInterface):
                     args=(name, value),
                 )
             else:
-                print(f'変数 {name} は .femprj に含まれていません。無視されます。')
+                logger.warn(f'変数 {name} は .femprj に含まれていません。無視されます。')
 
         # ここでは ReExecute しない
         pass
