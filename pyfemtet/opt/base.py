@@ -9,7 +9,6 @@ from time import time, sleep
 from threading import Thread
 from subprocess import Popen
 import warnings
-import logging
 
 import numpy as np
 import pandas as pd
@@ -19,7 +18,7 @@ from optuna.study import MaxTrialsCallback
 from optuna.trial import TrialState
 from optuna.exceptions import ExperimentalWarning
 from optuna._hypervolume import WFG
-from dask.distributed import LocalCluster, Client, Lock, get_worker
+from dask.distributed import LocalCluster, Client, Lock
 
 from win32com.client import constants, Constants
 
@@ -1235,7 +1234,7 @@ class FEMOpt:
 
         else:
             logger.info('Launching single machine cluster. This may take tens of seconds.')
-            cluster = LocalCluster(processes=True)  # FIXME: worker_class が Nanny だと勝手にリスタートするがそれに対応できてない。しかし Worker だとなんか不安定になる？
+            cluster = LocalCluster(processes=True)
             self.client = Client(cluster, direct_to_workers=False)
             self.scheduler_address = self.client.scheduler.address
 

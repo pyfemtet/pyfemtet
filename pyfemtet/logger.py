@@ -21,8 +21,14 @@ def _get_worker_name_as_prefix():
 
 class DaskLogRecord(logging.LogRecord):
     """Generate a log message with dask worker name."""
-    # Copyright (C) 2001-2022 Vinay Sajip. All Rights Reserved.
     def getMessage(self):
+        """Add worker name to loggin message.
+        
+        This function is originated from logging.LogRecord.
+
+            # Copyright (C) 2001-2022 Vinay Sajip. All Rights Reserved.
+
+        """
         msg = str(self.msg)
         if self.args:
             msg = msg % self.args
@@ -38,30 +44,9 @@ def _color_supported() -> bool:
 
     This function is originated from optuna.logging.
 
+        # Copyright (c) 2018 Preferred Networks, Inc.
+
     """
-
-    # MIT License
-    #
-    # Copyright (c) 2018 Preferred Networks, Inc.
-    #
-    # Permission is hereby granted, free of charge, to any person obtaining a copy
-    # of this software and associated documentation files (the "Software"), to deal
-    # in the Software without restriction, including without limitation the rights
-    # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    # copies of the Software, and to permit persons to whom the Software is
-    # furnished to do so, subject to the following conditions:
-    #
-    # The above copyright notice and this permission notice shall be included in all
-    # copies or substantial portions of the Software.
-    #
-    # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    # SOFTWARE.
-
 
     # NO_COLOR environment variable:
     if os.environ.get("NO_COLOR", None):
@@ -78,24 +63,20 @@ def _create_formatter() -> logging.Formatter:
     header = f"[pyfemtet %(name)s] %(levelname).4s"
     message = "%(message)s"
 
-    if _color_supported():
+    formatter = ColoredFormatter(
+        f"%(log_color)s{header}%(reset)s {message}",
+        datefmt=None,
+        reset=True,
+        log_colors={
+            "DEBUG": "purple",
+            "INFO": "cyan",
+            "WARNING": "yellow",
+            "ERROR": "light_red",
+            "CRITICAL": "red",
+        },
+    )
 
-        formatter = ColoredFormatter(
-            f"%(log_color)s{header}%(reset)s {message}",
-            datefmt=None,
-            reset=True,
-            log_colors={
-                "DEBUG": "purple",
-                "INFO": "cyan",
-                "WARNING": "yellow",
-                "ERROR": "light_red",
-                "CRITICAL": "red",
-            },
-        )
-
-        return formatter
-
-    return logging.Formatter(f"{header} {message}")
+    return formatter
 
 
 def get_logger(logger_name):
