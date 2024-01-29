@@ -11,9 +11,9 @@ Femtet の熱伝導解析ソルバーを用い
 --------------------
 .. note::
 
-   :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
+   :download:`サンプルプロジェクト<../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
    を Femtet で開いたまま、
-   :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py>`
+   :download:`サンプルコード<../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py>`
    をダブルクリックして実行してください。
 
 .. note::
@@ -47,7 +47,7 @@ substrate_d  基板の奥行き
 サンプルコード
 ---------------
 
-.. literalinclude:: ../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py
+.. literalinclude:: ../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py
    :language: python
    :linenos:
    :caption: wat_ex14_parametric.py

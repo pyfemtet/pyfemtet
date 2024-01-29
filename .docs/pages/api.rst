@@ -3,4 +3,4 @@ API reference
 
 .. toctree::
 
-   ./modules/modules
+   ../modules/modules

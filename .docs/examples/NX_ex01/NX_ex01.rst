@@ -16,12 +16,12 @@ Femtet の応力解析ソルバーを用いて
 ------------------------------
 .. note::
 
-   :download:`サンプルモデル<../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>`
+   :download:`サンプルモデル<../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>`
    と
-   :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>`
+   :download:`サンプルプロジェクト<../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>`
    を同じフォルダに配置し、
    プロジェクトを Femtet で開いたまま、
-   :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>`
+   :download:`サンプルコード<../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>`
    をダブルクリックして実行してください。
 
 
@@ -63,7 +63,7 @@ C      フランジ曲げ
 サンプルコード
 ------------------------------
 
-.. literalinclude:: ../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py
+.. literalinclude:: ../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py
    :language: python
    :linenos:
    :caption: NX_ex01.py

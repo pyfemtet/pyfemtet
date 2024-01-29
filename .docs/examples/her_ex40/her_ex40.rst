@@ -10,21 +10,15 @@ Femtet の電磁波解析ソルバーを用い、
 ------------------------------
 .. note::
 
-   :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/her_ex40_parametric.femprj>`
+   :download:`サンプルプロジェクト<../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.femprj>`
    を Femtet で開いたまま、
-   :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py>`
+   :download:`サンプルコード<../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py>`
    をダブルクリックして実行してください。
 
 .. warning::
 
-   この事例の実施には `BoTorch` ライブラリが必要です。
-   下記いずれかのコマンドで `BoTorch` ライブラリのインストールを行ってから
-   実施してください。
-   ``py -m pip install botorch`` 又は 
-   ``py -m pip install pyfemtet[all_methods]``
-
-   BoTorch ライブラリを使用しない場合は、プログラム内のコメントに従って
-   一部を修正してください。ただし、収束が遅くなる場合があります。
+   この事例の実施には `BoTorch` ライブラリが必要です。このライブラリは Python の最新バージョンに対応していない可能性があります。
+   `BoTorch` ライブラリを使用しない場合は、プログラム内のコメントに従って一部を修正してください。ただし、収束が遅くなる場合があります。
 
 .. note::
 
@@ -56,7 +50,7 @@ S(1,1) の第一ピークを与える共振周波数
 サンプルコード
 ------------------------------
 
-.. literalinclude:: ../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py
+.. literalinclude:: ../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py
    :language: python
    :linenos:
    :caption: her_ex40_parametric.py

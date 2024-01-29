@@ -42,22 +42,22 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 .. grid:: 2
 
     .. grid-item-card:: ソレノイドコイルのインダクタンス
-        :link: gau_ex08/gau_ex08
+        :link: examples/gau_ex08/gau_ex08
         :link-type: doc
         :text-align: center
 
-        .. image:: gau_ex08/gau_ex08.png
+        .. image:: examples/gau_ex08/gau_ex08.png
             :scale: 50
         +++
         磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。
 
 
     .. grid-item-card:: 円形パッチアンテナの共振周波数
-        :link: her_ex40/her_ex40
+        :link: examples/her_ex40/her_ex40
         :link-type: doc
         :text-align: center
 
-        .. image:: her_ex40/her_ex40.png
+        .. image:: examples/her_ex40/her_ex40.png
             :scale: 50
         +++
         電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。
@@ -65,7 +65,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
 .. tip::
     
-    :doc:`examples` セクションにより多くの実施例があります。
+    :doc:`pages/examples` セクションにより多くの実施例があります。
 
 
 シンプルな API
@@ -75,7 +75,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 ``add_parameter()`` と ``add_objective()`` で問題を設定し、
 ``main()`` で実施することができます。
 それ以外はあなたの Femtet のマクロスクリプトを流用できます。
-詳細な実施例は :doc:`usage` セクションを確認してください。
+詳細な実施例は :doc:`pages/usage` セクションを確認してください。
 
 .. code-block:: python
 
@@ -134,7 +134,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
     .. note::
 
         2024 年 1 月現在、pyfemtet は バージョン 3.9 ~ 3.12 の Python で動作します。
-        ただし、:doc:`/examples` にも使用している ``BoTorch`` ライブラリはバージョン 3.12 に対応していません。
+        ただし、:doc:`pages/examples` にも使用している ``BoTorch`` ライブラリはバージョン 3.12 に対応していません。
         より多くの最適化手法を適用できるため、現在のところ Python バージョンは 3.11 を推奨します。
 
     .. tip::
@@ -143,15 +143,15 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
         下記のスクリーンショットを参考に
         ご自身の環境に応じたインストーラをダウンロードしてください。
 
-    .. figure:: python_download.png
+    .. figure:: images/python_download.png
 
-    .. figure:: python_3.11.png
+    .. figure:: images/python_3.11.png
         :scale: 50%
 
         このスクリーンショットでは、64 bit 版 windows 向け python 3.11.7 のインストーラへの
         リンクの場所の例を示しています。
 
-    .. figure:: python_install.png
+    .. figure:: images/python_install.png
 
         インストーラ画面。
 
@@ -166,11 +166,11 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
     インストールが終了すると、"Successfully installed " の表示の後、コマンドプロンプトの制御が戻ります。
 
-    .. figure:: pip_while_install.png
+    .. figure:: images/pip_while_install.png
 
         インストール中
 
-    .. figure:: pip_complete_install.png
+    .. figure:: images/pip_complete_install.png
 
         インストール終了後
 
@@ -191,7 +191,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
     インストールが終了すると、コマンドプロンプトの制御が戻ります。
 
-    .. figure:: complete_makepy.png
+    .. figure:: images/complete_makepy.png
 
         makepy 終了後
 
@@ -201,7 +201,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
 .. tip::
     
-    動作確認には、はじめに :doc:`/examples` のサンプルを閲覧いただくことをお勧めします。
+    動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。
 
 
 
@@ -212,7 +212,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
     :maxdepth: 2
 
     ホーム <self>
-    examples
-    usage
-    api
-    LICENSE
+    pages/examples
+    pages/usage
+    pages/api
+    pages/LICENSE

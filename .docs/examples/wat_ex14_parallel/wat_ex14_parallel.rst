@@ -10,9 +10,9 @@ wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します�
 ------------------------------
 .. note::
 
-   :download:`サンプルプロジェクト<../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
+   :download:`サンプルプロジェクト<../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
    を Femtet で開いたまま、
-   :download:`サンプルコード<../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py>`
+   :download:`サンプルコード<../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py>`
    をダブルクリックして実行してください。
 
 .. note::
@@ -46,7 +46,7 @@ substrate_d  基板の奥行き
 サンプルコード
 ------------------------------
 
-.. literalinclude:: ../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py
+.. literalinclude:: ../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py
    :language: python
    :linenos:
    :caption: wat_ex14_parallel_parametric.py
@@ -85,10 +85,7 @@ substrate_d  基板の奥行き
 
 .. note::
 
-   N 並列した場合、一般に実行時間は単純に 1/N にはなりません。
-   これはプロセスの開始・終了時のオーバーヘッドや
-   単一の Femtet インスタンス内部でも並列処理による
-   高速化が図られている箇所があるためです。
+   一般に数値計算を N 並列した場合、実行時間は単純に 1/N にはなりません。
 
 .. warning::
 
