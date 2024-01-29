@@ -350,13 +350,15 @@ class History:
         self.is_restart = False
         self._future = client.submit(HistoryDfCore, actor=True)
         self._actor_data = self._future.result()
+        self.tmp_data = pd.DataFrame()
         self.param_names = []
         self.obj_names = []
         self.cns_names = []
 
         # path が存在すれば dataframe を読み込む
         if os.path.isfile(self.path):
-            self.actor_data = pd.read_csv(self.path, encoding='shift-jis')
+            self.tmp_data = pd.read_csv(self.path, encoding='shift-jis')
+            self.actor_data = self.tmp_data
             self.is_restart = True
 
     @property
@@ -406,6 +408,8 @@ class History:
                 raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.actor_data.columns)}\n\n現在の設定:\n{columns}')
 
         else:
+            for column in columns:
+                self.tmp_data[column] = None
             # actor_data は actor 経由の getter property なので self.data[column] = ... とやっても
             # actor には変更が反映されない. 以下同様
             tmp = self.actor_data
@@ -445,27 +449,25 @@ class History:
         with Lock('calc-history'):
             # append
             if len(self.actor_data) == 0:
-                self.actor_data = pd.DataFrame([row], columns=self.actor_data.columns)
+                self.tmp_data = pd.DataFrame([row], columns=self.actor_data.columns)
             else:
-                tmp = self.actor_data
-                tmp.loc[len(tmp)] = row
-                self.actor_data = tmp
+                self.tmp_data = self.actor_data
+                self.tmp_data.loc[len(self.tmp_data)] = row
 
             # calc
-            tmp = self.actor_data
-            tmp['trial'] = np.arange(len(tmp)) + 1  # 1 始まり
-            self.actor_data = tmp
-            self._calc_non_domi(objectives)
-            self._calc_hypervolume(objectives)
+            self.tmp_data['trial'] = np.arange(len(self.tmp_data)) + 1  # 1 始まり
+            self._calc_non_domi(objectives)  # update self.tmp_data
+            self._calc_hypervolume(objectives)  # update self.tmp_data
+            self.actor_data = self.tmp_data
 
     def _calc_non_domi(self, objectives):
 
         # 目的関数の履歴を取り出してくる
-        solution_set = self.actor_data[self.obj_names].copy()
+        solution_set = self.tmp_data[self.obj_names]
 
         # 最小化問題の座標空間に変換する
         for name, objective in objectives.items():
-            solution_set[name] = solution_set[name].map(objective.convert)
+            solution_set.loc[:, name] = solution_set[name].map(objective.convert)
 
         # 非劣解の計算
         non_domi = []
@@ -473,15 +475,11 @@ class History:
             non_domi.append((row > solution_set).product(axis=1).sum(axis=0) == 0)
 
         # 非劣解の登録
-        tmp = self.actor_data
-        tmp['non_domi'] = non_domi
-        self.actor_data = tmp
-
-        del solution_set
+        self.tmp_data['non_domi'] = non_domi
 
     def _calc_hypervolume(self, objectives):
-        # プロセス間の競合を避けるためローカルにコピーする
-        df = self.actor_data.copy()
+        # タイピングが面倒
+        df = self.tmp_data
 
         # パレート集合の抽出
         idx = df['non_domi'].values
@@ -545,9 +543,6 @@ class History:
                     df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
                 except IndexError:
                     df.loc[i, 'hypervolume'] = 0
-
-        # ローカルの df を worker に戻す
-        self.actor_data = df
 
 
 class OptimizationStatusActor:
