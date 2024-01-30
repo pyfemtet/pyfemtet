@@ -144,6 +144,14 @@ def _get_subprocess_log_prefix():
     return f'({current_process().name}) '
 
 
+def launch_and_dispatch_femtet_simple():
+    util.execute_femtet()
+    for i in tqdm(range(5), 'wait for launch femtet...'):
+        sleep(1)
+    Femtet, pid = dispatch_femtet()
+    return Femtet, pid
+
+
 def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     """Launch Femtet by new process and connect to it.
 

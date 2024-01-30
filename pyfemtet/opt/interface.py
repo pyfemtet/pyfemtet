@@ -9,7 +9,7 @@ import pandas as pd
 import psutil
 from pywintypes import com_error
 from pythoncom import CoInitialize, CoUninitialize
-from win32com.client import constants
+from win32com.client import constants, Dispatch
 from dask.distributed import get_worker
 from femtetutils import util
 
@@ -23,7 +23,7 @@ from ..dispatch_extensions import (
     dispatch_specific_femtet,
     launch_and_dispatch_femtet,
     _get_pid,
-    DispatchExtensionException,
+    DispatchExtensionException, launch_and_dispatch_femtet_simple,
 )
 
 import logging
@@ -151,6 +151,8 @@ class FemtetInterface(FEMInterface):
         self.parameters = None
         self.max_api_retry = 3
 
+        self._ignore_dispatch_extension = True
+
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
             worker = get_worker()
@@ -198,8 +200,14 @@ class FemtetInterface(FEMInterface):
 
     def _connect_new_femtet(self):
         logger.info('└ Try to launch and connect new Femtet process.')
-        self.Femtet, _ = launch_and_dispatch_femtet()
+
+        if self._ignore_dispatch_extension:
+            self.Femtet, _ = launch_and_dispatch_femtet_simple()
+        else:
+            self.Femtet, _ = launch_and_dispatch_femtet()
+
         self.connected_method = 'new'
+
 
     def _connect_existing_femtet(self, pid: int or None = None):
         logger.info('└ Try to connect existing Femtet process.')
