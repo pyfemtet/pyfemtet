@@ -144,23 +144,12 @@ def _get_subprocess_log_prefix():
     return f'({current_process().name}) '
 
 
-def launch_and_dispatch_femtet_simple():
-    util.execute_femtet()
-    for i in tqdm(range(5), 'wait for launch femtet...'):
-        sleep(1)
-    try:
-        with Lock('dispatch_femtet_simple'):
-            Femtet, pid = dispatch_femtet()
-    except RuntimeError:
-        Femtet, pid = dispatch_femtet()
-    return Femtet, pid
-
-
-def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
+def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strict_pid_specify=True) -> Tuple[IFemtet, int]:
     """Launch Femtet by new process and connect to it.
 
     Args:
         timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
+        strict_pid_specify (bool): If True, try to connect the launched femtet process strictly. If False, launch new process but try to connect any connectable femtet.
 
     Raises:
         FemtetNotFoundException: Launched Femtet is not found for some reason (i.e. failed to launch Femtet).
@@ -169,12 +158,26 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     Returns:
         Tuple[IFemtet, int]:
     """
+    # launch femtet
     util.execute_femtet()
     pid = util.get_last_executed_femtet_process_id()
     logger.debug(f'Target pid is {pid}.')
-    for i in tqdm(range(5), 'wait for launch femtet...'):
+    for _ in tqdm(range(5), 'wait for launch femtet...'):
         sleep(1)
-    Femtet, pid = dispatch_specific_femtet(pid, timeout)
+
+    # dispatch femtet
+    if strict_pid_specify:
+        Femtet, pid = dispatch_specific_femtet(pid, timeout)
+    else:
+        # worker process なら排他処理する
+        try:
+            with Lock('simply-dispatch-femtet'):
+                Femtet, pid = dispatch_femtet()
+        except RuntimeError as e:
+            if "distributed.lock.Lock" in str(e):
+                Femtet, pid = dispatch_femtet()
+            else:
+                raise e
     return Femtet, pid
 
 

@@ -23,7 +23,7 @@ from ..dispatch_extensions import (
     dispatch_specific_femtet,
     launch_and_dispatch_femtet,
     _get_pid,
-    DispatchExtensionException, launch_and_dispatch_femtet_simple,
+    DispatchExtensionException,
 )
 
 import logging
@@ -119,6 +119,7 @@ class FemtetInterface(FEMInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
+            strict_pid_specify=False,
             **kwargs
     ):
         """Initializes the FemtetInterface.
@@ -144,14 +145,13 @@ class FemtetInterface(FEMInterface):
         self.model_name = model_name
         self.connect_method = connect_method
 
-        # その他のメンバーの宣言や初期化初期化
+        # その他のメンバーの宣言や初期化
         self.Femtet = None
         self.quit_when_destruct = False
         self.connected_method = 'unconnected'
         self.parameters = None
         self.max_api_retry = 3
-
-        self._ignore_dispatch_extension = True
+        self.strict_pid_specify = strict_pid_specify
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -201,10 +201,7 @@ class FemtetInterface(FEMInterface):
     def _connect_new_femtet(self):
         logger.info('└ Try to launch and connect new Femtet process.')
 
-        if self._ignore_dispatch_extension:
-            self.Femtet, _ = launch_and_dispatch_femtet_simple()
-        else:
-            self.Femtet, _ = launch_and_dispatch_femtet()
+        self.Femtet, _ = launch_and_dispatch_femtet(strict_pid_specify=self.strict_pid_specify)
 
         self.connected_method = 'new'
 
