@@ -656,9 +656,10 @@ class AbstractOptimizer(ABC):
         logger.debug('history.record end')
         return np.array(y), np.array(_y), np.array(c)
 
-    def set_fem(self):
+    def set_fem(self, skip_reconstruct=False):
         # restore fem
-        self.fem = self.fem_class(**self.fem_kwargs)
+        if not skip_reconstruct:
+            self.fem = self.fem_class(**self.fem_kwargs)
 
         # COM 定数の restore
         for obj in self.objectives.values():
@@ -704,7 +705,7 @@ class AbstractOptimizer(ABC):
             subprocess_idx,
             worker_status_list,
             wait_setup,
-            skip_set_fem=False,
+            skip_set_fem,
     ) -> None:
 
         # 自分の worker_status の取得
@@ -1352,13 +1353,9 @@ class FEMOpt:
             # ローカルプロセスでの計算(opt._main 相当の処理)
             subprocess_idx = 0
 
-            # set_fem 相当の処理だけ外で行う（要検討、kwargs が変のはず）
+            # set_fem
             self.opt.fem = self.fem
-            # COM 定数の restore
-            for obj in self.opt.objectives.values():
-                obj._restore_constants()
-            for cns in self.opt.constraints.values():
-                cns._restore_constants()
+            self.opt.set_fem(skip_reconstruct=True)
 
             t_main = Thread(
                 target=self.opt._main,

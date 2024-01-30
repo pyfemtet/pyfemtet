@@ -140,6 +140,10 @@ def _get_pids(process_name):
     return pids
 
 
+def _get_subprocess_log_prefix():
+    return f'({current_process().name}) '
+
+
 def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     """Launch Femtet by new process and connect to it.
 
@@ -209,9 +213,6 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple
 
     return Femtet, pid
 
-
-def _get_subprocess_log_prefix():
-    return f'({current_process().name}) '
 
 
 def _block_other_femtets(
