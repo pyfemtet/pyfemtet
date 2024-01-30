@@ -709,7 +709,7 @@ class AbstractOptimizer(ABC):
             subprocess_idx,
             worker_status_list,
             wait_setup,
-            skip_set_fem,
+            skip_set_fem=False,
     ) -> None:
 
         # 自分の worker_status の取得
@@ -1310,7 +1310,7 @@ class FEMOpt:
 
         # actor の設定
         self.status = OptimizationStatus(self.client)
-        self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]
+        self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
         self.status.set(OptimizationStatus.SETTING_UP)
         self.history = History(self.history_path, self.client)
         self.history.init(
