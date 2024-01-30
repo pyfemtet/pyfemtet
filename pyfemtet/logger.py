@@ -12,8 +12,10 @@ def _get_worker_name_as_prefix():
     name = '(Main) '
     try:
         worker = get_worker()
-        # address = worker.address
-        name = f'(Worker:{worker.name}) '
+        if isinstance(worker.name, str):  # local なら index, cluster なら tcp address
+            name = f'({worker.name}) '
+        else:
+            name = f'(Sub{worker.name}) '
     except ValueError:
         pass
     return name

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, List, Tuple, Iterable, Any
+from typing import List, Iterable
 
 import os
 import datetime
@@ -65,13 +65,13 @@ def generate_lhs(bounds: List[List[float]], seed: int or None = None) -> np.ndar
     LIMIT = 100
 
     def is_prime(p):
-        for i in range(2, p):
-            if p % i == 0:
+        for j in range(2, p):
+            if p % j == 0:
                 return False
         return True
 
-    def get_prime(minimum):
-        for p in range(minimum, LIMIT):
+    def get_prime(_minimum):
+        for p in range(_minimum, LIMIT):
             if is_prime(p):
                 return p
 
@@ -252,7 +252,7 @@ class Objective(Function):
         super().__init__(fun, name, args, kwargs)
 
     def convert(self, value: float):
-        """Converts an evaluation value to the value of user-defined objective function based on the specified direction.
+        """Converts an evaluation value to the value of objective function based on the specified direction.
 
         When direction is `'minimize'`, ``value`` is calculated.
         When direction is `'maximize'`, ``-value`` is calculated.
@@ -329,9 +329,8 @@ class History:
     """Class for managing the history of optimization results.
 
     Attributes:
-        path (str): The path to the history file.
-        _actor_data (HistoryDfCore): The distributed DataFrame object for storing actor data.
-        data (pd.DataFrame): The DataFrame object for storing the entire history.
+        path (str): The path to the history csv file.
+        is_restart (bool): The main session is restarted or not.
         param_names (list): The names of the parameters in the study.
         obj_names (list): The names of the objectives in the study.
         cns_names (list): The names of the constraints in the study.
@@ -538,7 +537,7 @@ class History:
         # dominated の行に対して、上に見ていって
         # 最初に見つけた non-domi 行の hypervolume の値を割り当てます
         for i in range(len(df)):
-            if df.loc[i, 'non_domi'] == False:
+            if not df.loc[i, 'non_domi']:
                 try:
                     df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
                 except IndexError:
@@ -563,35 +562,41 @@ class OptimizationStatus:
     UNDEFINED = -1
     INITIALIZING = 0
     SETTING_UP = 10
-    LAUNCHING = 20
-    WAIT_1ST = 25
+    LAUNCHING_FEM = 20
+    WAIT_OTHER_WORKERS = 22
+    # WAIT_1ST = 25
     RUNNING = 30
     INTERRUPTING = 40
     TERMINATED = 50
     TERMINATE_ALL = 60
 
-    def __init__(self, client):
+    def __init__(self, client, name='entire'):
         self._future = client.submit(OptimizationStatusActor, actor=True)
         self._actor = self._future.result()
+        self.name = name
         self.set(self.INITIALIZING)
 
     @classmethod
-    def const_to_str(self, status_const):
-        if status_const == self.UNDEFINED: return 'Undefined'
-        if status_const == self.INITIALIZING: return 'Initializing'
-        if status_const == self.SETTING_UP: return 'Setting up'
-        if status_const == self.LAUNCHING: return 'Launching FEM processes'
-        if status_const == self.WAIT_1ST: return 'Running and waiting for 1st FEM result.'
-        if status_const == self.RUNNING: return 'Running'
-        if status_const == self.INTERRUPTING: return 'Interrupting'
-        if status_const == self.TERMINATED: return 'Terminated'
-        if status_const == self.TERMINATE_ALL: return 'Terminate_all'
+    def const_to_str(cls, status_const):
+        if status_const == cls.UNDEFINED: return 'Undefined'
+        if status_const == cls.INITIALIZING: return 'Initializing'
+        if status_const == cls.SETTING_UP: return 'Setting up'
+        if status_const == cls.LAUNCHING_FEM: return 'Launching FEM processes'
+        if status_const == cls.WAIT_OTHER_WORKERS: return 'Waiting for launching other processes'
+        # if status_const == cls.WAIT_1ST: return 'Running and waiting for 1st FEM result.'
+        if status_const == cls.RUNNING: return 'Running'
+        if status_const == cls.INTERRUPTING: return 'Interrupting'
+        if status_const == cls.TERMINATED: return 'Terminated'
+        if status_const == cls.TERMINATE_ALL: return 'Terminate_all'
 
     def set(self, status_const):
-        # self._actor.status_int = status_const
-        # self._actor.status = self.const_to_str(status_const)
         self._actor.set(status_const, self.const_to_str(status_const)).result()
-        logger.info(f'---{self.const_to_str(status_const)}---')
+        msg = f'---{self.const_to_str(status_const)}---'
+        if (status_const == self.INITIALIZING) and (self.name != 'entire'):
+            msg += f' (for Worker {self.name})'
+        if self.name == 'entire':
+            msg = '(entire) ' + msg
+        logger.info(msg)
 
     def get(self):
         return self._actor.status_int
@@ -609,8 +614,9 @@ class AbstractOptimizer(ABC):
         self.parameters = pd.DataFrame()
         self.objectives = dict()
         self.constraints = dict()
-        self.status = None  # shared
-        self.history = None  # shared
+        self.entire_status = None  # actor
+        self.history = None  # actor
+        self.worker_status = None  # actor
         self.message = ''
         self.seed = None
         self.timeout = None
@@ -618,9 +624,7 @@ class AbstractOptimizer(ABC):
         self.is_cluster = False
 
     def f(self, x):
-
-        if self.status.get() == OptimizationStatus.LAUNCHING:
-            self.status.set(OptimizationStatus.WAIT_1ST)
+        # interruption の実装は具象クラスに任せる
 
         # x の更新
         self.parameters['value'] = x
@@ -649,13 +653,11 @@ class AbstractOptimizer(ABC):
             self.message
         )
 
-        if self.status.get() == OptimizationStatus.WAIT_1ST:
-            self.status.set(OptimizationStatus.RUNNING)
-
         logger.debug('history.record end')
         return np.array(y), np.array(_y), np.array(c)
 
     def set_fem(self):
+        # restore fem
         self.fem = self.fem_class(**self.fem_kwargs)
 
         # COM 定数の restore
@@ -689,12 +691,64 @@ class AbstractOptimizer(ABC):
         else:
             raise ValueError('get_parameter() got invalid format: {format}')
 
-    def _main(self, subprocess_idx):
-        self.set_fem()
-        self.main(subprocess_idx)
+    def _check_interruption(self):
+        if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
+            self.worker_status.set(OptimizationStatus.INTERRUPTING)
+            self.finalize()
+            return True
+        else:
+            return False
+
+    def _main(
+            self,
+            subprocess_idx,
+            worker_status_list,
+            wait_setup,
+            skip_set_fem=False,
+    ) -> None:
+
+        # 自分の worker_status の取得
+        self.worker_status = worker_status_list[subprocess_idx]
+        self.worker_status.set(OptimizationStatus.LAUNCHING_FEM)
+
+        if self._check_interruption():
+            return None
+
+        # set_fem をはじめ、終了したらそれを示す
+        if not skip_set_fem:  # なくても動く？？
+            self.set_fem()
+        self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
+
+        # wait_setup or not
+        if wait_setup:
+            while True:
+                if self._check_interruption():
+                    return None
+                # 他のすべての worker_status が wait 以上になったら break
+                if all([ws.get() >= OptimizationStatus.WAIT_OTHER_WORKERS for ws in worker_status_list]):
+                    break
+                sleep(1)
+        else:
+            if self._check_interruption():
+                return None
+
+        # set status running
+        if self.entire_status.get() < OptimizationStatus.RUNNING:
+            self.entire_status.set(OptimizationStatus.RUNNING)
+        self.worker_status.set(OptimizationStatus.RUNNING)
+
+        # run and finalize
+        try:
+            self.main(subprocess_idx)
+        finally:
+            self.finalize()
+        return None
+
+    def finalize(self):
+        del self.fem
 
     @abstractmethod
-    def main(self, subprocess_idx: int):
+    def main(self, subprocess_idx: int = 0) -> None:
         """Called from dask worker."""
         pass
 
@@ -726,7 +780,7 @@ class OptunaOptimizer(AbstractOptimizer):
     def _objective(self, trial):
 
         # 中断の確認 (FAIL loop に陥る対策)
-        if self.status.get() == OptimizationStatus.INTERRUPTING:
+        if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             trial.study.stop()  # 現在実行中の trial を最後にする
             return None  # set TrialState FAIL
 
@@ -767,7 +821,7 @@ class OptunaOptimizer(AbstractOptimizer):
             print(self.get_parameter('dict'))
 
             # 中断の確認 (解析中に interrupt されている場合対策)
-            if self.status.get() == OptimizationStatus.INTERRUPTING:
+            if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
                 trial.study.stop()  # 現在実行中の trial を最後にする
                 return None  # set TrialState FAIL
 
@@ -784,7 +838,7 @@ class OptunaOptimizer(AbstractOptimizer):
         trial.set_user_attr('constraint', _c)
 
         # 中断の確認 (解析中に interrupt されている場合対策)
-        if self.status.get() == OptimizationStatus.INTERRUPTING:
+        if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             trial.study.stop()  # 現在実行中の trial を最後にする
             return None  # set TrialState FAIL
 
@@ -862,13 +916,13 @@ class OptunaOptimizer(AbstractOptimizer):
         # if is_restart, load study
         else:
             if not os.path.exists(storage_path):
-                raise FileNotFoundError(f'{storage_path} が見つかりません。.db ファイルは .csv ファイルと同じフォルダに生成されます。クラスター解析の場合は、スケジューラを起動したフォルダに生成されます。')
+                msg = f'{storage_path} が見つかりません。'
+                msg += '.db ファイルは .csv ファイルと同じフォルダに生成されます。'
+                msg += 'クラスター解析の場合は、スケジューラを起動したフォルダに生成されます。'
+                raise FileNotFoundError(msg)
             self.storage = optuna.integration.dask.DaskStorage(
                 f'sqlite:///{storage_path}',
             )
-
-
-
 
     def add_init_parameter(
             self,
@@ -890,7 +944,7 @@ class OptunaOptimizer(AbstractOptimizer):
             name = f'additional initial ({name})'
         self.additional_initial_parameter.append([parameter, name])
 
-    def main(self, subprocess_idx):
+    def main(self, subprocess_idx=0):
         """Dask worker から呼ばれる関数"""
 
         # (re)set random seed
@@ -920,27 +974,20 @@ class OptunaOptimizer(AbstractOptimizer):
             callbacks=self.optimize_callbacks,
         )
 
-        # finalize
-        del self.fem
-
 
 class FEMOpt:
     """Base class to control FEM interface and optimizer.
 
     Attributes:
-        fem (FEMInterface): The finite element method interface.
-        history_path (str): The path to the history (.csv) file .
-        ipv (InterprocessVariables): The interprocess variables.
-        parameters (pd.DataFrame): The DataFrame object for storing the parameters.
-        objectives (dict): The dictionary of objective functions.
-        constraints (dict): The dictionary of constraint functions.
-        history (History): The history of optimization results.
-        monitor (Monitor): The monitor object for visualization and monitoring.
-        monitor_thread: Thread object for monitor server.
-        seed (int or None): The random seed for reproducibility.
-        message(str) : Additional information or messages related to the optimization process
-        obj_values ([float]): A list to store objective values during optimization
-        cns_values ([float]): A list to store constraint values during optimization
+        fem (FEMInterface): The interface of FEM system.
+        client (Client): Dask client. For detail, see dask documentation.
+        scheduler_address (str or None): Dask scheduler address. If None, LocalCluster will be used.
+        status (OptimizationStatus): Entire process status. This contains dask actor.
+        history(History): History of optimization process. This contains dask actor.
+        history_path (str): The path to the history (.csv) file.
+        worker_status_list([OptimizationStatus]): Process status of each dask worker.
+        monitor_process_future(Future): Future of monitor server process. This is dask future.
+        monitor_server_kwargs(dict): Monitor server parameter. Currently, the valid arguments are hostname and port.
 
     """
 
@@ -954,7 +1001,7 @@ class FEMOpt:
         """Initializes an FEMOpt instance.
 
         Args:
-            fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automattically set to FemtetInterface.
+            fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automatically set to FemtetInterface.
             opt (AbstractOptimizer):
             history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
             scheduler_address (str or None): If cluster processing, set this parameter like ``"tcp://xxx.xxx.xxx.xxx:xxxx"``.
@@ -981,10 +1028,12 @@ class FEMOpt:
 
         # メンバーの宣言
         self.client = None
-        self.status = None
-        self.history = None
+        self.status = None  # actor
+        self.history = None  # actor
+        self.worker_status_list = None  # [actor]
         self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
+        self.monitor_process_worker_name = None
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -1016,7 +1065,7 @@ class FEMOpt:
         
         Args:
             name (str): The name of the parameter.
-            initial_value (float or None, optional): The initial value of the parameter. Defaults to None. If None, try to get inittial value from FEMInterface.
+            initial_value (float or None, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.
             lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             memo (str, optional): Additional information about the parameter. Defaults to ''.
@@ -1193,16 +1242,16 @@ class FEMOpt:
             n_trials=None,
             n_parallel=1,
             timeout=None,
+            wait_setup=True,
     ):
         """Runs the main optimization process.
 
         Args:
-            n_trials (int or None): The number of trials. Defaults to None.
-            n_parallel (int): The number of parallel processes. Defaults to 1.
-            timeout (float or None): The maximum amount of time in seconds that each trial can run. Defaults to None.
-            method (str): The optimization method to use. Defaults to 'TPE'.
-            **setup_kwargs: Additional keyword arguments for setting up the optimization process.
-        
+            n_trials (int or None, optional): The number of trials. Defaults to None.
+            n_parallel (int, optional): The number of parallel processes. Defaults to 1.
+            timeout (float or None, optional): The maximum amount of time in seconds that each trial can run. Defaults to None.
+            wait_setup (bool, optional): Wait for all workers launching FEM system. Defaults to True.
+
         Tip:
             If setup_monitor_server() is not executed, a local server for monitoring will be started at localhost:8080.
 
@@ -1219,37 +1268,46 @@ class FEMOpt:
 
         """
 
+        # 共通引数
+        self.opt.n_trials = n_trials
+        self.opt.timeout = timeout
 
-        # dask メンバーの設定
+        # クラスターの設定
         self.opt.is_cluster = self.scheduler_address is not None
         if self.opt.is_cluster:
             # 既存のクラスターに接続
             logger.info('Connecting to existing cluster.')
             self.client = Client(self.scheduler_address)
-
         else:
+            # ローカルクラスターを構築
             logger.info('Launching single machine cluster. This may take tens of seconds.')
             cluster = LocalCluster(processes=True)
             self.client = Client(cluster, direct_to_workers=False)
             self.scheduler_address = self.client.scheduler.address
 
+        # タスクを振り分ける worker を指定
+        subprocess_indices = list(range(n_parallel))
+        if not self.opt.is_cluster:
+            subprocess_indices = subprocess_indices[1:]
+        worker_addresses = list(self.client.nthreads().keys())
+        assert len(subprocess_indices) <= len(worker_addresses), 'コア数が不足しています。'
+        worker_addresses = worker_addresses[:len(range(n_parallel))]  # TODO: ノードごとに適度に振り分ける
+        if not self.opt.is_cluster:
+            worker_addresses[0] = 'Main'
+
         # monitor 用 worker を起動
         logger.info('Launching monitor server. This may take a few seconds.')
         self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
         cmd = f'dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
-        worker_addresses = list(self.client.has_what().keys())
-        Popen(cmd, shell=True)  #, stdout=PIPE) --> cause stream error
+        current_n_workers = len(self.client.nthreads().keys())
+        Popen(cmd, shell=True)  # , stdout=PIPE) --> cause stream error
 
         # monitor 用 worker が増えるまで待つ
-        while not (len(self.client.has_what()) > len(worker_addresses)):
-            sleep(1)
-        new_worker_addresses = list(self.client.has_what().keys())
-        launched_worker_addresses = [w_adrs for w_adrs in new_worker_addresses if not w_adrs in worker_addresses]
-        assert len(launched_worker_addresses) == 1
-        launched_worker_address = launched_worker_addresses[0]
+        self.client.wait_for_workers(n_workers=current_n_workers+1)
 
         # actor の設定
         self.status = OptimizationStatus(self.client)
+        self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]
         self.status.set(OptimizationStatus.SETTING_UP)
         self.history = History(self.history_path, self.client)
         self.history.init(
@@ -1258,17 +1316,13 @@ class FEMOpt:
             list(self.opt.constraints.keys()),
         )
 
-        # 共通引数
-        self.opt.n_trials = n_trials
-        self.opt.timeout = timeout
-
         # fem
         self.fem.setup_before_parallel(self.client)
 
         # opt
         self.opt.fem_class = type(self.fem)
         self.opt.fem_kwargs = self.fem.kwargs
-        self.opt.status = self.status
+        self.opt.entire_status = self.status
         self.opt.history = self.history
         self.opt.setup_before_parallel()
 
@@ -1277,39 +1331,46 @@ class FEMOpt:
             start_monitor_server_forever,
             self.history, self.status,  # args
             **self.monitor_server_kwargs,  # kwargs
-            workers=launched_worker_address,  # if invalid arg,
+            workers=self.monitor_process_worker_name,  # if invalid arg,
             allow_other_workers=False
         )
 
         # クラスターでの計算開始
-        self.status.set(OptimizationStatus.LAUNCHING)
+        self.status.set(OptimizationStatus.LAUNCHING_FEM)
         start = time()
-        subprocess_indices = list(range(n_parallel))
+        calc_futures = self.client.map(
+            self.opt._main,
+            subprocess_indices,
+            [self.worker_status_list]*len(subprocess_indices),
+            [wait_setup]*len(subprocess_indices),
+            workers=worker_addresses,
+            allow_other_workers=False,
+        )
 
-        if self.opt.is_cluster:
-            # FIXME: monitor-server-process には割り当てないようにする
-            worker_addresses = list(self.client.nthreads().keys())
-            worker_addresses.remove(launched_worker_address)
-            calc_futures = self.client.map(
-                self.opt._main,
-                subprocess_indices,
-                workers=worker_addresses,
-                allow_other_workers=False,
-            )
+        t_main = None
+        if not self.opt.is_cluster:
+            # ローカルプロセスでの計算(opt._main 相当の処理)
+            subprocess_idx = 0
 
-        else:
-            # ローカルなら既存の fem をひとつ使う
-            calc_futures = self.client.map(self.opt._main, subprocess_indices[1:])
-
-            # ローカルプロセスでの計算開始
-            # constants の restore （map の後なら大丈夫）
-            # TODO: 最適化中に cluster を scale する場合はここに気を付ける
+            # set_fem 相当の処理だけ外で行う（要検討、kwargs が変のはず）
+            self.opt.fem = self.fem
+            # COM 定数の restore
             for obj in self.opt.objectives.values():
                 obj._restore_constants()
             for cns in self.opt.constraints.values():
                 cns._restore_constants()
-            self.opt.fem = self.fem
-            t_main = Thread(target=self.opt.main, args=(subprocess_indices[0],))
+
+            t_main = Thread(
+                target=self.opt._main,
+                args=(
+                    subprocess_idx,
+                    self.worker_status_list,
+                    wait_setup,
+                ),
+                kwargs=dict(
+                    skip_set_fem=True,
+                )
+            )
             t_main.start()
 
         # save history
@@ -1325,11 +1386,11 @@ class FEMOpt:
         t_save_history = Thread(target=save_history)
         t_save_history.start()
 
-
         # 終了を待つ
         self.client.gather(calc_futures)
         if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
-            t_main.join()
+            if t_main is not None:
+                t_main.join()
         self.status.set(OptimizationStatus.TERMINATED)
         end = time()
 
@@ -1352,6 +1413,8 @@ class FEMOpt:
         # terminate actors
         self.client.cancel(self.history._future, force=True)
         self.client.cancel(self.status._future, force=True)
+        for worker_status in self.worker_status_list:
+            self.client.cancel(worker_status._future, force=True)
         logger.info('Terminate actors.')
         sleep(1)
 
@@ -1388,4 +1451,3 @@ def start_monitor_server_forever(history, status, host='localhost', port=8080):
     monitor = Monitor(history, status)
     monitor.start_server(host, port)
     return 'Exit monitor server process gracefully'
-

@@ -634,7 +634,7 @@ class FemtetWithNXInterface(FemtetInterface):
             femprj_path=femprj_path,
             model_name=model_name,
             connect_method=connect_method,
-            prt_path = os.path.basename(prt_path)  # upload_file でアップロードされたファイルへのパスになる
+            prt_path=os.path.basename(prt_path)  # upload_file でアップロードされたファイルへのパスになる
         )
 
 

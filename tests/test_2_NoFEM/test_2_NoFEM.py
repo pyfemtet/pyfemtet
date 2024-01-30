@@ -134,12 +134,12 @@ def simple():
     femopt.add_objective(objective_z, 'z', args=femopt.opt)
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
     femopt.set_random_seed(42)
-    femopt.main(n_trials=30, n_parallel=3)
+    femopt.main(n_trials=30, n_parallel=3, wait_setup=True)
     femopt.terminate_all()
 
 
 if __name__ == '__main__':
-    # simple()
+    simple()
     # test_2_2_restart()
-    record = False
-    test_2_NoFEM_random_seed()
+    # record = False
+    # test_2_NoFEM_random_seed()

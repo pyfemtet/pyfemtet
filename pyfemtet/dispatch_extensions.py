@@ -4,6 +4,7 @@ import os
 from time import time, sleep
 from multiprocessing import current_process
 
+from tqdm import tqdm
 import psutil
 from dask.distributed import Lock
 
@@ -15,6 +16,7 @@ from femtetutils import util
 
 from multiprocessing.context import BaseContext, SpawnProcess, _concrete_contexts
 from multiprocessing.process import _children, _cleanup
+from multiprocessing.managers import SyncManager
 
 import logging
 from .logger import get_logger
@@ -154,7 +156,8 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     util.execute_femtet()
     pid = util.get_last_executed_femtet_process_id()
     logger.debug(f'Target pid is {pid}.')
-    sleep(5)
+    for i in tqdm(range(5), 'wait for launch femtet...'):
+        sleep(1)
     Femtet, pid = dispatch_specific_femtet(pid, timeout)
     return Femtet, pid
 
@@ -386,10 +389,11 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
     if not (pid in pids):
         raise FemtetNotFoundException(f"Femtet (pid = {pid}) doesn't exist.")
 
+    logger.info('Searching specific Femtet...')
+
     # 子プロセスの準備
     # with Manager() as manager:
-    from multiprocessing.managers import SyncManager
-    m = SyncManager(ctx=_NestableSpawnContext())
+    m = SyncManager(ctx=_NestableSpawnContext())  # このへんが時間のかかる処理
     m.start()
     with m as manager:
         # フラグの準備
@@ -402,7 +406,7 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
         # 目的以外の Femtet をブロックする子プロセスを開始
         logger.debug('Start subprocess to block Femtet other than target pid.')
         processes = []
-        for subprocess_id in range(len(pids)):
+        for subprocess_id in tqdm(range(len(pids)), 'Specifying connection...'):
             p = _NestableSpawnProcess(
             # p = Process(
                 target=_block_other_femtets,
