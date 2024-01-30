@@ -692,13 +692,17 @@ class AbstractOptimizer(ABC):
         else:
             raise ValueError('get_parameter() got invalid format: {format}')
 
-    def _check_interruption(self):
+    def check_interruption(self):
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             self.worker_status.set(OptimizationStatus.INTERRUPTING)
             self.finalize()
             return True
         else:
             return False
+
+    def finalize(self):
+        del self.fem
+        self.worker_status.set(OptimizationStatus.TERMINATED)
 
     def _main(
             self,
@@ -712,7 +716,7 @@ class AbstractOptimizer(ABC):
         self.worker_status = worker_status_list[subprocess_idx]
         self.worker_status.set(OptimizationStatus.LAUNCHING_FEM)
 
-        if self._check_interruption():
+        if self.check_interruption():
             return None
 
         # set_fem をはじめ、終了したらそれを示す
@@ -723,14 +727,14 @@ class AbstractOptimizer(ABC):
         # wait_setup or not
         if wait_setup:
             while True:
-                if self._check_interruption():
+                if self.check_interruption():
                     return None
                 # 他のすべての worker_status が wait 以上になったら break
                 if all([ws.get() >= OptimizationStatus.WAIT_OTHER_WORKERS for ws in worker_status_list]):
                     break
                 sleep(1)
         else:
-            if self._check_interruption():
+            if self.check_interruption():
                 return None
 
         # set status running
@@ -743,10 +747,8 @@ class AbstractOptimizer(ABC):
             self.main(subprocess_idx)
         finally:
             self.finalize()
-        return None
 
-    def finalize(self):
-        del self.fem
+        return None
 
     @abstractmethod
     def main(self, subprocess_idx: int = 0) -> None:
