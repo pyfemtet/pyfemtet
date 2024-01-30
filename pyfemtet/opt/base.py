@@ -1293,7 +1293,7 @@ class FEMOpt:
         if not self.opt.is_cluster:
             subprocess_indices = subprocess_indices[1:]
         worker_addresses = list(self.client.nthreads().keys())
-        assert len(subprocess_indices) <= len(worker_addresses), 'コア数が不足しています。'
+        assert max(subprocess_indices) <= len(worker_addresses)-1, f'コア数{len(worker_addresses)}は不足しています。'
         worker_addresses = worker_addresses[:len(range(n_parallel))]  # TODO: ノードごとに適度に振り分ける
         if not self.opt.is_cluster:
             worker_addresses[0] = 'Main'

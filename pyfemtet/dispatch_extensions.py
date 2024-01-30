@@ -148,7 +148,11 @@ def launch_and_dispatch_femtet_simple():
     util.execute_femtet()
     for i in tqdm(range(5), 'wait for launch femtet...'):
         sleep(1)
-    Femtet, pid = dispatch_femtet()
+    try:
+        with Lock('dispatch_femtet_simple'):
+            Femtet, pid = dispatch_femtet()
+    except RuntimeError:
+        Femtet, pid = dispatch_femtet()
     return Femtet, pid
 
 
