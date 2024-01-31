@@ -784,6 +784,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # 中断の確認 (FAIL loop に陥る対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
+            self.worker_status.set(OptimizationStatus.INTERRUPTING)
             trial.study.stop()  # 現在実行中の trial を最後にする
             return None  # set TrialState FAIL
 
@@ -825,6 +826,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
             # 中断の確認 (解析中に interrupt されている場合対策)
             if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
+                self.worker_status.set(OptimizationStatus.INTERRUPTING)
                 trial.study.stop()  # 現在実行中の trial を最後にする
                 return None  # set TrialState FAIL
 
@@ -842,6 +844,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # 中断の確認 (解析中に interrupt されている場合対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
+            self.worker_status.set(OptimizationStatus.INTERRUPTING)
             trial.study.stop()  # 現在実行中の trial を最後にする
             return None  # set TrialState FAIL
 
@@ -1332,7 +1335,10 @@ class FEMOpt:
         # launch monitor
         self.monitor_process_future = self.client.submit(
             start_monitor_server_forever,
-            self.history, self.status,  # args
+            self.history,
+            self.status,
+            worker_addresses,
+            self.worker_status_list,
             **self.monitor_server_kwargs,  # kwargs
             workers=self.monitor_process_worker_name,  # if invalid arg,
             allow_other_workers=False
@@ -1446,7 +1452,7 @@ class FEMOpt:
         sleep(3)
 
 
-def start_monitor_server_forever(history, status, host='localhost', port=8080):
-    monitor = Monitor(history, status)
-    monitor.start_server(host, port)
+def start_monitor_server_forever(history, status, worker_addresses, worker_status_list, host='localhost', port=8080):
+    monitor = Monitor(history, status, worker_addresses, worker_status_list)
+    monitor.start_server(worker_addresses, worker_status_list, host, port)
     return 'Exit monitor server process gracefully'

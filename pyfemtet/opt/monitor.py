@@ -76,7 +76,7 @@ def update_scatter_matrix(history, data):
     return fig
 
 
-def setup_home():
+def create_home_layout():
     # components の設定
     # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
     dummy = html.Div('', id='dummy')
@@ -131,17 +131,57 @@ OptimizerBase.set_monitor_host() を実行してください。
     return layout
 
 
+def create_worker_monitor_layout(
+        worker_addresses,
+        worker_status_int_list
+):
+    from .base import OptimizationStatus
+
+    interval = dcc.Interval(
+        id='worker-status-update-interval',
+        interval=1*1000,  # in milliseconds
+        n_intervals=0,
+    )
+
+    rows = [interval]
+    for i, (worker_address, status_int) in enumerate(zip(worker_addresses, worker_status_int_list)):
+        status_msg = OptimizationStatus.const_to_str(status_int)
+        a = dbc.Alert(
+            children=[
+                f'({worker_address}) ',
+                html.P(
+                    status_msg,
+                    id=f'worker-status-msg-{i}'
+                ),
+            ],
+            id=f'worker-status-color-{i}',
+            color="primary",
+        )
+        rows.append(dbc.Row([dbc.Col(a)]))
+
+    layout = dbc.Container(
+        rows,
+        fluid=True
+    )
+
+    return layout
+
+
+
 class Monitor(object):
 
-    def __init__(self, history, status):
+    def __init__(self, history, status, worker_addresses, worker_status_list):
 
         from .base import OptimizationStatus
 
         # 引数の処理
         self.history = history
         self.status = status
+
+        # メインスレッドで更新してもらうメンバー
         self.current_status_int = self.status.get()
         self.current_status = self.status.get_text()
+        self.current_worker_status_list = [s.get() for s in worker_status_list]
         self.df = self.history.actor_data.copy()
 
         # ログファイルの保存場所
@@ -153,7 +193,8 @@ class Monitor(object):
         self.app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         # ページの components と layout の設定
-        self.home = setup_home()
+        self.home = create_home_layout()
+        self.worker_monitor = create_worker_monitor_layout(worker_addresses, self.current_worker_status_list)
 
         # setup sidebar
         # https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
@@ -186,7 +227,7 @@ class Monitor(object):
                 dbc.Nav(
                     [
                         dbc.NavLink("Home", href="/", active="exact"),
-                        # dbc.NavLink("ペアプロット", href="/page-1", active="exact"),
+                        dbc.NavLink("Workers", href="/page-1", active="exact"),
                     ],
                     vertical=True,
                     pills=True,
@@ -202,8 +243,8 @@ class Monitor(object):
         def render_page_content(pathname):
             if pathname == "/":  # p0
                 return self.home
-            # elif pathname == "/page-1":
-            #     return self.multi_pairplot_layout
+            elif pathname == "/page-1":
+                return self.worker_monitor
             # elif pathname == "/page-2":
             #     return html.P("Oh cool, this is page 2!")
             # If the user tries to reach a different page, return a 404 message
@@ -297,10 +338,41 @@ class Monitor(object):
 
             return max_intervals, button_disable, button_disable, toggle_text, graph, status_children, status_color
 
+        # worker_monitor のための callback
+        @self.app.callback(
+            [Output(f'worker-status-msg-{i}', 'children') for i in range(len(worker_addresses))],
+            [Output(f'worker-status-color-{i}', 'color') for i in range(len(worker_addresses))],
+            [Input('worker-status-update-interval', 'n_intervals'),]
+        )
+        def update_worker_state(_):
+            msgs = [OptimizationStatus.const_to_str(i) for i in self.current_worker_status_list]
+
+            colors = []
+            for status_int in self.current_worker_status_list:
+                if status_int == OptimizationStatus.INTERRUPTING:
+                    colors.append('warning')
+                elif status_int == OptimizationStatus.TERMINATED:
+                    colors.append('dark')
+                elif status_int == OptimizationStatus.TERMINATE_ALL:
+                    colors.append('dark')
+                else:
+                    colors.append('primary')
+
+            ret = msgs
+            ret.extend(colors)
+
+            return tuple(ret)
+
     def _run_server_forever(self, app, host, port):
         app.run(debug=False, host=host, port=port)
 
-    def start_server(self, host='localhost', port=8080):
+    def start_server(
+            self,
+            worker_addresses,
+            worker_status_list,  # [actor]
+            host='localhost',
+            port=8080,
+    ):
 
         from .base import OptimizationStatus
 
@@ -339,6 +411,7 @@ class Monitor(object):
             self.current_status_int = self.status.get()
             self.current_status = self.status.get_text()
             self.df = self.history.actor_data.copy()
+            self.current_worker_status_list = [s.get() for s in worker_status_list]
 
             # terminate_all 指令があれば monitor server をホストするプロセスごと終了する
             if self.status.get() == OptimizationStatus.TERMINATE_ALL:
