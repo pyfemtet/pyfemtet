@@ -217,7 +217,7 @@ class Function:
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
             args = (fem.Femtet, *args)
-        return self.fun(*args, **self.kwargs)
+        return float(self.fun(*args, **self.kwargs))
 
     def _restore_constants(self):
         """Helper function for parallelize Femtet."""
@@ -280,7 +280,7 @@ class Objective(Function):
 
         ret = symlog(ret)
 
-        return ret
+        return float(ret)
 
 
 class Constraint(Function):
@@ -1296,7 +1296,8 @@ class FEMOpt:
         if not self.opt.is_cluster:
             subprocess_indices = subprocess_indices[1:]
         worker_addresses = list(self.client.nthreads().keys())
-        assert max(subprocess_indices) <= len(worker_addresses)-1, f'コア数{len(worker_addresses)}は不足しています。'
+        if len(subprocess_indices)>0:
+            assert max(subprocess_indices) <= len(worker_addresses)-1, f'コア数{len(worker_addresses)}は不足しています。'
         worker_addresses = worker_addresses[:len(range(n_parallel))]  # TODO: ノードごとに適度に振り分ける
         if not self.opt.is_cluster:
             worker_addresses[0] = 'Main'
