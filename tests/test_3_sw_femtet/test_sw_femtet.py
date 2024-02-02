@@ -1,5 +1,9 @@
+import os
 import numpy as np
 from pyfemtet.opt import FEMOpt, FemtetWithSolidworksInterface
+
+
+here, me = os.path.split(__file__)
 
 
 class HyperSphere:
@@ -39,8 +43,8 @@ def z(Femtet):
 
 
 def test_cad_sw():
-    sldprt_path = __file__.replace('.py', '.sldprt')
-    femprj_path = __file__.replace('.py', '.femprj')
+    sldprt_path = os.path.join(here, f'{me.replace(".py", ".sldprt")}')
+    femprj_path = os.path.join(here, f'{me.replace(".py", ".femprj")}')
 
     fem = FemtetWithSolidworksInterface(
         sldprt_path=sldprt_path,

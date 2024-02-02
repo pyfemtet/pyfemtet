@@ -124,7 +124,7 @@ class FemtetInterface(FEMInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            strict_pid_specify=False,
+            strict_pid_specify=True,
             **kwargs
     ):
         """Initializes the FemtetInterface.
