@@ -112,6 +112,9 @@ class FEMInterface:
         """
         pass
 
+    def setup_after_parallel(self):
+        pass
+
 
 class FemtetInterface(FEMInterface):
     """Concrete class for the interface with Femtet software."""    
@@ -736,16 +739,6 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         # 引数の処理
         self.sldprt_path = os.path.abspath(sldprt_path)
 
-        # SolidWorks を捕まえ、ファイルを開く
-        self.swApp = DispatchEx('SLDWORKS.Application')
-        self.swApp.Visible = True
-
-        # open model
-        self.swApp.OpenDoc(self.sldprt_path, self.swDocPART)
-        self.swModel = self.swApp.ActiveDoc
-        self.swEqnMgr = self.swModel.GetEquationMgr
-        self.nEquation = self.swEqnMgr.GetCount
-
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
         super().__init__(
@@ -756,6 +749,21 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             strict_pid_specify=strict_pid_specify
         )
 
+    def initialize_sldworks_connection(self):
+        # SolidWorks を捕まえ、ファイルを開く
+        self.swApp = DispatchEx('SLDWORKS.Application')
+        self.swApp.Visible = True
+
+        # open model
+        self.swApp.OpenDoc(self.sldprt_path, self.swDocPART)
+        self.swModel = self.swApp.ActiveDoc
+        self.swEqnMgr = self.swModel.GetEquationMgr
+        self.nEquation = self.swEqnMgr.GetCount
+
+    def check_param_value(self, param_name):
+        # disable FemtetInterface.check_param_value
+        pass
+
     def setup_before_parallel(self, client):
         client.upload_file(
             self.kwargs['femprj_path'],
@@ -765,6 +773,11 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             self.kwargs['sldprt_path'],
             False
         )
+
+    def setup_after_parallel(self):
+        CoInitialize()
+        self.initialize_sldworks_connection()
+
 
     def update_model(self, parameters: pd.DataFrame):
 
@@ -828,7 +841,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         self.swEqnMgr.AutomaticSolveOrder = False
         self.swEqnMgr.AutomaticRebuild = False
 
-        for i in trange(self.nEquation):
+        for i in range(self.nEquation):
             # name, equation の取得
             current_equation = self.swEqnMgr.Equation(i)
             current_name = self._get_name_from_equation(current_equation)
