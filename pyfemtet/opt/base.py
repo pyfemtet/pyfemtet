@@ -722,6 +722,7 @@ class AbstractOptimizer(ABC):
         # set_fem をはじめ、終了したらそれを示す
         if not skip_set_fem:  # なくても動く？？
             self.set_fem()
+        self.fem.setup_after_parallel()
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
 
         # wait_setup or not
@@ -1323,16 +1324,6 @@ class FEMOpt:
             list(self.opt.constraints.keys()),
         )
 
-        # fem
-        self.fem.setup_before_parallel(self.client)
-
-        # opt
-        self.opt.fem_class = type(self.fem)
-        self.opt.fem_kwargs = self.fem.kwargs
-        self.opt.entire_status = self.status
-        self.opt.history = self.history
-        self.opt.setup_before_parallel()
-
         # launch monitor
         self.monitor_process_future = self.client.submit(
             start_monitor_server_forever,
@@ -1344,6 +1335,16 @@ class FEMOpt:
             workers=self.monitor_process_worker_name,  # if invalid arg,
             allow_other_workers=False
         )
+
+        # fem
+        self.fem.setup_before_parallel(self.client)
+
+        # opt
+        self.opt.fem_class = type(self.fem)
+        self.opt.fem_kwargs = self.fem.kwargs
+        self.opt.entire_status = self.status
+        self.opt.history = self.history
+        self.opt.setup_before_parallel()
 
         # クラスターでの計算開始
         self.status.set(OptimizationStatus.LAUNCHING_FEM)
