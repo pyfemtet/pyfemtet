@@ -128,6 +128,7 @@ class FemtetInterface(FEMInterface):
             femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
             model_name (str or None, optional): The name of the analysis model. Defaults to None.
             connect_method (str, optional): The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
+            strict_pid_specify (bool): If True and connect_method=='new', search launched Femtet process strictly based on its process id. This option requires large overhead time. So It is recommended to set False in large n_parallel.
 
         Tip:
             If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
@@ -176,6 +177,7 @@ class FemtetInterface(FEMInterface):
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
+            strict_pid_specify=self.strict_pid_specify,
             **kwargs
         )
 
