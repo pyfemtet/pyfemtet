@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Iterable
 
 import os
+import sys
 import datetime
 import inspect
 import ast
@@ -1330,7 +1331,7 @@ class FEMOpt:
         # monitor 用 worker を起動
         logger.info('Launching monitor server. This may take a few seconds.')
         self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
-        cmd = f'dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
+        cmd = f'{sys.executable} -m dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
         current_n_workers = len(self.client.nthreads().keys())
         Popen(cmd, shell=True)  # , stdout=PIPE) --> cause stream error
 
