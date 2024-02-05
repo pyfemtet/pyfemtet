@@ -204,9 +204,6 @@ class Function:
     def calc(self, fem: FEMInterface):
         """Execute user-defined fun.
 
-        If fem is a FemtetInterface,
-        the 1st argument of fun is set to fem automatically.
-
         Args:
             fem (FEMInterface)
 
@@ -246,6 +243,11 @@ class Objective(Function):
         Raises:
             ValueError: If the direction is not valid.
 
+        Note:
+            If FEMOpt.fem is a instance of FemtetInterface or its subclass,
+            the 1st argument of fun is set to fem automatically.
+
+
         """
         _check_direction(direction)
         self.direction = direction
@@ -257,7 +259,7 @@ class Objective(Function):
         When direction is `'minimize'`, ``value`` is calculated.
         When direction is `'maximize'`, ``-value`` is calculated.
         When direction is float, ``abs(value - direction)`` is calculated.
-        Finally, the calculated value is passed to the symlog function.
+        Finally, the calculated value is passed to the symlog function and returns it.
 
         ``value`` is the return value of the user-defined function.
 
@@ -312,7 +314,7 @@ class Constraint(Function):
         super().__init__(fun, name, args, kwargs)
 
 
-class HistoryDfCore:
+class _HistoryDfCore:
     """Class for managing a DataFrame object in a distributed manner."""
 
     def __init__(self):
@@ -334,6 +336,7 @@ class History:
         param_names (list): The names of the parameters in the study.
         obj_names (list): The names of the objectives in the study.
         cns_names (list): The names of the constraints in the study.
+        actor_data (pd.DataFrame): The history data of optimization.
 
     """
     def __init__(self, history_path, client):
@@ -347,7 +350,7 @@ class History:
         # 引数の処理
         self.path = history_path  # .csv
         self.is_restart = False
-        self._future = client.submit(HistoryDfCore, actor=True)
+        self._future = client.submit(_HistoryDfCore, actor=True)
         self._actor_data = self._future.result()
         self.tmp_data = pd.DataFrame()
         self.param_names = []
@@ -544,7 +547,7 @@ class History:
                     df.loc[i, 'hypervolume'] = 0
 
 
-class OptimizationStatusActor:
+class _OptimizationStatusActor:
     status_int = -1
     status = 'undefined'
 
@@ -554,11 +557,7 @@ class OptimizationStatusActor:
 
 
 class OptimizationStatus:
-    """Optimization status.
-
-    undefined -> setting up -> launching -> running (-> interrupting) -> terminated
-
-    """
+    """Optimization status."""
     UNDEFINED = -1
     INITIALIZING = 0
     SETTING_UP = 10
@@ -571,7 +570,7 @@ class OptimizationStatus:
     TERMINATE_ALL = 60
 
     def __init__(self, client, name='entire'):
-        self._future = client.submit(OptimizationStatusActor, actor=True)
+        self._future = client.submit(_OptimizationStatusActor, actor=True)
         self._actor = self._future.result()
         self.name = name
         self.set(self.INITIALIZING)
@@ -606,6 +605,25 @@ class OptimizationStatus:
 
 
 class AbstractOptimizer(ABC):
+    """Abstract base class for an interface of optimization library.
+        
+    Attributes:
+        fem (FEMInterface): The finite element method object.
+        fem_class (type): The class of the finite element method object.
+        fem_kwargs (dict): The keyword arguments used to instantiate the finite element method object.
+        parameters (pd.DataFrame): The parameters used in the optimization.
+        objectives (dict): A dictionary containing the objective functions used in the optimization.
+        constraints (dict): A dictionary containing the constraint functions used in the optimization.
+        entire_status (OptimizationStatus): The status of the entire optimization process.
+        history (History): An actor object that records the history of each iteration in the optimization process.
+        worker_status (OptimizationStatus): The status of each worker in a distributed computing environment.
+        message (str): A message associated with the current state of the optimization process.
+        seed (int or None): The random seed used for random number generation during the optimization process.
+        timeout (float or int or None): The maximum time allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.
+        n_trials (int or None): The maximum number of trials allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.
+        is_cluster (bool): Flag indicating if running on a distributed computing cluster.    
+    
+    """
 
     def __init__(self):
         self.fem = None
@@ -624,6 +642,7 @@ class AbstractOptimizer(ABC):
         self.is_cluster = False
 
     def f(self, x):
+        """Get x, update fem analysis, return objectives (and constraints)."""
         # interruption の実装は具象クラスに任せる
 
         # x の更新
@@ -657,6 +676,7 @@ class AbstractOptimizer(ABC):
         return np.array(y), np.array(_y), np.array(c)
 
     def set_fem(self, skip_reconstruct=False):
+        """Reconstruct FEMInterface in a subprocess."""
         # restore fem
         if not skip_reconstruct:
             self.fem = self.fem_class(**self.fem_kwargs)
@@ -692,7 +712,8 @@ class AbstractOptimizer(ABC):
         else:
             raise ValueError('get_parameter() got invalid format: {format}')
 
-    def check_interruption(self):
+    def _check_interruption(self):
+        """"""
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             self.worker_status.set(OptimizationStatus.INTERRUPTING)
             self.finalize()
@@ -701,6 +722,7 @@ class AbstractOptimizer(ABC):
             return False
 
     def finalize(self):
+        """Destruct fem and set worker status."""
         del self.fem
         self.worker_status.set(OptimizationStatus.TERMINATED)
 
@@ -716,7 +738,7 @@ class AbstractOptimizer(ABC):
         self.worker_status = worker_status_list[subprocess_idx]
         self.worker_status.set(OptimizationStatus.LAUNCHING_FEM)
 
-        if self.check_interruption():
+        if self._check_interruption():
             return None
 
         # set_fem をはじめ、終了したらそれを示す
@@ -728,14 +750,14 @@ class AbstractOptimizer(ABC):
         # wait_setup or not
         if wait_setup:
             while True:
-                if self.check_interruption():
+                if self._check_interruption():
                     return None
                 # 他のすべての worker_status が wait 以上になったら break
                 if all([ws.get() >= OptimizationStatus.WAIT_OTHER_WORKERS for ws in worker_status_list]):
                     break
                 sleep(1)
         else:
-            if self.check_interruption():
+            if self._check_interruption():
                 return None
 
         # set status running
@@ -753,12 +775,12 @@ class AbstractOptimizer(ABC):
 
     @abstractmethod
     def main(self, subprocess_idx: int = 0) -> None:
-        """Called from dask worker."""
+        """Start calcuration using optimization library."""
         pass
 
     @abstractmethod
     def setup_before_parallel(self, *args, **kwargs):
-        """Preprocessing for dask parallel workers."""
+        """Setup before parallel processes are launched."""
         pass
 
 
@@ -779,7 +801,6 @@ class OptunaOptimizer(AbstractOptimizer):
         self.sampler_kwargs = dict() if sampler_kwargs is None else sampler_kwargs
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
-
 
     def _objective(self, trial):
 
@@ -856,7 +877,7 @@ class OptunaOptimizer(AbstractOptimizer):
         return trial.user_attrs['constraint'] if 'constraint' in trial.user_attrs.keys() else (1,)  # infeasible
 
     def setup_before_parallel(self):
-        """Main process から呼ばれる関数"""
+        """Create storage, study and set initial parameter."""
 
         # create storage
         self.study_name = os.path.basename(self.history.path)
@@ -952,7 +973,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.additional_initial_parameter.append([parameter, name])
 
     def main(self, subprocess_idx=0):
-        """Dask worker から呼ばれる関数"""
+        """Set random seed, sampler, study and run study.optimize()."""
 
         # (re)set random seed
         seed = self.seed
@@ -1168,7 +1189,8 @@ class FEMOpt:
             lower_bound (float or Non, optional): The lower bound of the constraint. Defaults to None.
             upper_bound (float or Non, optional): The upper bound of the constraint. Defaults to None.
             strict (bool, optional): Flag indicating if it is a strict constraint. Defaults to True.
-            args (tuple or None, optional): Additional arguments for the constraint function. Defaults toNone.
+            args (tuple or None, optional): Additional arguments for the constraint function. Defaults to None.
+            kwargs (dict): Additional arguments for the constraint function. Defaults to None.
 
         Note:
             If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.
@@ -1230,10 +1252,13 @@ class FEMOpt:
             port (int or None, optional): The port number of the monitor server. If None, ``8080`` will be used. Defaults to None.
 
         Tip:
-            If host is ``0.0.0.0``, a server will be set up
-            that is visible from the local network.
-            Start a browser on another machine
-            and type ``<ip_address_or_hostname>:<port>`` in the address bar.
+            If you do not know the host IP address
+            for connecting to the local network,
+            use the ``ipconfig`` command to find out.
+            
+            Alternatively, you can specify host as 0.0.0.0
+            to access the monitor server through all network interfaces
+            used by that computer.        
 
             However, please note that in this case,
             it will be visible to all users on the local network.
@@ -1263,15 +1288,14 @@ class FEMOpt:
             If setup_monitor_server() is not executed, a local server for monitoring will be started at localhost:8080.
 
         Note:
-            If ``n_trials`` and ``timeout`` are both None, it will calculate repeatedly until interrupting by the user.
+            If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user.
         
         Note:
             If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.
 
-        Note:
-            Currently, supported methods are 'TPE' and 'botorch'.
-            For detail, see https://optuna.readthedocs.io/en/stable/reference/samplers/index.html.
-
+        Warning:
+            If ``n_parallel`` >= 2 and ``fem`` is a subclass of ``FemtetInterface``, the ``strictly_pid_specify`` of subprocess is set to ``False``.
+            So **it is recommended to close all other Femtet processes before running main().**
 
         """
 
@@ -1326,7 +1350,7 @@ class FEMOpt:
 
         # launch monitor
         self.monitor_process_future = self.client.submit(
-            start_monitor_server_forever,
+            start_monitor_server,
             self.history,
             self.status,
             worker_addresses,
@@ -1408,6 +1432,11 @@ class FEMOpt:
         logger.info(f'結果は{self.history.path}を確認してください.')
 
     def terminate_all(self):
+        """Try to terminate all launched processes.
+        
+        If distributed computing, Scheduler and Workers will NOT be terminated.
+        
+        """
 
         # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
         sleep(1)
@@ -1454,7 +1483,7 @@ class FEMOpt:
         sleep(3)
 
 
-def start_monitor_server_forever(history, status, worker_addresses, worker_status_list, host='localhost', port=8080):
+def start_monitor_server(history, status, worker_addresses, worker_status_list, host='localhost', port=8080):
     monitor = Monitor(history, status, worker_addresses, worker_status_list)
     monitor.start_server(worker_addresses, worker_status_list, host, port)
     return 'Exit monitor server process gracefully'

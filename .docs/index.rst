@@ -74,7 +74,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 下記は多目的最適化の実施例です。
 ``add_parameter()`` と ``add_objective()`` で問題を設定し、
 ``main()`` で実施することができます。
-それ以外はあなたの Femtet のマクロスクリプトを流用できます。
+それ以外は通常の Femtet のマクロスクリプトを使用します。
 詳細な実施例は :doc:`pages/usage` セクションを確認してください。
 
 .. code-block:: python
@@ -82,7 +82,6 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
    from pyfemtet.opt import FEMOpt
 
    def max_displacement(Femtet):
-
        dx, dy, dz = Femtet.Gogh.Galileo.GetMaxDisplacement()
        return dy
 

@@ -112,7 +112,6 @@ if __name__ == '__main__':
     opt = OptunaOptimizer(
         sampler_class=BoTorchSampler,
         sampler_kwargs=dict(
-            consider_running_trials=True,
             n_startup_trials=5,
         )
     )
