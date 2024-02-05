@@ -842,7 +842,7 @@ class OptunaOptimizer(AbstractOptimizer):
         try:
             _, _y, c = self.f(x)
         except (ModelError, MeshError, SolveError) as e:
-            logger.info(str(type(e)))
+            logger.info(e)
             logger.info('以下の変数で FEM 解析に失敗しました。')
             print(self.get_parameter('dict'))
 
