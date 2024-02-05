@@ -50,7 +50,7 @@ def test_cad_sw():
         sldprt_path=sldprt_path,
         femprj_path=femprj_path,
         connect_method='new',
-        strict_pid_specify=False,
+        strictly_pid_specify=False,
     )
 
     femopt = FEMOpt(fem=fem)

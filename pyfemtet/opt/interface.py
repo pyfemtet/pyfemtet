@@ -124,7 +124,7 @@ class FemtetInterface(FEMInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            strict_pid_specify=True,
+            strictly_pid_specify=True,
             **kwargs
     ):
         """Initializes the FemtetInterface.
@@ -133,7 +133,7 @@ class FemtetInterface(FEMInterface):
             femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
             model_name (str or None, optional): The name of the analysis model. Defaults to None.
             connect_method (str, optional): The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
-            strict_pid_specify (bool): If True and connect_method=='new', search launched Femtet process strictly based on its process id. This option requires large overhead time. So It is recommended to set False in large n_parallel.
+            strictly_pid_specify (bool): If True and connect_method=='new', search launched Femtet process strictly based on its process id. This option requires large overhead time. So It is recommended to set False in large n_parallel.
 
         Tip:
             If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
@@ -157,7 +157,7 @@ class FemtetInterface(FEMInterface):
         self.connected_method = 'unconnected'
         self.parameters = None
         self.max_api_retry = 3
-        self.strict_pid_specify = strict_pid_specify
+        self.strictly_pid_specify = strictly_pid_specify
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -166,6 +166,7 @@ class FemtetInterface(FEMInterface):
             # worker なら femprj_path が None でないはず
             self.femprj_path = os.path.join(space, os.path.basename(self.femprj_path))
             self.connect_method = 'new'
+            self.strictly_pid_specify = False
         except ValueError:  # get_worker に失敗した場合
             pass
 
@@ -182,7 +183,7 @@ class FemtetInterface(FEMInterface):
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
-            strict_pid_specify=self.strict_pid_specify,
+            strictly_pid_specify=self.strictly_pid_specify,
             **kwargs
         )
 
@@ -208,7 +209,7 @@ class FemtetInterface(FEMInterface):
     def _connect_new_femtet(self):
         logger.info('└ Try to launch and connect new Femtet process.')
 
-        self.Femtet, _ = launch_and_dispatch_femtet(strict_pid_specify=self.strict_pid_specify)
+        self.Femtet, _ = launch_and_dispatch_femtet(strictly_pid_specify=self.strictly_pid_specify)
 
         self.connected_method = 'new'
 
@@ -616,7 +617,7 @@ class FemtetWithNXInterface(FemtetInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            strict_pid_specify=False,
+            strictly_pid_specify=False,
     ):
         """
         Initializes the FemtetWithNXInterface class.
@@ -644,7 +645,7 @@ class FemtetWithNXInterface(FemtetInterface):
             model_name=model_name,
             connect_method=connect_method,
             prt_path=os.path.basename(prt_path),  # upload_file でアップロードされたファイルへのパスになる
-            strict_pid_specify=strict_pid_specify
+            strictly_pid_specify=strictly_pid_specify
         )
 
 
@@ -734,7 +735,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            strict_pid_specify=False,
+            strictly_pid_specify=False,
     ):
         # 引数の処理
         self.sldprt_path = os.path.abspath(sldprt_path)
@@ -746,7 +747,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             model_name=model_name,
             connect_method=connect_method,
             sldprt_path=os.path.basename(sldprt_path),  # upload_file でアップロードされたファイルへのパスになる
-            strict_pid_specify=strict_pid_specify
+            strictly_pid_specify=strictly_pid_specify
         )
 
     def initialize_sldworks_connection(self):

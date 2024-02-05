@@ -144,12 +144,12 @@ def _get_subprocess_log_prefix():
     return f'({current_process().name}) '
 
 
-def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strict_pid_specify=True) -> Tuple[IFemtet, int]:
+def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strictly_pid_specify=True) -> Tuple[IFemtet, int]:
     """Launch Femtet by new process and connect to it.
 
     Args:
         timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
-        strict_pid_specify (bool): If True, try to connect the launched femtet process strictly. If False, launch new process but try to connect any connectable femtet.
+        strictly_pid_specify (bool): If True, try to connect the launched femtet process strictly. If False, launch new process but try to connect any connectable femtet.
 
     Raises:
         FemtetNotFoundException: Launched Femtet is not found for some reason (i.e. failed to launch Femtet).
@@ -166,7 +166,7 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strict_pid_specify=True
         sleep(1)
 
     # dispatch femtet
-    if strict_pid_specify:
+    if strictly_pid_specify:
         Femtet, pid = dispatch_specific_femtet(pid, timeout)
     else:
         # worker process なら排他処理する
