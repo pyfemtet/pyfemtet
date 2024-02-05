@@ -125,7 +125,7 @@ class FemtetInterface(FEMInterface):
             model_name=None,
             connect_method='auto',
             strictly_pid_specify=True,
-            **kwargs
+            **kwargs  # 継承されたクラスからの引数
     ):
         """Initializes the FemtetInterface.
 
@@ -177,13 +177,12 @@ class FemtetInterface(FEMInterface):
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
         self.quit_when_destruct = self.connected_method == 'new'
 
-        # restore するための情報保管
+        # subprocess で restore するための情報保管
         # パスなどは connect_and_open_femtet での処理結果を反映し
         # メインで開いた解析モデルが確実に開かれるようにする
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
-            strictly_pid_specify=self.strictly_pid_specify,
             **kwargs
         )
 
@@ -638,14 +637,21 @@ class FemtetWithNXInterface(FemtetInterface):
         # 引数の処理
         self.prt_path = os.path.abspath(prt_path)
 
+        # dask サブプロセスのときは prt_path を worker space から取るようにする
+        try:
+            worker = get_worker()
+            space = worker.local_directory
+            # worker なら femprj_path が None でないはず
+            self.prt_path = os.path.join(space, os.path.basename(self.prt_path))
+        except ValueError:  # get_worker に失敗した場合
+            pass
+
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
         super().__init__(
             femprj_path=femprj_path,
             model_name=model_name,
-            connect_method=connect_method,
-            prt_path=os.path.basename(prt_path),  # upload_file でアップロードされたファイルへのパスになる
-            strictly_pid_specify=strictly_pid_specify
+            prt_path=self.prt_path,
         )
 
 
@@ -740,14 +746,21 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         # 引数の処理
         self.sldprt_path = os.path.abspath(sldprt_path)
 
+        # dask サブプロセスのときは prt_path を worker space から取るようにする
+        try:
+            worker = get_worker()
+            space = worker.local_directory
+            # worker なら femprj_path が None でないはず
+            self.prt_path = os.path.join(space, os.path.basename(self.prt_path))
+        except ValueError:  # get_worker に失敗した場合
+            pass
+
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
         super().__init__(
             femprj_path=femprj_path,
             model_name=model_name,
-            connect_method=connect_method,
-            sldprt_path=os.path.basename(sldprt_path),  # upload_file でアップロードされたファイルへのパスになる
-            strictly_pid_specify=strictly_pid_specify
+            sldprt_path=self.sldprt_path,
         )
 
     def initialize_sldworks_connection(self):

@@ -43,7 +43,7 @@ def z(Femtet):
 
 
 def test_cad_sw():
-    sldprt_path = os.path.join(here, f'{me.replace(".py", ".sldprt")}')
+    sldprt_path = os.path.join(here, f'{me.replace(".py", ".SLDPRT")}')
     femprj_path = os.path.join(here, f'{me.replace(".py", ".femprj")}')
 
     fem = FemtetWithSolidworksInterface(
