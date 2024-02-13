@@ -23,7 +23,7 @@ from dask.distributed import LocalCluster, Client, Lock
 
 from win32com.client import constants, Constants
 
-from ..core import ModelError, MeshError, SolveError
+from ..core import ModelError, MeshError, SolveError, _version
 from .interface import FEMInterface, FemtetInterface
 from .monitor import Monitor
 

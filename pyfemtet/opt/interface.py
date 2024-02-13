@@ -20,6 +20,7 @@ from ..core import (
     ModelError,
     MeshError,
     SolveError,
+    _version,
 )
 from ..dispatch_extensions import (
     dispatch_femtet,
@@ -459,14 +460,17 @@ class FemtetInterface(FEMInterface):
 
     def check_param_value(self, param_name):
         """See :func:`FEMInterface.check_param_value`"""
-        variable_names = self.Femtet.GetVariableNames()
-        if variable_names is not None:
-            if param_name in variable_names:
-                return self.Femtet.GetVariableValue(param_name)
-        message = f'Femtet 解析モデルに変数 {param_name} がありません.'
-        message += f'現在のモデルに設定されている変数は {variable_names} です.'
-        message += '大文字・小文字の区別に注意してください.'
-        raise RuntimeError(message)
+        if self._version() >= _version(2023, 1, 1):
+            variable_names = self.Femtet.GetVariableNames()
+            if variable_names is not None:
+                if param_name in variable_names:
+                    return self.Femtet.GetVariableValue(param_name)
+            message = f'Femtet 解析モデルに変数 {param_name} がありません.'
+            message += f'現在のモデルに設定されている変数は {variable_names} です.'
+            message += '大文字・小文字の区別に注意してください.'
+            raise RuntimeError(message)
+        else:
+            return None
 
     def update_parameter(self, parameters: 'pd.DataFrame'):
         """See :func:`FEMInterface.update_parameter`"""
@@ -584,6 +588,8 @@ class FemtetInterface(FEMInterface):
             False
         )
 
+    def _version(self):
+        return _version(Femtet=self.Femtet)
 
 class NoFEM(FEMInterface):
     """Interface with no FEM for debug."""

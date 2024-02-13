@@ -36,3 +36,17 @@ class SolveError(Exception):
 class FemtetAutomationError(Exception):
     """Exception raised for errors in automating Femtet."""
     pass
+
+
+def _version(
+        main=None,
+        major=None,
+        minor=None,
+        Femtet=None,
+):
+    if Femtet is not None:
+        assert (main is None) and (major is None) and (minor is None), 'バージョンを指定しないでください'
+        main, major, minor = [int(v) for v in Femtet.Version.split('.')[:3]]
+    else:
+        assert (main is not None) and (major is not None) and (minor is not None), 'バージョンを指定してください'
+    return main*10000 + major*100 + minor
