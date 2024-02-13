@@ -618,16 +618,13 @@ class FemtetWithNXInterface(FemtetInterface):
             raise FileNotFoundError(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
 
         # 引数の処理
-        self.prt_path = os.path.abspath(prt_path)
-
         # dask サブプロセスのときは prt_path を worker space から取るようにする
         try:
             worker = get_worker()
             space = worker.local_directory
-            # worker なら femprj_path が None でないはず
-            self.prt_path = os.path.join(space, os.path.basename(self.prt_path))
+            self.prt_path = os.path.join(space, os.path.basename(prt_path))
         except ValueError:  # get_worker に失敗した場合
-            pass
+            self.prt_path = os.path.abspath(prt_path)
 
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
@@ -730,16 +727,13 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             strictly_pid_specify=True,
     ):
         # 引数の処理
-        self.sldprt_path = os.path.abspath(sldprt_path)
-
-        # dask サブプロセスのときは prt_path を worker space から取るようにする
+        # dask サブプロセスのときは space 直下の sldprt_path を参照する
         try:
             worker = get_worker()
             space = worker.local_directory
-            # worker なら femprj_path が None でないはず
-            self.prt_path = os.path.join(space, os.path.basename(self.prt_path))
+            self.sldprt_path = os.path.join(space, os.path.basename(sldprt_path))
         except ValueError:  # get_worker に失敗した場合
-            pass
+            self.sldprt_path = os.path.abspath(sldprt_path)
 
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
