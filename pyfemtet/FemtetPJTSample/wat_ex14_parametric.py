@@ -32,7 +32,7 @@ def substrate_size(Femtet):
     Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
         目的関数は第一引数に Femtet インスタンスを取る必要があります。
 
-    subs_w * subs_d : XY 平面における基板の専有面積です。
+    subs_w * subs_d : XY 平面における基板の占有面積です。
         目的関数は単一の float を返す必要があります。
 
     """
