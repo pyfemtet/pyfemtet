@@ -29,12 +29,9 @@ def inductance(Femtet):
 if __name__ == '__main__':
 
     # 最適化手法を定義するオブジェクトを用意
-    # BoTorch ライブラリを使わない場合、このブロックをコメントアウトし、
-    # opt = None としてください。
     opt = OptunaOptimizer(
         sampler_class=BoTorchSampler,
         sampler_kwargs=dict(
-            consider_running_trials=True,
             n_startup_trials=5,
         )
     )
@@ -55,3 +52,4 @@ if __name__ == '__main__':
     # 最適化の実行
     femopt.set_random_seed(42)
     femopt.main(n_trials=20)
+    femopt.terminate_all()

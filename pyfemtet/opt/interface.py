@@ -5,6 +5,7 @@ from time import sleep, time
 import json
 import subprocess
 import signal
+from abc import ABC, abstractmethod
 
 import pandas as pd
 import psutil
@@ -36,7 +37,7 @@ logger.setLevel(logging.INFO)
 here, me = os.path.split(__file__)
 
 
-class FEMInterface:
+class FEMInterface(ABC):
     """Abstract base class for the interface with FEM software."""
 
     def __init__(
@@ -48,59 +49,28 @@ class FEMInterface:
         The concrete class should call super().__init__() with the desired arguments when restoring.
 
         Args:
-            subprocess_idx (int or None, optional): The index of the subprocess. Defaults to None.
-            subprocess_settings ('Any' or None, optional): Additional settings for the subprocess. Defaults to None.
-            **kwargs: keyword arguments for FEMInterface constructor.
+            **kwargs: keyword arguments for FEMInterface (re)constructor.
 
         """
         # restore のための情報保管
         self.kwargs = kwargs
 
-    def check_param_value(self, param_name) -> float or None:
-        """Checks the value of a parameter in the FEM model.
-
-        Args:
-            param_name (str): The name of the parameter.
-
-        Raises:
-            Exception: If param_name does not exist in the FEM model.
-
-        Returns:
-            float or None: The value of the parameter.
-
-        """
-        pass
-
+    @abstractmethod
     def update(self, parameters: pd.DataFrame) -> None:
-        """Updates the FEM analysis based on the proposed parameters.
+        """Updates the FEM analysis based on the proposed parameters."""
+        raise NotImplementedError('update() must be implemented.')
 
-        Args:
-            parameters (pd.DataFrame): The parameters to be updated. Must have at least 'name' and 'value'.
-
-         Raises:
-            ModelError, MeshError, SolveError: If there are errors in updating or analyzing the model.
-
-         Returns:
-            None
-
-         """
-        pass
+    def check_param_value(self, param_name) -> float or None:
+        """Checks the value of a parameter in the FEM model (if implemented in concrete class)."""
+        if False:
+            raise RuntimeError(f"{param_name} doesn't exist on FEM model.")
 
     def update_parameter(self, parameters: pd.DataFrame) -> None:
-        """Updates only FEM variables that can be obtained with Femtet.GetVariableValue and similar functions.
-
-        If users define a function to be passed to add_objective etc. to take OptimizerBase as an argument,
-        and access the variable by calling OptimizerBase.get_parameter() within the function,
-        there is no need to implement this method in the concrete class of FEMInterface.
-
-        Args:
-         parameters (pd.DataFrame): The parameters to be updated.
-
-        """
+        """Updates only FEM variables (if implemented in concrete class)."""
         pass
 
     def setup_before_parallel(self, client) -> None:
-        """Preprocessing before launching a dask worker.
+        """Preprocessing before launching a dask worker (if implemented in concrete class).
 
         Args:
             client: dask client.
@@ -113,32 +83,41 @@ class FEMInterface:
         pass
 
     def setup_after_parallel(self):
+        """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
 
 class FemtetInterface(FEMInterface):
-    """Concrete class for the interface with Femtet software."""    
+    """Concrete class for the interface with Femtet software.
+    
+        Args:
+            femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
+            model_name (str or None, optional): The name of the analysis model. Defaults to None.
+            connect_method (str, optional): The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
+            strictly_pid_specify (bool, optional): If True and connect_method=='new', search launched Femtet process strictly based on its process id.
+
+        Warning:
+            Even if you specify ``strictly_pid_specify=True`` on the constructor,
+            **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**
+            because of its large overhead.
+            So you should close all Femtet processes before running FEMOpt.main()
+            if ``n_parallel`` >= 2.
+
+
+
+        Tip:
+            If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
+    
+    """    
 
     def __init__(
             self,
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            strict_pid_specify=False,
-            **kwargs
+            strictly_pid_specify=True,
+            **kwargs  # 継承されたクラスからの引数
     ):
-        """Initializes the FemtetInterface.
-
-        Args:
-            femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
-            model_name (str or None, optional): The name of the analysis model. Defaults to None.
-            connect_method (str, optional): The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
-            strict_pid_specify (bool): If True and connect_method=='new', search launched Femtet process strictly based on its process id. This option requires large overhead time. So It is recommended to set False in large n_parallel.
-
-        Tip:
-            If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
-
-        """
 
         # win32com の初期化
         CoInitialize()
@@ -157,7 +136,7 @@ class FemtetInterface(FEMInterface):
         self.connected_method = 'unconnected'
         self.parameters = None
         self.max_api_retry = 3
-        self.strict_pid_specify = strict_pid_specify
+        self.strictly_pid_specify = strictly_pid_specify
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -166,6 +145,7 @@ class FemtetInterface(FEMInterface):
             # worker なら femprj_path が None でないはず
             self.femprj_path = os.path.join(space, os.path.basename(self.femprj_path))
             self.connect_method = 'new'
+            self.strictly_pid_specify = False
         except ValueError:  # get_worker に失敗した場合
             pass
 
@@ -176,13 +156,12 @@ class FemtetInterface(FEMInterface):
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
         self.quit_when_destruct = self.connected_method == 'new'
 
-        # restore するための情報保管
+        # subprocess で restore するための情報保管
         # パスなどは connect_and_open_femtet での処理結果を反映し
         # メインで開いた解析モデルが確実に開かれるようにする
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
-            strict_pid_specify=self.strict_pid_specify,
             **kwargs
         )
 
@@ -208,7 +187,7 @@ class FemtetInterface(FEMInterface):
     def _connect_new_femtet(self):
         logger.info('└ Try to launch and connect new Femtet process.')
 
-        self.Femtet, _ = launch_and_dispatch_femtet(strict_pid_specify=self.strict_pid_specify)
+        self.Femtet, _ = launch_and_dispatch_femtet(strictly_pid_specify=self.strictly_pid_specify)
 
         self.connected_method = 'new'
 
@@ -224,21 +203,25 @@ class FemtetInterface(FEMInterface):
 
     def connect_femtet(self, connect_method: str = 'auto', pid: int or None = None):
         """Connects to a Femtet process.
+
         Args:
             connect_method (str, optional): The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'new'.
             pid (int or None, optional): The process ID of an existing Femtet process and wanted to connect.
 
-        When connect_method is 'new', starts a new Femtet process and connects to it.
-        **`pid` will be ignored.**
+        Note:
+            When connect_method is 'new', starts a new Femtet process and connects to it.
+            **`pid` will be ignored.**
 
-        When 'existing', connect to an existing Femtet process.
-        However, if there are no Femtets to which it can connect
-        (i.e. already connected to another Python or Excel process),
-        it throws an exception.
+        Note:
+            When 'existing', connect to an existing Femtet process.
+            However, if there are no Femtets to which it can connect
+            (i.e. already connected to another Python or Excel process),
+            it throws an exception.
 
-        When set to 'auto', first tries 'existing', and if that fails, connects with 'new'.
-        If `pid` is specified and failed to connect,
-        it will not try existing another Femtet process.
+        Note:
+            When set to 'auto', first tries 'existing', and if that fails, connects with 'new'.
+            If `pid` is specified and failed to connect,
+            it will not try existing another Femtet process.
 
         """
 
@@ -405,6 +388,7 @@ class FemtetInterface(FEMInterface):
                 )
 
     def femtet_is_alive(self) -> bool:
+        """Returns connected femtet process is exsiting or not."""
         return _get_pid(self.Femtet.hWnd) > 0
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
@@ -603,12 +587,21 @@ class FemtetInterface(FEMInterface):
 
 class NoFEM(FEMInterface):
     """Interface with no FEM for debug."""
-    pass
+    def update(self, parameters: pd.DataFrame) -> None:
+        pass
 
 
 class FemtetWithNXInterface(FemtetInterface):
+    """Femtet with NX interface class.
 
-    JOURNAL_PATH = os.path.abspath(os.path.join(here, '_FemtetWithNX/update_model.py'))
+    Args:
+        prt_path: The path to the prt file.
+    
+    For details of The other arguments, see ``FemtetInterface``.
+
+    """
+
+    _JOURNAL_PATH = os.path.abspath(os.path.join(here, '_FemtetWithNX/update_model.py'))
 
     def __init__(
             self,
@@ -616,18 +609,8 @@ class FemtetWithNXInterface(FemtetInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            strict_pid_specify=False,
+            strictly_pid_specify=True,
     ):
-        """
-        Initializes the FemtetWithNXInterface class.
-
-        Args:
-            prt_path: The path to the prt file.
-
-        Returns:
-            None
-
-        """
 
         # check NX installation
         self.run_journal_path = os.path.join(os.environ.get('UGII_BASE_DIR'), 'NXBIN', 'run_journal.exe')
@@ -635,7 +618,7 @@ class FemtetWithNXInterface(FemtetInterface):
             raise FileNotFoundError(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
 
         # 引数の処理
-        # dask サブプロセスのときは space 直下の prt_path を参照する
+        # dask サブプロセスのときは prt_path を worker space から取るようにする
         try:
             worker = get_worker()
             space = worker.local_directory
@@ -649,28 +632,29 @@ class FemtetWithNXInterface(FemtetInterface):
             femprj_path=femprj_path,
             model_name=model_name,
             connect_method=connect_method,
-            prt_path=prt_path,
-            strict_pid_specify=strict_pid_specify
+            strictly_pid_specify=strictly_pid_specify,
+            prt_path=self.prt_path,
         )
 
 
     def check_param_value(self, name):
-        # disable FemtetInterface.check_param_value()
-        # because the parameter can be registered to not only .femprj but also .prt.
+        """Override FemtetInterface.check_param_value().
+        
+        Do nothing because the parameter can be registered
+        to not only .femprj but also .prt.
+        
+        """
         pass
 
     def setup_before_parallel(self, client):
         client.upload_file(
-            self.kwargs['femprj_path'],
-            False
-        )
-        client.upload_file(
             self.kwargs['prt_path'],
             False
         )
+        super().setup_before_parallel(client)
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
-        """Update .x_t file before FemtetInterface.update_model()"""
+        """Update .x_t"""
 
         self.parameters = parameters.copy()
 
@@ -690,7 +674,7 @@ class FemtetWithNXInterface(FemtetInterface):
         # NX journal を使ってモデルを編集する
         env = os.environ.copy()
         subprocess.run(
-            [self.run_journal_path, self.JOURNAL_PATH, '-args', self.prt_path, str_json, x_t_path],
+            [self.run_journal_path, self._JOURNAL_PATH, '-args', self.prt_path, str_json, x_t_path],
             env=env,
             shell=True,
             cwd=os.path.dirname(self.prt_path)
@@ -740,7 +724,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',
-            strict_pid_specify=False,
+            strictly_pid_specify=True,
     ):
         # 引数の処理
         # dask サブプロセスのときは space 直下の sldprt_path を参照する
@@ -757,8 +741,8 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             femprj_path=femprj_path,
             model_name=model_name,
             connect_method=connect_method,
+            strictly_pid_specify=strictly_pid_specify,
             sldprt_path=self.sldprt_path,
-            strict_pid_specify=strict_pid_specify
         )
 
     def initialize_sldworks_connection(self):
@@ -773,27 +757,27 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         self.nEquation = self.swEqnMgr.GetCount
 
     def check_param_value(self, param_name):
-        # disable FemtetInterface.check_param_value
+        """Override FemtetInterface.check_param_value().
+        
+        Do nothing because the parameter can be registered
+        to not only .femprj but also .SLDPRT.
+        
+        """
         pass
 
     def setup_before_parallel(self, client):
         client.upload_file(
-            self.kwargs['femprj_path'],
-            False
-        )
-        client.upload_file(
             self.kwargs['sldprt_path'],
             False
         )
+        super().setup_before_parallel(client)
 
     def setup_after_parallel(self):
         CoInitialize()
         self.initialize_sldworks_connection()
 
-
     def update_model(self, parameters: pd.DataFrame):
-
-        """Update .x_t file before FemtetInterface.update_model()"""
+        """Update .x_t"""
 
         self.parameters = parameters.copy()
 
@@ -842,6 +826,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         super().update_model(parameters)
 
     def update_sw_model(self, parameters: pd.DataFrame):
+        """Update .sldprt"""
         # df を dict に変換
         user_param_dict = {}
         for i, row in parameters.iterrows():

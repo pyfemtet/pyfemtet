@@ -74,7 +74,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 下記は多目的最適化の実施例です。
 ``add_parameter()`` と ``add_objective()`` で問題を設定し、
 ``main()`` で実施することができます。
-それ以外はあなたの Femtet のマクロスクリプトを流用できます。
+それ以外は通常の Femtet のマクロスクリプトを使用します。
 詳細な実施例は :doc:`pages/usage` セクションを確認してください。
 
 .. code-block:: python
@@ -82,7 +82,6 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
    from pyfemtet.opt import FEMOpt
 
    def max_displacement(Femtet):
-
        dx, dy, dz = Femtet.Gogh.Galileo.GetMaxDisplacement()
        return dy
 
@@ -131,12 +130,6 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
     リンク先のダウンロードリンクから
     インストーラをダウンロードし、実行してください。➡ |Python|
 
-    .. note::
-
-        2024 年 1 月現在、pyfemtet は バージョン 3.9 ~ 3.12 の Python で動作します。
-        ただし、:doc:`pages/examples` にも使用している ``BoTorch`` ライブラリはバージョン 3.12 に対応していません。
-        より多くの最適化手法を適用できるため、現在のところ Python バージョンは 3.11 を推奨します。
-
     .. tip::
 
         最新版でないバージョンの Python をダウンロードするには
@@ -160,7 +153,6 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 
     コマンドプロンプトで下記コマンドを実行してください。
     ライブラリのダウンロード及びインストールが始まります。
-    ただし、Python 3.12 では BoTorch ライブラリがインストールされません。::
 
         py -m pip install pyfemtet --no-warn-script-location 
 

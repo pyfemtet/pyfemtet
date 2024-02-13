@@ -95,11 +95,23 @@ CAD 連携
         .. image:: ../examples/NX_ex01/NX_ex01.png
             :scale: 50
         +++
-        CAD(NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。
+        CAD (NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。
+
+    .. grid-item-card:: 外部 CAD (Solidworks) 連携
+        :link: ../examples/Sldworks_ex01/Sldworks_ex01
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ../examples/Sldworks_ex01/Sldworks_ex01.png
+            :scale: 50
+        +++
+        外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。
+
 
 .. toctree::
     :titlesonly:
     :hidden:
 
     ../examples/NX_ex01/NX_ex01
+    ../examples/Sldworks_ex01/Sldworks_ex01
 

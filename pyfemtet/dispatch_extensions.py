@@ -144,12 +144,12 @@ def _get_subprocess_log_prefix():
     return f'({current_process().name}) '
 
 
-def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strict_pid_specify=True) -> Tuple[IFemtet, int]:
+def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strictly_pid_specify=True) -> Tuple[IFemtet, int]:
     """Launch Femtet by new process and connect to it.
 
     Args:
         timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
-        strict_pid_specify (bool): If True, try to connect the launched femtet process strictly. If False, launch new process but try to connect any connectable femtet.
+        strictly_pid_specify (bool): If True, try to connect the launched femtet process strictly. If False, launch new process but try to connect any connectable femtet.
 
     Raises:
         FemtetNotFoundException: Launched Femtet is not found for some reason (i.e. failed to launch Femtet).
@@ -166,7 +166,7 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strict_pid_specify=True
         sleep(1)
 
     # dispatch femtet
-    if strict_pid_specify:
+    if strictly_pid_specify:
         Femtet, pid = dispatch_specific_femtet(pid, timeout)
     else:
         # worker process なら排他処理する
@@ -350,6 +350,7 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
         If you have 2 free Femtet processes (their pid is 1000 and 1001),
         you can only connect to first connected Femtet
         and cannot change the connection.
+
         >>> from pyfemtet.dispatch_extensions import dispatch_specific_femtet
         >>> Femtet1, pid1 = dispatch_specific_femtet(pid=1000)
         >>> print(pid1)  # 1000
@@ -360,28 +361,6 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
 
         If you want to connect 2 more Femtet processes from single script or interprete,
         please consider parallel processing.
-
-    Code:
-
-        from multiprocessing import Process
-        from pyfemtet.dispatch_extensions import dispatch_specific_femtet
-
-        def connect_femtet(pid):
-            Femtet, pid = dispatch_specific_femtet(pid=pid)
-            ...  # some processing
-
-        if __name__ == '__main__':
-            # setup parallel processing
-            p1 = Process(target=connect_femtet, args=(1000,))
-            p2 = Process(target=connect_femtet, args=(1001,))
-
-            # start parallel processing
-            p1.start()
-            p2.start()
-
-            # wait for finish processes
-            p1.join()
-            p2.join()
 
     Args:
         pid (int): Process id of Femtet that you want to connect.
