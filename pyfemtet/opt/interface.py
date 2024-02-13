@@ -635,7 +635,13 @@ class FemtetWithNXInterface(FemtetInterface):
             raise FileNotFoundError(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
 
         # 引数の処理
-        self.prt_path = os.path.abspath(prt_path)
+        # dask サブプロセスのときは space 直下の prt_path を参照する
+        try:
+            worker = get_worker()
+            space = worker.local_directory
+            self.prt_path = os.path.join(space, os.path.basename(prt_path))
+        except ValueError:  # get_worker に失敗した場合
+            self.prt_path = os.path.abspath(prt_path)
 
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
@@ -643,7 +649,7 @@ class FemtetWithNXInterface(FemtetInterface):
             femprj_path=femprj_path,
             model_name=model_name,
             connect_method=connect_method,
-            prt_path=os.path.basename(prt_path),  # upload_file でアップロードされたファイルへのパスになる
+            prt_path=prt_path,
             strict_pid_specify=strict_pid_specify
         )
 
@@ -737,7 +743,13 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             strict_pid_specify=False,
     ):
         # 引数の処理
-        self.sldprt_path = os.path.abspath(sldprt_path)
+        # dask サブプロセスのときは space 直下の sldprt_path を参照する
+        try:
+            worker = get_worker()
+            space = worker.local_directory
+            self.sldprt_path = os.path.join(space, os.path.basename(sldprt_path))
+        except ValueError:  # get_worker に失敗した場合
+            self.sldprt_path = os.path.abspath(sldprt_path)
 
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
@@ -745,7 +757,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             femprj_path=femprj_path,
             model_name=model_name,
             connect_method=connect_method,
-            sldprt_path=os.path.basename(sldprt_path),  # upload_file でアップロードされたファイルへのパスになる
+            sldprt_path=self.sldprt_path,
             strict_pid_specify=strict_pid_specify
         )
 
