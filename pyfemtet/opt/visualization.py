@@ -67,3 +67,24 @@ def update_scatter_matrix(history, data):
         )
 
     return fig
+
+
+if __name__ == '__main__':
+    import os
+    import pandas as pd
+
+
+    class History:
+        def __init__(self, _df):
+            suffix = '_direction'
+            self.obj_names = [c[:-len(suffix)] for c in _df.columns if c.endswith(suffix)]
+
+
+    os.chdir(os.path.dirname(__file__))
+    csv_path = '_sample_history.csv'
+    df = pd.read_csv(csv_path, encoding='shift-jis')
+    h = History(df)
+
+    # fig = update_hypervolume_plot(h, df)
+    fig = update_scatter_matrix(h, df)
+    fig.show()
