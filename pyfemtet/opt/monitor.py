@@ -6,7 +6,7 @@ from threading import Thread
 from dash import Dash, html, dcc, ctx, Output, Input
 import dash_bootstrap_components as dbc
 
-from .visualization import update_scatter_matrix, update_hypervolume_plot
+from .visualization import update_default_figure, update_hypervolume_plot
 
 
 
@@ -156,7 +156,7 @@ class Monitor(object):
                 html.H2("PyFemtet Monitor", className="display-4"),
                 html.Hr(),
                 html.P(
-                    "最適化の進捗を可視化します.", className="lead"
+                    "最適化の進行状況を可視化します。", className="lead"
                 ),
                 dbc.Nav(
                     [
@@ -252,7 +252,7 @@ class Monitor(object):
             # グラフを更新する
             if active_tab_id is not None:
                 if active_tab_id == "tab-1":
-                    graph = dcc.Graph(figure=update_scatter_matrix(self.history, self.df))
+                    graph = dcc.Graph(figure=update_default_figure(self.history, self.df))
                 elif active_tab_id == "tab-2":
                     graph = dcc.Graph(figure=update_hypervolume_plot(self.history, self.df))
 

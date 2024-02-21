@@ -131,10 +131,12 @@ def simple():
     femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
     femopt.add_objective(objective_x, 'x', args=femopt.opt)
     femopt.add_objective(objective_y, 'y', args=femopt.opt)
-    femopt.add_objective(objective_z, 'z', args=femopt.opt)
+    # femopt.add_objective(objective_z, 'z', args=femopt.opt)
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
+    femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
     femopt.set_random_seed(42)
-    femopt.main(n_trials=30, n_parallel=3, wait_setup=True)
+    femopt.main(n_trials=None, n_parallel=1, wait_setup=True)
+    # input('enter to quit...')
     femopt.terminate_all()
 
 
