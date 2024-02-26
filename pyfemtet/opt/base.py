@@ -334,13 +334,36 @@ class History:
     Attributes:
         path (str): The path to the history csv file.
         is_restart (bool): The main session is restarted or not.
-        param_names (list): The names of the parameters in the study.
+        prm_names (list): The names of the parameters in the study.
         obj_names (list): The names of the objectives in the study.
         cns_names (list): The names of the constraints in the study.
         actor_data (pd.DataFrame): The history data of optimization.
 
     """
-    def __init__(self, history_path, client):
+
+    PRM_PREFIX = 'prm_'
+    OBJ_PREFIX = 'obj_'
+    OBJ_DIRECTION_PREFIX = 'obj.direction_'
+    CNS_PREFIX = 'cns_'
+    CNS_UB_PREFIX = 'cns.ub_'
+    CNS_LB_PREFIX = 'cns.lb_'
+    prm_names = []
+    obj_names = []
+    cns_names = []
+    local_data = pd.DataFrame()
+    is_restart = False
+    is_processing = False
+    _future = None
+    _actor_data = None
+
+    def __init__(
+            self,
+            history_path,
+            prm_names=None,
+            obj_names=None,
+            cns_names=None,
+            client=None
+    ):
         """Initializes a History instance.
 
         Args:
@@ -350,19 +373,64 @@ class History:
 
         # 引数の処理
         self.path = history_path  # .csv
-        self.is_restart = False
-        self._future = client.submit(_HistoryDfCore, actor=True)
-        self._actor_data = self._future.result()
-        self.tmp_data = pd.DataFrame()
-        self.param_names = []
-        self.obj_names = []
-        self.cns_names = []
+        self.prm_names = prm_names
+        self.obj_names = obj_names
+        self.cns_names = cns_names
 
-        # path が存在すれば dataframe を読み込む
-        if os.path.isfile(self.path):
-            self.tmp_data = pd.read_csv(self.path, encoding='shift-jis')
-            self.actor_data = self.tmp_data
-            self.is_restart = True
+        # 最適化実行中かどうか
+        self.is_processing = client is not None
+
+        # 最適化実行中の process monitor である場合
+        if self.is_processing:
+
+            # actor の生成
+            self._future = client.submit(_HistoryDfCore, actor=True)
+            self._actor_data = self._future.result()
+
+            # csv が存在すれば続きからモード
+            self.is_restart = os.path.isfile(self.path)
+
+            # 続きからなら df を読み込んで df にコピー
+            if self.is_restart:
+                self.load()
+
+            # そうでなければ df を初期化
+            else:
+                columns = self.create_df_columns()
+                for c in columns:
+                    self.local_data[c] = None
+
+            # actor_data の初期化
+            self.actor_data = self.local_data
+
+        # visualization only の場合
+        else:
+            # csv が存在しなければおかしい
+            if not os.path.isfile(self.path):
+                raise FileNotFoundError(f'{self.path} が見つかりません。')
+
+            # csv の local_data へと、names への読み込み
+            self.load()
+
+    def load(self):
+        # df を読み込む
+        self.local_data = pd.read_csv(self.path, encoding='shift-jis')
+        columns = self.local_data.columns
+        prm_names = [n[len(self.PRM_PREFIX):] for n in columns if n.startswith(self.PRM_PREFIX)]
+        obj_names = [n[len(self.OBJ_PREFIX):] for n in columns if n.startswith(self.OBJ_PREFIX)]
+        cns_names = [n[len(self.CNS_PREFIX):] for n in columns if n.startswith(self.CNS_PREFIX)]
+
+        # is_restart の場合、読み込んだ names と引数の names が一致するか確認しておく
+        if self.is_restart:
+            if prm_names != self.prm_names: raise ValueError(f'実行中の設定が csv ファイルの設定と一致しません。')
+            if obj_names != self.obj_names: raise ValueError(f'実行中の設定が csv ファイルの設定と一致しません。')
+            if cns_names != self.cns_names: raise ValueError(f'実行中の設定が csv ファイルの設定と一致しません。')
+
+        # visualization only の場合、読み込んだ names をも load する
+        if not self.is_processing:
+            self.prm_names = prm_names
+            self.obj_names = obj_names
+            self.cns_names = cns_names
 
     @property
     def actor_data(self):
@@ -372,53 +440,36 @@ class History:
     def actor_data(self, df):
         self._actor_data.set_df(df).result()
 
-    def init(self, param_names, obj_names, cns_names):
-        """Initializes the parameter, objective, and constraint names in the History instance.
-
-        Args:
-            param_names (list): The names of parameters in optimization.
-            obj_names (list): The names of objectives in optimization.
-            cns_names (list): The names of constraints in optimization.
-
-        """
-        self.param_names = param_names
-        self.obj_names = obj_names
-        self.cns_names = cns_names
-
+    def create_df_columns(self):
+        # df として保有するカラムを生成
         columns = list()
+
+        # trial
         columns.append('trial')  # index
-        columns.extend(self.param_names)  # parameters
-        for obj_name in self.obj_names:  # objectives, direction
-            columns.extend([obj_name, f'{obj_name}_direction'])
+
+        # parameter
+        prm_names = [self.PRM_PREFIX + name for name in self.prm_names]
+        columns.extend(prm_names)
+
+        # objective relative
+        for name in self.obj_names:
+            columns.append(self.OBJ_PREFIX + name)
+            columns.append(self.OBJ_DIRECTION_PREFIX + name)
         columns.append('non_domi')
-        for cns_name in cns_names:  # cns, lb, ub
-            columns.extend([cns_name, f'{cns_name}_lb', f'{cns_name}_ub'])
+
+        # constraint relative
+        for name in self.cns_names:
+            columns.append(self.CNS_PREFIX + name)
+            columns.append(self.CNS_LB_PREFIX + name)
+            columns.append(self.CNS_UB_PREFIX + name)
         columns.append('feasible')
+
+        # the others
         columns.append('hypervolume')
         columns.append('message')
         columns.append('time')
 
-        # restart ならば前のデータとの整合を確認
-        if len(self.actor_data.columns) > 0:
-            # 読み込んだ columns が生成した columns と違っていればエラー
-            try:
-                if list(self.actor_data.columns) != columns:
-                    raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.actor_data.columns)}\n\n現在の設定:\n{columns}')
-                else:
-                    # 同じであっても目的と拘束の上下限や direction が違えばエラー
-                    pass
-            except ValueError:
-                raise Exception(f'読み込んだ history と問題の設定が異なります. \n\n読み込まれた設定:\n{list(self.actor_data.columns)}\n\n現在の設定:\n{columns}')
-
-        else:
-            for column in columns:
-                self.tmp_data[column] = None
-            # actor_data は actor 経由の getter property なので self.data[column] = ... とやっても
-            # actor には変更が反映されない. 以下同様
-            tmp = self.actor_data
-            for column in columns:
-                tmp[column] = None
-            self.actor_data = tmp
+        return columns
 
     def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
         """Records the optimization results in the history.
@@ -435,16 +486,30 @@ class History:
 
         # create row
         row = list()
-        row.append(-1)  # dummy trial index
+
+        # trial(dummy)
+        row.append(-1)
+
+        # parameters
         row.extend(parameters['value'].values)
-        for (name, obj), obj_value in zip(objectives.items(), obj_values):  # objectives, direction
+
+        # objectives and their direction
+        for (_, obj), obj_value in zip(objectives.items(), obj_values):  # objectives, direction
             row.extend([obj_value, obj.direction])
-        row.append(False)  # dummy non_domi
+
+        # non_domi (dummy)
+        row.append(False)
+
+        # constraints and their lb, ub and calculate each feasibility
         feasible_list = []
-        for (name, cns), cns_value in zip(constraints.items(), cns_values):  # cns, lb, ub
+        for (_, cns), cns_value in zip(constraints.items(), cns_values):  # cns, lb, ub
             row.extend([cns_value, cns.lb, cns.ub])
             feasible_list.append(_is_feasible(cns_value, cns.lb, cns.ub))
+
+        # feasibility
         row.append(all(feasible_list))
+
+        # the others
         row.append(-1.)  # dummy hypervolume
         row.append(message)  # message
         row.append(datetime.datetime.now())  # time
@@ -452,25 +517,26 @@ class History:
         with Lock('calc-history'):
             # append
             if len(self.actor_data) == 0:
-                self.tmp_data = pd.DataFrame([row], columns=self.actor_data.columns)
+                self.local_data = pd.DataFrame([row], columns=self.actor_data.columns)
             else:
-                self.tmp_data = self.actor_data
-                self.tmp_data.loc[len(self.tmp_data)] = row
+                self.local_data = self.actor_data
+                self.local_data.loc[len(self.local_data)] = row
 
             # calc
-            self.tmp_data['trial'] = np.arange(len(self.tmp_data)) + 1  # 1 始まり
-            self._calc_non_domi(objectives)  # update self.tmp_data
-            self._calc_hypervolume(objectives)  # update self.tmp_data
-            self.actor_data = self.tmp_data
+            self.local_data['trial'] = np.arange(len(self.local_data)) + 1  # 1 始まり
+            self._calc_non_domi(objectives)  # update self.local_data
+            self._calc_hypervolume(objectives)  # update self.local_data
+            self.actor_data = self.local_data
 
     def _calc_non_domi(self, objectives):
 
         # 目的関数の履歴を取り出してくる
-        solution_set = self.tmp_data[self.obj_names]
+        obj_columns = [self.OBJ_PREFIX + n for n in self.obj_names]
+        solution_set = self.local_data[obj_columns]
 
         # 最小化問題の座標空間に変換する
-        for name, objective in objectives.items():
-            solution_set.loc[:, name] = solution_set[name].map(objective.convert)
+        for obj_column, (_, objective) in zip(obj_columns, objectives.items()):
+            solution_set.loc[:, obj_column] = solution_set[obj_column].map(objective.convert)
 
         # 非劣解の計算
         non_domi = []
@@ -478,16 +544,18 @@ class History:
             non_domi.append((row > solution_set).product(axis=1).sum(axis=0) == 0)
 
         # 非劣解の登録
-        self.tmp_data['non_domi'] = non_domi
+        self.local_data['non_domi'] = non_domi
 
     def _calc_hypervolume(self, objectives):
+        obj_columns = [self.OBJ_PREFIX + n for n in self.obj_names]
+
         # タイピングが面倒
-        df = self.tmp_data
+        df = self.local_data
 
         # パレート集合の抽出
         idx = df['non_domi'].values
         pdf = df[idx]
-        pareto_set = pdf[self.obj_names].values
+        pareto_set = pdf[obj_columns].values
         n = len(pareto_set)  # 集合の要素数
         m = len(pareto_set.T)  # 目的変数数
         # 多目的でないと計算できない
@@ -497,7 +565,7 @@ class History:
         if n <= 1:
             return None
         # 最小化問題に convert
-        for i, (name, objective) in enumerate(objectives.items()):
+        for i, (_, objective) in enumerate(objectives.items()):
             for j in range(n):
                 pareto_set[j, i] = objective.convert(pareto_set[j, i])
                 #### reference point の計算[1]
@@ -546,6 +614,10 @@ class History:
                     df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
                 except IndexError:
                     df.loc[i, 'hypervolume'] = 0
+
+    def save(self):
+        # save df with columns with prefix
+        self.actor_data.to_csv(self.path, index=None, encoding='shift-jis')
 
 
 class _OptimizationStatusActor:
@@ -1342,11 +1414,12 @@ class FEMOpt:
         self.status = OptimizationStatus(self.client)
         self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
         self.status.set(OptimizationStatus.SETTING_UP)
-        self.history = History(self.history_path, self.client)
-        self.history.init(
+        self.history = History(
+            self.history_path,
             self.opt.parameters['name'].to_list(),
             list(self.opt.objectives.keys()),
             list(self.opt.constraints.keys()),
+            self.client,
         )
 
         # launch monitor
@@ -1410,7 +1483,7 @@ class FEMOpt:
             while True:
                 sleep(2)
                 try:
-                    self.history.actor_data.to_csv(self.history.path, index=None, encoding='shift-jis')
+                    self.history.save()
                 except PermissionError:
                     pass
                 if self.status.get() == OptimizationStatus.TERMINATED:

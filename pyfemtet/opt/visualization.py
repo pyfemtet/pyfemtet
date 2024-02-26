@@ -1,6 +1,9 @@
 import plotly.graph_objs as go
 import plotly.express as px
 
+from dash import Dash, html, dcc, ctx, Output, Input
+import dash_bootstrap_components as dbc
+
 
 class ColorSet:
     feasible = {True: '#007bff', False: '#6c757d'}
@@ -17,10 +20,18 @@ class LanguageSet:
             self.feasible = {'feasible': '拘束条件', True: '満足', False: '違反'}
             self.non_domi = {'non_domi': '最適性', True: '非劣解', False: '劣解'}
 
-    def localize(self, df):
+    def localize(self, history, df):
+        # 元のオブジェクトを変更しないようにコピー
         cdf = df.copy()
+
+        # feasible, non_domi の localize
         cdf[self.feasible['feasible']] = [self.feasible[v] for v in cdf['feasible']]
         cdf[self.non_domi['non_domi']] = [self.non_domi[v] for v in cdf['non_domi']]
+
+        # obj_names から prefix を除去
+        columns = cdf.columns
+        columns = [n[len(history.OBJ_PREFIX):] if n.startswith(history.OBJ_PREFIX) else n for n in columns]
+        cdf.columns = columns
         return cdf
 
 
@@ -28,8 +39,8 @@ ls = LanguageSet('ja')
 cs = ColorSet()
 
 
-def update_hypervolume_plot(_, df):
-    df = ls.localize(df)
+def update_hypervolume_plot(history, df):
+    df = ls.localize(history, df)
 
     # create figure
     fig = px.line(
@@ -64,8 +75,8 @@ def update_default_figure(history, df):
 
 
 def update_single_objective_plot(history, df):
-    df = ls.localize(df)
 
+    df = ls.localize(history, df)
     obj_name = history.obj_names[0]
 
     fig = px.scatter(
@@ -105,7 +116,7 @@ def update_single_objective_plot(history, df):
 
 
 def update_multi_objective_pairplot(history, df):
-    df = ls.localize(df)
+    df = ls.localize(history, df)
 
     obj_names = history.obj_names
 
@@ -155,22 +166,15 @@ def update_multi_objective_pairplot(history, df):
 
 if __name__ == '__main__':
     import os
-    import pandas as pd
-
-
-    class History:
-        def __init__(self, _df):
-            suffix = '_direction'
-            self.obj_names = [c[:-len(suffix)] for c in _df.columns if c.endswith(suffix)]
+    from pyfemtet.opt.base import History
 
 
     os.chdir(os.path.dirname(__file__))
-    # csv_path = '_sample_history_include_infeasible_3obj.csv'
+    csv_path = '_sample_history_include_infeasible_3obj.csv'
     # csv_path = '_sample_history_include_infeasible_2obj.csv'
-    csv_path = '_sample_history_include_infeasible_1obj.csv'
-    _df = pd.read_csv(csv_path, encoding='shift-jis')
-    _h = History(_df)
+    # csv_path = '_sample_history_include_infeasible_1obj.csv'
+    _h = History(history_path=csv_path)
 
-    # _f = update_hypervolume_plot(_h, _df)
-    _f = update_default_figure(_h, _df)
+    # _f = update_hypervolume_plot(_h, _h.local_data)
+    _f = update_default_figure(_h, _h.local_data)
     _f.show()
