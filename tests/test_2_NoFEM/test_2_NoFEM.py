@@ -135,12 +135,14 @@ def simple():
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
     femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
     femopt.set_random_seed(42)
-    femopt.main(n_trials=None, n_parallel=1, wait_setup=True)
+    femopt.main(n_trials=None, n_parallel=3, wait_setup=True)
     # input('enter to quit...')
     # femopt.terminate_all()
 
 
 if __name__ == '__main__':
+    min_sleep_sec = 1
+    random_max_sleep_sec = 1
     simple()
     # test_2_2_restart()
     # record = False

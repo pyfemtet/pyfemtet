@@ -164,8 +164,8 @@ class Home:
             prevent_initial_call=True,
         )
         def monitor_work(
-                _,
-                interrupt_n_clicks,
+                _1,
+                _2,
                 toggle_n_clicks,
         ):
 
@@ -235,6 +235,72 @@ class Home:
         ], fluid=True)
 
 
+class WorkerMonitor:
+
+    # layout
+    layout = dbc.Container()
+
+    # id
+    ID_INTERVAL = 'worker-monitor-interval'
+    id_worker_alert_list = []
+
+    def __init__(self, monitor):
+        self.monitor = monitor
+        self.setup_layout()
+        self.add_callback()
+
+    def setup_layout(self):
+        # common
+        dummy = html.Div()
+        interval = dcc.Interval(id=self.ID_INTERVAL, interval=1000)
+
+        rows = [dbc.Row([dbc.Col(dummy), dbc.Col(interval)])]
+
+        # contents
+        worker_status_alerts = []
+        for i in range(len(self.monitor.worker_addresses)):
+            id_worker_alert = f'worker-status-alert-{i}'
+            alert = dbc.Alert('worker status here', id=id_worker_alert, color='dark')
+            worker_status_alerts.append(dbc.Row([dbc.Col(alert)]))
+            self.id_worker_alert_list.append(id_worker_alert)
+
+        rows.extend(worker_status_alerts)
+
+        self.layout = dbc.Container(rows, fluid=True)
+
+    def add_callback(self):
+        # worker_monitor のための callback
+        @self.monitor.app.callback(
+            [Output(f'{id_worker_alert}', 'children') for id_worker_alert in self.id_worker_alert_list],
+            [Output(f'{id_worker_alert}', 'color') for id_worker_alert in self.id_worker_alert_list],
+            [Input(self.ID_INTERVAL, 'n_intervals'),]
+        )
+        def update_worker_state(_):
+
+            OptimizationStatus = pyfemtet.opt.base.OptimizationStatus
+
+            ret = []
+
+            for worker_address, worker_status_int in zip(self.monitor.worker_addresses, self.monitor.local_worker_status_int_list):
+                worker_status_message = OptimizationStatus.const_to_str(worker_status_int)
+                ret.append(f'{worker_address} is {worker_status_message}')
+
+            colors = []
+            for status_int in self.monitor.local_worker_status_int_list:
+                if status_int == OptimizationStatus.INTERRUPTING:
+                    colors.append('warning')
+                elif status_int == OptimizationStatus.TERMINATED:
+                    colors.append('dark')
+                elif status_int == OptimizationStatus.TERMINATE_ALL:
+                    colors.append('dark')
+                else:
+                    colors.append('primary')
+
+            ret.extend(colors)
+
+            return tuple(ret)
+
+
 class StaticMonitor(object):
 
     # process_monitor or not
@@ -276,13 +342,13 @@ class StaticMonitor(object):
         self.app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         self.setup_home()
-        self.setup_sidebar()
 
     def setup_home(self):
         href = "/"
         home = Home(self)
         self.pages[href] = home.layout
-        self.nav_links[1.] = dbc.NavLink("Home", href=href, active="exact")
+        order = 1
+        self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
 
     def setup_sidebar(self):
         # setup sidebar
@@ -321,6 +387,10 @@ class StaticMonitor(object):
                     className="p-3 bg-light rounded-3",
                 )
 
+    def run(self, host='localhost', port=8080):
+        self.setup_sidebar()
+        self.app.run(debug=False, host=host, port=port)
+
 
 class Monitor(StaticMonitor):
 
@@ -331,13 +401,6 @@ class Monitor(StaticMonitor):
             worker_addresses: List[str],
             worker_status_list: List['pyfemtet.opt.base.OptimizationStatus'],
     ):
-
-        # 引数の処理
-        self.history = history
-
-        # df の初期化
-        self.local_df = self.history.local_data
-
 
         self.status = status
         self.worker_addresses = worker_addresses
@@ -350,21 +413,25 @@ class Monitor(StaticMonitor):
         # logger.addHandler(logging.FileHandler(log_path))
 
         # メインスレッドで更新してもらうメンバーを一旦初期化
-        self.local_df = history.local_data.copy()
         self.local_entire_status = self.status.get_text()
         self.local_entire_status_int = self.status.get()
-        # self.local_worker_status_list = [s.get() for s in self.worker_status_list]
+        self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
 
+        # dash app 設定
         super().__init__(history)
 
+        # page 設定
+        self.setup_worker_monitor()
 
-    def _run_server_forever(self, app, host, port):
-        app.run(debug=False, host=host, port=port)
+    def setup_worker_monitor(self):
+        href = "/worker-monitor"
+        page = WorkerMonitor(self)
+        self.pages[href] = page.layout
+        order = 2
+        self.nav_links[order] = dbc.NavLink("Workers", href=href, active="exact")
 
     def start_server(
             self,
-            worker_addresses,
-            worker_status_list,  # [actor]
             host='localhost',
             port=8080,
     ):
@@ -385,8 +452,8 @@ class Monitor(StaticMonitor):
 
         # dash app server を daemon thread で起動
         server_thread = Thread(
-            target=self._run_server_forever,
-            args=(self.app, host, port,),
+            target=self.run,
+            args=(host, port,),
             daemon=True,
         )
         server_thread.start()
@@ -406,7 +473,7 @@ class Monitor(StaticMonitor):
             self.local_entire_status_int = self.status.get()
             self.local_entire_status = self.status.get_text()
             self.local_df = self.history.actor_data.copy()
-            # self.local_worker_status_list = [s.get() for s in worker_status_list]
+            self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
 
             # terminate_all 指令があれば monitor server をホストするプロセスごと終了する
             if self.status.get() == OptimizationStatus.TERMINATE_ALL:
@@ -414,4 +481,3 @@ class Monitor(StaticMonitor):
 
             # interval
             sleep(1)
-

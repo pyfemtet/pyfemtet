@@ -1559,5 +1559,5 @@ class FEMOpt:
 
 def start_monitor_server(history, status, worker_addresses, worker_status_list, host='localhost', port=8080):
     monitor = Monitor(history, status, worker_addresses, worker_status_list)
-    monitor.start_server(worker_addresses, worker_status_list, host, port)
+    monitor.start_server(host, port)
     return 'Exit monitor server process gracefully'
