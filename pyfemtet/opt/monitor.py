@@ -407,10 +407,10 @@ class Monitor(StaticMonitor):
         self.worker_status_list = worker_status_list
         self.is_processing = True
 
-        # # ログファイルの保存場所
-        # log_path = history.path.replace('.csv', '.uilog')
-        # logger = logging.getLogger()
-        # logger.addHandler(logging.FileHandler(log_path))
+        # ログファイルの保存場所
+        log_path = history.path.replace('.csv', '.uilog')
+        logger = logging.getLogger()
+        logger.addHandler(logging.FileHandler(log_path))
 
         # メインスレッドで更新してもらうメンバーを一旦初期化
         self.local_entire_status = self.status.get_text()
