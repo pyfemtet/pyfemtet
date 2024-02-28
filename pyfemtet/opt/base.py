@@ -1132,9 +1132,10 @@ class FEMOpt:
         self.status = None  # actor
         self.history = None  # actor
         self.worker_status_list = None  # [actor]
-        self.monitor_process_future = None
+        # self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
-        self.monitor_process_worker_name = None
+        self.monitor_thread = None
+        # self.monitor_process_worker_name = None
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -1400,16 +1401,6 @@ class FEMOpt:
         if not self.opt.is_cluster:
             worker_addresses[0] = 'Main'
 
-        # monitor 用 worker を起動
-        logger.info('Launching monitor server. This may take a few seconds.')
-        self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
-        cmd = f'{sys.executable} -m dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
-        current_n_workers = len(self.client.nthreads().keys())
-        Popen(cmd, shell=True)  # , stdout=PIPE) --> cause stream error
-
-        # monitor 用 worker が増えるまで待つ
-        self.client.wait_for_workers(n_workers=current_n_workers+1)
-
         # actor の設定
         self.status = OptimizationStatus(self.client)
         self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
@@ -1423,16 +1414,17 @@ class FEMOpt:
         )
 
         # launch monitor
-        self.monitor_process_future = self.client.submit(
-            start_monitor_server,
-            self.history,
-            self.status,
-            worker_addresses,
-            self.worker_status_list,
-            **self.monitor_server_kwargs,  # kwargs
-            workers=self.monitor_process_worker_name,  # if invalid arg,
-            allow_other_workers=False
+        self.monitor_thread = Thread(
+            target=start_monitor_server,
+            args=(
+                self.history,
+                self.status,
+                worker_addresses,
+                self.worker_status_list,
+            ),
+            kwargs=self.monitor_server_kwargs,
         )
+        self.monitor_thread.start()
 
         # fem
         self.fem.setup_before_parallel(self.client)
@@ -1517,7 +1509,8 @@ class FEMOpt:
 
         # terminate monitor process
         self.status.set(OptimizationStatus.TERMINATE_ALL)
-        logger.info(self.monitor_process_future.result())
+        self.monitor_thread.join()
+        logger.info('Terminate monitor.')
         sleep(1)
 
         # terminate actors
@@ -1526,18 +1519,6 @@ class FEMOpt:
         for worker_status in self.worker_status_list:
             self.client.cancel(worker_status._future, force=True)
         logger.info('Terminate actors.')
-        sleep(1)
-
-        # terminate monitor worker
-        n_workers = len(self.client.nthreads())
-        self.client.retire_workers(
-            names=[self.monitor_process_worker_name],
-            close_workers=True,
-            remove=True,
-        )
-        while n_workers == len(self.client.nthreads()):
-            sleep(1)
-        logger.info('Terminate monitor processes worker.')
         sleep(1)
 
         # close scheduler, other workers(, cluster)
