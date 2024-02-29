@@ -137,7 +137,7 @@ def simple():
     femopt.set_random_seed(42)
     femopt.main(n_trials=None, n_parallel=3, wait_setup=True)
     # input('enter to quit...')
-    femopt.terminate_all()
+    # femopt.terminate_all()
 
 
 if __name__ == '__main__':
