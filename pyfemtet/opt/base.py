@@ -1382,33 +1382,38 @@ class FEMOpt:
             # 既存のクラスターに接続
             logger.info('Connecting to existing cluster.')
             self.client = Client(self.scheduler_address)
+
+            # 最適化タスクを振り分ける worker を指定
+            subprocess_indices = list(range(n_parallel))
+            worker_addresses = list(self.client.nthreads().keys())
+
+            # monitor worker の設定
+            logger.info('Launching monitor server. This may take a few seconds.')
+            self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
+            # cmd = f'{sys.executable} -m dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
+            # Popen(cmd, shell=True)  # , stdout=PIPE) --> cause stream error  # TODO:Python API
+            current_n_workers = len(self.client.nthreads().keys())
+            from dask.distributed import Worker
+            Worker(scheduler_ip=self.client.scheduler.address, nthreads=1, name=self.monitor_process_worker_name)
+            # monitor 用 worker が増えるまで待つ
+            self.client.wait_for_workers(n_workers=current_n_workers+1)
+
         else:
             # ローカルクラスターを構築
             logger.info('Launching single machine cluster. This may take tens of seconds.')
-            cluster = LocalCluster(processes=True)
+            cluster = LocalCluster(processes=True, n_workers=n_parallel, threads_per_worker=1)  # n_parallel = n_parallel - 1 + 1; main 分減らし、monitor 分増やす
             self.client = Client(cluster, direct_to_workers=False)
             self.scheduler_address = self.client.scheduler.address
 
-        # タスクを振り分ける worker を指定
-        subprocess_indices = list(range(n_parallel))
-        if not self.opt.is_cluster:
-            subprocess_indices = subprocess_indices[1:]
-        worker_addresses = list(self.client.nthreads().keys())
-        if len(subprocess_indices)>0:
-            assert max(subprocess_indices) <= len(worker_addresses)-1, f'コア数{len(worker_addresses)}は不足しています。'
-        worker_addresses = worker_addresses[:len(range(n_parallel))]  # TODO: ノードごとに適度に振り分ける
-        if not self.opt.is_cluster:
+            # 最適化タスクを振り分ける worker を指定
+            subprocess_indices = list(range(n_parallel))[1:]
+            worker_addresses = list(self.client.nthreads().keys())
+
+            # monitor worker の設定
+            self.monitor_process_worker_name = worker_addresses[0]
             worker_addresses[0] = 'Main'
 
-        # monitor 用 worker を起動
-        logger.info('Launching monitor server. This may take a few seconds.')
-        self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
-        cmd = f'{sys.executable} -m dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
-        current_n_workers = len(self.client.nthreads().keys())
-        Popen(cmd, shell=True)  # , stdout=PIPE) --> cause stream error
 
-        # monitor 用 worker が増えるまで待つ
-        self.client.wait_for_workers(n_workers=current_n_workers+1)
 
         # actor の設定
         self.status = OptimizationStatus(self.client)
@@ -1528,17 +1533,32 @@ class FEMOpt:
         logger.info('Terminate actors.')
         sleep(1)
 
+
+        # これがないと dash app が落ちないとか問題あるの？
+
         # terminate monitor worker
         n_workers = len(self.client.nthreads())
-        self.client.retire_workers(
-            names=[self.monitor_process_worker_name],
+
+        found_worker_dict = self.client.retire_workers(
+            names=[self.monitor_process_worker_name],  # name
             close_workers=True,
             remove=True,
         )
-        while n_workers == len(self.client.nthreads()):
+
+        if len(found_worker_dict)==0:
+            found_worker_dict = self.client.retire_workers(
+                workers=[self.monitor_process_worker_name],  # address
+                close_workers=True,
+                remove=True,
+            )
+
+        if len(found_worker_dict) > 0:
+            while n_workers == len(self.client.nthreads()):
+                sleep(1)
+            logger.info('Terminate monitor processes worker.')
             sleep(1)
-        logger.info('Terminate monitor processes worker.')
-        sleep(1)
+        else:
+            logger.warn('Monitor process worker not found.')
 
         # close scheduler, other workers(, cluster)
         self.client.close()
