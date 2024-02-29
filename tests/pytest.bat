@@ -1,5 +1,13 @@
 cd %~dp0\..
-poetry run pytest -s
+poetry run pytest -s -k "not test_cad"
 pause
+exit
 
-rem pytest --lf  # 前回失敗したものだけ
+# all(with stdout)
+poetry run pytest -s
+
+# last failed only
+poetry run pytest -s --lf
+
+# (un)match function only
+poetry run pytest -s -k "not _cad and not _sample"

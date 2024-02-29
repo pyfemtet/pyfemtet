@@ -194,6 +194,8 @@ class Home:
                 interrupt_disabled = True
                 self.monitor.local_entire_status_int = OptimizationStatus.INTERRUPTING
                 self.monitor.local_entire_status = OptimizationStatus.const_to_str(OptimizationStatus.INTERRUPTING)
+                status_children = html.H4('optimization status: ' + self.monitor.local_entire_status,
+                                          className="alert-heading")
 
             # 3. btn toggle => (toggle の children を切替) and (interval を切替)
             if toggle_n_clicks % 2 == 1:
@@ -211,7 +213,10 @@ class Home:
             # b. status terminated => (interrupt を無効) and (interval を無効)
             if self.monitor.local_entire_status_int >= OptimizationStatus.INTERRUPTING:
                 interrupt_disabled = True
+            if self.monitor.local_entire_status_int >= OptimizationStatus.TERMINATED:
                 max_intervals = 0  # disable
+                toggle_disabled = True
+                toggle_children = '更新されません'
 
             ret = (
                 fig,
