@@ -5,17 +5,30 @@ import logging
 from time import sleep
 from threading import Thread
 
+import psutil
 from plotly.graph_objects import Figure
 from dash import Dash, html, dcc, Output, Input, State, callback_context, no_update
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
 from .visualization import update_default_figure, update_hypervolume_plot
-
 import pyfemtet
 from pyfemtet.logger import get_logger
-logger = get_logger('vis')
+logger = get_logger('viz')
 logger.setLevel(logging.INFO)
+
+
+def _unused_port_number(start=49152):
+    # "LISTEN" 状態のポート番号をリスト化
+    used_ports = [conn.laddr.port for conn in psutil.net_connections() if conn.status == 'LISTEN']
+    port = start
+    for port in range(start, 65535 + 1):
+        # 未使用のポート番号ならreturn
+        if port not in set(used_ports):
+            break
+    if port != start:
+        logger.warn(f'Specified port "{start}" seems to be used. Port "{port}" is used instead.')
+    return port
 
 
 class Home:
@@ -154,6 +167,8 @@ class Home:
                 '---\n'
                 '- 最適化の結果分析画面です。\n'
                 '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
+                '- ブラウザを閉じてもプログラムは終了しません。'
+                '  - コマンドプロンプトを閉じるかコマンドプロンプトに `CTRL+C` を入力してプログラムを終了してください。\n'
             )
             self.contents.children = dbc.Row([dbc.Col(note)])
 
@@ -182,9 +197,9 @@ class Home:
             '- 最適化の結果分析画面です。\n'
             '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
             '- この画面を閉じても最適化は中断されません。\n'
-            '- この画面を再び開くにはブラウザのアドレスバーに「localhost:8050」と入力して下さい。\n'
+            f'- この画面を再び開くにはブラウザのアドレスバーに「localhost:{self.monitor.DEFAULT_PORT}」と入力して下さい。\n'
             '  - ネットワーク経由で他の PC からこの画面を開く方法は '
-            'API reference (pyfemtet.opt.monitor.Monitor.run) を参照してください。\n'
+            'API reference (pyfemtet.opt.monitor.StaticMonitor.run) を参照してください。\n'
         )
 
         self.contents.children = [
@@ -372,6 +387,9 @@ class StaticMonitor(object):
     # process_monitor or not
     is_processing = False
 
+    # port
+    DEFAULT_PORT = 49152
+
     # members for sidebar application
     SIDEBAR_STYLE = {
         "position": "fixed",
@@ -452,12 +470,22 @@ class StaticMonitor(object):
                     className="p-3 bg-light rounded-3",
                 )
 
-    def run(self, host='localhost', port=8080):
+    def run(self, host='localhost', port=None):
         self.setup_layout()
+        port = port or self.DEFAULT_PORT
+        # port を検証
+        port = _unused_port_number(port)
+        # ブラウザを起動
+        if host == '0.0.0.0':
+            webbrowser.open(f'http://localhost:{str(port)}')
+        else:
+            webbrowser.open(f'http://{host}:{str(port)}')
         self.app.run(debug=False, host=host, port=port)
 
 
 class Monitor(StaticMonitor):
+
+    DEFAULT_PORT = 8080
 
     def __init__(
             self,
@@ -473,8 +501,6 @@ class Monitor(StaticMonitor):
         self.is_processing = True
 
         # ログファイルの保存場所
-        print(logger.level)
-        print(logging.DEBUG)
         if logger.level != logging.DEBUG:
             log_path = history.path.replace('.csv', '.uilog')
             monitor_logger = logging.getLogger('werkzeug')
@@ -500,23 +526,13 @@ class Monitor(StaticMonitor):
 
     def start_server(
             self,
-            host='localhost',
-            port=8080,
+            host=None,
+            port=None,
     ):
+        host = host or 'localhost'
+        port = port or self.DEFAULT_PORT
 
         from .base import OptimizationStatus
-
-        # 引数の処理
-        if host is None:
-            host = 'localhost'
-        if port is None:
-            port = 8080
-
-        # ブラウザを起動
-        if host == '0.0.0.0':
-            webbrowser.open(f'http://localhost:{str(port)}')
-        else:
-            webbrowser.open(f'http://{host}:{str(port)}')
 
         # dash app server を daemon thread で起動
         server_thread = Thread(

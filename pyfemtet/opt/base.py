@@ -1317,7 +1317,7 @@ class FEMOpt:
         """
         return self.opt.get_parameter(format)
 
-    def set_monitor_host(self, host='localhost', port=None):
+    def set_monitor_host(self, host=None, port=None):
         """Sets up the monitor server with the specified host and port.
 
         Args:
@@ -1429,12 +1429,16 @@ class FEMOpt:
 
         # launch monitor
         self.monitor_process_future = self.client.submit(
+            # func
             start_monitor_server,
+            # args
             self.history,
             self.status,
             worker_addresses,
             self.worker_status_list,
-            **self.monitor_server_kwargs,  # kwargs
+            # kwargs
+            **self.monitor_server_kwargs,
+            # kwargs of submit
             workers=self.monitor_process_worker_name,  # if invalid arg,
             allow_other_workers=False
         )
@@ -1577,7 +1581,14 @@ class FEMOpt:
         sleep(3)
 
 
-def start_monitor_server(history, status, worker_addresses, worker_status_list, host='localhost', port=8080):
+def start_monitor_server(
+        history,
+        status,
+        worker_addresses,
+        worker_status_list,
+        host=None,
+        port=None,
+):
     monitor = Monitor(history, status, worker_addresses, worker_status_list)
     monitor.start_server(host, port)
     return 'Exit monitor server process gracefully'

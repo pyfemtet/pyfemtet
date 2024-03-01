@@ -461,6 +461,10 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
     return Femtet, my_pid
 
 
+def _debug():
+    launch_and_dispatch_femtet(5)
+
+
 if __name__ == '__main__':
     _Femtet, _my_pid = launch_and_dispatch_femtet(5)
     # _Femtet, _my_pid = dispatch_specific_femtet(pid=26124)

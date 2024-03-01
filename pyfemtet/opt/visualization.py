@@ -161,23 +161,41 @@ def update_multi_objective_pairplot(history, df):
     return fig
 
 
-if __name__ == '__main__':
+def _debug():
     import os
-    from pyfemtet.opt.base import History
-    from pyfemtet.opt.monitor import StaticMonitor
 
     os.chdir(os.path.dirname(__file__))
     csv_path = '_sample_history_include_infeasible_3obj.csv'
-    # csv_path = '_sample_history_include_infeasible_2obj.csv'
-    # csv_path = '_sample_history_include_infeasible_1obj.csv'
+
+    show_static_monitor(csv_path)
+
+
+def show_static_monitor(csv_path):
+    from pyfemtet.opt.base import History
+    from pyfemtet.opt.monitor import StaticMonitor
     _h = History(history_path=csv_path)
-
-
-    # # _f = update_hypervolume_plot(_h, _h.local_data)
-    # _f = update_default_figure(_h, _h.local_data)
-    # _f.show()
-
     _monitor = StaticMonitor(history=_h)
-    _monitor.run()
+    _monitor.run(port=8081)
 
 
+def entry_point():
+    import argparse
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('csv_path', help='pyfemtet を実行した結果の csv ファイルのパスを指定してください。', type=str)
+
+    # parser.add_argument(
+    #     "-c",
+    #     "--csv-path",
+    #     help="pyfemtet.opt による最適化結果 csv ファイルパス",
+    #     type=str,
+    # )
+
+    args = parser.parse_args()
+
+    if args.csv_path:
+        show_static_monitor(args.csv_path)
+
+
+if __name__ == '__main__':
+    _debug()
