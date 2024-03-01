@@ -5,31 +5,47 @@ import logging
 from time import sleep
 from threading import Thread
 
-from dash import Dash, html, dcc, ctx, Output, Input
+from plotly.graph_objects import Figure
+from dash import Dash, html, dcc, Output, Input, State, callback_context, no_update
+from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
 from .visualization import update_default_figure, update_hypervolume_plot
 
 import pyfemtet
+from pyfemtet.logger import get_logger
+logger = get_logger('vis')
+logger.setLevel(logging.INFO)
 
 
 class Home:
 
     layout = None
 
-    # system components
-    dummy = html.Div('', id='dummy-component')
-    interval = dcc.Interval(id='interval-component', interval=1000, n_intervals=0)
+    # component id
+    ID_DUMMY = 'home-dummy'
+    ID_INTERVAL = 'home-interval'
+    ID_GRAPH_TABS = 'home-graph-tabs'
+    ID_GRAPH_CARD_BODY = 'home-graph-card-body'
+    ID_GRAPH = 'home-graph'
+
+    # component id for Monitor
+    ID_ENTIRE_PROCESS_STATUS_ALERT = 'home-entire-process-status-alert'
+    ID_ENTIRE_PROCESS_STATUS_ALERT_CHILDREN = 'home-entire-process-status-alert-children'
+    ID_TOGGLE_INTERVAL_BUTTON = 'home-toggle-interval-button'
+    ID_INTERRUPT_PROCESS_BUTTON = 'home-interrupt-process-button'
+
+    # invisible components
+    dummy = html.Div(id=ID_DUMMY)
+    interval = dcc.Interval(id=ID_INTERVAL, interval=1000, n_intervals=0)
 
     # visible components
     header = html.H1('最適化の結果分析')
     graph_card = dbc.Card()
     contents = dbc.Container(fluid=True)
 
-    # 自動更新
-    auto_update = False
+    # card + tabs + tab + loading + graph 用
     graphs = {}  # {tab_id: {label, fig_func}}
-    active_tab = None
 
     def __init__(self, monitor):
         self.monitor = monitor
@@ -42,57 +58,92 @@ class Home:
 
     def setup_graph_card(self):
 
-        # タブと graph の追加
-        self.graphs['tab-id-1'] = dict(
+        # graph の追加
+        default_tab = 'tab-id-1'
+        self.graphs[default_tab] = dict(
             label='目的プロット',
             fig_func=update_default_figure,
         )
-        self.active_tab = 'tab-id-1'
 
         self.graphs['tab-id-2'] = dict(
             label='ハイパーボリューム',
             fig_func=update_hypervolume_plot,
         )
 
-        # tab 作成
+        # graphs から tab 作成
         tabs = []
         for tab_id, graph in self.graphs.items():
             tabs.append(dbc.Tab(label=graph['label'], tab_id=tab_id))
 
-        # タブ
+        # tab から tabs 作成
         tabs_component = dbc.Tabs(
             tabs,
-            id='card-tabs',
-            active_tab=self.active_tab,
+            id=self.ID_GRAPH_TABS,
+            active_tab=default_tab,
         )
 
         # タブ + グラフ本体のコンポーネント作成
         self.graph_card = dbc.Card(
             [
                 dbc.CardHeader(tabs_component),
-                dbc.CardBody(html.P(dcc.Graph(id='graph-component'), className="card-text")),
+                dbc.CardBody(
+                    children=[
+                        # Loading : child が Output である callback について、
+                        # それが発火してから return するまでの間 Spinner が出てくる
+                        dcc.Loading(
+                            dcc.Graph(id=self.ID_GRAPH),
+                        ),
+                    ],
+                    id=self.ID_GRAPH_CARD_BODY,
+                ),
+            ],
+        )
+
+        # Loading 表示のためページロード時のみ発火させる callback
+        @self.app.callback(
+            [
+                Output(self.ID_GRAPH, 'figure'),
+            ],
+            [
+                Input(self.ID_GRAPH_CARD_BODY, 'children'),
+            ],
+            [
+                State(self.ID_GRAPH_TABS, 'active_tab'),
             ]
         )
+        def on_load(_, active_tab):
+            # 1. initial_call または 2. card-body (即ちその中の graph) が変化した時に call される
+            # 2 で call された場合は ctx に card_body が格納されるのでそれで判定する
+            initial_call = callback_context.triggered_id is None
+            if initial_call:
+                return [self.get_fig_by_tab_id(active_tab)]
+            else:
+                raise PreventUpdate
 
         # tab によるグラフ切替 callback
         @self.app.callback(
-            [Output('graph-component', 'figure'),],
-            [Input("card-tabs", "active_tab"),]
+            [Output(self.ID_GRAPH, 'figure', allow_duplicate=True),],
+            [Input(self.ID_GRAPH_TABS, 'active_tab'),],
+            prevent_initial_call=True,
         )
         def switch_fig_by_tab(active_tab_id):
+            logger.debug(f'switch_fig_by_tab: {active_tab_id}')
+            if active_tab_id in self.graphs.keys():
+                fig_func = self.graphs[active_tab_id]['fig_func']
+                fig = fig_func(self.history, self.monitor.local_df)
+            else:
+                from plotly.graph_objects import Figure
+                fig = Figure()
 
-            self.active_tab = active_tab_id
+            return [fig]
 
-            graph_figure = dcc.Graph()
-
-            if len(self.df) == 0:
-                return (graph_figure,)
-
-            if self.active_tab in self.graphs.keys():
-                fig_func = self.graphs[self.active_tab]['fig_func']
-                graph_figure = fig_func(self.history, self.monitor.local_df)
-
-            return (graph_figure,)
+    def get_fig_by_tab_id(self, tab_id):
+        if tab_id in self.graphs.keys():
+            fig_func = self.graphs[tab_id]['fig_func']
+            fig = fig_func(self.history, self.monitor.local_df)
+        else:
+            fig = Figure()
+        return fig
 
     def setup_contents(self, is_processing):
         # contents
@@ -108,18 +159,23 @@ class Home:
 
     def setup_contents_as_process_monitor(self):
 
-        # 自動更新
-        self.auto_update = True
-
         # header
         self.header.children = '最適化の進捗状況'
 
         # whole status
-        status_alert = dbc.Alert('Optimization status will be shown here.', id='status-alert', color='primary')
+        status_alert = dbc.Alert(
+            children=html.H4(
+                'Optimization status will be shown here.',
+                className='alert-heading',
+                id=self.ID_ENTIRE_PROCESS_STATUS_ALERT_CHILDREN,
+            ),
+            id=self.ID_ENTIRE_PROCESS_STATUS_ALERT,
+            color='secondary',
+        )
 
         # buttons
-        toggle_interval_button = dbc.Button('グラフ自動更新を一時停止', id='toggle-interval-button', color='primary')
-        interrupt_button = dbc.Button('最適化を中断', id='interrupt-button', color='danger')
+        toggle_interval_button = dbc.Button('グラフ自動更新を一時停止', id=self.ID_TOGGLE_INTERVAL_BUTTON, color='primary')
+        interrupt_button = dbc.Button('最適化を中断', id=self.ID_INTERRUPT_PROCESS_BUTTON, color='danger')
 
         note = dcc.Markdown(
             '---\n'
@@ -147,88 +203,93 @@ class Home:
         # b. status terminated  =>  (toggle を無効) and (interrupt を無効) and (interval を無効)
         @self.monitor.app.callback(
             [
-                Output('graph-component', 'figure', allow_duplicate=True),  # 1 tab も fig を切り替える
-                Output('interrupt-button', 'disabled'),  # 2, b
-                Output('toggle-interval-button', 'children'),  # 3
-                Output('interval-component', 'max_intervals'),  # 3, b
-                Output('toggle-interval-button', 'disabled'),  # b
-                Output('status-alert', 'children'),  # a
-                Output('status-alert', 'color'),  # a
-                # Output('dummy-component', 'children'),  # debug
+                Output(self.ID_GRAPH_CARD_BODY, 'children'),  # 1
+                Output(self.ID_INTERRUPT_PROCESS_BUTTON, 'disabled'),  # 2, b
+                Output(self.ID_TOGGLE_INTERVAL_BUTTON, 'children'),  # 3
+                Output(self.ID_INTERVAL, 'max_intervals'),  # 3, b
+                Output(self.ID_TOGGLE_INTERVAL_BUTTON, 'disabled'),  # b
+                Output(self.ID_ENTIRE_PROCESS_STATUS_ALERT_CHILDREN, 'children'),  # a
+                Output(self.ID_ENTIRE_PROCESS_STATUS_ALERT, 'color'),  # a
             ],
             [
-                Input('interval-component', 'n_intervals'),  # 1
-                Input('interrupt-button', 'n_clicks'),  # 2
-                Input('toggle-interval-button', 'n_clicks'),  # 3
+                Input(self.ID_INTERVAL, 'n_intervals'),  # 1
+                Input(self.ID_INTERRUPT_PROCESS_BUTTON, 'n_clicks'),  # 2
+                Input(self.ID_TOGGLE_INTERVAL_BUTTON, 'n_clicks'),  # 3
+            ],
+            [
+                State(self.ID_GRAPH_TABS, "active_tab"),
             ],
             prevent_initial_call=True,
         )
-        def monitor_work(
+        def monitor_feature(
                 _1,
                 _2,
                 toggle_n_clicks,
+                active_tab_id,
         ):
-
-            OptimizationStatus = pyfemtet.opt.base.OptimizationStatus
+            # 発火確認
+            logger.debug(f'monitor_feature: {active_tab_id}')
 
             # 引数の処理
-            toggle_n_clicks = 0 if toggle_n_clicks is None else toggle_n_clicks
-            pressed_button_id = ctx.triggered_id if not None else 'No clicks yet'
+            toggle_n_clicks = toggle_n_clicks or 0
+            trigger = callback_context.triggered_id or 'implicit trigger'
 
-            # default の戻り値
-            fig = dcc.Graph()
-            interrupt_disabled = False
-            toggle_children = 'グラフ自動更新を一時停止'
-            max_intervals = -1  # enable
-            toggle_disabled = False
-            status_children = html.H4('optimization status: ' + self.monitor.local_entire_status, className="alert-heading")
-            status_color = 'primary'
+            # cls
+            OptimizationStatus = pyfemtet.opt.base.OptimizationStatus
 
-            # 1. interval => figure を更新する
-            if (len(self.monitor.local_df) > 0) and (self.active_tab is not None):
-                fig_func = self.graphs[self.active_tab]['fig_func']
-                fig = fig_func(self.history, self.monitor.local_df)
+            # return 値の default 値(Python >= 3.7 で順番を保持する仕様を利用)
+            ret = {
+                (card_body := 'card_body'): no_update,
+                (disable_interrupt := 'disable_interrupt'): no_update,
+                (toggle_btn_msg := 'toggle_btn_msg'): no_update,
+                (max_intervals := 'max_intervals'): no_update,  # 0:disable, -1:enable
+                (disable_toggle := 'disable_toggle'): no_update,
+                (status_msg := 'status_children'): no_update,
+                (status_color := 'status_color'): no_update,
+            }
 
             # 2. btn interrupt => x(status を interrupt にする) and (interrupt を無効)
-            if pressed_button_id == 'interrupt-button':
-                interrupt_disabled = True
+            if trigger == self.ID_INTERRUPT_PROCESS_BUTTON:
+                # status を更新
+                # component は下流の処理で更新する
                 self.monitor.local_entire_status_int = OptimizationStatus.INTERRUPTING
                 self.monitor.local_entire_status = OptimizationStatus.const_to_str(OptimizationStatus.INTERRUPTING)
-                status_children = html.H4('optimization status: ' + self.monitor.local_entire_status,
-                                          className="alert-heading")
+
+            # 1. interval => figure を更新する
+            if (len(self.monitor.local_df) > 0) and (active_tab_id is not None):
+                fig = self.get_fig_by_tab_id(active_tab_id)
+                ret[card_body] = dcc.Graph(figure=fig, id=self.ID_GRAPH)  # list にせんとダメかも
 
             # 3. btn toggle => (toggle の children を切替) and (interval を切替)
             if toggle_n_clicks % 2 == 1:
-                max_intervals = 0  # disable
-                toggle_children = 'グラフ自動更新を再開'
+                ret[max_intervals] = 0  # disable
+                ret[toggle_btn_msg] = '自動更新を再開'
+            else:
+                ret[max_intervals] = -1  # enable
+                ret[toggle_btn_msg] = '自動更新を一時停止'
 
             # a. status => status-alert を更新
+            ret[status_msg] = 'Optimization status: ' + self.monitor.local_entire_status
             if self.monitor.local_entire_status_int == OptimizationStatus.INTERRUPTING:
-                status_color = 'warning'
-            if self.monitor.local_entire_status_int == OptimizationStatus.TERMINATED:
-                status_color = 'dark'
-            if self.monitor.local_entire_status_int == OptimizationStatus.TERMINATE_ALL:
-                status_color = 'dark'
+                ret[status_color] = 'warning'
+            elif self.monitor.local_entire_status_int == OptimizationStatus.TERMINATED:
+                ret[status_color] = 'dark'
+            elif self.monitor.local_entire_status_int == OptimizationStatus.TERMINATE_ALL:
+                ret[status_color] = 'dark'
+            else:
+                ret[status_color] = 'primary'
 
             # b. status terminated => (interrupt を無効) and (interval を無効)
+            # 中断以降なら中断ボタンを disable にする
             if self.monitor.local_entire_status_int >= OptimizationStatus.INTERRUPTING:
-                interrupt_disabled = True
+                ret[disable_interrupt] = True
+            # 終了以降ならさらに toggle, interval を disable にする
             if self.monitor.local_entire_status_int >= OptimizationStatus.TERMINATED:
-                max_intervals = 0  # disable
-                toggle_disabled = True
-                toggle_children = '更新されません'
+                ret[max_intervals] = 0  # disable
+                ret[disable_toggle] = True
+                ret[toggle_btn_msg] = '更新されません'
 
-            ret = (
-                fig,
-                interrupt_disabled,
-                toggle_children,
-                max_intervals,
-                toggle_disabled,
-                status_children,
-                status_color,
-            )
-
-            return ret
+            return tuple(ret.values())
 
     def setup_layout(self):
         # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
@@ -335,7 +396,6 @@ class StaticMonitor(object):
     def __init__(
             self,
             history,
-
     ):
         # 引数の処理
         self.history = history
@@ -355,7 +415,7 @@ class StaticMonitor(object):
         order = 1
         self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
 
-    def setup_sidebar(self):
+    def setup_layout(self):
         # setup sidebar
         # https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
 
@@ -393,7 +453,7 @@ class StaticMonitor(object):
                 )
 
     def run(self, host='localhost', port=8080):
-        self.setup_sidebar()
+        self.setup_layout()
         self.app.run(debug=False, host=host, port=port)
 
 
@@ -413,9 +473,12 @@ class Monitor(StaticMonitor):
         self.is_processing = True
 
         # ログファイルの保存場所
-        log_path = history.path.replace('.csv', '.uilog')
-        logger = logging.getLogger()
-        logger.addHandler(logging.FileHandler(log_path))
+        print(logger.level)
+        print(logging.DEBUG)
+        if logger.level != logging.DEBUG:
+            log_path = history.path.replace('.csv', '.uilog')
+            monitor_logger = logging.getLogger('werkzeug')
+            monitor_logger.addHandler(logging.FileHandler(log_path))
 
         # メインスレッドで更新してもらうメンバーを一旦初期化
         self.local_entire_status = self.status.get_text()

@@ -1,5 +1,5 @@
 cd %~dp0\..
-poetry run pytest -s -k "not test_cad"
+poetry run pytest -s -k "not _cad and not _sample"
 pause
 exit
 

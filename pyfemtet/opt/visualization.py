@@ -1,9 +1,6 @@
 import plotly.graph_objs as go
 import plotly.express as px
 
-from dash import Dash, html, dcc, ctx, Output, Input
-import dash_bootstrap_components as dbc
-
 
 class ColorSet:
     feasible = {True: '#007bff', False: '#6c757d'}
@@ -167,7 +164,7 @@ def update_multi_objective_pairplot(history, df):
 if __name__ == '__main__':
     import os
     from pyfemtet.opt.base import History
-
+    from pyfemtet.opt.monitor import StaticMonitor
 
     os.chdir(os.path.dirname(__file__))
     csv_path = '_sample_history_include_infeasible_3obj.csv'
@@ -175,6 +172,12 @@ if __name__ == '__main__':
     # csv_path = '_sample_history_include_infeasible_1obj.csv'
     _h = History(history_path=csv_path)
 
-    # _f = update_hypervolume_plot(_h, _h.local_data)
-    _f = update_default_figure(_h, _h.local_data)
-    _f.show()
+
+    # # _f = update_hypervolume_plot(_h, _h.local_data)
+    # _f = update_default_figure(_h, _h.local_data)
+    # _f.show()
+
+    _monitor = StaticMonitor(history=_h)
+    _monitor.run()
+
+
