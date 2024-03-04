@@ -86,6 +86,7 @@ def update_single_objective_plot(history, df):
             ls.feasible[False]: cs.feasible[False],
         },
         hover_data={ls.feasible['feasible']: False},
+        custom_data='trial',
     )
 
     fig.add_trace(
@@ -128,6 +129,7 @@ def update_multi_objective_pairplot(history, df):
                 ls.feasible[False]: cs.feasible[False],
             },
             hover_data={ls.feasible['feasible']: False},
+            custom_data='trial',
         )
         fig.update_layout(
             dict(
@@ -146,6 +148,7 @@ def update_multi_objective_pairplot(history, df):
                 ls.feasible[False]: cs.feasible[False],
             },
             hover_data={ls.feasible['feasible']: False},
+            custom_data='trial',
         )
         fig.update_traces(
             patch={'diagonal.visible': False},
@@ -175,7 +178,7 @@ def show_static_monitor(csv_path):
     from pyfemtet.opt.monitor import StaticMonitor
     _h = History(history_path=csv_path)
     _monitor = StaticMonitor(history=_h)
-    _monitor.run(port=8081)
+    _monitor.run()
 
 
 def entry_point():

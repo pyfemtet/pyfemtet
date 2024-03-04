@@ -1,10 +1,12 @@
 from typing import Optional, List
 
+import json
 import webbrowser
 import logging
 from time import sleep
 from threading import Thread
 
+import pandas as pd
 import psutil
 from plotly.graph_objects import Figure
 from dash import Dash, html, dcc, Output, Input, State, callback_context, no_update
@@ -14,8 +16,10 @@ import dash_bootstrap_components as dbc
 from .visualization import update_default_figure, update_hypervolume_plot
 import pyfemtet
 from pyfemtet.logger import get_logger
+from pyfemtet.opt.interface import FemtetInterface
+
 logger = get_logger('viz')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 def _unused_port_number(start=49152):
@@ -29,6 +33,216 @@ def _unused_port_number(start=49152):
     if port != start:
         logger.warn(f'Specified port "{start}" seems to be used. Port "{port}" is used instead.')
     return port
+
+
+class FemtetControl:
+
+    # component ID
+    ID_LAUNCH_FEMTET_BUTTON = 'femtet-launch-button'
+    ID_FEMTET_STATE_DATA = 'femtet-state-data'
+    ID_TRANSFER_PARAMETER_BUTTON = 'femtet-transfer-parameter-button'
+    ID_INTERVAL = 'femtet-interval'
+
+    # arbitrary attribute name
+    ATTR_FEMTET_DATA = 'data-femtet'  # attribute of html.Data should start with data-*.
+
+    # interface
+    fem: Optional['pyfemtet.opt.interface.FemtetInterface'] = None
+
+    @classmethod
+    def create_components(cls, home: 'Home'):
+
+        interval = dcc.Interval(id=cls.ID_INTERVAL, interval=1000)
+        femtet_state = {'pid': 0}
+        femtet_state_data = html.Data(id=cls.ID_FEMTET_STATE_DATA, **{cls.ATTR_FEMTET_DATA: json.dumps(femtet_state)})
+        launch_femtet_button = dbc.Button('Launch Femtet!', id=cls.ID_LAUNCH_FEMTET_BUTTON, color='secondary')
+        transfer_parameter_button = dbc.Button('Transfer to Femtet!!', id=cls.ID_TRANSFER_PARAMETER_BUTTON, color='primary', disabled=True)
+
+        buttons = dbc.Row([
+            dbc.Col(launch_femtet_button),
+            dbc.Col(transfer_parameter_button)
+        ])
+
+        return [interval, femtet_state_data, buttons]
+
+    @classmethod
+    def add_callback(cls, home: 'Home'):
+
+        #
+        # NOTE: Femtet を起動し、pid を記憶する callback
+        @home.monitor.app.callback(
+            [
+                Output(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA, allow_duplicate=True),
+            ],
+            [
+                Input(cls.ID_LAUNCH_FEMTET_BUTTON, 'n_clicks'),
+            ],
+            prevent_initial_call=True,
+        )
+        def launch_femtet(_):
+            logger.debug(f'launch_femtet')
+            ret = {'femtet-state-data': no_update}
+            if callback_context.triggered_id is not None:
+                cls.fem = FemtetInterface(connect_method='auto', allow_without_project=True)
+                cls.fem.quit_when_destruct = False
+                femtet_state = {'pid': cls.fem.femtet_pid}
+                return tuple([json.dumps(femtet_state)])
+            else:
+                return tuple(ret.values())
+
+        #
+        # NOTE: Femtet の情報をアップデートするなどの監視 callback
+        @home.monitor.app.callback(
+            [
+                Output(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA),
+            ],
+            [
+                Input(cls.ID_INTERVAL, 'n_intervals'),
+            ],
+            [
+                State(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA)
+            ],
+        )
+        def interval_callback(n_intervals, current_femtet_data_json):
+            logger.debug('interval_callback')
+
+            # 戻り値
+            ret = {(femtet_state_json := 'femtet_state_json'): no_update}
+
+            # 引数の処理
+            n_intervals = n_intervals or 0
+            current_femtet_data = json.loads(current_femtet_data_json)
+
+            # check pid
+            if 'pid' in current_femtet_data.keys():
+                pid = current_femtet_data['pid']
+                if pid > 0:
+                    # 生きていると主張するなら、死んでいれば更新
+                    if not psutil.pid_exists(pid):
+                        ret[femtet_state_json] = json.dumps({'pid': 0})
+
+            return tuple(ret.values())
+
+        #
+        # NOTE: Femtet の生死でボタンを disable にする callback
+        @home.monitor.app.callback(
+            [
+                Output(cls.ID_LAUNCH_FEMTET_BUTTON, 'disabled', allow_duplicate=True),
+                Output(cls.ID_TRANSFER_PARAMETER_BUTTON, 'disabled', allow_duplicate=True),
+            ],
+            [
+                Input(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA),
+            ],
+            prevent_initial_call=True,
+        )
+        def disable_femtet_button_on_state(femtet_state_json):
+            logger.debug(f'disable_femtet_button')
+            ret = {
+                (femtet_button_disabled := '1'): no_update,
+                (transfer_button_disabled := '3'): no_update,
+            }
+
+            if callback_context.triggered_id is not None:
+                femtet_state = json.loads(femtet_state_json)
+                if femtet_state['pid'] > 0:
+                    ret[femtet_button_disabled] = True
+                    ret[transfer_button_disabled] = False
+                else:
+                    ret[femtet_button_disabled] = False
+                    ret[transfer_button_disabled] = True
+
+            return tuple(ret.values())
+
+        #
+        # NOTE: Femtet 起動ボタンを押したとき、起動完了を待たずにボタンを disable にする callback
+        @home.monitor.app.callback(
+            [
+                Output(cls.ID_LAUNCH_FEMTET_BUTTON, 'disabled', allow_duplicate=True),
+                Output(cls.ID_TRANSFER_PARAMETER_BUTTON, 'disabled', allow_duplicate=True),
+            ],
+            [
+                Input(cls.ID_LAUNCH_FEMTET_BUTTON, 'n_clicks'),
+            ],
+            prevent_initial_call=True,
+        )
+        def disable_femtet_button_immediately(n_clicks):
+            logger.debug(f'disable_button_on_state')
+            ret = {
+                (disable_femtet_button := '1'): no_update,
+                (disable_transfer_button := '2'): no_update,
+            }
+
+            if callback_context.triggered_id is not None:
+                ret[disable_femtet_button] = True
+                ret[disable_transfer_button] = True
+
+            return tuple(ret.values())
+
+        #
+        # NOTE: 転送ボタンを押すと Femtet にデータを転送する callback
+        @home.monitor.app.callback(
+            [
+                Output(cls.ID_TRANSFER_PARAMETER_BUTTON, 'children', allow_duplicate=True),
+            ],
+            [
+                Input(cls.ID_TRANSFER_PARAMETER_BUTTON, 'n_clicks'),
+            ],
+            [
+                State(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA),
+                State(home.ID_SELECTION_DATA, home.ATTR_SELECTION_DATA),
+            ],
+            prevent_initial_call=True,
+        )
+        def transfer_parameter_to_femtet(n_clicks, femtet_data_json, selection_data_json):
+            logger.debug('transfer_parameter_to_femtet')
+
+            # 戻り値
+            ret = {(button_msg := '1'): no_update}
+
+            # 引数の処理
+            femtet_data = json.loads(femtet_data_json)
+            selection_data = json.loads(selection_data_json)
+
+            if selection_data is None:
+                raise PreventUpdate
+
+            # Femtet が生きているか
+            femtet_alive = False
+            logger.debug(femtet_data.keys())
+            if 'pid' in femtet_data.keys():
+                pid = femtet_data['pid']
+                logger.debug(pid)
+                if (pid > 0) and (psutil.pid_exists(pid)):  # pid_exists(0) == True
+                    femtet_alive = True
+                    ret[button_msg] = 'Transfer to Femtet!!'
+
+            if not femtet_alive:
+                return tuple(ret.values())
+
+            # 開いている Femtet のプロジェクトは history のプロジェクトと一致しているか
+            ...
+
+            # とりあえず一個目を抽出
+            points_dicts = selection_data['points']
+            points_dict = points_dicts[0]
+            logger.debug(points_dict)
+            trial = points_dict['customdata'][0]  # TODO: customdata と index の const dict を作る
+            logger.debug(trial)
+            index = trial - 1
+            names = [name for name in home.monitor.local_df.columns if name.startswith('prm_')]
+            values = home.monitor.local_df.iloc[index][names]
+
+            # Femtet に値を転送
+            df = pd.DataFrame(
+                dict(
+                    name=names,
+                    value=values,
+                )
+            )
+            logger.debug(df)
+            cls.fem.update_model(df)
+
+            return tuple(ret.values())
 
 
 class Home:
@@ -47,6 +261,10 @@ class Home:
     ID_ENTIRE_PROCESS_STATUS_ALERT_CHILDREN = 'home-entire-process-status-alert-children'
     ID_TOGGLE_INTERVAL_BUTTON = 'home-toggle-interval-button'
     ID_INTERRUPT_PROCESS_BUTTON = 'home-interrupt-process-button'
+    ID_SELECTION_DATA = 'home-selection-data'
+
+    # data attribute
+    ATTR_SELECTION_DATA = 'data-selection'  # should start with data-*
 
     # invisible components
     dummy = html.Div(id=ID_DUMMY)
@@ -103,14 +321,20 @@ class Home:
                     children=[
                         # Loading : child が Output である callback について、
                         # それが発火してから return するまでの間 Spinner が出てくる
-                        dcc.Loading(
-                            dcc.Graph(id=self.ID_GRAPH),
-                        ),
+                        dcc.Loading(dcc.Graph(id=self.ID_GRAPH)),
                     ],
                     id=self.ID_GRAPH_CARD_BODY,
                 ),
+                html.Data(
+                    id=self.ID_SELECTION_DATA,
+                    **{self.ATTR_SELECTION_DATA: json.dumps('')}
+                ),
+                *FemtetControl.create_components(self)
             ],
         )
+
+        # Femtet 関連 callback
+        FemtetControl.add_callback(self)
 
         # Loading 表示のためページロード時のみ発火させる callback
         @self.app.callback(
@@ -150,6 +374,19 @@ class Home:
 
             return [fig]
 
+        # 選択したデータを記憶する callback
+        @self.monitor.app.callback(
+            [
+                Output(self.ID_SELECTION_DATA, self.ATTR_SELECTION_DATA),
+            ],
+            [
+                Input(self.ID_GRAPH, 'selectedData')
+            ],
+        )
+        def on_select(selected_data):
+            logger.debug(f'on_select: {selected_data}')
+            return [json.dumps(selected_data)]
+
     def get_fig_by_tab_id(self, tab_id):
         if tab_id in self.graphs.keys():
             fig_func = self.graphs[tab_id]['fig_func']
@@ -166,6 +403,7 @@ class Home:
             note = dcc.Markdown(
                 '---\n'
                 '- 最適化の結果分析画面です。\n'
+                '- 凡例をクリックすると、対応する要素の表示/非表示を切り替えます。\n'
                 '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
                 '- ブラウザを閉じてもプログラムは終了しません。'
                 '  - コマンドプロンプトを閉じるかコマンドプロンプトに `CTRL+C` を入力してプログラムを終了してください。\n'
