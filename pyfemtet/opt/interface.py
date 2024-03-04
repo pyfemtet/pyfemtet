@@ -27,6 +27,7 @@ from ..dispatch_extensions import (
     dispatch_specific_femtet,
     launch_and_dispatch_femtet,
     _get_pid,
+    _get_pids,
     DispatchExtensionException,
 )
 
@@ -117,6 +118,7 @@ class FemtetInterface(FEMInterface):
             model_name=None,
             connect_method='auto',
             strictly_pid_specify=True,
+            allow_without_project=False,
             **kwargs  # 継承されたクラスからの引数
     ):
 
@@ -130,9 +132,11 @@ class FemtetInterface(FEMInterface):
             self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
         self.connect_method = connect_method
+        self.allow_without_project = allow_without_project
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None
+        self.femtet_pid = 0
         self.quit_when_destruct = False
         self.connected_method = 'unconnected'
         self.parameters = None
@@ -188,18 +192,17 @@ class FemtetInterface(FEMInterface):
     def _connect_new_femtet(self):
         logger.info('└ Try to launch and connect new Femtet process.')
 
-        self.Femtet, _ = launch_and_dispatch_femtet(strictly_pid_specify=self.strictly_pid_specify)
+        self.Femtet, self.femtet_pid = launch_and_dispatch_femtet(strictly_pid_specify=self.strictly_pid_specify)
 
         self.connected_method = 'new'
-
 
     def _connect_existing_femtet(self, pid: int or None = None):
         logger.info('└ Try to connect existing Femtet process.')
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
-            self.Femtet, _ = dispatch_femtet(timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_femtet(timeout=5)
         else:
-            self.Femtet, _ = dispatch_specific_femtet(pid, timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_specific_femtet(pid, timeout=5)
         self.connected_method = 'existing'
 
     def connect_femtet(self, connect_method: str = 'auto', pid: int or None = None):
@@ -449,10 +452,19 @@ class FemtetInterface(FEMInterface):
         # femprj が指定されていない
         else:
             # かつ new だと解析すべき femprj がわからないのでエラー
-            if self.connect_method == 'new':
-                RuntimeError('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
-            # 開いている Femtet と接続する
-            self.connect_femtet('existing')
+            if (
+                    (self.connect_method == 'new')
+                    and (not self.allow_without_project)
+            ):
+                raise RuntimeError('femprj_path を指定せず Femtet の connect_method に "new" を指定する場合、"allow_without_project" 引数を True に設定してください。')
+            # さらに auto の場合は Femtet が存在しなければ new と同じ挙動になるので同様の処理
+            if (
+                    (self.connect_method == 'auto')
+                    and (len(_get_pids(process_name='Femtet.exe')) == 0)
+                    and (not self.allow_without_project)
+            ):
+                raise RuntimeError('femprj_path を指定せず Femtet の connect_method を指定しない（又は "auto" に指定する）場合、Femtet を起動して処理したい .femprj ファイルを開いた状態にしてください。')
+            self.connect_femtet(self.connect_method)
 
         # 最終的に接続した Femtet の femprj_path と model を インスタンスに戻す
         self.femprj_path = self.Femtet.Project
