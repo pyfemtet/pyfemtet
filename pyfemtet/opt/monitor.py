@@ -1,3 +1,4 @@
+import os
 from typing import Optional, List
 
 import json
@@ -69,7 +70,7 @@ class FemtetControl:
     def add_callback(cls, home: 'Home'):
 
         #
-        # NOTE: Femtet を起動し、pid を記憶する callback
+        # DESCRIPTION: Femtet を起動し、pid を記憶する callback
         @home.monitor.app.callback(
             [
                 Output(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA, allow_duplicate=True),
@@ -81,17 +82,41 @@ class FemtetControl:
         )
         def launch_femtet(_):
             logger.debug(f'launch_femtet')
+
+            # 戻り値の設定
             ret = {'femtet-state-data': no_update}
+
+            # ボタン経由ならば Femtet を起動
             if callback_context.triggered_id is not None:
-                cls.fem = FemtetInterface(connect_method='auto', allow_without_project=True)
+
+                # metadata を取得
+                metadata_json = home.monitor.local_df.loc[0, 'metadata']
+                metadata = json.loads(metadata_json)
+
+                # 解析ファイルのチェック
+                femprj_path = metadata['femprj_path']
+                model_name = metadata['model_name']
+                if not os.path.isfile(femprj_path):
+                    logger.warning(f'{femprj_path} が存在しません。Femtet 起動後、最適化を行ったファイルを開いてください。')  # TODO: UI に表示する
+                    femprj_path = None
+                    model_name = None
+
+                # Femtet を起動
+                cls.fem = FemtetInterface(
+                    femprj_path=femprj_path,
+                    model_name=model_name,
+                    connect_method='auto' if logger.level == logging.DEBUG else 'new',
+                    allow_without_project=True
+                )
                 cls.fem.quit_when_destruct = False
                 femtet_state = {'pid': cls.fem.femtet_pid}
+
                 return tuple([json.dumps(femtet_state)])
             else:
                 return tuple(ret.values())
 
         #
-        # NOTE: Femtet の情報をアップデートするなどの監視 callback
+        # DESCRIPTION: Femtet の情報をアップデートするなどの監視 callback
         @home.monitor.app.callback(
             [
                 Output(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA),
@@ -124,7 +149,7 @@ class FemtetControl:
             return tuple(ret.values())
 
         #
-        # NOTE: Femtet の生死でボタンを disable にする callback
+        # DESCRIPTION: Femtet の生死でボタンを disable にする callback
         @home.monitor.app.callback(
             [
                 Output(cls.ID_LAUNCH_FEMTET_BUTTON, 'disabled', allow_duplicate=True),
@@ -154,7 +179,7 @@ class FemtetControl:
             return tuple(ret.values())
 
         #
-        # NOTE: Femtet 起動ボタンを押したとき、起動完了を待たずにボタンを disable にする callback
+        # DESCRIPTION: Femtet 起動ボタンを押したとき、起動完了を待たずにボタンを disable にする callback
         @home.monitor.app.callback(
             [
                 Output(cls.ID_LAUNCH_FEMTET_BUTTON, 'disabled', allow_duplicate=True),
@@ -179,7 +204,7 @@ class FemtetControl:
             return tuple(ret.values())
 
         #
-        # NOTE: 転送ボタンを押すと Femtet にデータを転送する callback
+        # DESCRIPTION: 転送ボタンを押すと Femtet にデータを転送する callback
         @home.monitor.app.callback(
             [
                 Output(cls.ID_TRANSFER_PARAMETER_BUTTON, 'children', allow_duplicate=True),
@@ -219,9 +244,6 @@ class FemtetControl:
             if not femtet_alive:
                 return tuple(ret.values())
 
-            # 開いている Femtet のプロジェクトは history のプロジェクトと一致しているか
-            ...
-
             # とりあえず一個目を抽出
             points_dicts = selection_data['points']
             points_dict = points_dicts[0]
@@ -235,7 +257,7 @@ class FemtetControl:
             # Femtet に値を転送
             df = pd.DataFrame(
                 dict(
-                    name=names,
+                    name=[name[4:] for name in names],
                     value=values,
                 )
             )
