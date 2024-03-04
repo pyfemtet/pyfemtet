@@ -133,6 +133,7 @@ class FemtetInterface(FEMInterface):
         self.model_name = model_name
         self.connect_method = connect_method
         self.allow_without_project = allow_without_project
+        self.original_femprj_path = self.femprj_path
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None

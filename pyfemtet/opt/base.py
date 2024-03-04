@@ -3,6 +3,7 @@ from typing import List, Iterable
 
 import os
 import sys
+import json
 import datetime
 import inspect
 import ast
@@ -468,10 +469,11 @@ class History:
         columns.append('hypervolume')
         columns.append('message')
         columns.append('time')
+        columns.append('metadata')
 
         return columns
 
-    def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
+    def record(self, parameters, objectives, constraints, obj_values, cns_values, message, metadata):
         """Records the optimization results in the history.
 
         Args:
@@ -481,6 +483,7 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
+            metadata (str): JSON metadata.
 
         """
 
@@ -513,10 +516,12 @@ class History:
         row.append(-1.)  # dummy hypervolume
         row.append(message)  # message
         row.append(datetime.datetime.now())  # time
+        row.append('')  # metadata
 
         with Lock('calc-history'):
             # append
             if len(self.actor_data) == 0:
+                row[-1] = metadata
                 self.local_data = pd.DataFrame([row], columns=self.actor_data.columns)
             else:
                 self.local_data = self.actor_data
@@ -735,6 +740,16 @@ class AbstractOptimizer(ABC):
         logger.debug('calculate c start')
         c = [cns.calc(self.fem) for cns in self.constraints.values()]
 
+        # Femtet 特有の処理
+        metadata = ''
+        if isinstance(self.fem, FemtetInterface):
+            metadata = json.dumps(
+                dict(
+                    femprj_path=self.fem.original_femprj_path,
+                    model_name=self.fem.model_name
+                )
+            )
+
         logger.debug('history.record start')
         self.history.record(
             self.parameters,
@@ -742,7 +757,8 @@ class AbstractOptimizer(ABC):
             self.constraints,
             y,
             c,
-            self.message
+            self.message,
+            metadata
         )
 
         logger.debug('history.record end')
