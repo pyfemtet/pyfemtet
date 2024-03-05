@@ -50,9 +50,13 @@ class FemtetControl:
     ID_FEMTET_STATE_DATA = 'femtet-state-data'
     ID_TRANSFER_PARAMETER_BUTTON = 'femtet-transfer-parameter-button'
     ID_INTERVAL = 'femtet-interval'
+    ID_ALERT = 'femtet-control-alert'
 
     # arbitrary attribute name
     ATTR_FEMTET_DATA = 'data-femtet'  # attribute of html.Data should start with data-*.
+
+    # component element
+    DEFAULT_ALERT_MSG = '警告はありません。'
 
     # interface
     fem: Optional['pyfemtet.opt.interface.FemtetInterface'] = None
@@ -62,7 +66,7 @@ class FemtetControl:
 
         interval = dcc.Interval(id=cls.ID_INTERVAL, interval=1000)
         femtet_state = {'pid': 0}
-        femtet_state_data = html.Data(id=cls.ID_FEMTET_STATE_DATA, **{cls.ATTR_FEMTET_DATA: json.dumps(femtet_state)})
+        femtet_state_data = html.Data(id=cls.ID_FEMTET_STATE_DATA, **{cls.ATTR_FEMTET_DATA: femtet_state})
         launch_femtet_button = dbc.Button('Launch Femtet!', id=cls.ID_LAUNCH_FEMTET_BUTTON, color='secondary')
         transfer_parameter_button = dbc.Button('Transfer to Femtet!!', id=cls.ID_TRANSFER_PARAMETER_BUTTON, color='primary', disabled=True)
 
@@ -71,13 +75,127 @@ class FemtetControl:
             dbc.Col(transfer_parameter_button, style=DBC_COLUMN_STYLE)
         ])
 
-        return [interval, femtet_state_data, buttons]
+        alert = dbc.Alert(
+            children=cls.DEFAULT_ALERT_MSG,
+            id=cls.ID_ALERT,
+            color='success',
+            is_open=False,
+        )
+
+        component = dbc.Container(
+            [
+                buttons,
+                alert,
+            ]
+        )
+
+        return [interval, femtet_state_data, component]
 
     @classmethod
     def add_callback(cls, home: 'HomePage'):
 
+        def launch_femtet_rule():
+            # default は手動で開く
+            femprj_path = None
+            model_name = None
+            msg = cls.DEFAULT_ALERT_MSG
+            color = 'primary'
+
+            # metadata の有無を確認
+            if 'metadata' not in home.monitor.local_df.columns:
+                color = 'warning'
+                msg = (
+                    f'{home.monitor.history.path} に'
+                    'metadata が存在しないので'
+                    '解析ファイルを自動で開けません。'
+                    'Femtet 起動後、最適化を行ったファイルを'
+                    '手動で開いてください。'
+                )
+                logger.warn(msg)
+
+            else:
+                # metadata を読み込み
+                metadata_json = home.monitor.local_df.loc[0, 'metadata']
+                metadata = json.loads(metadata_json)
+
+                # metadata が存在しなければ警告
+                if metadata is None:
+                    color = 'warning'
+                    msg = (
+                        f'{home.monitor.history.path} の metadata が空なので'
+                        '解析ファイルを自動で開けません。'
+                        'Femtet 起動後、最適化を行ったファイルを'
+                        '手動で開いてください。'
+                    )
+                    logger.warning(msg)
+
+                # metadata が存在するが femprj に関する情報が掛けていれば警告
+                elif ('femprj_path' in metadata.keys()) and ('model_name' in metadata.keys()):
+                    color = 'warning'
+                    msg = (
+                        f'{home.monitor.history.path} の metadata に'
+                        '解析ファイルの情報が記録されていません。'
+                        'Femtet 起動後、最適化を行ったファイルを'
+                        '手動で開いてください。'
+                    )
+                    logger.warning(msg)
+
+                # femprj が存在しなければ警告
+                elif not os.path.isfile(metadata['femprj_path']):
+                    color = 'warning'
+                    msg = (
+                        f'{femprj_path} が見つかりません。'
+                        'Femtet 起動後、最適化を行ったファイルを'
+                        '手動で開いてください。'
+                    )
+
+                # femprj はあるがその中に model があるかないかは開かないとわからない
+                # そうでなければ自動で開く
+                else:
+                    femprj_path = metadata['femprj_path']
+                    model_name = metadata['model_name']
+
+            return femprj_path, model_name, msg, color
+
         #
-        # DESCRIPTION: Femtet を起動し、pid を記憶する callback
+        # DESCRIPTION:
+        #   Femtet を起動する際の挙動に従って warning を起こす callback
+        @home.monitor.app.callback(
+            [
+                Output(cls.ID_ALERT, 'children',),
+                Output(cls.ID_ALERT, 'color'),
+                Output(cls.ID_ALERT, 'is_open'),
+            ],
+            [
+                Input(cls.ID_LAUNCH_FEMTET_BUTTON, 'n_clicks'),
+            ],
+            prevent_initial_call=True,
+        )
+        def update_alert(_):
+            logger.debug('update-femtet-control-alert')
+
+            # ボタン経由でないなら無視
+            if callback_context.triggered_id is None:
+                raise PreventUpdate
+
+            # 戻り値
+            ret = {
+                (alert_msg := 1): no_update,
+                (alert_color := 2): no_update,
+                (alert_is_open := 3): no_update,
+            }
+
+            _, _, msg, color = launch_femtet_rule()
+
+            ret[alert_msg] = msg
+            ret[alert_color] = color
+            ret[alert_is_open] = msg != cls.DEFAULT_ALERT_MSG
+
+            return tuple(ret.values())
+
+        #
+        # DESCRIPTION:
+        #  Femtet を起動し、pid を記憶する callback
         @home.monitor.app.callback(
             [
                 Output(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA, allow_duplicate=True),
@@ -91,76 +209,28 @@ class FemtetControl:
             logger.debug(f'launch_femtet')
 
             # 戻り値の設定
-            ret = {'femtet-state-data': no_update}
+            ret = {
+                (femtet_state_data := 1): no_update,
+            }
 
-            # ボタン経由ならば Femtet を起動
-            if callback_context.triggered_id is not None:
+            # ボタン経由でなければ無視
+            if callback_context.triggered_id is None:
+                raise PreventUpdate
 
-                # default は手動で開く
-                femprj_path = None
-                model_name = None
+            # Femtet を起動するための引数をルールに沿って取得
+            femprj_path, model_name, _, _ = launch_femtet_rule()
 
-                # metadata の有無を確認
-                if 'metadata' not in home.monitor.local_df.columns:
-                    # TODO: UI に表示させる
-                    logger.warn(f'{home.monitor.history.path} に'
-                                'metadata が存在しないので'
-                                '解析ファイルを自動で開けません。'
-                                'Femtet 起動後、最適化を行ったファイルを'
-                                '手動で開いてください。')
+            # Femtet を起動
+            cls.fem = FemtetInterface(
+                femprj_path=femprj_path,
+                model_name=model_name,
+                connect_method='auto' if logger.level == logging.DEBUG else 'new',
+                allow_without_project=True
+            )
+            cls.fem.quit_when_destruct = False
+            ret[femtet_state_data] = {'pid': cls.fem.femtet_pid}
 
-                else:
-                    # metadata を読み込み
-                    metadata_json = home.monitor.local_df.loc[0, 'metadata']
-                    metadata = json.loads(metadata_json)
-
-                    # metadata が存在しなければ警告
-                    if metadata is None:
-                        # TODO: UI に表示させる
-                        logger.warning(
-                            f'{home.monitor.history.path} の metadata が空なので'
-                            '解析ファイルを自動で開けません。'
-                            'Femtet 起動後、最適化を行ったファイルを'
-                            '手動で開いてください。')
-
-                    elif ('femprj_path' in metadata.keys()) and ('model_name' in metadata.keys()):
-                        # TODO: UI に表示させる
-                        logger.warning(
-                            f'{home.monitor.history.path} の metadata に'
-                            '解析ファイルの情報が記録されていません。'
-                            'Femtet 起動後、最適化を行ったファイルを'
-                            '手動で開いてください。')
-
-                    else:
-                        # 自動で開く
-
-                        # 解析ファイルのチェック
-                        femprj_path = metadata['femprj_path']
-                        model_name = metadata['model_name']
-                        if not os.path.isfile(femprj_path):
-                            # TODO: UI に表示させる
-                            logger.warning(
-                                f'{femprj_path} が見つかりません。'
-                                'Femtet 起動後、最適化を行ったファイルを'
-                                '手動で開いてください。')
-                            femprj_path = None
-                            model_name = None
-
-
-                # Femtet を起動
-                cls.fem = FemtetInterface(
-                    femprj_path=femprj_path,
-                    model_name=model_name,
-                    connect_method='auto' if logger.level == logging.DEBUG else 'new',
-                    allow_without_project=True
-                )
-                cls.fem.quit_when_destruct = False
-                femtet_state = {'pid': cls.fem.femtet_pid}
-
-                return tuple([json.dumps(femtet_state)])
-
-            else:
-                return tuple(ret.values())
+            return tuple(ret.values())
 
         #
         # DESCRIPTION: Femtet の情報をアップデートするなどの監視 callback
@@ -175,15 +245,15 @@ class FemtetControl:
                 State(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA)
             ],
         )
-        def interval_callback(n_intervals, current_femtet_data_json):
+        def interval_callback(n_intervals, current_femtet_data):
             logger.debug('interval_callback')
 
             # 戻り値
-            ret = {(femtet_state_json := 'femtet_state_json'): no_update}
+            ret = {(femtet_data := 1): no_update}
 
             # 引数の処理
             n_intervals = n_intervals or 0
-            current_femtet_data = json.loads(current_femtet_data_json)
+            current_femtet_data = current_femtet_data or {}
 
             # check pid
             if 'pid' in current_femtet_data.keys():
@@ -191,7 +261,7 @@ class FemtetControl:
                 if pid > 0:
                     # 生きていると主張するなら、死んでいれば更新
                     if not psutil.pid_exists(pid):
-                        ret[femtet_state_json] = json.dumps({'pid': 0})
+                        ret[femtet_data] = current_femtet_data.update({'pid': 0})
 
             return tuple(ret.values())
 
@@ -207,7 +277,7 @@ class FemtetControl:
             ],
             prevent_initial_call=True,
         )
-        def disable_femtet_button_on_state(femtet_state_json):
+        def disable_femtet_button_on_state(femtet_data):
             logger.debug(f'disable_femtet_button')
             ret = {
                 (femtet_button_disabled := '1'): no_update,
@@ -215,8 +285,8 @@ class FemtetControl:
             }
 
             if callback_context.triggered_id is not None:
-                femtet_state = json.loads(femtet_state_json)
-                if femtet_state['pid'] > 0:
+                femtet_data = femtet_data or {}
+                if femtet_data['pid'] > 0:
                     ret[femtet_button_disabled] = True
                     ret[transfer_button_disabled] = False
                 else:
@@ -265,17 +335,17 @@ class FemtetControl:
             ],
             prevent_initial_call=True,
         )
-        def transfer_parameter_to_femtet(n_clicks, femtet_data_json, selection_data_json):
+        def transfer_parameter_to_femtet(n_clicks, femtet_data, selection_data):
             logger.debug('transfer_parameter_to_femtet')
 
             # 戻り値
             ret = {(dummy := '1'): no_update}
 
             # 引数の処理
-            femtet_data = json.loads(femtet_data_json)
-            selection_data = json.loads(selection_data_json)
+            femtet_data = femtet_data or {}
+            selection_data = selection_data or {}
 
-            if selection_data is None:
+            if len(selection_data) == 0:
                 # TODO: UI への表示
                 logger.warning('何も選択されていません。')
                 raise PreventUpdate
@@ -393,7 +463,7 @@ class HomePage:
                 ),
                 html.Data(
                     id=self.ID_SELECTION_DATA,
-                    **{self.ATTR_SELECTION_DATA: json.dumps('')}
+                    **{self.ATTR_SELECTION_DATA: {}}
                 ),
             ],
         )
@@ -446,8 +516,9 @@ class HomePage:
             ],
         )
         def on_select(selected_data):
+            print(type(selected_data))
             logger.debug(f'on_select: {selected_data}')
-            return [json.dumps(selected_data)]
+            return [selected_data]
 
     def get_fig_by_tab_id(self, tab_id):
         if tab_id in self.graphs.keys():
