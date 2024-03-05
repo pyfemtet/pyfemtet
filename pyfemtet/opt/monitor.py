@@ -67,8 +67,8 @@ class FemtetControl:
         transfer_parameter_button = dbc.Button('Transfer to Femtet!!', id=cls.ID_TRANSFER_PARAMETER_BUTTON, color='primary', disabled=True)
 
         buttons = dbc.Row([
-            dbc.Col(launch_femtet_button),
-            dbc.Col(transfer_parameter_button)
+            dbc.Col(launch_femtet_button, style=DBC_COLUMN_STYLE),
+            dbc.Col(transfer_parameter_button, style=DBC_COLUMN_STYLE)
         ])
 
         return [interval, femtet_state_data, buttons]
