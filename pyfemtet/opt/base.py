@@ -416,6 +416,8 @@ class History:
     def load(self):
         # df を読み込む
         self.local_data = pd.read_csv(self.path, encoding='shift-jis')
+        self.local_data['metadata'] = self.local_data['metadata'].fillna('null')
+
         columns = self.local_data.columns
         prm_names = [n[len(self.PRM_PREFIX):] for n in columns if n.startswith(self.PRM_PREFIX)]
         obj_names = [n[len(self.OBJ_PREFIX):] for n in columns if n.startswith(self.OBJ_PREFIX)]

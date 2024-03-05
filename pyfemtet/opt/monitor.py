@@ -58,7 +58,7 @@ class FemtetControl:
     fem: Optional['pyfemtet.opt.interface.FemtetInterface'] = None
 
     @classmethod
-    def create_components(cls, home: 'Home'):
+    def create_components(cls):
 
         interval = dcc.Interval(id=cls.ID_INTERVAL, interval=1000)
         femtet_state = {'pid': 0}
@@ -74,7 +74,7 @@ class FemtetControl:
         return [interval, femtet_state_data, buttons]
 
     @classmethod
-    def add_callback(cls, home: 'Home'):
+    def add_callback(cls, home: 'HomePage'):
 
         #
         # DESCRIPTION: Femtet を起動し、pid を記憶する callback
@@ -96,17 +96,56 @@ class FemtetControl:
             # ボタン経由ならば Femtet を起動
             if callback_context.triggered_id is not None:
 
-                # metadata を取得
-                metadata_json = home.monitor.local_df.loc[0, 'metadata']
-                metadata = json.loads(metadata_json)
+                # default は手動で開く
+                femprj_path = None
+                model_name = None
 
-                # 解析ファイルのチェック
-                femprj_path = metadata['femprj_path']
-                model_name = metadata['model_name']
-                if not os.path.isfile(femprj_path):
-                    logger.warning(f'{femprj_path} が存在しません。Femtet 起動後、最適化を行ったファイルを開いてください。')  # TODO: UI に表示する
-                    femprj_path = None
-                    model_name = None
+                # metadata の有無を確認
+                if 'metadata' not in home.monitor.local_df.columns:
+                    # TODO: UI に表示させる
+                    logger.warn(f'{home.monitor.history.path} に'
+                                'metadata が存在しないので'
+                                '解析ファイルを自動で開けません。'
+                                'Femtet 起動後、最適化を行ったファイルを'
+                                '手動で開いてください。')
+
+                else:
+                    # metadata を読み込み
+                    metadata_json = home.monitor.local_df.loc[0, 'metadata']
+                    metadata = json.loads(metadata_json)
+
+                    # metadata が存在しなければ警告
+                    if metadata is None:
+                        # TODO: UI に表示させる
+                        logger.warning(
+                            f'{home.monitor.history.path} の metadata が空なので'
+                            '解析ファイルを自動で開けません。'
+                            'Femtet 起動後、最適化を行ったファイルを'
+                            '手動で開いてください。')
+
+                    elif ('femprj_path' in metadata.keys()) and ('model_name' in metadata.keys()):
+                        # TODO: UI に表示させる
+                        logger.warning(
+                            f'{home.monitor.history.path} の metadata に'
+                            '解析ファイルの情報が記録されていません。'
+                            'Femtet 起動後、最適化を行ったファイルを'
+                            '手動で開いてください。')
+
+                    else:
+                        # 自動で開く
+
+                        # 解析ファイルのチェック
+                        femprj_path = metadata['femprj_path']
+                        model_name = metadata['model_name']
+                        if not os.path.isfile(femprj_path):
+                            # TODO: UI に表示させる
+                            logger.warning(
+                                f'{femprj_path} が見つかりません。'
+                                'Femtet 起動後、最適化を行ったファイルを'
+                                '手動で開いてください。')
+                            femprj_path = None
+                            model_name = None
+
 
                 # Femtet を起動
                 cls.fem = FemtetInterface(
@@ -119,6 +158,7 @@ class FemtetControl:
                 femtet_state = {'pid': cls.fem.femtet_pid}
 
                 return tuple([json.dumps(femtet_state)])
+
             else:
                 return tuple(ret.values())
 
@@ -214,7 +254,7 @@ class FemtetControl:
         # DESCRIPTION: 転送ボタンを押すと Femtet にデータを転送する callback
         @home.monitor.app.callback(
             [
-                Output(cls.ID_TRANSFER_PARAMETER_BUTTON, 'children', allow_duplicate=True),
+                Output(home.ID_DUMMY, 'children', allow_duplicate=True),
             ],
             [
                 Input(cls.ID_TRANSFER_PARAMETER_BUTTON, 'n_clicks'),
@@ -229,13 +269,15 @@ class FemtetControl:
             logger.debug('transfer_parameter_to_femtet')
 
             # 戻り値
-            ret = {(button_msg := '1'): no_update}
+            ret = {(dummy := '1'): no_update}
 
             # 引数の処理
             femtet_data = json.loads(femtet_data_json)
             selection_data = json.loads(selection_data_json)
 
             if selection_data is None:
+                # TODO: UI への表示
+                logger.warning('何も選択されていません。')
                 raise PreventUpdate
 
             # Femtet が生きているか
@@ -246,12 +288,13 @@ class FemtetControl:
                 logger.debug(pid)
                 if (pid > 0) and (psutil.pid_exists(pid)):  # pid_exists(0) == True
                     femtet_alive = True
-                    ret[button_msg] = 'Transfer to Femtet!!'
 
             if not femtet_alive:
-                return tuple(ret.values())
+                # TODO: UI への表示
+                logger.warning('接続された Femtet が見つかりません。')
+                raise PreventUpdate
 
-            # とりあえず一個目を抽出
+            # FIXME: とりあえず一個目を抽出
             points_dicts = selection_data['points']
             points_dict = points_dicts[0]
             logger.debug(points_dict)
@@ -415,15 +458,7 @@ class HomePage:
         return fig
 
     def setup_contents(self):
-        note = dcc.Markdown(
-            '---\n'
-            '- 最適化の結果分析画面です。\n'
-            '- 凡例をクリックすると、対応する要素の表示/非表示を切り替えます。\n'
-            '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
-            '- ブラウザを閉じてもプログラムは終了しません。'
-            '  - コマンドプロンプトを閉じるかコマンドプロンプトに `CTRL+C` を入力してプログラムを終了してください。\n'
-        )
-        self.contents.children = dbc.Row([dbc.Col(note)])
+        pass
 
     def setup_layout(self):
         # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
@@ -437,7 +472,26 @@ class HomePage:
 
 
 class StaticHomePage(HomePage):
-    ...  # Femtet 関連 contents を実装する
+
+    def setup_contents(self):
+        # Femtet control
+        div = FemtetControl.create_components()
+        FemtetControl.add_callback(self)
+
+        # note
+        note = dcc.Markdown(
+            '---\n'
+            '- 最適化の結果分析画面です。\n'
+            '- 凡例をクリックすると、対応する要素の表示/非表示を切り替えます。\n'
+            '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
+            '- ブラウザを閉じてもプログラムは終了しません。'
+            '  - コマンドプロンプトを閉じるかコマンドプロンプトに `CTRL+C` を入力してプログラムを終了してください。\n'
+        )
+        self.contents.children = [
+            dbc.Row(div),
+            dbc.Row(note)
+        ]
+
 
 class DynamicHomePage(HomePage):
 
@@ -693,12 +747,12 @@ class BaseMonitor(object):
         # app の立上げ
         self.app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    def setup_home(self):
-        href = "/"
-        home = Home(self)
-        self.pages[href] = home.layout
-        order = 1
-        self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
+    # def setup_some_page(self):
+    #     href = "/link-url"
+    #     page = SomePageClass(self)
+    #     self.pages[href] = page.layout
+    #     order: int = 1
+    #     self.nav_links[order] = dbc.NavLink('Some Page', href=href, active="exact")
 
     def setup_layout(self):
         # setup sidebar
@@ -750,6 +804,28 @@ class BaseMonitor(object):
         self.app.run(debug=False, host=host, port=port)
 
 
+class StaticMonitor(BaseMonitor):
+
+    def __init__(
+            self,
+            history,
+    ):
+
+        # 引数の設定、app の設定
+        super().__init__(history)
+
+        # page 設定
+        self.setup_home()
+
+
+    def setup_home(self):
+        href = "/"
+        page = StaticHomePage(self)
+        self.pages[href] = page.layout
+        order = 1
+        self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
+
+
 class DynamicMonitor(BaseMonitor):
 
     DEFAULT_PORT = 8080
@@ -787,7 +863,7 @@ class DynamicMonitor(BaseMonitor):
 
     def setup_home(self):
         href = "/"
-        page = DynamicHome(self)
+        page = DynamicHomePage(self)
         self.pages[href] = page.layout
         order = 1
         self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
