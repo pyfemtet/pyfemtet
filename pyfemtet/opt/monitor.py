@@ -23,6 +23,13 @@ logger = get_logger('viz')
 logger.setLevel(logging.DEBUG)
 
 
+DBC_COLUMN_STYLE = {
+    'display': 'flex',
+    'justify-content': 'center',
+    'align-items': 'center',
+}
+
+
 def _unused_port_number(start=49152):
     # "LISTEN" 状態のポート番号をリスト化
     used_ports = [conn.laddr.port for conn in psutil.net_connections() if conn.status == 'LISTEN']
@@ -267,7 +274,7 @@ class FemtetControl:
             return tuple(ret.values())
 
 
-class Home:
+class HomePage:
 
     layout = None
 
@@ -277,15 +284,9 @@ class Home:
     ID_GRAPH_TABS = 'home-graph-tabs'
     ID_GRAPH_CARD_BODY = 'home-graph-card-body'
     ID_GRAPH = 'home-graph'
-
-    # component id for Monitor
-    ID_ENTIRE_PROCESS_STATUS_ALERT = 'home-entire-process-status-alert'
-    ID_ENTIRE_PROCESS_STATUS_ALERT_CHILDREN = 'home-entire-process-status-alert-children'
-    ID_TOGGLE_INTERVAL_BUTTON = 'home-toggle-interval-button'
-    ID_INTERRUPT_PROCESS_BUTTON = 'home-interrupt-process-button'
     ID_SELECTION_DATA = 'home-selection-data'
 
-    # data attribute
+    # selection data attribute
     ATTR_SELECTION_DATA = 'data-selection'  # should start with data-*
 
     # invisible components
@@ -306,7 +307,7 @@ class Home:
         self.history = monitor.history
         self.df = monitor.local_df
         self.setup_graph_card()
-        self.setup_contents(is_processing=monitor.is_processing)
+        self.setup_contents()
         self.setup_layout()
 
     def setup_graph_card(self):
@@ -351,12 +352,8 @@ class Home:
                     id=self.ID_SELECTION_DATA,
                     **{self.ATTR_SELECTION_DATA: json.dumps('')}
                 ),
-                *FemtetControl.create_components(self)
             ],
         )
-
-        # Femtet 関連 callback
-        FemtetControl.add_callback(self)
 
         # Loading 表示のためページロード時のみ発火させる callback
         @self.app.callback(
@@ -417,22 +414,40 @@ class Home:
             fig = Figure()
         return fig
 
-    def setup_contents(self, is_processing):
-        # contents
-        if is_processing:
-            self.setup_contents_as_process_monitor()
-        else:
-            note = dcc.Markdown(
-                '---\n'
-                '- 最適化の結果分析画面です。\n'
-                '- 凡例をクリックすると、対応する要素の表示/非表示を切り替えます。\n'
-                '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
-                '- ブラウザを閉じてもプログラムは終了しません。'
-                '  - コマンドプロンプトを閉じるかコマンドプロンプトに `CTRL+C` を入力してプログラムを終了してください。\n'
-            )
-            self.contents.children = dbc.Row([dbc.Col(note)])
+    def setup_contents(self):
+        note = dcc.Markdown(
+            '---\n'
+            '- 最適化の結果分析画面です。\n'
+            '- 凡例をクリックすると、対応する要素の表示/非表示を切り替えます。\n'
+            '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
+            '- ブラウザを閉じてもプログラムは終了しません。'
+            '  - コマンドプロンプトを閉じるかコマンドプロンプトに `CTRL+C` を入力してプログラムを終了してください。\n'
+        )
+        self.contents.children = dbc.Row([dbc.Col(note)])
 
-    def setup_contents_as_process_monitor(self):
+    def setup_layout(self):
+        # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
+        self.layout = dbc.Container([
+            dbc.Row([dbc.Col(self.dummy), dbc.Col(self.interval)]),
+            dbc.Row([dbc.Col(self.header)]),
+            dbc.Row([dbc.Col(self.graph_card)]),
+            dbc.Row([dbc.Col(self.contents)]),
+        ], fluid=True)
+
+
+
+class StaticHomePage(HomePage):
+    ...  # Femtet 関連 contents を実装する
+
+class DynamicHomePage(HomePage):
+
+    # component id for Monitor
+    ID_ENTIRE_PROCESS_STATUS_ALERT = 'home-entire-process-status-alert'
+    ID_ENTIRE_PROCESS_STATUS_ALERT_CHILDREN = 'home-entire-process-status-alert-children'
+    ID_TOGGLE_INTERVAL_BUTTON = 'home-toggle-interval-button'
+    ID_INTERRUPT_PROCESS_BUTTON = 'home-interrupt-process-button'
+
+    def setup_contents(self):
 
         # header
         self.header.children = '最適化の進捗状況'
@@ -464,13 +479,16 @@ class Home:
 
         self.contents.children = [
             dbc.Row([dbc.Col(status_alert)]),
-            dbc.Row([dbc.Col(toggle_interval_button), dbc.Col(interrupt_button)]),
+            dbc.Row([
+                dbc.Col(toggle_interval_button, style=DBC_COLUMN_STYLE),
+                dbc.Col(interrupt_button, style=DBC_COLUMN_STYLE)
+            ]),
             dbc.Row([dbc.Col(note)]),
         ]
 
-        self.add_callback_as_process_monitor()
+        self.add_callback()
 
-    def add_callback_as_process_monitor(self):
+    def add_callback(self):
         # 1. interval           =>  figure を更新する
         # 2. btn interrupt      =>  x(status を interrupt にする) and (interrupt を無効)
         # 3. btn toggle         =>  (toggle の children を切替) and (interval を切替)
@@ -566,17 +584,8 @@ class Home:
 
             return tuple(ret.values())
 
-    def setup_layout(self):
-        # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
-        self.layout = dbc.Container([
-            dbc.Row([dbc.Col(self.dummy), dbc.Col(self.interval)]),
-            dbc.Row([dbc.Col(self.header)]),
-            dbc.Row([dbc.Col(self.graph_card)]),
-            dbc.Row([dbc.Col(self.contents)]),
-        ], fluid=True)
 
-
-class WorkerMonitor:
+class WorkerPage:
 
     # layout
     layout = dbc.Container()
@@ -642,7 +651,7 @@ class WorkerMonitor:
             return tuple(ret)
 
 
-class StaticMonitor(object):
+class BaseMonitor(object):
 
     # process_monitor or not
     is_processing = False
@@ -683,8 +692,6 @@ class StaticMonitor(object):
 
         # app の立上げ
         self.app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-        self.setup_home()
 
     def setup_home(self):
         href = "/"
@@ -743,7 +750,7 @@ class StaticMonitor(object):
         self.app.run(debug=False, host=host, port=port)
 
 
-class Monitor(StaticMonitor):
+class DynamicMonitor(BaseMonitor):
 
     DEFAULT_PORT = 8080
 
@@ -775,11 +782,19 @@ class Monitor(StaticMonitor):
         super().__init__(history)
 
         # page 設定
+        self.setup_home()
         self.setup_worker_monitor()
 
+    def setup_home(self):
+        href = "/"
+        page = DynamicHome(self)
+        self.pages[href] = page.layout
+        order = 1
+        self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
+
     def setup_worker_monitor(self):
-        href = "/worker-monitor"
-        page = WorkerMonitor(self)
+        href = "/worker-monitor/"
+        page = WorkerPage(self)
         self.pages[href] = page.layout
         order = 2
         self.nav_links[order] = dbc.NavLink("Workers", href=href, active="exact")

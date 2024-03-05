@@ -26,7 +26,7 @@ from win32com.client import constants, Constants
 
 from ..core import ModelError, MeshError, SolveError, _version
 from .interface import FEMInterface, FemtetInterface
-from .monitor import Monitor
+from .monitor import DynamicMonitor
 
 import logging
 from ..logger import get_logger
@@ -1605,6 +1605,6 @@ def start_monitor_server(
         host=None,
         port=None,
 ):
-    monitor = Monitor(history, status, worker_addresses, worker_status_list)
+    monitor = DynamicMonitor(history, status, worker_addresses, worker_status_list)
     monitor.start_server(host, port)
     return 'Exit monitor server process gracefully'
