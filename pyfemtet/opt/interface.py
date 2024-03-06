@@ -1,3 +1,5 @@
+from typing import Optional, List
+
 import os
 import re
 import sys
@@ -67,7 +69,7 @@ class FEMInterface(ABC):
         if False:
             raise RuntimeError(f"{param_name} doesn't exist on FEM model.")
 
-    def update_parameter(self, parameters: pd.DataFrame) -> None:
+    def update_parameter(self, parameters: pd.DataFrame, with_warning=False) -> Optional[List[str]]:
         """Updates only FEM variables (if implemented in concrete class)."""
         pass
 
@@ -485,7 +487,7 @@ class FemtetInterface(FEMInterface):
         else:
             return None
 
-    def update_parameter(self, parameters: 'pd.DataFrame'):
+    def update_parameter(self, parameters: 'pd.DataFrame', with_warning=False):
         """See :func:`FEMInterface.update_parameter`"""
         self.parameters = parameters.copy()
 
@@ -509,8 +511,12 @@ class FemtetInterface(FEMInterface):
 
         # 変数を含まないプロジェクトである場合
         if existing_variable_names is None:
-            return
+            if with_warning:
+                return ['解析モデルに変数が含まれていません。']
+            else:
+                return None
 
+        warnings = []
         for i, row in parameters.iterrows():
             name = row['name']
             value = row['value']
@@ -524,18 +530,23 @@ class FemtetInterface(FEMInterface):
                     args=(name, value),
                 )
             else:
-                logger.warn(f'変数 {name} は .femprj に含まれていません。無視されます。')
+                msg = f'変数 {name} は .femprj に含まれていません。無視されます。'
+                warnings.append(msg)
+                logger.warn(msg)
 
         # ここでは ReExecute しない
-        pass
+        if with_warning:
+            return warnings
+        else:
+            return None
 
-    def update_model(self, parameters: 'pd.DataFrame') -> None:
+    def update_model(self, parameters: 'pd.DataFrame', with_warning=False) -> Optional[List[str]]:
         """Updates the analysis model only."""
 
         self.parameters = parameters.copy()
 
         # 変数の更新
-        self.update_parameter(parameters)
+        warnings = self.update_parameter(parameters, with_warning)
 
         # 設計変数に従ってモデルを再構築
         self._call_femtet_api(
@@ -554,6 +565,9 @@ class FemtetInterface(FEMInterface):
             error_message=f'モデル再構築に失敗しました.',
             is_Gaudi_method=True,
         )
+
+        if with_warning:
+            return warnings or []
 
     def solve(self) -> None:
         """Execute FEM analysis (with updated model)."""

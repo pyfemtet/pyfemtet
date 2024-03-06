@@ -50,13 +50,11 @@ class FemtetControl:
     ID_FEMTET_STATE_DATA = 'femtet-state-data'
     ID_TRANSFER_PARAMETER_BUTTON = 'femtet-transfer-parameter-button'
     ID_INTERVAL = 'femtet-interval'
-    ID_ALERT = 'femtet-control-alert'
+    ID_ALERTS = 'femtet-control-alerts'
+    ID_CLEAR_ALERTS = 'femtet-control-clear-alerts'
 
     # arbitrary attribute name
     ATTR_FEMTET_DATA = 'data-femtet'  # attribute of html.Data should start with data-*.
-
-    # component element
-    DEFAULT_ALERT_MSG = '警告はありません。'
 
     # interface
     fem: Optional['pyfemtet.opt.interface.FemtetInterface'] = None
@@ -75,17 +73,19 @@ class FemtetControl:
             dbc.Col(transfer_parameter_button, style=DBC_COLUMN_STYLE)
         ])
 
-        alert = dbc.Alert(
-            children=cls.DEFAULT_ALERT_MSG,
-            id=cls.ID_ALERT,
-            color='success',
-            is_open=False,
-        )
+        alerts = dbc.CardBody(children=[], id=cls.ID_ALERTS)
+
+        control = dbc.Card([
+            dbc.CardHeader(
+                ['警告', dbc.Button('clear', id=cls.ID_CLEAR_ALERTS)],
+            ),
+            alerts,
+        ])
 
         component = dbc.Container(
             [
                 buttons,
-                alert,
+                control,
             ]
         )
 
@@ -98,8 +98,8 @@ class FemtetControl:
             # default は手動で開く
             femprj_path = None
             model_name = None
-            msg = cls.DEFAULT_ALERT_MSG
-            color = 'primary'
+            msg = None
+            color = None
 
             # metadata の有無を確認
             if 'metadata' not in home.monitor.local_df.columns:
@@ -157,21 +157,32 @@ class FemtetControl:
 
             return femprj_path, model_name, msg, color
 
+        def add_alert(current_alerts, msg, color):
+            new_alert = dbc.Alert(
+                msg,
+                id=f'alert-{len(current_alerts) + 1}',
+                dismissable=True,
+                color=color,
+            )
+            current_alerts.append(new_alert)
+            return current_alerts
+
         #
         # DESCRIPTION:
         #   Femtet を起動する際の挙動に従って warning を起こす callback
         @home.monitor.app.callback(
             [
-                Output(cls.ID_ALERT, 'children',),
-                Output(cls.ID_ALERT, 'color'),
-                Output(cls.ID_ALERT, 'is_open'),
+                Output(cls.ID_ALERTS, 'children', allow_duplicate=True),
             ],
             [
                 Input(cls.ID_LAUNCH_FEMTET_BUTTON, 'n_clicks'),
             ],
+            [
+                State(cls.ID_ALERTS, 'children'),
+            ],
             prevent_initial_call=True,
         )
-        def update_alert(_):
+        def update_alert(_, current_alerts):
             logger.debug('update-femtet-control-alert')
 
             # ボタン経由でないなら無視
@@ -180,16 +191,17 @@ class FemtetControl:
 
             # 戻り値
             ret = {
-                (alert_msg := 1): no_update,
-                (alert_color := 2): no_update,
-                (alert_is_open := 3): no_update,
+                (new_alerts_key := 1): no_update,
             }
+
+            # 引数の処理
+            current_alerts = current_alerts or []
 
             _, _, msg, color = launch_femtet_rule()
 
-            ret[alert_msg] = msg
-            ret[alert_color] = color
-            ret[alert_is_open] = msg != cls.DEFAULT_ALERT_MSG
+            if msg is not None:
+                new_alerts = add_alert(current_alerts, msg, color)
+                ret[new_alerts_key] = new_alerts
 
             return tuple(ret.values())
 
@@ -325,6 +337,7 @@ class FemtetControl:
         @home.monitor.app.callback(
             [
                 Output(home.ID_DUMMY, 'children', allow_duplicate=True),
+                Output(cls.ID_ALERTS, 'children', allow_duplicate=True),
             ],
             [
                 Input(cls.ID_TRANSFER_PARAMETER_BUTTON, 'n_clicks'),
@@ -332,23 +345,28 @@ class FemtetControl:
             [
                 State(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA),
                 State(home.ID_SELECTION_DATA, home.ATTR_SELECTION_DATA),
+                State(cls.ID_ALERTS, 'children'),
             ],
             prevent_initial_call=True,
         )
-        def transfer_parameter_to_femtet(n_clicks, femtet_data, selection_data):
+        def transfer_parameter_to_femtet(
+                n_clicks,
+                femtet_data,
+                selection_data,
+                current_alerts,
+        ):
             logger.debug('transfer_parameter_to_femtet')
 
             # 戻り値
-            ret = {(dummy := '1'): no_update}
+            ret = {
+                (dummy := 1): no_update,
+                (key_new_alerts := 2): no_update,
+            }
 
             # 引数の処理
             femtet_data = femtet_data or {}
             selection_data = selection_data or {}
-
-            if len(selection_data) == 0:
-                # TODO: UI への表示
-                logger.warning('何も選択されていません。')
-                raise PreventUpdate
+            alerts = current_alerts or []
 
             # Femtet が生きているか
             femtet_alive = False
@@ -359,10 +377,29 @@ class FemtetControl:
                 if (pid > 0) and (psutil.pid_exists(pid)):  # pid_exists(0) == True
                     femtet_alive = True
 
+            additional_alerts = []
+
             if not femtet_alive:
-                # TODO: UI への表示
-                logger.warning('接続された Femtet が見つかりません。')
-                raise PreventUpdate
+                msg = '接続された Femtet が見つかりません。'
+                color = 'danger'
+                logger.warning(msg)
+                additional_alerts = add_alert(additional_alerts, msg, color)
+
+            if 'points' not in selection_data.keys():
+                msg = '何も選択されていません。'
+                color = 'danger'
+                logger.warning(msg)
+                additional_alerts = add_alert(additional_alerts, msg, color)
+
+            logger.debug(additional_alerts)
+            logger.debug(len(additional_alerts) > 0)
+
+            # エラーがあれば処理せず終了
+            if len(additional_alerts) > 0:
+                alerts.extend(additional_alerts)
+                ret[key_new_alerts] = alerts
+                logger.debug(alerts)
+                return tuple(ret.values())
 
             # FIXME: とりあえず一個目を抽出
             points_dicts = selection_data['points']
@@ -382,7 +419,36 @@ class FemtetControl:
                 )
             )
             logger.debug(df)
-            cls.fem.update_model(df)
+            warnings = cls.fem.update_model(df, with_warning=True)
+            for msg in warnings:
+                color = 'warning'
+                logger.warning(msg)
+                alerts = add_alert(alerts, msg, color)
+                ret[key_new_alerts] = alerts
+
+            return tuple(ret.values())
+
+        #
+        # DESCRIPTION
+        #  Alerts を全部消す callback
+        @home.monitor.app.callback(
+            [
+                Output(cls.ID_ALERTS, 'children', allow_duplicate=True),
+            ],
+            [
+                Input(cls.ID_CLEAR_ALERTS, 'n_clicks'),
+            ],
+            prevent_initial_call=True
+        )
+        def clear_all_alerts(
+                clear_n_clicks
+        ):
+            ret = {
+                (alerts_key := 1): no_update
+            }
+
+            if callback_context.triggered_id is not None:
+                ret[alerts_key] = []
 
             return tuple(ret.values())
 
