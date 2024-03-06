@@ -23,10 +23,16 @@ logger = get_logger('viz')
 logger.setLevel(logging.DEBUG)
 
 
-DBC_COLUMN_STYLE = {
+DBC_COLUMN_STYLE_CENTER = {
     'display': 'flex',
     'justify-content': 'center',
     'align-items': 'center',
+}
+
+DBC_COLUMN_STYLE_RIGHT = {
+    'display': 'flex',
+    'justify-content': 'right',
+    'align-items': 'right',
 }
 
 
@@ -47,6 +53,8 @@ class FemtetControl:
 
     # component ID
     ID_LAUNCH_FEMTET_BUTTON = 'femtet-launch-button'
+    ID_CONNECT_FEMTET_BUTTON = 'femtet-connect-button'
+    ID_CONNECT_FEMTET_DROPDOWN = 'femtet-connect-dropdown'
     ID_FEMTET_STATE_DATA = 'femtet-state-data'
     ID_TRANSFER_PARAMETER_BUTTON = 'femtet-transfer-parameter-button'
     ID_INTERVAL = 'femtet-interval'
@@ -65,26 +73,48 @@ class FemtetControl:
         interval = dcc.Interval(id=cls.ID_INTERVAL, interval=1000)
         femtet_state = {'pid': 0}
         femtet_state_data = html.Data(id=cls.ID_FEMTET_STATE_DATA, **{cls.ATTR_FEMTET_DATA: femtet_state})
-        launch_femtet_button = dbc.Button('Launch Femtet!', id=cls.ID_LAUNCH_FEMTET_BUTTON, color='secondary')
-        transfer_parameter_button = dbc.Button('Transfer to Femtet!!', id=cls.ID_TRANSFER_PARAMETER_BUTTON, color='primary', disabled=True)
+
+        launch_new_femtet = dbc.DropdownMenuItem(
+            '新しい Femtet を起動して接続',
+            id=cls.ID_LAUNCH_FEMTET_BUTTON,
+        )
+
+        connect_existing_femtet = dbc.DropdownMenuItem(
+            '既存の Femtet と接続',
+            id=cls.ID_CONNECT_FEMTET_BUTTON,
+        )
+
+        launch_femtet_dropdown = dbc.DropdownMenu(
+            [
+                launch_new_femtet,
+                connect_existing_femtet
+            ],
+            label='Femtet と接続',
+            id=cls.ID_CONNECT_FEMTET_DROPDOWN,
+        )
+
+        transfer_parameter_button = dbc.Button('変数を Femtet に転送', id=cls.ID_TRANSFER_PARAMETER_BUTTON, color='primary', disabled=True)
+        clear_alert = dbc.Button('警告のクリア', id=cls.ID_CLEAR_ALERTS, color='secondary')
 
         buttons = dbc.Row([
-            dbc.Col(launch_femtet_button, style=DBC_COLUMN_STYLE),
-            dbc.Col(transfer_parameter_button, style=DBC_COLUMN_STYLE)
+            dbc.Col(
+                dbc.ButtonGroup([
+                    launch_femtet_dropdown,
+                    transfer_parameter_button,
+                ])
+            ),
+            dbc.Col(clear_alert, style=DBC_COLUMN_STYLE_RIGHT),
         ])
 
         alerts = dbc.CardBody(children=[], id=cls.ID_ALERTS)
 
         control = dbc.Card([
-            dbc.CardHeader(
-                ['警告', dbc.Button('clear', id=cls.ID_CLEAR_ALERTS)],
-            ),
+            dbc.CardHeader(buttons),
             alerts,
         ])
 
         component = dbc.Container(
             [
-                buttons,
                 control,
             ]
         )
@@ -176,13 +206,14 @@ class FemtetControl:
             ],
             [
                 Input(cls.ID_LAUNCH_FEMTET_BUTTON, 'n_clicks'),
+                Input(cls.ID_CONNECT_FEMTET_BUTTON, 'n_clicks'),
             ],
             [
                 State(cls.ID_ALERTS, 'children'),
             ],
             prevent_initial_call=True,
         )
-        def update_alert(_, current_alerts):
+        def update_alert(_1, _2, current_alerts):
             logger.debug('update-femtet-control-alert')
 
             # ボタン経由でないなら無視
@@ -211,19 +242,28 @@ class FemtetControl:
         @home.monitor.app.callback(
             [
                 Output(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA, allow_duplicate=True),
+                Output(cls.ID_ALERTS, 'children'),
             ],
             [
                 Input(cls.ID_LAUNCH_FEMTET_BUTTON, 'n_clicks'),
+                Input(cls.ID_CONNECT_FEMTET_BUTTON, 'n_clicks'),
+            ],
+            [
+                State(cls.ID_ALERTS, 'children'),
             ],
             prevent_initial_call=True,
         )
-        def launch_femtet(_):
+        def launch_femtet(launch_n_clicks, connect_n_clicks, current_alerts):
             logger.debug(f'launch_femtet')
 
             # 戻り値の設定
             ret = {
                 (femtet_state_data := 1): no_update,
+                (key_new_alerts := 2): no_update,
             }
+
+            # 引数の処理
+            current_alerts = current_alerts or []
 
             # ボタン経由でなければ無視
             if callback_context.triggered_id is None:
@@ -232,20 +272,35 @@ class FemtetControl:
             # Femtet を起動するための引数をルールに沿って取得
             femprj_path, model_name, _, _ = launch_femtet_rule()
 
+            # Femtet の起動方法を取得
+            method = None
+            if callback_context.triggered_id == cls.ID_LAUNCH_FEMTET_BUTTON:
+                method = 'new'
+            elif callback_context.triggered_id == cls.ID_CONNECT_FEMTET_BUTTON:
+                method = 'existing'
+
             # Femtet を起動
-            cls.fem = FemtetInterface(
-                femprj_path=femprj_path,
-                model_name=model_name,
-                connect_method='auto' if logger.level == logging.DEBUG else 'new',
-                allow_without_project=True
-            )
-            cls.fem.quit_when_destruct = False
-            ret[femtet_state_data] = {'pid': cls.fem.femtet_pid}
+            try:
+                cls.fem = FemtetInterface(
+                    femprj_path=femprj_path,
+                    model_name=model_name,
+                    connect_method=method,
+                    allow_without_project=True
+                )
+                cls.fem.quit_when_destruct = False
+                ret[femtet_state_data] = {'pid': cls.fem.femtet_pid}
+            except Exception as e:  # 広めに取る
+                msg = e.args[0]
+                color = 'danger'
+                new_alerts = add_alert(current_alerts, msg, color)
+                ret[femtet_state_data] = {'pid': 0}  # button の disable を再制御するため
+                ret[key_new_alerts] = new_alerts
 
             return tuple(ret.values())
 
         #
-        # DESCRIPTION: Femtet の情報をアップデートするなどの監視 callback
+        # DESCRIPTION
+        #  Femtet の情報をアップデートするなどの監視 callback
         @home.monitor.app.callback(
             [
                 Output(cls.ID_FEMTET_STATE_DATA, cls.ATTR_FEMTET_DATA),
@@ -278,10 +333,11 @@ class FemtetControl:
             return tuple(ret.values())
 
         #
-        # DESCRIPTION: Femtet の生死でボタンを disable にする callback
+        # DESCRIPTION
+        #  Femtet の生死でボタンを disable にする callback
         @home.monitor.app.callback(
             [
-                Output(cls.ID_LAUNCH_FEMTET_BUTTON, 'disabled', allow_duplicate=True),
+                Output(cls.ID_CONNECT_FEMTET_DROPDOWN, 'disabled', allow_duplicate=True),
                 Output(cls.ID_TRANSFER_PARAMETER_BUTTON, 'disabled', allow_duplicate=True),
             ],
             [
@@ -311,15 +367,16 @@ class FemtetControl:
         # DESCRIPTION: Femtet 起動ボタンを押したとき、起動完了を待たずにボタンを disable にする callback
         @home.monitor.app.callback(
             [
-                Output(cls.ID_LAUNCH_FEMTET_BUTTON, 'disabled', allow_duplicate=True),
+                Output(cls.ID_CONNECT_FEMTET_DROPDOWN, 'disabled', allow_duplicate=True),
                 Output(cls.ID_TRANSFER_PARAMETER_BUTTON, 'disabled', allow_duplicate=True),
             ],
             [
                 Input(cls.ID_LAUNCH_FEMTET_BUTTON, 'n_clicks'),
+                Input(cls.ID_CONNECT_FEMTET_BUTTON, 'n_clicks'),
             ],
             prevent_initial_call=True,
         )
-        def disable_femtet_button_immediately(n_clicks):
+        def disable_femtet_button_immediately(launch_n_clicks, connect_n_clicks):
             logger.debug(f'disable_button_on_state')
             ret = {
                 (disable_femtet_button := '1'): no_update,
@@ -394,7 +451,7 @@ class FemtetControl:
             logger.debug(additional_alerts)
             logger.debug(len(additional_alerts) > 0)
 
-            # エラーがあれば処理せず終了
+            # この時点で警告（エラー）があれば処理せず終了
             if len(additional_alerts) > 0:
                 alerts.extend(additional_alerts)
                 ret[key_new_alerts] = alerts
@@ -418,11 +475,18 @@ class FemtetControl:
                     value=values,
                 )
             )
-            logger.debug(df)
-            warnings = cls.fem.update_model(df, with_warning=True)
-            for msg in warnings:
-                color = 'warning'
-                logger.warning(msg)
+
+            try:
+                warnings = cls.fem.update_model(df, with_warning=True)
+                for msg in warnings:
+                    color = 'warning'
+                    logger.warning(msg)
+                    alerts = add_alert(alerts, msg, color)
+                    ret[key_new_alerts] = alerts
+
+            except Exception as e:  # 広めに取る
+                msg = e.args[0]
+                color = 'danger'
                 alerts = add_alert(alerts, msg, color)
                 ret[key_new_alerts] = alerts
 
@@ -671,8 +735,8 @@ class DynamicHomePage(HomePage):
         self.contents.children = [
             dbc.Row([dbc.Col(status_alert)]),
             dbc.Row([
-                dbc.Col(toggle_interval_button, style=DBC_COLUMN_STYLE),
-                dbc.Col(interrupt_button, style=DBC_COLUMN_STYLE)
+                dbc.Col(toggle_interval_button, style=DBC_COLUMN_STYLE_CENTER),
+                dbc.Col(interrupt_button, style=DBC_COLUMN_STYLE_CENTER)
             ]),
             dbc.Row([dbc.Col(note)]),
         ]

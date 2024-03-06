@@ -530,7 +530,7 @@ class FemtetInterface(FEMInterface):
                     args=(name, value),
                 )
             else:
-                msg = f'変数 {name} は .femprj に含まれていません。無視されます。'
+                msg = f'変数 {name} は 解析モデル {self.model_name} に含まれていません。無視されます。'
                 warnings.append(msg)
                 logger.warn(msg)
 
