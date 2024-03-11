@@ -458,37 +458,62 @@ class FemtetControl:
                 logger.debug(alerts)
                 return tuple(ret.values())
 
-            # FIXME: とりあえず一個目を抽出
             points_dicts = selection_data['points']
-            points_dict = points_dicts[0]
-            logger.debug(points_dict)
-            trial = points_dict['customdata'][0]  # TODO: customdata と index の const dict を作る
-            logger.debug(trial)
-            index = trial - 1
-            names = [name for name in home.monitor.local_df.columns if name.startswith('prm_')]
-            values = home.monitor.local_df.iloc[index][names]
+            for points_dict in points_dicts:
+                logger.debug(points_dict)
+                trial = points_dict['customdata'][0]  # TODO: customdata と index の const dict を作る
+                logger.debug(trial)
+                index = trial - 1
+                names = [name for name in home.monitor.local_df.columns if name.startswith('prm_')]
+                values = home.monitor.local_df.iloc[index][names]
 
-            # Femtet に値を転送
-            df = pd.DataFrame(
-                dict(
-                    name=[name[4:] for name in names],
-                    value=values,
+                df = pd.DataFrame(
+                    dict(
+                        name=[name[4:] for name in names],
+                        value=values,
+                    )
                 )
-            )
 
-            try:
-                warnings = cls.fem.update_model(df, with_warning=True)
-                for msg in warnings:
-                    color = 'warning'
-                    logger.warning(msg)
+                try:
+                    # Femtet に値を転送
+                    warnings = cls.fem.update_model(df, with_warning=True)  # exception の可能性
+                    for msg in warnings:
+                        color = 'warning'
+                        logger.warning(msg)
+                        alerts = add_alert(alerts, msg, color)
+                        ret[key_new_alerts] = alerts
+
+                    # femprj の保存先を設定
+                    wo_ext, ext = os.path.splitext(cls.fem.femprj_path)
+                    new_femprj_path = wo_ext + f'_trial{trial}' + ext
+
+                    # 上書きしない警告
+                    if os.path.exists(new_femprj_path):
+                        msg = f'{new_femprj_path} は存在するため、保存はスキップされます。'
+                        color = 'danger'
+                        alerts = add_alert(alerts, msg, color)
+
+                    else:
+                        # 存在する femprj に対して bForce=False で SaveProject すると
+                        # Exception が発生して except 節に飛んでしまう
+                        cls.fem.Femtet.SaveProject(
+                            new_femprj_path,  # ProjectFile
+                            False  # bForce
+                        )
+
+                except Exception as e:  # 広めに取る
+                    msg = ' '.join([arg for arg in e.args if type(arg) is str]) + 'このエラーが発生する主な理由は、Femtet でプロジェクトが開かれていないことです。'
+                    color = 'danger'
                     alerts = add_alert(alerts, msg, color)
                     ret[key_new_alerts] = alerts
 
-            except Exception as e:  # 広めに取る
-                msg = e.args[0]
-                color = 'danger'
-                alerts = add_alert(alerts, msg, color)
-                ret[key_new_alerts] = alerts
+            # 別のファイルを開いているならば元に戻す
+            if cls.fem.Femtet.Project != cls.fem.femprj_path:
+                cls.fem.Femtet.LoadProjectAndAnalysisModel(
+                    cls.fem.femprj_path,  # ProjectFile
+                    cls.fem.model_name,  # AnalysisModelName
+                    True  # bForce
+                )
 
             return tuple(ret.values())
 
@@ -946,7 +971,12 @@ class BaseMonitor(object):
         self.local_df = self.history.local_data
 
         # app の立上げ
-        self.app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+        self.app = Dash(
+            __name__,
+            external_stylesheets=[dbc.themes.BOOTSTRAP],
+            title='PyFemtet Monitor',
+            update_title=None,
+        )
 
     # def setup_some_page(self):
     #     href = "/link-url"
