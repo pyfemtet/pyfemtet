@@ -47,7 +47,8 @@ def update_hypervolume_plot(history, df):
         df,
         x="trial",
         y="hypervolume",
-        markers=True
+        markers=True,
+        custom_data=CUSTOM_DATA_DICT.keys(),
     )
 
     fig.update_layout(
