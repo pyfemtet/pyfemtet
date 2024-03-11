@@ -3,7 +3,6 @@ from typing import Optional, List
 
 import json
 import webbrowser
-import logging
 from time import sleep
 from threading import Thread
 
@@ -14,13 +13,19 @@ from dash import Dash, html, dcc, Output, Input, State, callback_context, no_upd
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
-from .visualization import update_default_figure, update_hypervolume_plot, CUSTOM_DATA_DICT
 import pyfemtet
-from pyfemtet.logger import get_logger
 from pyfemtet.opt.interface import FemtetInterface
+from pyfemtet.opt.visualization._graphs import (
+    update_default_figure,
+    update_hypervolume_plot,
+    CUSTOM_DATA_DICT
+)
 
+
+import logging
+from pyfemtet.logger import get_logger
 logger = get_logger('viz')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 DBC_COLUMN_STYLE_CENTER = {
@@ -683,7 +688,6 @@ class HomePage:
             ],
         )
         def on_select(selected_data):
-            print(type(selected_data))
             logger.debug(f'on_select: {selected_data}')
             return [selected_data]
 
@@ -820,7 +824,7 @@ class DynamicHomePage(HomePage):
             trigger = callback_context.triggered_id or 'implicit trigger'
 
             # cls
-            OptimizationStatus = pyfemtet.opt.base.OptimizationStatus
+            from pyfemtet.opt._core import OptimizationStatus
 
             # return 値の default 値(Python >= 3.7 で順番を保持する仕様を利用)
             ret = {
@@ -919,7 +923,7 @@ class WorkerPage:
         )
         def update_worker_state(_):
 
-            OptimizationStatus = pyfemtet.opt.base.OptimizationStatus
+            from pyfemtet.opt._core import OptimizationStatus
 
             ret = []
 
@@ -1076,9 +1080,9 @@ class DynamicMonitor(BaseMonitor):
     def __init__(
             self,
             history,
-            status: 'pyfemtet.opt.base.OptimizationStatus',
+            status,
             worker_addresses: List[str],
-            worker_status_list: List['pyfemtet.opt.base.OptimizationStatus'],
+            worker_status_list: List['pyfemtet.opt._core.OptimizationStatus'],
     ):
 
         self.status = status
@@ -1126,8 +1130,6 @@ class DynamicMonitor(BaseMonitor):
         host = host or 'localhost'
         port = port or self.DEFAULT_PORT
 
-        from .base import OptimizationStatus
-
         # dash app server を daemon thread で起動
         server_thread = Thread(
             target=self.run,
@@ -1138,6 +1140,7 @@ class DynamicMonitor(BaseMonitor):
 
         # dash app (=flask server) の callback で dask の actor にアクセスすると
         # おかしくなることがあるので、ここで必要な情報のみやり取りする
+        from pyfemtet.opt._core import OptimizationStatus
         while True:
             # running 以前に monitor が current status を interrupting にしていれば actor に反映
             if (
