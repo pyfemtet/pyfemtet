@@ -14,7 +14,7 @@ from dash import Dash, html, dcc, Output, Input, State, callback_context, no_upd
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
-from .visualization import update_default_figure, update_hypervolume_plot
+from .visualization import update_default_figure, update_hypervolume_plot, CUSTOM_DATA_DICT
 import pyfemtet
 from pyfemtet.logger import get_logger
 from pyfemtet.opt.interface import FemtetInterface
@@ -461,7 +461,7 @@ class FemtetControl:
             points_dicts = selection_data['points']
             for points_dict in points_dicts:
                 logger.debug(points_dict)
-                trial = points_dict['customdata'][0]  # TODO: customdata と index の const dict を作る
+                trial = points_dict['customdata'][CUSTOM_DATA_DICT['trial']]
                 logger.debug(trial)
                 index = trial - 1
                 names = [name for name in home.monitor.local_df.columns if name.startswith('prm_')]
@@ -475,25 +475,26 @@ class FemtetControl:
                 )
 
                 try:
-                    # Femtet に値を転送
-                    warnings = cls.fem.update_model(df, with_warning=True)  # exception の可能性
-                    for msg in warnings:
-                        color = 'warning'
-                        logger.warning(msg)
-                        alerts = add_alert(alerts, msg, color)
-                        ret[key_new_alerts] = alerts
-
                     # femprj の保存先を設定
                     wo_ext, ext = os.path.splitext(cls.fem.femprj_path)
                     new_femprj_path = wo_ext + f'_trial{trial}' + ext
 
-                    # 上書きしない警告
+                    # 保存できないエラー
                     if os.path.exists(new_femprj_path):
                         msg = f'{new_femprj_path} は存在するため、保存はスキップされます。'
                         color = 'danger'
                         alerts = add_alert(alerts, msg, color)
+                        ret[key_new_alerts] = alerts
 
                     else:
+                        # Femtet に値を転送
+                        warnings = cls.fem.update_model(df, with_warning=True)  # exception の可能性
+                        for msg in warnings:
+                            color = 'warning'
+                            logger.warning(msg)
+                            alerts = add_alert(alerts, msg, color)
+                            ret[key_new_alerts] = alerts
+
                         # 存在する femprj に対して bForce=False で SaveProject すると
                         # Exception が発生して except 節に飛んでしまう
                         cls.fem.Femtet.SaveProject(

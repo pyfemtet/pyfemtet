@@ -2,6 +2,9 @@ import plotly.graph_objs as go
 import plotly.express as px
 
 
+CUSTOM_DATA_DICT = {'trial': 0}  # 連番
+
+
 class ColorSet:
     feasible = {True: '#007bff', False: '#6c757d'}
 
@@ -85,8 +88,11 @@ def update_single_objective_plot(history, df):
             ls.feasible[True]: cs.feasible[True],
             ls.feasible[False]: cs.feasible[False],
         },
-        hover_data={ls.feasible['feasible']: False},
-        custom_data='trial',
+        hover_data={
+            ls.feasible['feasible']: False,
+            'trial': True,
+        },
+        custom_data=CUSTOM_DATA_DICT.keys(),
     )
 
     fig.add_trace(
@@ -128,8 +134,11 @@ def update_multi_objective_pairplot(history, df):
                 ls.feasible[True]: cs.feasible[True],
                 ls.feasible[False]: cs.feasible[False],
             },
-            hover_data={ls.feasible['feasible']: False},
-            custom_data='trial',
+            hover_data={
+                ls.feasible['feasible']: False,
+                'trial': True,
+            },
+            custom_data=CUSTOM_DATA_DICT.keys(),
         )
         fig.update_layout(
             dict(
@@ -147,8 +156,11 @@ def update_multi_objective_pairplot(history, df):
                 ls.feasible[True]: cs.feasible[True],
                 ls.feasible[False]: cs.feasible[False],
             },
-            hover_data={ls.feasible['feasible']: False},
-            custom_data='trial',
+            hover_data={
+                ls.feasible['feasible']: False,
+                'trial': True,
+            },
+            custom_data=CUSTOM_DATA_DICT.keys(),
         )
         fig.update_traces(
             patch={'diagonal.visible': False},
