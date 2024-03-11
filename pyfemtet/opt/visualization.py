@@ -6,27 +6,31 @@ CUSTOM_DATA_DICT = {'trial': 0}  # 連番
 
 
 class ColorSet:
-    feasible = {True: '#007bff', False: '#6c757d'}
+    non_domi = {True: '#007bff', False: '#6c757d'}  # color
+
+
+class SymbolSet:
+    feasible = {True: 'circle', False: 'circle-open'}  # style
 
 
 class LanguageSet:
 
-    feasible = {'feasible': 'feasible', True: True, False: False}
-    non_domi = {'non_domi': 'non_domi', True: True, False: False}
+    feasible = {'label': 'feasible', True: True, False: False}
+    non_domi = {'label': 'non_domi', True: True, False: False}
 
     def __init__(self, language: str = 'ja'):
         self.lang = language
         if self.lang.lower() == 'ja':
-            self.feasible = {'feasible': '拘束条件', True: '満足', False: '違反'}
-            self.non_domi = {'non_domi': '最適性', True: '非劣解', False: '劣解'}
+            self.feasible = {'label': '拘束条件', True: '満足', False: '違反'}
+            self.non_domi = {'label': '最適性', True: '非劣解', False: '劣解'}
 
     def localize(self, history, df):
         # 元のオブジェクトを変更しないようにコピー
         cdf = df.copy()
 
         # feasible, non_domi の localize
-        cdf[self.feasible['feasible']] = [self.feasible[v] for v in cdf['feasible']]
-        cdf[self.non_domi['non_domi']] = [self.non_domi[v] for v in cdf['non_domi']]
+        cdf[self.feasible['label']] = [self.feasible[v] for v in cdf['feasible']]
+        cdf[self.non_domi['label']] = [self.non_domi[v] for v in cdf['non_domi']]
 
         # obj_names から prefix を除去
         columns = cdf.columns
@@ -37,6 +41,7 @@ class LanguageSet:
 
 ls = LanguageSet('ja')
 cs = ColorSet()
+ss = SymbolSet()
 
 
 def update_hypervolume_plot(history, df):
@@ -84,13 +89,13 @@ def update_single_objective_plot(history, df):
         df,
         x='trial',
         y=obj_name,
-        color=ls.feasible['feasible'],
-        color_discrete_map={
-            ls.feasible[True]: cs.feasible[True],
-            ls.feasible[False]: cs.feasible[False],
+        symbol=ls.feasible['label'],
+        symbol_map={
+            ls.feasible[True]: ss.feasible[True],
+            ls.feasible[False]: ss.feasible[False],
         },
         hover_data={
-            ls.feasible['feasible']: False,
+            ls.feasible['label']: False,
             'trial': True,
         },
         custom_data=CUSTOM_DATA_DICT.keys(),
@@ -102,8 +107,8 @@ def update_single_objective_plot(history, df):
             y=df[obj_name],
             mode="lines",
             line=go.scatter.Line(
-                color=cs.feasible[False],
                 width=0.5,
+                color='#6c757d',
             ),
             showlegend=False
         )
@@ -125,21 +130,34 @@ def update_multi_objective_pairplot(history, df):
 
     obj_names = history.obj_names
 
+    common_kwargs = dict(
+        color=ls.non_domi['label'],
+        color_discrete_map={
+            ls.non_domi[True]: cs.non_domi[True],
+            ls.non_domi[False]: cs.non_domi[False],
+        },
+        symbol=ls.feasible['label'],
+        symbol_map={
+            ls.feasible[True]: ss.feasible[True],
+            ls.feasible[False]: ss.feasible[False],
+        },
+        hover_data={
+            ls.feasible['label']: False,
+            'trial': True,
+        },
+        custom_data=CUSTOM_DATA_DICT.keys(),
+        category_orders={
+            ls.feasible['label']: (ls.feasible[False], ls.feasible[True]),
+            ls.non_domi['label']: (ls.non_domi[False], ls.non_domi[True]),
+        },
+    )
+
     if len(obj_names) == 2:
         fig = px.scatter(
             data_frame=df,
             x=obj_names[0],
             y=obj_names[1],
-            color=ls.feasible['feasible'],
-            color_discrete_map={
-                ls.feasible[True]: cs.feasible[True],
-                ls.feasible[False]: cs.feasible[False],
-            },
-            hover_data={
-                ls.feasible['feasible']: False,
-                'trial': True,
-            },
-            custom_data=CUSTOM_DATA_DICT.keys(),
+            **common_kwargs,
         )
         fig.update_layout(
             dict(
@@ -152,16 +170,7 @@ def update_multi_objective_pairplot(history, df):
         fig = px.scatter_matrix(
             data_frame=df,
             dimensions=obj_names,
-            color=ls.feasible['feasible'],
-            color_discrete_map={
-                ls.feasible[True]: cs.feasible[True],
-                ls.feasible[False]: cs.feasible[False],
-            },
-            hover_data={
-                ls.feasible['feasible']: False,
-                'trial': True,
-            },
-            custom_data=CUSTOM_DATA_DICT.keys(),
+            **common_kwargs,
         )
         fig.update_traces(
             patch={'diagonal.visible': False},
@@ -181,7 +190,7 @@ def _debug():
     import os
 
     os.chdir(os.path.dirname(__file__))
-    csv_path = '_sample_history_include_infeasible_3obj.csv'
+    csv_path = '_sample_history_include_infeasible_1obj.csv'
 
     show_static_monitor(csv_path)
 

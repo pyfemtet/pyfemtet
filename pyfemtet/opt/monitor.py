@@ -458,6 +458,11 @@ class FemtetControl:
                 logger.debug(alerts)
                 return tuple(ret.values())
 
+            # もし手動で開いているなら現在開いているファイルとモデルを記憶させる
+            if cls.fem.femprj_path is None:
+                cls.fem.femprj_path = cls.fem.Femtet.Project
+                cls.fem.model_name = cls.fem.Femtet.AnalysisModelName
+
             points_dicts = selection_data['points']
             for points_dict in points_dicts:
                 logger.debug(points_dict)
@@ -510,11 +515,17 @@ class FemtetControl:
 
             # 別のファイルを開いているならば元に戻す
             if cls.fem.Femtet.Project != cls.fem.femprj_path:
-                cls.fem.Femtet.LoadProjectAndAnalysisModel(
-                    cls.fem.femprj_path,  # ProjectFile
-                    cls.fem.model_name,  # AnalysisModelName
-                    True  # bForce
-                )
+                try:
+                    cls.fem.Femtet.LoadProjectAndAnalysisModel(
+                        cls.fem.femprj_path,  # ProjectFile
+                        cls.fem.model_name,  # AnalysisModelName
+                        True  # bForce
+                    )
+                except Exception as e:
+                    msg = ' '.join([arg for arg in e.args if type(arg) is str]) + '元のファイルを開けません。'
+                    color = 'danger'
+                    alerts = add_alert(alerts, msg, color)
+                    ret[key_new_alerts] = alerts
 
             return tuple(ret.values())
 
