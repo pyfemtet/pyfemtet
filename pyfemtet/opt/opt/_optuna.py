@@ -11,7 +11,7 @@ from optuna.trial import TrialState
 from optuna.study import MaxTrialsCallback
 
 # pyfemtet relative
-from pyfemtet.opt.core import OptimizationStatus, generate_lhs
+from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
 from pyfemtet.opt.opt import AbstractOptimizer, logger
 from pyfemtet.core import MeshError, ModelError, SolveError
 

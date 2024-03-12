@@ -7,7 +7,7 @@ from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 from pyfemtet.opt.opt import OptunaOptimizer
 from pyfemtet.opt.opt import AbstractOptimizer
 
-from pyfemtet.opt._manager import FEMOpt
+from pyfemtet.opt._femopt import FEMOpt
 
 
 __all__ = [

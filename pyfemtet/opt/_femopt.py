@@ -12,26 +12,15 @@ from dask.distributed import LocalCluster, Client
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
 from pyfemtet.opt.opt import AbstractOptimizer, OptunaOptimizer
 from pyfemtet.opt.visualization._monitor import DynamicMonitor
-from pyfemtet.opt.core import (
-    # generate_lhs,
-    # symlog,
+from pyfemtet.opt._femopt_core import (
     check_bound,
-    _is_access_gogh,
-    # is_feasible,
-    # _Scapegoat,
-    # Function,
+    is_access_gogh,
     Objective,
     Constraint,
     History,
     OptimizationStatus,
+    logger,
 )
-
-# logger
-import logging
-from pyfemtet.logger import get_logger
-logger = get_logger('femopt')
-logger.setLevel(logging.INFO)
-
 
 
 class FEMOpt:
@@ -251,7 +240,7 @@ class FEMOpt:
 
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
         if strict:
-            if _is_access_gogh(fun):
+            if is_access_gogh(fun):
                 message = f'関数 {fun.__name__} に Gogh （Femtet 解析結果）へのアクセスがあります.'
                 message += 'デフォルトでは constraint は解析前に評価され, 条件を満たさない場合解析を行いません.'
                 message += '拘束に解析結果を含めたい場合は, strict=False を設定してください.'

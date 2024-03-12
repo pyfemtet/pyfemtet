@@ -21,24 +21,24 @@ from win32com.client import constants, Constants
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
-from pyfemtet.opt.visualization._monitor import DynamicMonitor
 
 # logger
 import logging
 from pyfemtet.logger import get_logger
-logger = get_logger('core')
+logger = get_logger('femopt')
 logger.setLevel(logging.INFO)
 
 
 __all__ = [
     'generate_lhs',
     'check_bound',
-    '_is_access_gogh',
+    'is_access_gogh',
     'is_feasible',
     'Objective',
     'Constraint',
     'History',
     'OptimizationStatus',
+    'logger',
 ]
 
 
@@ -132,7 +132,7 @@ def check_bound(lb, ub, name=None):
             raise ValueError(message)
 
 
-def _is_access_gogh(fun):
+def is_access_gogh(fun):
 
     # 関数fのソースコードを取得
     source = inspect.getsource(fun)
