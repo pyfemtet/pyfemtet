@@ -11,7 +11,7 @@ import pandas as pd
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FemtetInterface
-from pyfemtet.opt._core import OptimizationStatus
+from pyfemtet.opt.core import OptimizationStatus
 
 # logger
 import logging

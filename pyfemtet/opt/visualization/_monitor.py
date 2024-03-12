@@ -824,7 +824,7 @@ class DynamicHomePage(HomePage):
             trigger = callback_context.triggered_id or 'implicit trigger'
 
             # cls
-            from pyfemtet.opt._core import OptimizationStatus
+            from pyfemtet.opt.core import OptimizationStatus
 
             # return 値の default 値(Python >= 3.7 で順番を保持する仕様を利用)
             ret = {
@@ -923,7 +923,7 @@ class WorkerPage:
         )
         def update_worker_state(_):
 
-            from pyfemtet.opt._core import OptimizationStatus
+            from pyfemtet.opt.core import OptimizationStatus
 
             ret = []
 
@@ -1140,7 +1140,7 @@ class DynamicMonitor(BaseMonitor):
 
         # dash app (=flask server) の callback で dask の actor にアクセスすると
         # おかしくなることがあるので、ここで必要な情報のみやり取りする
-        from pyfemtet.opt._core import OptimizationStatus
+        from pyfemtet.opt.core import OptimizationStatus
         while True:
             # running 以前に monitor が current status を interrupting にしていれば actor に反映
             if (

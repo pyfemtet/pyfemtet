@@ -32,12 +32,9 @@ logger.setLevel(logging.INFO)
 
 __all__ = [
     'generate_lhs',
-    'symlog',
-    '_check_lb_ub',
+    'check_bound',
     '_is_access_gogh',
-    '_is_feasible',
-    '_Scapegoat',
-    'Function',
+    'is_feasible',
     'Objective',
     'Constraint',
     'History',
@@ -126,19 +123,7 @@ def symlog(x: float or np.ndarray):
     return ret
 
 
-def _check_direction(direction):
-    message = '評価関数の direction は "minimize", "maximize", 又は数値でなければなりません.'
-    message += f'与えられた値は {direction} です.'
-    if isinstance(direction, float) or isinstance(direction, int):
-        pass
-    elif isinstance(direction, str):
-        if (direction != 'minimize') and (direction != 'maximize'):
-            raise ValueError(message)
-    else:
-        raise ValueError(message)
-
-
-def _check_lb_ub(lb, ub, name=None):
+def check_bound(lb, ub, name=None):
     message = f'下限{lb} > 上限{ub} です.'
     if name is not None:
         message = f'{name}に対して' + message
@@ -175,7 +160,7 @@ def _is_access_gogh(fun):
             return False
 
 
-def _is_feasible(value, lb, ub):
+def is_feasible(value, lb, ub):
     if lb is None and ub is not None:
         return value < ub
     elif lb is not None and ub is None:
@@ -259,7 +244,7 @@ class Objective(Function):
 
 
         """
-        _check_direction(direction)
+        self._check_direction(direction)
         self.direction = direction
         super().__init__(fun, name, args, kwargs)
 
@@ -294,6 +279,17 @@ class Objective(Function):
 
         return float(ret)
 
+    def _check_direction(self, direction):
+        message = '評価関数の direction は "minimize", "maximize", 又は数値でなければなりません.'
+        message += f'与えられた値は {direction} です.'
+        if isinstance(direction, float) or isinstance(direction, int):
+            pass
+        elif isinstance(direction, str):
+            if (direction != 'minimize') and (direction != 'maximize'):
+                raise ValueError(message)
+        else:
+            raise ValueError(message)
+
 
 class Constraint(Function):
     """Class for registering user-defined constraint function."""
@@ -317,7 +313,7 @@ class Constraint(Function):
 
         """
 
-        _check_lb_ub(lb, ub)
+        check_bound(lb, ub)
         self.lb = lb
         self.ub = ub
         self.strict = strict
@@ -517,7 +513,7 @@ class History:
         feasible_list = []
         for (_, cns), cns_value in zip(constraints.items(), cns_values):  # cns, lb, ub
             row.extend([cns_value, cns.lb, cns.ub])
-            feasible_list.append(_is_feasible(cns_value, cns.lb, cns.ub))
+            feasible_list.append(is_feasible(cns_value, cns.lb, cns.ub))
 
         # feasibility
         row.append(all(feasible_list))
@@ -690,6 +686,3 @@ class OptimizationStatus:
 
     def get_text(self):
         return self._actor.status
-
-
-

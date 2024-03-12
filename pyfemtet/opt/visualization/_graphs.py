@@ -196,7 +196,7 @@ def _debug():
 
 
 def show_static_monitor(csv_path):
-    from pyfemtet.opt._core import History
+    from pyfemtet.opt.core import History
     from pyfemtet.opt.visualization._monitor import StaticMonitor
     _h = History(history_path=csv_path)
     _monitor = StaticMonitor(history=_h)

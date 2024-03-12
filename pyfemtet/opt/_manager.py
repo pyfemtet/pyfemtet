@@ -12,12 +12,12 @@ from dask.distributed import LocalCluster, Client
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
 from pyfemtet.opt.opt import AbstractOptimizer, OptunaOptimizer
 from pyfemtet.opt.visualization._monitor import DynamicMonitor
-from pyfemtet.opt._core import (
+from pyfemtet.opt.core import (
     # generate_lhs,
     # symlog,
-    _check_lb_ub,
+    check_bound,
     _is_access_gogh,
-    # _is_feasible,
+    # is_feasible,
     # _Scapegoat,
     # Function,
     Objective,
@@ -133,7 +133,7 @@ class FEMOpt:
 
         """
 
-        _check_lb_ub(lower_bound, upper_bound, name)
+        check_bound(lower_bound, upper_bound, name)
         value = self.fem.check_param_value(name)
         if initial_value is None:
             if value is not None:
