@@ -113,7 +113,7 @@ class OptunaOptimizer(AbstractOptimizer):
     def _constraint(self, trial):
         return trial.user_attrs['constraint'] if 'constraint' in trial.user_attrs.keys() else (1,)  # infeasible
 
-    def setup_before_parallel(self):
+    def _setup_before_parallel(self):
         """Create storage, study and set initial parameter."""
 
         # create storage
@@ -209,14 +209,14 @@ class OptunaOptimizer(AbstractOptimizer):
             name = f'additional initial ({name})'
         self.additional_initial_parameter.append([parameter, name])
 
-    def main(self, subprocess_idx=0):
+    def run(self):
         """Set random seed, sampler, study and run study.optimize()."""
 
         # (re)set random seed
         seed = self.seed
         if seed is not None:
-            if subprocess_idx is not None:
-                seed += subprocess_idx
+            if self.subprocess_idx is not None:
+                seed += self.subprocess_idx
 
         # restore sampler
         sampler = self.sampler_class(

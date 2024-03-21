@@ -70,14 +70,14 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         """
         pass
 
-    def setup_before_parallel(self, client):
+    def _setup_before_parallel(self, client):
         client.upload_file(
             self.kwargs['sldprt_path'],
             False
         )
-        super().setup_before_parallel(client)
+        super()._setup_before_parallel(client)
 
-    def setup_after_parallel(self):
+    def _setup_after_parallel(self):
         CoInitialize()
         self.initialize_sldworks_connection()
 

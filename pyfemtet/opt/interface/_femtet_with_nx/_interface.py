@@ -67,12 +67,12 @@ class FemtetWithNXInterface(FemtetInterface):
         """
         pass
 
-    def setup_before_parallel(self, client):
+    def _setup_before_parallel(self, client):
         client.upload_file(
             self.kwargs['prt_path'],
             False
         )
-        super().setup_before_parallel(client)
+        super()._setup_before_parallel(client)
 
     def update_model(self, parameters: 'pd.DataFrame') -> None:
         """Update .x_t"""

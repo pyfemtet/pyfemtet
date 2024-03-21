@@ -288,7 +288,7 @@ class FEMOpt:
             port=port
         )
 
-    def main(
+    def optimize(
             self,
             n_trials=None,
             n_parallel=1,
@@ -389,20 +389,20 @@ class FEMOpt:
         )
 
         # fem
-        self.fem.setup_before_parallel(self.client)
+        self.fem._setup_before_parallel(self.client)
 
         # opt
         self.opt.fem_class = type(self.fem)
         self.opt.fem_kwargs = self.fem.kwargs
         self.opt.entire_status = self.status
         self.opt.history = self.history
-        self.opt.setup_before_parallel()
+        self.opt._setup_before_parallel()
 
         # クラスターでの計算開始
         self.status.set(OptimizationStatus.LAUNCHING_FEM)
         start = time()
         calc_futures = self.client.map(
-            self.opt._main,
+            self.opt._run,
             subprocess_indices,
             [self.worker_status_list] * len(subprocess_indices),
             [wait_setup] * len(subprocess_indices),
@@ -417,10 +417,10 @@ class FEMOpt:
 
             # set_fem
             self.opt.fem = self.fem
-            self.opt.set_fem(skip_reconstruct=True)
+            self.opt._reconstruct_fem(skip_reconstruct=True)
 
             t_main = Thread(
-                target=self.opt._main,
+                target=self.opt._run,
                 args=(
                     subprocess_idx,
                     self.worker_status_list,

@@ -132,5 +132,5 @@ if __name__ == '__main__':
     femopt.add_objective(s.get_resonance_frequency, '第一共振周波数（GHz）', direction=3.0)
 
     femopt.set_random_seed(42)
-    femopt.main(n_trials=20)
+    femopt.optimize(n_trials=20)
     femopt.terminate_all()

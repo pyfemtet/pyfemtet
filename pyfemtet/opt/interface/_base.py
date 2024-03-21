@@ -46,7 +46,7 @@ class FEMInterface(ABC):
         """Updates only FEM variables (if implemented in concrete class)."""
         pass
 
-    def setup_before_parallel(self, client) -> None:
+    def _setup_before_parallel(self, client) -> None:
         """Preprocessing before launching a dask worker (if implemented in concrete class).
 
         Args:
@@ -59,7 +59,7 @@ class FEMInterface(ABC):
         """
         pass
 
-    def setup_after_parallel(self):
+    def _setup_after_parallel(self):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 

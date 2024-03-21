@@ -99,7 +99,7 @@ class FemtetInterface(FEMInterface):
 
         # femprj_path と model に基づいて Femtet を開き、
         # 開かれたモデルに応じて femprj_path と model を更新する
-        self.connect_and_open_femtet()
+        self._connect_and_open_femtet()
 
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
         self.quit_when_destruct = self.connected_method == 'new'
@@ -359,7 +359,7 @@ class FemtetInterface(FEMInterface):
         if not result:
             self.Femtet.ShowLastError()
 
-    def connect_and_open_femtet(self):
+    def _connect_and_open_femtet(self):
         """Connects to a Femtet process and open the femprj.
 
         This function is for establishing a connection with Femtet and opening the specified femprj file.
@@ -418,7 +418,7 @@ class FemtetInterface(FEMInterface):
     def check_param_value(self, param_name):
         """See :func:`FEMInterface.check_param_value`"""
         if self._version() >= _version(2023, 1, 1):
-            variable_names = self.Femtet.GetVariableNames()
+            variable_names = self.Femtet.GetVariableNames_py()
             if variable_names is not None:
                 if param_name in variable_names:
                     return self.Femtet.GetVariableValue(param_name)
@@ -551,7 +551,7 @@ class FemtetInterface(FEMInterface):
         """Force to terminate connected Femtet."""
         util.close_femtet(self.Femtet.hWnd, timeout, force)
 
-    def setup_before_parallel(self, client):
+    def _setup_before_parallel(self, client):
         client.upload_file(
             self.kwargs['femprj_path'],
             False

@@ -56,6 +56,7 @@ class AbstractOptimizer(ABC):
         self.timeout = None
         self.n_trials = None
         self.is_cluster = False
+        self.subprocess_idx = None
 
     def f(self, x):
         """Get x, update fem analysis, return objectives (and constraints)."""
@@ -102,9 +103,9 @@ class AbstractOptimizer(ABC):
         logger.debug('history.record end')
         return np.array(y), np.array(_y), np.array(c)
 
-    def set_fem(self, skip_reconstruct=False):
+    def _reconstruct_fem(self, skip_reconstruct=False):
         """Reconstruct FEMInterface in a subprocess."""
-        # restore fem
+        # reconstruct fem
         if not skip_reconstruct:
             self.fem = self.fem_class(**self.fem_kwargs)
 
@@ -143,17 +144,17 @@ class AbstractOptimizer(ABC):
         """"""
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             self.worker_status.set(OptimizationStatus.INTERRUPTING)
-            self.finalize()
+            self._finalize()
             return True
         else:
             return False
 
-    def finalize(self):
+    def _finalize(self):
         """Destruct fem and set worker status."""
         del self.fem
         self.worker_status.set(OptimizationStatus.TERMINATED)
 
-    def _main(
+    def _run(
             self,
             subprocess_idx,
             worker_status_list,
@@ -162,6 +163,7 @@ class AbstractOptimizer(ABC):
     ) -> None:
 
         # 自分の worker_status の取得
+        self.subprocess_idx = subprocess_idx
         self.worker_status = worker_status_list[subprocess_idx]
         self.worker_status.set(OptimizationStatus.LAUNCHING_FEM)
 
@@ -170,8 +172,8 @@ class AbstractOptimizer(ABC):
 
         # set_fem をはじめ、終了したらそれを示す
         if not skip_set_fem:  # なくても動く？？
-            self.set_fem()
-        self.fem.setup_after_parallel()
+            self._reconstruct_fem()
+        self.fem._setup_after_parallel()
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
 
         # wait_setup or not
@@ -194,18 +196,18 @@ class AbstractOptimizer(ABC):
 
         # run and finalize
         try:
-            self.main(subprocess_idx)
+            self.run()
         finally:
-            self.finalize()
+            self._finalize()
 
         return None
 
     @abstractmethod
-    def main(self, subprocess_idx: int = 0) -> None:
+    def run(self) -> None:
         """Start calcuration using optimization library."""
         pass
 
     @abstractmethod
-    def setup_before_parallel(self, *args, **kwargs):
+    def _setup_before_parallel(self, *args, **kwargs):
         """Setup before parallel processes are launched."""
         pass
