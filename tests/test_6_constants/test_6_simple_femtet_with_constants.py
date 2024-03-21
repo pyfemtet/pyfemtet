@@ -75,7 +75,7 @@ def test_simple_femtet_with_constants():
     femopt.add_objective(volume, '体積(mm3)', args=femopt.opt)
     femopt.add_objective(mises, 'mises 応力()')
     femopt.add_constraint(bottom_surface, '底面積<=30', upper_bound=30, args=femopt.opt)
-    femopt.run(n_trials=10, n_parallel=3, wait_setup=True)
+    femopt.optimize(n_trials=10, n_parallel=3, wait_setup=True)
     femopt.terminate_all()
 
 

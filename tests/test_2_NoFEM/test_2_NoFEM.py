@@ -145,7 +145,7 @@ if __name__ == '__main__':
     # random_max_sleep_sec = 1
     # simple()
 
-    # test_2_2_restart()
+    test_2_2_restart()
 
-    record = False
-    test_2_NoFEM_random_seed()
+    # record = False
+    # test_2_NoFEM_random_seed()
