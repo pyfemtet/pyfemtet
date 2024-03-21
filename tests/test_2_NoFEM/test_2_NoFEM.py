@@ -65,7 +65,7 @@ def test_2_NoFEM_random_seed():
     femopt.add_objective(objective_z, 'z(mm)', args=opt, direction=-1)
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=opt)  # 上書き
     femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=opt, strict=False)
-    femopt.optimize(n_trials=30, n_parallel=2)
+    femopt.optimize(n_trials=30)
 
     if record:
         femopt.history.actor_data.to_csv(
