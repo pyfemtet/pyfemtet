@@ -1,6 +1,6 @@
 import os
 from win32com.client import constants
-from pyfemtet.opt.base import FEMOpt
+from pyfemtet.opt import FEMOpt
 from pyfemtet.opt.interface import FemtetInterface
 
 here, me = os.path.split(__file__)
