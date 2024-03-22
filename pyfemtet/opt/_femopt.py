@@ -11,7 +11,7 @@ from dask.distributed import LocalCluster, Client
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
 from pyfemtet.opt.opt import AbstractOptimizer, OptunaOptimizer
-from pyfemtet.opt.visualization._monitor import DynamicMonitor
+from pyfemtet.opt.visualization._monitor import ProcessMonitorApp
 from pyfemtet.opt._femopt_core import (
     check_bound,
     is_access_gogh,
@@ -534,6 +534,6 @@ def start_monitor_server(
         host=None,
         port=None,
 ):
-    monitor = DynamicMonitor(history, status, worker_addresses, worker_status_list)
+    monitor = ProcessMonitorApp(history, status, worker_addresses, worker_status_list)
     monitor.start_server(host, port)
     return 'Exit monitor server process gracefully'

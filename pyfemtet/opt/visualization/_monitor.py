@@ -18,7 +18,7 @@ from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt.visualization._graphs import (
     update_default_figure,
     update_hypervolume_plot,
-    CUSTOM_DATA_DICT
+    _CUSTOM_DATA_DICT
 )
 
 
@@ -127,7 +127,7 @@ class FemtetControl:
         return [interval, femtet_state_data, component]
 
     @classmethod
-    def add_callback(cls, home: 'HomePage'):
+    def add_callback(cls, home: 'HomePageBase'):
 
         def launch_femtet_rule():
             # default は手動で開く
@@ -471,7 +471,7 @@ class FemtetControl:
             points_dicts = selection_data['points']
             for points_dict in points_dicts:
                 logger.debug(points_dict)
-                trial = points_dict['customdata'][CUSTOM_DATA_DICT['trial']]
+                trial = points_dict['customdata'][_CUSTOM_DATA_DICT['trial']]
                 logger.debug(trial)
                 index = trial - 1
                 names = [name for name in home.monitor.local_df.columns if name.startswith('prm_')]
@@ -559,7 +559,7 @@ class FemtetControl:
             return tuple(ret.values())
 
 
-class HomePage:
+class HomePageBase:
 
     layout = None
 
@@ -713,7 +713,7 @@ class HomePage:
 
 
 
-class StaticHomePage(HomePage):
+class ResultViewerAppHomePage(HomePageBase):
 
     def setup_contents(self):
         # Femtet control
@@ -735,7 +735,7 @@ class StaticHomePage(HomePage):
         ]
 
 
-class DynamicHomePage(HomePage):
+class ProcessMonitorAppHomePage(HomePageBase):
 
     # component id for Monitor
     ID_ENTIRE_PROCESS_STATUS_ALERT = 'home-entire-process-status-alert'
@@ -769,8 +769,6 @@ class DynamicHomePage(HomePage):
             '- ブラウザを使用しますが、ネットワーク通信は行いません。\n'
             '- この画面を閉じても最適化は中断されません。\n'
             f'- この画面を再び開くにはブラウザのアドレスバーに「localhost:{self.monitor.DEFAULT_PORT}」と入力して下さい。\n'
-            '  - ネットワーク経由で他の PC からこの画面を開く方法は '
-            'API reference (pyfemtet.opt.monitor.StaticMonitor.run) を参照してください。\n'
         )
 
         self.contents.children = [
@@ -881,7 +879,7 @@ class DynamicHomePage(HomePage):
             return tuple(ret.values())
 
 
-class WorkerPage:
+class ProcessMonitorAppWorkerPage:
 
     # layout
     layout = dbc.Container()
@@ -947,7 +945,7 @@ class WorkerPage:
             return tuple(ret)
 
 
-class BaseMonitor(object):
+class AppBase(object):
 
     # process_monitor or not
     is_processing = False
@@ -1051,7 +1049,7 @@ class BaseMonitor(object):
         self.app.run(debug=False, host=host, port=port)
 
 
-class StaticMonitor(BaseMonitor):
+class ResultViewerApp(AppBase):
 
     def __init__(
             self,
@@ -1067,13 +1065,13 @@ class StaticMonitor(BaseMonitor):
 
     def setup_home(self):
         href = "/"
-        page = StaticHomePage(self)
+        page = ResultViewerAppHomePage(self)
         self.pages[href] = page.layout
         order = 1
         self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
 
 
-class DynamicMonitor(BaseMonitor):
+class ProcessMonitorApp(AppBase):
 
     DEFAULT_PORT = 8080
 
@@ -1110,14 +1108,14 @@ class DynamicMonitor(BaseMonitor):
 
     def setup_home(self):
         href = "/"
-        page = DynamicHomePage(self)
+        page = ProcessMonitorAppHomePage(self)
         self.pages[href] = page.layout
         order = 1
         self.nav_links[order] = dbc.NavLink("Home", href=href, active="exact")
 
     def setup_worker_monitor(self):
         href = "/worker-monitor/"
-        page = WorkerPage(self)
+        page = ProcessMonitorAppWorkerPage(self)
         self.pages[href] = page.layout
         order = 2
         self.nav_links[order] = dbc.NavLink("Workers", href=href, active="exact")

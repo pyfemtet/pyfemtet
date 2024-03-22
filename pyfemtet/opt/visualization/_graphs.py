@@ -2,18 +2,18 @@ import plotly.graph_objs as go
 import plotly.express as px
 
 
-CUSTOM_DATA_DICT = {'trial': 0}  # 連番
+_CUSTOM_DATA_DICT = {'trial': 0}  # 連番
 
 
-class ColorSet:
+class _ColorSet:
     non_domi = {True: '#007bff', False: '#6c757d'}  # color
 
 
-class SymbolSet:
+class _SymbolSet:
     feasible = {True: 'circle', False: 'circle-open'}  # style
 
 
-class LanguageSet:
+class _LanguageSet:
 
     feasible = {'label': 'feasible', True: True, False: False}
     non_domi = {'label': 'non_domi', True: True, False: False}
@@ -39,13 +39,13 @@ class LanguageSet:
         return cdf
 
 
-ls = LanguageSet('ja')
-cs = ColorSet()
-ss = SymbolSet()
+_ls = _LanguageSet('ja')
+_cs = _ColorSet()
+_ss = _SymbolSet()
 
 
 def update_hypervolume_plot(history, df):
-    df = ls.localize(history, df)
+    df = _ls.localize(history, df)
 
     # create figure
     fig = px.line(
@@ -53,7 +53,7 @@ def update_hypervolume_plot(history, df):
         x="trial",
         y="hypervolume",
         markers=True,
-        custom_data=CUSTOM_DATA_DICT.keys(),
+        custom_data=_CUSTOM_DATA_DICT.keys(),
     )
 
     fig.update_layout(
@@ -82,23 +82,23 @@ def update_default_figure(history, df):
 
 def update_single_objective_plot(history, df):
 
-    df = ls.localize(history, df)
+    df = _ls.localize(history, df)
     obj_name = history.obj_names[0]
 
     fig = px.scatter(
         df,
         x='trial',
         y=obj_name,
-        symbol=ls.feasible['label'],
+        symbol=_ls.feasible['label'],
         symbol_map={
-            ls.feasible[True]: ss.feasible[True],
-            ls.feasible[False]: ss.feasible[False],
+            _ls.feasible[True]: _ss.feasible[True],
+            _ls.feasible[False]: _ss.feasible[False],
         },
         hover_data={
-            ls.feasible['label']: False,
+            _ls.feasible['label']: False,
             'trial': True,
         },
-        custom_data=CUSTOM_DATA_DICT.keys(),
+        custom_data=_CUSTOM_DATA_DICT.keys(),
     )
 
     fig.add_trace(
@@ -126,29 +126,29 @@ def update_single_objective_plot(history, df):
 
 
 def update_multi_objective_pairplot(history, df):
-    df = ls.localize(history, df)
+    df = _ls.localize(history, df)
 
     obj_names = history.obj_names
 
     common_kwargs = dict(
-        color=ls.non_domi['label'],
+        color=_ls.non_domi['label'],
         color_discrete_map={
-            ls.non_domi[True]: cs.non_domi[True],
-            ls.non_domi[False]: cs.non_domi[False],
+            _ls.non_domi[True]: _cs.non_domi[True],
+            _ls.non_domi[False]: _cs.non_domi[False],
         },
-        symbol=ls.feasible['label'],
+        symbol=_ls.feasible['label'],
         symbol_map={
-            ls.feasible[True]: ss.feasible[True],
-            ls.feasible[False]: ss.feasible[False],
+            _ls.feasible[True]: _ss.feasible[True],
+            _ls.feasible[False]: _ss.feasible[False],
         },
         hover_data={
-            ls.feasible['label']: False,
+            _ls.feasible['label']: False,
             'trial': True,
         },
-        custom_data=CUSTOM_DATA_DICT.keys(),
+        custom_data=_CUSTOM_DATA_DICT.keys(),
         category_orders={
-            ls.feasible['label']: (ls.feasible[False], ls.feasible[True]),
-            ls.non_domi['label']: (ls.non_domi[False], ls.non_domi[True]),
+            _ls.feasible['label']: (_ls.feasible[False], _ls.feasible[True]),
+            _ls.non_domi['label']: (_ls.non_domi[False], _ls.non_domi[True]),
         },
     )
 
@@ -197,9 +197,9 @@ def _debug():
 
 def show_static_monitor(csv_path):
     from pyfemtet.opt._femopt_core import History
-    from pyfemtet.opt.visualization._monitor import StaticMonitor
+    from pyfemtet.opt.visualization._monitor import ResultViewerApp
     _h = History(history_path=csv_path)
-    _monitor = StaticMonitor(history=_h)
+    _monitor = ResultViewerApp(history=_h)
     _monitor.run()
 
 
