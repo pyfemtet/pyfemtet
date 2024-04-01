@@ -125,7 +125,7 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
     この手順には管理者権限が必要です。
 
 
-3. **Python（3.9 以上）のインストール**
+3. **Python（3.9.3 以上）のインストール**
 
     リンク先のダウンロードリンクから
     インストーラをダウンロードし、実行してください。➡ |Python|
@@ -135,6 +135,18 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
         最新版でないバージョンの Python をダウンロードするには
         下記のスクリーンショットを参考に
         ご自身の環境に応じたインストーラをダウンロードしてください。
+
+    .. tip::
+
+        pyfemtet.opt は現在主に Python 3.11 環境で開発されており、
+        インストールや実施例の実行に不具合がある場合は Python 3.11 環境の構築をご検討ください。
+
+        特に、Python 3.12 以上の環境では依存ライブラリ botorch のインストールを行わない設定になっています。
+        botorch の機能が必要な場合は、お手数ですが下記コマンドで botorch のインストールを
+        手動で試みていただきますようお願いします。
+
+        ``py -m pip install botorch``
+
 
     .. figure:: images/python_download.png
 
@@ -152,9 +164,9 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
 4. **pyfemtet のインストール**
 
     コマンドプロンプトで下記コマンドを実行してください。
-    ライブラリのダウンロード及びインストールが始まります。
+    ライブラリのダウンロード及びインストールが始まります。::
 
-        py -m pip install pyfemtet --no-warn-script-location 
+        py -m pip install pyfemtet --no-warn-script-location
 
     インストールが終了すると、"Successfully installed " の表示の後、コマンドプロンプトの制御が戻ります。
 

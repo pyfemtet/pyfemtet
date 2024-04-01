@@ -408,6 +408,14 @@ class History:
             # actor_data の初期化
             self.actor_data = self.local_data
 
+            # 一時ファイルに書き込みを試み、UnicodeEncodeError が出ないかチェック
+            import tempfile
+            try:
+                with tempfile.TemporaryFile() as f:
+                    self.save(_f=f)
+            except UnicodeEncodeError:
+                raise ValueError('変数名、目的名または拘束名にエンコードできない文字が含まれています。環境依存文字は使用しないでください。')
+
         # visualization only の場合
         else:
             # csv が存在しなければおかしい
@@ -626,9 +634,14 @@ class History:
                 except IndexError:
                     df.loc[i, 'hypervolume'] = 0
 
-    def save(self):
-        # save df with columns with prefix
-        self.actor_data.to_csv(self.path, index=None, encoding='shift-jis')
+    def save(self, _f=None):
+        if _f is None:
+            # save df with columns with prefix
+            with open(self.path, 'w') as f:
+                f.write('sample\n\n')  # TODO
+                self.actor_data.to_csv(f, index=None, encoding='cp932', lineterminator='\n')
+        else:
+            self.actor_data.to_csv(_f, index=None, encoding='cp932', lineterminator='\n')
 
 
 class _OptimizationStatusActor:

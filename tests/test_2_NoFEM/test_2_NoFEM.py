@@ -130,7 +130,7 @@ def simple():
     femopt.add_parameter('theta', -np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
     femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
     femopt.add_objective(objective_x, 'x', args=femopt.opt)
-    femopt.add_objective(objective_y, 'y', args=femopt.opt)
+    femopt.add_objective(objective_y, 'y座標', args=femopt.opt)
     # femopt.add_objective(objective_z, 'z', args=femopt.opt)
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
     femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
@@ -143,9 +143,9 @@ def simple():
 if __name__ == '__main__':
     # min_sleep_sec = 3
     # random_max_sleep_sec = 1
-    # simple()
+    simple()
 
-    test_2_2_restart()
+    # test_2_2_restart()
 
     # record = False
     # test_2_NoFEM_random_seed()
