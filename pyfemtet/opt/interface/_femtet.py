@@ -32,7 +32,7 @@ from pyfemtet.opt.interface import FEMInterface, logger
 
 
 class FemtetInterface(FEMInterface):
-    """Concrete class for the interface with Femtet software.
+    """Concrete class for the interface with Femtet.
 
         Args:
             femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
@@ -44,10 +44,8 @@ class FemtetInterface(FEMInterface):
             Even if you specify ``strictly_pid_specify=True`` on the constructor,
             **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**
             because of its large overhead.
-            So you should close all Femtet processes before running FEMOpt.main()
+            So you should close all Femtet processes before running FEMOpt.optimize()
             if ``n_parallel`` >= 2.
-
-
 
         Tip:
             If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
@@ -335,7 +333,7 @@ class FemtetInterface(FEMInterface):
                 )
 
     def femtet_is_alive(self) -> bool:
-        """Returns connected femtet process is exsiting or not."""
+        """Returns connected femtet process is existing or not."""
         return _get_pid(self.Femtet.hWnd) > 0
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
@@ -416,7 +414,13 @@ class FemtetInterface(FEMInterface):
         self.model_name = self.Femtet.AnalysisModelName
 
     def check_param_value(self, param_name):
-        """See :func:`FEMInterface.check_param_value`"""
+        """Check param_name is set in femprj file or not.
+
+        Note:
+            This function works with Femtet version 2023.1.1 and above.
+            Otherwise, no check is performed.
+
+        """
         if self._version() >= _version(2023, 1, 1):
             variable_names = self.Femtet.GetVariableNames_py()
             if variable_names is not None:
@@ -430,7 +434,7 @@ class FemtetInterface(FEMInterface):
             return None
 
     def update_parameter(self, parameters: 'pd.DataFrame', with_warning=False):
-        """See :func:`FEMInterface.update_parameter`"""
+        """Update parameter of femprj."""
         self.parameters = parameters.copy()
 
         # 変数更新のための処理
@@ -512,7 +516,7 @@ class FemtetInterface(FEMInterface):
             return warnings or []
 
     def solve(self) -> None:
-        """Execute FEM analysis (with updated model)."""
+        """Execute FEM analysis."""
         # # メッシュを切る
         self._call_femtet_api(
             self.Femtet.Gaudi.Mesh,

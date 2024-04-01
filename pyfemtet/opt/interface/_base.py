@@ -15,20 +15,21 @@ here, me = os.path.split(__file__)
 
 
 class FEMInterface(ABC):
-    """Abstract base class for the interface with FEM software."""
+    """Abstract base class for the interface with FEM software.
+
+    Stores information necessary to restore FEMInterface instance in a subprocess.
+
+    The concrete class should call super().__init__() with the desired arguments when restoring.
+
+    Args:
+        **kwargs: keyword arguments for FEMInterface (re)constructor.
+
+    """
 
     def __init__(
             self,
             **kwargs
     ):
-        """Stores information necessary to restore FEMInterface instance in a subprocess.
-
-        The concrete class should call super().__init__() with the desired arguments when restoring.
-
-        Args:
-            **kwargs: keyword arguments for FEMInterface (re)constructor.
-
-        """
         # restore のための情報保管
         self.kwargs = kwargs
 
@@ -39,8 +40,7 @@ class FEMInterface(ABC):
 
     def check_param_value(self, param_name) -> float or None:
         """Checks the value of a parameter in the FEM model (if implemented in concrete class)."""
-        if False:
-            raise RuntimeError(f"{param_name} doesn't exist on FEM model.")
+        pass
 
     def update_parameter(self, parameters: pd.DataFrame, with_warning=False) -> Optional[List[str]]:
         """Updates only FEM variables (if implemented in concrete class)."""

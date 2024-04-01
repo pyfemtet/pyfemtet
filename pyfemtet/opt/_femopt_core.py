@@ -31,8 +31,8 @@ logger.setLevel(logging.INFO)
 
 __all__ = [
     'generate_lhs',
-    'check_bound',
-    'is_access_gogh',
+    '_check_bound',
+    '_is_access_gogh',
     'is_feasible',
     'Objective',
     'Constraint',
@@ -123,7 +123,7 @@ def symlog(x: float or np.ndarray):
     return ret
 
 
-def check_bound(lb, ub, name=None):
+def _check_bound(lb, ub, name=None):
     message = f'下限{lb} > 上限{ub} です.'
     if name is not None:
         message = f'{name}に対して' + message
@@ -132,7 +132,7 @@ def check_bound(lb, ub, name=None):
             raise ValueError(message)
 
 
-def is_access_gogh(fun):
+def _is_access_gogh(fun):
 
     # 関数fのソースコードを取得
     source = inspect.getsource(fun)
@@ -161,6 +161,17 @@ def is_access_gogh(fun):
 
 
 def is_feasible(value, lb, ub):
+    """
+    Check if a value is within the specified lower bound and upper bound.
+
+    Args:
+        value (numeric): The value to check.
+        lb (optional, numeric): The lower bound. If not specified, there is no lower bound.
+        ub (optional, numeric): The upper bound. If not specified, there is no upper bound.
+
+    Returns:
+        bool: True if the value satisfies the bounds; False otherwise.
+    """
     if lb is None and ub is not None:
         return value < ub
     elif lb is not None and ub is None:
@@ -313,7 +324,7 @@ class Constraint(Function):
 
         """
 
-        check_bound(lb, ub)
+        _check_bound(lb, ub)
         self.lb = lb
         self.ub = ub
         self.strict = strict
@@ -337,12 +348,18 @@ class History:
     """Class for managing the history of optimization results.
 
     Attributes:
-        path (str): The path to the history csv file.
-        is_restart (bool): The main session is restarted or not.
-        prm_names (list): The names of the parameters in the study.
-        obj_names (list): The names of the objectives in the study.
-        cns_names (list): The names of the constraints in the study.
-        actor_data (pd.DataFrame): The history data of optimization.
+        PRM_PREFIX (str): Prefix for parameters in the columns of csv.
+        OBJ_PREFIX (str): Prefix for objectives in the columns of csv.
+        OBJ_DIRECTION_PREFIX (str): Prefix for directions of each objective in the columns of csv.
+        CNS_PREFIX (str): Prefix for constraints in the columns of csv.
+        CNS_UB_PREFIX (str): Prefix for lower bounds of each constraint in the columns of csv.
+        CNS_LB_PREFIX (str): Prefix for upper bounds of each constraint in the columns of csv.
+        prm_names (str): User difined names of parameters.
+        obj_names (str): User difined names of objectives.
+        cns_names (str): User difined names of constraints.
+        local_data (pd.DataFrame): Local copy (on memory) of optimization history. 
+        is_restart (bool): If the optimization process is a continuation of another process or not.
+        is_processing (bool): The optimization is running or not.
 
     """
 
@@ -369,13 +386,19 @@ class History:
             cns_names=None,
             client=None
     ):
-        """Initializes a History instance.
+        """Initialize the class.
 
         Args:
-            history_path (str): The path to the history file.
+            history_path (str): The path to the csv file.
+            prm_names (List[str], optional): The names of parameters. Defaults to None.
+            obj_names (List[str], optional): The names of objectives. Defaults to None.
+            cns_names (List[str], optional): The names of constraints. Defaults to None.
+            client (dask.distributed.Client): Dask client.
+
+        Raises:
+            FileNotFoundError: If the csv file is not found.
 
         """
-
         # 引数の処理
         self.path = history_path  # .csv
         self.prm_names = prm_names
@@ -426,6 +449,8 @@ class History:
             self.load()
 
     def load(self):
+        """Load existing result csv."""
+
         # df を読み込む
         self.local_data = pd.read_csv(self.path, encoding='shift-jis')
         self.local_data['metadata'] = self.local_data['metadata'].fillna('null')
@@ -456,6 +481,8 @@ class History:
         self._actor_data.set_df(df).result()
 
     def create_df_columns(self):
+        """Create columns of history."""
+
         # df として保有するカラムを生成
         columns = list()
 
@@ -489,6 +516,8 @@ class History:
 
     def record(self, parameters, objectives, constraints, obj_values, cns_values, message, metadata):
         """Records the optimization results in the history.
+
+        Record only. NOT save.
 
         Args:
             parameters (pd.DataFrame): The parameter values.
@@ -635,6 +664,8 @@ class History:
                     df.loc[i, 'hypervolume'] = 0
 
     def save(self, _f=None):
+        """Save csv file."""
+
         if _f is None:
             # save df with columns with prefix
             with open(self.path, 'w') as f:
@@ -655,6 +686,7 @@ class _OptimizationStatusActor:
 
 class OptimizationStatus:
     """Optimization status."""
+
     UNDEFINED = -1
     INITIALIZING = 0
     SETTING_UP = 10
@@ -674,6 +706,7 @@ class OptimizationStatus:
 
     @classmethod
     def const_to_str(cls, status_const):
+        """Convert optimization status integer to message."""
         if status_const == cls.UNDEFINED: return 'Undefined'
         if status_const == cls.INITIALIZING: return 'Initializing'
         if status_const == cls.SETTING_UP: return 'Setting up'
@@ -686,6 +719,7 @@ class OptimizationStatus:
         if status_const == cls.TERMINATE_ALL: return 'Terminate_all'
 
     def set(self, status_const):
+        """Set optimization status."""
         self._actor.set(status_const, self.const_to_str(status_const)).result()
         msg = f'---{self.const_to_str(status_const)}---'
         if (status_const == self.INITIALIZING) and (self.name != 'entire'):
@@ -694,8 +728,10 @@ class OptimizationStatus:
             msg = '(entire) ' + msg
         logger.info(msg)
 
-    def get(self):
+    def get(self) -> int:
+        """Get optimization status."""
         return self._actor.status_int
 
-    def get_text(self):
+    def get_text(self) -> str:
+        """Get optimization status message."""
         return self._actor.status

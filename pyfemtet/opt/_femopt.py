@@ -4,6 +4,7 @@ import datetime
 from time import time, sleep
 from threading import Thread
 
+import numpy as np
 # 3rd-party
 import pandas as pd
 from dask.distributed import LocalCluster, Client
@@ -13,8 +14,8 @@ from pyfemtet.opt.interface import FEMInterface, FemtetInterface
 from pyfemtet.opt.opt import AbstractOptimizer, OptunaOptimizer
 from pyfemtet.opt.visualization._monitor import ProcessMonitorApp
 from pyfemtet.opt._femopt_core import (
-    check_bound,
-    is_access_gogh,
+    _check_bound,
+    _is_access_gogh,
     Objective,
     Constraint,
     History,
@@ -24,12 +25,19 @@ from pyfemtet.opt._femopt_core import (
 
 
 class FEMOpt:
-    """Base class to control FEM interface and optimizer.
+    """Class to control FEM interface and optimizer.
+
+    Args:
+        fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automatically set to FemtetInterface.
+        opt (AbstractOptimizer):
+        history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
+        scheduler_address (str or None): If cluster processing, set this parameter like "tcp://xxx.xxx.xxx.xxx:xxxx".
 
     Attributes:
         fem (FEMInterface): The interface of FEM system.
-        client (Client): Dask client. For detail, see dask documentation.
+        opt (AbstractOptimizer): The optimizer.
         scheduler_address (str or None): Dask scheduler address. If None, LocalCluster will be used.
+        client (Client): Dask client. For detail, see dask documentation.
         status (OptimizationStatus): Entire process status. This contains dask actor.
         history(History): History of optimization process. This contains dask actor.
         history_path (str): The path to the history (.csv) file.
@@ -46,16 +54,6 @@ class FEMOpt:
             history_path: str = None,
             scheduler_address: str = None
     ):
-        """Initializes an FEMOpt instance.
-
-        Args:
-            fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automatically set to FemtetInterface.
-            opt (AbstractOptimizer):
-            history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
-            scheduler_address (str or None): If cluster processing, set this parameter like ``"tcp://xxx.xxx.xxx.xxx:xxxx"``.
-
-        """
-
         logger.info('Initialize FEMOpt')
 
         # 引数の処理
@@ -122,7 +120,7 @@ class FEMOpt:
 
         """
 
-        check_bound(lower_bound, upper_bound, name)
+        _check_bound(lower_bound, upper_bound, name)
         value = self.fem.check_param_value(name)
         if initial_value is None:
             if value is not None:
@@ -202,7 +200,7 @@ class FEMOpt:
     ):
         """Adds a constraint to the optimization problem.
 
-        Args：
+        Args:
             fun (callable): The constraint function.
             name (str or None, optional): The name of the constraint. Defaults to None.
             lower_bound (float or Non, optional): The lower bound of the constraint. Defaults to None.
@@ -240,7 +238,7 @@ class FEMOpt:
 
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
         if strict:
-            if is_access_gogh(fun):
+            if _is_access_gogh(fun):
                 message = f'関数 {fun.__name__} に Gogh （Femtet 解析結果）へのアクセスがあります.'
                 message += 'デフォルトでは constraint は解析前に評価され, 条件を満たさない場合解析を行いません.'
                 message += '拘束に解析結果を含めたい場合は, strict=False を設定してください.'
@@ -248,14 +246,14 @@ class FEMOpt:
 
         self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
 
-    def get_parameter(self, format='dict'):
-        """Returns the parameters in the specified format.
+    def get_parameter(self, format='dict') -> pd.DataFrame or dict or np.ndarray:
+        """Returns the parameter in a specified format.
 
         Args:
-            format (str, optional): The desired format of the parameters. Can be 'df' (DataFrame), 'values', or 'dict'. Defaults to 'dict'.
+            format (str, optional): The desired output format. Defaults to 'dict'. Valid formats are 'values', 'df' and 'dict'.
 
         Returns:
-            object: The parameters in the specified format.
+            pd.DataFrame or dict or np.ndarray: The parameter data converted into the specified format.
 
         Raises:
             ValueError: If an invalid format is provided.
@@ -271,16 +269,12 @@ class FEMOpt:
             port (int or None, optional): The port number of the monitor server. If None, ``8080`` will be used. Defaults to None.
 
         Tip:
-            If you do not know the host IP address
-            for connecting to the local network,
-            use the ``ipconfig`` command to find out.
-
-            Alternatively, you can specify host as 0.0.0.0
-            to access the monitor server through all network interfaces
-            used by that computer.
+            Specifying host ``0.0.0.0`` allows viewing monitor from all computers on the local network.
 
             However, please note that in this case,
             it will be visible to all users on the local network.
+
+            If no hostname is specified, the monitor server will be hosted on ``localhost``.
 
         """
         self.monitor_server_kwargs = dict(
@@ -304,7 +298,7 @@ class FEMOpt:
             wait_setup (bool, optional): Wait for all workers launching FEM system. Defaults to True.
 
         Tip:
-            If setup_monitor_server() is not executed, a local server for monitoring will be started at localhost:8080.
+            If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080.
 
         Note:
             If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user.
@@ -314,7 +308,7 @@ class FEMOpt:
 
         Warning:
             If ``n_parallel`` >= 2 and ``fem`` is a subclass of ``FemtetInterface``, the ``strictly_pid_specify`` of subprocess is set to ``False``.
-            So **it is recommended to close all other Femtet processes before running main().**
+            So **it is recommended to close all other Femtet processes before running.**
 
         """
 
@@ -336,11 +330,10 @@ class FEMOpt:
             # monitor worker の設定
             logger.info('Launching monitor server. This may take a few seconds.')
             self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
-            # cmd = f'{sys.executable} -m dask worker {self.client.scheduler.address} --name {self.monitor_process_worker_name} --no-nanny'
-            # Popen(cmd, shell=True)  # , stdout=PIPE) --> cause stream error  # TODO:Python API
             current_n_workers = len(self.client.nthreads().keys())
             from dask.distributed import Worker
             Worker(scheduler_ip=self.client.scheduler.address, nthreads=1, name=self.monitor_process_worker_name)
+
             # monitor 用 worker が増えるまで待つ
             self.client.wait_for_workers(n_workers=current_n_workers + 1)
 
@@ -375,7 +368,7 @@ class FEMOpt:
         # launch monitor
         self.monitor_process_future = self.client.submit(
             # func
-            start_monitor_server,
+            _start_monitor_server,
             # args
             self.history,
             self.status,
@@ -439,8 +432,8 @@ class FEMOpt:
                 try:
                     self.history.save()
                 except PermissionError:
-                    pass
-                if self.status.get() == OptimizationStatus.TERMINATED:
+                    logger.warning(f'{self.history.path} が使用中のため書き込みできません。プログラム終了までにこのファイルを解放してください。履歴データが失われます。')
+                if self.status.get() >= OptimizationStatus.TERMINATED:
                     break
 
         t_save_history = Thread(target=save_history)
@@ -526,7 +519,7 @@ class FEMOpt:
         sleep(3)
 
 
-def start_monitor_server(
+def _start_monitor_server(
         history,
         status,
         worker_addresses,
