@@ -24,7 +24,7 @@ class _LanguageSet:
             self.feasible = {'label': '拘束条件', True: '満足', False: '違反'}
             self.non_domi = {'label': '最適性', True: '非劣解', False: '劣解'}
 
-    def localize(self, history, df):
+    def localize(self, df):
         # 元のオブジェクトを変更しないようにコピー
         cdf = df.copy()
 
@@ -32,10 +32,6 @@ class _LanguageSet:
         cdf[self.feasible['label']] = [self.feasible[v] for v in cdf['feasible']]
         cdf[self.non_domi['label']] = [self.non_domi[v] for v in cdf['non_domi']]
 
-        # obj_names から prefix を除去
-        columns = cdf.columns
-        columns = [n[len(history.OBJ_PREFIX):] if n.startswith(history.OBJ_PREFIX) else n for n in columns]
-        cdf.columns = columns
         return cdf
 
 
@@ -45,7 +41,7 @@ _ss = _SymbolSet()
 
 
 def update_hypervolume_plot(history, df):
-    df = _ls.localize(history, df)
+    df = _ls.localize(df)
 
     # create figure
     fig = px.line(
@@ -82,7 +78,7 @@ def update_default_figure(history, df):
 
 def update_single_objective_plot(history, df):
 
-    df = _ls.localize(history, df)
+    df = _ls.localize(df)
     obj_name = history.obj_names[0]
 
     fig = px.scatter(
@@ -126,7 +122,7 @@ def update_single_objective_plot(history, df):
 
 
 def update_multi_objective_pairplot(history, df):
-    df = _ls.localize(history, df)
+    df = _ls.localize(df)
 
     obj_names = history.obj_names
 
@@ -190,7 +186,7 @@ def _debug():
     import os
 
     os.chdir(os.path.dirname(__file__))
-    csv_path = '_sample_history_include_infeasible_1obj.csv'
+    csv_path = 'sample.csv'
 
     show_static_monitor(csv_path)
 

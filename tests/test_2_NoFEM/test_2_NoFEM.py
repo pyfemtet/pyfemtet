@@ -115,7 +115,7 @@ def test_2_2_restart():
         os.remove('test_2_2_restart.uilog')
     sub()
     sub()
-    df = pd.read_csv('test_2_2_restart.csv', encoding='shift-jis')
+    df = pd.read_csv('test_2_2_restart.csv', encoding='cp932', header=2)
     assert len(df) == 10
 
 
@@ -135,7 +135,7 @@ def simple():
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
     femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=None, n_parallel=3, wait_setup=True)
+    femopt.optimize(n_trials=30, n_parallel=3, wait_setup=True)
     # input('enter to quit...')
     femopt.terminate_all()
 
@@ -143,9 +143,9 @@ def simple():
 if __name__ == '__main__':
     # min_sleep_sec = 3
     # random_max_sleep_sec = 1
-    simple()
+    # simple()
 
     # test_2_2_restart()
 
-    # record = False
-    # test_2_NoFEM_random_seed()
+    record = False
+    test_2_NoFEM_random_seed()

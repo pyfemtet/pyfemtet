@@ -79,16 +79,6 @@ class AbstractOptimizer(ABC):
         logger.debug('calculate c start')
         c = [cns.calc(self.fem) for cns in self.constraints.values()]
 
-        # Femtet 特有の処理
-        metadata = ''
-        if isinstance(self.fem, FemtetInterface):
-            metadata = json.dumps(
-                dict(
-                    femprj_path=self.fem.original_femprj_path,
-                    model_name=self.fem.model_name
-                )
-            )
-
         logger.debug('history.record start')
         self.history.record(
             self.parameters,
@@ -97,7 +87,6 @@ class AbstractOptimizer(ABC):
             y,
             c,
             self.message,
-            metadata
         )
 
         logger.debug('history.record end')

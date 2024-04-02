@@ -137,11 +137,23 @@ class FemtetControl:
             color = None
 
             # metadata の有無を確認
-            if 'metadata' not in home.monitor.local_df.columns:
+            additional_metadata = home.monitor.history.metadata[0]
+            is_invalid = False
+
+            # json である && femprj_path と model_name が key にある
+            prj_data = None
+            try:
+                prj_data = json.loads(additional_metadata)
+                _ = prj_data['femprj_path']
+                _ = prj_data['model_name']
+            except (TypeError, json.decoder.JSONDecodeError, KeyError):
+                is_invalid = True
+
+            if is_invalid:
                 color = 'warning'
                 msg = (
                     f'{home.monitor.history.path} に'
-                    'metadata が存在しないので'
+                    '解析プロジェクトファイルを示すデータが存在しないので'
                     '解析ファイルを自動で開けません。'
                     'Femtet 起動後、最適化を行ったファイルを'
                     '手動で開いてください。'
@@ -149,34 +161,9 @@ class FemtetControl:
                 logger.warn(msg)
 
             else:
-                # metadata を読み込み
-                metadata_json = home.monitor.local_df.loc[0, 'metadata']
-                metadata = json.loads(metadata_json)
-
-                # metadata が存在しなければ警告
-                if metadata is None:
-                    color = 'warning'
-                    msg = (
-                        f'{home.monitor.history.path} の metadata が空なので'
-                        '解析ファイルを自動で開けません。'
-                        'Femtet 起動後、最適化を行ったファイルを'
-                        '手動で開いてください。'
-                    )
-                    logger.warning(msg)
-
-                # metadata が存在するが femprj に関する情報が掛けていれば警告
-                elif ('femprj_path' in metadata.keys()) and ('model_name' in metadata.keys()):
-                    color = 'warning'
-                    msg = (
-                        f'{home.monitor.history.path} の metadata に'
-                        '解析ファイルの情報が記録されていません。'
-                        'Femtet 起動後、最適化を行ったファイルを'
-                        '手動で開いてください。'
-                    )
-                    logger.warning(msg)
 
                 # femprj が存在しなければ警告
-                elif not os.path.isfile(metadata['femprj_path']):
+                if not os.path.isfile(prj_data['femprj_path']):
                     color = 'warning'
                     msg = (
                         f'{femprj_path} が見つかりません。'
@@ -187,8 +174,8 @@ class FemtetControl:
                 # femprj はあるがその中に model があるかないかは開かないとわからない
                 # そうでなければ自動で開く
                 else:
-                    femprj_path = metadata['femprj_path']
-                    model_name = metadata['model_name']
+                    femprj_path = prj_data['femprj_path']
+                    model_name = prj_data['model_name']
 
             return femprj_path, model_name, msg, color
 

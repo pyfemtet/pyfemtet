@@ -6,15 +6,14 @@ import os
 import datetime
 import inspect
 import ast
-from time import time, sleep
-from threading import Thread
+import csv
 
 # 3rd-party
 import numpy as np
 import pandas as pd
 from scipy.stats.qmc import LatinHypercube
 from optuna._hypervolume import WFG
-from dask.distributed import LocalCluster, Client, Lock
+from dask.distributed import Lock
 
 # win32com
 from win32com.client import constants, Constants
@@ -347,28 +346,31 @@ class _HistoryDfCore:
 class History:
     """Class for managing the history of optimization results.
 
+    Args:
+        history_path (str): The path to the csv file.
+        prm_names (List[str], optional): The names of parameters. Defaults to None.
+        obj_names (List[str], optional): The names of objectives. Defaults to None.
+        cns_names (List[str], optional): The names of constraints. Defaults to None.
+        client (dask.distributed.Client): Dask client.
+        additional_metadata (str, optional): metadata of optimization process.
+
+    Raises:
+        FileNotFoundError: If the csv file is not found.
+
     Attributes:
-        PRM_PREFIX (str): Prefix for parameters in the columns of csv.
-        OBJ_PREFIX (str): Prefix for objectives in the columns of csv.
-        OBJ_DIRECTION_PREFIX (str): Prefix for directions of each objective in the columns of csv.
-        CNS_PREFIX (str): Prefix for constraints in the columns of csv.
-        CNS_UB_PREFIX (str): Prefix for lower bounds of each constraint in the columns of csv.
-        CNS_LB_PREFIX (str): Prefix for upper bounds of each constraint in the columns of csv.
-        prm_names (str): User difined names of parameters.
-        obj_names (str): User difined names of objectives.
-        cns_names (str): User difined names of constraints.
+        HEADER_ROW (int): Header row number of csv file. Must be grater than 0. Default to 2.
+        ENCODING (str): Encoding of csv file. Default to 'cp932'.
+        prm_names (str): User defined names of parameters.
+        obj_names (str): User defined names of objectives.
+        cns_names (str): User defined names of constraints.
         local_data (pd.DataFrame): Local copy (on memory) of optimization history. 
         is_restart (bool): If the optimization process is a continuation of another process or not.
         is_processing (bool): The optimization is running or not.
 
     """
 
-    PRM_PREFIX = 'prm_'
-    OBJ_PREFIX = 'obj_'
-    OBJ_DIRECTION_PREFIX = 'obj.direction_'
-    CNS_PREFIX = 'cns_'
-    CNS_UB_PREFIX = 'cns.ub_'
-    CNS_LB_PREFIX = 'cns.lb_'
+    HEADER_ROW = 2
+    ENCODING = 'cp932'
     prm_names = []
     obj_names = []
     cns_names = []
@@ -384,26 +386,16 @@ class History:
             prm_names=None,
             obj_names=None,
             cns_names=None,
-            client=None
+            client=None,
+            additional_metadata=None,
     ):
-        """Initialize the class.
 
-        Args:
-            history_path (str): The path to the csv file.
-            prm_names (List[str], optional): The names of parameters. Defaults to None.
-            obj_names (List[str], optional): The names of objectives. Defaults to None.
-            cns_names (List[str], optional): The names of constraints. Defaults to None.
-            client (dask.distributed.Client): Dask client.
-
-        Raises:
-            FileNotFoundError: If the csv file is not found.
-
-        """
         # 引数の処理
         self.path = history_path  # .csv
         self.prm_names = prm_names
         self.obj_names = obj_names
         self.cns_names = cns_names
+        self.additional_metadata = additional_metadata or ''
 
         # 最適化実行中かどうか
         self.is_processing = client is not None
@@ -424,9 +416,10 @@ class History:
 
             # そうでなければ df を初期化
             else:
-                columns = self.create_df_columns()
+                columns, metadata = self.create_df_columns()
                 for c in columns:
                     self.local_data[c] = None
+                self.metadata = metadata
 
             # actor_data の初期化
             self.actor_data = self.local_data
@@ -452,13 +445,17 @@ class History:
         """Load existing result csv."""
 
         # df を読み込む
-        self.local_data = pd.read_csv(self.path, encoding='shift-jis')
-        self.local_data['metadata'] = self.local_data['metadata'].fillna('null')
+        self.local_data = pd.read_csv(self.path, encoding=self.ENCODING, header=self.HEADER_ROW)
 
         columns = self.local_data.columns
-        prm_names = [n[len(self.PRM_PREFIX):] for n in columns if n.startswith(self.PRM_PREFIX)]
-        obj_names = [n[len(self.OBJ_PREFIX):] for n in columns if n.startswith(self.OBJ_PREFIX)]
-        cns_names = [n[len(self.CNS_PREFIX):] for n in columns if n.startswith(self.CNS_PREFIX)]
+
+        with open(self.path, mode='r', encoding=self.ENCODING, newline='\n') as f:
+            reader = csv.reader(f, delimiter=',')
+            self.metadata = reader.__next__()
+
+        prm_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'prm']
+        obj_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'obj']
+        cns_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'cns']
 
         # is_restart の場合、読み込んだ names と引数の names が一致するか確認しておく
         if self.is_restart:
@@ -486,35 +483,48 @@ class History:
         # df として保有するカラムを生成
         columns = list()
 
+        # columns のメタデータを作成
+        metadata = list()
+
         # trial
         columns.append('trial')  # index
+        metadata.append(self.additional_metadata)
 
         # parameter
-        prm_names = [self.PRM_PREFIX + name for name in self.prm_names]
-        columns.extend(prm_names)
+        columns.extend(self.prm_names)
+        metadata.extend(['prm'] * len(self.prm_names))
 
         # objective relative
         for name in self.obj_names:
-            columns.append(self.OBJ_PREFIX + name)
-            columns.append(self.OBJ_DIRECTION_PREFIX + name)
+            columns.append(name)
+            metadata.append('obj')
+            columns.append(name + '_direction')
+            metadata.append('obj_direction')
         columns.append('non_domi')
+        metadata.append('')
 
         # constraint relative
         for name in self.cns_names:
-            columns.append(self.CNS_PREFIX + name)
-            columns.append(self.CNS_LB_PREFIX + name)
-            columns.append(self.CNS_UB_PREFIX + name)
+            columns.append(name)
+            metadata.append('cns')
+            columns.append(name + '_lower_bound')
+            metadata.append('cns_lb')
+            columns.append(name + '_upper_bound')
+            metadata.append('cns_ub')
         columns.append('feasible')
+        metadata.append('')
 
         # the others
         columns.append('hypervolume')
+        metadata.append('')
         columns.append('message')
+        metadata.append('')
         columns.append('time')
-        columns.append('metadata')
+        metadata.append('')
 
-        return columns
+        return columns, metadata
 
-    def record(self, parameters, objectives, constraints, obj_values, cns_values, message, metadata):
+    def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
         """Records the optimization results in the history.
 
         Record only. NOT save.
@@ -526,7 +536,6 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
-            metadata (str): JSON metadata.
 
         """
 
@@ -559,12 +568,10 @@ class History:
         row.append(-1.)  # dummy hypervolume
         row.append(message)  # message
         row.append(datetime.datetime.now())  # time
-        row.append('')  # metadata
 
         with Lock('calc-history'):
             # append
             if len(self.actor_data) == 0:
-                row[-1] = metadata
                 self.local_data = pd.DataFrame([row], columns=self.actor_data.columns)
             else:
                 self.local_data = self.actor_data
@@ -579,11 +586,10 @@ class History:
     def _calc_non_domi(self, objectives):
 
         # 目的関数の履歴を取り出してくる
-        obj_columns = [self.OBJ_PREFIX + n for n in self.obj_names]
-        solution_set = self.local_data[obj_columns]
+        solution_set = self.local_data[self.obj_names]
 
         # 最小化問題の座標空間に変換する
-        for obj_column, (_, objective) in zip(obj_columns, objectives.items()):
+        for obj_column, (_, objective) in zip(self.obj_names, objectives.items()):
             solution_set.loc[:, obj_column] = solution_set[obj_column].map(objective.convert)
 
         # 非劣解の計算
@@ -595,7 +601,6 @@ class History:
         self.local_data['non_domi'] = non_domi
 
     def _calc_hypervolume(self, objectives):
-        obj_columns = [self.OBJ_PREFIX + n for n in self.obj_names]
 
         # タイピングが面倒
         df = self.local_data
@@ -603,7 +608,7 @@ class History:
         # パレート集合の抽出
         idx = df['non_domi'].values
         pdf = df[idx]
-        pareto_set = pdf[obj_columns].values
+        pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数
         m = len(pareto_set.T)  # 目的変数数
         # 多目的でないと計算できない
@@ -668,11 +673,14 @@ class History:
 
         if _f is None:
             # save df with columns with prefix
-            with open(self.path, 'w') as f:
-                f.write('sample\n\n')  # TODO
-                self.actor_data.to_csv(f, index=None, encoding='cp932', lineterminator='\n')
-        else:
-            self.actor_data.to_csv(_f, index=None, encoding='cp932', lineterminator='\n')
+            with open(self.path, 'w', encoding=self.ENCODING) as f:
+                writer = csv.writer(f, delimiter=',', lineterminator="\n")
+                writer.writerow(self.metadata)
+                for i in range(self.HEADER_ROW-1):
+                    writer.writerow([''] * len(self.metadata))
+                self.actor_data.to_csv(f, index=None, encoding=self.ENCODING, lineterminator='\n')
+        else:  # test
+            self.actor_data.to_csv(_f, index=None, encoding=self.ENCODING, lineterminator='\n')
 
 
 class _OptimizationStatusActor:

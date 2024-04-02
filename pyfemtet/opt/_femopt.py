@@ -3,9 +3,10 @@ import os
 import datetime
 from time import time, sleep
 from threading import Thread
+import json
 
-import numpy as np
 # 3rd-party
+import numpy as np
 import pandas as pd
 from dask.distributed import LocalCluster, Client
 
@@ -353,6 +354,16 @@ class FEMOpt:
             self.monitor_process_worker_name = worker_addresses[0]
             worker_addresses[0] = 'Main'
 
+        # Femtet 特有の処理
+        metadata = None
+        if isinstance(self.fem, FemtetInterface):
+            metadata = json.dumps(
+                dict(
+                    femprj_path=self.fem.original_femprj_path,
+                    model_name=self.fem.model_name
+                )
+            )
+
         # actor の設定
         self.status = OptimizationStatus(self.client)
         self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
@@ -363,6 +374,7 @@ class FEMOpt:
             list(self.opt.objectives.keys()),
             list(self.opt.constraints.keys()),
             self.client,
+            metadata,
         )
 
         # launch monitor
