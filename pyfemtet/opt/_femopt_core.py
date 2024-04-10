@@ -447,12 +447,13 @@ class History:
         # df を読み込む
         self.local_data = pd.read_csv(self.path, encoding=self.ENCODING, header=self.HEADER_ROW)
 
-        columns = self.local_data.columns
-
+        # metadata を読み込む
         with open(self.path, mode='r', encoding=self.ENCODING, newline='\n') as f:
             reader = csv.reader(f, delimiter=',')
             self.metadata = reader.__next__()
 
+        # 最適化問題を読み込む
+        columns = self.local_data.columns
         prm_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'prm']
         obj_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'obj']
         cns_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'cns']
@@ -626,22 +627,6 @@ class History:
         maximum = pareto_set.max(axis=0)
         minimum = pareto_set.min(axis=0)
 
-        # # [1]Hisao Ishibuchi et al. "Reference Point Specification in Hypercolume Calculation for Fair Comparison and Efficient Search"
-        # # (H+m-1)C(m-1) <= n <= (m-1)C(H+m) になるような H を探す[1]
-        # H = 0
-        # while True:
-        #     left = math.comb(H + m - 1, m - 1)
-        #     right = math.comb(H + m, m - 1)
-        #     if left <= n <= right:
-        #         break
-        #     else:
-        #         H += 1
-        # # H==0 なら r は最大の値
-        # if H == 0:
-        #     r = 2
-        # else:
-        #     # r を計算
-        #     r = 1 + 1. / H
         r = 1.01
 
         # r を逆正規化
