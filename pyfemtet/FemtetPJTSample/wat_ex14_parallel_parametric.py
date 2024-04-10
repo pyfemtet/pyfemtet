@@ -59,5 +59,5 @@ if __name__ == '__main__':
     # 最適化の実行
     femopt.set_random_seed(42)
     # femopt.main(n_trials=20)
-    femopt.main(n_trials=20, n_parallel=3)  # ここのみ wat_ex14_parametric.py から変更しました。
+    femopt.optimize(n_trials=20, n_parallel=3)  # ここのみ wat_ex14_parametric.py から変更しました。
     femopt.terminate_all()

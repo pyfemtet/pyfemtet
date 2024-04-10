@@ -1,95 +1,39 @@
+from typing import Optional, List
+
 import os
-import re
 import sys
 from time import sleep, time
-import json
-import subprocess
 import signal
-from abc import ABC, abstractmethod
 
 import pandas as pd
 import psutil
+from dask.distributed import get_worker
+
 from pywintypes import com_error
 from pythoncom import CoInitialize, CoUninitialize
-from win32com.client import constants, DispatchEx
-from dask.distributed import get_worker
-from tqdm import trange
+from win32com.client import constants
 from femtetutils import util
 
-from ..core import (
+from pyfemtet.core import (
     ModelError,
     MeshError,
     SolveError,
+    _version,
 )
-from ..dispatch_extensions import (
+from pyfemtet.dispatch_extensions import (
     dispatch_femtet,
     dispatch_specific_femtet,
     launch_and_dispatch_femtet,
     _get_pid,
+    _get_pids,
     DispatchExtensionException,
 )
-
-import logging
-from ..logger import get_logger
-logger = get_logger('FEM')
-logger.setLevel(logging.INFO)
-
-here, me = os.path.split(__file__)
-
-
-class FEMInterface(ABC):
-    """Abstract base class for the interface with FEM software."""
-
-    def __init__(
-            self,
-            **kwargs
-    ):
-        """Stores information necessary to restore FEMInterface instance in a subprocess.
-
-        The concrete class should call super().__init__() with the desired arguments when restoring.
-
-        Args:
-            **kwargs: keyword arguments for FEMInterface (re)constructor.
-
-        """
-        # restore のための情報保管
-        self.kwargs = kwargs
-
-    @abstractmethod
-    def update(self, parameters: pd.DataFrame) -> None:
-        """Updates the FEM analysis based on the proposed parameters."""
-        raise NotImplementedError('update() must be implemented.')
-
-    def check_param_value(self, param_name) -> float or None:
-        """Checks the value of a parameter in the FEM model (if implemented in concrete class)."""
-        if False:
-            raise RuntimeError(f"{param_name} doesn't exist on FEM model.")
-
-    def update_parameter(self, parameters: pd.DataFrame) -> None:
-        """Updates only FEM variables (if implemented in concrete class)."""
-        pass
-
-    def setup_before_parallel(self, client) -> None:
-        """Preprocessing before launching a dask worker (if implemented in concrete class).
-
-        Args:
-            client: dask client.
-            i.e. you can update associated files by
-            `client.upload_file(file_path)`
-            The file will be saved to dask-scratch-space directory
-            without any directory structure.
-
-        """
-        pass
-
-    def setup_after_parallel(self):
-        """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
-        pass
+from pyfemtet.opt.interface import FEMInterface, logger
 
 
 class FemtetInterface(FEMInterface):
-    """Concrete class for the interface with Femtet software.
-    
+    """Concrete class for the interface with Femtet.
+
         Args:
             femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
             model_name (str or None, optional): The name of the analysis model. Defaults to None.
@@ -100,15 +44,13 @@ class FemtetInterface(FEMInterface):
             Even if you specify ``strictly_pid_specify=True`` on the constructor,
             **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**
             because of its large overhead.
-            So you should close all Femtet processes before running FEMOpt.main()
+            So you should close all Femtet processes before running FEMOpt.optimize()
             if ``n_parallel`` >= 2.
-
-
 
         Tip:
             If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
-    
-    """    
+
+    """
 
     def __init__(
             self,
@@ -116,6 +58,7 @@ class FemtetInterface(FEMInterface):
             model_name=None,
             connect_method='auto',
             strictly_pid_specify=True,
+            allow_without_project=False,
             **kwargs  # 継承されたクラスからの引数
     ):
 
@@ -129,9 +72,12 @@ class FemtetInterface(FEMInterface):
             self.femprj_path = os.path.abspath(femprj_path)
         self.model_name = model_name
         self.connect_method = connect_method
+        self.allow_without_project = allow_without_project
+        self.original_femprj_path = self.femprj_path
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None
+        self.femtet_pid = 0
         self.quit_when_destruct = False
         self.connected_method = 'unconnected'
         self.parameters = None
@@ -151,7 +97,7 @@ class FemtetInterface(FEMInterface):
 
         # femprj_path と model に基づいて Femtet を開き、
         # 開かれたモデルに応じて femprj_path と model を更新する
-        self.connect_and_open_femtet()
+        self._connect_and_open_femtet()
 
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
         self.quit_when_destruct = self.connected_method == 'new'
@@ -187,18 +133,17 @@ class FemtetInterface(FEMInterface):
     def _connect_new_femtet(self):
         logger.info('└ Try to launch and connect new Femtet process.')
 
-        self.Femtet, _ = launch_and_dispatch_femtet(strictly_pid_specify=self.strictly_pid_specify)
+        self.Femtet, self.femtet_pid = launch_and_dispatch_femtet(strictly_pid_specify=self.strictly_pid_specify)
 
         self.connected_method = 'new'
-
 
     def _connect_existing_femtet(self, pid: int or None = None):
         logger.info('└ Try to connect existing Femtet process.')
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
-            self.Femtet, _ = dispatch_femtet(timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_femtet(timeout=5)
         else:
-            self.Femtet, _ = dispatch_specific_femtet(pid, timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_specific_femtet(pid, timeout=5)
         self.connected_method = 'existing'
 
     def connect_femtet(self, connect_method: str = 'auto', pid: int or None = None):
@@ -309,7 +254,7 @@ class FemtetInterface(FEMInterface):
         # 2. API 実行時に成功失敗を示す戻り値を返し、ShowLastError で例外にアクセスできる状態になる
 
         # Gaudi コマンドなら Gaudi.Activate する
-        logger.debug(' '*print_indent + f'Femtet API:{fun.__name__}, args:{args}, kwargs:{kwargs}')
+        logger.debug(' ' * print_indent + f'Femtet API:{fun.__name__}, args:{args}, kwargs:{kwargs}')
         if is_Gaudi_method:  # Optimizer は Gogh に触らないので全部にこれをつけてもいい気がする
             try:
                 self._call_femtet_api(
@@ -317,7 +262,7 @@ class FemtetInterface(FEMInterface):
                     False,  # None 以外なら何でもいい
                     Exception,
                     '解析モデルのオープンに失敗しました',
-                    print_indent=print_indent+1
+                    print_indent=print_indent + 1
                 )
             except com_error:
                 # Gaudi へのアクセスだけで com_error が生じうる
@@ -332,8 +277,8 @@ class FemtetInterface(FEMInterface):
             if ret_for_check_idx is None:
                 returns = ret_if_failed
             else:
-                returns = [ret_if_failed]*(ret_for_check_idx+1)
-        logger.debug(' '*print_indent + f'Femtet API result:{returns}')
+                returns = [ret_if_failed] * (ret_for_check_idx + 1)
+        logger.debug(' ' * print_indent + f'Femtet API result:{returns}')
 
         # チェックすべき値の抽出
         if ret_for_check_idx is None:
@@ -383,12 +328,12 @@ class FemtetInterface(FEMInterface):
                     ret_for_check_idx,
                     args,
                     kwargs,
-                    recourse_depth+1,
-                    print_indent+1
+                    recourse_depth + 1,
+                    print_indent + 1
                 )
 
     def femtet_is_alive(self) -> bool:
-        """Returns connected femtet process is exsiting or not."""
+        """Returns connected femtet process is existing or not."""
         return _get_pid(self.Femtet.hWnd) > 0
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
@@ -412,7 +357,7 @@ class FemtetInterface(FEMInterface):
         if not result:
             self.Femtet.ShowLastError()
 
-    def connect_and_open_femtet(self):
+    def _connect_and_open_femtet(self):
         """Connects to a Femtet process and open the femprj.
 
         This function is for establishing a connection with Femtet and opening the specified femprj file.
@@ -448,28 +393,48 @@ class FemtetInterface(FEMInterface):
         # femprj が指定されていない
         else:
             # かつ new だと解析すべき femprj がわからないのでエラー
-            if self.connect_method == 'new':
-                RuntimeError('Femtet の connect_method に "new" を用いる場合、femprj_path を指定してください。')
-            # 開いている Femtet と接続する
-            self.connect_femtet('existing')
+            if (
+                    (self.connect_method == 'new')
+                    and (not self.allow_without_project)
+            ):
+                raise RuntimeError(
+                    'femprj_path を指定せず Femtet の connect_method に "new" を指定する場合、"allow_without_project" 引数を True に設定してください。')
+            # さらに auto の場合は Femtet が存在しなければ new と同じ挙動になるので同様の処理
+            if (
+                    (self.connect_method == 'auto')
+                    and (len(_get_pids(process_name='Femtet.exe')) == 0)
+                    and (not self.allow_without_project)
+            ):
+                raise RuntimeError(
+                    'femprj_path を指定せず Femtet の connect_method を指定しない（又は "auto" に指定する）場合、Femtet を起動して処理したい .femprj ファイルを開いた状態にしてください。')
+            self.connect_femtet(self.connect_method)
 
         # 最終的に接続した Femtet の femprj_path と model を インスタンスに戻す
         self.femprj_path = self.Femtet.Project
         self.model_name = self.Femtet.AnalysisModelName
 
     def check_param_value(self, param_name):
-        """See :func:`FEMInterface.check_param_value`"""
-        variable_names = self.Femtet.GetVariableNames()
-        if variable_names is not None:
-            if param_name in variable_names:
-                return self.Femtet.GetVariableValue(param_name)
-        message = f'Femtet 解析モデルに変数 {param_name} がありません.'
-        message += f'現在のモデルに設定されている変数は {variable_names} です.'
-        message += '大文字・小文字の区別に注意してください.'
-        raise RuntimeError(message)
+        """Check param_name is set in femprj file or not.
 
-    def update_parameter(self, parameters: 'pd.DataFrame'):
-        """See :func:`FEMInterface.update_parameter`"""
+        Note:
+            This function works with Femtet version 2023.1.1 and above.
+            Otherwise, no check is performed.
+
+        """
+        if self._version() >= _version(2023, 1, 1):
+            variable_names = self.Femtet.GetVariableNames_py()
+            if variable_names is not None:
+                if param_name in variable_names:
+                    return self.Femtet.GetVariableValue(param_name)
+            message = f'Femtet 解析モデルに変数 {param_name} がありません.'
+            message += f'現在のモデルに設定されている変数は {variable_names} です.'
+            message += '大文字・小文字の区別に注意してください.'
+            raise RuntimeError(message)
+        else:
+            return None
+
+    def update_parameter(self, parameters: 'pd.DataFrame', with_warning=False):
+        """Update parameter of femprj."""
         self.parameters = parameters.copy()
 
         # 変数更新のための処理
@@ -483,17 +448,21 @@ class FemtetInterface(FEMInterface):
 
         # Femtet の設計変数の更新
         existing_variable_names = self._call_femtet_api(
-                    fun=self.Femtet.GetVariableNames_py,
-                    ret_if_failed=False,  # 意味がない
-                    if_error=ModelError,  # 生きてるのに失敗した場合
-                    error_message=f'GetVariableNames_py に失敗しました。',
-                    is_Gaudi_method=True,
-                )
+            fun=self.Femtet.GetVariableNames_py,
+            ret_if_failed=False,  # 意味がない
+            if_error=ModelError,  # 生きてるのに失敗した場合
+            error_message=f'GetVariableNames_py に失敗しました。',
+            is_Gaudi_method=True,
+        )
 
         # 変数を含まないプロジェクトである場合
         if existing_variable_names is None:
-            return
+            if with_warning:
+                return ['解析モデルに変数が含まれていません。']
+            else:
+                return None
 
+        warnings = []
         for i, row in parameters.iterrows():
             name = row['name']
             value = row['value']
@@ -507,18 +476,23 @@ class FemtetInterface(FEMInterface):
                     args=(name, value),
                 )
             else:
-                logger.warn(f'変数 {name} は .femprj に含まれていません。無視されます。')
+                msg = f'変数 {name} は 解析モデル {self.model_name} に含まれていません。無視されます。'
+                warnings.append(msg)
+                logger.warn(msg)
 
         # ここでは ReExecute しない
-        pass
+        if with_warning:
+            return warnings
+        else:
+            return None
 
-    def update_model(self, parameters: 'pd.DataFrame') -> None:
+    def update_model(self, parameters: 'pd.DataFrame', with_warning=False) -> Optional[List[str]]:
         """Updates the analysis model only."""
 
         self.parameters = parameters.copy()
 
         # 変数の更新
-        self.update_parameter(parameters)
+        warnings = self.update_parameter(parameters, with_warning)
 
         # 設計変数に従ってモデルを再構築
         self._call_femtet_api(
@@ -538,8 +512,11 @@ class FemtetInterface(FEMInterface):
             is_Gaudi_method=True,
         )
 
+        if with_warning:
+            return warnings or []
+
     def solve(self) -> None:
-        """Execute FEM analysis (with updated model)."""
+        """Execute FEM analysis."""
         # # メッシュを切る
         self._call_femtet_api(
             self.Femtet.Gaudi.Mesh,
@@ -578,292 +555,11 @@ class FemtetInterface(FEMInterface):
         """Force to terminate connected Femtet."""
         util.close_femtet(self.Femtet.hWnd, timeout, force)
 
-    def setup_before_parallel(self, client):
+    def _setup_before_parallel(self, client):
         client.upload_file(
             self.kwargs['femprj_path'],
             False
         )
 
-
-class NoFEM(FEMInterface):
-    """Interface with no FEM for debug."""
-    def update(self, parameters: pd.DataFrame) -> None:
-        pass
-
-
-class FemtetWithNXInterface(FemtetInterface):
-    """Femtet with NX interface class.
-
-    Args:
-        prt_path: The path to the prt file.
-    
-    For details of The other arguments, see ``FemtetInterface``.
-
-    """
-
-    _JOURNAL_PATH = os.path.abspath(os.path.join(here, '_FemtetWithNX/update_model.py'))
-
-    def __init__(
-            self,
-            prt_path,
-            femprj_path=None,
-            model_name=None,
-            connect_method='auto',
-            strictly_pid_specify=True,
-    ):
-
-        # check NX installation
-        self.run_journal_path = os.path.join(os.environ.get('UGII_BASE_DIR'), 'NXBIN', 'run_journal.exe')
-        if not os.path.isfile(self.run_journal_path):
-            raise FileNotFoundError(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
-
-        # 引数の処理
-        # dask サブプロセスのときは prt_path を worker space から取るようにする
-        try:
-            worker = get_worker()
-            space = worker.local_directory
-            self.prt_path = os.path.join(space, os.path.basename(prt_path))
-        except ValueError:  # get_worker に失敗した場合
-            self.prt_path = os.path.abspath(prt_path)
-
-        # FemtetInterface の設定 (femprj_path, model_name の更新など)
-        # + restore 情報の上書き
-        super().__init__(
-            femprj_path=femprj_path,
-            model_name=model_name,
-            connect_method=connect_method,
-            strictly_pid_specify=strictly_pid_specify,
-            prt_path=self.prt_path,
-        )
-
-
-    def check_param_value(self, name):
-        """Override FemtetInterface.check_param_value().
-        
-        Do nothing because the parameter can be registered
-        to not only .femprj but also .prt.
-        
-        """
-        pass
-
-    def setup_before_parallel(self, client):
-        client.upload_file(
-            self.kwargs['prt_path'],
-            False
-        )
-        super().setup_before_parallel(client)
-
-    def update_model(self, parameters: 'pd.DataFrame') -> None:
-        """Update .x_t"""
-
-        self.parameters = parameters.copy()
-
-        # Femtet が参照している x_t パスを取得する
-        x_t_path = self.Femtet.Gaudi.LastXTPath
-
-        # 前のが存在するならば消しておく
-        if os.path.isfile(x_t_path):
-            os.remove(x_t_path)
-
-        # 変数の json 文字列を作る
-        tmp_dict = {}
-        for i, row in parameters.iterrows():
-            tmp_dict[row['name']] = row['value']
-        str_json = json.dumps(tmp_dict)
-
-        # NX journal を使ってモデルを編集する
-        env = os.environ.copy()
-        subprocess.run(
-            [self.run_journal_path, self._JOURNAL_PATH, '-args', self.prt_path, str_json, x_t_path],
-            env=env,
-            shell=True,
-            cwd=os.path.dirname(self.prt_path)
-        )
-
-        # この時点で x_t ファイルがなければ NX がモデル更新に失敗しているはず
-        if not os.path.isfile(x_t_path):
-            raise ModelError
-
-        # モデルの再インポート
-        self._call_femtet_api(
-            self.Femtet.Gaudi.ReExecute,
-            False,
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
-            is_Gaudi_method=True,
-        )
-
-        # 処理を確定
-        self._call_femtet_api(
-            self.Femtet.Redraw,
-            False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
-            is_Gaudi_method=True,
-        )
-
-        # femprj モデルの変数も更新
-        super().update_model(parameters)
-
-
-class FemtetWithSolidworksInterface(FemtetInterface):
-
-    # 定数の宣言
-    swThisConfiguration = 1  # https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swInConfigurationOpts_e.html
-    swAllConfiguration = 2
-    swSpecifyConfiguration = 3  # use with ConfigName argument
-    swSaveAsCurrentVersion = 0
-    swSaveAsOptions_Copy = 2  #
-    swSaveAsOptions_Silent = 1  # https://help.solidworks.com/2021/english/api/swconst/solidworks.interop.swconst~solidworks.interop.swconst.swsaveasoptions_e.html
-    swSaveWithReferencesOptions_None = 0  # https://help-solidworks-com.translate.goog/2023/english/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swSaveWithReferencesOptions_e.html?_x_tr_sl=auto&_x_tr_tl=ja&_x_tr_hl=ja&_x_tr_pto=wapp
-    swDocPART = 1  # https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swDocumentTypes_e.html
-
-    def __init__(
-            self,
-            sldprt_path,
-            femprj_path=None,
-            model_name=None,
-            connect_method='auto',
-            strictly_pid_specify=True,
-    ):
-        # 引数の処理
-        # dask サブプロセスのときは space 直下の sldprt_path を参照する
-        try:
-            worker = get_worker()
-            space = worker.local_directory
-            self.sldprt_path = os.path.join(space, os.path.basename(sldprt_path))
-        except ValueError:  # get_worker に失敗した場合
-            self.sldprt_path = os.path.abspath(sldprt_path)
-
-        # FemtetInterface の設定 (femprj_path, model_name の更新など)
-        # + restore 情報の上書き
-        super().__init__(
-            femprj_path=femprj_path,
-            model_name=model_name,
-            connect_method=connect_method,
-            strictly_pid_specify=strictly_pid_specify,
-            sldprt_path=self.sldprt_path,
-        )
-
-    def initialize_sldworks_connection(self):
-        # SolidWorks を捕まえ、ファイルを開く
-        self.swApp = DispatchEx('SLDWORKS.Application')
-        self.swApp.Visible = True
-
-        # open model
-        self.swApp.OpenDoc(self.sldprt_path, self.swDocPART)
-        self.swModel = self.swApp.ActiveDoc
-        self.swEqnMgr = self.swModel.GetEquationMgr
-        self.nEquation = self.swEqnMgr.GetCount
-
-    def check_param_value(self, param_name):
-        """Override FemtetInterface.check_param_value().
-        
-        Do nothing because the parameter can be registered
-        to not only .femprj but also .SLDPRT.
-        
-        """
-        pass
-
-    def setup_before_parallel(self, client):
-        client.upload_file(
-            self.kwargs['sldprt_path'],
-            False
-        )
-        super().setup_before_parallel(client)
-
-    def setup_after_parallel(self):
-        CoInitialize()
-        self.initialize_sldworks_connection()
-
-    def update_model(self, parameters: pd.DataFrame):
-        """Update .x_t"""
-
-        self.parameters = parameters.copy()
-
-        # Femtet が参照している x_t パスを取得する
-        x_t_path = self.Femtet.Gaudi.LastXTPath
-
-        # 前のが存在するならば消しておく
-        if os.path.isfile(x_t_path):
-            os.remove(x_t_path)
-
-        # solidworks のモデルの更新
-        self.update_sw_model(parameters)
-
-        # export as x_t
-        self.swModel.SaveAs(x_t_path)
-
-        # 30 秒待っても x_t ができてなければエラー(COM なので)
-        timeout = 30
-        start = time()
-        while True:
-            if os.path.isfile(x_t_path):
-                break
-            if time()-start > timeout:
-                raise ModelError('モデル再構築に失敗しました')
-            sleep(1)
-
-        # モデルの再インポート
-        self._call_femtet_api(
-            self.Femtet.Gaudi.ReExecute,
-            False,
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
-            is_Gaudi_method=True,
-        )
-
-        # 処理を確定
-        self._call_femtet_api(
-            self.Femtet.Redraw,
-            False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
-            is_Gaudi_method=True,
-        )
-
-        # femprj モデルの変数も更新
-        super().update_model(parameters)
-
-    def update_sw_model(self, parameters: pd.DataFrame):
-        """Update .sldprt"""
-        # df を dict に変換
-        user_param_dict = {}
-        for i, row in parameters.iterrows():
-            user_param_dict[row['name']] = row['value']
-
-        # プロパティを退避
-        buffer_aso = self.swEqnMgr.AutomaticSolveOrder
-        buffer_ar = self.swEqnMgr.AutomaticRebuild
-        self.swEqnMgr.AutomaticSolveOrder = False
-        self.swEqnMgr.AutomaticRebuild = False
-
-        for i in range(self.nEquation):
-            # name, equation の取得
-            current_equation = self.swEqnMgr.Equation(i)
-            current_name = self._get_name_from_equation(current_equation)
-            # 対象なら処理
-            if current_name in list(user_param_dict.keys()):
-                new_equation = f'"{current_name}" = {user_param_dict[current_name]}'
-                self.swEqnMgr.Equation(i, new_equation)
-
-        # 式の計算
-        # noinspection PyStatementEffect
-        self.swEqnMgr.EvaluateAll  # always returns -1
-
-        # プロパティをもとに戻す
-        self.swEqnMgr.AutomaticSolveOrder = buffer_aso
-        self.swEqnMgr.AutomaticRebuild = buffer_ar
-
-        # 更新する（ここで失敗はしうる）
-        result = self.swModel.EditRebuild3  # モデル再構築
-        if not result:
-            raise ModelError('モデル再構築に失敗しました')
-
-    def _get_name_from_equation(self, equation:str):
-        pattern = r'^\s*"(.+?)"\s*$'
-        matched = re.match(pattern, equation.split('=')[0])
-        if matched:
-            return matched.group(1)
-        else:
-            return None
+    def _version(self):
+        return _version(Femtet=self.Femtet)

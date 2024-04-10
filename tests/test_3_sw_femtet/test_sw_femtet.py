@@ -60,7 +60,7 @@ def test_cad_sw():
     femopt.add_objective(x, 'x(mm)', args=femopt.opt)
     femopt.add_objective(y, 'y(mm)')
     femopt.add_objective(z, 'z(mm)')
-    femopt.main(n_trials=10)
+    femopt.optimize(n_trials=10)
     femopt.terminate_all()
 
 

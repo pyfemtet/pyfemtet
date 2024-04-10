@@ -186,6 +186,7 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple
 
     Args:
         timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
+        subprocess_log_prefix (str, optional): The prefix of log message.
 
     Raises:
         FemtetConnectionTimeoutError: Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched).
@@ -459,6 +460,10 @@ def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemte
         # warnings.warn(txt)
 
     return Femtet, my_pid
+
+
+def _debug():
+    launch_and_dispatch_femtet(5)
 
 
 if __name__ == '__main__':

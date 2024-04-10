@@ -60,12 +60,12 @@ def test_2_NoFEM_random_seed():
     femopt.add_parameter('r（半径）', .5, 0, 1)
     femopt.add_parameter('theta（角度1）', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
     femopt.add_parameter('fai（角度2）', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
-    femopt.add_objective(objective_x, 'x(mm)', args=femopt)
-    femopt.add_objective(objective_y, 'y(mm)', args=femopt)
-    femopt.add_objective(objective_z, 'z(mm)', args=femopt, direction=-1)
-    femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt)  # 上書き
-    femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt, strict=False)
-    femopt.main(n_trials=30)
+    femopt.add_objective(objective_x, 'x(mm)', args=opt)
+    femopt.add_objective(objective_y, 'y(mm)', args=opt)
+    femopt.add_objective(objective_z, 'z(mm)', args=opt, direction=-1)
+    femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=opt)  # 上書き
+    femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=opt, strict=False)
+    femopt.optimize(n_trials=30)
 
     if record:
         femopt.history.actor_data.to_csv(
@@ -82,7 +82,7 @@ def test_2_NoFEM_random_seed():
 
         femopt.terminate_all()
 
-        assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.0001
+        assert np.sum(np.abs(def_df.values - ref_df.values)) < 0.0001, 'seed 設定が反映されていません。'
 
 
 def sub():
@@ -99,7 +99,7 @@ def sub():
     femopt.add_objective(objective_z, 'z(mm)', args=femopt.opt, direction=-1)
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=femopt.opt)  # 上書き
     femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
-    femopt.main(n_trials=5)
+    femopt.optimize(n_trials=5)
     femopt.terminate_all()
 
 
@@ -115,7 +115,7 @@ def test_2_2_restart():
         os.remove('test_2_2_restart.uilog')
     sub()
     sub()
-    df = pd.read_csv('test_2_2_restart.csv', encoding='shift-jis')
+    df = pd.read_csv('test_2_2_restart.csv', encoding='cp932', header=2)
     assert len(df) == 10
 
 
@@ -130,16 +130,22 @@ def simple():
     femopt.add_parameter('theta', -np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
     femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
     femopt.add_objective(objective_x, 'x', args=femopt.opt)
-    femopt.add_objective(objective_y, 'y', args=femopt.opt)
-    femopt.add_objective(objective_z, 'z', args=femopt.opt)
+    femopt.add_objective(objective_y, 'y座標', args=femopt.opt)
+    # femopt.add_objective(objective_z, 'z', args=femopt.opt)
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
+    femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
     femopt.set_random_seed(42)
-    femopt.main(n_trials=30, n_parallel=3, wait_setup=True)
+    femopt.optimize(n_trials=30, n_parallel=3, wait_setup=True)
+    # input('enter to quit...')
     femopt.terminate_all()
 
 
 if __name__ == '__main__':
-    simple()
-    # test_2_2_restart()
+    # min_sleep_sec = 3
+    # random_max_sleep_sec = 1
+    # simple()
+
+    test_2_2_restart()
+
     # record = False
     # test_2_NoFEM_random_seed()

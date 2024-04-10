@@ -51,27 +51,27 @@ def main(py_script_path):
     util.close_femtet(_get_hwnds(pid)[0], 1, True)
 
 
-def test_gau_ex08_parametric():
+def test_sample_gau_ex08_parametric():
     py_script_path = os.path.join(SAMPLE_DIR, 'gau_ex08_parametric.py')
     main(py_script_path)
 
 
-def test_her_ex40_parametric():
+def test_sample_her_ex40_parametric():
     py_script_path = os.path.join(SAMPLE_DIR, 'her_ex40_parametric.py')
     main(py_script_path)
 
 
-def test_wat_ex14_parametric():
+def test_sample_wat_ex14_parametric():
     py_script_path = os.path.join(SAMPLE_DIR, 'wat_ex14_parametric.py')
     main(py_script_path)
 
 
-def test_nx_ex01():
+def test_cad_sample_nx_ex01():
     py_script_path = os.path.join(SAMPLE_DIR, 'NX_ex01', 'NX_ex01.py')
     main(py_script_path)
 
 
-def test_sldworks_ex01():
+def test_cad_sample_sldworks_ex01():
     py_script_path = os.path.join(SAMPLE_DIR, 'Sldworks_ex01', 'Sldworks_ex01.py')
     main(py_script_path)
 
