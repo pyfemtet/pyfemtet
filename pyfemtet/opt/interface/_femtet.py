@@ -446,27 +446,48 @@ class FemtetInterface(FEMInterface):
             error_message='解析モデルが開かれていません',
         )
 
-        # Femtet の設計変数の更新
-        existing_variable_names = self._call_femtet_api(
-            fun=self.Femtet.GetVariableNames_py,
-            ret_if_failed=False,  # 意味がない
-            if_error=ModelError,  # 生きてるのに失敗した場合
-            error_message=f'GetVariableNames_py に失敗しました。',
-            is_Gaudi_method=True,
-        )
+        if self._version() >= _version(2023, 1, 1):
+            # Femtet の設計変数の更新
+            existing_variable_names = self._call_femtet_api(
+                fun=self.Femtet.GetVariableNames_py,
+                ret_if_failed=False,  # 意味がない
+                if_error=ModelError,  # 生きてるのに失敗した場合
+                error_message=f'GetVariableNames_py に失敗しました。',
+                is_Gaudi_method=True,
+            )
 
-        # 変数を含まないプロジェクトである場合
-        if existing_variable_names is None:
-            if with_warning:
-                return ['解析モデルに変数が含まれていません。']
-            else:
-                return None
+            # 変数を含まないプロジェクトである場合
+            if existing_variable_names is None:
+                if with_warning:
+                    return ['解析モデルに変数が含まれていません。']
+                else:
+                    return None
 
-        warnings = []
-        for i, row in parameters.iterrows():
-            name = row['name']
-            value = row['value']
-            if name in existing_variable_names:
+            # update
+            warnings = []
+            for i, row in parameters.iterrows():
+                name = row['name']
+                value = row['value']
+                if name in existing_variable_names:
+                    self._call_femtet_api(
+                        fun=self.Femtet.UpdateVariable,
+                        ret_if_failed=False,
+                        if_error=ModelError,  # 生きてるのに失敗した場合
+                        error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
+                        is_Gaudi_method=True,
+                        args=(name, value),
+                    )
+                else:
+                    msg = f'変数 {name} は 解析モデル {self.model_name} に含まれていません。無視されます。'
+                    warnings.append(msg)
+                    logger.warn(msg)
+
+        else:
+            # update without parameter check
+            warnings = []
+            for i, row in parameters.iterrows():
+                name = row['name']
+                value = row['value']
                 self._call_femtet_api(
                     fun=self.Femtet.UpdateVariable,
                     ret_if_failed=False,
@@ -475,10 +496,6 @@ class FemtetInterface(FEMInterface):
                     is_Gaudi_method=True,
                     args=(name, value),
                 )
-            else:
-                msg = f'変数 {name} は 解析モデル {self.model_name} に含まれていません。無視されます。'
-                warnings.append(msg)
-                logger.warn(msg)
 
         # ここでは ReExecute しない
         if with_warning:
