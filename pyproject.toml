@@ -36,7 +36,7 @@ sphinx-autobuild = "==2021.3.14"
 pytest = "^7.4.3"
 sphinx-design = "^0.5.0"
 bokeh = "^3.3.3"
-pytest-dashboard = "^0.0.2"
+pytest-dashboard = "*"
 
 [tool.poetry.scripts]
 opt-show = "pyfemtet.opt.visualization:entry_point"
