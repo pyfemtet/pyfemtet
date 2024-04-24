@@ -155,6 +155,12 @@ class OptunaOptimizer(AbstractOptimizer):
 
                 # add_initial_parameter で追加された初期値
                 for prm, prm_set_name in self.additional_initial_parameter:
+                    if type(prm) is dict:
+                        assert prm.keys() == params.keys(), '設定されたパラメータ名と add_init_parameter で追加されたパラメータ名が一致しません。'
+                    else:
+                        assert len(prm) == len(params.keys()), '設定されたパラメータ数と add_init_parameter で追加されたパラメータ数が一致しません。'
+                        prm = dict(zip(params.keys(), prm))
+
                     self.study.enqueue_trial(
                         prm,
                         user_attrs={"message": prm_set_name}
