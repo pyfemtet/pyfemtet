@@ -97,3 +97,4 @@ if __name__ == '__main__':
     # 最適化の実行
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=20)
+    femopt.terminate_all()
