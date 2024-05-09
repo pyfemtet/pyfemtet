@@ -48,7 +48,9 @@ def main(py_script_path):
     run([sys.executable, py_script_path], check=True)
 
     # shutdown Femtet
-    util.close_femtet(_get_hwnds(pid)[0], 1, True)
+    sleep(1)
+    util.close_process(pid)
+    sleep(1)
 
 
 def test_sample_gau_ex08_parametric():
