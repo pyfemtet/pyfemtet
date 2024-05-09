@@ -126,7 +126,7 @@ class FemtetInterface(FEMInterface):
                     sleep(1)
                 sleep(1)
 
-            except AttributeError:  # already dead
+            except (AttributeError, OSError):  # already dead
                 pass
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
