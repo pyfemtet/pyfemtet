@@ -19,4 +19,5 @@ PyFemtet.egg-info
 /dist
 /.venv
 /build
-docs/index.html
+
+*.mo
