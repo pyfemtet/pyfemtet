@@ -1,0 +1,20 @@
+pyfemtet.opt package
+====================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyfemtet.opt.interface
+   pyfemtet.opt.opt
+   pyfemtet.opt.visualization
+
+Module contents
+---------------
+
+.. automodule:: pyfemtet.opt
+   :members:
+   :undoc-members:
+   :show-inheritance:
