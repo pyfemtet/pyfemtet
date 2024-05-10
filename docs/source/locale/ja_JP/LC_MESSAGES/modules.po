@@ -1,0 +1,857 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, Kazuma Naito
+# This file is distributed under the same license as the PyFemtet Project package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PyFemtet Project \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-10 16:07+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja_JP\n"
+"Language-Team: ja_JP <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.14.0\n"
+
+#: ../../source/modules/modules.rst:2
+msgid "pyfemtet"
+msgstr ""
+
+#: ../../source/modules/pyfemtet.rst:2
+msgid "pyfemtet package"
+msgstr ""
+
+#: ../../source/modules/pyfemtet.opt.rst:5 ../../source/modules/pyfemtet.rst:5
+msgid "Subpackages"
+msgstr ""
+
+#: ../../source/modules/pyfemtet.rst:13
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/modules/pyfemtet.rst:16
+msgid "pyfemtet.core module"
+msgstr ""
+
+#: of pyfemtet.core.FemtetAutomationError:1 pyfemtet.core.MeshError:1
+#: pyfemtet.core.ModelError:1 pyfemtet.core.SolveError:1
+#: pyfemtet.dispatch_extensions.DispatchExtensionException:1
+msgid "Bases: :py:class:`Exception`"
+msgstr ""
+
+#: of pyfemtet.core.FemtetAutomationError:1
+msgid "Exception raised for errors in automating Femtet."
+msgstr ""
+
+#: of pyfemtet.core.MeshError:1
+msgid "Exception raised for errors in the meshing."
+msgstr ""
+
+#: of pyfemtet.core.MeshError:3 pyfemtet.core.ModelError:3
+#: pyfemtet.core.SolveError:3
+msgid "If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible."
+msgstr ""
+
+#: of pyfemtet.core.ModelError:1
+msgid "Exception raised for errors in the model update."
+msgstr ""
+
+#: of pyfemtet.core.SolveError:1
+msgid "Exception raised for errors in the solver."
+msgstr ""
+
+#: ../../source/modules/pyfemtet.rst:24
+msgid "pyfemtet.dispatch\\_extensions module"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.FemtetConnectionTimeoutError:1
+#: pyfemtet.dispatch_extensions.FemtetNotFoundException:1
+msgid "Bases: :py:class:`~pyfemtet.dispatch_extensions.DispatchExtensionException`"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.FemtetConnectionTimeoutError:1
+msgid "Raises when connection trials is timed out."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.FemtetNotFoundException:1
+msgid "Raises when (specific) Femtet process doesn't exist."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.IFemtet:1 pyfemtet.opt._femopt.FEMOpt:1
+msgid "Bases: :py:class:`object`"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.IFemtet:1
+msgid "IDispatch object to contact with Femtet."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.IFemtet:13
+msgid "Usage:"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.IFemtet:9
+msgid "or"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.IFemtet:15
+msgid "This is just an dummy class for type hint. More detail usage, see Femtet Macro Help."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_femtet:1
+msgid "Connect to existing Femtet process."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_femtet
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
+#: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
+#: pyfemtet.opt._femopt.FEMOpt pyfemtet.opt._femopt.FEMOpt.add_constraint
+#: pyfemtet.opt._femopt.FEMOpt.add_objective
+#: pyfemtet.opt._femopt.FEMOpt.add_parameter
+#: pyfemtet.opt._femopt.FEMOpt.get_parameter
+#: pyfemtet.opt._femopt.FEMOpt.optimize
+#: pyfemtet.opt._femopt.FEMOpt.set_monitor_host
+#: pyfemtet.opt._femopt.FEMOpt.set_random_seed
+#: pyfemtet.opt.interface._base.FEMInterface
+#: pyfemtet.opt.interface._femtet.FemtetInterface
+#: pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface
+#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+#: pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter
+msgid "Parameters"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_femtet:3
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet:9
+#: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet:3
+msgid "Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_femtet:5
+msgid "The prefix of log message."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_femtet
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
+#: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
+#: pyfemtet.opt._femopt.FEMOpt.add_parameter
+#: pyfemtet.opt._femopt.FEMOpt.get_parameter
+#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+msgid "Raises"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_femtet:8
+msgid "Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched)."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_femtet
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
+#: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
+#: pyfemtet.opt._femopt.FEMOpt.get_parameter
+#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+msgid "Return type"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet:1
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:1
+msgid "Connect Femtet whose process id is specified."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet:3
+msgid "This is a wrapper function of `dispatch_specific_femtet_core`. When this function is called by dask worker, the connection is processed exclusively."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet:7
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:26
+msgid "Process id of Femtet that you want to connect."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet:12
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:31
+msgid "Femtet whose process id is `pid` doesn't exist."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet:13
+#: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:32
+#: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet:9
+msgid "Connection trial takes over `timeout` seconds by some reason."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:5
+msgid "Once Femtet is connected a python process, the python process can only connect it during the process lifetime even if the process runs this function."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:10
+msgid "Example"
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:11
+msgid "If you have 2 free Femtet processes (their pid is 1000 and 1001), you can only connect to first connected Femtet and cannot change the connection."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:21
+msgid "If you want to reconnect another process, please restart python script or interpreter."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:23
+msgid "If you want to connect 2 more Femtet processes from single script or interprete, please consider parallel processing."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.dispatch_specific_femtet_core:28
+msgid "Seconds to wait for connection. Defaults to 10."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.launch_and_dispatch_femtet:1
+msgid "Launch Femtet by new process and connect to it."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.launch_and_dispatch_femtet:5
+msgid "If True, try to connect the launched femtet process strictly. If False, launch new process but try to connect any connectable femtet."
+msgstr ""
+
+#: of pyfemtet.dispatch_extensions.launch_and_dispatch_femtet:8
+msgid "Launched Femtet is not found for some reason (i.e. failed to launch Femtet)."
+msgstr ""
+
+#: ../../source/modules/pyfemtet.rst:32
+msgid "pyfemtet.logger module"
+msgstr ""
+
+#: of pyfemtet.logger.get_logger:1
+msgid "Return a logger with a default ColoredFormatter."
+msgstr ""
+
+#: ../../source/modules/pyfemtet.opt.interface.rst:5
+#: ../../source/modules/pyfemtet.opt.opt.rst:5
+#: ../../source/modules/pyfemtet.opt.rst:15
+#: ../../source/modules/pyfemtet.opt.visualization.rst:5
+#: ../../source/modules/pyfemtet.rst:40
+msgid "Module contents"
+msgstr ""
+
+#: ../../source/modules/pyfemtet.opt.rst:2
+msgid "pyfemtet.opt package"
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface:1
+#: pyfemtet.opt.opt._base.AbstractOptimizer:1
+msgid "Bases: :py:class:`~abc.ABC`"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:1
+msgid "Abstract base class for an interface of optimization library."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:5
+msgid "The finite element method object."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt pyfemtet.opt.opt._base.AbstractOptimizer
+#: pyfemtet.opt.opt._base.AbstractOptimizer:13
+msgid "type"
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:16 pyfemtet.opt.opt._base.AbstractOptimizer:7
+msgid "FEMInterface"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:11
+msgid "The class of the finite element method object."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:17
+msgid "The keyword arguments used to instantiate the finite element method object."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:70
+#: pyfemtet.opt.opt._base.AbstractOptimizer:19
+#: pyfemtet.opt.opt._base.AbstractOptimizer:31
+#: pyfemtet.opt.opt._base.AbstractOptimizer:37
+msgid "dict"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:23
+msgid "The parameters used in the optimization."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:25
+msgid "pd.DataFrame"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:29
+msgid "A dictionary containing the objective functions used in the optimization."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:35
+msgid "A dictionary containing the constraint functions used in the optimization."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:41
+msgid "The status of the entire optimization process."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:40
+#: pyfemtet.opt.opt._base.AbstractOptimizer:43
+#: pyfemtet.opt.opt._base.AbstractOptimizer:55
+msgid "OptimizationStatus"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:47
+msgid "An actor object that records the history of each iteration in the optimization process."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:46
+#: pyfemtet.opt.opt._base.AbstractOptimizer:49
+msgid "History"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:53
+msgid "The status of each worker in a distributed computing environment."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:59
+msgid "A message associated with the current state of the optimization process."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:52
+#: pyfemtet.opt.opt._base.AbstractOptimizer:61
+msgid "str"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:65
+msgid "The random seed used for random number generation during the optimization process."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:67
+#: pyfemtet.opt.opt._base.AbstractOptimizer:79
+msgid "int or None"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:71
+msgid "The maximum time allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:73
+msgid "float or int or None"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:77
+msgid "The maximum number of trials allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:83
+msgid "Flag indicating if running on a distributed computing cluster."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer:85
+msgid "bool"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer.f:1
+msgid "Get x, update fem analysis, return objectives (and constraints)."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:1
+msgid "Returns the parameters in the specified format."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:3
+msgid "The desired format of the parameters. Can be 'df' (DataFrame), 'values', or 'dict'. Defaults to 'dict'."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.get_parameter
+#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+msgid "Returns"
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:6
+msgid "The parameters in the specified format."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:9
+#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:9
+msgid "If an invalid format is provided."
+msgstr ""
+
+#: of pyfemtet.opt.opt._base.AbstractOptimizer.run:1
+msgid "Start calcuration using optimization library."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface:1
+msgid "Abstract base class for the interface with FEM software."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface:3
+msgid "Stores information necessary to restore FEMInterface instance in a subprocess."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface:5
+msgid "The concrete class should call super().__init__() with the desired arguments when restoring."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface:7
+msgid "keyword arguments for FEMInterface (re)constructor."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
+msgid "Checks the value of a parameter in the FEM model (if implemented in concrete class)."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface.update:1
+#: pyfemtet.opt.interface._base.NoFEM.update:1
+msgid "Updates the FEM analysis based on the proposed parameters."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface.update_parameter:1
+msgid "Updates only FEM variables (if implemented in concrete class)."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:1
+msgid "Class to control FEM interface and optimizer."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:3
+msgid "The finite element method interface. Defaults to None. If None, automatically set to FemtetInterface."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:7
+#, python-format
+msgid "The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:9
+msgid "If cluster processing, set this parameter like \"tcp://xxx.xxx.xxx.xxx:xxxx\"."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:14
+msgid "The interface of FEM system."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:20
+msgid "The optimizer."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:22
+msgid "AbstractOptimizer"
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:26
+msgid "Dask scheduler address. If None, LocalCluster will be used."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:28
+msgid "str or None"
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:32
+msgid "Dask client. For detail, see dask documentation."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:34
+msgid "Client"
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:38
+msgid "Entire process status. This contains dask actor."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:44
+msgid "History of optimization process. This contains dask actor."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:50
+msgid "The path to the history (.csv) file."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:56
+msgid "Process status of each dask worker."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:58
+msgid "[OptimizationStatus]"
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:62
+msgid "Future of monitor server process. This is dask future."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:64
+msgid "Future"
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt:68
+msgid "Monitor server parameter. Currently, the valid arguments are hostname and port."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:1
+msgid "Adds a constraint to the optimization problem."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:3
+msgid "The constraint function."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:5
+msgid "The name of the constraint. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:7
+msgid "The lower bound of the constraint. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:9
+msgid "The upper bound of the constraint. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:11
+msgid "Flag indicating if it is a strict constraint. Defaults to True."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:13
+#: pyfemtet.opt._femopt.FEMOpt.add_constraint:15
+msgid "Additional arguments for the constraint function. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:18
+#: pyfemtet.opt._femopt.FEMOpt.add_objective:14
+msgid "If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_constraint:20
+msgid "If name is None, name is a string with the prefix `\"cns_\"` followed by a sequential number."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_objective:1
+msgid "Adds an objective to the optimization problem."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_objective:3
+msgid "The objective function."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_objective:5
+msgid "The name of the objective. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_objective:7
+msgid "The optimization direction. Defaults to 'minimize'."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_objective:9
+msgid "Additional arguments for the objective function. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_objective:11
+msgid "Additional keyword arguments for the objective function. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_objective:16
+msgid "If name is None, name is a string with the prefix `\"obj_\"` followed by a sequential number."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:1
+msgid "Adds a parameter to the optimization problem."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:3
+msgid "The name of the parameter."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:5
+msgid "The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:7
+msgid "The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:9
+msgid "The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:11
+msgid "Additional information about the parameter. Defaults to ''."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:14
+msgid "If initial_value is not specified and the value for the given name is also not specified."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:1
+msgid "Returns the parameter in a specified format."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:3
+msgid "The desired output format. Defaults to 'dict'. Valid formats are 'values', 'df' and 'dict'."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:6
+msgid "The parameter data converted into the specified format."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:1
+msgid "Runs the main optimization process."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:3
+msgid "The number of trials. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:5
+msgid "The number of parallel processes. Defaults to 1."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:7
+msgid "The maximum amount of time in seconds that each trial can run. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:9
+msgid "Wait for all workers launching FEM system. Defaults to True."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:12
+msgid "If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:14
+msgid "If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:16
+msgid "If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.optimize:20
+msgid "If ``n_parallel`` >= 2 and ``fem`` is a subclass of ``FemtetInterface``, the ``strictly_pid_specify`` of subprocess is set to ``False``. So **it is recommended to close all other Femtet processes before running.**"
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:1
+msgid "Sets up the monitor server with the specified host and port."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:3
+msgid "The hostname or IP address of the monitor server."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:5
+msgid "The port number of the monitor server. If None, ``8080`` will be used. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:10
+msgid "Specifying host ``0.0.0.0`` allows viewing monitor from all computers on the local network."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:12
+msgid "However, please note that in this case, it will be visible to all users on the local network."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:15
+msgid "If no hostname is specified, the monitor server will be hosted on ``localhost``."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_random_seed:1
+msgid "Sets the random seed for reproducibility."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.set_random_seed:3
+msgid "The random seed value to be set."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.terminate_all:1
+msgid "Try to terminate all launched processes."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.terminate_all:3
+msgid "If distributed computing, Scheduler and Workers will NOT be terminated."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.NoFEM:1
+#: pyfemtet.opt.interface._femtet.FemtetInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`"
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:1
+msgid "Concrete class for the interface with Femtet."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:3
+msgid "The path to the .femprj file. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:5
+msgid "The name of the analysis model. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:7
+msgid "The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:9
+msgid "If True and connect_method=='new', search launched Femtet process strictly based on its process id."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:14
+msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:20
+msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.check_param_value:1
+msgid "Check param_name is set in femprj file or not."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.check_param_value:5
+msgid "This function works with Femtet version 2023.1.1 and above. Otherwise, no check is performed."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:1
+msgid "Connects to a Femtet process."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:3
+msgid "The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'new'."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:5
+msgid "The process ID of an existing Femtet process and wanted to connect."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:10
+msgid "When connect_method is 'new', starts a new Femtet process and connects to it. **`pid` will be ignored.**"
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:15
+msgid "When 'existing', connect to an existing Femtet process. However, if there are no Femtets to which it can connect (i.e. already connected to another Python or Excel process), it throws an exception."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:22
+msgid "When set to 'auto', first tries 'existing', and if that fails, connects with 'new'. If `pid` is specified and failed to connect, it will not try existing another Femtet process."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:1
+msgid "Returns connected femtet process is existing or not."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.open:1
+msgid "Open specific analysis model with connected Femtet."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.quit:1
+msgid "Force to terminate connected Femtet."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.solve:1
+msgid "Execute FEM analysis."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.update:1
+msgid "See :func:`FEMInterface.update`"
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.update_model:1
+msgid "Updates the analysis model only."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:1
+msgid "Update parameter of femprj."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:1
+#: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet.FemtetInterface`"
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:1
+msgid "Femtet with NX interface class."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:3
+msgid "The path to the prt file."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:5
+msgid "For details of The other arguments, see ``FemtetInterface``."
+msgstr ""
+
+#: of
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.check_param_value:1
+#: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.check_param_value:1
+msgid "Override FemtetInterface.check_param_value()."
+msgstr ""
+
+#: of
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.check_param_value:3
+msgid "Do nothing because the parameter can be registered to not only .femprj but also .prt."
+msgstr ""
+
+#: of
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.update_model:1
+#: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_model:1
+msgid "Update .x_t"
+msgstr ""
+
+#: of
+#: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.check_param_value:3
+msgid "Do nothing because the parameter can be registered to not only .femprj but also .SLDPRT."
+msgstr ""
+
+#: of
+#: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_sw_model:1
+msgid "Update .sldprt"
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.NoFEM:1
+msgid "Interface with no FEM for debug."
+msgstr ""
+
+#: of pyfemtet.opt.opt._optuna.OptunaOptimizer:1
+msgid "Bases: :py:class:`~pyfemtet.opt.opt._base.AbstractOptimizer`"
+msgstr ""
+
+#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:1
+msgid "Add additional initial parameter for evaluate."
+msgstr ""
+
+#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:3
+msgid "The parameter set is ignored if the main() is continued."
+msgstr ""
+
+#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:5
+msgid "Parameter to evaluate before run optimization algorithm."
+msgstr ""
+
+#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:7
+msgid "Optional. If specified, the name is saved in the history row. Default to None."
+msgstr ""
+
+#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.run:1
+msgid "Set random seed, sampler, study and run study.optimize()."
+msgstr ""
+
+#: ../../source/modules/pyfemtet.opt.interface.rst:2
+msgid "pyfemtet.opt.interface package"
+msgstr ""
+
+#: ../../source/modules/pyfemtet.opt.opt.rst:2
+msgid "pyfemtet.opt.opt package"
+msgstr ""
+
+#: ../../source/modules/pyfemtet.opt.visualization.rst:2
+msgid "pyfemtet.opt.visualization package"
+msgstr ""
+
+#: of pyfemtet.opt.visualization._monitor.ProcessMonitorApp:1
+#: pyfemtet.opt.visualization._monitor.ResultViewerApp:1
+msgid "Bases: :py:class:`~pyfemtet.opt.visualization._monitor.AppBase`"
+msgstr ""
+

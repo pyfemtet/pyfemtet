@@ -2120,6 +2120,26 @@ theme-rtd = ["sphinx-rtd-theme (>=1.0,<2.0)"]
 theme-sbt = ["sphinx-book-theme (>=1.0,<2.0)"]
 
 [[package]]
+name = "sphinx-intl"
+version = "2.2.0"
+description = "Sphinx utility that make it easy to translate and to apply translation."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "sphinx_intl-2.2.0-py3-none-any.whl", hash = "sha256:56ad5f360fae4aa1cb963448c802f141b55c87223bb32a7b29e936620bd1a381"},
+    {file = "sphinx_intl-2.2.0.tar.gz", hash = "sha256:66976a85d31624dfcb564059a6918f90b31669269bfe3f30b2d72e81f225ab20"},
+]
+
+[package.dependencies]
+babel = "*"
+click = "*"
+setuptools = "*"
+sphinx = "*"
+
+[package.extras]
+test = ["mock", "pytest"]
+
+[[package]]
 name = "sphinx-rtd-theme"
 version = "2.0.0"
 description = "Read the Docs theme for Sphinx"
@@ -2648,4 +2668,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = " >= 3.9.3, < 3.13"
-content-hash = "dabcb6a1f32aa4ec657082b41da9ea83db81919227cfb7d58c6650f277b2d877"
+content-hash = "bc0e1b0017e6f2ca1cb6b01a8148a031f2d4d0d02dae57d0902563d745427734"

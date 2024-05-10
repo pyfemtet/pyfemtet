@@ -1,0 +1,233 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, Kazuma Naito
+# This file is distributed under the same license as the PyFemtet Project package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PyFemtet Project \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-10 16:07+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja_JP\n"
+"Language-Team: ja_JP <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.14.0\n"
+
+#: ../../source/index.rst:219
+msgid "ホーム"
+msgstr "Home"
+
+#: ../../source/index.rst:2
+msgid "Welcome to PyFemtet's documentation!"
+msgstr ""
+
+#: ../../source/index.rst:14
+msgid "概要"
+msgstr "Abstruct"
+
+#: ../../source/index.rst:16
+msgid "**pyfemtet は ムラタソフトウェア製 CAE ソフト Femtet の拡張機能を提供します。**"
+msgstr "**pyfemtet provides extensions for Femtet, a CAE software developed by Murata Software.**"
+
+#: ../../source/index.rst:18
+msgid "pyfemtet はオープンソースライブラリであり、無償かつ商用利用可能です。"
+msgstr "pyfemtet is an open-source library and can be used free of charge for both non-commercial and commercial purposes."
+
+#: ../../source/index.rst:19
+msgid "Femtet 本体の使用にはライセンスが必要です。pyfemtet は Femtet 本体のライセンスを一切変更しません。"
+msgstr "A license is required to use the Femtet main body. pyfemtet does not alter the license of the Femtet main body in any way."
+
+#: ../../source/index.rst:20
+msgid "評価のための試用版 Femtet は ムラタソフトウェア にお問い合わせください。"
+msgstr "Please contact Murata Software for a trial version of Femtet for evaluation purposes."
+
+#: ../../source/index.rst:22
+msgid "➡ |Femtet|"
+msgstr "=> |Femtet|"
+
+#: ../../source/index.rst:26
+msgid "pyfemtet の主要機能"
+msgstr "Main Features of pyfemtet"
+
+#: ../../source/index.rst:28
+msgid "pyfemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。 現在、 **pyfemtet の唯一の機能は設計パラメータの最適化** であり、pyfemtet.opt サブパッケージとして実装されています。"
+msgstr "pyfemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of pyfemtet is design parameter optimization, which is implemented as a subpackage pyfemtet.opt."
+
+#: ../../source/index.rst:31
+msgid "pyfemtet.opt による最適化機能は、以下の特徴を有します。"
+msgstr "The optimization feature by pyfemtet.opt has the following characteristics:"
+
+#: ../../source/index.rst:33
+msgid "単目的および多目的の最適化"
+msgstr "Single-objective and multi-objective optimization"
+
+#: ../../source/index.rst:34
+msgid "プロセスモニタによるリアルタイム進行状況の表示"
+msgstr "Real-time progress display with process monitoring"
+
+#: ../../source/index.rst:35
+msgid "複数の Femtet インスタンスによる並列計算"
+msgstr "Parallel computation with multiple instances of Femtet"
+
+#: ../../source/index.rst:36
+msgid "Excel 等で分析が容易な csv 形式での結果出力"
+msgstr "Result output in easy-to-analyze csv format for Excel and other tools"
+
+#: ../../source/index.rst:40
+msgid "実施例"
+msgstr "Example of Implementation"
+
+#: ../../source/index.rst:44
+msgid "ソレノイドコイルのインダクタンス"
+msgstr "Inductance of a solenoid coil"
+
+#: ../../source/index.rst:52
+msgid "磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。"
+msgstr "In magnetic field analysis, the self-inductance of a finite-length solenoid coil is set to a specific value."
+
+#: ../../source/index.rst:55
+msgid "円形パッチアンテナの共振周波数"
+msgstr "Resonant frequency of a circular patch antenna"
+
+#: ../../source/index.rst:63
+msgid "電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。"
+msgstr "In electromagnetic wave analysis, the resonant frequency of a circular patch antenna is set to a specific value."
+
+#: ../../source/index.rst:68
+msgid ":doc:`pages/examples` セクションにより多くの実施例があります。"
+msgstr "There are more examples in the :doc:`pages/examples` section."
+
+#: ../../source/index.rst:72
+msgid "シンプルな API"
+msgstr "Simple API"
+
+#: ../../source/index.rst:74
+msgid "下記は多目的最適化の実施例です。 ``add_parameter()`` と ``add_objective()`` で問題を設定し、 ``main()`` で実施することができます。 それ以外は通常の Femtet のマクロスクリプトを使用します。 詳細な実施例は :doc:`pages/usage` セクションを確認してください。"
+msgstr "Below is an example of multi-objective optimization. You can set up the problem with add_parameter() and add_objective(), and then execute it with main(). For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the :doc:`pages/usage` section."
+
+#: ../../source/index.rst:104
+msgid "インストール"
+msgstr "Install"
+
+#: ../../source/index.rst:106
+msgid "pyfemtet は windows にのみ対応しています。"
+msgstr "pyfemtet is only available for Windows."
+
+#: ../../source/index.rst:110
+msgid "Python 及び Femtet がインストールされ Femtet のマクロが有効化されている環境では 単に ``pip install pyfemtet`` を実行してください。 以下の手順は、Python 及び Femtet のフルセットアップの手順です。"
+msgstr "In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run pip install pyfemtet. The following steps are for a full setup of Python and Femtet."
+
+#: ../../source/index.rst:116
+msgid "**Femtet（2023.0 以降）のインストール**"
+msgstr "Installation of Femtet (version 2023.0 or later)"
+
+#: ../../source/index.rst:118
+msgid "初めての方は、試用版または個人版のご利用をご検討ください。➡ |Femtet|"
+msgstr "For first-time users, please consider using the trial version or personal edition. => |Femtet|"
+
+#: ../../source/index.rst:122
+msgid "最新版以外の Femtet では制限される機能があります。"
+msgstr "Femtet versions other than the latest one have limited features."
+
+#: ../../source/index.rst:125
+msgid "**Femtet のマクロ有効化**"
+msgstr "Enabling Femtet macros"
+
+#: ../../source/index.rst:127
+msgid "Femtet インストール後にスタートメニューから 「マクロ機能を有効化する」を実行してください。 この手順には管理者権限が必要です。"
+msgstr "After installing Femtet, please run 'Enable Macro Function' from the start menu. This procedure requires administrator privileges."
+
+#: ../../source/index.rst:132
+msgid "**Python（3.9.3 以上）のインストール**"
+msgstr "Installation of Python (version 3.9.3 or later)"
+
+#: ../../source/index.rst:134
+msgid "リンク先のダウンロードリンクから インストーラをダウンロードし、実行してください。➡ |Python|"
+msgstr "Download the installer from the link provided and run it. => |Python|"
+
+#: ../../source/index.rst:139
+msgid "最新版でないバージョンの Python をダウンロードするには 下記のスクリーンショットを参考に ご自身の環境に応じたインストーラをダウンロードしてください。"
+msgstr "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
+
+#: ../../source/index.rst:145
+msgid "pyfemtet.opt は現在主に Python 3.11 環境で開発されており、 インストールや実施例の実行に不具合がある場合は Python 3.11 環境の構築をご検討ください。"
+msgstr "pyfemtet.opt is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment."
+
+#: ../../source/index.rst:148
+msgid "特に、Python 3.12 以上の環境では依存ライブラリ botorch のインストールを行わない設定になっています。 botorch の機能が必要な場合は、お手数ですが下記コマンドで botorch のインストールを 手動で試みていただきますようお願いします。"
+msgstr "In particular, in environments with Python 3.12 or higher, the installation of the dependent library botorch is not set to be performed automatically. If you require the functionality of botorch, we kindly ask you to manually attempt its installation with the command below."
+
+#: ../../source/index.rst:152
+msgid "``py -m pip install botorch``"
+msgstr ""
+
+#: ../../source/index.rst:160
+msgid "このスクリーンショットでは、64 bit 版 windows 向け python 3.11.7 のインストーラへの リンクの場所の例を示しています。"
+msgstr "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
+
+#: ../../source/index.rst:165
+msgid "インストーラ画面。"
+msgstr "Installer screen."
+
+#: ../../source/index.rst:168
+msgid "**pyfemtet のインストール**"
+msgstr "Installing pyfemtet"
+
+#: ../../source/index.rst:170
+msgid "コマンドプロンプトで下記コマンドを実行してください。 ライブラリのダウンロード及びインストールが始まります。::"
+msgstr "Please run the following command in the command prompt. The download and installation of the library will begin.::"
+
+#: ../../source/index.rst:175
+msgid "インストールが終了すると、\"Successfully installed \" の表示の後、コマンドプロンプトの制御が戻ります。"
+msgstr "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
+
+#: ../../source/index.rst:179
+msgid "インストール中"
+msgstr "Installing"
+
+#: ../../source/index.rst:183
+msgid "インストール終了後"
+msgstr "Installation completed"
+
+#: ../../source/index.rst:187
+msgid "環境によりますが、インストールには 5 分程度を要します。"
+msgstr "Depending on the environment, installation may take about 5 minutes."
+
+#: ../../source/index.rst:191
+msgid "インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、 エラーではなく、無視しても問題ありません。"
+msgstr "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
+
+#: ../../source/index.rst:194
+msgid "**Femtet マクロ定数の設定**"
+msgstr "Setting Femtet Macro Constants"
+
+#: ../../source/index.rst:196
+msgid "コマンドプロンプトで下記コマンドを実行してください。::"
+msgstr "Please run the following command in the command prompt.::"
+
+#: ../../source/index.rst:200
+msgid "インストールが終了すると、コマンドプロンプトの制御が戻ります。"
+msgstr "Once the installation is complete, control will return to the command prompt."
+
+#: ../../source/index.rst:204
+msgid "makepy 終了後"
+msgstr "After makepy finishes"
+
+#: ../../source/index.rst:208
+msgid "以上で終了です。"
+msgstr "That's all."
+
+#: ../../source/index.rst:212
+msgid "動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。"
+msgstr "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
+
+#: ../../source/index.rst:217
+msgid "目次"
+msgstr "Table of Contents"
+
