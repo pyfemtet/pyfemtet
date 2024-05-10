@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>基板上の発熱体（並列計算） &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="外部 CAD (NX) 連携" href="../NX_ex01/NX_ex01.html" />
+    <link rel="prev" title="基板上の発熱体" href="../wat_ex14/wat_ex14.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">実施例</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id2">単目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id3">多目的最適化</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#id4">並列計算</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">基板上の発熱体（並列計算）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">サンプルファイル</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">設計変数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">目的関数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">サンプルコード</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">サンプルコードの実行結果</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#cad">CAD 連携</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../pages/examples.html">実施例</a></li>
+      <li class="breadcrumb-item active">基板上の発熱体（並列計算）</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/wat_ex14_parallel/wat_ex14_parallel.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>基板上の発熱体（並列計算）<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します。
+サンプルコード及び実行結果以外の項目は <a class="reference internal" href="../wat_ex14/wat_ex14.html"><span class="doc">基板上の発熱体</span></a> と同じです。</p>
+<section id="id2">
+<h2>サンプルファイル<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference download internal" download="" href="../../_downloads/fe38078beaea25135dd921adb8fd9fd7/wat_ex14_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a>
+を Femtet で開いたまま、
+<a class="reference download internal" download="" href="../../_downloads/07876713bcf08505865131bf1911f260/wat_ex14_parallel_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a>
+をダブルクリックして実行してください。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>FEM 問題としての詳細については、FemtetHelp / 例題集 / 熱伝導解析 / 例題14 を参照してください。</p>
+</div>
+</section>
+<section id="id3">
+<h2>設計変数<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id7">
+<img alt="../../_images/wat_ex14_model1.png" src="../../_images/wat_ex14_model1.png" />
+<figcaption>
+<p><span class="caption-text">モデルの外観</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>substrate_w</p></td>
+<td><p>基板の幅</p></td>
+</tr>
+<tr class="row-odd"><td><p>substrate_d</p></td>
+<td><p>基板の奥行き</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id4">
+<h2>目的関数<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>メインチップの最高温度（最小にする）</p></li>
+<li><p>サブチップの最高温度（最小にする）</p></li>
+<li><p>基板の平面上の専有面積（最小にする）</p></li>
+</ul>
+</section>
+<section id="id5">
+<h2>サンプルコード<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">wat_ex14_parallel_parametric.py</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;基板上の発熱体</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="sd">wat_ex14_parametric.femprj に対し熱伝導解析を行い、</span>
+<span class="linenos"> 4</span><span class="sd">チップの発熱による温度上昇を最小にしつつ</span>
+<span class="linenos"> 5</span><span class="sd">基板寸法を最小にする</span>
+<span class="linenos"> 6</span><span class="sd">基板寸法・チップ配置寸法を探索します。</span>
+<span class="linenos"> 7</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="k">def</span> <span class="nf">max_temperature</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">body_name</span><span class="p">):</span>
+<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Femtet の解析結果からチップの最高温度を取得します。</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="sd">    Femtet : マクロを使用するためのインスタンスです。詳しくは &quot;Femtet マクロヘルプ / CFemtet クラス&quot; をご覧ください。</span>
+<span class="linenos">16</span><span class="sd">        目的関数は第一引数に Femtet インスタンスを取る必要があります。</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="sd">    max_temp : 計算された最高温度です。</span>
+<span class="linenos">19</span><span class="sd">        目的関数は単一の float を返す必要があります。</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">22</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>    <span class="n">temp</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Watt</span><span class="o">.</span><span class="n">GetTemp_py</span><span class="p">(</span><span class="n">body_name</span><span class="p">)</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span>    <span class="k">return</span> <span class="n">temp</span>  <span class="c1"># degree</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="k">def</span> <span class="nf">substrate_size</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos">30</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Femtet の設計変数から基板サイズを取得します。</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="sd">    Femtet : マクロを使用するためのインスタンスです。詳しくは &quot;Femtet マクロヘルプ / CFemtet クラス&quot; をご覧ください。</span>
+<span class="linenos">33</span><span class="sd">        目的関数は第一引数に Femtet インスタンスを取る必要があります。</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="sd">    subs_w * subs_d : XY 平面における基板の占有面積です。</span>
+<span class="linenos">36</span><span class="sd">        目的関数は単一の float を返す必要があります。</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">39</span>    <span class="n">subs_w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">)</span>
+<span class="linenos">40</span>    <span class="n">subs_d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_d&#39;</span><span class="p">)</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span>    <span class="k">return</span> <span class="n">subs_w</span> <span class="o">*</span> <span class="n">subs_d</span>  <span class="c1"># mm2</span>
+<span class="linenos">43</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">46</span>
+<span class="linenos">47</span>    <span class="c1"># 最適化処理を行うオブジェクトを用意</span>
+<span class="linenos">48</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">()</span>
+<span class="linenos">49</span>
+<span class="linenos">50</span>    <span class="c1"># 設計変数の設定</span>
+<span class="linenos">51</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;substrate_w&quot;</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="s1">&#39;基板サイズ X&#39;</span><span class="p">)</span>
+<span class="linenos">52</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;substrate_d&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="s1">&#39;基板サイズ Y&#39;</span><span class="p">)</span>
+<span class="linenos">53</span>
+<span class="linenos">54</span>    <span class="c1"># 目的関数の設定</span>
+<span class="linenos">55</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_temperature</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;メインチップ温度&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;MAINCHIP&#39;</span><span class="p">,))</span>
+<span class="linenos">56</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_temperature</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;サブチップ温度&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;SUBCHIP&#39;</span><span class="p">,))</span>
+<span class="linenos">57</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">substrate_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;基板サイズ&#39;</span><span class="p">)</span>
+<span class="linenos">58</span>
+<span class="linenos">59</span>    <span class="c1"># 最適化の実行</span>
+<span class="linenos">60</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">61</span>    <span class="c1"># femopt.main(n_trials=20)</span>
+<span class="linenos">62</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_parallel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># ここのみ wat_ex14_parametric.py から変更しました。</span>
+<span class="linenos">63</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>並列化を実施するには、main() 関数の引数 n_parallel に並列化したい数を渡すだけです。</p>
+</div>
+</section>
+<section id="id6">
+<h2>サンプルコードの実行結果<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>実行環境</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>OS</p></td>
+<td><p>windows 10</p></td>
+</tr>
+<tr class="row-even"><td><p>CPU</p></td>
+<td><p>Intel Core-i7 12700 (12 cores, 20 threads)</p></td>
+</tr>
+<tr class="row-odd"><td><p>メモリ</p></td>
+<td><p>32 GB</p></td>
+</tr>
+</tbody>
+</table>
+<p>実行結果</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>並列なし</p></td>
+<td><p>3並列</p></td>
+</tr>
+<tr class="row-even"><td><p>117秒</p></td>
+<td><p>74秒</p></td>
+</tr>
+</tbody>
+</table>
+<p>このデモでは 3 つの Femtet インスタンスでの計算を行いました。
+<a class="reference internal" href="../wat_ex14/wat_ex14.html"><span class="doc">基板上の発熱体</span></a> の問題について、
+上記実行環境で並列を用いない場合は 20 回の試行に 117 秒を要しましたが、
+このデモでは 74 秒で 21 回の試行が終了し、実行時間を 37% 低減しています。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>一般に数値計算を N 並列した場合、実行時間は単純に 1/N にはなりません。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>実行環境や解析モデルによって並列化による高速化効果は変動します。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../wat_ex14/wat_ex14.html" class="btn btn-neutral float-left" title="基板上の発熱体" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../NX_ex01/NX_ex01.html" class="btn btn-neutral float-right" title="外部 CAD (NX) 連携" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>外部 CAD (Solidworks) 連携 &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="使い方" href="../../pages/usage.html" />
+    <link rel="prev" title="外部 CAD (NX) 連携" href="../NX_ex01/NX_ex01.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">実施例</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id2">単目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id3">多目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id4">並列計算</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#cad">CAD 連携</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../NX_ex01/NX_ex01.html">外部 CAD (NX) 連携</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">外部 CAD (Solidworks) 連携</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">サンプルファイル</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">サンプルコード</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">サンプルコードの実行結果</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../pages/examples.html">実施例</a></li>
+      <li class="breadcrumb-item active">外部 CAD (Solidworks) 連携</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/Sldworks_ex01/Sldworks_ex01.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cad-solidworks">
+<h1>外部 CAD (Solidworks) 連携<a class="headerlink" href="#cad-solidworks" title="Link to this heading"></a></h1>
+<p>pyfemtet では外部 CAD (Solidworks) で作成したモデルを
+Femtet にインポートして解析を行う場合でも
+CAD と Femtet を連携して最適化を行うことができます。</p>
+<p>Femtet の応力解析ソルバーを用いて
+外部 CAD (Solidworks) でパラメトリックモデリングを行った H 型鋼について
+体積を最小化しつつ
+変位を最小にする
+例題を解説します。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>サンプルコード及び実行結果以外の項目は <a class="reference internal" href="../NX_ex01/NX_ex01.html"><span class="doc">外部 CAD (NX) 連携</span></a> と同じです。</p>
+</div>
+<section id="id1">
+<h2>サンプルファイル<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference download internal" download="" href="../../_downloads/3d2414c4716c58a1defe1ada15f61eb7/Sldworks_ex01.SLDPRT"><code class="xref download docutils literal notranslate"><span class="pre">サンプルモデル</span></code></a>
+と
+<a class="reference download internal" download="" href="../../_downloads/775fda6be8bc08017ce2dacdee80b985/Sldworks_ex01.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a>
+を同じフォルダに配置し、
+プロジェクトを Femtet で開いたまま、
+<a class="reference download internal" download="" href="../../_downloads/7a41e4e2a9669c5f10295e9af78edace/Sldworks_ex01.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a>
+をダブルクリックして実行してください。</p>
+</div>
+</section>
+<section id="id2">
+<h2>サンプルコード<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Sldworks_ex01.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="sd">&quot;&quot;&quot;外部 CAD ソフト Solidworks との連携</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="sd">外部 CAD ソフト Solidworks で作成したパラメトリックモデルを</span>
+<span class="linenos">  4</span><span class="sd">Femtet にインポートして最適化を行います。</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="sd">事前準備として、以下の作業を行ってください。</span>
+<span class="linenos">  7</span><span class="sd">    - Sldworks_ex01.SLDPRT と Sldworks_ex01.femprj を同じフォルダに配置する</span>
+<span class="linenos">  8</span><span class="sd">    - C:\temp フォルダを作成する</span>
+<span class="linenos">  9</span><span class="sd">        ※ 最適化の実行中に Solidworks から .x_t ファイルがエクスポートされます。</span>
+<span class="linenos"> 10</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 11</span>
+<span class="linenos"> 12</span><span class="kn">import</span> <span class="nn">os</span>
+<span class="linenos"> 13</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
+<span class="linenos"> 14</span><span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetWithSolidworksInterface</span>
+<span class="linenos"> 15</span><span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span><span class="n">here</span><span class="p">,</span> <span class="n">me</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="linenos"> 19</span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">here</span><span class="p">)</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span>
+<span class="linenos"> 22</span><span class="k">def</span> <span class="nf">disp</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 23</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;解析結果から Z 方向最大変位を取得します。</span>
+<span class="linenos"> 24</span><span class="sd">    目的関数の第一引数は Femtet インスタンスである必要があります。</span>
+<span class="linenos"> 25</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 26</span>    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement_py</span><span class="p">()</span>
+<span class="linenos"> 27</span>
+<span class="linenos"> 28</span>    <span class="c1"># CAD 連携の場合、境界条件をトポロジーIDに基づいて割り当てているので、</span>
+<span class="linenos"> 29</span>    <span class="c1"># 意図しない箇所に境界条件が割り当てられることがあります。</span>
+<span class="linenos"> 30</span>    <span class="c1"># この問題では意図通りの割り当てができていれば最大変位は必ず負なので</span>
+<span class="linenos"> 31</span>    <span class="c1"># 答えが正の場合は境界条件割り当てに失敗しているとみなして</span>
+<span class="linenos"> 32</span>    <span class="c1"># ModelError を送出するようにします。</span>
+<span class="linenos"> 33</span>    <span class="c1"># 最適化ルーチン中に ModelError, MeshError, SolveError が送出された場合</span>
+<span class="linenos"> 34</span>    <span class="c1"># Optimizer はその試行を失敗とみなし、スキップして次の試行を行います。</span>
+<span class="linenos"> 35</span>    <span class="k">if</span> <span class="n">ret</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos"> 36</span>        <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s1">&#39;境界条件の割り当てが間違えています。&#39;</span><span class="p">)</span>
+<span class="linenos"> 37</span>    <span class="k">return</span> <span class="n">ret</span>
+<span class="linenos"> 38</span>
+<span class="linenos"> 39</span>
+<span class="linenos"> 40</span><span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 41</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;解析結果からモデル体積を取得します。</span>
+<span class="linenos"> 42</span><span class="sd">    目的関数の第一引数は Femtet インスタンスである必要があります。</span>
+<span class="linenos"> 43</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 44</span>    <span class="n">_</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">CalcVolume_py</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos"> 45</span>    <span class="k">return</span> <span class="n">ret</span>
+<span class="linenos"> 46</span>
+<span class="linenos"> 47</span>
+<span class="linenos"> 48</span><span class="k">def</span> <span class="nf">C_minus_B</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+<span class="linenos"> 49</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;C 寸法と B 寸法の差を計算します。</span>
+<span class="linenos"> 50</span>
+<span class="linenos"> 51</span><span class="sd">    拘束関数の第一引数は Femtet インスタンスである必要がありますが、</span>
+<span class="linenos"> 52</span><span class="sd">    この例では使用していません。</span>
+<span class="linenos"> 53</span>
+<span class="linenos"> 54</span><span class="sd">    ほかの例では設計変数にアクセスする際以下のスニペットを用いますが、</span>
+<span class="linenos"> 55</span><span class="sd">    CAD 連携を行う場合、Femtet に設計変数が設定されていないためです。</span>
+<span class="linenos"> 56</span><span class="sd">        A = Femtet.GetVariableValue(&#39;A&#39;)</span>
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span><span class="sd">    pyfemtet.opt では目的関数・拘束関数の第二引数以降に任意の変数を設定できます。</span>
+<span class="linenos"> 59</span><span class="sd">    この例では、第二引数に FEMOpt のメンバー変数 opt を取り、</span>
+<span class="linenos"> 60</span><span class="sd">    そのメソッド get_parameter() を用いて設計変数を取得しています。</span>
+<span class="linenos"> 61</span>
+<span class="linenos"> 62</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 63</span>    <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+<span class="linenos"> 64</span>    <span class="k">return</span> <span class="n">C</span> <span class="o">-</span> <span class="n">B</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos"> 68</span>
+<span class="linenos"> 69</span>    <span class="c1"># Solidworks-Femtet 連携オブジェクトを用意</span>
+<span class="linenos"> 70</span>    <span class="c1"># ここで起動している Femtet と紐づけがされます。</span>
+<span class="linenos"> 71</span>    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetWithSolidworksInterface</span><span class="p">(</span>
+<span class="linenos"> 72</span>        <span class="n">sldprt_path</span><span class="o">=</span><span class="s1">&#39;Sldworks_ex01.SLDPRT&#39;</span><span class="p">,</span>
+<span class="linenos"> 73</span>        <span class="n">femprj_path</span><span class="o">=</span><span class="s1">&#39;Sldworks_ex01.femprj&#39;</span><span class="p">,</span>
+<span class="linenos"> 74</span>    <span class="p">)</span>
+<span class="linenos"> 75</span>
+<span class="linenos"> 76</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
+<span class="linenos"> 77</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<span class="linenos"> 78</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="linenos"> 79</span>        <span class="p">)</span>
+<span class="linenos"> 80</span>    <span class="p">)</span>
+<span class="linenos"> 81</span>
+<span class="linenos"> 82</span>    <span class="c1"># 最適化処理を行うオブジェクトに連携オブジェクトを紐づけ</span>
+<span class="linenos"> 83</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
+<span class="linenos"> 84</span>
+<span class="linenos"> 85</span>    <span class="c1"># 設計変数の設定</span>
+<span class="linenos"> 86</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+<span class="linenos"> 87</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="linenos"> 88</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span>    <span class="c1"># 拘束関数の設定</span>
+<span class="linenos"> 91</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">C_minus_B</span><span class="p">,</span> <span class="s1">&#39;C&gt;B&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">)</span>
+<span class="linenos"> 92</span>
+<span class="linenos"> 93</span>    <span class="c1"># 目的関数の設定</span>
+<span class="linenos"> 94</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">disp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;変位&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 95</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;体積&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
+<span class="linenos"> 96</span>
+<span class="linenos"> 97</span>    <span class="c1"># 最適化の実行</span>
+<span class="linenos"> 98</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 99</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="linenos">100</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h2>サンプルコードの実行結果<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id5">
+<a class="reference internal image-reference" href="../../_images/Sldworks_ex01_result.png"><img alt="../../_images/Sldworks_ex01_result.png" src="../../_images/Sldworks_ex01_result.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">Sldworks_ex01.py の実行結果。
+横軸が 変位 、
+縦軸が 体積 です。</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>20 回目の試行の結果、
+変位と体積のパレート集合が得られます。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../NX_ex01/NX_ex01.html" class="btn btn-neutral float-left" title="外部 CAD (NX) 連携" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../pages/usage.html" class="btn btn-neutral float-right" title="使い方" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
