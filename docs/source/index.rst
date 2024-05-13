@@ -10,7 +10,7 @@ Welcome to PyFemtet's documentation!
     <a href="https://www.python.org/" target="_blank">python.org</a>
 
 
-概要
+Abstruct
 ----------
 
 **PyFemtet provides extensions for Femtet, a CAE software developed by Murata Software.**
