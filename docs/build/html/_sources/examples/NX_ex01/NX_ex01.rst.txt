@@ -1,66 +1,59 @@
-外部 CAD (NX) 連携
+External CAD (NX) Integration
 ==============================
 
-pyfemtet では外部 CAD (NX) で作成したモデルを
-Femtet にインポートして解析を行う場合でも
-CAD と Femtet を連携して最適化を行うことができます。
-
-Femtet の応力解析ソルバーを用いて
-外部 CAD (NX) でパラメトリックモデリングを行った H 型鋼について
-体積を最小化しつつ
-変位を最小にする
-例題を解説します。
+PyFemtet allows parametric optimization even for analysis models created with external CAD (NX) and imported into Femtet.
 
 
-サンプルファイル
+Sample File
 ------------------------------
 .. note::
 
-   :download:`サンプルモデル<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>`
-   と
-   :download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>`
-   を同じフォルダに配置し、
-   プロジェクトを Femtet で開いたまま、
-   :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>`
-   をダブルクリックして実行してください。
+   Place the 
+   :download:`sample model<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>`
+   and
+   :download:`sample project<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>`
+   in the same folder.
+   Keep the project open in Femtet, then double-click on the
+   :download:`sample code<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>`
+   to execute it.
 
 
-FEM 問題としての詳細
+Details as a FEM Problem
 ------------------------------
 
 .. figure:: NX_ex01_analysis.png
    
-   モデルの外観 (解析条件)
+   Appearance of the Model (and Analysis Conditions)
 
-- fix ... 完全固定
-- load ... -Z 方向への荷重（1N）
-- mirror ... XZ 平面に対して対称
+- fix ... Fully Fixed
+- load ... Load in the -Z direction (1N)
+- mirror ... Symmetrical to the XZ plane
 
 
-設計変数
+Design Variables
 ------------------------------
 
 .. figure:: NX_ex01_model_dsgn.png
    
-   モデルの外観 (設計変数)
+   Appearance of the Model Section (and Design Variables)
 
-====== ======
-変数名 説明
-====== ======
-A      ウェブ板厚
-B      フランジ板厚
-C      フランジ曲げ
-====== ======
+============== ============
+Variable Name  Description
+============== ============
+A              Web Tickness
+B              Flange Tickness
+C              Flange Bending
+============== ============
 
 
-目的関数
+Objective Function
 ------------------------------
 
-- Z 方向最大変位（0 にする）
-- 体積（最小にする）
+- Maximum Displacement in the Z direction (set to 0)
+- Volume (minimize)
 
 
-サンプルコード
+Sample Code
 ------------------------------
 
 .. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py
@@ -69,20 +62,17 @@ C      フランジ曲げ
    :caption: NX_ex01.py
 
 
-サンプルコードの実行結果
-------------------------------
+Execution Result of the Sample Code
+----------------------------------------
 
 .. figure:: NX_ex01_result.png
    :width: 300
 
-   NX_ex01.py の実行結果。
-   横軸が 変位 、
-   縦軸が 体積 です。
+   Execution result of NX_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.
 
-20 回目の試行の結果、
-変位と体積のパレート集合が得られます。
+After the 20 trials, a Pareto set of displacement and volume is obtained.
 
 
 .. note::
 
-   Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。
+   Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on.

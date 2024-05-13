@@ -1,37 +1,27 @@
-外部 CAD (Solidworks) 連携
-==============================
+External CAD (Solidworks) Integration
+========================================
 
-pyfemtet では外部 CAD (Solidworks) で作成したモデルを
-Femtet にインポートして解析を行う場合でも
-CAD と Femtet を連携して最適化を行うことができます。
+PyFemtet allows parametric optimization even for analysis models created with external CAD (Solidworks) and imported into Femtet.
 
-Femtet の応力解析ソルバーを用いて
-外部 CAD (Solidworks) でパラメトリックモデリングを行った H 型鋼について
-体積を最小化しつつ
-変位を最小にする
-例題を解説します。
+An example will be explained using an H-shaped steel that was parametrically modeled in an external CAD (Solidworks) and analyzed using Femtet's stress analysis solver to minimize volume while minimizing displacement.
 
 .. note::
 
-    サンプルコード及び実行結果以外の項目は :doc:`../NX_ex01/NX_ex01` と同じです。
+   Other than the sample code and execution results, the items are the same as in :doc:`../NX_ex01/NX_ex01`.
 
 
 
-サンプルファイル
+Sample File
 ------------------------------
 .. note::
 
-   :download:`サンプルモデル<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.SLDPRT>`
-   と
-   :download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.femprj>`
-   を同じフォルダに配置し、
-   プロジェクトを Femtet で開いたまま、
-   :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.py>`
-   をダブルクリックして実行してください。
+   Place the :download:`sample model<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.SLDPRT>`
+   and :download:`sample project<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.femprj>` in the same folder, keep the project open in Femtet,
+   and double-click on :download:`sample code<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.py>` to execute.
 
 
 
-サンプルコード
+Sample Code
 ------------------------------
 
 .. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.py
@@ -40,20 +30,17 @@ Femtet の応力解析ソルバーを用いて
    :caption: Sldworks_ex01.py
 
 
-サンプルコードの実行結果
-------------------------------
+Execution Result of the Sample Code
+----------------------------------------
 
 .. figure:: Sldworks_ex01_result.png
    :width: 300
 
-   Sldworks_ex01.py の実行結果。
-   横軸が 変位 、
-   縦軸が 体積 です。
+   Execution result of Sldworks_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.
 
-20 回目の試行の結果、
-変位と体積のパレート集合が得られます。
+After 20 trials, a Pareto set of displacement and volume is obtained.
 
 
 .. note::
 
-   Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。
+   Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on.

@@ -23,7 +23,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="索引" href="genindex.html" />
     <link rel="search" title="検索" href="search.html" />
-    <link rel="next" title="Examples" href="pages/examples.html" /> 
+    <link rel="next" title="例題" href="pages/examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,9 +46,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/LICENSE.html">License</a></li>
 </ul>
@@ -79,45 +79,45 @@
              
   <section id="welcome-to-pyfemtet-s-documentation">
 <h1>Welcome to PyFemtet’s documentation!<a class="headerlink" href="#welcome-to-pyfemtet-s-documentation" title="Link to this heading"></a></h1>
-<section id="id1">
-<h2>Abstruct<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
-<p><strong>pyfemtet provides extensions for Femtet, a CAE software developed by Murata Software.</strong></p>
+<section id="abstruct">
+<h2>概要<a class="headerlink" href="#abstruct" title="Link to this heading"></a></h2>
+<p><strong>PyFemtet は ムラタソフトウェア製 CAE ソフト Femtet の拡張機能を提供します。</strong></p>
 <ul>
-<li><p>pyfemtet is an open-source library and can be used free of charge for both non-commercial and commercial purposes.</p></li>
-<li><p>A license is required to use the Femtet main body. pyfemtet does not alter the license of the Femtet main body in any way.</p></li>
-<li><p>Please contact Murata Software for a trial version of Femtet for evaluation purposes.</p>
+<li><p>PyFemtet はオープンソースライブラリであり、無償かつ商用利用可能です。</p></li>
+<li><p>PyFemtet は Femtet 本体のライセンスを一切変更しません。</p></li>
+<li><p>評価のための試用版 Femtet は ムラタソフトウェア にお問い合わせください。</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>=&gt; <a href="https://www.muratasoftware.com/" target="_blank">muratasoftware.com</a></p></li>
+<li><p>–&gt; <a href="https://www.muratasoftware.com/" target="_blank">muratasoftware.com</a></p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 </section>
-<section id="pyfemtet">
-<h2>Main Features of pyfemtet<a class="headerlink" href="#pyfemtet" title="Link to this heading"></a></h2>
-<p>pyfemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of pyfemtet is design parameter optimization, which is implemented as a subpackage pyfemtet.opt.</p>
+<section id="main-features-of-pyfemtet">
+<h2>PyFemtet の主要な機能<a class="headerlink" href="#main-features-of-pyfemtet" title="Link to this heading"></a></h2>
+<p>PyFemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。現在、 <strong>PyFemtet の唯一の機能は設計パラメータの最適化</strong> であり、<code class="docutils literal notranslate"><span class="pre">pyfemtet.opt</span></code> サブパッケージとして実装されています。</p>
 <p>The optimization feature by pyfemtet.opt has the following characteristics:</p>
 <ul class="simple">
-<li><p>Single-objective and multi-objective optimization</p></li>
-<li><p>Real-time progress display with process monitoring</p></li>
-<li><p>Parallel computation with multiple instances of Femtet</p></li>
-<li><p>Result output in easy-to-analyze csv format for Excel and other tools</p></li>
+<li><p>単目的および多目的の最適化</p></li>
+<li><p>プロセスモニタによるリアルタイム進行状況の表示</p></li>
+<li><p>複数の Femtet インスタンスによる並列計算</p></li>
+<li><p>Excel 等で分析が容易な csv 形式での結果出力</p></li>
 </ul>
 </section>
-<section id="id2">
-<h2>Example of Implementation<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
 <div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
 <div class="sd-card-body docutils">
 <div class="sd-card-title sd-font-weight-bold docutils">
-Inductance of a solenoid coil</div>
+ソレノイドコイルのインダクタンス</div>
 <a class="reference internal image-reference" href="_images/gau_ex08.png"><img alt="_images/gau_ex08.png" src="_images/gau_ex08.png" style="width: 150.0px; height: 150.0px;" /></a>
 </div>
 <div class="sd-card-footer docutils">
-<p class="sd-card-text">In magnetic field analysis, the self-inductance of a finite-length solenoid coil is set to a specific value.</p>
+<p class="sd-card-text">磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。</p>
 </div>
 <a class="sd-stretched-link reference internal" href="examples/gau_ex08/gau_ex08.html"><span class="doc"></span></a></div>
 </div>
@@ -125,11 +125,11 @@ Inductance of a solenoid coil</div>
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
 <div class="sd-card-body docutils">
 <div class="sd-card-title sd-font-weight-bold docutils">
-Resonant frequency of a circular patch antenna</div>
+円形パッチアンテナの共振周波数</div>
 <a class="reference internal image-reference" href="_images/her_ex40.png"><img alt="_images/her_ex40.png" src="_images/her_ex40.png" style="width: 150.0px; height: 150.0px;" /></a>
 </div>
 <div class="sd-card-footer docutils">
-<p class="sd-card-text">In electromagnetic wave analysis, the resonant frequency of a circular patch antenna is set to a specific value.</p>
+<p class="sd-card-text">電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。</p>
 </div>
 <a class="sd-stretched-link reference internal" href="examples/her_ex40/her_ex40.html"><span class="doc"></span></a></div>
 </div>
@@ -137,12 +137,12 @@ Resonant frequency of a circular patch antenna</div>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>There are more examples in the <a class="reference internal" href="pages/examples.html"><span class="doc">Examples</span></a> section.</p>
+<p><a class="reference internal" href="pages/examples.html"><span class="doc">例題</span></a> セクションにより多くの実施例があります。</p>
 </div>
 </section>
-<section id="api">
-<h2>Simple API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
-<p>Below is an example of multi-objective optimization. You can set up the problem with add_parameter() and add_objective(), and then execute it with main(). For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the <a class="reference internal" href="pages/usage.html"><span class="doc">Usage</span></a> section.</p>
+<section id="simple-api">
+<h2>シンプルな API<a class="headerlink" href="#simple-api" title="Link to this heading"></a></h2>
+<p>下記は多目的最適化の実施例です。<code class="docutils literal notranslate"><span class="pre">add_parameter()</span></code> と <code class="docutils literal notranslate"><span class="pre">add_objective()</span></code> で問題を設定し、<code class="docutils literal notranslate"><span class="pre">optimize()</span></code> で実施することができます。それ以外は通常の Femtet のマクロスクリプトを使用します。詳細な実施例は <a class="reference internal" href="pages/usage.html"><span class="doc">使い方</span></a> セクションを確認してください。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
 
 <span class="k">def</span> <span class="nf">max_displacement</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
@@ -159,133 +159,138 @@ Resonant frequency of a circular patch antenna</div>
     <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">()</span>
     <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
     <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_displacement</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;最大変位&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;体積&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
-    <span class="n">femopt</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_displacement</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;max_displacement&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h2>Install<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<section id="install">
+<h2>インストール<a class="headerlink" href="#install" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>pyfemtet is only available for Windows.</p>
+<p>PyFemtet は Windows にのみ対応しています。</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run pip install pyfemtet. The following steps are for a full setup of Python and Femtet.</p>
+<p>Python 及び Femtet がインストールされており Femtet のマクロが有効化されている環境では単に <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyfemtet</span></code> を実行してください。以下の手順は、Python, Femtet 及び PyFemtet のフルセットアップの手順です。</p>
 </div>
 <ol class="arabic">
-<li><p>Installation of Femtet (version 2023.0 or later)</p>
+<li><p><strong>Femtet（2023.0 以降）のインストール</strong></p>
 <blockquote>
-<div><p>For first-time users, please consider using the trial version or personal edition. =&gt; <a href="https://www.muratasoftware.com/" target="_blank">muratasoftware.com</a></p>
+<div><p>初めての方は、試用版または個人版のご利用をご検討ください。➡ <a href="https://www.muratasoftware.com/" target="_blank">muratasoftware.com</a></p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>Femtet versions other than the latest one have limited features.</p>
+<p>最新版以外の Femtet では PyFemtet の機能の一部が制限されます。</p>
 </div>
 </div></blockquote>
 </li>
-<li><p>Enabling Femtet macros</p>
+<li><p><strong>Femtet のマクロ有効化</strong></p>
 <blockquote>
-<div><p>After installing Femtet, please run 『Enable Macro Function』 from the start menu. This procedure requires administrator privileges.</p>
+<div><figure class="align-default">
+<img alt="_images/enableMacrosIcon.png" src="_images/enableMacrosIcon.png" />
+</figure>
+<p>Femtet インストール後にスタートメニューから <strong>「マクロ機能を有効化する」</strong> を実行してください。この手順には管理者権限が必要です。</p>
 </div></blockquote>
 </li>
-<li><p>Installation of Python (version 3.9.3 or later)</p>
+<li><p><strong>Python（3.9.3 以上）のインストール</strong></p>
 <blockquote>
-<div><p>Download the installer from the link provided and run it. =&gt; <a href="https://www.python.org/" target="_blank">python.org</a></p>
+<div><p>リンク先のダウンロードリンクからインストーラをダウンロードし、実行してください。➡ <a href="https://www.python.org/" target="_blank">python.org</a></p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment.</p>
+<p>最新版でないバージョンの Python をダウンロードするには下記のスクリーンショットを参考にご自身の環境に応じたインストーラをダウンロードしてください。</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>pyfemtet.opt is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment.</p>
-<p>In particular, in environments with Python 3.12 or higher, the installation of the dependent library botorch is not set to be performed automatically. If you require the functionality of botorch, we kindly ask you to manually attempt its installation with the command below.</p>
-<p><code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">botorch</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">pyfemtet.opt</span></code> は現在主に Python 3.11 環境で開発されており、インストールや実施例の実行に不具合がある場合は Python 3.11 環境の構築をご検討ください。</p>
+<p>特に、Python 3.12 以上の環境では依存ライブラリ <code class="docutils literal notranslate"><span class="pre">botorch</span></code> のインストールを行わない設定になっています。<code class="docutils literal notranslate"><span class="pre">botorch</span></code> の機能が必要な場合は、お手数ですが下記コマンドで <code class="docutils literal notranslate"><span class="pre">botorch</span></code> のインストールを手動で試みていただきますようお願いします。</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">botorch</span>
+</pre></div>
 </div>
 <figure class="align-default">
 <img alt="_images/python_download.png" src="_images/python_download.png" />
 </figure>
-<figure class="align-default" id="id5">
+<figure class="align-default" id="id1">
 <a class="reference internal image-reference" href="_images/python_3.11.png"><img alt="_images/python_3.11.png" src="_images/python_3.11.png" style="width: 297.5px; height: 404.0px;" /></a>
 <figcaption>
-<p><span class="caption-text">This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+<p><span class="caption-text">このスクリーンショットでは、64 bit 版 Windows 向け Python 3.11.7 のインストーラへのリンクの場所の例を示しています。</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<figure class="align-default" id="id6">
+<figure class="align-default" id="id2">
 <img alt="_images/python_install.png" src="_images/python_install.png" />
 <figcaption>
-<p><span class="caption-text">Installer screen.</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+<p><span class="caption-text">インストーラ画面。</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 </div></blockquote>
 </li>
-<li><p>Installing pyfemtet</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyfemtet</span></code> <strong>のインストール</strong></p>
 <blockquote>
-<div><p>Please run the following command in the command prompt. The download and installation of the library will begin.:</p>
+<div><p>コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyfemtet</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">warn</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">location</span>
 </pre></div>
 </div>
-<p>Once the installation is complete, after displaying 「Successfully installed 「, control will return to the command prompt.</p>
-<figure class="align-default" id="id7">
+<p>インストールが終了すると、」Successfully installed 「 の表示の後、コマンドプロンプトの制御が戻ります。</p>
+<figure class="align-default" id="id3">
 <img alt="_images/pip_while_install.png" src="_images/pip_while_install.png" />
 <figcaption>
-<p><span class="caption-text">Installing</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+<p><span class="caption-text">インストール中</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<figure class="align-default" id="id8">
+<figure class="align-default" id="id4">
 <img alt="_images/pip_complete_install.png" src="_images/pip_complete_install.png" />
 <figcaption>
-<p><span class="caption-text">Installation completed</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
+<p><span class="caption-text">インストール終了後</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>Depending on the environment, installation may take about 5 minutes.</p>
+<p>環境によりますが、インストールには 5 分程度を要します。</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>At the end of the installation, you may see a message such as <code class="docutils literal notranslate"><span class="pre">[notice]</span> <span class="pre">A</span> <span class="pre">new</span> <span class="pre">release</span> <span class="pre">of</span> <span class="pre">pip</span> <span class="pre">is</span> <span class="pre">available:</span></code> . This is not an error and can be ignored without any issues.</p>
+<p>インストール終了時に <code class="docutils literal notranslate"><span class="pre">[notice]</span> <span class="pre">A</span> <span class="pre">new</span> <span class="pre">release</span> <span class="pre">of</span> <span class="pre">pip</span> <span class="pre">is</span> <span class="pre">available:</span></code> などの表示がされることがありますが、エラーではなく、無視しても問題ありません。</p>
 </div>
 </div></blockquote>
 </li>
-<li><p>Setting Femtet Macro Constants</p>
+<li><p><strong>Femtet マクロ定数の設定</strong></p>
 <blockquote>
-<div><p>Please run the following command in the command prompt.:</p>
+<div><p>コマンドプロンプトで下記コマンドを実行してください。:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">makepy</span> <span class="n">FemtetMacro</span>
 </pre></div>
 </div>
-<p>Once the installation is complete, control will return to the command prompt.</p>
-<figure class="align-default" id="id9">
+<p>インストールが終了すると、コマンドプロンプトの制御が戻ります。</p>
+<figure class="align-default" id="id5">
 <img alt="_images/complete_makepy.png" src="_images/complete_makepy.png" />
 <figcaption>
-<p><span class="caption-text">After makepy finishes</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+<p><span class="caption-text">makepy 終了後</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 </div></blockquote>
 </li>
 </ol>
-<p>That’s all.</p>
+<p>以上で終了です。</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>For verification, we recommend that you first view the samples in <a class="reference internal" href="pages/examples.html"><span class="doc">Examples</span></a>.</p>
+<p>動作確認には、はじめに <a class="reference internal" href="pages/examples.html"><span class="doc">例題</span></a> のサンプルを閲覧いただくことをお勧めします。</p>
 </div>
 </section>
-<section id="id4">
-<h2>Table of Contents<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<section id="table-of-contents">
+<h2>目次<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#id2">Single Objective Optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#id3">Multi-Objective Optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#id4">Parallel Computing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#cad">CAD Integration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/examples.html">例題</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#single-objective-optimization">単目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#multi-objective-optimization">多目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#parallel-computing">並列計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#cad-integration">CAD 連携</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="pages/usage.html">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_optimize_your_project.html">Procedure for executing optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_deploy_cluster.html">Procedure for Running Cluster Calculations (Experimental Feature)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/usage.html">使い方</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_optimize_your_project.html">最適化の実行手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_deploy_cluster.html">（実験的機能）クラスタ計算の実行手順</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pages/api.html">API reference</a><ul>
@@ -302,7 +307,7 @@ Resonant frequency of a circular patch antenna</div>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pages/examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pages/examples.html" class="btn btn-neutral float-right" title="例題" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

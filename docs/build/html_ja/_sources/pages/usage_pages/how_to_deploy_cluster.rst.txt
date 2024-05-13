@@ -3,138 +3,112 @@
     <a href="https://docs.dask.org/en/stable/deploying.html" target="_blank">dask documentation</a>
 
 
-（実験的機能）クラスタ計算の実行手順
---------------------------------------------
+Procedure for Running Cluster Calculations (Experimental Feature)
+----------------------------------------------------------------------------
 
-
-このページでは、pyfemtet.opt を用いた最適化プログラムを
-複数台の PC を用いて並列計算する際の手順を示します。
+This page outlines the procedure for parallel computing an optimization program using ``pyfemtet.opt`` on multiple PCs.
 
 .. note::
     
-    ここでは、 **プログラムを呼び出す手元マシンを「手元 PC」、計算を実行するマシンを「計算 PC」と呼びます。**
-    計算 PC は複数あっても構いません。手元マシンが計算マシンであっても構いません。
-    計算 PC 1 台ごとに「計算 PC のセットアップ」および「Worker の起動」を行ってください。
+    **Here, the machine where the program is called is referred to as the 'local PC,' and the machine running the calculations is referred to as the 'calculation PC.'**
+    It is acceptable to have multiple calculation PCs.
+    The local machine can also be a calculation machine.
+    Please perform '2. Setting Up Calculation PC' and '4. Launching the Worker' for each calculation PC.
 
 
 .. tip::
     
-    pyfemtet の並列計算は ``dask.distributed`` に依存しています。
-    また本ドキュメントは dask version 2023.12.1 時点での挙動を説明しています。
-    詳細、および最新の CLI コマンド使用方法は |dask| をご覧ください。
+    Parallel computing in pyfemtet depends on ``dask.distributed``. This document describes the behavior as of dask version 2023.12.1. For more details and the latest CLI command usage, please refer to |dask|.
 
 
-1. プログラムの作成
+1. Creating a Program
 
-    :doc:`how_to_optimize_your_project`  などを参考に、
-    最適化を行うプログラムを作成してください。
+    Refer to :doc:`how_to_optimize_your_project` and create a program for optimization.
 
 
-2. 計算 PC のセットアップ
+2. Setting Up Calculation PC
 
-    - 計算 PC に Femtet をインストールしてください。
-    - 計算 PC に手元 PC と同じバージョンの Python をインストールしてください。
-    - 計算 PC に手元 PC と同じバージョンの pyfemtet および依存ライブラリをインストールしてください。
+    - Please install Femtet on the calculation PC.
+    - Please install the same version of Python as on the local PC on the calculation PC.
+    - Please install the same version of pyfemtet and its dependencies as on the local PC on the calculation PC.
 
-        - 依存ライブラリのバージョンを指定してインストールするには、下記手順が便利です。コマンドプロンプトから下記手順を実行してください。
-          # 以降はコメントなので、実行しないでください。
+        - To install dependencies with specified versions, the following steps are convenient. Please execute the following steps from the command prompt. (Please do not execute the line starts with # as it is a comment.)
 
         .. code-block::
 
-            # 手元 PC
-            # カレントディレクトリに requirements.txt というファイルを作成し
-            # 現在の環境にインストールされているライブラリ一覧を
-            # バージョンとともに書き出すコマンドです。
-            pip freeze > requirements.txt
+            # local PC
+            py -m pip freeze > requirements.txt
 
-        ここで生成された requirements.txt というファイルを計算 PC に転送し、
-        コマンドプロンプトで下記コマンドを実行します。
+        Transfer the file generated here, named requirements.txt, to the calculation PCs, and run the following command in the command prompt.
 
         .. code-block::
             
-            # 計算 PC
-            # requirements.txt を読み込み、記載通りのバージョンのライブラリを
-            # インストールするコマンドです。
-            pip install -r requirements.txtのパス
+            # calculation PC            
+            py -m pip install -r <path/to/requirements.txt>
 
-        makepy コマンドを実行し、Femtet のマクロ定数の設定を行ってください。
+        Then run the makepy command to set the macro constants for Femtet.
 
         .. code-block::
             
-            # 計算 PC
+            # calculation PC            
             py -m win32com.client.makepy FemtetMacro
 
 
-3. Scheduler（複数の PC のプロセスを管理するプロセス）の起動
+3. Launching the Scheduler (a process that manages processes on multiple calculation PCs)
 
-    - 手元 PC で下記コマンドを実行してください。
+    - Please run the following command on your local PC.
 
         .. code-block::
 
-            # 手元 PC
-            # このコマンドの実行後、コマンドプロンプトは
-            # 通信待ち状態となり制御を受け付けなくなります。
-            # 終了時は Ctrl+C で終了してください。
+            # local PC
             dask scheduler 
 
         .. figure:: images/dask_scheduler.png
 
-            ここで表示される tcp://~~~:~~~ という数字を記録してください。
+            Please make a note of the numbers displayed here, such as tcp://~~~:~~~.
 
         .. note::
 
-            | ファイアウォール等の制約により通信できるポートが決まっている場合は、
+            | If communication ports are restricted due to firewalls or other constraints,
             | ``dask scheduler --port your_port``
-            | コマンドを使用してください（your_port はポート番号に置き換えてください）。
+            | please use the above command (replace your_port with the port number).
 
 
-4. Worker（計算を実行するプロセス）の起動
+4. Launching the Worker (a process that performs calculations)
 
-    - 計算 PC で下記コマンドを実行してください。
+    - Please run the following command on the calculation PCs.
 
         .. code-block::
 
-            # 計算 PC
-            # このコマンドの実行後、コマンドプロンプトは
-            # 通信待ち状態となり制御を受け付けなくなります。
-            # 終了時は Ctrl+C で終了してください。
+            # calculation PC
             dask worker tcp://~~~:~~~ --nthreads 1 --nworkers -1
 
-        scheduler, worker 双方で画面が更新され、
-        ``Starting established connection`` という
-        文字が表示されれば通信が成功しています。
+        If the screen updates on both scheduler and worker, and the text ``Starting established connection`` is displayed, the communication has been successful.
 
-        .. note:: 通信できない状態で一定時間が経過すると、Worker 側でタイムアウトした旨のメッセージが表示されます。
+        .. note:: If communication is not possible for a certain period of time, a message indicating a timeout will be displayed on the Worker side.
         
 
-5. プログラムの編集と実行
+5. Editing and executing programs
 
-    - プログラムに Scheduler のアドレスを記載し、プログラム実行時に Scheduler に計算タスクが渡されるようにします。
-    - FEMOpt コンストラクタの引数 ``scheduler_address`` に ``tcp://~~~:~~~`` を指定してください。
+    - Include the address of the Scheduler in the program so that computational tasks are passed to the Scheduler during program execution.
+    - Specify ``tcp://~~~:~~~`` for the argument ``scheduler_address`` in the FEMOpt constructor.
 
         .. code-block:: Python
 
             from pyfemtet.opt import FEMOpt
 
-            ...  # 目的関数の定義など
+            ...  # Define objectives, constraints and so on.
 
             if __name__ == '__main__':
 
-                ...  # fem, opt のセットアップなど
-
                 femopt = FEMOpt(scheduler_address='tcp://~~~:~~~')
 
-                ...  # 最適化問題のセットアップなど
+                ...  # Setup optimization problem.
         
-                femopt.main()  # クラスターに接続され、最適化が実行されます。
-
-                # femopt.terminate_all()  # 手順 3, 4 で起動した Scheduler, Worker 等のプロセスを自動で終了します。
+                femopt.optimize()  # Connect cluster and start optimization
+                femopt.terminate_all()  # terminate Shceduler and Workers started in procedure 3 and 4.
 
 
 .. warning::
 
-    エラー等でプログラムが異常終了した場合、再試行の前に Scheduler, Worker を一度終了し、
-    もう一度手順 3, 4 を実行することをお勧めします。
-
-
-
+    If the program terminates abnormally due to errors, it is recommended to terminate the Scheduler and Worker once before retrying, and then proceed with steps 3 and 4 again.

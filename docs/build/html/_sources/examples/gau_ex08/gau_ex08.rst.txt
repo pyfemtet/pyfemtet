@@ -1,47 +1,45 @@
-ソレノイドコイルの自己インダクタンス
+Self-inductance of a solenoid coil
 ========================================
 
-Femtet の磁場解析ソルバーを用い、有限長ソレノイドコイルの
-自己インダクタンスを特定の値にする例題を解説します。
+An example will be explained using Femtet's magnetic field analysis solver to determine the self-inductance of a finite-length solenoid coil to a specific value.
 
 
-サンプルファイル
+Sample File
 ------------------------------
 .. note::
 
-   :download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.femprj>`
-   を Femtet で開いたまま、
-   :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>`
-   をダブルクリックして実行してください。
+   Keep the :download:`sample project<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.femprj>`
+   open in Femtet and double-click on the :download:`sample code<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>`
+   to execute it.
 
 .. note::
 
-   FEM 問題としての詳細については、FemtetHelp / 例題集 / 磁場解析 / 例題8 を参照してください。
+   For more details on the FEM problem, please refer to FemtetHelp / Example Collection / Magnetic Analysis / Example 8.
 
 
-設計変数
+Design Variables
 ------------------------------
 
 .. figure:: gau_ex08_model.png
    
-   モデルの外観
+   Appearance of the Model
 
-====== ======
-変数名 説明
-====== ======
-h      1巻きあたりのピッチ
-r      コイルの半径
-n      コイルの巻き数
-====== ======
+============== ====================================
+Variable Name  Description
+============== ====================================
+h              Pitch per 1 turn
+r              Radius of the coil
+n              Number of turns in the coil
+============== ====================================
 
 
-目的関数
+Objective Function
 ------------------------------
 
-自己インダクタンス
+Self-inductance of the coil.
 
 
-サンプルコード
+Sample Code
 ------------------------------
 
 .. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py
@@ -50,17 +48,16 @@ n      コイルの巻き数
    :caption: gau_ex08_parametric.py
 
 
-サンプルコードの実行結果
-------------------------------
+Execution Result of the Sample Code
+-------------------------------------
 
 .. figure:: gau_ex08_result.png
    :width: 300
 
-   gau_ex08_parametric.py の実行結果。
-   横軸が試行回数、縦軸が自己インダクタンスです。
+   Execution result of gau_ex08_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is self-inductance.
 
-20 回目の試行の結果、自己インダクタンスは 0.103 μF となります。
+After 20 iterations, the self-inductance was calculated to be 0.103 µF.
 
 .. note::
 
-   Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。
+   Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on.

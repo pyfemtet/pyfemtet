@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>External CAD (NX) Integration &mdash; PyFemtet Project  ドキュメント</title>
+  <title>外部 CAD (NX) 連携 &mdash; PyFemtet Project  ドキュメント</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -23,8 +23,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="検索" href="../../search.html" />
-    <link rel="next" title="External CAD (Solidworks) Integration" href="../Sldworks_ex01/Sldworks_ex01.html" />
-    <link rel="prev" title="Heat-generating elements on the substrate (parallel computation)" href="../wat_ex14_parallel/wat_ex14_parallel.html" /> 
+    <link rel="next" title="外部 CAD (Solidworks) 連携" href="../Sldworks_ex01/Sldworks_ex01.html" />
+    <link rel="prev" title="基板上の発熱体（並列計算）" href="../wat_ex14_parallel/wat_ex14_parallel.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,27 +47,27 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id2">Single Objective Optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id3">Multi-Objective Optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#id4">Parallel Computing</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#cad">CAD Integration</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">External CAD (NX) Integration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">sample file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#fem">Details as a FEM Problem</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Design Variables</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">Objective Function</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">Sample Code</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">Execution Result of the Sample Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">例題</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#single-objective-optimization">単目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#multi-objective-optimization">多目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#parallel-computing">並列計算</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#cad-integration">CAD 連携</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">外部 CAD (NX) 連携</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sample-file">サンプルファイル</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#details-as-a-fem-problem">FEM 問題としての詳細</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-variables">設計変数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#objective-function">目的関数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sample-code">サンプルコード</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">サンプルコードの実行結果</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../Sldworks_ex01/Sldworks_ex01.html">External CAD (Solidworks) Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Sldworks_ex01/Sldworks_ex01.html">外部 CAD (Solidworks) 連携</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
 </ul>
@@ -86,8 +86,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../pages/examples.html">Examples</a></li>
-      <li class="breadcrumb-item active">External CAD (NX) Integration</li>
+          <li class="breadcrumb-item"><a href="../../pages/examples.html">例題</a></li>
+      <li class="breadcrumb-item active">外部 CAD (NX) 連携</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/NX_ex01/NX_ex01.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,77 +97,68 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="cad-nx">
-<h1>External CAD (NX) Integration<a class="headerlink" href="#cad-nx" title="Link to this heading"></a></h1>
-<p>pyfemtet では外部 CAD (NX) で作成したモデルを
-Femtet にインポートして解析を行う場合でも
-CAD と Femtet を連携して最適化を行うことができます。</p>
-<p>With pyfemtet, you can optimize the collaboration between CAD and Femtet even when importing models created in an external CAD (NX) into Femtet for analysis.</p>
-<section id="id1">
-<h2>sample file<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+  <section id="external-cad-nx-integration">
+<h1>外部 CAD (NX) 連携<a class="headerlink" href="#external-cad-nx-integration" title="Link to this heading"></a></h1>
+<p>PyFemtet では外部 CAD (NX) で作成したモデルを Femtet にインポートする解析モデルにおいても、パラメトリック最適化を行うことができます。</p>
+<section id="sample-file">
+<h2>サンプルファイル<a class="headerlink" href="#sample-file" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p><a class="reference download internal" download="" href="../../_downloads/18d04ad07af2b15986a98c5d30844348/NX_ex01.prt"><code class="xref download docutils literal notranslate"><span class="pre">サンプルモデル</span></code></a>
-と
-<a class="reference download internal" download="" href="../../_downloads/f89096ec20e8d66dd24fbd80120af592/NX_ex01.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a>
-を同じフォルダに配置し、
-プロジェクトを Femtet で開いたまま、
-<a class="reference download internal" download="" href="../../_downloads/d466d471902c3da21e8912b69b66fb55/NX_ex01.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a>
-をダブルクリックして実行してください。</p>
+<p><a class="reference download internal" download="" href="../../_downloads/18d04ad07af2b15986a98c5d30844348/NX_ex01.prt"><code class="xref download docutils literal notranslate"><span class="pre">サンプルモデル</span></code></a> と <a class="reference download internal" download="" href="../../_downloads/f89096ec20e8d66dd24fbd80120af592/NX_ex01.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 <a class="reference download internal" download="" href="../../_downloads/d466d471902c3da21e8912b69b66fb55/NX_ex01.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> をダブルクリックして実行してください。</p>
 </div>
 </section>
-<section id="fem">
-<h2>Details as a FEM Problem<a class="headerlink" href="#fem" title="Link to this heading"></a></h2>
-<figure class="align-default" id="id6">
+<section id="details-as-a-fem-problem">
+<h2>FEM 問題としての詳細<a class="headerlink" href="#details-as-a-fem-problem" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
 <img alt="../../_images/NX_ex01_analysis.png" src="../../_images/NX_ex01_analysis.png" />
 <figcaption>
-<p><span class="caption-text">Appearance of the Model (Analysis Conditions)</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+<p><span class="caption-text">モデルの外観 (解析条件)</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <ul class="simple">
-<li><p>fix … Fully Fixed</p></li>
+<li><p>fix … 完全固定</p></li>
 <li><p>load … Load in the -Z direction (1N)</p></li>
 <li><p>mirror … Symmetrical to the XZ plane</p></li>
 </ul>
 </section>
-<section id="id2">
-<h2>Design Variables<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
-<figure class="align-default" id="id7">
+<section id="design-variables">
+<h2>設計変数<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id2">
 <img alt="../../_images/NX_ex01_model_dsgn.png" src="../../_images/NX_ex01_model_dsgn.png" />
 <figcaption>
-<p><span class="caption-text">Appearance of the Model (Design Variables)</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+<p><span class="caption-text">モデルの外観 (設計変数)</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>説明</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>A</p></td>
-<td><p>Web Tickness</p></td>
+<td><p>ウェブ板厚</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
-<td><p>Flange Tickness</p></td>
+<td><p>フランジ板厚</p></td>
 </tr>
 <tr class="row-even"><td><p>C</p></td>
-<td><p>Flange Bending</p></td>
+<td><p>フランジ曲げ</p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="id3">
-<h2>Objective Function<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<section id="objective-function">
+<h2>目的関数<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Maximum Displacement in the Z direction (set to 0)</p></li>
-<li><p>Volume (minimize)</p></li>
+<li><p>Z 方向最大変位（0 にする）</p></li>
+<li><p>体積（最小にする）</p></li>
 </ul>
 </section>
-<section id="id4">
-<h2>Sample Code<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">NX_ex01.py</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<section id="sample-code">
+<h2>サンプルコード<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">NX_ex01.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;外部 CAD ソフト NX との連携</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="sd">外部 CAD ソフト NX で作成したパラメトリックモデルを</span>
@@ -261,18 +252,18 @@ CAD と Femtet を連携して最適化を行うことができます。</p>
 </div>
 </div>
 </section>
-<section id="id5">
-<h2>Execution Result of the Sample Code<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
-<figure class="align-default" id="id9">
+<section id="execution-result-of-the-sample-code">
+<h2>サンプルコードの実行結果<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id4">
 <a class="reference internal image-reference" href="../../_images/NX_ex01_result.png"><img alt="../../_images/NX_ex01_result.png" src="../../_images/NX_ex01_result.png" style="width: 300px;" /></a>
 <figcaption>
-<p><span class="caption-text">Execution result of NX_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+<p><span class="caption-text">NX_ex01.py の実行結果。 横軸が 変位 、 縦軸が 体積 です。</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<p>After the 20th trial, a Pareto set of displacement and volume is obtained.</p>
+<p>20 回の反復計算の結果、 変位と体積のパレート集合が得られます。</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>Results may vary slightly depending on the versions of Femtet, pyfemtet, and the optimization engine it depends on.</p>
+<p>Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。</p>
 </div>
 </section>
 </section>
@@ -281,8 +272,8 @@ CAD と Femtet を連携して最適化を行うことができます。</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../wat_ex14_parallel/wat_ex14_parallel.html" class="btn btn-neutral float-left" title="Heat-generating elements on the substrate (parallel computation)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../Sldworks_ex01/Sldworks_ex01.html" class="btn btn-neutral float-right" title="External CAD (Solidworks) Integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../wat_ex14_parallel/wat_ex14_parallel.html" class="btn btn-neutral float-left" title="基板上の発熱体（並列計算）" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Sldworks_ex01/Sldworks_ex01.html" class="btn btn-neutral float-right" title="外部 CAD (Solidworks) 連携" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
