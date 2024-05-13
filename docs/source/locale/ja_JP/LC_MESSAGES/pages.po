@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-10 17:43+0900\n"
+"POT-Creation-Date: 2024-05-13 12:00+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -52,338 +52,410 @@ msgid "API reference"
 msgstr ""
 
 #: ../../source/pages/examples.rst:2
-msgid "実施例"
-msgstr "Examples"
+msgid "Examples"
+msgstr "例題"
 
 #: ../../source/pages/examples.rst:5
-msgid "単目的最適化"
-msgstr "Single Objective Optimization"
+msgid "Single Objective Optimization"
+msgstr "単目的最適化"
 
 #: ../../source/pages/examples.rst:9
-msgid "ソレノイドコイルのインダクタンス"
-msgstr "Inductance of a Solenoid Coil"
+msgid "Inductance of a Solenoid Coil"
+msgstr "ソレノイドコイルのインダクタンス"
 
 #: ../../source/pages/examples.rst:17
-msgid "磁場解析で 有限長ソレノイドコイルの自己インダクタンスを 特定の値にします。"
-msgstr "In magnetic field analysis, set the self-inductance of a finite-length solenoid coil to a specific value."
+msgid "In magnetic field analysis, set the self-inductance of a finite-length solenoid coil to a specific value."
+msgstr "磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。"
 
-#: ../../source/pages/examples.rst:22
-msgid "円形パッチアンテナの共振周波数"
-msgstr "Resonant Frequency of Circular Patch Antenna"
+#: ../../source/pages/examples.rst:20
+msgid "Resonant Frequency of Circular Patch Antenna"
+msgstr "円形パッチアンテナの共振周波数"
 
-#: ../../source/pages/examples.rst:30
-msgid "電磁波解析で 円形パッチアンテナの共振周波数を 特定の値にします。"
-msgstr "In electromagnetic wave analysis, set the resonant frequency of a circular patch antenna to a specific value."
+#: ../../source/pages/examples.rst:28
+msgid "In electromagnetic wave analysis, set the resonant frequency of a circular patch antenna to a specific value."
+msgstr "電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。"
 
-#: ../../source/pages/examples.rst:43
-msgid "多目的最適化"
-msgstr "Multi-Objective Optimization"
+#: ../../source/pages/examples.rst:39
+msgid "Multi-Objective Optimization"
+msgstr "多目的最適化"
 
-#: ../../source/pages/examples.rst:46
-msgid "基板上の発熱体"
-msgstr "Heating Element on Substrate"
+#: ../../source/pages/examples.rst:42
+msgid "Heating Element on Substrate"
+msgstr "基板上の発熱体"
 
-#: ../../source/pages/examples.rst:54
-msgid "熱伝導解析で 基板上の IC チップの温度と 基板サイズを最小にします。"
-msgstr "In thermal conduction analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate."
+#: ../../source/pages/examples.rst:50
+msgid "In thermal conduction analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate."
+msgstr "熱伝導解析で基板上の IC チップの温度と基板サイズを最小にします。"
 
-#: ../../source/pages/examples.rst:66
-msgid "並列計算"
-msgstr "Parallel Computing"
+#: ../../source/pages/examples.rst:60
+msgid "Parallel Computing"
+msgstr "並列計算"
 
-#: ../../source/pages/examples.rst:69
-msgid "基板上の発熱体（並列計算）"
-msgstr "Heating Element on Substrate (Parallel Computing)"
+#: ../../source/pages/examples.rst:63
+msgid "Heating Element on Substrate (Parallel Computing)"
+msgstr "基板上の発熱体（並列計算）"
 
-#: ../../source/pages/examples.rst:77
-msgid "「基板上の発熱体」を複数 Femtet の並列計算により高速化します。"
-msgstr "Speed up 'Heating Element on Substrate' using parallel computing in multiple Femtet instances."
+#: ../../source/pages/examples.rst:71
+msgid "Speed up 'Heating Element on Substrate' using parallel computing in multiple Femtet instances."
+msgstr "「基板上の発熱体」を複数 Femtet の並列計算により高速化します。"
 
-#: ../../source/pages/examples.rst:87
-msgid "CAD 連携"
-msgstr "CAD Integration"
+#: ../../source/pages/examples.rst:81
+msgid "CAD Integration"
+msgstr "CAD 連携"
 
-#: ../../source/pages/examples.rst:90
-msgid "外部 CAD (NX) 連携"
-msgstr "External CAD (NX) Integration"
+#: ../../source/pages/examples.rst:84
+msgid "External CAD (NX) Integration"
+msgstr "外部 CAD (NX) 連携"
 
-#: ../../source/pages/examples.rst:98
-msgid "CAD (NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。"
-msgstr "Explore dimensions of sturdy and lightweight H-beams using CAD (NX) integration."
+#: ../../source/pages/examples.rst:92
+msgid "Explore dimensions of sturdy and lightweight H-beams using NX integration."
+msgstr "CAD (NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。"
 
-#: ../../source/pages/examples.rst:100
-msgid "外部 CAD (Solidworks) 連携"
-msgstr "External CAD (Solidworks) Integration"
+#: ../../source/pages/examples.rst:94
+msgid "External CAD (Solidworks) Integration"
+msgstr "外部 CAD (Solidworks) 連携"
 
-#: ../../source/pages/examples.rst:108
-msgid "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
-msgstr "Explore the same problem with Solidworks integration as with external CAD (NX) integration."
+#: ../../source/pages/examples.rst:102
+msgid "Explore the same problem as left with Solidworks integration."
+msgstr "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
 
 #: ../../source/pages/usage.rst:2
-msgid "使い方"
-msgstr "Usage"
+msgid "Usage"
+msgstr "使い方"
 
 #: ../../source/pages/usage.rst:4
-msgid "このセクションでは、ご自身のプロジェクトで pyfemtet.opt を適用するための 標準的な手順を示します。"
-msgstr "This section outlines the standard procedure for applying pyfemtet.opt in your own project."
+msgid "This section outlines the standard procedure for applying ``pyfemtet.opt`` in your own project."
+msgstr "このセクションでは、ご自身のプロジェクトで ``pyfemtet.opt`` を適用するための基本的な手順を示します。"
 
-#: ../../source/pages/usage.rst:11
-msgid "pyfemtet の動作確認には、 :doc:`examples` の確認をお勧めします。"
-msgstr "To verify the operation of pyfemtet, we recommend checking the examples in :doc:`examples`."
+#: ../../source/pages/usage.rst:8
+msgid "To verify the operation of PyFemtet, we recommend checking the examples in :doc:`examples`."
+msgstr "PyFemtet の動作確認には、:doc:`examples` の確認をお勧めします。"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:7
-msgid "（実験的機能）クラスタ計算の実行手順"
-msgstr "Procedure for Running Cluster Calculations (Experimental Feature)"
+msgid "Procedure for Running Cluster Calculations (Experimental Feature)"
+msgstr "（実験的機能）クラスタ計算の実行手順"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:10
-msgid "このページでは、pyfemtet.opt を用いた最適化プログラムを 複数台の PC を用いて並列計算する際の手順を示します。"
-msgstr "This page outlines the procedure for parallel computing an optimization program using pyfemtet.opt on multiple PCs."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:9
+msgid "This page outlines the procedure for parallel computing an optimization program using ``pyfemtet.opt`` on multiple PCs."
+msgstr "このページでは、 ``pyfemtet.opt`` を用いた最適化プログラムを 複数台の PC を用いて並列計算する際の手順を示します。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:15
-msgid "ここでは、 **プログラムを呼び出す手元マシンを「手元 PC」、計算を実行するマシンを「計算 PC」と呼びます。** 計算 PC は複数あっても構いません。手元マシンが計算マシンであっても構いません。 計算 PC 1 台ごとに「計算 PC のセットアップ」および「Worker の起動」を行ってください。"
-msgstr "Here, the machine where the program is called is referred to as the 'local PC,' and the machine running the calculations is referred to as the 'calculation PC.' It is acceptable to have multiple calculation PCs. The local machine can also be a calculation machine. Please perform 'Calculation PC Setup' and 'Worker Startup' for each calculation PC."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:13
+msgid "**Here, the machine where the program is called is referred to as the 'local PC,' and the machine running the calculations is referred to as the 'calculation PC.'** It is acceptable to have multiple calculation PCs. The local machine can also be a calculation machine. Please perform '2. Setting Up Calculation PC' and '4. Launching the Worker' for each calculation PC."
+msgstr "ここでは、 **プログラムを呼び出す手元マシンを「手元 PC」、計算を実行するマシンを「計算 PC」と呼びます。** 計算 PC は複数あっても構いません。手元マシンが計算マシンであっても構いません。 計算 PC 1 台ごとに「計算 PC のセットアップ」および「Worker の起動」を行ってください。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:22
-msgid "pyfemtet の並列計算は ``dask.distributed`` に依存しています。 また本ドキュメントは dask version 2023.12.1 時点での挙動を説明しています。 詳細、および最新の CLI コマンド使用方法は |dask| をご覧ください。"
-msgstr "Parallel computing in pyfemtet depends on ``dask.distributed``. This document describes the behavior as of dask version 2023.12.1. For more details and the latest CLI command usage, please refer to |dask|."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:21
+msgid "Parallel computing in pyfemtet depends on ``dask.distributed``. This document describes the behavior as of dask version 2023.12.1. For more details and the latest CLI command usage, please refer to |dask|."
+msgstr "pyfemtet の並列計算は ``dask.distributed`` に依存しています。 また本ドキュメントは dask version 2023.12.1 時点での挙動を説明しています。 詳細、および最新の CLI コマンド使用方法は |dask| をご覧ください。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:27
-msgid "プログラムの作成"
-msgstr "Creating a Program"
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:24
+msgid "Creating a Program"
+msgstr "プログラムの作成"
+
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:26
+msgid "Refer to :doc:`how_to_optimize_your_project` and create a program for optimization."
+msgstr ":doc:`how_to_optimize_your_project`  などを参考に、最適化を行うプログラムを作成してください。"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:29
-msgid ":doc:`how_to_optimize_your_project`  などを参考に、 最適化を行うプログラムを作成してください。"
-msgstr "Refer to :doc:`how_to_optimize_your_project` and create a program for optimization."
+msgid "Setting Up Calculation PC"
+msgstr "計算 PC のセットアップ"
+
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:31
+msgid "Please install Femtet on the calculation PC."
+msgstr "計算 PC に Femtet をインストールしてください。"
+
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:32
+msgid "Please install the same version of Python as on the local PC on the calculation PC."
+msgstr "計算 PC に手元 PC と同じバージョンの Python をインストールしてください。"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:33
-msgid "計算 PC のセットアップ"
-msgstr "Setting Up Calculation PCs"
+msgid "Please install the same version of pyfemtet and its dependencies as on the local PC on the calculation PC."
+msgstr "計算 PC に手元 PC と同じバージョンの pyfemtet および依存ライブラリをインストールしてください。"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:35
-msgid "計算 PC に Femtet をインストールしてください。"
-msgstr "Please install Femtet on the calculation PCs."
+msgid "To install dependencies with specified versions, the following steps are convenient. Please execute the following steps from the command prompt. (Please do not execute the line starts with # as it is a comment.)"
+msgstr "依存ライブラリのバージョンを指定してインストールするには、下記手順が便利です。コマンドプロンプトから下記手順を実行してください。 # 以降はコメントなので、実行しないでください。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:36
-msgid "計算 PC に手元 PC と同じバージョンの Python をインストールしてください。"
-msgstr "Please install the same version of Python as on the local PC on the calculation PCs."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:42
+msgid "Transfer the file generated here, named requirements.txt, to the calculation PCs, and run the following command in the command prompt."
+msgstr "ここで生成された requirements.txt というファイルを計算 PC に転送し、 コマンドプロンプトで下記コマンドを実行します。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:37
-msgid "計算 PC に手元 PC と同じバージョンの pyfemtet および依存ライブラリをインストールしてください。"
-msgstr "Please install the same version of pyfemtet and its dependencies as on the local PC on the calculation PCs."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:49
+msgid "Then run the makepy command to set the macro constants for Femtet."
+msgstr "makepy コマンドを実行し、Femtet のマクロ定数の設定を行ってください。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:39
-msgid "依存ライブラリのバージョンを指定してインストールするには、下記手順が便利です。コマンドプロンプトから下記手順を実行してください。 # 以降はコメントなので、実行しないでください。"
-msgstr "To install dependencies with specified versions, the following steps are convenient. Please execute the following steps from the command prompt. # Please do not execute anything beyond this point as it is a comment."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:57
+msgid "Launching the Scheduler (a process that manages processes on multiple calculation PCs)"
+msgstr "Scheduler（複数の PC のプロセスを管理するプロセス）の起動"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:50
-msgid "ここで生成された requirements.txt というファイルを計算 PC に転送し、 コマンドプロンプトで下記コマンドを実行します。"
-msgstr "Transfer the file generated here, named requirements.txt, to the calculation PCs, and run the following command in the command prompt."
-
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:60
-msgid "makepy コマンドを実行し、Femtet のマクロ定数の設定を行ってください。"
-msgstr "Run the makepy command to set the macro constants for Femtet."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:59
+msgid "Please run the following command on your local PC."
+msgstr "手元 PC で下記コマンドを実行してください。"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:68
-msgid "Scheduler（複数の PC のプロセスを管理するプロセス）の起動"
-msgstr "Launching the Scheduler (a process that manages processes on multiple PCs)"
-
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:70
-msgid "手元 PC で下記コマンドを実行してください。"
-msgstr "Please run the following command on your local PC."
-
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:82
-msgid "ここで表示される tcp://~~~:~~~ という数字を記録してください。"
-msgstr "Please make a note of the numbers displayed here, such as tcp://~~~:~~~."
+msgid "Please make a note of the numbers displayed here, such as tcp://~~~:~~~."
+msgstr "ここで表示される tcp://~~~:~~~ という数字を記録してください。"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst
-msgid "ファイアウォール等の制約により通信できるポートが決まっている場合は、"
-msgstr "If communication ports are restricted due to firewalls or other constraints,"
+msgid "If communication ports are restricted due to firewalls or other constraints,"
+msgstr "ファイアウォール等の制約により通信できるポートが決まっている場合は、"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst
 msgid "``dask scheduler --port your_port``"
 msgstr ""
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst
-msgid "コマンドを使用してください（your_port はポート番号に置き換えてください）。"
-msgstr "please use the above command (replace your_port with the port number)."
+msgid "please use the above command (replace your_port with the port number)."
+msgstr "コマンドを使用してください（your_port はポート番号に置き換えてください）。"
+
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:77
+msgid "Launching the Worker (a process that performs calculations)"
+msgstr "Worker（計算を実行するプロセス）の起動"
+
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:79
+msgid "Please run the following command on the calculation PCs."
+msgstr "計算 PC で下記コマンドを実行してください。"
+
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:86
+msgid "If the screen updates on both scheduler and worker, and the text ``Starting established connection`` is displayed, the communication has been successful."
+msgstr "scheduler, worker 双方で画面が更新され、 ``Starting established connection`` という 文字が表示されれば通信が成功しています。"
+
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:88
+msgid "If communication is not possible for a certain period of time, a message indicating a timeout will be displayed on the Worker side."
+msgstr "通信できない状態で一定時間が経過すると、Worker 側でタイムアウトした旨のメッセージが表示されます。"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:91
-msgid "Worker（計算を実行するプロセス）の起動"
-msgstr "Launching the Worker (a process that performs calculations)"
+msgid "Editing and executing programs"
+msgstr "プログラムの編集と実行"
 
 #: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:93
-msgid "計算 PC で下記コマンドを実行してください。"
-msgstr "Please run the following command on the calculation PCs."
+msgid "Include the address of the Scheduler in the program so that computational tasks are passed to the Scheduler during program execution."
+msgstr "プログラムに Scheduler のアドレスを記載し、プログラム実行時に Scheduler に計算タスクが渡されるようにします。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:103
-msgid "scheduler, worker 双方で画面が更新され、 ``Starting established connection`` という 文字が表示されれば通信が成功しています。"
-msgstr "If the screen updates on both scheduler and worker, and the text 'Starting established connection' is displayed, the communication has been successful."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:94
+msgid "Specify ``tcp://~~~:~~~`` for the argument ``scheduler_address`` in the FEMOpt constructor."
+msgstr "FEMOpt コンストラクタの引数 ``scheduler_address`` に ``tcp://~~~:~~~`` を指定してください。"
 
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:107
-msgid "通信できない状態で一定時間が経過すると、Worker 側でタイムアウトした旨のメッセージが表示されます。"
-msgstr "If communication is not possible for a certain period of time, a message indicating a timeout will be displayed on the Worker side."
-
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:110
-msgid "プログラムの編集と実行"
-msgstr "Editing and executing programs"
-
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:112
-msgid "プログラムに Scheduler のアドレスを記載し、プログラム実行時に Scheduler に計算タスクが渡されるようにします。"
-msgstr "Include the address of the Scheduler in the program so that computational tasks are passed to the Scheduler during program execution."
-
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:113
-msgid "FEMOpt コンストラクタの引数 ``scheduler_address`` に ``tcp://~~~:~~~`` を指定してください。"
-msgstr "Specify 'tcp://~~~:~~~' for the argument 'scheduler_address' in the FEMOpt constructor."
-
-#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:136
-msgid "エラー等でプログラムが異常終了した場合、再試行の前に Scheduler, Worker を一度終了し、 もう一度手順 3, 4 を実行することをお勧めします。"
-msgstr "If the program terminates abnormally due to errors, it is recommended to terminate the Scheduler and Worker once before retrying, and then proceed with steps 3 and 4 again."
+#: ../../source/pages/usage_pages/how_to_deploy_cluster.rst:114
+msgid "If the program terminates abnormally due to errors, it is recommended to terminate the Scheduler and Worker once before retrying, and then proceed with steps 3 and 4 again."
+msgstr "エラー等でプログラムが異常終了した場合、再試行の前に Scheduler, Worker を一度終了し、 もう一度手順 3, 4 を実行することをお勧めします。"
 
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:2
-msgid "最適化の実行手順"
-msgstr "Procedure for executing optimization"
+msgid "Procedure for executing optimization"
+msgstr "最適化の実行手順"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:5
-msgid "このページでは、ご自身のプロジェクトに pyfemtet.opt を適用して最適設計を行う際の プログラム作成方法を示します。"
-msgstr "This page demonstrates how to create a program for conducting optimal design using pyfemtet.opt in your own project."
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:4
+msgid "This page demonstrates how to create a program for conducting optimal design using ``pyfemtet.opt`` in your own project."
+msgstr "このページでは、ご自身のプロジェクトに ``pyfemtet.opt`` を適用して最適設計を行う際の プログラム作成方法を示します。"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:10
-msgid "Femtet プロジェクトの作成"
-msgstr "Creating a Femtet project"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:7
+msgid "Creating a Femtet project"
+msgstr "Femtet プロジェクトの作成"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:9
+msgid "Create an analysis model on Femtet. **Register the parameters you want to optimize as variables.** For more details on analysis settings using parameters, please refer to Femtet Help / Project Creation / Variables."
+msgstr "Femtet 上で解析モデルを作成します。 **最適化したいパラメータを変数として登録してください。** パラメータを用いた解析設定の詳細については Femtet ヘルプ / プロジェクトの作成 / 変数 をご覧ください。"
 
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:12
-msgid "Femtet 上で解析モデルを作成します。 **最適化したいパラメータを変数として登録してください。** パラメータを用いた解析設定の詳細については Femtet ヘルプ / プロジェクトの作成 / 変数 をご覧ください。"
-msgstr "Create an analysis model on Femtet. **Register the parameters you want to optimize as variables.** For more details on analysis settings using parameters, please refer to Femtet Help / Project Creation / Variables."
+msgid "Setting the objective function"
+msgstr "目的関数の設定"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:18
-msgid "目的関数の設定"
-msgstr "Setting the objective function"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:14
+msgid "In optimization problems, the metric to be evaluated is referred to as the objective function. Please write the process of calculating the objective function from analysis results or model shapes using Python macros in Femtet."
+msgstr "最適化問題では、評価したい指標を目的関数と呼びます。 解析結果やモデル形状から目的関数を計算する処理を Femtet の Python マクロを用いて記述してください。"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:20
-msgid "最適化問題では、評価したい指標を目的関数と呼びます。 解析結果やモデル形状から目的関数を計算する処理を Femtet の Python マクロを用いて記述してください。"
-msgstr "In optimization problems, the metric to be evaluated is referred to as the objective function. Please write the process of calculating the objective function from analysis results or model shapes using Python macros in Femtet."
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:35
+msgid "For the Python macro syntax in Femtet, please refer to the Femtet Macro Help or `Macro Examples <https://www.muratasoftware.com/support/macro/>`_."
+msgstr "Femtet の Python マクロ文法は、Femtet マクロヘルプ又は `サンプルマクロ事例 <https://www.muratasoftware.com/support/macro/>`_ をご覧ください。"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:39
-msgid "Femtet の Python マクロ文法は、Femtet マクロヘルプ又は `サンプルマクロ事例 <https://www.muratasoftware.com/support/macro/>`_ をご覧ください。"
-msgstr "For the Python macro syntax in Femtet, please refer to the Femtet Macro Help or Sample Macro Examples <https://www.muratasoftware.com/support/macro/>_."
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:38
+msgid "Creating the main script"
+msgstr "メインスクリプトの作成"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:44
-msgid "メインスクリプトの作成"
-msgstr "Creating the main script"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:40
+msgid "Using the design variables and objective function defined above, create the main script."
+msgstr "上記で定義した設計変数と目的関数とを用い、メインスクリプトを作成します。"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:46
-msgid "上記で定義した設計変数と目的関数とを用い、メインスクリプトを作成します。"
-msgstr "Using the design variables and objective function defined above, create the main script."
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:70
+msgid "For this script to actually work, you need a Femtet stress analysis project with variables ``w`` and ``d``."
+msgstr ""
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:76
-#, fuzzy
-msgid "目的関数は第一引数に Femtet インスタンスを取る必要があります。 インスタンスは ~Optimizer クラス内で作成されるので、メインスクリプト内で定義しないでください。 詳細は :doc:`../examples` 又は :doc:`../api` をご覧ください。"
-msgstr "The objective function must take a Femtet instance as the first argument. Since the instance is created within the ~Optimizer class, do not define it in the main script. For more details, please refer to :doc:../pages/examples or :doc:../pages/api."
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:75
+msgid "**The objective function must take a Femtet instance as the first argument,** since the ``FEMOpt`` instance intarcreates it internally."
+msgstr "目的関数は第一引数に Femtet インスタンスを取る必要がありますが、このインスタンスは ``FEMOpt`` クラス内で生成されるので、スクリプト内で明示的に定義する必要はありません。"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:80
+msgid "Only perform ``add_parameter()`` on variables set with constant expressions within Femtet, and do not do it for variables set with string expressions. The string expressions will be lost."
+msgstr "``add_parameter()`` は Femtet 内で定数式を設定した変数にのみ行い、 文字式を設定した変数に対しては行わないでください。文字式が失われます。"
 
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:83
-msgid "``add_parameter()`` は Femtet 内で定数式を設定した変数にのみ行い、 文字式を設定した変数に対しては行わないでください。文字式が失われます。"
-msgstr "Only perform ``add_parameter()`` on variables set with constant expressions within Femtet, and do not do it for variables set with string expressions. The string expressions will be lost."
+msgid "Run the script."
+msgstr "スクリプトを実行します。"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:87
-msgid "スクリプトを実行します。"
-msgstr "Run the script."
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:85
+msgid "When the script is executed, the progress and results will be saved in a csv file. Each row in the csv file represents the result of one analysis attempt. The meaning of each column is as follows:"
+msgstr "スクリプトが実行されると、進捗および結果が csv ファイルに保存されます。 csv ファイルの各行は一回の解析試行結果を示しています。各列の意味は以下の通りです。"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:89
-msgid "スクリプトが実行されると、進捗および結果が csv ファイルに保存されます。 csv ファイルの各行は一回の解析試行結果を示しています。各列の意味は以下の通りです。"
-msgstr "When the script is executed, the progress and results will be saved in a csv file. Each row in the csv file represents the result of one analysis attempt. The meaning of each column is as follows:"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:88
+msgid "Columns"
+msgstr "列名"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:93
-msgid "列"
-msgstr "Column"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:88
+msgid "Meaning"
+msgstr "意味"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:93
-msgid "意味"
-msgstr "Meaning"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:95
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:90
 msgid "trial"
 msgstr ""
 
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:90
+msgid "The number of the attempt"
+msgstr "その試行が何度目の試行であるか"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:91
+msgid "<Variable name>"
+msgstr "<変数名>"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:91
+msgid "The value of the variable specified in the script"
+msgstr "スクリプトで指定した変数の値"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:92
+msgid "<Objective name>"
+msgstr "<目的名>"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:92
+msgid "The calculation result of the objective function specified in the script"
+msgstr "スクリプトで指定した目的関数の計算結果"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:93
+msgid "<Objective name>_direction"
+msgstr "<目的名>_direction"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:93
+msgid "The target of the objective function specified in the script"
+msgstr "スクリプトで指定した目的関数の目標"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:94
+msgid "<Constraint name>"
+msgstr "<拘束名>"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:94
+msgid "The calculation result of the constraint function specified in the script"
+msgstr "スクリプトで指定した拘束関数の計算結果"
+
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:95
-msgid "その試行が何度目の試行であるか"
-msgstr "The number of the attempt"
+msgid "<Constraint name>_lb"
+msgstr "<拘束名>_lb"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:95
+msgid "The lower bound of the constraint function specified in the script"
+msgstr "スクリプトで指定した拘束関数の下限"
 
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:96
-msgid "<変数名>"
-msgstr "<Variable name>"
+msgid "<Constraint name>_ub"
+msgstr "<拘束名>_ub"
 
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:96
-msgid "スクリプトで指定した変数の値"
-msgstr "The value of the variable specified in the script"
+msgid "The upper bound of the constraint function specified in the script"
+msgstr "スクリプトで指定した拘束関数の上限"
 
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:97
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:98
-msgid "<目的名>"
-msgstr "<Objective name>"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:97
-msgid "スクリプトで指定した目的関数の計算結果"
-msgstr "The calculation result of the objective function specified in the script"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:98
-msgid "スクリプトで指定した目的関数の目標"
-msgstr "The target of the objective function specified in the script"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:99
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:100
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:101
-msgid "<拘束名>"
-msgstr "<Constraint name>"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:99
-msgid "スクリプトで指定した拘束関数の計算結果"
-msgstr "The calculation result of the constraint function specified in the script"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:100
-msgid "スクリプトで指定した拘束関数の下限"
-msgstr "The lower bound of the constraint function specified in the script"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:101
-msgid "スクリプトで指定した拘束関数の上限"
-msgstr "The upper bound of the constraint function specified in the script"
-
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:102
 msgid "feasible"
 msgstr ""
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:102
-msgid "その試行がすべての拘束を満たすか"
-msgstr "Whether the attempt satisfies all constraints"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:97
+msgid "Whether the attempt satisfies all constraints"
+msgstr "その試行がすべての拘束を満たすか"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:103
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:98
 msgid "hypervolume"
 msgstr ""
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:103
-msgid "（目的関数が2以上の場合のみ）その試行までのhypervolume"
-msgstr "The hypervolume up to that attempt (only when the objective function is 2 or more)"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:98
+msgid "The hypervolume up to that attempt (only when the objective function is 2 or more)"
+msgstr "（目的関数が2以上の場合のみ）その試行までの hypervolume"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:104
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:99
 msgid "message"
 msgstr ""
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:104
-msgid "最適化プロセスによる特記事項"
-msgstr "Special notes from the optimization process"
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:99
+msgid "Special notes from the optimization process"
+msgstr "最適化プロセスによる特記事項"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:105
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:100
 msgid "time"
 msgstr ""
 
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:100
+msgid "Time when the attempt was completed"
+msgstr "試行が完了した時刻"
+
+#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:103
+msgid "Items enclosed in <> indicate that their content and number may vary depending on the script."
+msgstr "<> で囲まれた項目はスクリプトに応じて内容と数が変化することを示しています。"
+
 #: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:105
-msgid "試行が完了した時刻"
-msgstr "Time when the attempt was completed"
+msgid "If the objective name and constraint name are not specified in the script, values such as obj_1, cns_1 will be automatically assigned."
+msgstr "目的名、拘束名はスクリプト中で指定しない場合、obj_1, cns_1 などの値が自動で割り当てられます。"
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:108
-msgid "<> で囲まれた項目はスクリプトに応じて内容と数が変化することを示しています。"
-msgstr "Items enclosed in <> indicate that their content and number may vary depending on the script."
+#~ msgid "実施例"
+#~ msgstr ""
 
-#: ../../source/pages/usage_pages/how_to_optimize_your_project.rst:110
-msgid "目的名、拘束名はスクリプト中で指定しない場合、obj_1, cns_1 などの値が自動で割り当てられます。"
-msgstr "If the objective name and constraint name are not specified in the script, values such as obj_1, cns_1 will be automatically assigned."
+#~ msgid "単目的最適化"
+#~ msgstr ""
+
+#~ msgid "ソレノイドコイルのインダクタンス"
+#~ msgstr ""
+
+#~ msgid "磁場解析で 有限長ソレノイドコイルの自己インダクタンスを 特定の値にします。"
+#~ msgstr ""
+
+#~ msgid "円形パッチアンテナの共振周波数"
+#~ msgstr ""
+
+#~ msgid "電磁波解析で 円形パッチアンテナの共振周波数を 特定の値にします。"
+#~ msgstr ""
+
+#~ msgid "多目的最適化"
+#~ msgstr ""
+
+#~ msgid "基板上の発熱体"
+#~ msgstr ""
+
+#~ msgid "熱伝導解析で 基板上の IC チップの温度と 基板サイズを最小にします。"
+#~ msgstr ""
+
+#~ msgid "並列計算"
+#~ msgstr ""
+
+#~ msgid "基板上の発熱体（並列計算）"
+#~ msgstr ""
+
+#~ msgid "「基板上の発熱体」を複数 Femtet の並列計算により高速化します。"
+#~ msgstr ""
+
+#~ msgid "CAD 連携"
+#~ msgstr ""
+
+#~ msgid "外部 CAD (NX) 連携"
+#~ msgstr ""
+
+#~ msgid "CAD (NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。"
+#~ msgstr ""
+
+#~ msgid "外部 CAD (Solidworks) 連携"
+#~ msgstr ""
+
+#~ msgid "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
+#~ msgstr ""
+
+#~ msgid "使い方"
+#~ msgstr ""
+
+#~ msgid "このセクションでは、ご自身のプロジェクトで pyfemtet.opt を適用するための 標準的な手順を示します。"
+#~ msgstr ""
+
+#~ msgid "pyfemtet の動作確認には、 :doc:`examples` の確認をお勧めします。"
+#~ msgstr ""
 
