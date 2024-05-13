@@ -13,35 +13,34 @@ Welcome to PyFemtet's documentation!
 概要
 ----------
 
-**pyfemtet は ムラタソフトウェア製 CAE ソフト Femtet の拡張機能を提供します。**
+**PyFemtet provides extensions for Femtet, a CAE software developed by Murata Software.**
 
-- pyfemtet はオープンソースライブラリであり、無償かつ商用利用可能です。
-- Femtet 本体の使用にはライセンスが必要です。pyfemtet は Femtet 本体のライセンスを一切変更しません。
-- 評価のための試用版 Femtet は ムラタソフトウェア にお問い合わせください。
+- PyFemtet is an open-source library and can be used free of charge for both non-commercial and commercial purposes.
+- A license is required to use the Femtet main body. PyFemtet does not alter the license of the Femtet main body in any way.
+- Please contact Murata Software for a trial version of Femtet for evaluation purposes.
 
-    - ➡ |Femtet|
+    - --> |Femtet|
 
 
-pyfemtet の主要機能
+Main Features of PyFemtet
 ----------------------------
 
-pyfemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。
-現在、 **pyfemtet の唯一の機能は設計パラメータの最適化** であり、pyfemtet.opt サブパッケージとして実装されています。
+PyFemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of PyFemtet is design parameter optimization, which is implemented as a subpackage ``pyfemtet.opt``.
 
-pyfemtet.opt による最適化機能は、以下の特徴を有します。
+The optimization feature by pyfemtet.opt has the following characteristics:
 
-- 単目的および多目的の最適化
-- プロセスモニタによるリアルタイム進行状況の表示
-- 複数の Femtet インスタンスによる並列計算
-- Excel 等で分析が容易な csv 形式での結果出力
+- Single-objective and multi-objective optimization
+- Real-time progress display with process monitoring
+- Parallel computation with multiple instances of Femtet
+- Result output in easy-to-analyze csv format for Excel and other tools
 
 
-実施例
+Example of Implementation
 --------
 
 .. grid:: 2
 
-    .. grid-item-card:: ソレノイドコイルのインダクタンス
+    .. grid-item-card:: Inductance of a solenoid coil
         :link: examples/gau_ex08/gau_ex08
         :link-type: doc
         :text-align: center
@@ -49,10 +48,10 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
         .. image:: examples/gau_ex08/gau_ex08.png
             :scale: 50
         +++
-        磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。
+        In magnetic field analysis, the self-inductance of a finite-length solenoid coil is set to a specific value.
 
 
-    .. grid-item-card:: 円形パッチアンテナの共振周波数
+    .. grid-item-card:: Resonant frequency of a circular patch antenna
         :link: examples/her_ex40/her_ex40
         :link-type: doc
         :text-align: center
@@ -60,22 +59,18 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
         .. image:: examples/her_ex40/her_ex40.png
             :scale: 50
         +++
-        電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。
+        In electromagnetic wave analysis, the resonant frequency of a circular patch antenna is set to a specific value.
 
 
 .. tip::
     
-    :doc:`pages/examples` セクションにより多くの実施例があります。
+    There are more examples in the :doc:`pages/examples` section.
 
 
-シンプルな API
+Simple API
 ----------------------------
 
-下記は多目的最適化の実施例です。
-``add_parameter()`` と ``add_objective()`` で問題を設定し、
-``main()`` で実施することができます。
-それ以外は通常の Femtet のマクロスクリプトを使用します。
-詳細な実施例は :doc:`pages/usage` セクションを確認してください。
+Below is an example of multi-objective optimization. You can set up the problem with ``add_parameter()`` and ``add_objective()``, and then execute it with ``optimize()``. For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the :doc:`pages/usage` section.
 
 .. code-block:: python
 
@@ -95,59 +90,49 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
        femopt = FEMOpt()
        femopt.add_parameter('w', 10, 2, 20)
        femopt.add_parameter('d', 10, 2, 20)
-       femopt.add_objective(max_displacement, name='最大変位', direction=0)
-       femopt.add_objective(volume, name='体積', direction='minimize')
-       femopt.main(n_trials=20)
+       femopt.add_objective(max_displacement, name='max_displacement', direction=0)
+       femopt.add_objective(volume, name='volume', direction='minimize')
+       femopt.optimize(n_trials=20)
 
 
-インストール
+Install
 ---------------
 
-.. note:: pyfemtet は windows にのみ対応しています。
+.. note:: PyFemtet is only available for Windows.
 
 .. note::
     
-    Python 及び Femtet がインストールされ
-    Femtet のマクロが有効化されている環境では
-    単に ``pip install pyfemtet`` を実行してください。
-    以下の手順は、Python 及び Femtet のフルセットアップの手順です。
+    In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run ``pip install pyfemtet``. The following steps are for a full setup of Python, Femtet and PyFemtet.
 
-
-1. **Femtet（2023.0 以降）のインストール**
+1. **Installation of Femtet (version 2023.0 or later)**
     
-    初めての方は、試用版または個人版のご利用をご検討ください。➡ |Femtet|
+    For first-time users, please consider using the trial version or personal edition. --> |Femtet|
 
     .. note::
 
-        最新版以外の Femtet では制限される機能があります。
+        If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used.
 
     
-2. **Femtet のマクロ有効化**
+2. **Enabling Femtet macros**
 
-    Femtet インストール後にスタートメニューから
-    「マクロ機能を有効化する」を実行してください。
-    この手順には管理者権限が必要です。
+    .. figure:: images/enableMacrosIcon.png
+
+    After installing Femtet, **please run 'EnableMacros' from the start menu.** This procedure requires administrator privileges.
 
 
-3. **Python（3.9.3 以上）のインストール**
+3. **Installation of Python (version 3.9.3 or later)**
 
-    リンク先のダウンロードリンクから
-    インストーラをダウンロードし、実行してください。➡ |Python|
-
-    .. tip::
-
-        最新版でないバージョンの Python をダウンロードするには
-        下記のスクリーンショットを参考に
-        ご自身の環境に応じたインストーラをダウンロードしてください。
+    Download the installer from the link provided and run it.  --> |Python|
 
     .. tip::
 
-        pyfemtet.opt は現在主に Python 3.11 環境で開発されており、
-        インストールや実施例の実行に不具合がある場合は Python 3.11 環境の構築をご検討ください。
+        To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment.
 
-        特に、Python 3.12 以上の環境では依存ライブラリ botorch のインストールを行わない設定になっています。
-        botorch の機能が必要な場合は、お手数ですが下記コマンドで botorch のインストールを
-        手動で試みていただきますようお願いします。
+    .. tip::
+
+        ``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment.
+
+        In particular, in environments with Python 3.12 or higher, the installation of the dependent library ``botorch`` is not set to be performed automatically. If you require the functionality of ``botorch``, we kindly ask you to manually attempt its installation with the command below.
 
         ``py -m pip install botorch``
 
@@ -157,69 +142,65 @@ pyfemtet.opt による最適化機能は、以下の特徴を有します。
     .. figure:: images/python_3.11.png
         :scale: 50%
 
-        このスクリーンショットでは、64 bit 版 windows 向け python 3.11.7 のインストーラへの
-        リンクの場所の例を示しています。
+        This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows.
 
     .. figure:: images/python_install.png
 
-        インストーラ画面。
+        Installer screen.
 
 
-4. **pyfemtet のインストール**
+4. **Installing pyfemtet**
 
-    コマンドプロンプトで下記コマンドを実行してください。
-    ライブラリのダウンロード及びインストールが始まります。::
+    Please run the following command in the command prompt. The download and installation of the library will begin.::
 
         py -m pip install pyfemtet --no-warn-script-location
 
-    インストールが終了すると、"Successfully installed " の表示の後、コマンドプロンプトの制御が戻ります。
+    Once the installation is complete, after displaying "Successfully installed ", control will return to the command prompt.
 
     .. figure:: images/pip_while_install.png
 
-        インストール中
+        Installing
 
     .. figure:: images/pip_complete_install.png
 
-        インストール終了後
+        Installation completed
 
     .. note::
 
-        環境によりますが、インストールには 5 分程度を要します。
+        Depending on the environment, installation may take about 5 minutes.
 
     .. note::
 
-        インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、
-        エラーではなく、無視しても問題ありません。
+        At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues.
 
-5. **Femtet マクロ定数の設定**
+5. **Setting Femtet Macro Constants**
 
-    コマンドプロンプトで下記コマンドを実行してください。::
+    Please run the following command in the command prompt.::
 
         py -m win32com.client.makepy FemtetMacro
 
-    インストールが終了すると、コマンドプロンプトの制御が戻ります。
+    Once the setting is complete, control will return to the command prompt.
 
     .. figure:: images/complete_makepy.png
 
-        makepy 終了後
+        After makepy finishes
 
+That's all.
 
-
-以上で終了です。
 
 .. tip::
     
-    動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。
+    For verification, we recommend that you first view the samples in :doc:`pages/examples`.
 
 
 
-目次
---------
+Table of Contents
+------------------------
 
 .. toctree::
     :maxdepth: 2
 
-    ホーム <self>
+    Home <self>
     pages/examples
     pages/usage
     pages/api

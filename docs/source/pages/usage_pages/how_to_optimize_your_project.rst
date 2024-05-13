@@ -1,110 +1,105 @@
-最適化の実行手順
---------------------
+Procedure for executing optimization
+----------------------------------------
+
+This page demonstrates how to create a program for conducting optimal design using ``pyfemtet.opt`` in your own project.
 
 
-このページでは、ご自身のプロジェクトに
-pyfemtet.opt を適用して最適設計を行う際の
-プログラム作成方法を示します。
+1. Creating a Femtet project
+
+    Create an analysis model on Femtet. **Register the parameters you want to optimize as variables.** For more details on analysis settings using parameters, please refer to Femtet Help / Project Creation / Variables.
 
 
-1. Femtet プロジェクトの作成
+2. Setting the objective function
 
-    Femtet 上で解析モデルを作成します。
-    **最適化したいパラメータを変数として登録してください。**
-    パラメータを用いた解析設定の詳細については
-    Femtet ヘルプ / プロジェクトの作成 / 変数 をご覧ください。
+    In optimization problems, the metric to be evaluated is referred to as the objective function. Please write the process of calculating the objective function from analysis results or model shapes using Python macros in Femtet.
 
-
-2. 目的関数の設定
-
-    最適化問題では、評価したい指標を目的関数と呼びます。
-    解析結果やモデル形状から目的関数を計算する処理を Femtet の Python マクロを用いて記述してください。
 
     .. code-block:: python
 
-        """Femtet の解析結果から評価指標を計算する例です。"""
+        """Example to calculate max displacement (for your obejctive function).
+        The scripts after Dispatch are Femtet's Python macros.
+        """
         from win32com.client import Dispatch
 
-        # Femtet の操作のためのオブジェクトを取得
+        # Get object to control Femtet.
         Femtet = Dispatch("FemtetMacro.Femtet")
 
-        # Femtet で解析結果を開く
+        # Open analysis result by Femtet.
         Femtet.OpenCurrentResult(True)
         Gogh = Femtet.Gogh
 
-        # （例）応力解析結果からモデルの最大変位を取得
+        # ex.) Get max displacement from analysis deresult.
         dx, dy, dz = Gogh.Galileo.GetMaxDisplacement()
 
     .. note::
-        Femtet の Python マクロ文法は、Femtet マクロヘルプ又は
-        `サンプルマクロ事例 <https://www.muratasoftware.com/support/macro/>`_
-        をご覧ください。
+        For the Python macro syntax in Femtet, please refer to the Femtet Macro Help or `Macro Examples <https://www.muratasoftware.com/support/macro/>`_.
     
 
-3. メインスクリプトの作成
+3. Creating the main script
 
-    上記で定義した設計変数と目的関数とを用い、メインスクリプトを作成します。
+    Using the design variables and objective function defined above, create the main script.
 
     .. code-block:: python
 
-        """pyfemtet を用いてパラメータ最適化を行う最小限のコードの例です。"""
+        """The minimum code example to execute parameter optimization using PyFemtet."""
 
-        from pyfemtet.opt import OptunaOptimizer
+        from pyfemtet.opt import FEMOpt
 
         def max_displacement(Femtet):
-            """目的関数となる評価指標を計算する関数です。"""
+            """Objective function"""
             Gogh = Femtet.Gogh
             dx, dy, dz = Gogh.Galileo.GetMaxDisplacement()
             return dy
             
         if __name__ == '__main__':
-            # 最適化を行うオブジェクトの準備
-            femopt = OptunaOptimizer()
+            # prepareing optimization object
+            femopt = FEMOpt()
 
-            # 設計変数の設定
+            # parameter setting
             femopt.add_parameter('w', 10, 2, 20)
             femopt.add_parameter('d', 10, 2, 20)
 
-            # 目的関数の設定
+            # objective setting
             femopt.add_objective(max_displacement, direction=0)
 
-            # 最適化の実行
+            # run optimization
             femopt.optimize()
 
     .. note::
  
-        目的関数は第一引数に Femtet インスタンスを取る必要があります。
-        インスタンスは ~Optimizer クラス内で作成されるので、メインスクリプト内で定義しないでください。
-        詳細は :doc:`../examples` 又は :doc:`../api` をご覧ください。 
+        For this script to actually work, you need a Femtet stress analysis project with variables ``w`` and ``d``.
+ 
+ 
+    .. note::
+ 
+        **The objective function must take a Femtet instance as the first argument,** since the ``FEMOpt`` instance intarcreates it internally.
 
 
     .. warning::
  
-        ``add_parameter()`` は Femtet 内で定数式を設定した変数にのみ行い、
-        文字式を設定した変数に対しては行わないでください。文字式が失われます。
+        Only perform ``add_parameter()`` on variables set with constant expressions within Femtet, and do not do it for variables set with string expressions. The string expressions will be lost.
 
 
-4. スクリプトを実行します。
+4. Run the script.
 
-    スクリプトが実行されると、進捗および結果が csv ファイルに保存されます。
-    csv ファイルの各行は一回の解析試行結果を示しています。各列の意味は以下の通りです。
+    When the script is executed, the progress and results will be saved in a csv file. Each row in the csv file represents the result of one analysis attempt. The meaning of each column is as follows:
 
-    ===========  ======================================================
-        列                                意味
-    ===========  ======================================================
-    trial        その試行が何度目の試行であるか
-    <変数名>     スクリプトで指定した変数の値
-    <目的名>     スクリプトで指定した目的関数の計算結果
-    <目的名>     スクリプトで指定した目的関数の目標
-    <拘束名>     スクリプトで指定した拘束関数の計算結果
-    <拘束名>     スクリプトで指定した拘束関数の下限
-    <拘束名>     スクリプトで指定した拘束関数の上限
-    feasible     その試行がすべての拘束を満たすか
-    hypervolume  （目的関数が2以上の場合のみ）その試行までのhypervolume
-    message      最適化プロセスによる特記事項
-    time         試行が完了した時刻
-    ===========  ======================================================
+    ==================================  ============================================================================================================
+      Columns                           Meaning
+    ==================================  ============================================================================================================
+    trial                               The number of the attempt
+    <Variable name>                     The value of the variable specified in the script
+    <Objective name>                    The calculation result of the objective function specified in the script
+    <Objective name>_direction          The target of the objective function specified in the script
+    <Constraint name>                   The calculation result of the constraint function specified in the script
+    <Constraint name>_lb                The lower bound of the constraint function specified in the script
+    <Constraint name>_ub                The upper bound of the constraint function specified in the script
+    feasible                            Whether the attempt satisfies all constraints
+    hypervolume                         The hypervolume up to that attempt (only when the objective function is 2 or more)
+    message                             Special notes from the optimization process
+    time                                Time when the attempt was completed
+    ==================================  ============================================================================================================
 
-    .. note:: <> で囲まれた項目はスクリプトに応じて内容と数が変化することを示しています。
+    .. note:: Items enclosed in <> indicate that their content and number may vary depending on the script.
 
-    .. note:: 目的名、拘束名はスクリプト中で指定しない場合、obj_1, cns_1 などの値が自動で割り当てられます。
+    .. note:: If the objective name and constraint name are not specified in the script, values such as obj_1, cns_1 will be automatically assigned.

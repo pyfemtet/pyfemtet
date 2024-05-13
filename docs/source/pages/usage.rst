@@ -1,15 +1,11 @@
-使い方
+Usage
 ===============
 
-このセクションでは、ご自身のプロジェクトで
-pyfemtet.opt を適用するための
-標準的な手順を示します。
-
+This section outlines the standard procedure for applying ``pyfemtet.opt`` in your own project.
 
 .. note::
 
-    pyfemtet の動作確認には、
-    :doc:`examples` の確認をお勧めします。
+    To verify the operation of PyFemtet, we recommend checking the examples in :doc:`examples`.
 
 
 .. toctree::

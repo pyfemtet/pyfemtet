@@ -1,23 +1,21 @@
-基板上の発熱体（並列計算）
-==============================
+Heat-generating elements on the substrate (parallel computation)
+==========================================================================================
 
 
-wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します。
-サンプルコード及び実行結果以外の項目は :doc:`../wat_ex14/wat_ex14` と同じです。
+Parallelize wat_ex14_parametric with 3 Femtet instances. Other items, except for sample code and execution results, are the same as :doc:`../wat_ex14/wat_ex14`.
 
 
-サンプルファイル
+Sample File
 ------------------------------
 .. note::
 
-   :download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
-   を Femtet で開いたまま、
-   :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py>`
-   をダブルクリックして実行してください。
+   Keep the :download:`sample project <../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
+   open in Femtet, then double-click on the :download:`sample code <../../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py>`
+   to execute it.
 
 .. note::
 
-   FEM 問題としての詳細については、FemtetHelp / 例題集 / 熱伝導解析 / 例題14 を参照してください。
+   For details on the FEM problem, please refer to FemtetHelp / Examples / Heat Conduction Analysis / Example 14.
 
 
 設計変数
@@ -25,26 +23,25 @@ wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します�
 
 .. figure:: wat_ex14_model.png
    
-   モデルの外観
+   Appearance of the Model
 
-===========  ============
-  変数名         説明
-===========  ============
-substrate_w  基板の幅
-substrate_d  基板の奥行き
-===========  ============
+============== ========================
+Variable Name  Description
+============== ========================
+substrate_w    Width of the substrate
+substrate_d    Depth of the substrate
+============== ========================
+
+Objective Function
+-----------------------------
+
+- Maximum temperature of the main chip (to minimize)
+- Maximum temperature of the sub chip (to minimize)
+- Occupied area on the substrate plane (to minimize)
 
 
-目的関数
-------------------------------
-
-- メインチップの最高温度（最小にする）
-- サブチップの最高温度（最小にする）
-- 基板の平面上の専有面積（最小にする）
-
-
-サンプルコード
-------------------------------
+Sample Code
+---------------
 
 .. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py
    :language: python
@@ -54,43 +51,40 @@ substrate_d  基板の奥行き
 
 .. note::
 
-   並列化を実施するには、main() 関数の引数 n_parallel に並列化したい数を渡すだけです。
+   To parallelize, simply pass the desired number of parallelizations to the ``n_parallel`` argument of the ``optimize()`` method.
 
 
-サンプルコードの実行結果
-------------------------------
+Execution Result of the Sample Code
+----------------------------------------
 
-実行環境
+Execution Environment
 
 +--------+--------------------------------------------+
 | OS     | windows 10                                 |
 +--------+--------------------------------------------+
 | CPU    | Intel Core-i7 12700 (12 cores, 20 threads) |
 +--------+--------------------------------------------+
-| メモリ | 32 GB                                      |
+| Memory | 32 GB                                      |
 +--------+--------------------------------------------+
 
 
-実行結果
+Execution Results
 
-========  =====
-並列なし  3並列
-117秒     74秒
-========  =====
+================================  =========================
+Without Parallelization           With 3 Parallelizations
+117 sec                           74 sec
+================================  =========================
 
-このデモでは 3 つの Femtet インスタンスでの計算を行いました。
-:doc:`../wat_ex14/wat_ex14` の問題について、
-上記実行環境で並列を用いない場合は 20 回の試行に 117 秒を要しましたが、
-このデモでは 74 秒で 21 回の試行が終了し、実行時間を 37% 低減しています。
+In this demo, calculations were performed with 3 Femtet instances. For the problem in :doc:`../wat_ex14/wat_ex14`, without using parallelization in the above execution environment, it took 117 seconds for 20 trials. However, in this demo, 21 trials were completed in 74 seconds, reducing the execution time by 37%.
 
 .. note::
 
-   一般に数値計算を N 並列した場合、実行時間は単純に 1/N にはなりません。
+   Generally, when parallelizing numerical calculations by N, the execution time does not simply become 1/N.
 
 .. warning::
 
-   実行環境や解析モデルによって並列化による高速化効果は変動します。
+   The acceleration effect of parallelization varies depending on the execution environment and analysis model.
 
 .. note::
 
-   Femtet, pyfemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。
+   Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on.
