@@ -1,7 +1,8 @@
 PyFemtet is the extension package for Femtet with Python.
 
 - Femtet Website: https://www.muratasoftware.com/
-- Documentation: https://pyfemtet.github.io/pyfemtet/
+- Documentation (English): https://pyfemtet-en.readthedocs.io/en/stable/
+- ドキュメント（日本語）: https://pyfemtet-jp.readthedocs.io/jp/stable/
 - Source code: https://github.com/pyfemtet/pyfemtet
 - Bug reports: https://github.com/pyfemtet/pyfemtet/issues
 
