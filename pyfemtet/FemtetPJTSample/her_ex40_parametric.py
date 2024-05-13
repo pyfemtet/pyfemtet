@@ -1,3 +1,9 @@
+"""Single-objective optimization: Resonant frequency of a circular patch antenna
+
+Using Femtet’s electromagnetic wave analysis solver,
+we explain an example of setting the resonant frequency
+of a circular patch antenna to a specific value.
+"""
 from time import sleep
 
 import numpy as np
@@ -8,9 +14,8 @@ from optuna.integration.botorch import BoTorchSampler
 from pyfemtet.opt import OptunaOptimizer, FEMOpt
 
 
-
 class SParameterCalculator:
-    """S パラメータ・共振周波数計算用クラスです。"""
+    """This class is for calculating S-parameters and resonance frequencies."""
     
     def __init__(self):
         self.freq = []
@@ -20,51 +25,55 @@ class SParameterCalculator:
         self.minimum_S = None
 
     def get_result_from_Femtet(self, Femtet):
-        """Femtet の解析結果から周波数と S パラメータの関係を取得します。"""
+        """Obtain the relationship between frequency and S-parameter from the Femtet analysis results."""
 
-        # 前準備
+        # Preparation
         Femtet.OpenCurrentResult(True)
         Gogh = Femtet.Gogh
         
-        # 各モードに対して周波数と S(1,1) を取得する
+        # Obtain the frequency and S(1,1) for each mode
         mode = 0
         freq_list = []
         dB_S_list = []
-        for mode in tqdm(range(Gogh.Hertz.nMode), '結果取得中'):
-            # Femtet 結果画面のモード設定
+        for mode in tqdm(range(Gogh.Hertz.nMode), 'Obtaining frequency and S-parameter'):
+            # Femtet result screen mode settings
             Gogh.Hertz.Mode = mode
             sleep(0.01)
-            # 周波数の取得
+            # Get frequency
             freq = Gogh.Hertz.GetFreq().Real
-            # S パラメータの取得
+            # Get S-parameters
             comp_S = Gogh.Hertz.GetSMatrix(0, 0)
             norm = np.linalg.norm((comp_S.Real, comp_S.Imag))
             dB_S = 20 * np.log10(norm)
-            # 結果の取得
+            # Get results
             freq_list.append(freq)
             dB_S_list.append(dB_S)
         self.freq = freq_list
         self.S = dB_S_list
 
     def calc_resonance_frequency(self):
-        """S に対して最初のピークを与える freq を計算します。"""
+        """Compute the frequency that gives the first peak for S-parameter."""
         x = -np.array(self.S)
         peaks, _ = find_peaks(x, height=None, threshold=None, distance=None, prominence=0.5, width=None, wlen=None, rel_height=0.5, plateau_size=None)
         from pyfemtet.core import SolveError
         if len(peaks) == 0:
-            raise SolveError('ピークが検出されませんでした。')
+            raise SolveError('No peaks detected.')
         self.resonance_frequency = self.freq[peaks[0]]
         self.minimum_S = self.S[peaks[0]]
 
     def get_resonance_frequency(self, Femtet):
-        """共振周波数を計算します。
+        """Calculate the resonant frequency.
 
-        Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
-            目的関数は第一引数に Femtet インスタンスを取る必要があります。
+        Note:
+            The objective or constraint function
+            must take a Femtet as its first argument
+            and must return a single float.
 
-        f : 計算された共振周波数です。
-            目的関数は単一の float を返す必要があります。
-
+        Params:
+            Femtet: An instance for using Femtet macros. For more information, see "Femtet Macro Help / CFemtet Class".
+        
+        Returns:
+            float: A resonance frequency.
         """
         self.get_result_from_Femtet(Femtet)
         self.calc_resonance_frequency()
@@ -73,14 +82,16 @@ class SParameterCalculator:
         
 
 def antenna_is_smaller_than_substrate(Femtet):
-    """アンテナのサイズと基板のサイズの関係を計算します。
+    """Calculate the relationship between antenna size and board size.
 
-    Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
-        拘束関数は第一引数に Femtet インスタンスを取る必要があります。
+    This function is used to constrain the model
+    from breaking down while changing parameters.
 
-    Sx/2 - ant_r : 基板サイズとアンテナサイズの差です。
-        拘束関数は単一の float を返す必要があります。
-
+    Params:
+        Femtet: An instance for using Femtet macros.
+    
+    Returns:
+        float: Difference between the board size and antenna size. Must be equal to or grater than 1 mm.
     """
     ant_r = Femtet.GetVariableValue('ant_r')
     Sx = Femtet.GetVariableValue('sx')
@@ -88,14 +99,16 @@ def antenna_is_smaller_than_substrate(Femtet):
 
 
 def port_is_inside_antenna(Femtet):
-    """給電ポートの位置とアンテナのサイズの関係を計算します。
+    """Calculate the relationship between the feed port location and antenna size.
 
-    Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
-        拘束関数は第一引数に Femtet インスタンスを取る必要があります。
+    This function is used to constrain the model
+    from breaking down while changing parameters.
 
-    ant_r - xf : アンテナ辺縁と給電ポートの位置の差です。
-        拘束関数は単一の float を返す必要があります。
-
+    Params:
+        Femtet: An instance for using Femtet macros.
+    
+    Returns:
+        float: Difference between the antenna edge and the position of the feed port. Must be equal to or grater than 1 mm.
     """
     ant_r = Femtet.GetVariableValue('ant_r')
     xf = Femtet.GetVariableValue('xf')
@@ -103,10 +116,10 @@ def port_is_inside_antenna(Femtet):
 
 
 if __name__ == '__main__':
-    # S パラメータ計算用クラス
+    # Define the object for calculating S-parameters and resonance frequencies.
     s = SParameterCalculator()
 
-    # 最適化手法を定義するオブジェクトを用意
+    # Define mathematical optimization object.
     opt = OptunaOptimizer(
         sampler_class=BoTorchSampler,
         sampler_kwargs=dict(
@@ -114,22 +127,21 @@ if __name__ == '__main__':
         )
     )
     
-    # 最適化処理を行うオブジェクトを用意
-    femopt = FEMOpt(
-        opt=opt,
-    )  # ここで起動している Femtet が紐づけされます
+    # Define FEMOpt object (This process integrates mathematical optimization and FEM.).
+    femopt = FEMOpt(opt=opt)
     
-    # 設計変数の設定
-    femopt.add_parameter('ant_r', 10, 5, 20, memo='円形アンテナの半径')
-    femopt.add_parameter('sx', 50, 40, 60, memo='基板のサイズ')
-    femopt.add_parameter('xf', 5, 1, 20, memo='給電ポートの偏心量')
+    # Add design variables (Use variable names set in Femtet) to the optimization problem.
+    femopt.add_parameter('ant_r', 10, 5, 20)
+    femopt.add_parameter('sx', 50, 40, 60)
+    femopt.add_parameter('xf', 5, 1, 20)
 
-    # 拘束の設定
-    femopt.add_constraint(antenna_is_smaller_than_substrate, 'アンテナサイズ', lower_bound=1)
-    femopt.add_constraint(port_is_inside_antenna, 'ポート位置', lower_bound=1)
+    # Add constraint to the optimization problem.
+    femopt.add_constraint(antenna_is_smaller_than_substrate, 'board_antenna_clearance', lower_bound=1)
+    femopt.add_constraint(port_is_inside_antenna, 'antenna_port_clearance', lower_bound=1)
 
-    # 目的の設定
-    femopt.add_objective(s.get_resonance_frequency, '第一共振周波数（GHz）', direction=3.0)
+    # Add objective to the optimization problem.
+    # The target frequency is 3 GHz.
+    femopt.add_objective(s.get_resonance_frequency, 'First_resonant_frequency(GHz)', direction=3.0)
 
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=20)

@@ -374,7 +374,6 @@ class History:
     prm_names = []
     obj_names = []
     cns_names = []
-    local_data = pd.DataFrame()
     is_restart = False
     is_processing = False
     _future = None
@@ -396,6 +395,9 @@ class History:
         self.obj_names = obj_names
         self.cns_names = cns_names
         self.additional_metadata = additional_metadata or ''
+
+        # 初期化
+        self.local_data = pd.DataFrame()
 
         # 最適化実行中かどうか
         self.is_processing = client is not None

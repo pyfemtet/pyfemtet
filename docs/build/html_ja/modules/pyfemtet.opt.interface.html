@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.interface package &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="pyfemtet.opt.opt package" href="pyfemtet.opt.opt.html" />
+    <link rel="prev" title="pyfemtet.opt package" href="pyfemtet.opt.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">使い方</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">pyfemtet</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.core">pyfemtet.core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.dispatch_extensions">pyfemtet.dispatch_extensions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.logger">pyfemtet.logger module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../pages/api.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyfemtet</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet package</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.opt.html">pyfemtet.opt package</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.interface package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/pyfemtet.opt.interface.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pyfemtet-opt-interface-package">
+<h1>pyfemtet.opt.interface package<a class="headerlink" href="#pyfemtet-opt-interface-package" title="Link to this heading"></a></h1>
+<section id="module-pyfemtet.opt.interface">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.opt.interface" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">FEMInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FEMInterface" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for the interface with FEM software.</p>
+<p>Stores information necessary to restore FEMInterface instance in a subprocess.</p>
+<p>The concrete class should call super().__init__() with the desired arguments when restoring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – keyword arguments for FEMInterface (re)constructor.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface.check_param_value">
+<span class="sig-name descname"><span class="pre">check_param_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_name</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FEMInterface.check_param_value" title="Link to this definition"></a></dt>
+<dd><p>Checks the value of a parameter in the FEM model (if implemented in concrete class).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface.update">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FEMInterface.update" title="Link to this definition"></a></dt>
+<dd><p>Updates the FEM analysis based on the proposed parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface.update_parameter">
+<span class="sig-name descname"><span class="pre">update_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FEMInterface.update_parameter" title="Link to this definition"></a></dt>
+<dd><p>Updates only FEM variables (if implemented in concrete class).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">FemtetInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">femprj_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strictly_pid_specify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_without_project</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.interface.FEMInterface" title="pyfemtet.opt.interface._base.FEMInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEMInterface</span></code></a></p>
+<p>Concrete class for the interface with Femtet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>femprj_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – The path to the .femprj file. Defaults to None.</p></li>
+<li><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – The name of the analysis model. Defaults to None.</p></li>
+<li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – The connection method to use. Can be 『new』, 『existing』, or 『auto』. Defaults to 『auto』.</p></li>
+<li><p><strong>strictly_pid_specify</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and connect_method==』new』, search launched Femtet process strictly based on its process id.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>Even if you specify <code class="docutils literal notranslate"><span class="pre">strictly_pid_specify=True</span></code> on the constructor,
+<strong>the connection behavior is like</strong> <code class="docutils literal notranslate"><span class="pre">strictly_pid_specify=False</span></code> <strong>in parallel processing</strong>
+because of its large overhead.
+So you should close all Femtet processes before running FEMOpt.optimize()
+if <code class="docutils literal notranslate"><span class="pre">n_parallel</span></code> &gt;= 2.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you search for information about the method to connect python and Femtet, see <a class="reference internal" href="#pyfemtet.opt.interface.FemtetInterface.connect_femtet" title="pyfemtet.opt.interface.FemtetInterface.connect_femtet"><code class="xref py py-func docutils literal notranslate"><span class="pre">connect_femtet()</span></code></a>.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.check_param_value">
+<span class="sig-name descname"><span class="pre">check_param_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.check_param_value" title="Link to this definition"></a></dt>
+<dd><p>Check param_name is set in femprj file or not.</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>This function works with Femtet version 2023.1.1 and above.
+Otherwise, no check is performed.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.connect_femtet">
+<span class="sig-name descname"><span class="pre">connect_femtet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connect_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.connect_femtet" title="Link to this definition"></a></dt>
+<dd><p>Connects to a Femtet process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – The connection method. Can be 『new』, 『existing』, or 『auto』. Defaults to 『new』.</p></li>
+<li><p><strong>pid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – The process ID of an existing Femtet process and wanted to connect.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>When connect_method is 『new』, starts a new Femtet process and connects to it.
+<strong>`pid` will be ignored.</strong></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>When 『existing』, connect to an existing Femtet process.
+However, if there are no Femtets to which it can connect
+(i.e. already connected to another Python or Excel process),
+it throws an exception.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>When set to 『auto』, first tries 『existing』, and if that fails, connects with 『new』.
+If <cite>pid</cite> is specified and failed to connect,
+it will not try existing another Femtet process.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.femtet_is_alive">
+<span class="sig-name descname"><span class="pre">femtet_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.femtet_is_alive" title="Link to this definition"></a></dt>
+<dd><p>Returns connected femtet process is existing or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.open">
+<span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">femprj_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.open" title="Link to this definition"></a></dt>
+<dd><p>Open specific analysis model with connected Femtet.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.quit">
+<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.quit" title="Link to this definition"></a></dt>
+<dd><p>Force to terminate connected Femtet.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.solve" title="Link to this definition"></a></dt>
+<dd><p>Execute FEM analysis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.update" title="Link to this definition"></a></dt>
+<dd><p>See <a class="reference internal" href="#pyfemtet.opt.interface.FEMInterface.update" title="pyfemtet.opt.interface.FEMInterface.update"><code class="xref py py-func docutils literal notranslate"><span class="pre">FEMInterface.update()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.update_model">
+<span class="sig-name descname"><span class="pre">update_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.update_model" title="Link to this definition"></a></dt>
+<dd><p>Updates the analysis model only.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.update_parameter">
+<span class="sig-name descname"><span class="pre">update_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.update_parameter" title="Link to this definition"></a></dt>
+<dd><p>Update parameter of femprj.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">FemtetWithNXInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prt_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">femprj_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strictly_pid_specify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.interface.FemtetInterface" title="pyfemtet.opt.interface._femtet.FemtetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FemtetInterface</span></code></a></p>
+<p>Femtet with NX interface class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prt_path</strong> – The path to the prt file.</p>
+</dd>
+</dl>
+<p>For details of The other arguments, see <code class="docutils literal notranslate"><span class="pre">FemtetInterface</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.check_param_value">
+<span class="sig-name descname"><span class="pre">check_param_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface.check_param_value" title="Link to this definition"></a></dt>
+<dd><p>Override FemtetInterface.check_param_value().</p>
+<p>Do nothing because the parameter can be registered
+to not only .femprj but also .prt.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.update_model">
+<span class="sig-name descname"><span class="pre">update_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface.update_model" title="Link to this definition"></a></dt>
+<dd><p>Update .x_t</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">FemtetWithSolidworksInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sldprt_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">femprj_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strictly_pid_specify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.interface.FemtetInterface" title="pyfemtet.opt.interface._femtet.FemtetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FemtetInterface</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.check_param_value">
+<span class="sig-name descname"><span class="pre">check_param_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.check_param_value" title="Link to this definition"></a></dt>
+<dd><p>Override FemtetInterface.check_param_value().</p>
+<p>Do nothing because the parameter can be registered
+to not only .femprj but also .SLDPRT.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.initialize_sldworks_connection">
+<span class="sig-name descname"><span class="pre">initialize_sldworks_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.initialize_sldworks_connection" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swAllConfiguration">
+<span class="sig-name descname"><span class="pre">swAllConfiguration</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swAllConfiguration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swDocPART">
+<span class="sig-name descname"><span class="pre">swDocPART</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swDocPART" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveAsCurrentVersion">
+<span class="sig-name descname"><span class="pre">swSaveAsCurrentVersion</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveAsCurrentVersion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveAsOptions_Copy">
+<span class="sig-name descname"><span class="pre">swSaveAsOptions_Copy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveAsOptions_Copy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveAsOptions_Silent">
+<span class="sig-name descname"><span class="pre">swSaveAsOptions_Silent</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveAsOptions_Silent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveWithReferencesOptions_None">
+<span class="sig-name descname"><span class="pre">swSaveWithReferencesOptions_None</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSaveWithReferencesOptions_None" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSpecifyConfiguration">
+<span class="sig-name descname"><span class="pre">swSpecifyConfiguration</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swSpecifyConfiguration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.swThisConfiguration">
+<span class="sig-name descname"><span class="pre">swThisConfiguration</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.swThisConfiguration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_model">
+<span class="sig-name descname"><span class="pre">update_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_model" title="Link to this definition"></a></dt>
+<dd><p>Update .x_t</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_sw_model">
+<span class="sig-name descname"><span class="pre">update_sw_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_sw_model" title="Link to this definition"></a></dt>
+<dd><p>Update .sldprt</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.NoFEM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">NoFEM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.NoFEM" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.interface.FEMInterface" title="pyfemtet.opt.interface._base.FEMInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEMInterface</span></code></a></p>
+<p>Interface with no FEM for debug.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.NoFEM.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pyfemtet.opt.interface.NoFEM.update" title="Link to this definition"></a></dt>
+<dd><p>Updates the FEM analysis based on the proposed parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyfemtet.opt.html" class="btn btn-neutral float-left" title="pyfemtet.opt package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyfemtet.opt.opt.html" class="btn btn-neutral float-right" title="pyfemtet.opt.opt package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

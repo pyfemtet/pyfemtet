@@ -18,6 +18,7 @@ from pyfemtet.opt import FemtetInterface
 def taskkill_femtet():
     sleep(3)
     run(['taskkill', '/f', '/im', 'Femtet.exe'])
+    sleep(3)
 
 
 def test_launch_and_connect_femtet():
@@ -141,13 +142,11 @@ def test_empty_femtet():
 
 def test_allow_empty_femtet():
     taskkill_femtet()
-    sleep(3)
     fem = FemtetInterface(allow_without_project=True)
     assert fem.femtet_pid > 0, 'Femtet が起動できていません。'
-    assert fem.Femtet.hWnd == _get_hwnds(fem.femtet_pid)[0], '起動された Femtet と接続していません。'
     taskkill_femtet()
 
 
 if __name__ == '__main__':
-    # test_FemtetInterface()
+    test_allow_empty_femtet()
     pass

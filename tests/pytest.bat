@@ -1,5 +1,5 @@
 cd %~dp0\..
-poetry run pytest ./tests -s --lf
+poetry run pytest ./tests -s
 pause
 exit
 
