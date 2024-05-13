@@ -48,7 +48,7 @@ Sample Code
    :caption: her_ex40_parametric.py
 
 
-Execution Result of The Sample Code
+Execution Result of the Sample Code
 -------------------------------------
 
 .. figure:: her_ex40_result.png

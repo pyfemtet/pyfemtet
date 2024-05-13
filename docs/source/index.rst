@@ -35,8 +35,8 @@ The optimization feature by pyfemtet.opt has the following characteristics:
 - Result output in easy-to-analyze csv format for Excel and other tools
 
 
-Example of Implementation
---------
+Examples
+--------------------------------
 
 .. grid:: 2
 
@@ -134,7 +134,10 @@ Install
 
         In particular, in environments with Python 3.12 or higher, the installation of the dependent library ``botorch`` is not set to be performed automatically. If you require the functionality of ``botorch``, we kindly ask you to manually attempt its installation with the command below.
 
-        ``py -m pip install botorch``
+
+    .. code-block::
+
+        py -m pip install botorch
 
 
     .. figure:: images/python_download.png
@@ -149,7 +152,7 @@ Install
         Installer screen.
 
 
-4. **Installing pyfemtet**
+4. **Installing** ``pyfemtet``
 
     Please run the following command in the command prompt. The download and installation of the library will begin.::
 

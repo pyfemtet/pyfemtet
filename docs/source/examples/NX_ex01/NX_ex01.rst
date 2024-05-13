@@ -1,7 +1,7 @@
 External CAD (NX) Integration
 ==============================
 
-With PyFemtet, you can optimize the collaboration between CAD and Femtet even when importing models created in an external CAD (NX) into Femtet for analysis.
+PyFemtet allows parametric optimization even for analysis models created with external CAD (NX) and imported into Femtet.
 
 
 Sample File

@@ -50,7 +50,7 @@ Sample Code
 
 
 Execution Result of the Sample Code
--------------------------
+--------------------------------------------------
 
 .. figure:: wat_ex14_result.png
    :width: 300

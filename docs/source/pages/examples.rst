@@ -2,7 +2,7 @@ Examples
 ===============
 
 Single Objective Optimization
----------------
+------------------------------
 
 .. grid:: 2
 
@@ -57,7 +57,7 @@ Multi-Objective Optimization
 
 
 Parallel Computing
----------------
+------------------------------
 .. grid:: 2
 
     .. grid-item-card:: Heating Element on Substrate (Parallel Computing)

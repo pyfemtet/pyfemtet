@@ -18,7 +18,7 @@ Sample File
    For details on the FEM problem, please refer to FemtetHelp / Examples / Heat Conduction Analysis / Example 14.
 
 
-設計変数
+Design Variables
 ------------------------------
 
 .. figure:: wat_ex14_model.png
