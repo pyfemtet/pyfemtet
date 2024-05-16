@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-13 13:44+0900\n"
+"POT-Creation-Date: 2024-05-16 15:38+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: ../../source/index.rst:200
+#: ../../source/index.rst:203
 msgid "Home"
 msgstr "ホーム"
 
@@ -60,9 +60,8 @@ msgid "PyFemtet is a library that provides functionality using the Python macro 
 msgstr "PyFemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。現在、 **PyFemtet の唯一の機能は設計パラメータの最適化** であり、``pyfemtet.opt`` サブパッケージとして実装されています。"
 
 #: ../../source/index.rst:30
-#, fuzzy
-msgid "The optimization feature by pyfemtet.opt has the following characteristics:"
-msgstr "``pyfemtet.opt`` による最適化機能は、以下の特徴を有します。"
+msgid "``pyfemtet.opt`` has the following characteristics."
+msgstr "PyFemtet の最適化機能 ``pyfemtet.opt`` は以下の特徴を有します。"
 
 #: ../../source/index.rst:32
 msgid "Single-objective and multi-objective optimization"
@@ -164,71 +163,67 @@ msgstr "``pyfemtet.opt`` は現在主に Python 3.11 環境で開発されてお
 msgid "In particular, in environments with Python 3.12 or higher, the installation of the dependent library ``botorch`` is not set to be performed automatically. If you require the functionality of ``botorch``, we kindly ask you to manually attempt its installation with the command below."
 msgstr "特に、Python 3.12 以上の環境では依存ライブラリ ``botorch`` のインストールを行わない設定になっています。``botorch`` の機能が必要な場合は、お手数ですが下記コマンドで ``botorch`` のインストールを手動で試みていただきますようお願いします。"
 
-#: ../../source/index.rst:137
-msgid "``py -m pip install botorch``"
-msgstr ""
-
-#: ../../source/index.rst:145
+#: ../../source/index.rst:148
 msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
 msgstr "このスクリーンショットでは、64 bit 版 Windows 向け Python 3.11.7 のインストーラへのリンクの場所の例を示しています。"
 
-#: ../../source/index.rst:149
+#: ../../source/index.rst:152
 msgid "Installer screen."
 msgstr "インストーラ画面。"
 
-#: ../../source/index.rst:152
+#: ../../source/index.rst:155
 msgid "**Installing** ``pyfemtet``"
 msgstr "``pyfemtet`` **のインストール**"
 
-#: ../../source/index.rst:154
+#: ../../source/index.rst:157
 msgid "Please run the following command in the command prompt. The download and installation of the library will begin.::"
 msgstr "コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。::"
 
-#: ../../source/index.rst:158
+#: ../../source/index.rst:161
 msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
 msgstr "インストールが終了すると、\"Successfully installed \" の表示の後、コマンドプロンプトの制御が戻ります。"
 
-#: ../../source/index.rst:162
+#: ../../source/index.rst:165
 msgid "Installing"
 msgstr "インストール中"
 
-#: ../../source/index.rst:166
+#: ../../source/index.rst:169
 msgid "Installation completed"
 msgstr "インストール終了後"
 
-#: ../../source/index.rst:170
+#: ../../source/index.rst:173
 msgid "Depending on the environment, installation may take about 5 minutes."
 msgstr "環境によりますが、インストールには 5 分程度を要します。"
 
-#: ../../source/index.rst:174
+#: ../../source/index.rst:177
 msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
 msgstr "インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、エラーではなく、無視しても問題ありません。"
 
-#: ../../source/index.rst:176
+#: ../../source/index.rst:179
 msgid "**Setting Femtet Macro Constants**"
 msgstr "**Femtet マクロ定数の設定**"
 
-#: ../../source/index.rst:178
+#: ../../source/index.rst:181
 msgid "Please run the following command in the command prompt.::"
 msgstr "コマンドプロンプトで下記コマンドを実行してください。::"
 
-#: ../../source/index.rst:182
+#: ../../source/index.rst:185
 msgid "Once the setting is complete, control will return to the command prompt."
 msgstr "インストールが終了すると、コマンドプロンプトの制御が戻ります。"
 
-#: ../../source/index.rst:186
+#: ../../source/index.rst:189
 msgid "After makepy finishes"
 msgstr "makepy 終了後"
 
-#: ../../source/index.rst:188
+#: ../../source/index.rst:191
 msgid "That's all."
 msgstr "以上で終了です。"
 
-#: ../../source/index.rst:193
+#: ../../source/index.rst:196
 msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
 msgstr "動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。"
 
-#: ../../source/index.rst:198
+#: ../../source/index.rst:201
 msgid "Table of Contents"
 msgstr "目次"
 
@@ -240,4 +235,7 @@ msgstr "目次"
 
 #~ msgid "Example of Implementation"
 #~ msgstr "実施例"
+
+#~ msgid "``py -m pip install botorch``"
+#~ msgstr ""
 
