@@ -147,68 +147,70 @@ to execute it.</p>
 <h2>Sample Code<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">wat_ex14_parametric.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;基板上の発熱体</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;Multi-objective optimization: heating element on board</span>
 <span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="sd">wat_ex14_parametric.femprj に対し熱伝導解析を行い、</span>
-<span class="linenos"> 4</span><span class="sd">チップの発熱による温度上昇を最小にしつつ</span>
-<span class="linenos"> 5</span><span class="sd">基板寸法を最小にする</span>
-<span class="linenos"> 6</span><span class="sd">基板寸法・チップ配置寸法を探索します。</span>
+<span class="linenos"> 3</span><span class="sd">Perform thermal conduction analysis on wat_ex14_parametric.femprj</span>
+<span class="linenos"> 4</span><span class="sd">and search for board dimensions and chip placement dimensions that</span>
+<span class="linenos"> 5</span><span class="sd">minimize the board dimensions while minimizing the temperature rise</span>
+<span class="linenos"> 6</span><span class="sd">due to chip heat generation.</span>
 <span class="linenos"> 7</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
+<span class="linenos"> 8</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
+<span class="linenos"> 9</span>
 <span class="linenos">10</span>
-<span class="linenos">11</span>
-<span class="linenos">12</span><span class="k">def</span> <span class="nf">max_temperature</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">body_name</span><span class="p">):</span>
-<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Femtet の解析結果からチップの最高温度を取得します。</span>
-<span class="linenos">14</span>
-<span class="linenos">15</span><span class="sd">    Femtet : マクロを使用するためのインスタンスです。詳しくは &quot;Femtet マクロヘルプ / CFemtet クラス&quot; をご覧ください。</span>
-<span class="linenos">16</span><span class="sd">        目的関数は第一引数に Femtet インスタンスを取る必要があります。</span>
-<span class="linenos">17</span>
-<span class="linenos">18</span><span class="sd">    max_temp : 計算された最高温度です。</span>
-<span class="linenos">19</span><span class="sd">        目的関数は単一の float を返す必要があります。</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">22</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
-<span class="linenos">23</span>
-<span class="linenos">24</span>    <span class="n">temp</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Watt</span><span class="o">.</span><span class="n">GetTemp_py</span><span class="p">(</span><span class="n">body_name</span><span class="p">)</span>
-<span class="linenos">25</span>
-<span class="linenos">26</span>    <span class="k">return</span> <span class="n">temp</span>  <span class="c1"># degree</span>
-<span class="linenos">27</span>
+<span class="linenos">11</span><span class="k">def</span> <span class="nf">max_temperature</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">body_name</span><span class="p">):</span>
+<span class="linenos">12</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the maximum temperature of the chip.</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="sd">    Note:</span>
+<span class="linenos">15</span><span class="sd">        The objective or constraint function</span>
+<span class="linenos">16</span><span class="sd">        must take a Femtet as its first argument</span>
+<span class="linenos">17</span><span class="sd">        and must return a single float.</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="sd">    Params:</span>
+<span class="linenos">20</span><span class="sd">        Femtet: An instance for using Femtet macros. For more information, see &quot;Femtet Macro Help / CFemtet Class&quot;.</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="sd">    Returns:</span>
+<span class="linenos">23</span><span class="sd">        float: Max-temperature.</span>
+<span class="linenos">24</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">25</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="n">temp</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Watt</span><span class="o">.</span><span class="n">GetTemp_py</span><span class="p">(</span><span class="n">body_name</span><span class="p">)</span>
 <span class="linenos">28</span>
-<span class="linenos">29</span><span class="k">def</span> <span class="nf">substrate_size</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
-<span class="linenos">30</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Femtet の設計変数から基板サイズを取得します。</span>
+<span class="linenos">29</span>    <span class="k">return</span> <span class="n">temp</span>  <span class="c1"># degree</span>
+<span class="linenos">30</span>
 <span class="linenos">31</span>
-<span class="linenos">32</span><span class="sd">    Femtet : マクロを使用するためのインスタンスです。詳しくは &quot;Femtet マクロヘルプ / CFemtet クラス&quot; をご覧ください。</span>
-<span class="linenos">33</span><span class="sd">        目的関数は第一引数に Femtet インスタンスを取る必要があります。</span>
+<span class="linenos">32</span><span class="k">def</span> <span class="nf">substrate_size</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos">33</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the substrate size.</span>
 <span class="linenos">34</span>
-<span class="linenos">35</span><span class="sd">    subs_w * subs_d : XY 平面における基板の占有面積です。</span>
-<span class="linenos">36</span><span class="sd">        目的関数は単一の float を返す必要があります。</span>
-<span class="linenos">37</span>
-<span class="linenos">38</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">39</span>    <span class="n">subs_w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">)</span>
-<span class="linenos">40</span>    <span class="n">subs_d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_d&#39;</span><span class="p">)</span>
-<span class="linenos">41</span>
-<span class="linenos">42</span>    <span class="k">return</span> <span class="n">subs_w</span> <span class="o">*</span> <span class="n">subs_d</span>  <span class="c1"># mm2</span>
+<span class="linenos">35</span><span class="sd">    Params:</span>
+<span class="linenos">36</span><span class="sd">        Femtet: An instance for using Femtet macros. For more information, see &quot;Femtet Macro Help / CFemtet Class&quot;.</span>
+<span class="linenos">37</span><span class="sd">    </span>
+<span class="linenos">38</span><span class="sd">    Returns:</span>
+<span class="linenos">39</span><span class="sd">        float: The area occupied by the board in the XY plane.</span>
+<span class="linenos">40</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">41</span>    <span class="n">subs_w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">)</span>
+<span class="linenos">42</span>    <span class="n">subs_d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_d&#39;</span><span class="p">)</span>
 <span class="linenos">43</span>
-<span class="linenos">44</span>
-<span class="linenos">45</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">44</span>    <span class="k">return</span> <span class="n">subs_w</span> <span class="o">*</span> <span class="n">subs_d</span>  <span class="c1"># mm2</span>
+<span class="linenos">45</span>
 <span class="linenos">46</span>
-<span class="linenos">47</span>    <span class="c1"># 最適化処理を行うオブジェクトを用意</span>
-<span class="linenos">48</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">()</span>
-<span class="linenos">49</span>
-<span class="linenos">50</span>    <span class="c1"># 設計変数の設定</span>
-<span class="linenos">51</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;substrate_w&quot;</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="s1">&#39;基板サイズ X&#39;</span><span class="p">)</span>
-<span class="linenos">52</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;substrate_d&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="s1">&#39;基板サイズ Y&#39;</span><span class="p">)</span>
-<span class="linenos">53</span>
-<span class="linenos">54</span>    <span class="c1"># 目的関数の設定</span>
-<span class="linenos">55</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_temperature</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;メインチップ温度&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;MAINCHIP&#39;</span><span class="p">,))</span>
-<span class="linenos">56</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_temperature</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;サブチップ温度&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;SUBCHIP&#39;</span><span class="p">,))</span>
-<span class="linenos">57</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">substrate_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;基板サイズ&#39;</span><span class="p">)</span>
-<span class="linenos">58</span>
-<span class="linenos">59</span>    <span class="c1"># 最適化の実行</span>
-<span class="linenos">60</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="linenos">61</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="linenos">62</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+<span class="linenos">47</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">48</span>
+<span class="linenos">49</span>    <span class="c1"># Define FEMOpt object (This process integrates mathematical optimization and FEM.).</span>
+<span class="linenos">50</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">()</span>
+<span class="linenos">51</span>
+<span class="linenos">52</span>    <span class="c1"># Add design variables (Use variable names set in Femtet) to the optimization problem.</span>
+<span class="linenos">53</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;substrate_w&quot;</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="linenos">54</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;substrate_d&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+<span class="linenos">55</span>
+<span class="linenos">56</span>    <span class="c1"># Add objective to the optimization problem.</span>
+<span class="linenos">57</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_temperature</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;main chip temp.&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;MAINCHIP&#39;</span><span class="p">,))</span>
+<span class="linenos">58</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_temperature</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;sub chip temp.&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;SUBCHIP&#39;</span><span class="p">,))</span>
+<span class="linenos">59</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">substrate_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;substrate size&#39;</span><span class="p">)</span>
+<span class="linenos">60</span>
+<span class="linenos">61</span>    <span class="c1"># Run optimization.</span>
+<span class="linenos">62</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">63</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="linenos">64</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

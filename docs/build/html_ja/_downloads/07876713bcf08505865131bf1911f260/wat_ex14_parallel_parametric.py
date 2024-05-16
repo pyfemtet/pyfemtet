@@ -1,23 +1,26 @@
-"""基板上の発熱体
+"""Parallel computing / Multi-objective optimization: heating element on board
 
-wat_ex14_parametric.femprj に対し熱伝導解析を行い、
-チップの発熱による温度上昇を最小にしつつ
-基板寸法を最小にする
-基板寸法・チップ配置寸法を探索します。
+Perform thermal conduction analysis on wat_ex14_parametric.femprj
+and search for board dimensions and chip placement dimensions that
+minimize the board dimensions while minimizing the temperature rise
+due to chip heat generation.
 """
-
 from pyfemtet.opt import FEMOpt
 
 
 def max_temperature(Femtet, body_name):
-    """Femtet の解析結果からチップの最高温度を取得します。
+    """Get the maximum temperature of the chip.
 
-    Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
-        目的関数は第一引数に Femtet インスタンスを取る必要があります。
+    Note:
+        The objective or constraint function
+        must take a Femtet as its first argument
+        and must return a single float.
 
-    max_temp : 計算された最高温度です。
-        目的関数は単一の float を返す必要があります。
+    Params:
+        Femtet: An instance for using Femtet macros. For more information, see "Femtet Macro Help / CFemtet Class".
 
+    Returns:
+        float: Max-temperature.
     """
     Gogh = Femtet.Gogh
 
@@ -27,14 +30,13 @@ def max_temperature(Femtet, body_name):
 
 
 def substrate_size(Femtet):
-    """Femtet の設計変数から基板サイズを取得します。
+    """Calculate the substrate size.
 
-    Femtet : マクロを使用するためのインスタンスです。詳しくは "Femtet マクロヘルプ / CFemtet クラス" をご覧ください。
-        目的関数は第一引数に Femtet インスタンスを取る必要があります。
-
-    subs_w * subs_d : XY 平面における基板の占有面積です。
-        目的関数は単一の float を返す必要があります。
-
+    Params:
+        Femtet: An instance for using Femtet macros. For more information, see "Femtet Macro Help / CFemtet Class".
+    
+    Returns:
+        float: The area occupied by the board in the XY plane.
     """
     subs_w = Femtet.GetVariableValue('substrate_w')
     subs_d = Femtet.GetVariableValue('substrate_d')
@@ -44,20 +46,20 @@ def substrate_size(Femtet):
 
 if __name__ == '__main__':
 
-    # 最適化処理を行うオブジェクトを用意
+    # Define FEMOpt object (This process integrates mathematical optimization and FEM.).
     femopt = FEMOpt()
 
-    # 設計変数の設定
-    femopt.add_parameter("substrate_w", 40, lower_bound=22, upper_bound=40, memo='基板サイズ X')
-    femopt.add_parameter("substrate_d", 60, lower_bound=33, upper_bound=60, memo='基板サイズ Y')
+    # Add design variables (Use variable names set in Femtet) to the optimization problem.
+    femopt.add_parameter("substrate_w", 40, lower_bound=22, upper_bound=40)
+    femopt.add_parameter("substrate_d", 60, lower_bound=33, upper_bound=60)
 
-    # 目的関数の設定
-    femopt.add_objective(max_temperature, name='メインチップ温度', args=('MAINCHIP',))
-    femopt.add_objective(max_temperature, name='サブチップ温度', args=('SUBCHIP',))
-    femopt.add_objective(substrate_size, name='基板サイズ')
+    # Add objective to the optimization problem.
+    femopt.add_objective(max_temperature, name='main chip temp.', args=('MAINCHIP',))
+    femopt.add_objective(max_temperature, name='sub chip temp.', args=('SUBCHIP',))
+    femopt.add_objective(substrate_size, name='substrate size')
 
-    # 最適化の実行
+    # Run optimization.
     femopt.set_random_seed(42)
-    # femopt.main(n_trials=20)
-    femopt.optimize(n_trials=20, n_parallel=3)  # ここのみ wat_ex14_parametric.py から変更しました。
+    # femopt.optimize(n_trials=20)
+    femopt.optimize(n_trials=20, n_parallel=3)  # Change only this line.
     femopt.terminate_all()
