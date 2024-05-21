@@ -27,10 +27,7 @@ class FemtetWithNXInterface(FemtetInterface):
     def __init__(
             self,
             prt_path,
-            femprj_path=None,
-            model_name=None,
-            connect_method='auto',
-            strictly_pid_specify=True,
+            **kwargs
     ):
 
         # check NX installation
@@ -51,11 +48,8 @@ class FemtetWithNXInterface(FemtetInterface):
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
         super().__init__(
-            femprj_path=femprj_path,
-            model_name=model_name,
-            connect_method=connect_method,
-            strictly_pid_specify=strictly_pid_specify,
             prt_path=self.prt_path,
+            **kwargs
         )
 
     def check_param_value(self, name):
