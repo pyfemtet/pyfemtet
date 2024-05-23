@@ -103,7 +103,7 @@
 <h2>サンプルファイル<a class="headerlink" href="#sample-file" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p><a class="reference download internal" download="" href="../../_downloads/af6720e06b321f1cc8d3f28e05f855c5/gau_ex08_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> を Femtet で開いたまま、 <a class="reference download internal" download="" href="../../_downloads/f444df81304374b5c2dce1389eaff947/gau_ex08_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> をダブルクリックして実行してください。</p>
+<p><a class="reference download internal" download="" href="../../_downloads/46bbd32467e2ea157b8f4d01d98624aa/gau_ex08_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> を Femtet で開いたまま、 <a class="reference download internal" download="" href="../../_downloads/85a9b4c31bf24faa81b5d49928cfc4c8/gau_ex08_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> をダブルクリックして実行してください。</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
@@ -145,41 +145,41 @@
 <h2>サンプルコード<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">gau_ex08_parametric.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;Single-objective optimization: self-inductance of a finite length solenoid coil</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;単目的最適化: 有限長ヘリカルコイルの自己インダクタンス</span>
 <span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="sd">Perform magnetic field analysis on gau_ex08_parametric.femprj</span>
-<span class="linenos"> 4</span><span class="sd">to find the dimensions of a finite length solenoid coil</span>
-<span class="linenos"> 5</span><span class="sd">that makes the self-inductance a specific value.</span>
-<span class="linenos"> 6</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos"> 7</span><span class="kn">from</span> <span class="nn">optuna.integration.botorch</span> <span class="kn">import</span> <span class="n">BoTorchSampler</span>
-<span class="linenos"> 8</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
-<span class="linenos"> 9</span>
-<span class="linenos">10</span>
-<span class="linenos">11</span><span class="k">def</span> <span class="nf">inductance</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
-<span class="linenos">12</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the self-inductance.</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="sd">    Note:</span>
-<span class="linenos">15</span><span class="sd">        The objective or constraint function</span>
-<span class="linenos">16</span><span class="sd">        must take a Femtet as its first argument</span>
-<span class="linenos">17</span><span class="sd">        and must return a single float.</span>
-<span class="linenos">18</span>
-<span class="linenos">19</span><span class="sd">    Params:</span>
-<span class="linenos">20</span><span class="sd">        Femtet: An instance for using Femtet macros. For more information, see &quot;Femtet Macro Help / CFemtet Class&quot;.</span>
-<span class="linenos">21</span>
-<span class="linenos">22</span><span class="sd">    Returns:</span>
-<span class="linenos">23</span><span class="sd">        float: Self-inductance.</span>
-<span class="linenos">24</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">25</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
-<span class="linenos">26</span>
-<span class="linenos">27</span>    <span class="c1"># Get inductance.</span>
-<span class="linenos">28</span>    <span class="n">cName</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetCoilList</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<span class="linenos">29</span>    <span class="n">l</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetL</span><span class="p">(</span><span class="n">cName</span><span class="p">,</span> <span class="n">cName</span><span class="p">)</span>
-<span class="linenos">30</span>    <span class="k">return</span> <span class="n">l</span>  <span class="c1"># F</span>
+<span class="linenos"> 3</span><span class="sd">Femtet の磁場解析ソルバを利用して、</span>
+<span class="linenos"> 4</span><span class="sd">有限長ヘリカルコイルの自己インダクタンスを</span>
+<span class="linenos"> 5</span><span class="sd">目標の値にする設計を行います。</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="sd">対応プロジェクト: gau_ex08_parametric_jp.femprj</span>
+<span class="linenos"> 8</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 9</span><span class="kn">from</span> <span class="nn">optuna.integration.botorch</span> <span class="kn">import</span> <span class="n">BoTorchSampler</span>
+<span class="linenos">10</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="k">def</span> <span class="nf">inductance</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;自己インダクタンスを取得します。</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="sd">    Note:</span>
+<span class="linenos">17</span><span class="sd">        目的関数または制約関数は、</span>
+<span class="linenos">18</span><span class="sd">        第一引数としてFemtetを受け取り、</span>
+<span class="linenos">19</span><span class="sd">        戻り値としてfloat型を返す必要があります。</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="sd">    Params:</span>
+<span class="linenos">22</span><span class="sd">        Femtet: Femtet をマクロで操作するためのインスタンスです。詳細な情報については、「Femtet マクロヘルプ」をご覧ください。</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="sd">    Returns:</span>
+<span class="linenos">25</span><span class="sd">        float: 自己インダクタンスです。</span>
+<span class="linenos">26</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">27</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="n">coil_name</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetCoilList</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">30</span>    <span class="k">return</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetL</span><span class="p">(</span><span class="n">coil_name</span><span class="p">,</span> <span class="n">coil_name</span><span class="p">)</span>  <span class="c1"># 単位: F</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span>
 <span class="linenos">33</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 <span class="linenos">34</span>
-<span class="linenos">35</span>    <span class="c1"># Define mathematical optimization object.</span>
+<span class="linenos">35</span>    <span class="c1"># 数値最適化問題の初期化 (最適化手法を決定します)</span>
 <span class="linenos">36</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
 <span class="linenos">37</span>        <span class="n">sampler_class</span><span class="o">=</span><span class="n">BoTorchSampler</span><span class="p">,</span>
 <span class="linenos">38</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
@@ -187,19 +187,19 @@
 <span class="linenos">40</span>        <span class="p">)</span>
 <span class="linenos">41</span>    <span class="p">)</span>
 <span class="linenos">42</span>
-<span class="linenos">43</span>    <span class="c1"># Define FEMOpt object (This process integrates mathematical optimization and FEM.).</span>
+<span class="linenos">43</span>    <span class="c1"># FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)。</span>
 <span class="linenos">44</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
 <span class="linenos">45</span>
-<span class="linenos">46</span>    <span class="c1"># Add design variables (Use variable names set in Femtet) to the optimization problem.</span>
-<span class="linenos">47</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-<span class="linenos">48</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="linenos">49</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">46</span>    <span class="c1"># 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)。</span>
+<span class="linenos">47</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;helical_pitch&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="linenos">48</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;coil_radius&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">49</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;n_turns&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 <span class="linenos">50</span>
-<span class="linenos">51</span>    <span class="c1"># Add objective to the optimization problem.</span>
-<span class="linenos">52</span>    <span class="c1"># The target inductance value is 0.1 uF.</span>
-<span class="linenos">53</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">inductance</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;self-inductance&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">0.1e-06</span><span class="p">)</span>
+<span class="linenos">51</span>    <span class="c1"># 目的関数を最適化問題に追加</span>
+<span class="linenos">52</span>    <span class="c1"># 目標の自己インダクタンスは 0.1 μF です。</span>
+<span class="linenos">53</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">inductance</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;自己インダクタンス (F)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
 <span class="linenos">54</span>
-<span class="linenos">55</span>    <span class="c1"># Run optimization.</span>
+<span class="linenos">55</span>    <span class="c1"># 最適化を実行</span>
 <span class="linenos">56</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
 <span class="linenos">57</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="linenos">58</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>

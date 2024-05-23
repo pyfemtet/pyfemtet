@@ -37,8 +37,8 @@ msgid "Sample File"
 msgstr "サンプルファイル"
 
 #: ../../source/examples/NX_ex01/NX_ex01.rst:11
-msgid "Place the :download:`sample model<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>` and :download:`sample project<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>` in the same folder. Keep the project open in Femtet, then double-click on the :download:`sample code<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>` to execute it."
-msgstr ":download:`サンプルモデル<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>` と :download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>` を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>` をダブルクリックして実行してください。"
+msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_NX.prt>` and :download:`sample project<../_temporary_sample_files/cad_ex01_NX.femprj>` in the same folder. Keep the project open in Femtet, then double-click on the :download:`sample code<../_temporary_sample_files/cad_ex01_NX.py>` to execute it."
+msgstr ":download:`サンプルモデル<../_temporary_sample_files/cad_ex01_NX.prt>` と :download:`サンプルプロジェクト<../_temporary_sample_files/cad_ex01_NX.femprj>` を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/cad_ex01_NX.py>` をダブルクリックして実行してください。"
 
 #: ../../source/examples/NX_ex01/NX_ex01.rst:22
 msgid "Details as a FEM Problem"
@@ -182,8 +182,8 @@ msgid "Other than the sample code and execution results, the items are the same 
 msgstr "サンプルコード及び実行結果以外の項目は :doc:`../NX_ex01/NX_ex01` と同じです。"
 
 #: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:18
-msgid "Place the :download:`sample model<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.SLDPRT>` and :download:`sample project<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.femprj>` in the same folder, keep the project open in Femtet, and double-click on :download:`sample code<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.py>` to execute."
-msgstr ":download:`サンプルモデル<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.SLDPRT>` と :download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.femprj>` を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.py>` をダブルクリックして実行してください。"
+msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_SW.SLDPRT>` and :download:`sample project<../_temporary_sample_files/cad_ex01_SW.femprj>` in the same folder, keep the project open in Femtet, and double-click on :download:`sample code<../_temporary_sample_files/cad_ex01_SW.py>` to execute."
+msgstr ":download:`サンプルモデル<../_temporary_sample_files/cad_ex01_SW.SLDPRT>` と :download:`サンプルプロジェクト<../_temporary_sample_files/cad_ex01_SW.femprj>` を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/cad_ex01_SW.py>` をダブルクリックして実行してください。"
 
 #: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:27
 msgid "Sldworks_ex01.py"
@@ -206,8 +206,8 @@ msgid "An example will be explained using Femtet's magnetic field analysis solve
 msgstr "Femtet の磁場解析ソルバーを用い、有限長ソレノイドコイルの 自己インダクタンスを特定の値にする例題を解説します。"
 
 #: ../../source/examples/gau_ex08/gau_ex08.rst:11
-msgid "Keep the :download:`sample project<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.femprj>` open in Femtet and double-click on the :download:`sample code<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>` to execute it."
-msgstr ":download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>` をダブルクリックして実行してください。"
+msgid "Keep the :download:`sample project<../_temporary_sample_files/gau_ex08_parametric.femprj>` open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/gau_ex08_parametric.py>` to execute it."
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/gau_ex08_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/gau_ex08_parametric.py>` をダブルクリックして実行してください。"
 
 #: ../../source/examples/gau_ex08/gau_ex08.rst:17
 msgid "For more details on the FEM problem, please refer to FemtetHelp / Example Collection / Magnetic Analysis / Example 8."
@@ -269,8 +269,8 @@ msgid "Using Femtet's electromagnetic wave analysis solver, we explain an exampl
 msgstr "Femtet の電磁波解析ソルバーを用い、 円形パッチアンテナの共振周波数を 特定の値にする例題を解説します。"
 
 #: ../../source/examples/her_ex40/her_ex40.rst:11
-msgid "Keep the :download:`sample project<../../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py>` to execute it."
-msgstr ":download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py>` をダブルクリックして実行してください。"
+msgid "Keep the :download:`sample project<../_temporary_sample_files/her_ex40_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/her_ex40_parametric.py>` to execute it."
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/her_ex40_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/her_ex40_parametric.py>` をダブルクリックして実行してください。"
 
 #: ../../source/examples/her_ex40/her_ex40.rst:17
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Electromagnetic Wave Analysis / Example 40."
@@ -325,8 +325,8 @@ msgid "Using Femtet's heat conduction analysis solver, we explain an example of 
 msgstr "Femtet の熱伝導解析ソルバーを用い 基板上の IC チップの最高温度を最小にしつつ 基板のサイズを最小にする 基板寸法を探索する例題を解説します。"
 
 #: ../../source/examples/wat_ex14/wat_ex14.rst:11
-msgid "Keep the :download:`sample project<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py>` to execute it."
-msgstr ":download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.py>` をダブルクリックして実行してください。"
+msgid "Keep the :download:`sample project<../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/wat_ex14_parametric.py>` to execute it."
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parametric.py>` をダブルクリックして実行してください。"
 
 #: ../../source/examples/wat_ex14/wat_ex14.rst:17
 #: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:18
@@ -417,8 +417,8 @@ msgid "Parallelize wat_ex14_parametric with 3 Femtet instances. Other items, exc
 msgstr "wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します。 サンプルコード及び実行結果以外の項目は :doc:`../wat_ex14/wat_ex14` と同じです。"
 
 #: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:12
-msgid "Keep the :download:`sample project <../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py>` to execute it."
-msgstr ":download:`サンプルプロジェクト<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py>` をダブルクリックして実行してください。"
+msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parallel_parametric.py>` to execute it."
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parallel_parametric.py>` をダブルクリックして実行してください。"
 
 #: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:46
 msgid "wat_ex14_parallel_parametric.py"

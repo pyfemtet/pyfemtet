@@ -8,8 +8,8 @@ Sample File
 ------------------------------
 .. note::
 
-   Keep the :download:`sample project<../../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.femprj>`
-   open in Femtet, and double-click on the :download:`sample code<../../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py>`
+   Keep the :download:`sample project<../_temporary_sample_files/her_ex40_parametric.femprj>`
+   open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/her_ex40_parametric.py>`
    to execute it.
 
 .. note::
@@ -42,7 +42,7 @@ Resonant frequency giving the first peak of S(1,1)
 Sample Code
 ------------------------------
 
-.. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/her_ex40_parametric.py
+.. literalinclude:: ../_temporary_sample_files/her_ex40_parametric.py
    :language: python
    :linenos:
    :caption: her_ex40_parametric.py

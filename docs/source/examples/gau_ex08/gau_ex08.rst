@@ -8,8 +8,8 @@ Sample File
 ------------------------------
 .. note::
 
-   Keep the :download:`sample project<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.femprj>`
-   open in Femtet and double-click on the :download:`sample code<../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py>`
+   Keep the :download:`sample project<../_temporary_sample_files/gau_ex08_parametric.femprj>`
+   open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/gau_ex08_parametric.py>`
    to execute it.
 
 .. note::
@@ -42,7 +42,7 @@ Self-inductance of the coil.
 Sample Code
 ------------------------------
 
-.. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/gau_ex08_parametric.py
+.. literalinclude:: ../_temporary_sample_files/gau_ex08_parametric.py
    :language: python
    :linenos:
    :caption: gau_ex08_parametric.py

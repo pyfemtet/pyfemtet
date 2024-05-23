@@ -9,12 +9,12 @@ Sample File
 .. note::
 
    Place the 
-   :download:`sample model<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>`
+   :download:`sample model<../_temporary_sample_files/cad_ex01_NX.prt>`
    and
-   :download:`sample project<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>`
+   :download:`sample project<../_temporary_sample_files/cad_ex01_NX.femprj>`
    in the same folder.
    Keep the project open in Femtet, then double-click on the
-   :download:`sample code<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>`
+   :download:`sample code<../_temporary_sample_files/cad_ex01_NX.py>`
    to execute it.
 
 
@@ -56,10 +56,10 @@ Objective Function
 Sample Code
 ------------------------------
 
-.. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py
+.. literalinclude:: ../_temporary_sample_files/cad_ex01_NX.py
    :language: python
    :linenos:
-   :caption: NX_ex01.py
+   :caption: cad_ex01_NX.py
 
 
 Execution Result of the Sample Code
