@@ -49,11 +49,22 @@ Multi-Objective Optimization
         +++
         In thermal conduction analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate.
 
+    .. grid-item-card:: Air cooling of IC Substrate
+        :link: ../examples/paswat_ex1/paswat_ex1
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ../examples/paswat_ex1/paswat_ex1.png
+            :scale: 50
+        +++
+        In simple fluid-thermal analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate under forced convection.
+
 .. toctree::
     :titlesonly:
     :hidden:
 
     ../examples/wat_ex14/wat_ex14
+    ../examples/paswat_ex1/paswat_ex1
 
 
 Parallel Computing
