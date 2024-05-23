@@ -26,10 +26,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
     def __init__(
             self,
             sldprt_path,
-            femprj_path=None,
-            model_name=None,
-            connect_method='auto',
-            strictly_pid_specify=True,
+            **kwargs
     ):
         # 引数の処理
         # dask サブプロセスのときは space 直下の sldprt_path を参照する
@@ -43,11 +40,8 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
         super().__init__(
-            femprj_path=femprj_path,
-            model_name=model_name,
-            connect_method=connect_method,
-            strictly_pid_specify=strictly_pid_specify,
             sldprt_path=self.sldprt_path,
+            **kwargs
         )
 
     def initialize_sldworks_connection(self):
