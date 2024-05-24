@@ -22,6 +22,7 @@ Details as a FEM Problem
 ------------------------------
 
 .. figure:: NX_ex01_analysis.png
+   :width: 450
    
    Appearance of the Model (and Analysis Conditions)
 
@@ -34,6 +35,7 @@ Design Variables
 ------------------------------
 
 .. figure:: NX_ex01_model_dsgn.png
+   :width: 450
    
    Appearance of the Model Section (and Design Variables)
 
@@ -66,11 +68,11 @@ Execution Result of the Sample Code
 ----------------------------------------
 
 .. figure:: NX_ex01_result.png
-   :width: 300
+   :width: 450
 
-   Execution result of NX_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.
+   Execution result of NX_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass.
 
-After the 20 trials, a Pareto set of displacement and volume is obtained.
+After the 20 trials, a Pareto set of von Mises stress and mass is obtained.
 
 
 .. note::

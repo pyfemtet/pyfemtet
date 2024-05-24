@@ -34,11 +34,11 @@ Execution Result of the Sample Code
 ----------------------------------------
 
 .. figure:: Sldworks_ex01_result.png
-   :width: 300
+   :width: 450
 
-   Execution result of Sldworks_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.
+   Execution result of Sldworks_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass.
 
-After 20 trials, a Pareto set of displacement and volume is obtained.
+After 20 trials, a Pareto set of von Mises stress and mass is obtained.
 
 
 .. note::
