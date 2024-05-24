@@ -1,0 +1,577 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, Kazuma Naito
+# This file is distributed under the same license as the PyFemtet Project package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PyFemtet Project \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-24 15:39+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:2
+msgid "External CAD (NX) Integration"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:4
+msgid "PyFemtet allows parametric optimization even for analysis models created with external CAD (NX) and imported into Femtet."
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:8
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:15
+#: ../source/examples/gau_ex08/gau_ex08.rst:8
+#: ../source/examples/her_ex40/her_ex40.rst:8
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:16
+#: ../source/examples/wat_ex14/wat_ex14.rst:8
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:9
+msgid "Sample File"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:11
+msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_NX.prt>` and :download:`sample project<../_temporary_sample_files/cad_ex01_NX.femprj>` in the same folder. Keep the project open in Femtet, then double-click on the :download:`sample code<../_temporary_sample_files/cad_ex01_NX.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:22
+msgid "Details as a FEM Problem"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:27
+msgid "Appearance of the Model (and Analysis Conditions)"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:29
+msgid "fix ... Fully Fixed"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:30
+msgid "load ... Load in the -Z direction (1N)"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:31
+msgid "mirror ... Symmetrical to the XZ plane"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:35
+#: ../source/examples/gau_ex08/gau_ex08.rst:21
+#: ../source/examples/her_ex40/her_ex40.rst:21
+#: ../source/examples/wat_ex14/wat_ex14.rst:21
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:22
+msgid "Design Variables"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:40
+msgid "Appearance of the Model Section (and Design Variables)"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/gau_ex08/gau_ex08.rst:28
+#: ../source/examples/her_ex40/her_ex40.rst:28
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:37
+#: ../source/examples/wat_ex14/wat_ex14.rst:28
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
+msgid "Variable Name"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/gau_ex08/gau_ex08.rst:28
+#: ../source/examples/her_ex40/her_ex40.rst:28
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:37
+#: ../source/examples/wat_ex14/wat_ex14.rst:28
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
+msgid "Description"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:45
+msgid "A"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:45
+msgid "Web Tickness"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:46
+msgid "B"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:46
+msgid "Flange Tickness"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:47
+msgid "C"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:47
+msgid "Flange Bending"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:52
+#: ../source/examples/gau_ex08/gau_ex08.rst:37
+#: ../source/examples/her_ex40/her_ex40.rst:37
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:46
+#: ../source/examples/wat_ex14/wat_ex14.rst:36
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:36
+msgid "Objective Function"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:54
+msgid "Maximum Displacement in the Z direction (set to 0)"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:55
+msgid "Volume (minimize)"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:59
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:25
+#: ../source/examples/gau_ex08/gau_ex08.rst:43
+#: ../source/examples/her_ex40/her_ex40.rst:43
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:54
+#: ../source/examples/wat_ex14/wat_ex14.rst:44
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:44
+msgid "Sample Code"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:61
+msgid "cad_ex01_NX.py"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:68
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:34
+#: ../source/examples/gau_ex08/gau_ex08.rst:52
+#: ../source/examples/her_ex40/her_ex40.rst:52
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:63
+#: ../source/examples/wat_ex14/wat_ex14.rst:53
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:58
+msgid "Execution Result of the Sample Code"
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:73
+msgid "Execution result of NX_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass."
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:75
+msgid "After the 20 trials, a Pareto set of von Mises stress and mass is obtained."
+msgstr ""
+
+#: ../source/examples/NX_ex01/NX_ex01.rst:80
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:46
+#: ../source/examples/gau_ex08/gau_ex08.rst:63
+#: ../source/examples/her_ex40/her_ex40.rst:63
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:103
+#: ../source/examples/wat_ex14/wat_ex14.rst:81
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:90
+msgid "Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on."
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:2
+msgid "External CAD (Solidworks) Integration"
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:4
+msgid "PyFemtet allows parametric optimization even for analysis models created with external CAD (Solidworks) and imported into Femtet."
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:6
+msgid "An example will be explained using an H-shaped steel that was parametrically modeled in an external CAD (Solidworks) and analyzed using Femtet's stress analysis solver to minimize volume while minimizing displacement."
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:10
+msgid "Other than the sample code and execution results, the items are the same as in :doc:`../NX_ex01/NX_ex01`."
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:18
+msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_SW.SLDPRT>` and :download:`sample project<../_temporary_sample_files/cad_ex01_SW.femprj>` in the same folder, keep the project open in Femtet, and double-click on :download:`sample code<../_temporary_sample_files/cad_ex01_SW.py>` to execute."
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:27
+msgid "cad_ex01_SW.py"
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:39
+msgid "Execution result of Sldworks_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass."
+msgstr ""
+
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:41
+msgid "After 20 trials, a Pareto set of von Mises stress and mass is obtained."
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:2
+msgid "Self-inductance of a solenoid coil"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:4
+msgid "An example will be explained using Femtet's magnetic field analysis solver to determine the self-inductance of a finite-length solenoid coil to a specific value."
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:11
+msgid "Keep the :download:`sample project<../_temporary_sample_files/gau_ex08_parametric.femprj>` open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/gau_ex08_parametric.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:17
+msgid "For more details on the FEM problem, please refer to FemtetHelp / Example Collection / Magnetic Analysis / Example 8."
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:25
+#: ../source/examples/her_ex40/her_ex40.rst:25
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:34
+#: ../source/examples/wat_ex14/wat_ex14.rst:25
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:26
+msgid "Appearance of the Model"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:30
+msgid "h"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:30
+msgid "Pitch per 1 turn"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:31
+msgid "r"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:31
+msgid "Radius of the coil"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:32
+msgid "n"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:32
+msgid "Number of turns in the coil"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:39
+msgid "Self-inductance of the coil."
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:45
+msgid "gau_ex08_parametric.py"
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:57
+msgid "Execution result of gau_ex08_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is self-inductance."
+msgstr ""
+
+#: ../source/examples/gau_ex08/gau_ex08.rst:59
+msgid "After 20 iterations, the self-inductance was calculated to be 0.103 µF."
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:2
+msgid "Resonant frequency of a circular patch antenna"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:4
+msgid "Using Femtet's electromagnetic wave analysis solver, we explain an example of setting the resonant frequency of a circular patch antenna to a specific value."
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:11
+msgid "Keep the :download:`sample project<../_temporary_sample_files/her_ex40_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/her_ex40_parametric.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:17
+msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Electromagnetic Wave Analysis / Example 40."
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:30
+msgid "ant_r"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:30
+msgid "Radius of the circular antenna"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:31
+msgid "sx"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:31
+msgid "Size of the substrate"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:32
+msgid "xf"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:32
+msgid "Power port location"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:39
+msgid "Resonant frequency giving the first peak of S(1,1)"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:45
+msgid "her_ex40_parametric.py"
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:57
+msgid "Execution result of her_ex40_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is the resonant frequency."
+msgstr ""
+
+#: ../source/examples/her_ex40/her_ex40.rst:59
+msgid "After 20 iterations, the the best frequency was calculated to be 2.991 GHz."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:2
+msgid "Air cooling of IC substrate"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:6
+msgid "Using Femtet's simple fluid-thermal analysis solver, we explain an example of searching for the substrate dimensions and its angle that minimize the size of the substrate while keeping the maximum temperature of an IC chip on the substrate to a minimum."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:12
+msgid "Related example: :doc:`../wat_ex14/wat_ex14`"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:19
+msgid "Keep the :download:`sample project<../_temporary_sample_files/paswat_ex1_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/paswat_ex1_parametric.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:25
+msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Simple Fluid-Thermal Analysis / Example 1."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:29
+msgid "Analysis Model and Design Variables"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:39
+#: ../source/examples/wat_ex14/wat_ex14.rst:30
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:31
+msgid "substrate_w"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:39
+#: ../source/examples/wat_ex14/wat_ex14.rst:30
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:31
+msgid "Width of the substrate"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:40
+#: ../source/examples/wat_ex14/wat_ex14.rst:31
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:32
+msgid "substrate_d"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:40
+#: ../source/examples/wat_ex14/wat_ex14.rst:31
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:32
+msgid "Depth of the substrate"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:41
+msgid "rot"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:41
+msgid "Rotation angle of the substrate"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:48
+#: ../source/examples/wat_ex14/wat_ex14.rst:38
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:38
+msgid "Maximum temperature of the main chip (to minimize)"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:49
+#: ../source/examples/wat_ex14/wat_ex14.rst:39
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:39
+msgid "Maximum temperature of the sub chip (to minimize)"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:50
+#: ../source/examples/wat_ex14/wat_ex14.rst:40
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:40
+msgid "Occupied area on the substrate plane (to minimize)"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:56
+msgid "|SAMPLE_NAME| _parametric.py"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:68
+msgid "Execution result of |SAMPLE_NAME| _parametric.py. This is a pair plot with the combination of each objective function on the vertical axis and horizontal axis."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:74
+msgid "From this result, we can see the following:"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:72
+msgid "MAINCHIP temperature and SUBCHIP temperature have a positive correlation."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:73
+msgid "Substrate size and CHIP temperature have a negative correlation and cannot be reduced at the same time."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:74
+msgid "Depending on the combination of design variables, there are conditions under which MAINCHIP and SUBCHIP temperatures can be further reduced even with the same substrate size."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:76
+msgid "In multi-objective optimization, a solution for which all objective function values are far from the goal compared to other solutions (that is, there is no reason to choose it) is called a **\"dominated solution.\"**"
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:80
+msgid "On the other hand, the set of **\"non-dominated solutions\"** is called the **Pareto set**."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:82
+msgid "Pareto sets generally have tradeoffs. In parameter optimization for product design, the Pareto set is determined by the rough design of the product and how variables are set."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:85
+msgid "Therefore, it is important for the designer to perform a rough design so that the entire Pareto set approaches the target values of all objective functions."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:88
+msgid "Finally, select a solution from the Pareto set and reflect it in the design."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:93
+#: ../source/examples/wat_ex14/wat_ex14.rst:71
+msgid "In multi-objective optimization, it is possible that the optimization of objective functions may not be compatible. In such cases, the designer needs to select the appropriate design from among the trade-off solutions."
+msgstr ""
+
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:98
+#: ../source/examples/wat_ex14/wat_ex14.rst:75
+msgid "Since the physical reasons for these trade-offs cannot be derived from optimization algorithms, designers need to interpret the analysis results of Femtet."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:2
+msgid "Heating element on the substrate"
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:4
+msgid "Using Femtet's heat conduction analysis solver, we explain an example of searching for the substrate dimensions that minimize the size of the substrate while keeping the maximum temperature of an IC chip on the substrate to a minimum."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:11
+msgid "Keep the :download:`sample project<../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/wat_ex14_parametric.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:17
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:18
+msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Heat Conduction Analysis / Example 14."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:46
+msgid "wat_ex14_parametric.py"
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:58
+msgid "Execution result of wat_ex14_parametric.py. This is a pair plot with the combination of each objective function on the vertical axis and horizontal axis."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:61
+msgid "From the results of the 20 trials, the following can be observed."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:63
+msgid "The temperature of the main chip and the temperature of the sub chip can both be reduced by decreasing one of them."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:64
+msgid "Reducing the substrate size increases the temperature of the main chip."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:65
+msgid "Reducing the substrate size increases the temperature of the sub chip."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:67
+msgid "From this, it can be seen that it is possible to design both the main chip and the sub chip to minimize temperature, but there is a trade-off relationship between the temperature of each chip and the substrate size, and it is understood that these minimizations are not compatible."
+msgstr ""
+
+#: ../source/examples/wat_ex14/wat_ex14.rst:77
+msgid "In this problem, it can be inferred that the reduced substrate size has decreased the heat dissipation capacity to the environment, causing the chip temperature to rise because heat is not escaping from the substrate."
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:2
+msgid "Heat-generating elements on the substrate (parallel computation)"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:5
+msgid "Parallelize wat_ex14_parametric with 3 Femtet instances. Other items, except for sample code and execution results, are the same as :doc:`../wat_ex14/wat_ex14`."
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:12
+msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parallel_parametric.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:54
+msgid "To parallelize, simply pass the desired number of parallelizations to the ``n_parallel`` argument of the ``optimize()`` method."
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:60
+msgid "Execution Environment"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:63
+msgid "OS"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:63
+msgid "windows 10"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:65
+msgid "CPU"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:65
+msgid "Intel Core-i7 12700 (12 cores, 20 threads)"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:67
+msgid "Memory"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:67
+msgid "32 GB"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:71
+msgid "Execution Results"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:74
+msgid "Without Parallelization"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:74
+msgid "With 3 Parallelizations"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:75
+msgid "117 sec"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:75
+msgid "74 sec"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:78
+msgid "In this demo, calculations were performed with 3 Femtet instances. For the problem in :doc:`../wat_ex14/wat_ex14`, without using parallelization in the above execution environment, it took 117 seconds for 20 trials. However, in this demo, 21 trials were completed in 74 seconds, reducing the execution time by 37%."
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:82
+msgid "Generally, when parallelizing numerical calculations by N, the execution time does not simply become 1/N."
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:86
+msgid "The acceleration effect of parallelization varies depending on the execution environment and analysis model."
+msgstr ""

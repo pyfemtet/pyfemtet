@@ -4,7 +4,7 @@ Set-Location $psscriptroot/..  # project root
 
 $SOURCE_DIR = "./docs/source"
 $LOCALE_DIR = "./docs/source/locale"
-$GETTEXT_DIR = "./docs/build/gettext"
+$GETTEXT_DIR = "./docs/gettext"
 
 poetry run sphinx-apidoc -f -o $SOURCE_DIR\modules .\pyfemtet
 

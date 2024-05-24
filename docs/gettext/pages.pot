@@ -1,0 +1,409 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, Kazuma Naito
+# This file is distributed under the same license as the PyFemtet Project package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PyFemtet Project \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-24 15:42+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../source/pages/LICENSE.rst:2
+msgid "License"
+msgstr ""
+
+#: ../../LICENSE:1
+msgid "Copyright (c) 2023 Kazuma Naito All rights reserved."
+msgstr ""
+
+#: ../../LICENSE:4
+msgid "Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:"
+msgstr ""
+
+#: ../../LICENSE:6
+msgid "Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer."
+msgstr ""
+
+#: ../../LICENSE:8
+msgid "Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution."
+msgstr ""
+
+#: ../../LICENSE:10
+msgid "Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission."
+msgstr ""
+
+#: ../../LICENSE:12
+msgid "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+msgstr ""
+
+#: ../source/pages/api.rst:2
+msgid "API reference"
+msgstr ""
+
+#: ../source/pages/api.rst:4
+msgid "Source: `https://github.com/pyfemtet/pyfemtet <https://github.com/pyfemtet/pyfemtet>`_"
+msgstr ""
+
+#: ../source/pages/examples.rst:2
+msgid "Examples"
+msgstr ""
+
+#: ../source/pages/examples.rst:5
+msgid "Single Objective Optimization"
+msgstr ""
+
+#: ../source/pages/examples.rst:9
+msgid "Inductance of a Solenoid Coil"
+msgstr ""
+
+#: ../source/pages/examples.rst:17
+msgid "In magnetic field analysis, set the self-inductance of a finite-length solenoid coil to a specific value."
+msgstr ""
+
+#: ../source/pages/examples.rst:20
+msgid "Resonant Frequency of Circular Patch Antenna"
+msgstr ""
+
+#: ../source/pages/examples.rst:28
+msgid "In electromagnetic wave analysis, set the resonant frequency of a circular patch antenna to a specific value."
+msgstr ""
+
+#: ../source/pages/examples.rst:39
+msgid "Multi-Objective Optimization"
+msgstr ""
+
+#: ../source/pages/examples.rst:42
+msgid "Heating Element on Substrate"
+msgstr ""
+
+#: ../source/pages/examples.rst:50
+msgid "In thermal conduction analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate."
+msgstr ""
+
+#: ../source/pages/examples.rst:52
+msgid "Air cooling of IC Substrate"
+msgstr ""
+
+#: ../source/pages/examples.rst:60
+msgid "In simple fluid-thermal analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate under forced convection."
+msgstr ""
+
+#: ../source/pages/examples.rst:71
+msgid "Parallel Computing"
+msgstr ""
+
+#: ../source/pages/examples.rst:74
+msgid "Heating Element on Substrate (Parallel Computing)"
+msgstr ""
+
+#: ../source/pages/examples.rst:82
+msgid "Speed up 'Heating Element on Substrate' using parallel computing in multiple Femtet instances."
+msgstr ""
+
+#: ../source/pages/examples.rst:92
+msgid "CAD Integration"
+msgstr ""
+
+#: ../source/pages/examples.rst:95
+msgid "External CAD (NX) Integration"
+msgstr ""
+
+#: ../source/pages/examples.rst:103
+msgid "Explore dimensions of sturdy and lightweight H-beams using NX integration."
+msgstr ""
+
+#: ../source/pages/examples.rst:105
+msgid "External CAD (Solidworks) Integration"
+msgstr ""
+
+#: ../source/pages/examples.rst:113
+msgid "Explore the same problem as left with Solidworks integration."
+msgstr ""
+
+#: ../source/pages/usage.rst:2
+msgid "Usage"
+msgstr ""
+
+#: ../source/pages/usage.rst:4
+msgid "This section outlines the standard procedure for applying ``pyfemtet.opt`` in your own project."
+msgstr ""
+
+#: ../source/pages/usage.rst:8
+msgid "To verify the operation of PyFemtet, we recommend checking the examples in :doc:`examples`."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:7
+msgid "Procedure for Running Cluster Calculations (Experimental Feature)"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:9
+msgid "This page outlines the procedure for parallel computing an optimization program using ``pyfemtet.opt`` on multiple PCs."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:13
+msgid "**Here, the machine where the program is called is referred to as the 'local PC,' and the machine running the calculations is referred to as the 'calculation PC.'** It is acceptable to have multiple calculation PCs. The local machine can also be a calculation machine. Please perform '2. Setting Up Calculation PC' and '4. Launching the Worker' for each calculation PC."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:21
+msgid "Parallel computing in pyfemtet depends on ``dask.distributed``. This document describes the behavior as of dask version 2023.12.1. For more details and the latest CLI command usage, please refer to |dask|."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:24
+msgid "Creating a Program"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:26
+msgid "Refer to :doc:`how_to_optimize_your_project` and create a program for optimization."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:29
+msgid "Setting Up Calculation PC"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:31
+msgid "Please install Femtet on the calculation PC."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:32
+msgid "Please install the same version of Python as on the local PC on the calculation PC."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:33
+msgid "Please install the same version of pyfemtet and its dependencies as on the local PC on the calculation PC."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:35
+msgid "To install dependencies with specified versions, the following steps are convenient. Please execute the following steps from the command prompt. (Please do not execute the line starts with # as it is a comment.)"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:42
+msgid "Transfer the file generated here, named requirements.txt, to the calculation PCs, and run the following command in the command prompt."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:49
+msgid "Then run the makepy command to set the macro constants for Femtet."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:57
+msgid "Launching the Scheduler (a process that manages processes on multiple calculation PCs)"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:59
+msgid "Please run the following command on your local PC."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:68
+msgid "Please make a note of the numbers displayed here, such as tcp://~~~:~~~."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:0
+msgid "If communication ports are restricted due to firewalls or other constraints,"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:0
+msgid "``dask scheduler --port your_port``"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:0
+msgid "please use the above command (replace your_port with the port number)."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:77
+msgid "Launching the Worker (a process that performs calculations)"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:79
+msgid "Please run the following command on the calculation PCs."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:86
+msgid "If the screen updates on both scheduler and worker, and the text ``Starting established connection`` is displayed, the communication has been successful."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:88
+msgid "If communication is not possible for a certain period of time, a message indicating a timeout will be displayed on the Worker side."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:91
+msgid "Editing and executing programs"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:93
+msgid "Include the address of the Scheduler in the program so that computational tasks are passed to the Scheduler during program execution."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:94
+msgid "Specify ``tcp://~~~:~~~`` for the argument ``scheduler_address`` in the FEMOpt constructor."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_deploy_cluster.rst:114
+msgid "If the program terminates abnormally due to errors, it is recommended to terminate the Scheduler and Worker once before retrying, and then proceed with steps 3 and 4 again."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:2
+msgid "Procedure for executing optimization"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:4
+msgid "This page demonstrates how to create a program for conducting optimal design using ``pyfemtet.opt`` in your own project."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:7
+msgid "Creating a Femtet project"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:9
+msgid "Create an analysis model on Femtet. **Register the parameters you want to optimize as variables.** For more details on analysis settings using parameters, please refer to Femtet Help / Project Creation / Variables."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:12
+msgid "Setting the objective function"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:14
+msgid "In optimization problems, the metric to be evaluated is referred to as the objective function. Please write the process of calculating the objective function from analysis results or model shapes using Python macros in Femtet."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:35
+msgid "For the Python macro syntax in Femtet, please refer to the Femtet Macro Help or `Macro Examples <https://www.muratasoftware.com/support/macro/>`_."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:38
+msgid "Creating the main script"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:40
+msgid "Using the design variables and objective function defined above, create the main script."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:70
+msgid "For this script to actually work, you need a Femtet stress analysis project with variables ``w`` and ``d``."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:75
+msgid "**The objective function must take a Femtet instance as the first argument,** since the ``FEMOpt`` instance intarcreates it internally."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:80
+msgid "Only perform ``add_parameter()`` on variables set with constant expressions within Femtet, and do not do it for variables set with string expressions. The string expressions will be lost."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:83
+msgid "Run the script."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:85
+msgid "When the script is executed, the progress and results will be saved in a csv file. Each row in the csv file represents the result of one analysis attempt. The meaning of each column is as follows:"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:88
+msgid "Columns"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:88
+msgid "Meaning"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:90
+msgid "trial"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:90
+msgid "The number of the attempt"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:91
+msgid "<Variable name>"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:91
+msgid "The value of the variable specified in the script"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:92
+msgid "<Objective name>"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:92
+msgid "The calculation result of the objective function specified in the script"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:93
+msgid "<Objective name>_direction"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:93
+msgid "The target of the objective function specified in the script"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:94
+msgid "<Constraint name>"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:94
+msgid "The calculation result of the constraint function specified in the script"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:95
+msgid "<Constraint name>_lb"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:95
+msgid "The lower bound of the constraint function specified in the script"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:96
+msgid "<Constraint name>_ub"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:96
+msgid "The upper bound of the constraint function specified in the script"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:97
+msgid "feasible"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:97
+msgid "Whether the attempt satisfies all constraints"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:98
+msgid "hypervolume"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:98
+msgid "The hypervolume up to that attempt (only when the objective function is 2 or more)"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:99
+msgid "message"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:99
+msgid "Special notes from the optimization process"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:100
+msgid "time"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:100
+msgid "Time when the attempt was completed"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:103
+msgid "Items enclosed in <> indicate that their content and number may vary depending on the script."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_optimize_your_project.rst:105
+msgid "If the objective name and constraint name are not specified in the script, values such as obj_1, cns_1 will be automatically assigned."
+msgstr ""
