@@ -1,4 +1,4 @@
-Air cooling of IC.
+Air cooling of IC substrate
 ===================================
 
 .. |SAMPLE_NAME| replace:: paswat_ex1
@@ -25,12 +25,12 @@ Sample File
    For details on the FEM problem, please refer to FemtetHelp / Examples / Simple Fluid-Thermal Analysis / Example 1.
 
 
-Design Variables
-------------------
+Analysis Model and Design Variables
+------------------------------------
 
 .. figure:: paswat_ex1_model.png
    :width: 450
-   
+
    Appearance of the Model
 
 ============== ==================================
@@ -68,9 +68,24 @@ Execution Result of the Sample Code
    Execution result of |SAMPLE_NAME| _parametric.py. This is a pair plot with the combination of each objective function on the vertical axis and horizontal axis.
 
 
-From the results of the 15 trials, the following can be observed.
+From this result, we can see the following:
+   - MAINCHIP temperature and SUBCHIP temperature have a positive correlation.
+   - Substrate size and CHIP temperature have a negative correlation and cannot be reduced at the same time.
+   - Depending on the combination of design variables, there are conditions under which MAINCHIP and SUBCHIP temperatures can be further reduced even with the same substrate size.
 
-**UNDER_CONSTRUCTION!!!!!!!!!!!!!!!**
+In multi-objective optimization, a solution for which all objective function
+values are far from the goal compared to other solutions (that is, there is
+no reason to choose it) is called a **"dominated solution."**
+
+On the other hand, the set of **"non-dominated solutions"** is called the **Pareto set**.
+
+Pareto sets generally have tradeoffs. In parameter optimization for product design,
+the Pareto set is determined by the rough design of the product and how variables are set.
+
+Therefore, it is important for the designer to perform a rough design so that the entire
+Pareto set approaches the target values of all objective functions.
+
+Finally, select a solution from the Pareto set and reflect it in the design.
 
 
 .. tip::
