@@ -15,30 +15,30 @@ Sample File
 ------------------------------
 .. note::
 
-   Place the :download:`sample model<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.SLDPRT>`
-   and :download:`sample project<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.femprj>` in the same folder, keep the project open in Femtet,
-   and double-click on :download:`sample code<../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.py>` to execute.
+   Place the :download:`sample model<../_temporary_sample_files/cad_ex01_SW.SLDPRT>`
+   and :download:`sample project<../_temporary_sample_files/cad_ex01_SW.femprj>` in the same folder, keep the project open in Femtet,
+   and double-click on :download:`sample code<../_temporary_sample_files/cad_ex01_SW.py>` to execute.
 
 
 
 Sample Code
 ------------------------------
 
-.. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/Sldworks_ex01/Sldworks_ex01.py
+.. literalinclude:: ../_temporary_sample_files/cad_ex01_SW.py
    :language: python
    :linenos:
-   :caption: Sldworks_ex01.py
+   :caption: cad_ex01_SW.py
 
 
 Execution Result of the Sample Code
 ----------------------------------------
 
 .. figure:: Sldworks_ex01_result.png
-   :width: 300
+   :width: 450
 
-   Execution result of Sldworks_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.
+   Execution result of Sldworks_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass.
 
-After 20 trials, a Pareto set of displacement and volume is obtained.
+After 20 trials, a Pareto set of von Mises stress and mass is obtained.
 
 
 .. note::

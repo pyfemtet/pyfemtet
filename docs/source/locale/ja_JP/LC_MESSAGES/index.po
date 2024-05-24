@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-16 15:38+0900\n"
+"POT-Creation-Date: 2024-05-24 13:29+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -60,8 +60,9 @@ msgid "PyFemtet is a library that provides functionality using the Python macro 
 msgstr "PyFemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。現在、 **PyFemtet の唯一の機能は設計パラメータの最適化** であり、``pyfemtet.opt`` サブパッケージとして実装されています。"
 
 #: ../../source/index.rst:30
-msgid "``pyfemtet.opt`` has the following characteristics."
-msgstr "PyFemtet の最適化機能 ``pyfemtet.opt`` は以下の特徴を有します。"
+#, fuzzy
+msgid "The optimization feature by pyfemtet.opt has the following characteristics:"
+msgstr "``pyfemtet.opt`` による最適化機能は、以下の特徴を有します。"
 
 #: ../../source/index.rst:32
 msgid "Single-objective and multi-objective optimization"

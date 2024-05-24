@@ -9,8 +9,8 @@ Sample File
 ------------------------------
 .. note::
 
-   Keep the :download:`sample project <../../../../pyfemtet/FemtetPJTSample/wat_ex14_parametric.femprj>`
-   open in Femtet, then double-click on the :download:`sample code <../../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py>`
+   Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>`
+   open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parallel_parametric.py>`
    to execute it.
 
 .. note::
@@ -43,7 +43,7 @@ Objective Function
 Sample Code
 ---------------
 
-.. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/wat_ex14_parallel_parametric.py
+.. literalinclude:: ../_temporary_sample_files/wat_ex14_parallel_parametric.py
    :language: python
    :linenos:
    :caption: wat_ex14_parallel_parametric.py

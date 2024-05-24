@@ -105,19 +105,19 @@
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Place the
-<a class="reference download internal" download="" href="../../_downloads/18d04ad07af2b15986a98c5d30844348/NX_ex01.prt"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">model</span></code></a>
+<a class="reference download internal" download="" href="../../_downloads/3bb9314cd5b0f291a694be79fd4c4753/cad_ex01_NX.prt"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">model</span></code></a>
 and
-<a class="reference download internal" download="" href="../../_downloads/f89096ec20e8d66dd24fbd80120af592/NX_ex01.femprj"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">project</span></code></a>
+<a class="reference download internal" download="" href="../../_downloads/4a20fde6db1f10d60d503d2990cd923e/cad_ex01_NX.femprj"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">project</span></code></a>
 in the same folder.
 Keep the project open in Femtet, then double-click on the
-<a class="reference download internal" download="" href="../../_downloads/d466d471902c3da21e8912b69b66fb55/NX_ex01.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">code</span></code></a>
+<a class="reference download internal" download="" href="../../_downloads/82a72bb4387eed2ec6a892d62ba6e991/cad_ex01_NX.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">code</span></code></a>
 to execute it.</p>
 </div>
 </section>
 <section id="details-as-a-fem-problem">
 <h2>Details as a FEM Problem<a class="headerlink" href="#details-as-a-fem-problem" title="Link to this heading"></a></h2>
 <figure class="align-default" id="id1">
-<img alt="../../_images/NX_ex01_analysis.png" src="../../_images/NX_ex01_analysis.png" />
+<a class="reference internal image-reference" href="../../_images/NX_ex01_analysis.png"><img alt="../../_images/NX_ex01_analysis.png" src="../../_images/NX_ex01_analysis.png" style="width: 450px;" /></a>
 <figcaption>
 <p><span class="caption-text">Appearance of the Model (and Analysis Conditions)</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
@@ -131,7 +131,7 @@ to execute it.</p>
 <section id="design-variables">
 <h2>Design Variables<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
 <figure class="align-default" id="id2">
-<img alt="../../_images/NX_ex01_model_dsgn.png" src="../../_images/NX_ex01_model_dsgn.png" />
+<a class="reference internal image-reference" href="../../_images/NX_ex01_model_dsgn.png"><img alt="../../_images/NX_ex01_model_dsgn.png" src="../../_images/NX_ex01_model_dsgn.png" style="width: 450px;" /></a>
 <figcaption>
 <p><span class="caption-text">Appearance of the Model Section (and Design Variables)</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
 </figcaption>
@@ -165,125 +165,139 @@ to execute it.</p>
 <section id="sample-code">
 <h2>Sample Code<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">NX_ex01.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="code-block-caption"><span class="caption-text">cad_ex01_NX.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="sd">&quot;&quot;&quot;External CAD (NX) Integration</span>
 <span class="linenos">  2</span>
-<span class="linenos">  3</span><span class="sd">This script performs parametric optimization</span>
-<span class="linenos">  4</span><span class="sd">using a project that has imported an external CAD model</span>
-<span class="linenos">  5</span><span class="sd">that has been parametrically modeled.</span>
-<span class="linenos">  6</span>
-<span class="linenos">  7</span><span class="sd">Please perform the following steps in preparation.</span>
-<span class="linenos">  8</span><span class="sd">    - Install NX.</span>
-<span class="linenos">  9</span><span class="sd">    - Place NX_ex01.prt, NX_ex01.femprj and .py file in the same folder.</span>
-<span class="linenos"> 10</span><span class="sd">    - Create C:\\temp folder on your disk.</span>
-<span class="linenos"> 11</span><span class="sd">        Note: NX exports .x_t files during optimization.</span>
-<span class="linenos"> 12</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos"> 13</span>
-<span class="linenos"> 14</span><span class="kn">import</span> <span class="nn">os</span>
-<span class="linenos"> 15</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
-<span class="linenos"> 16</span><span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetWithNXInterface</span>
-<span class="linenos"> 17</span><span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
-<span class="linenos"> 18</span>
+<span class="linenos">  3</span><span class="sd">Using Femtet&#39;s stress analysis solver and Siemens&#39; CAD software NX,</span>
+<span class="linenos">  4</span><span class="sd">design a lightweight and high-strength H-shaped beam.</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="sd">As a preliminary step, please perform the following procedures:</span>
+<span class="linenos">  7</span><span class="sd">- Install NX</span>
+<span class="linenos">  8</span><span class="sd">- Create a C:\temp folder</span>
+<span class="linenos">  9</span><span class="sd">    - Note: NX will save a .x_t file in this folder.</span>
+<span class="linenos"> 10</span><span class="sd">- Place the following files in the same folder:</span>
+<span class="linenos"> 11</span><span class="sd">    - cad_ex01_NX.py (this file)</span>
+<span class="linenos"> 12</span><span class="sd">    - cad_ex01_NX.prt</span>
+<span class="linenos"> 13</span><span class="sd">    - cad_ex01_NX.femprj</span>
+<span class="linenos"> 14</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 15</span>
+<span class="linenos"> 16</span><span class="kn">import</span> <span class="nn">os</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span><span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">constants</span>
 <span class="linenos"> 19</span>
-<span class="linenos"> 20</span><span class="n">here</span><span class="p">,</span> <span class="n">me</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
-<span class="linenos"> 21</span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">here</span><span class="p">)</span>
-<span class="linenos"> 22</span>
+<span class="linenos"> 20</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
+<span class="linenos"> 21</span><span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetWithNXInterface</span>
+<span class="linenos"> 22</span><span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
 <span class="linenos"> 23</span>
-<span class="linenos"> 24</span><span class="k">def</span> <span class="nf">disp</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
-<span class="linenos"> 25</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtain the maximum displacement in the Z direction from the analysis results.</span>
-<span class="linenos"> 26</span>
-<span class="linenos"> 27</span><span class="sd">    Note:</span>
-<span class="linenos"> 28</span><span class="sd">        The objective or constraint function</span>
-<span class="linenos"> 29</span><span class="sd">        must take a Femtet as its first argument</span>
-<span class="linenos"> 30</span><span class="sd">        and must return a single float.</span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span><span class="n">here</span><span class="p">,</span> <span class="n">me</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="linenos"> 26</span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">here</span><span class="p">)</span>
+<span class="linenos"> 27</span>
+<span class="linenos"> 28</span>
+<span class="linenos"> 29</span><span class="k">def</span> <span class="nf">von_mises</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 30</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtain the maximum von Mises stress of the model.</span>
 <span class="linenos"> 31</span>
-<span class="linenos"> 32</span><span class="sd">    Warning:</span>
-<span class="linenos"> 33</span><span class="sd">        CAD integration may assign boundary conditions to unintended locations.</span>
-<span class="linenos"> 34</span>
-<span class="linenos"> 35</span><span class="sd">        In this example, if the boundary conditions are assigned as intended,</span>
-<span class="linenos"> 36</span><span class="sd">        the maximum displacement is always negative.</span>
-<span class="linenos"> 37</span><span class="sd">        If the maximum displacement is positive,</span>
-<span class="linenos"> 38</span><span class="sd">        it is assumed that boundary condition assignment has failed</span>
-<span class="linenos"> 39</span><span class="sd">        and a ModelError is raised.</span>
-<span class="linenos"> 40</span><span class="sd">        </span>
-<span class="linenos"> 41</span><span class="sd">        If a ModelError, MeshError, or SolveError is raised during an optimization,</span>
-<span class="linenos"> 42</span><span class="sd">        the Optimizer considers the trial a failure</span>
-<span class="linenos"> 43</span><span class="sd">        and skips it to the next trial.</span>
-<span class="linenos"> 44</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos"> 45</span>    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement_py</span><span class="p">()</span>
-<span class="linenos"> 46</span>
-<span class="linenos"> 47</span>    <span class="k">if</span> <span class="n">ret</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-<span class="linenos"> 48</span>        <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s1">&#39;The boundary condition assignment is incorrect.&#39;</span><span class="p">)</span>
-<span class="linenos"> 49</span>    <span class="k">return</span> <span class="n">ret</span>
-<span class="linenos"> 50</span>
-<span class="linenos"> 51</span>
-<span class="linenos"> 52</span><span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
-<span class="linenos"> 53</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtain the volume.&quot;&quot;&quot;</span>
-<span class="linenos"> 54</span>    <span class="n">_</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">CalcVolume_py</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
-<span class="linenos"> 55</span>    <span class="k">return</span> <span class="n">ret</span>
-<span class="linenos"> 56</span>
-<span class="linenos"> 57</span>
-<span class="linenos"> 58</span><span class="k">def</span> <span class="nf">C_minus_B</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
-<span class="linenos"> 59</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the difference between C and B dimensions.</span>
-<span class="linenos"> 60</span>
-<span class="linenos"> 61</span><span class="sd">    The constraint function must take a Femtet instance as its first argument,</span>
-<span class="linenos"> 62</span><span class="sd">    but this example does not use it.</span>
-<span class="linenos"> 63</span>
-<span class="linenos"> 64</span><span class="sd">    Another example uses the following snippet to access design variables:</span>
-<span class="linenos"> 65</span>
-<span class="linenos"> 66</span><span class="sd">        A = Femtet.GetVariableValue(&#39;A&#39;)</span>
-<span class="linenos"> 67</span><span class="sd">    </span>
-<span class="linenos"> 68</span><span class="sd">    However, when performing CAD integration,</span>
-<span class="linenos"> 69</span><span class="sd">    this method does not work because the variables are not set in the .femprj file.</span>
+<span class="linenos"> 32</span><span class="sd">    Note:</span>
+<span class="linenos"> 33</span><span class="sd">        The objective or constraint function should take Femtet</span>
+<span class="linenos"> 34</span><span class="sd">        as its first argument and return a float as the output.</span>
+<span class="linenos"> 35</span>
+<span class="linenos"> 36</span><span class="sd">    Warning:</span>
+<span class="linenos"> 37</span><span class="sd">        CAD integration may assign boundary conditions to unintended locations.</span>
+<span class="linenos"> 38</span>
+<span class="linenos"> 39</span><span class="sd">        In this example, if the boundary conditions are assigned as intended,</span>
+<span class="linenos"> 40</span><span class="sd">        the maximum z displacement is always negative.</span>
+<span class="linenos"> 41</span><span class="sd">        If the maximum displacement is not negative, it is assumed that</span>
+<span class="linenos"> 42</span><span class="sd">        boundary condition assignment has failed.</span>
+<span class="linenos"> 43</span><span class="sd">        Then this function raises a ModelError.</span>
+<span class="linenos"> 44</span>
+<span class="linenos"> 45</span><span class="sd">        If a ModelError, MeshError, or SolveError occurs during optimization,</span>
+<span class="linenos"> 46</span><span class="sd">        the optimization process considers the attempt a failure and skips to</span>
+<span class="linenos"> 47</span><span class="sd">        the next trial.</span>
+<span class="linenos"> 48</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 49</span>
+<span class="linenos"> 50</span>    <span class="c1"># Simple check for the correctness of boundary conditions.</span>
+<span class="linenos"> 51</span>    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement_py</span><span class="p">()</span>
+<span class="linenos"> 52</span>    <span class="k">if</span> <span class="n">dz</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos"> 53</span>        <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s1">&#39;Assigning unintended boundary conditions.&#39;</span><span class="p">)</span>
+<span class="linenos"> 54</span>
+<span class="linenos"> 55</span>    <span class="c1"># Von Mises stress calculation.</span>
+<span class="linenos"> 56</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
+<span class="linenos"> 57</span>    <span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">Potential</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">GALILEO_VON_MISES_C</span>
+<span class="linenos"> 58</span>    <span class="n">succeed</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">mises</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMAXPotentialPoint_py</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">CMPX_REAL_C</span><span class="p">)</span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span>    <span class="k">return</span> <span class="n">mises</span>
+<span class="linenos"> 61</span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span><span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 64</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtain model mass.&quot;&quot;&quot;</span>
+<span class="linenos"> 65</span>    <span class="k">return</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMass</span><span class="p">(</span><span class="s1">&#39;H_beam&#39;</span><span class="p">)</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span>
+<span class="linenos"> 68</span><span class="k">def</span> <span class="nf">C_minus_B</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+<span class="linenos"> 69</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the difference between C and B dimensions.</span>
 <span class="linenos"> 70</span>
-<span class="linenos"> 71</span><span class="sd">    In CAD integration, design variables are obtained in the following way.</span>
-<span class="linenos"> 72</span><span class="sd">    </span>
-<span class="linenos"> 73</span><span class="sd">    The objective function and constraint function can take any variable after the first argument.</span>
-<span class="linenos"> 74</span><span class="sd">    The member variable opt of FEMOpt has a method called get_parameter().</span>
-<span class="linenos"> 75</span><span class="sd">    This method can retrieve design variables added by add_parameter().</span>
-<span class="linenos"> 76</span><span class="sd">    By taking opt as the second argument, you can execute get_parameter()</span>
-<span class="linenos"> 77</span><span class="sd">    in the objective function or constraint function to obtain the design variables.</span>
-<span class="linenos"> 78</span><span class="sd">    </span>
-<span class="linenos"> 79</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos"> 80</span>    <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
-<span class="linenos"> 81</span>    <span class="k">return</span> <span class="n">C</span> <span class="o">-</span> <span class="n">B</span>
-<span class="linenos"> 82</span>
-<span class="linenos"> 83</span>
-<span class="linenos"> 84</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-<span class="linenos"> 85</span>
-<span class="linenos"> 86</span>    <span class="c1"># Define NX-Femtet integration object.</span>
-<span class="linenos"> 87</span>    <span class="c1"># At this point, Python is connected to the running Femtet.</span>
-<span class="linenos"> 88</span>    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetWithNXInterface</span><span class="p">(</span>
-<span class="linenos"> 89</span>        <span class="n">prt_path</span><span class="o">=</span><span class="s1">&#39;NX_ex01.prt&#39;</span><span class="p">,</span>
-<span class="linenos"> 90</span>        <span class="n">femprj_path</span><span class="o">=</span><span class="s1">&#39;NX_ex01.femprj&#39;</span><span class="p">,</span>
-<span class="linenos"> 91</span>    <span class="p">)</span>
-<span class="linenos"> 92</span>
-<span class="linenos"> 93</span>    <span class="c1"># Define mathematical optimization object.</span>
-<span class="linenos"> 94</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
-<span class="linenos"> 95</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-<span class="linenos"> 96</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-<span class="linenos"> 97</span>        <span class="p">)</span>
-<span class="linenos"> 98</span>    <span class="p">)</span>
-<span class="linenos"> 99</span>
-<span class="linenos">100</span>    <span class="c1"># Define FEMOpt object (This process integrates mathematical optimization and FEM.).</span>
-<span class="linenos">101</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
+<span class="linenos"> 71</span><span class="sd">    Another example uses the following snippet to access design variables:</span>
+<span class="linenos"> 72</span>
+<span class="linenos"> 73</span><span class="sd">        A = Femtet.GetVariableValue(&#39;A&#39;)</span>
+<span class="linenos"> 74</span><span class="sd">    </span>
+<span class="linenos"> 75</span><span class="sd">    However, when performing CAD integration, this method does not work</span>
+<span class="linenos"> 76</span><span class="sd">    because the variables are not set in the .femprj file.</span>
+<span class="linenos"> 77</span>
+<span class="linenos"> 78</span><span class="sd">    In CAD integration, design variables are obtained in the following way.</span>
+<span class="linenos"> 79</span>
+<span class="linenos"> 80</span><span class="sd">        # How to obtain a dictionary with the variable names of parameters</span>
+<span class="linenos"> 81</span><span class="sd">        # added by add_parameter() as keys.</span>
+<span class="linenos"> 82</span><span class="sd">        params: dict = opt.get_parameter()</span>
+<span class="linenos"> 83</span><span class="sd">        A = params[&#39;A&#39;]</span>
+<span class="linenos"> 84</span>
+<span class="linenos"> 85</span><span class="sd">    Or</span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span><span class="sd">        # How to obtain an array of values of parameters added in the order</span>
+<span class="linenos"> 88</span><span class="sd">        # by add_parameter().</span>
+<span class="linenos"> 89</span><span class="sd">        values: np.ndarray = opt.get_parameter(&#39;values&#39;)</span>
+<span class="linenos"> 90</span><span class="sd">        A, B, C = values</span>
+<span class="linenos"> 91</span>
+<span class="linenos"> 92</span><span class="sd">    Objective functions and constraint functions can take arbitrary variables</span>
+<span class="linenos"> 93</span><span class="sd">    after the first argument.</span>
+<span class="linenos"> 94</span><span class="sd">    The FEMOpt member variable `opt` has a method called get_parameter().</span>
+<span class="linenos"> 95</span><span class="sd">    This method allows you to retrieve design variables added by add_parameter().</span>
+<span class="linenos"> 96</span><span class="sd">    By taking `opt` as the second argument, you can execute get_parameter()</span>
+<span class="linenos"> 97</span><span class="sd">    within the objective or constraint function to retrieve design variables.</span>
+<span class="linenos"> 98</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 99</span>    <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+<span class="linenos">100</span>    <span class="k">return</span> <span class="n">C</span> <span class="o">-</span> <span class="n">B</span>
+<span class="linenos">101</span>
 <span class="linenos">102</span>
-<span class="linenos">103</span>    <span class="c1"># Add design variables (Use variable names set in NX) to the optimization problem.</span>
-<span class="linenos">104</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
-<span class="linenos">105</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
-<span class="linenos">106</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
-<span class="linenos">107</span>
-<span class="linenos">108</span>    <span class="c1"># Add constraint to the optimization problem.</span>
-<span class="linenos">109</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">C_minus_B</span><span class="p">,</span> <span class="s1">&#39;C&gt;B&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">)</span>
-<span class="linenos">110</span>
-<span class="linenos">111</span>    <span class="c1"># Add objective to the optimization problem.</span>
-<span class="linenos">112</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">disp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;displacement&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="linenos">113</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
-<span class="linenos">114</span>
-<span class="linenos">115</span>    <span class="c1"># Run optimization.</span>
-<span class="linenos">116</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="linenos">117</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="linenos">118</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+<span class="linenos">103</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">104</span>
+<span class="linenos">105</span>    <span class="c1"># Initialize NX-Femtet integration object.</span>
+<span class="linenos">106</span>    <span class="c1"># At this point, Python is connected to the Femtet.</span>
+<span class="linenos">107</span>    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetWithNXInterface</span><span class="p">(</span>
+<span class="linenos">108</span>        <span class="n">prt_path</span><span class="o">=</span><span class="s1">&#39;cad_ex01_NX.prt&#39;</span><span class="p">,</span>
+<span class="linenos">109</span>        <span class="n">open_result_with_gui</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># To calculate von Mises stress, set this argument to False. See Femtet Macro Help.</span>
+<span class="linenos">110</span>    <span class="p">)</span>
+<span class="linenos">111</span>
+<span class="linenos">112</span>    <span class="c1"># Initialize the FEMOpt object.</span>
+<span class="linenos">113</span>    <span class="c1"># (establish connection between the optimization problem and Femtet)</span>
+<span class="linenos">114</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
+<span class="linenos">115</span>
+<span class="linenos">116</span>    <span class="c1"># Add design variables to the optimization problem.</span>
+<span class="linenos">117</span>    <span class="c1"># (Specify the variables registered in the femprj file.)</span>
+<span class="linenos">118</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+<span class="linenos">119</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="linenos">120</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+<span class="linenos">121</span>
+<span class="linenos">122</span>    <span class="c1"># Add the constraint function to the optimization problem.</span>
+<span class="linenos">123</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">C_minus_B</span><span class="p">,</span> <span class="s1">&#39;C&gt;B&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">)</span>
+<span class="linenos">124</span>
+<span class="linenos">125</span>    <span class="c1"># Add the objective function to the optimization problem.</span>
+<span class="linenos">126</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">von_mises</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;von Mises (Pa)&#39;</span><span class="p">)</span>
+<span class="linenos">127</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mass (kg)&#39;</span><span class="p">)</span>
+<span class="linenos">128</span>
+<span class="linenos">129</span>    <span class="c1"># Run optimization.</span>
+<span class="linenos">130</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">131</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="linenos">132</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -291,12 +305,12 @@ to execute it.</p>
 <section id="execution-result-of-the-sample-code">
 <h2>Execution Result of the Sample Code<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
 <figure class="align-default" id="id4">
-<a class="reference internal image-reference" href="../../_images/NX_ex01_result.png"><img alt="../../_images/NX_ex01_result.png" src="../../_images/NX_ex01_result.png" style="width: 300px;" /></a>
+<a class="reference internal image-reference" href="../../_images/NX_ex01_result.png"><img alt="../../_images/NX_ex01_result.png" src="../../_images/NX_ex01_result.png" style="width: 450px;" /></a>
 <figcaption>
-<p><span class="caption-text">Execution result of NX_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+<p><span class="caption-text">Execution result of NX_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<p>After the 20 trials, a Pareto set of displacement and volume is obtained.</p>
+<p>After the 20 trials, a Pareto set of von Mises stress and mass is obtained.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on.</p>

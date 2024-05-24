@@ -59,6 +59,7 @@ class FemtetInterface(FEMInterface):
             connect_method='auto',
             strictly_pid_specify=True,
             allow_without_project=False,
+            open_result_with_gui=True,
             **kwargs  # 継承されたクラスからの引数
     ):
 
@@ -74,6 +75,7 @@ class FemtetInterface(FEMInterface):
         self.connect_method = connect_method
         self.allow_without_project = allow_without_project
         self.original_femprj_path = self.femprj_path
+        self.open_result_with_gui = open_result_with_gui
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None
@@ -108,6 +110,7 @@ class FemtetInterface(FEMInterface):
         super().__init__(
             femprj_path=self.femprj_path,
             model_name=self.model_name,
+            open_result_with_gui=self.open_result_with_gui,
             **kwargs
         )
 
@@ -559,13 +562,14 @@ class FemtetInterface(FEMInterface):
             SolveError,  # 生きてるのに開けない場合
             error_message='解析結果のオープンに失敗しました',
             is_Gaudi_method=True,
-            args=(True,),
+            args=(self.open_result_with_gui,),
         )
 
     def update(self, parameters: 'pd.DataFrame') -> None:
         """See :func:`FEMInterface.update`"""
         self.parameters = parameters.copy()
         self.update_model(parameters)
+        # TODO: CAD 連携における座標を基にした境界条件の割当直しなどの処理をここに挟めるようにする
         self.solve()
 
     def quit(self, timeout=1, force=True):

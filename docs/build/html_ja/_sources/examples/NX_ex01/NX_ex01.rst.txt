@@ -9,12 +9,12 @@ Sample File
 .. note::
 
    Place the 
-   :download:`sample model<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.prt>`
+   :download:`sample model<../_temporary_sample_files/cad_ex01_NX.prt>`
    and
-   :download:`sample project<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.femprj>`
+   :download:`sample project<../_temporary_sample_files/cad_ex01_NX.femprj>`
    in the same folder.
    Keep the project open in Femtet, then double-click on the
-   :download:`sample code<../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py>`
+   :download:`sample code<../_temporary_sample_files/cad_ex01_NX.py>`
    to execute it.
 
 
@@ -22,6 +22,7 @@ Details as a FEM Problem
 ------------------------------
 
 .. figure:: NX_ex01_analysis.png
+   :width: 450
    
    Appearance of the Model (and Analysis Conditions)
 
@@ -34,6 +35,7 @@ Design Variables
 ------------------------------
 
 .. figure:: NX_ex01_model_dsgn.png
+   :width: 450
    
    Appearance of the Model Section (and Design Variables)
 
@@ -56,21 +58,21 @@ Objective Function
 Sample Code
 ------------------------------
 
-.. literalinclude:: ../../../../pyfemtet/FemtetPJTSample/NX_ex01/NX_ex01.py
+.. literalinclude:: ../_temporary_sample_files/cad_ex01_NX.py
    :language: python
    :linenos:
-   :caption: NX_ex01.py
+   :caption: cad_ex01_NX.py
 
 
 Execution Result of the Sample Code
 ----------------------------------------
 
 .. figure:: NX_ex01_result.png
-   :width: 300
+   :width: 450
 
-   Execution result of NX_ex01.py. The horizontal axis is displacement, and the vertical axis is volume.
+   Execution result of NX_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass.
 
-After the 20 trials, a Pareto set of displacement and volume is obtained.
+After the 20 trials, a Pareto set of von Mises stress and mass is obtained.
 
 
 .. note::
