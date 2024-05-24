@@ -23,7 +23,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="検索" href="../../search.html" />
-    <link rel="next" title="基板上の発熱体（並列計算）" href="../wat_ex14_parallel/wat_ex14_parallel.html" />
+    <link rel="next" title="Air cooling of IC substrate" href="../paswat_ex1/paswat_ex1.html" />
     <link rel="prev" title="円形パッチアンテナの共振周波数" href="../her_ex40/her_ex40.html" /> 
 </head>
 
@@ -59,6 +59,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">サンプルコードの実行結果</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../paswat_ex1/paswat_ex1.html">Air cooling of IC substrate</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#parallel-computing">並列計算</a></li>
@@ -194,9 +195,9 @@
 <span class="linenos">47</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;substrate_d&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">34</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
 <span class="linenos">48</span>
 <span class="linenos">49</span>    <span class="c1"># 目的関数を最適化問題に追加</span>
-<span class="linenos">50</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">chip_temp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;max temp. of MAINCHIP (degree)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;MAINCHIP&#39;</span><span class="p">,))</span>
-<span class="linenos">51</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">chip_temp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;max temp. of SUBCHIP (degree)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;SUBCHIP&#39;</span><span class="p">,))</span>
-<span class="linenos">52</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">substrate_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;substrate size&#39;</span><span class="p">)</span>
+<span class="linenos">50</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">chip_temp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MAINCHIP&lt;br&gt;最高温度(度)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;MAINCHIP&#39;</span><span class="p">,))</span>
+<span class="linenos">51</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">chip_temp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;SUBCHIP&lt;br&gt;最高温度(度)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;SUBCHIP&#39;</span><span class="p">,))</span>
+<span class="linenos">52</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">substrate_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;基板サイズ(mm2)&#39;</span><span class="p">)</span>
 <span class="linenos">53</span>
 <span class="linenos">54</span>    <span class="c1"># 最適化を実行</span>
 <span class="linenos">55</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
@@ -242,7 +243,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../her_ex40/her_ex40.html" class="btn btn-neutral float-left" title="円形パッチアンテナの共振周波数" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../wat_ex14_parallel/wat_ex14_parallel.html" class="btn btn-neutral float-right" title="基板上の発熱体（並列計算）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../paswat_ex1/paswat_ex1.html" class="btn btn-neutral float-right" title="Air cooling of IC substrate" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

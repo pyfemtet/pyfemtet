@@ -14,12 +14,12 @@ $SAMPLES_SOURCE_JP = ".\pyfemtet\opt\femprj_sample_jp"
 
 if (test-path $BUILD_DIR) {
     remove-item $BUILD_DIR -recurse
-    mkdir $BUILD_DIR
+    mkdir $BUILD_DIR | Out-Null
 }
 
 # copy English sample files to doc_source
 if (Test-Path $SAMPLES_ON_DOC_SOURCE) {Remove-Item $SAMPLES_ON_DOC_SOURCE -Recurse -Force}
-mkdir $SAMPLES_ON_DOC_SOURCE
+mkdir $SAMPLES_ON_DOC_SOURCE | Out-Null
 Copy-Item -Path "$SAMPLES_SOURCE\*" -Destination $SAMPLES_ON_DOC_SOURCE -Recurse -Force
 
 # build English document
@@ -30,10 +30,10 @@ Copy-Item -Path "$SAMPLES_SOURCE_JP\*" -Destination $SAMPLES_ON_DOC_SOURCE -Forc
 $files = Get-ChildItem $SAMPLES_ON_DOC_SOURCE -Recurse
 foreach ($file in $files) {
     if ($file.BaseName.EndsWith('_jp')) {
-        write-host "Replace $($newName + $extension) to jp file."
         $newName = $file.BaseName -replace '_jp$', ''
         $extension = $file.Extension
         $newPath = Join-Path $file.Directory.FullName ($newName + $extension)
+        write-host "Replace $($newName + $extension) to jp file."
         if (Test-Path $newPath) {Remove-Item $newPath -Force}
         Rename-Item -Path $file.FullName -NewName ($newName + $extension) -Force
     }

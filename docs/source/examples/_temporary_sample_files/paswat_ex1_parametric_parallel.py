@@ -49,8 +49,8 @@ if __name__ == '__main__':
     femopt.add_parameter("rot", 0, lower_bound=0, upper_bound=180)
 
     # 目的関数を最適化問題に追加
-    femopt.add_objective(chip_temp, name='MAIN最高温度（度）', direction='minimize', args=('MAINCHIP',))
-    femopt.add_objective(chip_temp, name='SUB最高温度（度）', direction='minimize', args=('SUBCHIP',))
+    femopt.add_objective(chip_temp, name='MAINCHIP<br>最高温度（度）', direction='minimize', args=('MAINCHIP',))
+    femopt.add_objective(chip_temp, name='SUBCHIP<br>最高温度（度）', direction='minimize', args=('SUBCHIP',))
     femopt.add_objective(substrate_size, name='基板サイズ（mm2）', direction='minimize')
 
     # 最適化を実行

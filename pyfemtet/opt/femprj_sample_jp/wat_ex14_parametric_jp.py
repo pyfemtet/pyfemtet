@@ -47,9 +47,9 @@ if __name__ == '__main__':
     femopt.add_parameter("substrate_d", 60, lower_bound=34, upper_bound=60)
 
     # 目的関数を最適化問題に追加
-    femopt.add_objective(chip_temp, name='max temp. of MAINCHIP (degree)', direction='minimize', args=('MAINCHIP',))
-    femopt.add_objective(chip_temp, name='max temp. of SUBCHIP (degree)', direction='minimize', args=('SUBCHIP',))
-    femopt.add_objective(substrate_size, name='substrate size')
+    femopt.add_objective(chip_temp, name='MAINCHIP<br>最高温度(度)', direction='minimize', args=('MAINCHIP',))
+    femopt.add_objective(chip_temp, name='SUBCHIP<br>最高温度(度)', direction='minimize', args=('SUBCHIP',))
+    femopt.add_objective(substrate_size, name='基板サイズ(mm2)')
 
     # 最適化を実行
     femopt.set_random_seed(42)
