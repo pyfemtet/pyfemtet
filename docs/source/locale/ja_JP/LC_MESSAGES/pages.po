@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-13 12:00+0900\n"
+"POT-Creation-Date: 2024-05-24 13:29+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -87,35 +87,44 @@ msgstr "基板上の発熱体"
 msgid "In thermal conduction analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate."
 msgstr "熱伝導解析で基板上の IC チップの温度と基板サイズを最小にします。"
 
+#: ../../source/pages/examples.rst:52
+msgid "Air cooling of IC Substrate"
+msgstr "IC 基板の空冷"
+
 #: ../../source/pages/examples.rst:60
+#, fuzzy
+msgid "In simple fluid-thermal analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate under forced convection."
+msgstr "簡易熱流体解析で基板上の IC チップの温度と基板サイズを最小にします。"
+
+#: ../../source/pages/examples.rst:71
 msgid "Parallel Computing"
 msgstr "並列計算"
 
-#: ../../source/pages/examples.rst:63
+#: ../../source/pages/examples.rst:74
 msgid "Heating Element on Substrate (Parallel Computing)"
 msgstr "基板上の発熱体（並列計算）"
 
-#: ../../source/pages/examples.rst:71
+#: ../../source/pages/examples.rst:82
 msgid "Speed up 'Heating Element on Substrate' using parallel computing in multiple Femtet instances."
 msgstr "「基板上の発熱体」を複数 Femtet の並列計算により高速化します。"
 
-#: ../../source/pages/examples.rst:81
+#: ../../source/pages/examples.rst:92
 msgid "CAD Integration"
 msgstr "CAD 連携"
 
-#: ../../source/pages/examples.rst:84
+#: ../../source/pages/examples.rst:95
 msgid "External CAD (NX) Integration"
 msgstr "外部 CAD (NX) 連携"
 
-#: ../../source/pages/examples.rst:92
+#: ../../source/pages/examples.rst:103
 msgid "Explore dimensions of sturdy and lightweight H-beams using NX integration."
 msgstr "CAD (NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。"
 
-#: ../../source/pages/examples.rst:94
+#: ../../source/pages/examples.rst:105
 msgid "External CAD (Solidworks) Integration"
 msgstr "外部 CAD (Solidworks) 連携"
 
-#: ../../source/pages/examples.rst:102
+#: ../../source/pages/examples.rst:113
 msgid "Explore the same problem as left with Solidworks integration."
 msgstr "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
 
