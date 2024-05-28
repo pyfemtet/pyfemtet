@@ -7,6 +7,7 @@ import datetime
 import inspect
 import ast
 import csv
+import ctypes
 
 # 3rd-party
 import numpy as np
@@ -197,9 +198,12 @@ class Function:
 
         # serializable でない COM 定数を parallelize するため
         # COM 定数を一度 _Scapegoat 型のオブジェクトにする
-        for varname in fun.__globals__:
-            if isinstance(fun.__globals__[varname], Constants):
-                fun.__globals__[varname] = _Scapegoat()
+        # ParametricIF で使う dll 関数は _FuncPtr 型であって __globals__ を持たないが、
+        # これは絶対に constants を持たないので単に無視すればよい。
+        if not isinstance(fun, ctypes._CFuncPtr):
+            for varname in fun.__globals__:
+                if isinstance(fun.__globals__[varname], Constants):
+                    fun.__globals__[varname] = _Scapegoat()
 
         self.fun = fun
         self.name = name
@@ -224,10 +228,11 @@ class Function:
     def _restore_constants(self):
         """Helper function for parallelize Femtet."""
         fun = self.fun
-        for varname in fun.__globals__:
-            if isinstance(fun.__globals__[varname], _Scapegoat):
-                if not fun.__globals__[varname]._ignore_when_restore_constants:
-                    fun.__globals__[varname] = constants
+        if not isinstance(fun, ctypes._CFuncPtr):
+            for varname in fun.__globals__:
+                if isinstance(fun.__globals__[varname], _Scapegoat):
+                    if not fun.__globals__[varname]._ignore_when_restore_constants:
+                        fun.__globals__[varname] = constants
 
 
 class Objective(Function):
