@@ -60,6 +60,7 @@ class FemtetInterface(FEMInterface):
             strictly_pid_specify=True,
             allow_without_project=False,
             open_result_with_gui=True,
+            use_parametric_as_objective=False,
             **kwargs  # 継承されたクラスからの引数
     ):
 
@@ -85,6 +86,7 @@ class FemtetInterface(FEMInterface):
         self.parameters = None
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
+        self.use_parametric_as_objective = use_parametric_as_objective
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -111,6 +113,7 @@ class FemtetInterface(FEMInterface):
             femprj_path=self.femprj_path,
             model_name=self.model_name,
             open_result_with_gui=self.open_result_with_gui,
+            use_parametric_as_objective=self.use_parametric_as_objective,
             **kwargs
         )
 
@@ -203,7 +206,7 @@ class FemtetInterface(FEMInterface):
     def _call_femtet_api(
             self,
             fun,
-            ret_if_failed,
+            return_value_if_failed,
             if_error,
             error_message,
             is_Gaudi_method=False,
@@ -219,7 +222,7 @@ class FemtetInterface(FEMInterface):
         ----------
         fun : Callable
             Femtet API
-        ret_if_failed : Any
+        return_value_if_failed : Any
             API が失敗した時の戻り値
         if_error : Type
             エラーが発生していたときに送出したい Exception
@@ -278,9 +281,9 @@ class FemtetInterface(FEMInterface):
         except com_error:
             # パターン 2 エラーが生じたことは確定なのでエラーが起こるよう returns を作る
             if ret_for_check_idx is None:
-                returns = ret_if_failed
+                returns = return_value_if_failed
             else:
-                returns = [ret_if_failed] * (ret_for_check_idx + 1)
+                returns = [return_value_if_failed] * (ret_for_check_idx + 1)
         logger.debug(' ' * print_indent + f'Femtet API result:{returns}')
 
         # チェックすべき値の抽出
@@ -290,7 +293,7 @@ class FemtetInterface(FEMInterface):
             ret_for_check = returns[ret_for_check_idx]
 
         # エラーのない場合は戻り値を return する
-        if ret_for_check != ret_if_failed:
+        if ret_for_check != return_value_if_failed:
             return returns
 
         # エラーがある場合は Femtet の生死をチェックし,
@@ -324,7 +327,7 @@ class FemtetInterface(FEMInterface):
                 logger.info(' ' * print_indent + f'Femtet が回復されました。コマンド {fun.__name__} を再試行します。')
                 return self._call_femtet_api(
                     fun,
-                    ret_if_failed,
+                    return_value_if_failed,
                     if_error,
                     error_message,
                     is_Gaudi_method,
@@ -453,7 +456,7 @@ class FemtetInterface(FEMInterface):
             # Femtet の設計変数の更新
             existing_variable_names = self._call_femtet_api(
                 fun=self.Femtet.GetVariableNames_py,
-                ret_if_failed=False,  # 意味がない
+                return_value_if_failed=False,  # 意味がない
                 if_error=ModelError,  # 生きてるのに失敗した場合
                 error_message=f'GetVariableNames_py に失敗しました。',
                 is_Gaudi_method=True,
@@ -474,7 +477,7 @@ class FemtetInterface(FEMInterface):
                 if name in existing_variable_names:
                     self._call_femtet_api(
                         fun=self.Femtet.UpdateVariable,
-                        ret_if_failed=False,
+                        return_value_if_failed=False,
                         if_error=ModelError,  # 生きてるのに失敗した場合
                         error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
                         is_Gaudi_method=True,
@@ -493,7 +496,7 @@ class FemtetInterface(FEMInterface):
                 value = row['value']
                 self._call_femtet_api(
                     fun=self.Femtet.UpdateVariable,
-                    ret_if_failed=False,
+                    return_value_if_failed=False,
                     if_error=ModelError,  # 生きてるのに失敗した場合
                     error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
                     is_Gaudi_method=True,
@@ -546,14 +549,25 @@ class FemtetInterface(FEMInterface):
             is_Gaudi_method=True,
         )
 
-        # # ソルブする
-        self._call_femtet_api(
-            self.Femtet.Solve,
-            False,
-            SolveError,
-            'ソルブに失敗しました',
-            is_Gaudi_method=True,
-        )
+        if self.use_parametric_as_objective:
+            from pyfemtet.opt.interface._femtet_parametric import solve_via_parametric_dll
+            self._call_femtet_api(
+                fun=solve_via_parametric_dll,
+                return_value_if_failed=False,
+                if_error=SolveError,
+                error_message='パラメトリック解析を用いたソルブに失敗しました',
+                is_Gaudi_method=True,
+                args=(self.Femtet,),
+            )
+        else:
+            # # ソルブする
+            self._call_femtet_api(
+                self.Femtet.Solve,
+                False,
+                SolveError,
+                'ソルブに失敗しました',
+                is_Gaudi_method=True,
+            )
 
         # 次に呼ばれるはずのユーザー定義コスト関数の記述を簡単にするため先に解析結果を開いておく
         self._call_femtet_api(

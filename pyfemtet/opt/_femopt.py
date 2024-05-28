@@ -357,12 +357,17 @@ class FEMOpt:
         # Femtet 特有の処理
         metadata = None
         if isinstance(self.fem, FemtetInterface):
+            # 結果 csv に記載する femprj に関する情報
             metadata = json.dumps(
                 dict(
                     femprj_path=self.fem.original_femprj_path,
                     model_name=self.fem.model_name
                 )
             )
+            # Femtet の parametric 設定を目的関数に用いるかどうか
+            if self.fem.use_parametric_as_objective:
+                from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
+                add_parametric_results_as_objectives(self)
 
         # actor の設定
         self.status = OptimizationStatus(self.client)
