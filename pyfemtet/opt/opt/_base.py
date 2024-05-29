@@ -142,7 +142,8 @@ class AbstractOptimizer(ABC):
     def _finalize(self):
         """Destruct fem and set worker status."""
         del self.fem
-        self.worker_status.set(OptimizationStatus.TERMINATED)
+        if not self.worker_status.get() == OptimizationStatus.CRASHED:
+            self.worker_status.set(OptimizationStatus.TERMINATED)
 
     def _run(
             self,
@@ -193,6 +194,7 @@ class AbstractOptimizer(ABC):
             logger.error("================================")
             logger.error(e)
             self._is_error_exit = True
+            self.worker_status.set(OptimizationStatus.CRASHED)
         finally:
             self._finalize()
 

@@ -18,7 +18,7 @@ count = 0
 def objective_x(opt):
     global count
     count += 1
-    if count >= 3:
+    if count >= 5:
         raise Exception('pytestから実行中された際に異常終了したときの挙動を調べるための例外をスロー')
 
     sleep(min_sleep_sec+np.random.rand()*random_max_sleep_sec)
@@ -72,7 +72,8 @@ def test_2_NoFEM_random_seed():
     femopt.add_objective(objective_z, 'z(mm)', args=opt, direction=-1)
     femopt.add_constraint(constraint_y, 'y<=0', upper_bound=0, args=opt)  # 上書き
     femopt.add_constraint(constraint_z, 'z<=0', upper_bound=0, args=opt, strict=False)
-    femopt.optimize(n_trials=30)
+    femopt.optimize(n_trials=60, n_parallel=3)
+    femopt.terminate_all()
 
     if record:
         femopt.history.actor_data.to_csv(
