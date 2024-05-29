@@ -57,6 +57,7 @@ class AbstractOptimizer(ABC):
         self.n_trials = None
         self.is_cluster = False
         self.subprocess_idx = None
+        self._is_error_exit = False
 
     def f(self, x):
         """Get x, update fem analysis, return objectives (and constraints)."""
@@ -149,7 +150,7 @@ class AbstractOptimizer(ABC):
             worker_status_list,
             wait_setup,
             skip_set_fem=False,
-    ) -> None:
+    ) -> bool:
 
         # 自分の worker_status の取得
         self.subprocess_idx = subprocess_idx
@@ -186,10 +187,16 @@ class AbstractOptimizer(ABC):
         # run and finalize
         try:
             self.run()
+        except Exception as e:
+            logger.error("================================")
+            logger.error("An unexpected error has occured!")
+            logger.error("================================")
+            logger.error(e)
+            self._is_error_exit = True
         finally:
             self._finalize()
 
-        return None
+        return self._is_error_exit
 
     @abstractmethod
     def run(self) -> None:

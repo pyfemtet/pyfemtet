@@ -81,6 +81,7 @@ class FEMOpt:
         self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
         self.monitor_process_worker_name = None
+        self._is_error_exit = False
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -457,10 +458,13 @@ class FEMOpt:
         t_save_history.start()
 
         # 終了を待つ
-        self.client.gather(calc_futures)
+        local_opt_crashed = False
+        opt_crashed_list = self.client.gather(calc_futures)
         if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
             if t_main is not None:
                 t_main.join()
+                local_opt_crashed = self.opt._is_error_exit
+        opt_crashed_list.append(local_opt_crashed)
         self.status.set(OptimizationStatus.TERMINATED)
         end = time()
 
@@ -469,6 +473,13 @@ class FEMOpt:
 
         logger.info(f'計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.')
         logger.info(f'結果は{self.history.path}を確認してください.')
+
+        # ひとつでも crashed ならばフラグを立てる
+        if any(opt_crashed_list):
+            self._is_error_exit = True
+        
+        return self.history.local_data
+
 
     def terminate_all(self):
         """Try to terminate all launched processes.
@@ -534,6 +545,10 @@ class FEMOpt:
             self.client.shutdown()
             logger.info('Terminate all relative processes.')
         sleep(3)
+
+        # if optimization was crashed, raise Exception
+        if self._is_error_exit:
+            raise RuntimeError('At least 1 of optimization processes have been crashed. See console log.')
 
 
 def _start_monitor_server(
