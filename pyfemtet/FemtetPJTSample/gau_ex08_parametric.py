@@ -7,8 +7,13 @@ that makes the self-inductance a specific value.
 from optuna.integration.botorch import BoTorchSampler
 from pyfemtet.opt import FEMOpt, OptunaOptimizer
 
+count = 0
 
 def inductance(Femtet):
+    global count
+    count += 1
+    if count >= 3:
+        raise Exception('pytestから実行中された際に異常終了したときの挙動を調べるための例外をスロー')
     """Get the self-inductance.
 
     Note:
@@ -27,6 +32,7 @@ def inductance(Femtet):
     # Get inductance.
     cName = Gogh.Gauss.GetCoilList()[0]
     l = Gogh.Gauss.GetL(cName, cName)
+    
     return l  # F
 
 
