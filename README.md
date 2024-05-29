@@ -4,7 +4,7 @@
 
 <img src="img/pyfemtet_conceptual_diagram.png" width="450">
 
-> **Note**
+> [!NOTE]
 > For details, see the documentation of "Related Pages" section.
 
 ### Design Parameter Optimization
@@ -27,7 +27,7 @@
 
 ## Getting Started
 
-> **Note**
+> [!NOTE]
 > Currently Femtet and `pyfemtet` supports **Windows only**.
 
 ### 1. Install Femtet
@@ -35,13 +35,13 @@
 - Access [Murata Software Website](https://www.muratasoftware.com/) and get **Femtet trial version** or purchase a lisence.
 - Get installer and launch it.
 - **Run 'EnableMacros'** from the start menu.
-    > **Note**
-    > This procedure requires administrator privileges.
+> [!NOTE]
+> This procedure requires administrator privileges.
 
 
 ### 2. Install PyFemtet
 
-> **Note**
+> [!NOTE]
 > The commands on this section are for `CMD` or `PowerShell` on with `py launcher`.
 > For a virtual environment, replace `py` to `python`.
 > If you do not have Python, please install it first.
