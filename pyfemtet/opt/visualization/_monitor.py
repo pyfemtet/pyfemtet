@@ -922,8 +922,8 @@ class ProcessMonitorAppWorkerPage:
                     colors.append('warning')
                 elif status_int == OptimizationStatus.TERMINATED:
                     colors.append('dark')
-                elif status_int == OptimizationStatus.TERMINATE_ALL:
-                    colors.append('dark')
+                elif status_int == OptimizationStatus.CRASHED:
+                    colors.append('danger')
                 else:
                     colors.append('primary')
 

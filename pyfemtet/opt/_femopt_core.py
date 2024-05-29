@@ -696,6 +696,7 @@ class OptimizationStatus:
     RUNNING = 30
     INTERRUPTING = 40
     TERMINATED = 50
+    CRASHED = 55
     TERMINATE_ALL = 60
 
     def __init__(self, client, name='entire'):
@@ -717,6 +718,7 @@ class OptimizationStatus:
         if status_const == cls.INTERRUPTING: return 'Interrupting'
         if status_const == cls.TERMINATED: return 'Terminated'
         if status_const == cls.TERMINATE_ALL: return 'Terminate_all'
+        if status_const == cls.CRASHED: return 'Crashed'
 
     def set(self, status_const):
         """Set optimization status."""
