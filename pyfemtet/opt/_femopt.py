@@ -329,14 +329,13 @@ class FEMOpt:
             subprocess_indices = list(range(n_parallel))
             worker_addresses = list(self.client.nthreads().keys())
 
-            # プラン 1 でバグフィックス
             # worker が足りない場合はエラー
             if n_parallel > len(worker_addresses):
                 raise RuntimeError(f'n_parallel({n_parallel}) > n_workers({len(worker_addresses)}). Worker 数が不足しています。')
 
             # worker が多い場合は閉じる
             if n_parallel < len(worker_addresses):
-                used_worker_addresses = worker_addresses[:n_parallel]  # 前から順番に選ぶ：本当は CPU の早い順に並べたほうがいい
+                used_worker_addresses = worker_addresses[:n_parallel]  # 前から順番に選ぶ：CPU の早い / メモリの多い順に並べることが望ましい
                 unused_worker_addresses = worker_addresses[n_parallel:]
                 self.client.retire_workers(unused_worker_addresses, close_workers=True)
                 worker_addresses = used_worker_addresses
@@ -345,24 +344,8 @@ class FEMOpt:
             logger.info('Launching monitor server. This may take a few seconds.')
             self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor%Y%m%d%H%M%S")
             current_n_workers = len(self.client.nthreads().keys())
-            # from dask.distributed import Worker
-            # Worker(scheduler_ip=self.client.scheduler.address, nthreads=1, name=self.monitor_process_worker_name)
             from subprocess import Popen
             import sys
-            # Popen([
-            #     sys.executable,
-            #     '-m',
-            #     'dask',
-            #     'worker',
-            #     self.client.scheduler.address,
-            #     '--nthreads',
-            #     '1',
-            #     '--nworkers',
-            #     '1',
-            #     '--name',
-            #     self.monitor_process_worker_name,
-            #     '--no-nanny',
-            # ])
             Popen(
                 f'{sys.executable} -m dask worker {self.client.scheduler.address} --nthreads 1 --nworkers 1 --name {self.monitor_process_worker_name} --no-nanny',
                 shell=True
@@ -427,7 +410,7 @@ class FEMOpt:
             # kwargs
             **self.monitor_server_kwargs,
             # kwargs of submit
-            workers=self.monitor_process_worker_name,  # if invalid arg,
+            workers=self.monitor_process_worker_name,
             allow_other_workers=False
         )
 

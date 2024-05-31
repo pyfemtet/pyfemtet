@@ -173,13 +173,6 @@ class AbstractOptimizer(ABC):
                 if self._check_interruption():
                     return None
                 # 他のすべての worker_status が wait 以上になったら break
-                # FIXME: 「他のすべての worker_status」だと、クラスターで Worker 数が 5 だというときに、n_parallel が 3 だとすると、残り 2 workers を（永遠に処理が進まないにもかかわらず）待ってしまう
-                # TODO: 1. optimize() 開始時点で n_parallel に合わせて クラスターの数を減らす
-                # TODO: 2. _run() を実行しなかった Worker は Terminated にする
-                # TODO: 3. すべての worker_status ではなく Task を持っている worker の status だけ待つ
-                # のいずれかで対応する。
-                # 1. 2. は、
-
                 if all([ws.get() >= OptimizationStatus.WAIT_OTHER_WORKERS for ws in worker_status_list]):
                     break
                 sleep(1)
