@@ -10,7 +10,7 @@ Welcome to PyFemtet's documentation!
     <a href="https://www.python.org/" target="_blank">python.org</a>
 
 
-Abstruct
+Abstract
 ----------
 
 **PyFemtet provides extensions for Femtet, a CAE software developed by Murata Software.**
@@ -27,7 +27,7 @@ Main Features of PyFemtet
 
 PyFemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of PyFemtet is design parameter optimization, which is implemented as a subpackage ``pyfemtet.opt``.
 
-The optimization feature by pyfemtet.opt has the following characteristics:
+The optimization feature by ``pyfemtet.opt`` has the following characteristics:
 
 - Single-objective and multi-objective optimization
 - Real-time progress display with process monitoring

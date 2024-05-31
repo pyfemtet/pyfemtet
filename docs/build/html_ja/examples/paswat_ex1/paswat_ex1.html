@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Air cooling of IC substrate &mdash; PyFemtet Project  ドキュメント</title>
+  <title>IC 基板の空冷 &mdash; PyFemtet Project  ドキュメント</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -52,9 +52,9 @@
 <li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#single-objective-optimization">単目的最適化</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#multi-objective-optimization">多目的最適化</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../wat_ex14/wat_ex14.html">基板上の発熱体</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Air cooling of IC substrate</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">IC 基板の空冷</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#sample-file">サンプルファイル</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#analysis-model-and-design-variables">Analysis Model and Design Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#analysis-model-and-design-variables">解析モデルの概要と設計変数</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#objective-function">目的関数</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sample-code">サンプルコード</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">サンプルコードの実行結果</a></li>
@@ -86,7 +86,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../pages/examples.html">例題</a></li>
-      <li class="breadcrumb-item active">Air cooling of IC substrate</li>
+      <li class="breadcrumb-item active">IC 基板の空冷</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/paswat_ex1/paswat_ex1.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,10 +97,8 @@
            <div itemprop="articleBody">
              
   <section id="air-cooling-of-ic-substrate">
-<h1>Air cooling of IC substrate<a class="headerlink" href="#air-cooling-of-ic-substrate" title="Link to this heading"></a></h1>
-<p>Using Femtet’s simple fluid-thermal analysis solver,
-we explain an example of searching for the substrate dimensions and its angle
-that minimize the size of the substrate while keeping the maximum temperature of an IC chip on the substrate to a minimum.</p>
+<h1>IC 基板の空冷<a class="headerlink" href="#air-cooling-of-ic-substrate" title="Link to this heading"></a></h1>
+<p>Femtet の熱伝導ソルバー・簡易流体解析ソルバーの連成解析を用い 基板上の IC チップの最高温度を最小にしつつ 基板のサイズを最小にする 基板寸法と冷却風角度を探索する例題を解説します。</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
 <p>関係する例題: <a class="reference internal" href="../wat_ex14/wat_ex14.html"><span class="doc">基板上の発熱体</span></a></p>
@@ -109,17 +107,15 @@ that minimize the size of the substrate while keeping the maximum temperature of
 <h2>サンプルファイル<a class="headerlink" href="#sample-file" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>Keep the <a class="reference download internal" download="" href="../../_downloads/6206d5ef536eccb7b823229f16e144d8/paswat_ex1_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">project</span></code></a>
-open in Femtet, and double-click on the <a class="reference download internal" download="" href="../../_downloads/c83a8f539941da3d51003d6f70d95a47/paswat_ex1_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">code</span></code></a>
-to execute it.</p>
+<p><a class="reference download internal" download="" href="../../_downloads/6206d5ef536eccb7b823229f16e144d8/paswat_ex1_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> を Femtet で開いたまま、 <a class="reference download internal" download="" href="../../_downloads/f1664e6f51dfca51438de28f9f0f96ba/wat_ex14_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> をダブルクリックして実行してください。</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>For details on the FEM problem, please refer to FemtetHelp / Examples / Simple Fluid-Thermal Analysis / Example 1.</p>
+<p>FEM 問題としての詳細については、FemtetHelp / 例題集 / 簡易熱流体解析 / 例題1 を参照してください。</p>
 </div>
 </section>
 <section id="analysis-model-and-design-variables">
-<h2>Analysis Model and Design Variables<a class="headerlink" href="#analysis-model-and-design-variables" title="Link to this heading"></a></h2>
+<h2>解析モデルの概要と設計変数<a class="headerlink" href="#analysis-model-and-design-variables" title="Link to this heading"></a></h2>
 <figure class="align-default" id="id1">
 <a class="reference internal image-reference" href="../../_images/paswat_ex1_model.png"><img alt="../../_images/paswat_ex1_model.png" src="../../_images/paswat_ex1_model.png" style="width: 450px;" /></a>
 <figcaption>
@@ -140,7 +136,7 @@ to execute it.</p>
 <td><p>基板の奥行き</p></td>
 </tr>
 <tr class="row-even"><td><p>rot</p></td>
-<td><p>Rotation angle of the substrate</p></td>
+<td><p>基板の回転角</p></td>
 </tr>
 </tbody>
 </table>
@@ -225,11 +221,11 @@ to execute it.</p>
 <figure class="align-default" id="id3">
 <a class="reference internal image-reference" href="../../_images/paswat_ex1_result.png"><img alt="../../_images/paswat_ex1_result.png" src="../../_images/paswat_ex1_result.png" style="width: 450px;" /></a>
 <figcaption>
-<p><span class="caption-text">Execution result of paswat_ex1 _parametric.py. This is a pair plot with the combination of each objective function on the vertical axis and horizontal axis.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+<p><span class="caption-text">paswat_ex1 _parametric.py の実行結果。 各目的関数の組み合わせが縦軸、横軸となる ペアプロットです。</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <dl class="simple">
-<dt>From this result, we can see the following:</dt><dd><ul class="simple">
+<dt>反復計算の結果、以下のことがわかります。</dt><dd><ul class="simple">
 <li><p>MAINCHIP 温度と SUBCHIP 温度には正の相関があります。</p></li>
 <li><p>基板サイズと各CHIP温度は負の相関関係があり、同時に小さくすることはできません。</p></li>
 <li><p>設計変数の組み合わせによっては、同じ基板サイズでも MAINCHIP と SUBCHIP の温度をさらに下げることができる条件があります。</p></li>

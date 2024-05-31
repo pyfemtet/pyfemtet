@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-24 15:39+0900\n"
+"POT-Creation-Date: 2024-05-31 20:36+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgid "Welcome to PyFemtet's documentation!"
 msgstr ""
 
 #: ../source/index.rst:14
-msgid "Abstruct"
+msgid "Abstract"
 msgstr ""
 
 #: ../source/index.rst:16

@@ -52,7 +52,6 @@ msgid "API reference"
 msgstr ""
 
 #: ../source/pages/api.rst:4
-#, fuzzy
 msgid "Source: `https://github.com/pyfemtet/pyfemtet <https://github.com/pyfemtet/pyfemtet>`_"
 msgstr "リポジトリはこちらです: `https://github.com/pyfemtet/pyfemtet <https://github.com/pyfemtet/pyfemtet>`_"
 
@@ -97,7 +96,6 @@ msgid "Air cooling of IC Substrate"
 msgstr "IC 基板の空冷"
 
 #: ../source/pages/examples.rst:60
-#, fuzzy
 msgid "In simple fluid-thermal analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate under forced convection."
 msgstr "簡易熱流体解析で基板上の IC チップの温度と基板サイズを最小にします。"
 
