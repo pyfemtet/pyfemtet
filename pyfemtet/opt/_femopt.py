@@ -329,6 +329,18 @@ class FEMOpt:
             subprocess_indices = list(range(n_parallel))
             worker_addresses = list(self.client.nthreads().keys())
 
+            # プラン 1 でバグフィックス
+            # worker が足りない場合はエラー
+            if n_parallel > len(worker_addresses):
+                raise RuntimeError(f'n_parallel({n_parallel}) > n_workers({len(worker_addresses)}). Worker 数が不足しています。')
+
+            # worker が多い場合は閉じる
+            if n_parallel < len(worker_addresses):
+                used_worker_addresses = worker_addresses[:n_parallel]  # 前から順番に選ぶ：本当は CPU の早い順に並べたほうがいい
+                unused_worker_addresses = worker_addresses[n_parallel:]
+                self.client.retire_workers(unused_worker_addresses, close_workers=True)
+                worker_addresses = used_worker_addresses
+
             # monitor worker の設定
             logger.info('Launching monitor server. This may take a few seconds.')
             self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor%Y%m%d%H%M%S")
