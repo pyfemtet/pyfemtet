@@ -699,8 +699,8 @@ class OptimizationStatus:
     CRASHED = 55
     TERMINATE_ALL = 60
 
-    def __init__(self, client, name='entire'):
-        self._future = client.submit(_OptimizationStatusActor, actor=True)
+    def __init__(self, client, workers=None, name='entire'):
+        self._future = client.submit(_OptimizationStatusActor, actor=True, workers=workers)
         self._actor = self._future.result()
         self.name = name
         self.set(self.INITIALIZING)

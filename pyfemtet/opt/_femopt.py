@@ -331,10 +331,30 @@ class FEMOpt:
 
             # monitor worker の設定
             logger.info('Launching monitor server. This may take a few seconds.')
-            self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
+            self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor%Y%m%d%H%M%S")
             current_n_workers = len(self.client.nthreads().keys())
-            from dask.distributed import Worker
-            Worker(scheduler_ip=self.client.scheduler.address, nthreads=1, name=self.monitor_process_worker_name)
+            # from dask.distributed import Worker
+            # Worker(scheduler_ip=self.client.scheduler.address, nthreads=1, name=self.monitor_process_worker_name)
+            from subprocess import Popen
+            import sys
+            # Popen([
+            #     sys.executable,
+            #     '-m',
+            #     'dask',
+            #     'worker',
+            #     self.client.scheduler.address,
+            #     '--nthreads',
+            #     '1',
+            #     '--nworkers',
+            #     '1',
+            #     '--name',
+            #     self.monitor_process_worker_name,
+            #     '--no-nanny',
+            # ])
+            Popen(
+                f'{sys.executable} -m dask worker {self.client.scheduler.address} --nthreads 1 --nworkers 1 --name {self.monitor_process_worker_name} --no-nanny',
+                shell=True
+            )
 
             # monitor 用 worker が増えるまで待つ
             self.client.wait_for_workers(n_workers=current_n_workers + 1)
@@ -372,7 +392,7 @@ class FEMOpt:
 
         # actor の設定
         self.status = OptimizationStatus(self.client)
-        self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
+        self.worker_status_list = [OptimizationStatus(self.client, worker_addresses, name) for name in worker_addresses]  # tqdm 検討
         self.status.set(OptimizationStatus.SETTING_UP)
         self.history = History(
             self.history_path,
