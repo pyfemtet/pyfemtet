@@ -329,12 +329,27 @@ class FEMOpt:
             subprocess_indices = list(range(n_parallel))
             worker_addresses = list(self.client.nthreads().keys())
 
+            # worker が足りない場合はエラー
+            if n_parallel > len(worker_addresses):
+                raise RuntimeError(f'n_parallel({n_parallel}) > n_workers({len(worker_addresses)}). Worker 数が不足しています。')
+
+            # worker が多い場合は閉じる
+            if n_parallel < len(worker_addresses):
+                used_worker_addresses = worker_addresses[:n_parallel]  # 前から順番に選ぶ：CPU の早い / メモリの多い順に並べることが望ましい
+                unused_worker_addresses = worker_addresses[n_parallel:]
+                self.client.retire_workers(unused_worker_addresses, close_workers=True)
+                worker_addresses = used_worker_addresses
+
             # monitor worker の設定
             logger.info('Launching monitor server. This may take a few seconds.')
-            self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor-%Y%m%d-%H%M%S")
+            self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor%Y%m%d%H%M%S")
             current_n_workers = len(self.client.nthreads().keys())
-            from dask.distributed import Worker
-            Worker(scheduler_ip=self.client.scheduler.address, nthreads=1, name=self.monitor_process_worker_name)
+            from subprocess import Popen
+            import sys
+            Popen(
+                f'{sys.executable} -m dask worker {self.client.scheduler.address} --nthreads 1 --nworkers 1 --name {self.monitor_process_worker_name} --no-nanny',
+                shell=True
+            )
 
             # monitor 用 worker が増えるまで待つ
             self.client.wait_for_workers(n_workers=current_n_workers + 1)
@@ -395,7 +410,7 @@ class FEMOpt:
             # kwargs
             **self.monitor_server_kwargs,
             # kwargs of submit
-            workers=self.monitor_process_worker_name,  # if invalid arg,
+            workers=self.monitor_process_worker_name,
             allow_other_workers=False
         )
 
@@ -533,20 +548,14 @@ class FEMOpt:
         else:
             logger.warn('Monitor process worker not found.')
 
-        # close scheduler, other workers(, cluster)
-        self.client.close()
-        while self.client.scheduler is not None:
-            sleep(1)
-        logger.info('Terminate client.')
-
         # close FEM (if specified to quit when deconstruct)
         del self.fem
         logger.info('Terminate FEM.')
+        sleep(1)
 
-        # terminate dask relative processes.
-        if not self.opt.is_cluster:
-            self.client.shutdown()
-            logger.info('Terminate all relative processes.')
+        # close scheduler, other workers(, cluster)
+        self.client.shutdown()
+        logger.info('Terminate all relative processes.')
         sleep(3)
 
         # if optimization was crashed, raise Exception

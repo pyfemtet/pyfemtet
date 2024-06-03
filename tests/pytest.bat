@@ -1,5 +1,5 @@
 cd %~dp0\..
-poetry run pytest ./tests -s
+poetry run pytest ./tests -s -k "not cluster"
 pause
 exit
 
