@@ -548,20 +548,14 @@ class FEMOpt:
         else:
             logger.warn('Monitor process worker not found.')
 
-        # close scheduler, other workers(, cluster)
-        self.client.close()
-        while self.client.scheduler is not None:
-            sleep(1)
-        logger.info('Terminate client.')
-
         # close FEM (if specified to quit when deconstruct)
         del self.fem
         logger.info('Terminate FEM.')
+        sleep(1)
 
-        # terminate dask relative processes.
-        if not self.opt.is_cluster:
-            self.client.shutdown()
-            logger.info('Terminate all relative processes.')
+        # close scheduler, other workers(, cluster)
+        self.client.shutdown()
+        logger.info('Terminate all relative processes.')
         sleep(3)
 
         # if optimization was crashed, raise Exception
