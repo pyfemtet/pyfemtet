@@ -387,7 +387,7 @@ class FEMOpt:
 
         # actor の設定
         self.status = OptimizationStatus(self.client)
-        self.worker_status_list = [OptimizationStatus(self.client, worker_addresses, name) for name in worker_addresses]  # tqdm 検討
+        self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
         self.status.set(OptimizationStatus.SETTING_UP)
         self.history = History(
             self.history_path,
