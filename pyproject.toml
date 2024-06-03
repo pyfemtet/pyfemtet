@@ -26,28 +26,18 @@ distributed = "^2023.12.1"
 colorlog = "^6.8.0"
 optuna-integration = "^3.6.0"
 botorch = {version = "^0.9.5", python = "<3.12"}
-pip-licenses = { version = "^4.3.3", optional = true}
-sphinx = { version = "==7.2.6", optional = true}
-myst-parser = { version = "==2.0.0", optional = true}
-sphinx-rtd-theme = { version = "==2.0.0", optional = true}
-sphinx-autobuild = { version = "==2021.3.14", optional = true}
-pytest = { version = "^7.4.3", optional = true}
-sphinx-design = { version = "^0.5.0", optional = true}
-bokeh = { version = "^3.3.3", optional = true}
-pytest-dashboard = { version = "*", optional = true}
-sphinx-intl = { version = "^2.2.0", optional = true}
 
-[tool.poetry.extras]
-pip-licenses = ["dev"]
-sphinx = ["dev"]
-myst-parser = ["dev"]
-sphinx-rtd-theme = ["dev"]
-sphinx-autobuild = ["dev"]
-pytest = ["dev"]
-sphinx-design = ["dev"]
-bokeh = ["dev"]
-pytest-dashboard = ["dev"]
-sphinx-intl = ["dev"]
+[tool.poetry.group.dev.dependencies]
+pip-licenses = "^4.3.3"
+sphinx = "==7.2.6"
+myst-parser = "==2.0.0"
+sphinx-rtd-theme = "==2.0.0"
+sphinx-autobuild = "==2021.3.14"
+pytest = "^7.4.3"
+sphinx-design = "^0.5.0"
+bokeh = "^3.3.3"
+pytest-dashboard = "*"
+sphinx-intl = "^2.2.0"
 
 [tool.poetry.scripts]
 opt-show = "pyfemtet.opt.visualization:entry_point"
