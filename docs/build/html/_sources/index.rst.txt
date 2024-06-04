@@ -132,14 +132,6 @@ Install
 
         ``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment.
 
-        In particular, in environments with Python 3.12 or higher, the installation of the dependent library ``botorch`` is not set to be performed automatically. If you require the functionality of ``botorch``, we kindly ask you to manually attempt its installation with the command below.
-
-
-    .. code-block::
-
-        py -m pip install botorch
-
-
     .. figure:: images/python_download.png
 
     .. figure:: images/python_3.11.png
