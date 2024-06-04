@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-04 14:11+0900\n"
+"POT-Creation-Date: 2024-06-04 14:42+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: ../source/index.rst:195
+#: ../source/index.rst:210
 msgid "Home"
 msgstr "ホーム"
 
@@ -172,54 +172,66 @@ msgid "**Installing** ``pyfemtet``"
 msgstr "``pyfemtet`` **のインストール**"
 
 #: ../source/index.rst:149
-msgid "Please run the following command in the command prompt. The download and installation of the library will begin.::"
-msgstr "コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。::"
+msgid "Please launch the command prompt (``cmd``)."
+msgstr "コマンドプロンプトを起動してください。"
 
 #: ../source/index.rst:153
-msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
-msgstr "インストールが終了すると、\"Successfully installed \" の表示の後、コマンドプロンプトの制御が戻ります。"
+msgid "Launch cmd via start button."
+msgstr "スタート ボタンからのコマンドプロンプト起動"
 
-#: ../source/index.rst:157
+#: ../source/index.rst:156
+msgid "Then run the following command in the command prompt. The download and installation of the library will begin."
+msgstr "コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。"
+
+#: ../source/index.rst:165
+msgid "Run pip command on command prompt."
+msgstr "コマンドプロンプトで pip コマンドを実行"
+
+#: ../source/index.rst:168
+msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
+msgstr "インストールが終了すると、Successfully installed の表示の後、コマンドプロンプトの制御が戻ります。"
+
+#: ../source/index.rst:172
 msgid "Installing"
 msgstr "インストール中"
 
-#: ../source/index.rst:161
+#: ../source/index.rst:176
 msgid "Installation completed"
 msgstr "インストール終了後"
 
-#: ../source/index.rst:165
+#: ../source/index.rst:180
 msgid "Depending on the environment, installation may take about 5 minutes."
 msgstr "環境によりますが、インストールには 5 分程度を要します。"
 
-#: ../source/index.rst:169
+#: ../source/index.rst:184
 msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
 msgstr "インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、エラーではなく、無視しても問題ありません。"
 
-#: ../source/index.rst:171
+#: ../source/index.rst:186
 msgid "**Setting Femtet Macro Constants**"
 msgstr "**Femtet マクロ定数の設定**"
 
-#: ../source/index.rst:173
+#: ../source/index.rst:188
 msgid "Please run the following command in the command prompt.::"
 msgstr "コマンドプロンプトで下記コマンドを実行してください。::"
 
-#: ../source/index.rst:177
+#: ../source/index.rst:192
 msgid "Once the setting is complete, control will return to the command prompt."
 msgstr "インストールが終了すると、コマンドプロンプトの制御が戻ります。"
 
-#: ../source/index.rst:181
+#: ../source/index.rst:196
 msgid "After makepy finishes"
 msgstr "makepy 終了後"
 
-#: ../source/index.rst:183
+#: ../source/index.rst:198
 msgid "That's all."
 msgstr "以上で終了です。"
 
-#: ../source/index.rst:188
+#: ../source/index.rst:203
 msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
 msgstr "動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。"
 
-#: ../source/index.rst:193
+#: ../source/index.rst:208
 msgid "Table of Contents"
 msgstr "目次"
 

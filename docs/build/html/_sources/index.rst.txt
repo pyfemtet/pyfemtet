@@ -146,9 +146,24 @@ Install
 
 4. **Installing** ``pyfemtet``
 
-    Please run the following command in the command prompt. The download and installation of the library will begin.::
+    Please launch the command prompt (``cmd``).
+
+    .. figure:: images/launch_cmd.png
+
+        Launch cmd via start button.
+
+
+    Then run the following command in the command prompt. The download and installation of the library will begin.
+
+    .. code-block::
 
         py -m pip install pyfemtet --no-warn-script-location
+
+
+    .. figure:: images/pip_on_cmd.png
+
+        Run pip command on command prompt.
+
 
     Once the installation is complete, after displaying "Successfully installed ", control will return to the command prompt.
 

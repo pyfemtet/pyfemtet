@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-04 14:11+0900\n"
+"POT-Creation-Date: 2024-06-04 14:42+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../source/index.rst:195
+#: ../source/index.rst:210
 msgid "Home"
 msgstr ""
 
@@ -169,53 +169,65 @@ msgid "**Installing** ``pyfemtet``"
 msgstr ""
 
 #: ../source/index.rst:149
-msgid "Please run the following command in the command prompt. The download and installation of the library will begin.::"
+msgid "Please launch the command prompt (``cmd``)."
 msgstr ""
 
 #: ../source/index.rst:153
-msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
+msgid "Launch cmd via start button."
 msgstr ""
 
-#: ../source/index.rst:157
-msgid "Installing"
-msgstr ""
-
-#: ../source/index.rst:161
-msgid "Installation completed"
+#: ../source/index.rst:156
+msgid "Then run the following command in the command prompt. The download and installation of the library will begin."
 msgstr ""
 
 #: ../source/index.rst:165
+msgid "Run pip command on command prompt."
+msgstr ""
+
+#: ../source/index.rst:168
+msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
+msgstr ""
+
+#: ../source/index.rst:172
+msgid "Installing"
+msgstr ""
+
+#: ../source/index.rst:176
+msgid "Installation completed"
+msgstr ""
+
+#: ../source/index.rst:180
 msgid "Depending on the environment, installation may take about 5 minutes."
 msgstr ""
 
-#: ../source/index.rst:169
+#: ../source/index.rst:184
 msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
 msgstr ""
 
-#: ../source/index.rst:171
+#: ../source/index.rst:186
 msgid "**Setting Femtet Macro Constants**"
 msgstr ""
 
-#: ../source/index.rst:173
+#: ../source/index.rst:188
 msgid "Please run the following command in the command prompt.::"
 msgstr ""
 
-#: ../source/index.rst:177
+#: ../source/index.rst:192
 msgid "Once the setting is complete, control will return to the command prompt."
 msgstr ""
 
-#: ../source/index.rst:181
+#: ../source/index.rst:196
 msgid "After makepy finishes"
 msgstr ""
 
-#: ../source/index.rst:183
+#: ../source/index.rst:198
 msgid "That's all."
 msgstr ""
 
-#: ../source/index.rst:188
+#: ../source/index.rst:203
 msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
 msgstr ""
 
-#: ../source/index.rst:193
+#: ../source/index.rst:208
 msgid "Table of Contents"
 msgstr ""
