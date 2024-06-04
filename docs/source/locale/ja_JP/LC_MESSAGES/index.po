@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-31 20:36+0900\n"
+"POT-Creation-Date: 2024-06-04 14:11+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: ../source/index.rst:203
+#: ../source/index.rst:195
 msgid "Home"
 msgstr "ホーム"
 
@@ -159,71 +159,67 @@ msgstr "最新版でないバージョンの Python をダウンロードする�
 msgid "``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment."
 msgstr "``pyfemtet.opt`` は現在主に Python 3.11 環境で開発されており、インストールや実施例の実行に不具合がある場合は Python 3.11 環境の構築をご検討ください。"
 
-#: ../source/index.rst:135
-msgid "In particular, in environments with Python 3.12 or higher, the installation of the dependent library ``botorch`` is not set to be performed automatically. If you require the functionality of ``botorch``, we kindly ask you to manually attempt its installation with the command below."
-msgstr "特に、Python 3.12 以上の環境では依存ライブラリ ``botorch`` のインストールを行わない設定になっています。``botorch`` の機能が必要な場合は、お手数ですが下記コマンドで ``botorch`` のインストールを手動で試みていただきますようお願いします。"
-
-#: ../source/index.rst:148
+#: ../source/index.rst:140
 msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
 msgstr "このスクリーンショットでは、64 bit 版 Windows 向け Python 3.11.7 のインストーラへのリンクの場所の例を示しています。"
 
-#: ../source/index.rst:152
+#: ../source/index.rst:144
 msgid "Installer screen."
 msgstr "インストーラ画面。"
 
-#: ../source/index.rst:155
+#: ../source/index.rst:147
 msgid "**Installing** ``pyfemtet``"
 msgstr "``pyfemtet`` **のインストール**"
 
-#: ../source/index.rst:157
+#: ../source/index.rst:149
 msgid "Please run the following command in the command prompt. The download and installation of the library will begin.::"
 msgstr "コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。::"
 
-#: ../source/index.rst:161
+#: ../source/index.rst:153
 msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
 msgstr "インストールが終了すると、\"Successfully installed \" の表示の後、コマンドプロンプトの制御が戻ります。"
 
-#: ../source/index.rst:165
+#: ../source/index.rst:157
 msgid "Installing"
 msgstr "インストール中"
 
-#: ../source/index.rst:169
+#: ../source/index.rst:161
 msgid "Installation completed"
 msgstr "インストール終了後"
 
-#: ../source/index.rst:173
+#: ../source/index.rst:165
 msgid "Depending on the environment, installation may take about 5 minutes."
 msgstr "環境によりますが、インストールには 5 分程度を要します。"
 
-#: ../source/index.rst:177
+#: ../source/index.rst:169
 msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
 msgstr "インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、エラーではなく、無視しても問題ありません。"
 
-#: ../source/index.rst:179
+#: ../source/index.rst:171
 msgid "**Setting Femtet Macro Constants**"
 msgstr "**Femtet マクロ定数の設定**"
 
-#: ../source/index.rst:181
+#: ../source/index.rst:173
 msgid "Please run the following command in the command prompt.::"
 msgstr "コマンドプロンプトで下記コマンドを実行してください。::"
 
-#: ../source/index.rst:185
+#: ../source/index.rst:177
 msgid "Once the setting is complete, control will return to the command prompt."
 msgstr "インストールが終了すると、コマンドプロンプトの制御が戻ります。"
 
-#: ../source/index.rst:189
+#: ../source/index.rst:181
 msgid "After makepy finishes"
 msgstr "makepy 終了後"
 
-#: ../source/index.rst:191
+#: ../source/index.rst:183
 msgid "That's all."
 msgstr "以上で終了です。"
 
-#: ../source/index.rst:196
+#: ../source/index.rst:188
 msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
 msgstr "動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。"
 
-#: ../source/index.rst:201
+#: ../source/index.rst:193
 msgid "Table of Contents"
 msgstr "目次"
 
@@ -238,4 +234,7 @@ msgstr "目次"
 
 #~ msgid "``py -m pip install botorch``"
 #~ msgstr ""
+
+#~ msgid "In particular, in environments with Python 3.12 or higher, the installation of the dependent library ``botorch`` is not set to be performed automatically. If you require the functionality of ``botorch``, we kindly ask you to manually attempt its installation with the command below."
+#~ msgstr "特に、Python 3.12 以上の環境では依存ライブラリ ``botorch`` のインストールを行わない設定になっています。``botorch`` の機能が必要な場合は、お手数ですが下記コマンドで ``botorch`` のインストールを手動で試みていただきますようお願いします。"
 
