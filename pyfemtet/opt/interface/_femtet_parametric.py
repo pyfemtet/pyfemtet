@@ -55,14 +55,14 @@ def _get_prm_result_names(Femtet):
     return out
 
 
-def add_parametric_results_as_objectives(femopt) -> bool:
+def add_parametric_results_as_objectives(femopt, indexes) -> bool:
     # load dll and set target femtet
     dll = _get_dll_with_set_femtet(femopt.fem.Femtet)
 
     # get objective names
     dll.GetPrmnResult.restype = ctypes.c_int
     n = dll.GetPrmnResult()
-    for i in range(n):
+    for i in indexes:
         # objective name
         dll.GetPrmResultName.restype = ctypes.c_char_p
         result = dll.GetPrmResultName(i)

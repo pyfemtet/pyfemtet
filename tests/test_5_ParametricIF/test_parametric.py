@@ -14,7 +14,7 @@ def test_parametric():
     femprj_path = os.path.join(here, f'{me.replace(".py", ".femprj")}')
     fem = FemtetInterface(
         femprj_path=femprj_path,
-        use_parametric_as_objective=True,
+        parametric_output_indexes_use_as_objective=[0,1],
     )
 
     femopt = FEMOpt(fem=fem)
@@ -26,6 +26,7 @@ def test_parametric():
 
     femopt.opt.seed = 42
     femopt.optimize(n_trials=9, n_parallel=3)
+    femopt.terminate_all()
 
 
 if __name__ == '__main__':

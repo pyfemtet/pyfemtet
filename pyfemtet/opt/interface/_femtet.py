@@ -39,6 +39,9 @@ class FemtetInterface(FEMInterface):
             model_name (str or None, optional): The name of the analysis model. Defaults to None.
             connect_method (str, optional): The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
             strictly_pid_specify (bool, optional): If True and connect_method=='new', search launched Femtet process strictly based on its process id.
+            allow_without_project (bool, optional): Allow to launch Femtet with no project file. Default to False.
+            open_result_with_gui (bool, optional): Open analysis result with Femtet GUI. Default to True.
+            parametric_output_indexes_use_as_objective (list of int, optional): Parametric output indexes which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output 'No.' in dialog is starts with 1, but this 'index' is starts with 0. Default to None.
 
         Warning:
             Even if you specify ``strictly_pid_specify=True`` on the constructor,
@@ -60,7 +63,7 @@ class FemtetInterface(FEMInterface):
             strictly_pid_specify=True,
             allow_without_project=False,
             open_result_with_gui=True,
-            use_parametric_as_objective=False,
+            parametric_output_indexes_use_as_objective=None,
             **kwargs  # 継承されたクラスからの引数
     ):
 
@@ -86,7 +89,10 @@ class FemtetInterface(FEMInterface):
         self.parameters = None
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
-        self.use_parametric_as_objective = use_parametric_as_objective
+        if parametric_output_indexes_use_as_objective is None:
+            self.parametric_output_indexes_use_as_objective = []
+        else:
+            self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -113,7 +119,7 @@ class FemtetInterface(FEMInterface):
             femprj_path=self.femprj_path,
             model_name=self.model_name,
             open_result_with_gui=self.open_result_with_gui,
-            use_parametric_as_objective=self.use_parametric_as_objective,
+            parametric_output_indexes_use_as_objective=self.parametric_output_indexes_use_as_objective,
             **kwargs
         )
 
@@ -549,7 +555,7 @@ class FemtetInterface(FEMInterface):
             is_Gaudi_method=True,
         )
 
-        if self.use_parametric_as_objective:
+        if self.parametric_output_indexes_use_as_objective is not None:
             from pyfemtet.opt.interface._femtet_parametric import solve_via_parametric_dll
             self._call_femtet_api(
                 fun=solve_via_parametric_dll,
