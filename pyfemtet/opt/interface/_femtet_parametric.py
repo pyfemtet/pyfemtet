@@ -39,6 +39,22 @@ def _get_dll_with_set_femtet(Femtet):
     return dll
 
 
+def _get_prm_result_names(Femtet):
+    out = []
+
+    # load dll and set target femtet
+    dll = _get_dll_with_set_femtet(Femtet)
+    n = dll.GetPrmnResult()
+    for i in range(n):
+        # objective name
+        dll.GetPrmResultName.restype = ctypes.c_char_p
+        result = dll.GetPrmResultName(i)
+        name = result.decode('mbcs')
+        # objective value function
+        out.append(name)
+    return out
+
+
 def add_parametric_results_as_objectives(femopt) -> bool:
     # load dll and set target femtet
     dll = _get_dll_with_set_femtet(femopt.fem.Femtet)
