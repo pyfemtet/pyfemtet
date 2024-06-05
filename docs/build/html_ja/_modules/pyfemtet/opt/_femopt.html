@@ -481,9 +481,9 @@
                 <span class="p">)</span>
             <span class="p">)</span>
             <span class="c1"># Femtet の parametric 設定を目的関数に用いるかどうか</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">use_parametric_as_objective</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface._femtet_parametric</span> <span class="kn">import</span> <span class="n">add_parametric_results_as_objectives</span>
-                <span class="n">add_parametric_results_as_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">add_parametric_results_as_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">)</span>
 
         <span class="c1"># actor の設定</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">OptimizationStatus</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
