@@ -383,7 +383,13 @@ class FEMOpt:
             # Femtet の parametric 設定を目的関数に用いるかどうか
             if self.fem.parametric_output_indexes_use_as_objective is not None:
                 from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
-                add_parametric_results_as_objectives(self, self.fem.parametric_output_indexes_use_as_objective)
+                indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
+                directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
+                add_parametric_results_as_objectives(
+                    self,
+                    indexes,
+                    directions,
+                )
 
         # actor の設定
         self.status = OptimizationStatus(self.client)
