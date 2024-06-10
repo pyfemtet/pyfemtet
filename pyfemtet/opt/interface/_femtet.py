@@ -89,10 +89,7 @@ class FemtetInterface(FEMInterface):
         self.parameters = None
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
-        if parametric_output_indexes_use_as_objective is None:
-            self.parametric_output_indexes_use_as_objective = []
-        else:
-            self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
+        self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
