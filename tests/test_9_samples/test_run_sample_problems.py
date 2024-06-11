@@ -12,7 +12,7 @@ from win32com.client import Dispatch
 import pyfemtet
 from pyfemtet.dispatch_extensions import _get_hwnds
 
-from test_util import test_util
+from pyfemtet import _test_util
 
 
 LIBRARY_ROOT = os.path.dirname(pyfemtet.__file__)
@@ -25,7 +25,7 @@ def main(py_script_path):
     femprj_path = py_script_path.replace('.py', '.femprj')
 
     # launch and open Femtet externally
-    test_util.launch_femtet(femprj_path)
+    _test_util.launch_femtet(femprj_path)
 
     try:
 
@@ -33,32 +33,32 @@ def main(py_script_path):
         run([sys.executable, py_script_path], check=True)
 
         # search generated csv
-        generated_csv_path = test_util.find_latest_csv()
+        generated_csv_path = _test_util.find_latest_csv()
         if RECORD_MODE:
             # copy to same directory
-            test_util.record_result(
+            _test_util.record_result(
                 src=generated_csv_path,
                 py_path=py_script_path,
                 suffix='_test_result'
             )
         else:
             # search recorded csv
-            recorded_csv = test_util.py_to_reccsv(
+            recorded_csv = _test_util.py_to_reccsv(
                 py_path=py_script_path,
                 suffix='_test_result'
             )
             # raise assertion error if needed
-            test_util.is_equal_result(
+            _test_util.is_equal_result(
                 generated_csv_path,
                 recorded_csv
             )
 
         # shutdown Femtet
-        test_util.taskkill_femtet()
+        _test_util.taskkill_femtet()
 
     except Exception as e:
         # shutdown Femtet anyway
-        test_util.taskkill_femtet()
+        _test_util.taskkill_femtet()
         raise e
 
 
