@@ -98,8 +98,8 @@ def test_cad_sample_sldworks_ex01():
 
 
 if __name__ == '__main__':
-    for path in glob(os.path.join(SAMPLE_DIR, '*.py'), recursive=True):
-        print(path)
-        if not 'cad' in path:
-            main(path)
-    # test_sample_gau_ex08_parametric()
+    # for path in glob(os.path.join(SAMPLE_DIR, '*.py'), recursive=True):
+    #     print(path)
+    #     if not 'cad' in path:
+    #         main(path)
+    test_sample_gau_ex08_parametric()

@@ -77,12 +77,10 @@ def record_result(src: FEMOpt or str, py_path, suffix=''):
 def is_equal_result(csv1, csv2):
     """Check the equality of two result csv files."""
 
-    df1 = pd.read_csv(csv1, encoding='shift-jis').replace(np.nan, None).select_dtypes(include='number')
-    df2 = pd.read_csv(csv2, encoding='shift-jis').replace(np.nan, None).select_dtypes(include='number')
+    df1 = pd.read_csv(csv1, encoding='shift-jis', header=2).replace(np.nan, None).select_dtypes(include='number')
+    df2 = pd.read_csv(csv2, encoding='shift-jis', header=2).replace(np.nan, None).select_dtypes(include='number')
 
+    assert len(df1) > 0 and len(df2) > 0, '結果 csv の取得ができていません。'
     assert len(df1.iloc[0]) == len(df2.iloc[0]), '結果 csv の column 数が異なります。'
     assert len(df1) == len(df2), '結果 csv の row 数が異なります。'
     assert np.sum(np.abs(df1.values - df2.values)) < 0.0001, 'seed 設定が反映されていません。'
-
-
-
