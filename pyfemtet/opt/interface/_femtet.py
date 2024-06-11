@@ -199,8 +199,12 @@ class FemtetInterface(FEMInterface):
             cmd = f'{sys.executable} -m win32com.client.makepy FemtetMacro'
             os.system(cmd)
             message = 'Femtet python マクロ定数の設定が完了してないことを検出しました.'
-            message += '次のコマンドにより、設定は自動で行われました（python -m win32com.client.makepy FemtetMacro）.'
-            message += 'インタープリタを再起動してください.'
+            message += '設定は自動で行われました（python -m win32com.client.makepy FemtetMacro）.'
+            message += 'プログラムを再起動してください.'
+            print('================')
+            print(message)
+            print('================')
+            input('終了するには Enter を押してください。')
             raise RuntimeError(message)
 
         if self.Femtet is None:
