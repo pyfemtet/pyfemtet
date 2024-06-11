@@ -1,5 +1,5 @@
 Set-Location $PSScriptRoot\..
-$yamlFolder = ".\test_results"
+$yamlFolder = Convert-Path ".\test_results"
 $yamlBaseName = Get-Date -Format "yyyyMMdd_HHmmss"
 $yamlPath = Join-Path $yamlFolder $yamlBaseName".yaml"
 
