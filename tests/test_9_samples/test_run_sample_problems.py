@@ -18,7 +18,7 @@ from test_util import test_util
 LIBRARY_ROOT = os.path.dirname(pyfemtet.__file__)
 SAMPLE_DIR = os.path.join(LIBRARY_ROOT, 'opt', 'femprj_sample')
 
-RECORD_MODE = True
+RECORD_MODE = False
 
 
 def main(py_script_path):
