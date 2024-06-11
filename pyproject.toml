@@ -29,6 +29,7 @@ botorch = [
     {version = "^0.9.5", python = "<3.12"},
     {version = ">=0.9.5", python = ">=3.12,<3.13"},
     ]
+pytest-dashboard = "^0.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pip-licenses = "^4.3.3"
@@ -39,7 +40,6 @@ sphinx-autobuild = "==2021.3.14"
 pytest = "^7.4.3"
 sphinx-design = "^0.5.0"
 bokeh = "^3.3.3"
-pytest-dashboard = "*"
 sphinx-intl = "^2.2.0"
 
 [tool.poetry.scripts]
