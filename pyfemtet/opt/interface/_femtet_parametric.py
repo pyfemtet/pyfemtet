@@ -55,20 +55,20 @@ def _get_prm_result_names(Femtet):
     return out
 
 
-def add_parametric_results_as_objectives(femopt, indexes) -> bool:
+def add_parametric_results_as_objectives(femopt, indexes, directions) -> bool:
     # load dll and set target femtet
     dll = _get_dll_with_set_femtet(femopt.fem.Femtet)
 
     # get objective names
     dll.GetPrmnResult.restype = ctypes.c_int
     n = dll.GetPrmnResult()
-    for i in indexes:
+    for i, direction in zip(indexes, directions):
         # objective name
         dll.GetPrmResultName.restype = ctypes.c_char_p
         result = dll.GetPrmResultName(i)
         name = result.decode('mbcs')
         # objective value function
-        femopt.add_objective(_parametric_objective, name, args=(i,))
+        femopt.add_objective(_parametric_objective, name, direction=direction, args=(i,))
     return True  # ここまで来たら成功
 
 

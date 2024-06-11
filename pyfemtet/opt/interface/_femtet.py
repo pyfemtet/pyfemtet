@@ -41,7 +41,7 @@ class FemtetInterface(FEMInterface):
             strictly_pid_specify (bool, optional): If True and connect_method=='new', search launched Femtet process strictly based on its process id.
             allow_without_project (bool, optional): Allow to launch Femtet with no project file. Default to False.
             open_result_with_gui (bool, optional): Open analysis result with Femtet GUI. Default to True.
-            parametric_output_indexes_use_as_objective (list of int, optional): Parametric output indexes which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output 'No.' in dialog is starts with 1, but this 'index' is starts with 0. Default to None.
+            parametric_output_indexes_use_as_objective (dict, optional): Parametric output indexes and their directions which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output 'No.' in dialog is starts with 1, but this 'index' is starts with 0. The key is the 'index', the value is direction ('maximize', 'minimize' or float). Default to None.
 
         Warning:
             Even if you specify ``strictly_pid_specify=True`` on the constructor,
@@ -274,7 +274,7 @@ class FemtetInterface(FEMInterface):
                     self.Femtet.Gaudi.Activate,
                     False,  # None 以外なら何でもいい
                     Exception,
-                    '解析モデルのオープンに失敗しました',
+                    'Gaudi のオープンに失敗しました',
                     print_indent=print_indent + 1
                 )
             except com_error:
