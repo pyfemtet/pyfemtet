@@ -77,8 +77,13 @@ def test_sample_wat_ex14_parametric():
     main(py_script_path)
 
 
-def test_sample_wat_ex14_parametric():
-    py_script_path = os.path.join(SAMPLE_DIR, 'paswat_ex01_parametric.py')
+def test_sample_paswat_ex1_parametric():
+    py_script_path = os.path.join(SAMPLE_DIR, 'paswat_ex1_parametric.py')
+    main(py_script_path)
+
+
+def test_sample_gal_ex58_parametric():
+    py_script_path = os.path.join(SAMPLE_DIR, 'gal_ex58_parametric.py')
     main(py_script_path)
 
 
