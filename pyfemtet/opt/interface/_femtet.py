@@ -434,14 +434,30 @@ class FemtetInterface(FEMInterface):
             Otherwise, no check is performed.
 
         """
-        if self._version() >= _version(2023, 1, 1):
-            variable_names = self.Femtet.GetVariableNames_py()
+        major, minor, bugfix = 2023, 1, 1
+        if self._version() >= _version(major, minor, bugfix):
+            try:
+                variable_names = self.Femtet.GetVariableNames_py()
+            except AttributeError as e:
+                message = 'GetVariableNames_py' + 'にアクセスできません。'
+                f'Femtet {major}.{minor}.{bugfix} 以降で「マクロの有効化」が行われていない可能性があります。'
+                'スタートメニューから、インストールされいてる Femtet と同一バージョンの「マクロ機能を有効化する」コマンドを管理者権限で実行してください。'
+                print('================')
+                logger.error(message)
+                print('================')
+                input('終了するには Enter を押してください。')
+                raise e
+                
             if variable_names is not None:
                 if param_name in variable_names:
                     return self.Femtet.GetVariableValue(param_name)
             message = f'Femtet 解析モデルに変数 {param_name} がありません.'
             message += f'現在のモデルに設定されている変数は {variable_names} です.'
             message += '大文字・小文字の区別に注意してください.'
+            print('================')
+            logger.error(message)
+            print('================')
+            input('終了するには Enter を押してください。')
             raise RuntimeError(message)
         else:
             return None
@@ -459,8 +475,9 @@ class FemtetInterface(FEMInterface):
             error_message='解析モデルが開かれていません',
         )
 
-        if self._version() >= _version(2023, 1, 1):
-            # Femtet の設計変数の更新
+        major, minor, bugfix = 2023, 1, 1
+        if self._version() >= _version(major, minor, bugfix):
+            # Femtet の設計変数の更新（2023.1.1 以降でマクロだけ古い場合はcheck_param_valueで引っかかっているはずなのでここはAttributeError をチェックしない）
             existing_variable_names = self._call_femtet_api(
                 fun=self.Femtet.GetVariableNames_py,
                 return_value_if_failed=False,  # 意味がない
