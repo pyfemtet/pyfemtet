@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-04 14:42+0900\n"
+"POT-Creation-Date: 2024-06-17 10:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../source/index.rst:210
+#: ../source/index.rst:211
 msgid "Home"
 msgstr ""
 
@@ -37,197 +37,201 @@ msgid "PyFemtet is an open-source library and can be used free of charge for bot
 msgstr ""
 
 #: ../source/index.rst:19
-msgid "A license is required to use the Femtet main body. PyFemtet does not alter the license of the Femtet main body in any way."
+msgid "This software is provided \"as is\" and without warranty of any kind. See the :doc:`pages/license` page for details."
 msgstr ""
 
 #: ../source/index.rst:20
+msgid "A license is required to use the Femtet main body. PyFemtet does not alter the license of the Femtet main body in any way."
+msgstr ""
+
+#: ../source/index.rst:21
 msgid "Please contact Murata Software for a trial version of Femtet for evaluation purposes."
 msgstr ""
 
-#: ../source/index.rst:22
+#: ../source/index.rst:23
 msgid "--> |Femtet|"
 msgstr ""
 
-#: ../source/index.rst:26
+#: ../source/index.rst:27
 msgid "Main Features of PyFemtet"
 msgstr ""
 
-#: ../source/index.rst:28
+#: ../source/index.rst:29
 msgid "PyFemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of PyFemtet is design parameter optimization, which is implemented as a subpackage ``pyfemtet.opt``."
 msgstr ""
 
-#: ../source/index.rst:30
+#: ../source/index.rst:31
 msgid "The optimization feature by ``pyfemtet.opt`` has the following characteristics:"
 msgstr ""
 
-#: ../source/index.rst:32
+#: ../source/index.rst:33
 msgid "Single-objective and multi-objective optimization"
 msgstr ""
 
-#: ../source/index.rst:33
+#: ../source/index.rst:34
 msgid "Real-time progress display with process monitoring"
 msgstr ""
 
-#: ../source/index.rst:34
+#: ../source/index.rst:35
 msgid "Parallel computation with multiple instances of Femtet"
 msgstr ""
 
-#: ../source/index.rst:35
+#: ../source/index.rst:36
 msgid "Result output in easy-to-analyze csv format for Excel and other tools"
 msgstr ""
 
-#: ../source/index.rst:39
+#: ../source/index.rst:40
 msgid "Examples"
 msgstr ""
 
-#: ../source/index.rst:43
+#: ../source/index.rst:44
 msgid "Inductance of a solenoid coil"
 msgstr ""
 
-#: ../source/index.rst:51
+#: ../source/index.rst:52
 msgid "In magnetic field analysis, the self-inductance of a finite-length solenoid coil is set to a specific value."
 msgstr ""
 
-#: ../source/index.rst:54
+#: ../source/index.rst:55
 msgid "Resonant frequency of a circular patch antenna"
 msgstr ""
 
-#: ../source/index.rst:62
+#: ../source/index.rst:63
 msgid "In electromagnetic wave analysis, the resonant frequency of a circular patch antenna is set to a specific value."
 msgstr ""
 
-#: ../source/index.rst:67
+#: ../source/index.rst:68
 msgid "There are more examples in the :doc:`pages/examples` section."
 msgstr ""
 
-#: ../source/index.rst:71
+#: ../source/index.rst:72
 msgid "Simple API"
 msgstr ""
 
-#: ../source/index.rst:73
+#: ../source/index.rst:74
 msgid "Below is an example of multi-objective optimization. You can set up the problem with ``add_parameter()`` and ``add_objective()``, and then execute it with ``optimize()``. For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the :doc:`pages/usage` section."
 msgstr ""
 
-#: ../source/index.rst:99
+#: ../source/index.rst:100
 msgid "Install"
 msgstr ""
 
-#: ../source/index.rst:101
+#: ../source/index.rst:102
 msgid "PyFemtet is only available for Windows."
 msgstr ""
 
-#: ../source/index.rst:105
+#: ../source/index.rst:106
 msgid "In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run ``pip install pyfemtet``. The following steps are for a full setup of Python, Femtet and PyFemtet."
 msgstr ""
 
-#: ../source/index.rst:107
+#: ../source/index.rst:108
 msgid "**Installation of Femtet (version 2023.0 or later)**"
 msgstr ""
 
-#: ../source/index.rst:109
+#: ../source/index.rst:110
 msgid "For first-time users, please consider using the trial version or personal edition. --> |Femtet|"
 msgstr ""
 
-#: ../source/index.rst:113
+#: ../source/index.rst:114
 msgid "If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used."
 msgstr ""
 
-#: ../source/index.rst:116
+#: ../source/index.rst:117
 msgid "**Enabling Femtet macros**"
 msgstr ""
 
-#: ../source/index.rst:120
+#: ../source/index.rst:121
 msgid "After installing Femtet, **please run 'EnableMacros' from the start menu.** This procedure requires administrator privileges."
 msgstr ""
 
-#: ../source/index.rst:123
+#: ../source/index.rst:124
 msgid "**Installation of Python (version 3.9.3 or later)**"
 msgstr ""
 
-#: ../source/index.rst:125
+#: ../source/index.rst:126
 msgid "Download the installer from the link provided and run it.  --> |Python|"
 msgstr ""
 
-#: ../source/index.rst:129
+#: ../source/index.rst:130
 msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
 msgstr ""
 
-#: ../source/index.rst:133
+#: ../source/index.rst:134
 msgid "``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment."
 msgstr ""
 
-#: ../source/index.rst:140
+#: ../source/index.rst:141
 msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
 msgstr ""
 
-#: ../source/index.rst:144
+#: ../source/index.rst:145
 msgid "Installer screen."
 msgstr ""
 
-#: ../source/index.rst:147
+#: ../source/index.rst:148
 msgid "**Installing** ``pyfemtet``"
 msgstr ""
 
-#: ../source/index.rst:149
+#: ../source/index.rst:150
 msgid "Please launch the command prompt (``cmd``)."
 msgstr ""
 
-#: ../source/index.rst:153
+#: ../source/index.rst:154
 msgid "Launch cmd via start button."
 msgstr ""
 
-#: ../source/index.rst:156
+#: ../source/index.rst:157
 msgid "Then run the following command in the command prompt. The download and installation of the library will begin."
 msgstr ""
 
-#: ../source/index.rst:165
+#: ../source/index.rst:166
 msgid "Run pip command on command prompt."
 msgstr ""
 
-#: ../source/index.rst:168
+#: ../source/index.rst:169
 msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
 msgstr ""
 
-#: ../source/index.rst:172
+#: ../source/index.rst:173
 msgid "Installing"
 msgstr ""
 
-#: ../source/index.rst:176
+#: ../source/index.rst:177
 msgid "Installation completed"
 msgstr ""
 
-#: ../source/index.rst:180
+#: ../source/index.rst:181
 msgid "Depending on the environment, installation may take about 5 minutes."
 msgstr ""
 
-#: ../source/index.rst:184
+#: ../source/index.rst:185
 msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
 msgstr ""
 
-#: ../source/index.rst:186
+#: ../source/index.rst:187
 msgid "**Setting Femtet Macro Constants**"
 msgstr ""
 
-#: ../source/index.rst:188
+#: ../source/index.rst:189
 msgid "Please run the following command in the command prompt.::"
 msgstr ""
 
-#: ../source/index.rst:192
+#: ../source/index.rst:193
 msgid "Once the setting is complete, control will return to the command prompt."
 msgstr ""
 
-#: ../source/index.rst:196
+#: ../source/index.rst:197
 msgid "After makepy finishes"
 msgstr ""
 
-#: ../source/index.rst:198
+#: ../source/index.rst:199
 msgid "That's all."
 msgstr ""
 
-#: ../source/index.rst:203
+#: ../source/index.rst:204
 msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
 msgstr ""
 
-#: ../source/index.rst:208
+#: ../source/index.rst:209
 msgid "Table of Contents"
 msgstr ""

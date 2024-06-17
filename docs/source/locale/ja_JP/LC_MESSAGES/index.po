@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PyFemtet Project package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-04 14:42+0900\n"
+"POT-Creation-Date: 2024-06-17 10:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -17,9 +16,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.15.0\n"
 
-#: ../source/index.rst:210
+#: ../source/index.rst:211
 msgid "Home"
 msgstr "ホーム"
 
@@ -40,198 +39,202 @@ msgid "PyFemtet is an open-source library and can be used free of charge for bot
 msgstr "PyFemtet はオープンソースライブラリであり、無償かつ商用利用可能です。"
 
 #: ../source/index.rst:19
+msgid "This library is provided \"as is\" and without warranty of any kind."
+msgstr "このライブラリは現状のまま提供され、いかなる保証もいたしません。"
+
+#: ../source/index.rst:20
 msgid "A license is required to use the Femtet main body. PyFemtet does not alter the license of the Femtet main body in any way."
 msgstr "PyFemtet は Femtet 本体のライセンスを一切変更しません。"
 
-#: ../source/index.rst:20
+#: ../source/index.rst:21
 msgid "Please contact Murata Software for a trial version of Femtet for evaluation purposes."
 msgstr "評価のための試用版 Femtet は ムラタソフトウェア にお問い合わせください。"
 
-#: ../source/index.rst:22
+#: ../source/index.rst:23
 msgid "--> |Femtet|"
 msgstr ""
 
-#: ../source/index.rst:26
+#: ../source/index.rst:27
 msgid "Main Features of PyFemtet"
 msgstr "PyFemtet の主要な機能"
 
-#: ../source/index.rst:28
+#: ../source/index.rst:29
 msgid "PyFemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of PyFemtet is design parameter optimization, which is implemented as a subpackage ``pyfemtet.opt``."
 msgstr "PyFemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。現在、 **PyFemtet の唯一の機能は設計パラメータの最適化** であり、``pyfemtet.opt`` サブパッケージとして実装されています。"
 
-#: ../source/index.rst:30
+#: ../source/index.rst:31
 msgid "The optimization feature by ``pyfemtet.opt`` has the following characteristics:"
 msgstr "``pyfemtet.opt`` は、以下の特徴を有します。"
 
-#: ../source/index.rst:32
+#: ../source/index.rst:33
 msgid "Single-objective and multi-objective optimization"
 msgstr "単目的および多目的の最適化"
 
-#: ../source/index.rst:33
+#: ../source/index.rst:34
 msgid "Real-time progress display with process monitoring"
 msgstr "プロセスモニタによるリアルタイム進行状況の表示"
 
-#: ../source/index.rst:34
+#: ../source/index.rst:35
 msgid "Parallel computation with multiple instances of Femtet"
 msgstr "複数の Femtet インスタンスによる並列計算"
 
-#: ../source/index.rst:35
+#: ../source/index.rst:36
 msgid "Result output in easy-to-analyze csv format for Excel and other tools"
 msgstr "Excel 等で分析が容易な csv 形式での結果出力"
 
-#: ../source/index.rst:39
+#: ../source/index.rst:40
 msgid "Examples"
 msgstr "例題"
 
-#: ../source/index.rst:43
+#: ../source/index.rst:44
 msgid "Inductance of a solenoid coil"
 msgstr "ソレノイドコイルのインダクタンス"
 
-#: ../source/index.rst:51
+#: ../source/index.rst:52
 msgid "In magnetic field analysis, the self-inductance of a finite-length solenoid coil is set to a specific value."
 msgstr "磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。"
 
-#: ../source/index.rst:54
+#: ../source/index.rst:55
 msgid "Resonant frequency of a circular patch antenna"
 msgstr "円形パッチアンテナの共振周波数"
 
-#: ../source/index.rst:62
+#: ../source/index.rst:63
 msgid "In electromagnetic wave analysis, the resonant frequency of a circular patch antenna is set to a specific value."
 msgstr "電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。"
 
-#: ../source/index.rst:67
+#: ../source/index.rst:68
 msgid "There are more examples in the :doc:`pages/examples` section."
 msgstr ":doc:`pages/examples` セクションにより多くの実施例があります。"
 
-#: ../source/index.rst:71
+#: ../source/index.rst:72
 msgid "Simple API"
 msgstr "シンプルな API"
 
-#: ../source/index.rst:73
+#: ../source/index.rst:74
 msgid "Below is an example of multi-objective optimization. You can set up the problem with ``add_parameter()`` and ``add_objective()``, and then execute it with ``optimize()``. For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the :doc:`pages/usage` section."
 msgstr "下記は多目的最適化の実施例です。``add_parameter()`` と ``add_objective()`` で問題を設定し、``optimize()`` で実施することができます。それ以外は通常の Femtet のマクロスクリプトを使用します。詳細な実施例は :doc:`pages/usage` セクションを確認してください。"
 
-#: ../source/index.rst:99
+#: ../source/index.rst:100
 msgid "Install"
 msgstr "インストール"
 
-#: ../source/index.rst:101
+#: ../source/index.rst:102
 msgid "PyFemtet is only available for Windows."
 msgstr "PyFemtet は Windows にのみ対応しています。"
 
-#: ../source/index.rst:105
+#: ../source/index.rst:106
 msgid "In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run ``pip install pyfemtet``. The following steps are for a full setup of Python, Femtet and PyFemtet."
 msgstr "Python 及び Femtet がインストールされており Femtet のマクロが有効化されている環境では単に ``pip install pyfemtet`` を実行してください。以下の手順は、Python, Femtet 及び PyFemtet のフルセットアップの手順です。"
 
-#: ../source/index.rst:107
+#: ../source/index.rst:108
 msgid "**Installation of Femtet (version 2023.0 or later)**"
 msgstr "**Femtet（2023.0 以降）のインストール**"
 
-#: ../source/index.rst:109
+#: ../source/index.rst:110
 msgid "For first-time users, please consider using the trial version or personal edition. --> |Femtet|"
 msgstr "初めての方は、試用版または個人版のご利用をご検討ください。➡ |Femtet|"
 
-#: ../source/index.rst:113
+#: ../source/index.rst:114
 msgid "If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used."
 msgstr "最新版以外の Femtet では PyFemtet の機能の一部が制限されます。"
 
-#: ../source/index.rst:116
+#: ../source/index.rst:117
 msgid "**Enabling Femtet macros**"
 msgstr "**Femtet のマクロ有効化**"
 
-#: ../source/index.rst:120
+#: ../source/index.rst:121
 msgid "After installing Femtet, **please run 'EnableMacros' from the start menu.** This procedure requires administrator privileges."
 msgstr "Femtet インストール後にスタートメニューから **「マクロ機能を有効化する」** を実行してください。この手順には管理者権限が必要です。"
 
-#: ../source/index.rst:123
+#: ../source/index.rst:124
 msgid "**Installation of Python (version 3.9.3 or later)**"
 msgstr "**Python（3.9.3 以上）のインストール**"
 
-#: ../source/index.rst:125
+#: ../source/index.rst:126
 msgid "Download the installer from the link provided and run it.  --> |Python|"
 msgstr "リンク先のダウンロードリンクからインストーラをダウンロードし、実行してください。➡ |Python|"
 
-#: ../source/index.rst:129
+#: ../source/index.rst:130
 msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
 msgstr "最新版でないバージョンの Python をダウンロードするには下記のスクリーンショットを参考にご自身の環境に応じたインストーラをダウンロードしてください。"
 
-#: ../source/index.rst:133
+#: ../source/index.rst:134
 msgid "``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment."
 msgstr "``pyfemtet.opt`` は現在主に Python 3.11 環境で開発されており、インストールや実施例の実行に不具合がある場合は Python 3.11 環境の構築をご検討ください。"
 
-#: ../source/index.rst:140
+#: ../source/index.rst:141
 msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
 msgstr "このスクリーンショットでは、64 bit 版 Windows 向け Python 3.11.7 のインストーラへのリンクの場所の例を示しています。"
 
-#: ../source/index.rst:144
+#: ../source/index.rst:145
 msgid "Installer screen."
 msgstr "インストーラ画面。"
 
-#: ../source/index.rst:147
+#: ../source/index.rst:148
 msgid "**Installing** ``pyfemtet``"
 msgstr "``pyfemtet`` **のインストール**"
 
-#: ../source/index.rst:149
+#: ../source/index.rst:150
 msgid "Please launch the command prompt (``cmd``)."
 msgstr "コマンドプロンプトを起動してください。"
 
-#: ../source/index.rst:153
+#: ../source/index.rst:154
 msgid "Launch cmd via start button."
 msgstr "スタート ボタンからのコマンドプロンプト起動"
 
-#: ../source/index.rst:156
+#: ../source/index.rst:157
 msgid "Then run the following command in the command prompt. The download and installation of the library will begin."
 msgstr "コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。"
 
-#: ../source/index.rst:165
+#: ../source/index.rst:166
 msgid "Run pip command on command prompt."
 msgstr "コマンドプロンプトで pip コマンドを実行"
 
-#: ../source/index.rst:168
+#: ../source/index.rst:169
 msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
 msgstr "インストールが終了すると、Successfully installed の表示の後、コマンドプロンプトの制御が戻ります。"
 
-#: ../source/index.rst:172
+#: ../source/index.rst:173
 msgid "Installing"
 msgstr "インストール中"
 
-#: ../source/index.rst:176
+#: ../source/index.rst:177
 msgid "Installation completed"
 msgstr "インストール終了後"
 
-#: ../source/index.rst:180
+#: ../source/index.rst:181
 msgid "Depending on the environment, installation may take about 5 minutes."
 msgstr "環境によりますが、インストールには 5 分程度を要します。"
 
-#: ../source/index.rst:184
+#: ../source/index.rst:185
 msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
 msgstr "インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、エラーではなく、無視しても問題ありません。"
 
-#: ../source/index.rst:186
+#: ../source/index.rst:187
 msgid "**Setting Femtet Macro Constants**"
 msgstr "**Femtet マクロ定数の設定**"
 
-#: ../source/index.rst:188
+#: ../source/index.rst:189
 msgid "Please run the following command in the command prompt.::"
 msgstr "コマンドプロンプトで下記コマンドを実行してください。::"
 
-#: ../source/index.rst:192
+#: ../source/index.rst:193
 msgid "Once the setting is complete, control will return to the command prompt."
 msgstr "インストールが終了すると、コマンドプロンプトの制御が戻ります。"
 
-#: ../source/index.rst:196
+#: ../source/index.rst:197
 msgid "After makepy finishes"
 msgstr "makepy 終了後"
 
-#: ../source/index.rst:198
+#: ../source/index.rst:199
 msgid "That's all."
 msgstr "以上で終了です。"
 
-#: ../source/index.rst:203
+#: ../source/index.rst:204
 msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
 msgstr "動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。"
 
-#: ../source/index.rst:208
+#: ../source/index.rst:209
 msgid "Table of Contents"
 msgstr "目次"
 

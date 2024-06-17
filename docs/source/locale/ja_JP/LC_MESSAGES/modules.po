@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-13 11:56+0900\n"
+"POT-Creation-Date: 2024-06-17 10:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -17,25 +17,25 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.15.0\n"
 
-#: ../../source/modules/modules.rst:2
+#: ../source/modules/modules.rst:2
 msgid "pyfemtet"
 msgstr ""
 
-#: ../../source/modules/pyfemtet.rst:2
+#: ../source/modules/pyfemtet.rst:2
 msgid "pyfemtet package"
 msgstr ""
 
-#: ../../source/modules/pyfemtet.opt.rst:5 ../../source/modules/pyfemtet.rst:5
+#: ../source/modules/pyfemtet.opt.rst:5 ../source/modules/pyfemtet.rst:5
 msgid "Subpackages"
 msgstr ""
 
-#: ../../source/modules/pyfemtet.rst:13
+#: ../source/modules/pyfemtet.rst:13
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/modules/pyfemtet.rst:16
+#: ../source/modules/pyfemtet.rst:16
 msgid "pyfemtet.core module"
 msgstr ""
 
@@ -66,7 +66,7 @@ msgstr ""
 msgid "Exception raised for errors in the solver."
 msgstr ""
 
-#: ../../source/modules/pyfemtet.rst:24
+#: ../source/modules/pyfemtet.rst:24
 msgid "pyfemtet.dispatch\\_extensions module"
 msgstr ""
 
@@ -221,7 +221,7 @@ msgstr ""
 msgid "Launched Femtet is not found for some reason (i.e. failed to launch Femtet)."
 msgstr ""
 
-#: ../../source/modules/pyfemtet.rst:32
+#: ../source/modules/pyfemtet.rst:32
 msgid "pyfemtet.logger module"
 msgstr ""
 
@@ -229,15 +229,15 @@ msgstr ""
 msgid "Return a logger with a default ColoredFormatter."
 msgstr ""
 
-#: ../../source/modules/pyfemtet.opt.interface.rst:5
-#: ../../source/modules/pyfemtet.opt.opt.rst:5
-#: ../../source/modules/pyfemtet.opt.rst:15
-#: ../../source/modules/pyfemtet.opt.visualization.rst:5
-#: ../../source/modules/pyfemtet.rst:40
+#: ../source/modules/pyfemtet.opt.interface.rst:5
+#: ../source/modules/pyfemtet.opt.opt.rst:5
+#: ../source/modules/pyfemtet.opt.rst:15
+#: ../source/modules/pyfemtet.opt.visualization.rst:5
+#: ../source/modules/pyfemtet.rst:40
 msgid "Module contents"
 msgstr ""
 
-#: ../../source/modules/pyfemtet.opt.rst:2
+#: ../source/modules/pyfemtet.opt.rst:2
 msgid "pyfemtet.opt package"
 msgstr ""
 
@@ -698,11 +698,23 @@ msgstr ""
 msgid "If True and connect_method=='new', search launched Femtet process strictly based on its process id."
 msgstr ""
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:14
-msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:11
+msgid "Allow to launch Femtet with no project file. Default to False."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:13
+msgid "Open analysis result with Femtet GUI. Default to True."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:15
+msgid "Parametric output indexes and their directions which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output 'No.' in dialog is starts with 1, but this 'index' is starts with 0. The key is the 'index', the value is direction ('maximize', 'minimize' or float). Default to None."
 msgstr ""
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface:20
+msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
+msgstr ""
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:26
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr ""
 
@@ -838,15 +850,15 @@ msgstr ""
 msgid "Set random seed, sampler, study and run study.optimize()."
 msgstr ""
 
-#: ../../source/modules/pyfemtet.opt.interface.rst:2
+#: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
 msgstr ""
 
-#: ../../source/modules/pyfemtet.opt.opt.rst:2
+#: ../source/modules/pyfemtet.opt.opt.rst:2
 msgid "pyfemtet.opt.opt package"
 msgstr ""
 
-#: ../../source/modules/pyfemtet.opt.visualization.rst:2
+#: ../source/modules/pyfemtet.opt.visualization.rst:2
 msgid "pyfemtet.opt.visualization package"
 msgstr ""
 

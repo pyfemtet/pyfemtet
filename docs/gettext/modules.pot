@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-04 14:11+0900\n"
+"POT-Creation-Date: 2024-06-17 10:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -702,11 +702,23 @@ msgstr ""
 msgid "If True and connect_method=='new', search launched Femtet process strictly based on its process id."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:14
-msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:11
+msgid "Allow to launch Femtet with no project file. Default to False."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:13
+msgid "Open analysis result with Femtet GUI. Default to True."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:15
+msgid "Parametric output indexes and their directions which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output 'No.' in dialog is starts with 1, but this 'index' is starts with 0. The key is the 'index', the value is direction ('maximize', 'minimize' or float). Default to None."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:20
+msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:26
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr ""
 

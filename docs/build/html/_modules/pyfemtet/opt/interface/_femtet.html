@@ -121,7 +121,7 @@
 <span class="sd">            strictly_pid_specify (bool, optional): If True and connect_method==&#39;new&#39;, search launched Femtet process strictly based on its process id.</span>
 <span class="sd">            allow_without_project (bool, optional): Allow to launch Femtet with no project file. Default to False.</span>
 <span class="sd">            open_result_with_gui (bool, optional): Open analysis result with Femtet GUI. Default to True.</span>
-<span class="sd">            parametric_output_indexes_use_as_objective (list of int, optional): Parametric output indexes which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output &#39;No.&#39; in dialog is starts with 1, but this &#39;index&#39; is starts with 0. Default to None.</span>
+<span class="sd">            parametric_output_indexes_use_as_objective (dict, optional): Parametric output indexes and their directions which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output &#39;No.&#39; in dialog is starts with 1, but this &#39;index&#39; is starts with 0. The key is the &#39;index&#39;, the value is direction (&#39;maximize&#39;, &#39;minimize&#39; or float). Default to None.</span>
 
 <span class="sd">        Warning:</span>
 <span class="sd">            Even if you specify ``strictly_pid_specify=True`` on the constructor,</span>
@@ -169,10 +169,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_api_retry</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strictly_pid_specify</span> <span class="o">=</span> <span class="n">strictly_pid_specify</span>
-        <span class="k">if</span> <span class="n">parametric_output_indexes_use_as_objective</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="o">=</span> <span class="n">parametric_output_indexes_use_as_objective</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="o">=</span> <span class="n">parametric_output_indexes_use_as_objective</span>
 
         <span class="c1"># dask サブプロセスのときは femprj を更新し connect_method を new にする</span>
         <span class="k">try</span><span class="p">:</span>
@@ -284,8 +281,12 @@
             <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s1"> -m win32com.client.makepy FemtetMacro&#39;</span>
             <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
             <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Femtet python マクロ定数の設定が完了してないことを検出しました.&#39;</span>
-            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;次のコマンドにより、設定は自動で行われました（python -m win32com.client.makepy FemtetMacro）.&#39;</span>
-            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;インタープリタを再起動してください.&#39;</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;設定は自動で行われました（python -m win32com.client.makepy FemtetMacro）.&#39;</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;プログラムを再起動してください.&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
+            <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;終了するには Enter を押してください。&#39;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -356,7 +357,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">Activate</span><span class="p">,</span>
                     <span class="kc">False</span><span class="p">,</span>  <span class="c1"># None 以外なら何でもいい</span>
                     <span class="ne">Exception</span><span class="p">,</span>
-                    <span class="s1">&#39;解析モデルのオープンに失敗しました&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Gaudi のオープンに失敗しました&#39;</span><span class="p">,</span>
                     <span class="n">print_indent</span><span class="o">=</span><span class="n">print_indent</span> <span class="o">+</span> <span class="mi">1</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="n">com_error</span><span class="p">:</span>

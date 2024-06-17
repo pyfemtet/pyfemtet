@@ -16,6 +16,7 @@ Abstract
 **PyFemtet provides extensions for Femtet, a CAE software developed by Murata Software.**
 
 - PyFemtet is an open-source library and can be used free of charge for both non-commercial and commercial purposes.
+- This library is provided "as is" and without warranty of any kind.
 - A license is required to use the Femtet main body. PyFemtet does not alter the license of the Femtet main body in any way.
 - Please contact Murata Software for a trial version of Femtet for evaluation purposes.
 
