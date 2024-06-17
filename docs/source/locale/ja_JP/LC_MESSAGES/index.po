@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-17 10:47+0900\n"
+"POT-Creation-Date: 2024-06-17 10:52+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -155,8 +155,8 @@ msgid "When you follow this step, the Femtet help window will appear. You do not
 msgstr "この手順を実行すると、Femtet ヘルプ ウィンドウが表示されます。ヘルプ ウィンドウに従う必要はないので、閉じてください。"
 
 #: ../source/index.rst:135
-msgid "**Installation of Python (version 3.9.3 or later)**"
-msgstr "**Python（3.9.3 以上）のインストール**"
+msgid "**Installation of 64bit Python (version 3.9.3 or later)**"
+msgstr "**64bit Python（3.9.3 以上）のインストール**"
 
 #: ../source/index.rst:137
 msgid "Download the installer from the link provided and run it.  --> |Python|"

@@ -132,7 +132,7 @@ Install
         When you follow this step, the Femtet help window will appear. You do not need to follow the help window, so close it.
 
 
-3. **Installation of Python (version 3.9.3 or later)**
+3. **Installation of 64bit Python (version 3.9.3 or later)**
 
     Download the installer from the link provided and run it.  --> |Python|
 

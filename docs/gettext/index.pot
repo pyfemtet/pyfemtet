@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-17 10:47+0900\n"
+"POT-Creation-Date: 2024-06-17 10:52+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -153,7 +153,7 @@ msgid "When you follow this step, the Femtet help window will appear. You do not
 msgstr ""
 
 #: ../source/index.rst:135
-msgid "**Installation of Python (version 3.9.3 or later)**"
+msgid "**Installation of 64bit Python (version 3.9.3 or later)**"
 msgstr ""
 
 #: ../source/index.rst:137
