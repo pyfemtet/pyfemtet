@@ -77,18 +77,19 @@ def record_result(src: FEMOpt or str, py_path, suffix=''):
 
 def _get_obj_from_csv(csv_path):
     df = pd.read_csv(csv_path, encoding='cp932', header=2)
+    columns = df.columns
     with open(csv_path, mode='r', encoding='cp932', newline='\n') as f:
         reader = csv.reader(f, delimiter=',')
         meta = reader.__next__()
     obj_indices = np.where(np.array(meta) == 'obj')[0]
     out = df.iloc[:, obj_indices]
-    return out
+    return out, columns
 
 
 def is_equal_result(csv1, csv2):
     """Check the equality of two result csv files."""
-    df1 = _get_obj_from_csv(csv1)
-    df2 = _get_obj_from_csv(csv2)
-    assert len(df1.iloc[0]) == len(df2.iloc[0]), '結果 csv の column 数が異なります。'
+    df1, columns1 = _get_obj_from_csv(csv1)
+    df2, columns2 = _get_obj_from_csv(csv2)
+    assert len(columns1) == len(columns2), '結果 csv の column 数が異なります。'
     assert len(df1) == len(df2), '結果 csv の row 数が異なります。'
     assert (np.abs(df1.values - df2.values) / np.abs(df2.values)).max() <= 0.01, '前回の結果と 1% を超える相違があります。'
