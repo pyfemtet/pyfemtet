@@ -612,7 +612,22 @@ class FemtetInterface(FEMInterface):
 
     def quit(self, timeout=1, force=True):
         """Force to terminate connected Femtet."""
-        util.close_femtet(self.Femtet.hWnd, timeout, force)
+        major, minor, bugfix = 2024, 0, 1
+        if self._version() >= _version(major, minor, bugfix):
+            # gracefully termination method without save project available from 2024.0.1
+            try:
+                self.Femtet.Exit(True)
+            except AttributeError as e:
+                message = 'Femtet.Exit()' + 'にアクセスできません。'
+                f'Femtet {major}.{minor}.{bugfix} 以降で「マクロの有効化」が行われていない可能性があります。'
+                'スタートメニューから、インストールされいてる Femtet と同一バージョンの「マクロ機能を有効化する」コマンドを管理者権限で実行してください。'
+                print('================')
+                logger.error(message)
+                print('================')
+                input('終了するには Enter を押してください。')
+                raise e
+        else:
+            util.close_femtet(self.Femtet.hWnd, timeout, force)
 
     def _setup_before_parallel(self, client):
         client.upload_file(
