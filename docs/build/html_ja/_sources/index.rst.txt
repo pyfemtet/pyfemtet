@@ -118,7 +118,18 @@ Install
 
     .. figure:: images/enableMacrosIcon.png
 
+
+    .. note::
+
+        Close Excel and Femtet before following this step.
+
+
     After installing Femtet, **please run 'EnableMacros' from the start menu.** This procedure requires administrator privileges.
+
+
+    .. note::
+
+        When you follow this step, the Femtet help window will appear. You do not need to follow the help window, so close it.
 
 
 3. **Installation of Python (version 3.9.3 or later)**

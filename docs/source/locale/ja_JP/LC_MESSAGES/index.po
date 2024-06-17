@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-17 10:28+0900\n"
+"POT-Creation-Date: 2024-06-17 10:47+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.15.0\n"
 
-#: ../source/index.rst:211
+#: ../source/index.rst:222
 msgid "Home"
 msgstr "ホーム"
 
@@ -142,99 +142,107 @@ msgstr "最新版以外の Femtet では PyFemtet の機能の一部が制限さ
 msgid "**Enabling Femtet macros**"
 msgstr "**Femtet のマクロ有効化**"
 
-#: ../source/index.rst:121
+#: ../source/index.rst:124
+msgid "Close Excel and Femtet before following this step."
+msgstr "この手順を実行する前に、Excel と Femtet を閉じてください。"
+
+#: ../source/index.rst:127
 msgid "After installing Femtet, **please run 'EnableMacros' from the start menu.** This procedure requires administrator privileges."
 msgstr "Femtet インストール後にスタートメニューから **「マクロ機能を有効化する」** を実行してください。この手順には管理者権限が必要です。"
 
-#: ../source/index.rst:124
+#: ../source/index.rst:132
+msgid "When you follow this step, the Femtet help window will appear. You do not need to follow the help window, so close it."
+msgstr "この手順を実行すると、Femtet ヘルプ ウィンドウが表示されます。ヘルプ ウィンドウに従う必要はないので、閉じてください。"
+
+#: ../source/index.rst:135
 msgid "**Installation of Python (version 3.9.3 or later)**"
 msgstr "**Python（3.9.3 以上）のインストール**"
 
-#: ../source/index.rst:126
+#: ../source/index.rst:137
 msgid "Download the installer from the link provided and run it.  --> |Python|"
 msgstr "リンク先のダウンロードリンクからインストーラをダウンロードし、実行してください。➡ |Python|"
 
-#: ../source/index.rst:130
+#: ../source/index.rst:141
 msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
 msgstr "最新版でないバージョンの Python をダウンロードするには下記のスクリーンショットを参考にご自身の環境に応じたインストーラをダウンロードしてください。"
 
-#: ../source/index.rst:134
+#: ../source/index.rst:145
 msgid "``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment."
 msgstr "``pyfemtet.opt`` は現在主に Python 3.11 環境で開発されており、インストールや実施例の実行に不具合がある場合は Python 3.11 環境の構築をご検討ください。"
 
-#: ../source/index.rst:141
+#: ../source/index.rst:152
 msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
 msgstr "このスクリーンショットでは、64 bit 版 Windows 向け Python 3.11.7 のインストーラへのリンクの場所の例を示しています。"
 
-#: ../source/index.rst:145
+#: ../source/index.rst:156
 msgid "Installer screen."
 msgstr "インストーラ画面。"
 
-#: ../source/index.rst:148
+#: ../source/index.rst:159
 msgid "**Installing** ``pyfemtet``"
 msgstr "``pyfemtet`` **のインストール**"
 
-#: ../source/index.rst:150
+#: ../source/index.rst:161
 msgid "Please launch the command prompt (``cmd``)."
 msgstr "コマンドプロンプトを起動してください。"
 
-#: ../source/index.rst:154
+#: ../source/index.rst:165
 msgid "Launch cmd via start button."
 msgstr "スタート ボタンからのコマンドプロンプト起動"
 
-#: ../source/index.rst:157
+#: ../source/index.rst:168
 msgid "Then run the following command in the command prompt. The download and installation of the library will begin."
 msgstr "コマンドプロンプトで下記コマンドを実行してください。ライブラリのダウンロード及びインストールが始まります。"
 
-#: ../source/index.rst:166
+#: ../source/index.rst:177
 msgid "Run pip command on command prompt."
 msgstr "コマンドプロンプトで pip コマンドを実行"
 
-#: ../source/index.rst:169
+#: ../source/index.rst:180
 msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
 msgstr "インストールが終了すると、Successfully installed の表示の後、コマンドプロンプトの制御が戻ります。"
 
-#: ../source/index.rst:173
+#: ../source/index.rst:184
 msgid "Installing"
 msgstr "インストール中"
 
-#: ../source/index.rst:177
+#: ../source/index.rst:188
 msgid "Installation completed"
 msgstr "インストール終了後"
 
-#: ../source/index.rst:181
+#: ../source/index.rst:192
 msgid "Depending on the environment, installation may take about 5 minutes."
 msgstr "環境によりますが、インストールには 5 分程度を要します。"
 
-#: ../source/index.rst:185
+#: ../source/index.rst:196
 msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
 msgstr "インストール終了時に ``[notice] A new release of pip is available:`` などの表示がされることがありますが、エラーではなく、無視しても問題ありません。"
 
-#: ../source/index.rst:187
+#: ../source/index.rst:198
 msgid "**Setting Femtet Macro Constants**"
 msgstr "**Femtet マクロ定数の設定**"
 
-#: ../source/index.rst:189
+#: ../source/index.rst:200
 msgid "Please run the following command in the command prompt.::"
 msgstr "コマンドプロンプトで下記コマンドを実行してください。::"
 
-#: ../source/index.rst:193
+#: ../source/index.rst:204
 msgid "Once the setting is complete, control will return to the command prompt."
 msgstr "インストールが終了すると、コマンドプロンプトの制御が戻ります。"
 
-#: ../source/index.rst:197
+#: ../source/index.rst:208
 msgid "After makepy finishes"
 msgstr "makepy 終了後"
 
-#: ../source/index.rst:199
+#: ../source/index.rst:210
 msgid "That's all."
 msgstr "以上で終了です。"
 
-#: ../source/index.rst:204
+#: ../source/index.rst:215
 msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
 msgstr "動作確認には、はじめに :doc:`pages/examples` のサンプルを閲覧いただくことをお勧めします。"
 
-#: ../source/index.rst:209
+#: ../source/index.rst:220
 msgid "Table of Contents"
 msgstr "目次"
 
