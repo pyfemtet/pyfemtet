@@ -81,6 +81,9 @@ def update_single_objective_plot(history, df):
     df = _ls.localize(df)
     obj_name = history.obj_names[0]
 
+    df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
+    obj_name = obj_name.replace(' / ', '<BR>/ ')
+
     fig = px.scatter(
         df,
         x='trial',
@@ -125,6 +128,9 @@ def update_multi_objective_pairplot(history, df):
     df = _ls.localize(df)
 
     obj_names = history.obj_names
+
+    df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
+    obj_names = [o.replace(' / ', '<BR>/ ') for o in obj_names]
 
     common_kwargs = dict(
         color=_ls.non_domi['label'],
