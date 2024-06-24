@@ -20,6 +20,69 @@ logger = get_logger('opt')
 logger.setLevel(logging.INFO)
 
 
+class OptimizationMethodChecker:
+    """Check implementation of PyFemtet functions."""
+
+    def __init__(self, opt):
+        self.opt = opt
+
+    def check_parallel(self, raise_error=True):
+        function = 'parallel computing'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_timeout(self, raise_error=True):
+        function = 'timeout'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_multi_objective(self, raise_error=True):
+        function = 'multi-objective'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_strict_constraint(self, raise_error=True):
+        function = 'strict_constraint'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_constraint(self, raise_error=True):
+        function = 'strict_constraint'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_skip(self, raise_error=True):
+        function = 'skip'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_seed(self, raise_error=True):
+        function = 'random seed setting'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+
 class AbstractOptimizer(ABC):
     """Abstract base class for an interface of optimization library.
 
@@ -45,9 +108,9 @@ class AbstractOptimizer(ABC):
         self.fem = None
         self.fem_class = None
         self.fem_kwargs = dict()
-        self.parameters = pd.DataFrame()
-        self.objectives = dict()
-        self.constraints = dict()
+        self.parameters: pd.DataFrame = pd.DataFrame()
+        self.objectives: dict = dict()
+        self.constraints: dict = dict()
         self.entire_status = None  # actor
         self.history = None  # actor
         self.worker_status = None  # actor
@@ -58,6 +121,7 @@ class AbstractOptimizer(ABC):
         self.is_cluster = False
         self.subprocess_idx = None
         self._is_error_exit = False
+        self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
 
     def f(self, x):
         """Get x, update fem analysis, return objectives (and constraints)."""

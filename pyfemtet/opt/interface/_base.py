@@ -43,7 +43,12 @@ class FEMInterface(ABC):
         pass
 
     def update_parameter(self, parameters: pd.DataFrame, with_warning=False) -> Optional[List[str]]:
-        """Updates only FEM variables (if implemented in concrete class)."""
+        """Updates only FEM variables (if implemented in concrete class).
+
+        If this method is implemented,
+        it is able to get parameter via FEMInterface.
+
+        """
         pass
 
     def _setup_before_parallel(self, client) -> None:

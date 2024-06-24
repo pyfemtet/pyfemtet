@@ -314,6 +314,20 @@ class FEMOpt:
 
         """
 
+        # method checker
+        if n_parallel > 1:
+            self.opt.method_checker.check_parallel()
+        if timeout is not None:
+            self.opt.method_checker.check_timeout()
+        if len(self.opt.objectives) > 1:
+            self.opt.method_checker.check_multi_objective()
+        if len(self.opt.constraints) > 0:
+            self.opt.method_checker.check_constraint()
+        for key, value in self.opt.constraints.items():
+            if value.strict:
+                self.opt.method_checker.check_strict_constraint()
+                break
+
         # 共通引数
         self.opt.n_trials = n_trials
         self.opt.timeout = timeout
