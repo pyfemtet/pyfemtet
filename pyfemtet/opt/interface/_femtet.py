@@ -106,6 +106,15 @@ class FemtetInterface(FEMInterface):
         # 開かれたモデルに応じて femprj_path と model を更新する
         self._connect_and_open_femtet()
 
+        # original_fem_prj が None なら必ず
+        # dask worker でないプロセスがオリジナルファイルを開いている
+        if self.original_femprj_path is None:
+            # dask worker でなければ original のはず
+            try:
+                worker = get_worker()
+            except ValueError:
+                self.original_femprj_path = self.femprj_path
+
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
         self.quit_when_destruct = self.connected_method == 'new'
 
