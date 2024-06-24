@@ -9,11 +9,8 @@ import NXOpen
 def main(
         prtPath: str,
         parameters: str,  # dumped json
-        x_tPath: str = None,
-        include_curves: bool or None = None,  # None: same with user's last export setting
-        include_surfaces: bool or None = None,  # None: same with user's last export setting
-        include_solids: bool or None = None,  # None: same with user's last export setting
-        flatten_assembly: bool or None = None,  # None: same with user's last export setting
+        x_tPath: str,
+        dumped_json_export_settings: str,
 ):
     """Update the parameter of .prt file and export to .x_t file."""
 
@@ -24,7 +21,14 @@ def main(
 
     # 辞書の作成
     parameters = json.loads(parameters)
-    
+
+    # export 設定
+    settings = json.loads(dumped_json_export_settings)
+    include_curves = settings['include_curves']
+    include_surfaces = settings['include_surfaces']
+    include_solids = settings['include_solids']
+    flatten_assembly = settings['flatten_assembly']
+
     # session の取得とパートを開く
     theSession = NXOpen.Session.GetSession()
     theSession.Parts.OpenActiveDisplay(prtPath, NXOpen.DisplayPartOption.AllowAdditional)
