@@ -63,9 +63,20 @@ class FEMInterface(ABC):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
+    def create_result_file_content(self):
+        """Called after solve"""
+        pass
+
+    def create_file_path_creator(self, trial: int):
+        return _return_nothing
+
 
 class NoFEM(FEMInterface):
     """Interface with no FEM for debug."""
 
     def update(self, parameters: pd.DataFrame) -> None:
         pass
+
+
+def _return_nothing():
+    pass

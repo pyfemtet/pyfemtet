@@ -646,3 +646,25 @@ class FemtetInterface(FEMInterface):
 
     def _version(self):
         return _version(Femtet=self.Femtet)
+
+    def create_result_file_content(self):
+        """Called after solve"""
+
+        # save to worker space
+        result_dir = self.femprj_path.replace('.femprj', '.Results')
+        pdt_path = os.path.join(result_dir, self.model_name + '.pdt')
+        succeed = self.Femtet.SavePDT(pdt_path, True)
+
+        if succeed:
+            with open(pdt_path, 'rb') as f:
+                content = f.read()
+            return content
+
+        else:
+            raise Exception('pdt ファイルの保存でエラーが発生しました。')
+
+    def create_file_path(self, trial: int):
+        # return path of scheduler environment
+        result_dir = self.original_femprj_path.replace('.femprj', '.Results')
+        pdt_path = os.path.join(result_dir, self.model_name + f'_trial{trial}.pdt')
+        return pdt_path

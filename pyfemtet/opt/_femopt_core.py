@@ -532,7 +532,17 @@ class History:
 
         return columns, metadata
 
-    def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
+    def record(
+            self,
+            parameters,
+            objectives,
+            constraints,
+            obj_values,
+            cns_values,
+            message,
+            file_content,  # with open(..., 'rb') as f: content = f.read()
+            file_path_creator,  # fem specific
+    ):
         """Records the optimization results in the history.
 
         Record only. NOT save.
@@ -590,6 +600,13 @@ class History:
             self._calc_non_domi(objectives)  # update self.local_data
             self._calc_hypervolume(objectives)  # update self.local_data
             self.actor_data = self.local_data
+
+            # save file
+            file_path = file_path_creator(self.local_data['trial'].values[-1])  # trial number is used to create filename
+            if file_path is not None:
+                # FIXME: run_on_schedular したい
+                with open(file_path, 'wb') as f:
+                    f.write(file_content)
 
     def _calc_non_domi(self, objectives):
 
