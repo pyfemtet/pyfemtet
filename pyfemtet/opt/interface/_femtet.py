@@ -668,3 +668,49 @@ class FemtetInterface(FEMInterface):
         result_dir = self.original_femprj_path.replace('.femprj', '.Results')
         pdt_path = os.path.join(result_dir, self.model_name + f'_trial{trial}.pdt')
         return pdt_path
+
+
+from win32com.client import Dispatch, constants
+
+class _UnPicklableNoFEM(FemtetInterface):
+
+
+    original_femprj_path = 'dummy'
+    model_name = 'dummy'
+    parametric_output_indexes_use_as_objective = None
+    kwargs = dict()
+    Femtet = None
+    quit_when_destruct = False
+
+    def __init__(self):
+        CoInitialize()
+        self.unpicklable_member = Dispatch('FemtetMacro.Femtet')
+        self.cns = constants
+
+    def _setup_before_parallel(self, *args, **kwargs):
+        pass
+
+    def check_param_value(self, *args, **kwargs):
+        pass
+
+    def update_parameter(self, *args, **kwargs):
+        pass
+
+    def update(self, *args, **kwargs):
+        pass
+
+    def create_result_file_content(self):
+        """Called after solve"""
+
+        # save to worker space
+        with open(__file__, 'rb') as f:
+            content = f.read()
+
+        return content
+
+    def create_file_path(self, trial: int):
+        # return path of scheduler environment
+        here = os.path.dirname(__file__)
+        pdt_path = os.path.join(here, f'trial{trial}.pdt')
+        return pdt_path
+
