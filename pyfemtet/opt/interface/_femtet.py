@@ -128,7 +128,7 @@ class FemtetInterface(FEMInterface):
             model_name=self.model_name,
             open_result_with_gui=self.open_result_with_gui,
             parametric_output_indexes_use_as_objective=self.parametric_output_indexes_use_as_objective,
-            save_pdt=self.save_pdt
+            save_pdt=self.save_pdt,
             **kwargs
         )
 
