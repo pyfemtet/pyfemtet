@@ -54,8 +54,8 @@ class FemtetWithNXInterface(FemtetInterface):
 
         self.export_curves = export_curves
         self.export_surfaces = export_surfaces
-        self.export_solids = export_surfaces
-        self.export_flattened_assembly = export_surfaces
+        self.export_solids = export_solids
+        self.export_flattened_assembly = export_flattened_assembly
 
         # FemtetInterface の設定 (femprj_path, model_name の更新など)
         # + restore 情報の上書き
@@ -63,8 +63,8 @@ class FemtetWithNXInterface(FemtetInterface):
             prt_path=self.prt_path,
             export_curves=self.export_curves,
             export_surfaces=self.export_surfaces,
-            export_solids=self.export_surfaces,
-            export_flattened_assembly=self.export_surfaces,
+            export_solids=self.export_solids,
+            export_flattened_assembly=self.export_flattened_assembly,
             **kwargs
         )
 
