@@ -122,21 +122,7 @@ class FemtetInterface(FEMInterface):
 
     def __del__(self):
         if self.quit_when_destruct:
-            try:
-                # 強制終了 TODO: 自動保存を回避する
-                hwnd = self.Femtet.hWnd
-                pid = _get_pid(hwnd)
-                util.close_femtet(hwnd, 1, True)
-                start = time()
-                while psutil.pid_exists(pid):
-                    if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
-                        os.kill(pid, signal.SIGKILL)
-                        break
-                    sleep(1)
-                sleep(1)
-
-            except (AttributeError, OSError):  # already dead
-                pass
+            self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
     def _connect_new_femtet(self):
@@ -626,8 +612,25 @@ class FemtetInterface(FEMInterface):
                 print('================')
                 input('終了するには Enter を押してください。')
                 raise e
+
         else:
-            util.close_femtet(self.Femtet.hWnd, timeout, force)
+            hwnd = self.Femtet.hWnd
+
+            # terminate
+            util.close_femtet(hwnd, timeout, force)
+
+            try:
+                pid = _get_pid(hwnd)
+                start = time()
+                while psutil.pid_exists(pid):
+                    if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
+                        logger.error('Femtet の終了に失敗しました。')
+                        break
+                    sleep(1)
+                sleep(1)
+
+            except (AttributeError, OSError):  # already dead
+                pass
 
     def _setup_before_parallel(self, client):
         client.upload_file(
