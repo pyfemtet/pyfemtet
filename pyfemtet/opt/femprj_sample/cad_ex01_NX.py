@@ -107,6 +107,10 @@ if __name__ == '__main__':
     fem = FemtetWithNXInterface(
         prt_path='cad_ex01_NX.prt',
         open_result_with_gui=False,  # To calculate von Mises stress, set this argument to False. See Femtet Macro Help.
+        export_curves=False,
+        export_surfaces=False,
+        export_solids=True,
+        export_flattened_assembly=False,
     )
 
     # Initialize the FEMOpt object.

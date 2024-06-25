@@ -103,6 +103,10 @@ if __name__ == '__main__':
     fem = FemtetWithNXInterface(
         prt_path='cad_ex01_NX.prt',
         open_result_with_gui=False,
+        export_curves=False,
+        export_surfaces=False,
+        export_solids=True,
+        export_flattened_assembly=False,
     )
 
     # FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)
