@@ -617,12 +617,13 @@ class HomePageBase:
                     children=[
                         # Loading : child が Output である callback について、
                         # それが発火してから return するまでの間 Spinner が出てくる
-                        # dcc.Loading(
-                            html.Div([
+
+                        html.Div([
+                            dcc.Loading(
                                 dcc.Graph(id=self.ID_GRAPH, clear_on_unhover=True, figure=self.get_fig_by_tab_id(default_tab)),
-                                dcc.Tooltip(id=self.ID_GRAPH_TOOLTIP),
-                            ]),
-                        # ),
+                            ),
+                            dcc.Tooltip(id=self.ID_GRAPH_TOOLTIP),
+                        ]),
                     ],
                     id=self.ID_GRAPH_CARD_BODY,
                 ),
@@ -633,26 +634,26 @@ class HomePageBase:
             ],
         )
 
-        # # Loading 表示のためページロード時のみ発火させる callback
-        # @self.app.callback(
-        #     [
-        #         Output(self.ID_GRAPH, 'figure'),
-        #     ],
-        #     [
-        #         Input(self.ID_DUMMY, 'children'),
-        #     ],
-        #     [
-        #         State(self.ID_GRAPH_TABS, 'active_tab'),
-        #     ]
-        # )
-        # def on_load(_, active_tab):
-        #     # 1. initial_call または 2. card-body (即ちその中の graph) が変化した時に call される
-        #     # 2 で call された場合は ctx に card_body が格納されるのでそれで判定する
-        #     initial_call = callback_context.triggered_id is None
-        #     if initial_call:
-        #         return [self.get_fig_by_tab_id(active_tab)]
-        #     else:
-        #         raise PreventUpdate
+        # Loading 表示のためページロード時のみ発火させる callback
+        @self.app.callback(
+            [
+                Output(self.ID_GRAPH, 'figure'),
+            ],
+            [
+                Input(self.ID_DUMMY, 'children'),
+            ],
+            [
+                State(self.ID_GRAPH_TABS, 'active_tab'),
+            ]
+        )
+        def on_load(_, active_tab):
+            # 1. initial_call または 2. card-body (即ちその中の graph) が変化した時に call される
+            # 2 で call された場合は ctx に card_body が格納されるのでそれで判定する
+            initial_call = callback_context.triggered_id is None
+            if initial_call:
+                return [self.get_fig_by_tab_id(active_tab)]
+            else:
+                raise PreventUpdate
 
         # tab によるグラフ切替 callback
         @self.app.callback(
