@@ -63,12 +63,12 @@ class FEMInterface(ABC):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
-    def create_result_file_content(self):
+    def create_result_file_content(self) -> 'Bytes' or None:
         """Called after solve"""
         pass
 
-    def create_file_path_creator(self, trial: int):
-        return _return_nothing
+    def create_file_path_on_scheduler(self, trial: int) -> str or None:
+        pass
 
 
 class NoFEM(FEMInterface):
@@ -76,7 +76,3 @@ class NoFEM(FEMInterface):
 
     def update(self, parameters: pd.DataFrame) -> None:
         pass
-
-
-def _return_nothing():
-    pass

@@ -554,6 +554,8 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
+            file_content (Bytes): Result file content(like .pdt of Femtet)
+            file_path_creator (Callable): A function who gets a trial(int) and returns a path to save file_content on scheduler.
 
         """
 
