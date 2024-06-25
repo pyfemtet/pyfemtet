@@ -54,6 +54,6 @@ if __name__ == '__main__':
     # femopt.add_objective(coordinate, 'y', args=(femopt.opt, 1))
     # femopt.add_objective(coordinate, 'z', args=(femopt.opt, 2))
 
-    femopt.optimize(n_parallel=3)
+    femopt.optimize(n_parallel=3, n_trials=60)
     femopt.terminate_all()
 

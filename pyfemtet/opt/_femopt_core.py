@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats.qmc import LatinHypercube
 from optuna._hypervolume import WFG
-from dask.distributed import Lock
+from dask.distributed import Lock, get_client
 
 # win32com
 from win32com.client import constants, Constants
@@ -604,9 +604,13 @@ class History:
             # save file
             file_path = file_path_creator(self.local_data['trial'].values[-1])  # trial number is used to create filename
             if file_path is not None:
-                # FIXME: run_on_schedular したい
-                with open(file_path, 'wb') as f:
-                    f.write(file_content)
+
+                def save_file(filepath, filecontent, dask_scheduler=None):
+                    with open(filepath, 'wb') as f:
+                        f.write(filecontent)
+
+                client = get_client()  # always returns valid client
+                client.run_on_scheduler(save_file, filepath=file_path, filecontent=file_content)
 
     def _calc_non_domi(self, objectives):
 
