@@ -59,9 +59,10 @@ class FemtetInterface(FEMInterface):
             self,
             femprj_path=None,
             model_name=None,
-            connect_method='auto',
-            strictly_pid_specify=True,
-            allow_without_project=False,
+            connect_method='auto',  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
+            save_pdt=False,
+            strictly_pid_specify=True,  # dask worker では True にしたいので super() の引数にしない。
+            allow_without_project=False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui=True,
             parametric_output_indexes_use_as_objective=None,
             **kwargs  # 継承されたクラスからの引数
@@ -80,6 +81,7 @@ class FemtetInterface(FEMInterface):
         self.allow_without_project = allow_without_project
         self.original_femprj_path = self.femprj_path
         self.open_result_with_gui = open_result_with_gui
+        self.save_pdt = save_pdt
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None
@@ -106,6 +108,15 @@ class FemtetInterface(FEMInterface):
         # 開かれたモデルに応じて femprj_path と model を更新する
         self._connect_and_open_femtet()
 
+        # original_fem_prj が None なら必ず
+        # dask worker でないプロセスがオリジナルファイルを開いている
+        if self.original_femprj_path is None:
+            # dask worker でなければ original のはず
+            try:
+                worker = get_worker()
+            except ValueError:
+                self.original_femprj_path = self.femprj_path
+
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
         self.quit_when_destruct = self.connected_method == 'new'
 
@@ -117,6 +128,7 @@ class FemtetInterface(FEMInterface):
             model_name=self.model_name,
             open_result_with_gui=self.open_result_with_gui,
             parametric_output_indexes_use_as_objective=self.parametric_output_indexes_use_as_objective,
+            save_pdt=self.save_pdt,
             **kwargs
         )
 
@@ -640,3 +652,78 @@ class FemtetInterface(FEMInterface):
 
     def _version(self):
         return _version(Femtet=self.Femtet)
+
+    def create_result_file_content(self):
+        """Called after solve"""
+        if self.save_pdt:
+            # save to worker space
+            result_dir = self.femprj_path.replace('.femprj', '.Results')
+            pdt_path = os.path.join(result_dir, self.model_name + '.pdt')
+            succeed = self.Femtet.SavePDT(pdt_path, True)
+
+            # convert .pdt to ByteIO
+            if succeed:
+                with open(pdt_path, 'rb') as f:
+                    content = f.read()
+                return content
+
+            else:
+                raise Exception('pdt ファイルの保存でエラーが発生しました。')
+
+        else:
+            return super().create_result_file_content()  # do nothing
+
+    def create_file_path_on_scheduler(self, trial: int):
+        if self.save_pdt:
+            # return path of scheduler environment
+            result_dir = self.original_femprj_path.replace('.femprj', '.Results')
+            pdt_path = os.path.join(result_dir, self.model_name + f'_trial{trial}.pdt')
+            return pdt_path
+        else:
+            return super().create_file_path_on_scheduler(trial)  # do nothing
+
+
+from win32com.client import Dispatch, constants
+
+class _UnPicklableNoFEM(FemtetInterface):
+
+
+    original_femprj_path = 'dummy'
+    model_name = 'dummy'
+    parametric_output_indexes_use_as_objective = None
+    kwargs = dict()
+    Femtet = None
+    quit_when_destruct = False
+
+    def __init__(self):
+        CoInitialize()
+        self.unpicklable_member = Dispatch('FemtetMacro.Femtet')
+        self.cns = constants
+
+    def _setup_before_parallel(self, *args, **kwargs):
+        pass
+
+    def check_param_value(self, *args, **kwargs):
+        pass
+
+    def update_parameter(self, *args, **kwargs):
+        pass
+
+    def update(self, *args, **kwargs):
+        pass
+
+    def create_result_file_content(self):
+        """Called after solve"""
+
+        # save to worker space
+        with open(__file__, 'rb') as f:
+            content = f.read()
+
+        return content
+
+    def create_file_path(self, trial: int):
+        # return path of scheduler environment
+        here = os.path.dirname(__file__)
+        pdt_path = os.path.join(here, f'trial{trial}.pdt')
+        return pdt_path
+

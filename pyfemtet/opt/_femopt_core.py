@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats.qmc import LatinHypercube
 from optuna._hypervolume import WFG
-from dask.distributed import Lock
+from dask.distributed import Lock, get_client
 
 # win32com
 from win32com.client import constants, Constants
@@ -532,7 +532,17 @@ class History:
 
         return columns, metadata
 
-    def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
+    def record(
+            self,
+            parameters,
+            objectives,
+            constraints,
+            obj_values,
+            cns_values,
+            message,
+            file_content,  # with open(..., 'rb') as f: content = f.read()
+            file_path_creator,  # fem specific
+    ):
         """Records the optimization results in the history.
 
         Record only. NOT save.
@@ -544,6 +554,8 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
+            file_content (Bytes): Result file content(like .pdt of Femtet)
+            file_path_creator (Callable): A function who gets a trial(int) and returns a path to save file_content on scheduler.
 
         """
 
@@ -590,6 +602,17 @@ class History:
             self._calc_non_domi(objectives)  # update self.local_data
             self._calc_hypervolume(objectives)  # update self.local_data
             self.actor_data = self.local_data
+
+            # save file
+            file_path = file_path_creator(self.local_data['trial'].values[-1])  # trial number is used to create filename
+            if file_path is not None:
+
+                def save_file(filepath, filecontent, dask_scheduler=None):
+                    with open(filepath, 'wb') as f:
+                        f.write(filecontent)
+
+                client = get_client()  # always returns valid client
+                client.run_on_scheduler(save_file, filepath=file_path, filecontent=file_content)
 
     def _calc_non_domi(self, objectives):
 
