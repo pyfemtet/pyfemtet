@@ -556,6 +556,7 @@ class HomePageBase:
     ID_GRAPH_TABS = 'home-graph-tabs'
     ID_GRAPH_CARD_BODY = 'home-graph-card-body'
     ID_GRAPH = 'home-graph'
+    ID_GRAPH_TOOLTIP = 'home-graph-hover-tooltip'
     ID_SELECTION_DATA = 'home-selection-data'
 
     # selection data attribute
@@ -616,7 +617,12 @@ class HomePageBase:
                     children=[
                         # Loading : child が Output である callback について、
                         # それが発火してから return するまでの間 Spinner が出てくる
-                        dcc.Loading(dcc.Graph(id=self.ID_GRAPH)),
+                        dcc.Loading(
+                            html.Div([
+                                dcc.Graph(id=self.ID_GRAPH, clear_on_unhover=True),
+                                dcc.Tooltip(id=self.ID_GRAPH_TOOLTIP),
+                            ]),
+                        ),
                     ],
                     id=self.ID_GRAPH_CARD_BODY,
                 ),
@@ -677,6 +683,8 @@ class HomePageBase:
         def on_select(selected_data):
             logger.debug(f'on_select: {selected_data}')
             return [selected_data]
+
+        # ホバーに画像を表示する callback
 
     def get_fig_by_tab_id(self, tab_id):
         if tab_id in self.graphs.keys():
