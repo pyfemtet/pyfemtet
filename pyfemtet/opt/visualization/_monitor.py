@@ -617,12 +617,12 @@ class HomePageBase:
                     children=[
                         # Loading : child が Output である callback について、
                         # それが発火してから return するまでの間 Spinner が出てくる
-                        dcc.Loading(
+                        # dcc.Loading(
                             html.Div([
-                                dcc.Graph(id=self.ID_GRAPH, clear_on_unhover=True),
+                                dcc.Graph(id=self.ID_GRAPH, clear_on_unhover=True, figure=self.get_fig_by_tab_id(default_tab)),
                                 dcc.Tooltip(id=self.ID_GRAPH_TOOLTIP),
                             ]),
-                        ),
+                        # ),
                     ],
                     id=self.ID_GRAPH_CARD_BODY,
                 ),
@@ -633,26 +633,26 @@ class HomePageBase:
             ],
         )
 
-        # Loading 表示のためページロード時のみ発火させる callback
-        @self.app.callback(
-            [
-                Output(self.ID_GRAPH, 'figure'),
-            ],
-            [
-                Input(self.ID_GRAPH_CARD_BODY, 'children'),
-            ],
-            [
-                State(self.ID_GRAPH_TABS, 'active_tab'),
-            ]
-        )
-        def on_load(_, active_tab):
-            # 1. initial_call または 2. card-body (即ちその中の graph) が変化した時に call される
-            # 2 で call された場合は ctx に card_body が格納されるのでそれで判定する
-            initial_call = callback_context.triggered_id is None
-            if initial_call:
-                return [self.get_fig_by_tab_id(active_tab)]
-            else:
-                raise PreventUpdate
+        # # Loading 表示のためページロード時のみ発火させる callback
+        # @self.app.callback(
+        #     [
+        #         Output(self.ID_GRAPH, 'figure'),
+        #     ],
+        #     [
+        #         Input(self.ID_DUMMY, 'children'),
+        #     ],
+        #     [
+        #         State(self.ID_GRAPH_TABS, 'active_tab'),
+        #     ]
+        # )
+        # def on_load(_, active_tab):
+        #     # 1. initial_call または 2. card-body (即ちその中の graph) が変化した時に call される
+        #     # 2 で call された場合は ctx に card_body が格納されるのでそれで判定する
+        #     initial_call = callback_context.triggered_id is None
+        #     if initial_call:
+        #         return [self.get_fig_by_tab_id(active_tab)]
+        #     else:
+        #         raise PreventUpdate
 
         # tab によるグラフ切替 callback
         @self.app.callback(
@@ -685,6 +685,41 @@ class HomePageBase:
             return [selected_data]
 
         # ホバーに画像を表示する callback
+        @self.monitor.app.callback(
+            Output(self.ID_GRAPH_TOOLTIP, "show"),
+            Output(self.ID_GRAPH_TOOLTIP, "bbox"),
+            Output(self.ID_GRAPH_TOOLTIP, "children"),
+            Input(self.ID_GRAPH, "hoverData"),
+        )
+        def display_hover(hoverData):
+            if hoverData is None:
+                return False, no_update, no_update
+
+            # demo only shows the first point, but other points may also be available
+            pt = hoverData["points"][0]
+            bbox = pt["bbox"]
+
+            # create image
+            import os
+            here = os.path.dirname(__file__)
+            img_path = os.path.join(here, 'sample.png')
+            import base64
+            with open(img_path, 'rb') as f:
+                content = f.read()
+            encoded_image = base64.b64encode(content).decode('utf-8')
+            img_url = 'data:image/png;base64, ' + encoded_image
+
+            children = [
+                html.Div([
+                    html.Img(src=img_url, style={"width": "100%"}),
+                    # html.H2(f"name", style={"color": "darkblue"}),
+                    # html.P(f"description"),
+                ], style={'width': '200px', 'white-space': 'normal'})
+            ]
+
+            return True, bbox, children
+
+
 
     def get_fig_by_tab_id(self, tab_id):
         if tab_id in self.graphs.keys():

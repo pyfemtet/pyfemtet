@@ -67,13 +67,17 @@ def update_default_figure(history, df):
     obj_names = history.obj_names
 
     if len(obj_names) == 0:
-        return go.Figure()
+        fig = go.Figure()
 
     elif len(obj_names) == 1:
-        return update_single_objective_plot(history, df)
+        fig =  update_single_objective_plot(history, df)
 
     elif len(obj_names) >= 2:
-        return update_multi_objective_pairplot(history, df)
+        fig =  update_multi_objective_pairplot(history, df)
+
+    fig.update_traces(hoverinfo="none", hovertemplate=None)
+
+    return fig
 
 
 def update_single_objective_plot(history, df):
