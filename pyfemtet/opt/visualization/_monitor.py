@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import psutil
 from plotly.graph_objects import Figure
-from dash import Dash, html, dcc, Output, Input, State, callback_context, no_update
+from dash import Dash, html, dcc, Output, Input, State, callback_context, no_update, dash_table
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
@@ -20,7 +20,6 @@ from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt.visualization._graphs import (
     update_default_figure,
     update_hypervolume_plot,
-    _CUSTOM_DATA_DICT
 )
 
 
@@ -462,7 +461,7 @@ class FemtetControl:
             points_dicts = selection_data['points']
             for points_dict in points_dicts:
                 logger.debug(points_dict)
-                trial = points_dict['customdata'][_CUSTOM_DATA_DICT['trial']]
+                trial = points_dict['customdata'][0]
                 logger.debug(trial)
                 index = trial - 1
                 names = [name for name in home.monitor.local_df.columns if name.startswith('prm_')]
@@ -709,7 +708,8 @@ class HomePageBase:
             # === create hovered data ===
             # get encoded image from history.additional_metadata
             img_url = None
-            # Femtet 特有の処理
+
+            # Femtet specified processing
             metadata = self.history.metadata
             if metadata[0] != '':
                 # get img path
@@ -724,24 +724,31 @@ class HomePageBase:
                         content = f.read()
                     encoded_image = base64.b64encode(content).decode('utf-8')
                     img_url = 'data:image/png;base64, ' + encoded_image
+            html_img = html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
 
             # parameters
+            pd.options.display.float_format = '{:.4e}'.format
             parameters = row.iloc[:, np.where(np.array(metadata) == 'prm')[0]]
+            names = parameters.columns
+            values = [f'{value:.3e}' for value in parameters.values.ravel()]
+            data = pd.DataFrame(dict(
+                name=names, value=values
+            ))
 
-            # objectives
-            ...
+            # descript result
+            desc = html.Div([
+                html.H3(f"trial{trial}", style={"color": "darkblue"}),
+                dash_table.DataTable(
+                    columns=[{'name': col, 'id': col} for col in data.columns],
+                    data=data.to_dict('records')
+                ),
+            ])
 
-            # create components
-            html_img = html.Img(src=img_url, style={"width": "100%"}) if img_url is not None else html.Div()
-
-            children = [
-                html.Div([
-                    html_img,
-                    html.H3(f"trial{trial}", style={"color": "darkblue"}),
-                    html.Div(f"parameters"),
-                    dbc.Table.from_dataframe(parameters, striped=True, bordered=True, hover=False, size='sm'),
-                ], style={'width': '200px', 'white-space': 'normal'})
-            ]
+            # make output
+            children = html.Div([
+                html.Div(html_img, style={'display': 'inline-block', 'margin-right': '10px', 'vertical-align': 'top'}),
+                html.Div(desc, style={'display': 'inline-block', 'margin-right': '10px'})
+            ])
 
             return True, bbox, children
 
