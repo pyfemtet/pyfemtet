@@ -2,9 +2,6 @@ import plotly.graph_objs as go
 import plotly.express as px
 
 
-_CUSTOM_DATA_DICT = {'trial': 0}  # 連番
-
-
 class _ColorSet:
     non_domi = {True: '#007bff', False: '#6c757d'}  # color
 
@@ -49,7 +46,7 @@ def update_hypervolume_plot(history, df):
         x="trial",
         y="hypervolume",
         markers=True,
-        custom_data=_CUSTOM_DATA_DICT.keys(),
+        custom_data=['trial'],
     )
 
     fig.update_layout(
@@ -70,10 +67,10 @@ def update_default_figure(history, df):
         fig = go.Figure()
 
     elif len(obj_names) == 1:
-        fig =  update_single_objective_plot(history, df)
+        fig = update_single_objective_plot(history, df)
 
     elif len(obj_names) >= 2:
-        fig =  update_multi_objective_pairplot(history, df)
+        fig = update_multi_objective_pairplot(history, df)
 
     fig.update_traces(hoverinfo="none", hovertemplate=None)
 
@@ -101,7 +98,7 @@ def update_single_objective_plot(history, df):
             _ls.feasible['label']: False,
             'trial': True,
         },
-        custom_data=_CUSTOM_DATA_DICT.keys(),
+        custom_data=['trial'],
     )
 
     fig.add_trace(
@@ -147,11 +144,7 @@ def update_multi_objective_pairplot(history, df):
             _ls.feasible[True]: _ss.feasible[True],
             _ls.feasible[False]: _ss.feasible[False],
         },
-        hover_data={
-            _ls.feasible['label']: False,
-            'trial': True,
-        },
-        custom_data=_CUSTOM_DATA_DICT.keys(),
+        custom_data=['trial'],
         category_orders={
             _ls.feasible['label']: (_ls.feasible[False], _ls.feasible[True]),
             _ls.non_domi['label']: (_ls.non_domi[False], _ls.non_domi[True]),

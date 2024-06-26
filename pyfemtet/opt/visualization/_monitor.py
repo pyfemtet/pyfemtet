@@ -1,4 +1,5 @@
 import os
+import base64
 from typing import Optional, List
 
 import json
@@ -6,6 +7,7 @@ import webbrowser
 from time import sleep
 from threading import Thread
 
+import numpy as np
 import pandas as pd
 import psutil
 from plotly.graph_objects import Figure
@@ -27,6 +29,8 @@ from pyfemtet.logger import get_logger
 logger = get_logger('viz')
 logger.setLevel(logging.INFO)
 
+
+here = os.path.dirname(__file__)
 
 DBC_COLUMN_STYLE_CENTER = {
     'display': 'flex',
@@ -617,7 +621,6 @@ class HomePageBase:
                     children=[
                         # Loading : child が Output である callback について、
                         # それが発火してから return するまでの間 Spinner が出てくる
-
                         html.Div([
                             dcc.Loading(
                                 dcc.Graph(id=self.ID_GRAPH, clear_on_unhover=True, figure=self.get_fig_by_tab_id(default_tab)),
@@ -696,30 +699,51 @@ class HomePageBase:
             if hoverData is None:
                 return False, no_update, no_update
 
-            # demo only shows the first point, but other points may also be available
             pt = hoverData["points"][0]
             bbox = pt["bbox"]
 
-            # create image
-            import os
-            here = os.path.dirname(__file__)
-            img_path = os.path.join(here, 'sample.png')
-            import base64
-            with open(img_path, 'rb') as f:
-                content = f.read()
-            encoded_image = base64.b64encode(content).decode('utf-8')
-            img_url = 'data:image/png;base64, ' + encoded_image
+            # get row of the history
+            trial = pt['customdata'][0]
+            row = self.df[self.df['trial'] == trial]
+
+            # === create hovered data ===
+            # get encoded image from history.additional_metadata
+            img_url = None
+            # Femtet 特有の処理
+            metadata = self.history.metadata
+            if metadata[0] != '':
+                # get img path
+                d = json.loads(metadata[0])
+                femprj_path = d['femprj_path']
+                model_name = d['model_name']
+                femprj_result_dir = femprj_path.replace('.femprj', '.Results')
+                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.png')
+                if os.path.exists(img_path):
+                    # create encoded image
+                    with open(img_path, 'rb') as f:
+                        content = f.read()
+                    encoded_image = base64.b64encode(content).decode('utf-8')
+                    img_url = 'data:image/png;base64, ' + encoded_image
+
+            # parameters
+            parameters = row.iloc[:, np.where(np.array(metadata) == 'prm')[0]]
+
+            # objectives
+            ...
+
+            # create components
+            html_img = html.Img(src=img_url, style={"width": "100%"}) if img_url is not None else html.Div()
 
             children = [
                 html.Div([
-                    html.Img(src=img_url, style={"width": "100%"}),
-                    # html.H2(f"name", style={"color": "darkblue"}),
-                    # html.P(f"description"),
+                    html_img,
+                    html.H3(f"trial{trial}", style={"color": "darkblue"}),
+                    html.Div(f"parameters"),
+                    dbc.Table.from_dataframe(parameters, striped=True, bordered=True, hover=False, size='sm'),
                 ], style={'width': '200px', 'white-space': 'normal'})
             ]
 
             return True, bbox, children
-
 
 
     def get_fig_by_tab_id(self, tab_id):
