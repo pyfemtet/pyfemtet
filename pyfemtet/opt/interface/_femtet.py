@@ -653,6 +653,19 @@ class FemtetInterface(FEMInterface):
     def _version(self):
         return _version(Femtet=self.Femtet)
 
+    def create_postprocess_args(self):
+        file_content = self.create_result_file_content()
+        out = dict(
+            file_content=file_content
+        )
+        return out
+
+    def postprocess_func(self, trial: int, file_content=None, dask_scheculer=None):
+        if file_content is not None:
+            filepath = self.create_file_path_on_scheduler(trial)
+            with open(filepath, 'wb') as f:
+                f.write(file_content)
+
     def create_result_file_content(self):
         """Called after solve"""
         if self.save_pdt:
@@ -682,8 +695,24 @@ class FemtetInterface(FEMInterface):
         else:
             return super().create_file_path_on_scheduler(trial)  # do nothing
 
+    def save_png(self, trial: int):
+        result_dir = self.original_femprj_path.replace('.femprj', '.Results')
+        jpg_path = os.path.join(result_dir, self.model_name + f'_trial{trial}.jpg')
+
+        # モデル表示画面の設定
+        self.Femtet.Fit()
+        self.Femtet.SetWindowSize(200, 200)
+        self.Femtet.ViewNumeric.SetCoord(1, 1, 1)
+
+        # ---モデルの画面を保存---
+        self.Femtet.Redraw()  # 再描画
+        self.Femtet.SavePicture(jpg_path, 200, 200, 80)
+
+        self.Femtet.RedrawMode = True  # 逐一の描画をオン
+
 
 from win32com.client import Dispatch, constants
+
 
 class _UnPicklableNoFEM(FemtetInterface):
 
