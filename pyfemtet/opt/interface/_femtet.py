@@ -653,6 +653,38 @@ class FemtetInterface(FEMInterface):
     def _version(self):
         return _version(Femtet=self.Femtet)
 
+    def create_postprocess_args(self):
+        file_content = self.create_result_file_content()
+        jpg_content = self.create_jpg_content()
+
+        out = dict(
+            original_femprj_path=self.original_femprj_path,
+            model_name=self.model_name,
+            pdt_file_content=file_content,
+            jpg_file_content=jpg_content,
+        )
+        return out
+
+    @staticmethod
+    def postprocess_func(
+            trial: int,
+            original_femprj_path: str,
+            model_name: str,
+            pdt_file_content=None,
+            jpg_file_content=None,
+            dask_scheduler=None
+    ):
+        result_dir = original_femprj_path.replace('.femprj', '.Results')
+        if pdt_file_content is not None:
+            pdt_path = os.path.join(result_dir, model_name + f'_trial{trial}.pdt')
+            with open(pdt_path, 'wb') as f:
+                f.write(pdt_file_content)
+
+        if jpg_file_content is not None:
+            jpg_path = os.path.join(result_dir, model_name + f'_trial{trial}.jpg')
+            with open(jpg_path, 'wb') as f:
+                f.write(jpg_file_content)
+
     def create_result_file_content(self):
         """Called after solve"""
         if self.save_pdt:
@@ -671,19 +703,37 @@ class FemtetInterface(FEMInterface):
                 raise Exception('pdt ファイルの保存でエラーが発生しました。')
 
         else:
-            return super().create_result_file_content()  # do nothing
+            return None
 
-    def create_file_path_on_scheduler(self, trial: int):
-        if self.save_pdt:
-            # return path of scheduler environment
-            result_dir = self.original_femprj_path.replace('.femprj', '.Results')
-            pdt_path = os.path.join(result_dir, self.model_name + f'_trial{trial}.pdt')
-            return pdt_path
-        else:
-            return super().create_file_path_on_scheduler(trial)  # do nothing
+    def create_jpg_content(self):
+        result_dir = self.femprj_path.replace('.femprj', '.Results')
+        jpg_path = os.path.join(result_dir, self.model_name + '.jpg')
+
+        # モデル表示画面の設定
+        self.Femtet.SetWindowSize(200, 200)
+        self.Femtet.Fit()
+        self.Femtet.ViewNumeric.SetCoord(1, 1, 1)
+
+        # ---モデルの画面を保存---
+        self.Femtet.Redraw()  # 再描画
+        succeed = self.Femtet.SavePicture(jpg_path, 200, 200, 80)
+
+        self.Femtet.RedrawMode = True  # 逐一の描画をオン
+
+        if not succeed:
+            raise Exception('jpg ファイルの保存でエラーが発生しました。')
+
+        if not os.path.exists(jpg_path):
+            raise Exception('保存した jpg ファイルが見つかりませんでした。')
+
+        with open(jpg_path, 'rb') as f:
+            content = f.read()
+
+        return content
 
 
 from win32com.client import Dispatch, constants
+
 
 class _UnPicklableNoFEM(FemtetInterface):
 

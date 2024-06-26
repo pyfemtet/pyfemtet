@@ -540,8 +540,8 @@ class History:
             obj_values,
             cns_values,
             message,
-            file_content,  # with open(..., 'rb') as f: content = f.read()
-            file_path_creator,  # fem specific
+            postprocess_func,
+            postprocess_args,
     ):
         """Records the optimization results in the history.
 
@@ -554,9 +554,8 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
-            file_content (Bytes): Result file content(like .pdt of Femtet)
-            file_path_creator (Callable): A function who gets a trial(int) and returns a path to save file_content on scheduler.
-
+            postprocess_func (Callable): fem method to call after solving. i.e. save result file. Must take trial(int) for 1st argument.
+            postprocess_args (dict): arguments for `postprocess_func`. i.e. create binary data of result file in the worker process.
         """
 
         # create row
@@ -604,15 +603,10 @@ class History:
             self.actor_data = self.local_data
 
             # save file
-            file_path = file_path_creator(self.local_data['trial'].values[-1])  # trial number is used to create filename
-            if file_path is not None:
-
-                def save_file(filepath, filecontent, dask_scheduler=None):
-                    with open(filepath, 'wb') as f:
-                        f.write(filecontent)
-
+            if postprocess_args is not None:
+                trial = self.local_data['trial'].values[-1]
                 client = get_client()  # always returns valid client
-                client.run_on_scheduler(save_file, filepath=file_path, filecontent=file_content)
+                client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
 
     def _calc_non_domi(self, objectives):
 

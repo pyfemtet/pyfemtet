@@ -1,4 +1,5 @@
 import os
+import base64
 from typing import Optional, List
 
 import json
@@ -6,10 +7,11 @@ import webbrowser
 from time import sleep
 from threading import Thread
 
+import numpy as np
 import pandas as pd
 import psutil
 from plotly.graph_objects import Figure
-from dash import Dash, html, dcc, Output, Input, State, callback_context, no_update
+from dash import Dash, html, dcc, Output, Input, State, callback_context, no_update, dash_table
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
@@ -18,7 +20,6 @@ from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt.visualization._graphs import (
     update_default_figure,
     update_hypervolume_plot,
-    _CUSTOM_DATA_DICT
 )
 
 
@@ -27,6 +28,8 @@ from pyfemtet.logger import get_logger
 logger = get_logger('viz')
 logger.setLevel(logging.INFO)
 
+
+here = os.path.dirname(__file__)
 
 DBC_COLUMN_STYLE_CENTER = {
     'display': 'flex',
@@ -458,7 +461,7 @@ class FemtetControl:
             points_dicts = selection_data['points']
             for points_dict in points_dicts:
                 logger.debug(points_dict)
-                trial = points_dict['customdata'][_CUSTOM_DATA_DICT['trial']]
+                trial = points_dict['customdata'][0]
                 logger.debug(trial)
                 index = trial - 1
                 names = [name for name in home.monitor.local_df.columns if name.startswith('prm_')]
@@ -556,6 +559,7 @@ class HomePageBase:
     ID_GRAPH_TABS = 'home-graph-tabs'
     ID_GRAPH_CARD_BODY = 'home-graph-card-body'
     ID_GRAPH = 'home-graph'
+    ID_GRAPH_TOOLTIP = 'home-graph-hover-tooltip'
     ID_SELECTION_DATA = 'home-selection-data'
 
     # selection data attribute
@@ -577,7 +581,6 @@ class HomePageBase:
         self.monitor = monitor
         self.app: Dash = monitor.app
         self.history = monitor.history
-        self.df = monitor.local_df
         self.setup_graph_card()
         self.setup_contents()
         self.setup_layout()
@@ -616,7 +619,12 @@ class HomePageBase:
                     children=[
                         # Loading : child が Output である callback について、
                         # それが発火してから return するまでの間 Spinner が出てくる
-                        dcc.Loading(dcc.Graph(id=self.ID_GRAPH)),
+                        html.Div([
+                            dcc.Loading(
+                                dcc.Graph(id=self.ID_GRAPH, clear_on_unhover=True, figure=self.get_fig_by_tab_id(default_tab)),
+                            ),
+                            dcc.Tooltip(id=self.ID_GRAPH_TOOLTIP),
+                        ]),
                     ],
                     id=self.ID_GRAPH_CARD_BODY,
                 ),
@@ -633,7 +641,7 @@ class HomePageBase:
                 Output(self.ID_GRAPH, 'figure'),
             ],
             [
-                Input(self.ID_GRAPH_CARD_BODY, 'children'),
+                Input(self.ID_DUMMY, 'children'),
             ],
             [
                 State(self.ID_GRAPH_TABS, 'active_tab'),
@@ -677,6 +685,72 @@ class HomePageBase:
         def on_select(selected_data):
             logger.debug(f'on_select: {selected_data}')
             return [selected_data]
+
+        # ホバーに画像を表示する callback
+        @self.monitor.app.callback(
+            Output(self.ID_GRAPH_TOOLTIP, "show"),
+            Output(self.ID_GRAPH_TOOLTIP, "bbox"),
+            Output(self.ID_GRAPH_TOOLTIP, "children"),
+            Input(self.ID_GRAPH, "hoverData"),
+        )
+        def display_hover(hoverData):
+            if hoverData is None:
+                return False, no_update, no_update
+
+            pt = hoverData["points"][0]
+            bbox = pt["bbox"]
+
+            # get row of the history
+            trial = pt['customdata'][0]
+            row = self.monitor.local_df[self.monitor.local_df['trial'] == trial]
+
+            # === create hovered data ===
+            # get encoded image from history.additional_metadata
+            img_url = None
+
+            # Femtet specified processing
+            metadata = self.history.metadata
+            if metadata[0] != '':
+                # get img path
+                d = json.loads(metadata[0])
+                femprj_path = d['femprj_path']
+                model_name = d['model_name']
+                femprj_result_dir = femprj_path.replace('.femprj', '.Results')
+                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
+                if os.path.exists(img_path):
+                    # create encoded image
+                    with open(img_path, 'rb') as f:
+                        content = f.read()
+                    encoded_image = base64.b64encode(content).decode('utf-8')
+                    img_url = 'data:image/jpeg;base64, ' + encoded_image
+            html_img = html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
+
+            # parameters
+            pd.options.display.float_format = '{:.4e}'.format
+            parameters = row.iloc[:, np.where(np.array(metadata) == 'prm')[0]]
+            names = parameters.columns
+            values = [f'{value:.3e}' for value in parameters.values.ravel()]
+            data = pd.DataFrame(dict(
+                name=names, value=values
+            ))
+
+            # descript result
+            desc = html.Div([
+                html.H3(f"trial{trial}", style={"color": "darkblue"}),
+                dash_table.DataTable(
+                    columns=[{'name': col, 'id': col} for col in data.columns],
+                    data=data.to_dict('records')
+                ),
+            ])
+
+            # make output
+            children = html.Div([
+                html.Div(html_img, style={'display': 'inline-block', 'margin-right': '10px', 'vertical-align': 'top'}),
+                html.Div(desc, style={'display': 'inline-block', 'margin-right': '10px'})
+            ])
+
+            return True, bbox, children
+
 
     def get_fig_by_tab_id(self, tab_id):
         if tab_id in self.graphs.keys():
@@ -832,7 +906,10 @@ class ProcessMonitorAppHomePage(HomePageBase):
             # 1. interval => figure を更新する
             if (len(self.monitor.local_df) > 0) and (active_tab_id is not None):
                 fig = self.get_fig_by_tab_id(active_tab_id)
-                ret[card_body] = dcc.Graph(figure=fig, id=self.ID_GRAPH)  # list にせんとダメかも
+                ret[card_body] = [
+                    dcc.Graph(figure=fig, id=self.ID_GRAPH, clear_on_unhover=True),
+                    dcc.Tooltip(id=self.ID_GRAPH_TOOLTIP),
+                ]
 
             # 3. btn toggle => (toggle の children を切替) and (interval を切替)
             if toggle_n_clicks % 2 == 1:

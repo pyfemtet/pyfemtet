@@ -88,8 +88,8 @@ class AbstractOptimizer(ABC):
             y,
             c,
             self.message,
-            file_content=self.fem.create_result_file_content(),  # with open(..., 'rb') as f: content = f.read()
-            file_path_creator=self.fem.create_file_path_on_scheduler,  # fem specific
+            postprocess_func=self.fem.postprocess_func,
+            postprocess_args=self.fem.create_postprocess_args(),
         )
 
         logger.debug('history.record end')
