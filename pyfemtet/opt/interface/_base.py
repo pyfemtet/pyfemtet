@@ -63,14 +63,7 @@ class FEMInterface(ABC):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
-    # def create_result_file_content(self) -> 'Bytes' or None:
-    #     """Called after solve"""
-    #     pass
-    #
-    # def create_file_path_on_scheduler(self, trial: int) -> str or None:
-    #     pass
-
-    def postprocess_func(self, trial: int, *args, **kwargs):
+    def postprocess_func(self, trial: int, *args, dask_scheduler=None, **kwargs):
         pass
 
     def create_postprocess_args(self):

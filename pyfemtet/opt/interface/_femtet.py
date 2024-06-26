@@ -655,16 +655,29 @@ class FemtetInterface(FEMInterface):
 
     def create_postprocess_args(self):
         file_content = self.create_result_file_content()
+        if file_content is None:
+            return super().create_postprocess_args()
+
         out = dict(
-            file_content=file_content
+            original_femprj_path=self.original_femprj_path,
+            model_name=self.model_name,
+            pdt_file_content=file_content
         )
         return out
 
-    def postprocess_func(self, trial: int, file_content=None, dask_scheculer=None):
-        if file_content is not None:
-            filepath = self.create_file_path_on_scheduler(trial)
-            with open(filepath, 'wb') as f:
-                f.write(file_content)
+    @staticmethod
+    def postprocess_func(
+            trial: int,
+            original_femprj_path: str,
+            model_name: str,
+            pdt_file_content=None,
+            dask_scheduler=None
+    ):
+        if pdt_file_content is not None:
+            result_dir = original_femprj_path.replace('.femprj', '.Results')
+            pdt_path = os.path.join(result_dir, model_name + f'_trial{trial}.pdt')
+            with open(pdt_path, 'wb') as f:
+                f.write(pdt_file_content)
 
     def create_result_file_content(self):
         """Called after solve"""
@@ -686,14 +699,14 @@ class FemtetInterface(FEMInterface):
         else:
             return super().create_result_file_content()  # do nothing
 
-    def create_file_path_on_scheduler(self, trial: int):
-        if self.save_pdt:
-            # return path of scheduler environment
-            result_dir = self.original_femprj_path.replace('.femprj', '.Results')
-            pdt_path = os.path.join(result_dir, self.model_name + f'_trial{trial}.pdt')
-            return pdt_path
-        else:
-            return super().create_file_path_on_scheduler(trial)  # do nothing
+    # def create_file_path_on_scheduler(self, trial: int):
+    #     if self.save_pdt:
+    #         # return path of scheduler environment
+    #         result_dir = self.original_femprj_path.replace('.femprj', '.Results')
+    #         pdt_path = os.path.join(result_dir, self.model_name + f'_trial{trial}.pdt')
+    #         return pdt_path
+    #     else:
+    #         return super().create_file_path_on_scheduler(trial)  # do nothing
 
     def save_png(self, trial: int):
         result_dir = self.original_femprj_path.replace('.femprj', '.Results')

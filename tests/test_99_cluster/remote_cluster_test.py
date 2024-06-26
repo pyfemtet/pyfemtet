@@ -98,6 +98,55 @@ def bottom_surface(_, opt):
     return d * w
 
 
+def test_local_cluster_with_femtet():
+
+    hostname = 'localhost'
+    port = 60000
+
+    # launch scheduler
+    Popen(
+        f'powershell -file launch_scheduler.ps1 -port {port}',
+        shell=True
+    )
+
+    # launch worker
+    Popen(
+        f'powershell -file launch_workers.ps1 -hostname {hostname} -port {port} -nworkers -1',
+        shell=True
+    )
+
+    sleep(20)
+
+    # femopt setup
+    # fem setup
+    femprj_path = os.path.join(
+        here,
+        '..',
+        'test_4_constants',
+        'test_simple_femtet_with_constants.femprj'
+    )
+    fem = FemtetInterface(
+        femprj_path, connect_method='new',
+        save_pdt=True
+    )
+
+    # femopt setup
+    femopt = FEMOpt(fem=fem, scheduler_address=f'tcp://{hostname}:{port}')
+
+    # problem setup
+    femopt.opt.seed = 42
+    femopt.add_parameter('d', 5, 1, 10)
+    femopt.add_parameter('h', 5, 1, 10)
+    femopt.add_parameter('w', 5, 1, 10)
+    femopt.add_objective(max_disp, '最大変位(m)')
+    femopt.add_objective(volume, '体積(mm3)', args=femopt.opt)
+    femopt.add_objective(mises, 'mises 応力()')
+    femopt.add_constraint(bottom_surface, '底面積<=30', upper_bound=30, args=femopt.opt)
+    femopt.optimize(n_trials=10, n_parallel=3, wait_setup=True)
+    femopt.terminate_all()
+
+
+
 def test_remote_cluster_with_femtet():
     # get remote info
     json_path = os.path.join(here, 'remote.json')
@@ -142,4 +191,4 @@ def test_remote_cluster_with_femtet():
 
 
 if __name__ == '__main__':
-    test_remote_cluster_with_femtet()
+    test_local_cluster_with_femtet()

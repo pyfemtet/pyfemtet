@@ -603,9 +603,10 @@ class History:
             self.actor_data = self.local_data
 
             # save file
-            trial = self.local_data['trial'].values[-1]
-            client = get_client()  # always returns valid client
-            client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
+            if postprocess_args is not None:
+                trial = self.local_data['trial'].values[-1]
+                client = get_client()  # always returns valid client
+                client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
 
     def _calc_non_domi(self, objectives):
 
