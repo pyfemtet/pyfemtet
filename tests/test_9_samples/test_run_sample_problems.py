@@ -20,6 +20,8 @@ SAMPLE_DIR = os.path.join(LIBRARY_ROOT, 'opt', 'femprj_sample')
 
 RECORD_MODE = False
 
+os.chdir(LIBRARY_ROOT)
+
 
 def main(py_script_path):
     femprj_path = py_script_path.replace('.py', '.femprj')
@@ -50,7 +52,11 @@ def main(py_script_path):
             # raise assertion error if needed
             _test_util.is_equal_result(
                 generated_csv_path,
-                recorded_csv
+                recorded_csv,
+                os.path.join(
+                    os.path.dirname(__file__),
+                    os.path.basename(py_script_path).replace('.py', '.txt')
+                )
             )
 
         # shutdown Femtet
@@ -102,4 +108,4 @@ if __name__ == '__main__':
     #     print(path)
     #     if not 'cad' in path:
     #         main(path)
-    test_sample_gau_ex08_parametric()
+    test_sample_gal_ex58_parametric()

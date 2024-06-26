@@ -86,10 +86,30 @@ def _get_obj_from_csv(csv_path):
     return out, columns
 
 
-def is_equal_result(csv1, csv2):
+def is_equal_result(csv1, csv2, result_save_to=None):
     """Check the equality of two result csv files."""
     df1, columns1 = _get_obj_from_csv(csv1)
     df2, columns2 = _get_obj_from_csv(csv2)
+
+    if result_save_to is not None:
+        import datetime
+        with open(result_save_to, 'a', encoding='utf-8', newline='\n') as f:
+            name = os.path.basename(csv1)
+            content = [
+                f'===== result of {name} =====\n',
+                f'{datetime.datetime.now()}\n',
+                f'----- column numbers -----\n',
+                f'csv1: {len(columns1)} columns\n',
+                f'csv2: {len(columns2)} columns\n',
+                f'----- row numbers -----\n',
+                f'csv1: {len(df1)} columns\n',
+                f'csv2: {len(df2)} columns\n',
+                f'----- difference -----\n',
+                f'max difference ratio: {(np.abs(df1.values - df2.values) / np.abs(df2.values)).max() * 100}%\n',
+                '\n'
+            ]
+            f.writelines(content)
+
     assert len(columns1) == len(columns2), '結果 csv の column 数が異なります。'
     assert len(df1) == len(df2), '結果 csv の row 数が異なります。'
     assert (np.abs(df1.values - df2.values) / np.abs(df2.values)).max() <= 0.01, '前回の結果と 1% を超える相違があります。'
