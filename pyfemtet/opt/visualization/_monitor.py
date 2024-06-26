@@ -581,7 +581,6 @@ class HomePageBase:
         self.monitor = monitor
         self.app: Dash = monitor.app
         self.history = monitor.history
-        self.df = monitor.local_df
         self.setup_graph_card()
         self.setup_contents()
         self.setup_layout()
@@ -703,7 +702,7 @@ class HomePageBase:
 
             # get row of the history
             trial = pt['customdata'][0]
-            row = self.df[self.df['trial'] == trial]
+            row = self.monitor.local_df[self.monitor.local_df['trial'] == trial]
 
             # === create hovered data ===
             # get encoded image from history.additional_metadata
@@ -717,13 +716,13 @@ class HomePageBase:
                 femprj_path = d['femprj_path']
                 model_name = d['model_name']
                 femprj_result_dir = femprj_path.replace('.femprj', '.Results')
-                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.png')
+                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
                 if os.path.exists(img_path):
                     # create encoded image
                     with open(img_path, 'rb') as f:
                         content = f.read()
                     encoded_image = base64.b64encode(content).decode('utf-8')
-                    img_url = 'data:image/png;base64, ' + encoded_image
+                    img_url = 'data:image/jpeg;base64, ' + encoded_image
             html_img = html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
 
             # parameters
@@ -907,7 +906,10 @@ class ProcessMonitorAppHomePage(HomePageBase):
             # 1. interval => figure を更新する
             if (len(self.monitor.local_df) > 0) and (active_tab_id is not None):
                 fig = self.get_fig_by_tab_id(active_tab_id)
-                ret[card_body] = dcc.Graph(figure=fig, id=self.ID_GRAPH)  # list にせんとダメかも
+                ret[card_body] = [
+                    dcc.Graph(figure=fig, id=self.ID_GRAPH, clear_on_unhover=True),
+                    dcc.Tooltip(id=self.ID_GRAPH_TOOLTIP),
+                ]
 
             # 3. btn toggle => (toggle の children を切替) and (interval を切替)
             if toggle_n_clicks % 2 == 1:
