@@ -60,7 +60,7 @@ class FemtetInterface(FEMInterface):
             femprj_path=None,
             model_name=None,
             connect_method='auto',  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
-            save_pdt=None,  # 'all' or None
+            save_pdt='all',  # 'all' or None
             strictly_pid_specify=True,  # dask worker では True にしたいので super() の引数にしない。
             allow_without_project=False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui=True,
