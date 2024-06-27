@@ -39,12 +39,21 @@ def main(py_script_path):
         # wait for the subprocess
         out, err = process.communicate()
 
+        try:
+            out = out.decode('cp932')
+        except UnicodeDecodeError:
+            out = out.decode('utf-8')
+        try:
+            err = err.decode('cp932')
+        except UnicodeDecodeError:
+            err = err.decode('utf-8')
+
         # check stdout and stderr
         print('===== stdout =====')
-        print(out.decode('utf-8'))
+        print(out)
         print()
         print('===== stderr =====')
-        print(err.decode('utf-8'))
+        print(err)
         print()
 
         # if include Exception, raise Exception
@@ -52,7 +61,7 @@ def main(py_script_path):
         # [x]test: continue if logger (all logger were stderr)
         # [x]test: stop if raise error in script
         # [x]test: stop if raise error in module (raise RuntimeError in terminate_all())
-        if 'Traceback (most recent call last):' in err.decode('utf-8'):
+        if 'Traceback (most recent call last):' in err:
             raise Exception(f'Unexpected Error has occurred in {py_script_path}')
 
         # search generated csv
