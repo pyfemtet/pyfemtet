@@ -1220,7 +1220,7 @@ class ProcessMonitorApp(AppBase):
             self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
 
             # terminate_all 指令があれば monitor server をホストするプロセスごと終了する
-            if self.status.get() == OptimizationStatus.TERMINATE_ALL:
+            if self.status.get() >= OptimizationStatus.TERMINATE_ALL:
                 return 0  # take server down with me
 
             # interval

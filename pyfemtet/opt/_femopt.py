@@ -513,10 +513,7 @@ class FEMOpt:
         sleep(1)
 
         # terminate monitor process
-        if self._is_error_exit:
-            self.status.set(OptimizationStatus.CRASHED)
-        else:
-            self.status.set(OptimizationStatus.TERMINATE_ALL)
+        self.status.set(OptimizationStatus.TERMINATE_ALL)
         logger.info(self.monitor_process_future.result())
         sleep(1)
 

@@ -1,16 +1,8 @@
 import os
 import sys
-from glob import glob
-from time import sleep
-from multiprocessing import Process
-from subprocess import run
-
-from tqdm import tqdm
-from femtetutils import util
-from win32com.client import Dispatch
+import subprocess
 
 import pyfemtet
-from pyfemtet.dispatch_extensions import _get_hwnds
 
 from pyfemtet import _test_util
 
@@ -32,10 +24,40 @@ def main(py_script_path):
     try:
 
         # run script
-        run([sys.executable, py_script_path], check=True)
+        # run([sys.executable, py_script_path], check=True)
+        process = subprocess.Popen(
+            [sys.executable, py_script_path],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        # press enter to skip input() in sample script
+        process.stdin.write(b'\n')
+        process.stdin.flush()
+
+        # wait for the subprocess
+        out, err = process.communicate()
+
+        # check stdout and stderr
+        print('===== stdout =====')
+        print(out.decode('utf-8'))
+        print()
+        print('===== stderr =====')
+        print(err.decode('utf-8'))
+        print()
+
+        # if include Exception, raise Exception
+        # [x]test: continue if succeed
+        # [x]test: continue if logger (all logger were stderr)
+        # [x]test: stop if raise error in script
+        # [x]test: stop if raise error in module (raise RuntimeError in terminate_all())
+        if 'Traceback (most recent call last):' in err.decode('utf-8'):
+            raise Exception(f'Unexpected Error has occurred in {py_script_path}')
 
         # search generated csv
         generated_csv_path = _test_util.find_latest_csv()
+
         if RECORD_MODE:
             # copy to same directory
             _test_util.record_result(

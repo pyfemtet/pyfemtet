@@ -713,8 +713,8 @@ class OptimizationStatus:
     RUNNING = 30
     INTERRUPTING = 40
     TERMINATED = 50
-    CRASHED = 55
     TERMINATE_ALL = 60
+    CRASHED = 70
 
     def __init__(self, client, name='entire'):
         self._future = client.submit(_OptimizationStatusActor, actor=True)

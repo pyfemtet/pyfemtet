@@ -1,0 +1,22 @@
+===== result of 20240627_114853.csv =====
+2024-06-27 11:49:11.528440
+----- column numbers -----
+csv1: 9 columns
+csv2: 9 columns
+----- row numbers -----
+csv1: 1 columns
+csv2: 10 columns
+----- difference -----
+max difference ratio: 14.112055991698046%
+
+===== result of 20240627_122632.csv =====
+2024-06-27 12:27:29.314261
+----- column numbers -----
+csv1: 9 columns
+csv2: 9 columns
+----- row numbers -----
+csv1: 10 columns
+csv2: 10 columns
+----- difference -----
+max difference ratio: 3.3752509246258665e-05%
+
