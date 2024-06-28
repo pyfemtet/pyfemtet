@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.opt._optuna &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.opt._optuna</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.opt._optuna</h1><div class="highlight"><pre>
+<span></span><span class="c1"># typing</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="c1"># built-in</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># 3rd-party</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">optuna</span>
+<span class="kn">from</span> <span class="nn">optuna.trial</span> <span class="kn">import</span> <span class="n">TrialState</span>
+<span class="kn">from</span> <span class="nn">optuna.study</span> <span class="kn">import</span> <span class="n">MaxTrialsCallback</span>
+
+<span class="c1"># pyfemtet relative</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span><span class="p">,</span> <span class="n">generate_lhs</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.opt</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">MeshError</span><span class="p">,</span> <span class="n">ModelError</span><span class="p">,</span> <span class="n">SolveError</span>
+
+<span class="c1"># filter warnings</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">optuna.exceptions</span> <span class="kn">import</span> <span class="n">ExperimentalWarning</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ExperimentalWarning</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OptunaOptimizer">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.OptunaOptimizer">[docs]</a>
+<span class="k">class</span> <span class="nc">OptunaOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">sampler_class</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">BaseSampler</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">add_init_method</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">study_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimize_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span> <span class="k">if</span> <span class="n">sampler_class</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sampler_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">sampler_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sampler_kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_parameter</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_methods</span> <span class="o">=</span> <span class="n">add_init_method</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">add_init_method</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">add_init_method</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+
+        <span class="c1"># 中断の確認 (FAIL loop に陥る対策)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">)</span>
+            <span class="n">trial</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>  <span class="c1"># 現在実行中の trial を最後にする</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># set TrialState FAIL</span>
+
+        <span class="c1"># candidate x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lb&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ub&#39;</span><span class="p">])</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c1"># message の設定</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;message&#39;</span> <span class="ow">in</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="c1"># fem や opt 経由で変数を取得して constraint を計算する時のためにアップデート</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="c1"># strict 拘束</span>
+        <span class="n">strict_constraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">cns</span> <span class="k">for</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">strict</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">cns</span> <span class="ow">in</span> <span class="n">strict_constraints</span><span class="p">:</span>
+            <span class="n">feasible</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">cns_value</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">calc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">feasible</span> <span class="o">=</span> <span class="n">feasible</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cns_value</span> <span class="o">&gt;=</span> <span class="n">cns</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">feasible</span> <span class="o">=</span> <span class="n">feasible</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cns</span><span class="o">.</span><span class="n">ub</span> <span class="o">&gt;=</span> <span class="n">cns_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">feasible</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;以下の変数で拘束 </span><span class="si">{</span><span class="n">cns</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> が満たされませんでした。&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="n">optuna</span><span class="o">.</span><span class="n">TrialPruned</span><span class="p">()</span>  <span class="c1"># set TrialState PRUNED because FAIL causes similar candidate loop.</span>
+
+        <span class="c1"># 計算</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">ModelError</span><span class="p">,</span> <span class="n">MeshError</span><span class="p">,</span> <span class="n">SolveError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;以下の変数で FEM 解析に失敗しました。&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">))</span>
+
+            <span class="c1"># 中断の確認 (解析中に interrupt されている場合対策)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">)</span>
+                <span class="n">trial</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>  <span class="c1"># 現在実行中の trial を最後にする</span>
+                <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># set TrialState FAIL</span>
+
+            <span class="k">raise</span> <span class="n">optuna</span><span class="o">.</span><span class="n">TrialPruned</span><span class="p">()</span>  <span class="c1"># set TrialState PRUNED because FAIL causes similar candidate loop.</span>
+
+        <span class="c1"># 拘束 attr の更新</span>
+        <span class="n">_c</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 非正なら OK</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">cns</span><span class="p">),</span> <span class="n">c_value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">c</span><span class="p">):</span>
+            <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">lb</span><span class="p">,</span> <span class="n">cns</span><span class="o">.</span><span class="n">ub</span>
+            <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># fun &gt;= lb  &lt;=&gt;  lb - fun &lt;= 0</span>
+                <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lb</span> <span class="o">-</span> <span class="n">c_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># ub &gt;= fun  &lt;=&gt;  fun - ub &lt;= 0</span>
+                <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c_value</span> <span class="o">-</span> <span class="n">ub</span><span class="p">)</span>
+        <span class="n">trial</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span><span class="s1">&#39;constraint&#39;</span><span class="p">,</span> <span class="n">_c</span><span class="p">)</span>
+
+        <span class="c1"># 中断の確認 (解析中に interrupt されている場合対策)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">)</span>
+            <span class="n">trial</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>  <span class="c1"># 現在実行中の trial を最後にする</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># set TrialState FAIL</span>
+
+        <span class="c1"># 結果</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s1">&#39;constraint&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;constraint&#39;</span> <span class="ow">in</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>  <span class="c1"># infeasible</span>
+
+    <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create storage, study and set initial parameter.&quot;&quot;&quot;</span>
+
+        <span class="c1"># create storage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">study_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;.db&#39;</span><span class="p">)</span>  <span class="c1"># history と同じところに保存</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_cluster</span><span class="p">:</span>  <span class="c1"># remote cluster なら scheduler の working dir に保存</span>
+            <span class="n">storage_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;.db&#39;</span><span class="p">)</span>
+
+        <span class="c1"># callback to terminate</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_trials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span>
+
+            <span class="c1"># restart である場合、追加 N 回と見做す</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
+                <span class="n">n_existing_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">actor_data</span><span class="p">)</span>
+                <span class="n">n_trials</span> <span class="o">+=</span> <span class="n">n_existing_trials</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimize_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MaxTrialsCallback</span><span class="p">(</span><span class="n">n_trials</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,)))</span>
+
+        <span class="c1"># if not restart, create study if storage is not exists</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">integration</span><span class="o">.</span><span class="n">dask</span><span class="o">.</span><span class="n">DaskStorage</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span>
+                <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span>
+                <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="c1"># 初期値の設定</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">trials</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># リスタートでなければ</span>
+                <span class="c1"># ユーザーの指定した初期値</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">user_attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;initial&quot;</span><span class="p">})</span>
+
+                <span class="c1"># add_initial_parameter で追加された初期値</span>
+                <span class="k">for</span> <span class="n">prm</span><span class="p">,</span> <span class="n">prm_set_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_parameter</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+                        <span class="k">assert</span> <span class="n">prm</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s1">&#39;設定されたパラメータ名と add_init_parameter で追加されたパラメータ名が一致しません。&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="s1">&#39;設定されたパラメータ数と add_init_parameter で追加されたパラメータ数が一致しません。&#39;</span>
+                        <span class="n">prm</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">prm</span><span class="p">))</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span>
+                        <span class="n">prm</span><span class="p">,</span>
+                        <span class="n">user_attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">prm_set_name</span><span class="p">}</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># add_init で指定された方法による初期値</span>
+                <span class="k">if</span> <span class="s1">&#39;LHS&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_methods</span><span class="p">:</span>
+                    <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+                        <span class="n">lb</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lb&#39;</span><span class="p">]</span>
+                        <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ub&#39;</span><span class="p">]</span>
+                        <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">])</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">generate_lhs</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">datum</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
+                            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span>
+                            <span class="n">d</span><span class="p">,</span> <span class="n">user_attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;additional initial (Latin Hypercube Sampling)&quot;</span><span class="p">}</span>
+                        <span class="p">)</span>
+
+        <span class="c1"># if is_restart, load study</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">storage_path</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">storage_path</span><span class="si">}</span><span class="s1"> が見つかりません。&#39;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;.db ファイルは .csv ファイルと同じフォルダに生成されます。&#39;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;クラスター解析の場合は、スケジューラを起動したフォルダに生成されます。&#39;</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">integration</span><span class="o">.</span><span class="n">dask</span><span class="o">.</span><span class="n">DaskStorage</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="OptunaOptimizer.add_init_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.OptunaOptimizer.add_init_parameter">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_init_parameter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="p">:</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="n">Iterable</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add additional initial parameter for evaluate.</span>
+
+<span class="sd">        The parameter set is ignored if the main() is continued.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parameter (dict or Iterable): Parameter to evaluate before run optimization algorithm.</span>
+<span class="sd">            name (str or None): Optional. If specified, the name is saved in the history row. Default to None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;additional initial&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;additional initial (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_parameter</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">parameter</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="OptunaOptimizer.run">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.OptunaOptimizer.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set random seed, sampler, study and run study.optimize().&quot;&quot;&quot;</span>
+
+        <span class="c1"># (re)set random seed</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subprocess_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">seed</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subprocess_idx</span>
+
+        <span class="c1"># restore sampler</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="p">(</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">constraints_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraint</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span>
+        <span class="p">)</span>
+
+        <span class="c1"># load study</span>
+        <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">load_study</span><span class="p">(</span>
+            <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+            <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span>
+            <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># run</span>
+        <span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">callbacks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimize_callbacks</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

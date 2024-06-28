@@ -275,29 +275,40 @@ to execute it.</p>
 <span class="linenos">107</span>    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetWithNXInterface</span><span class="p">(</span>
 <span class="linenos">108</span>        <span class="n">prt_path</span><span class="o">=</span><span class="s1">&#39;cad_ex01_NX.prt&#39;</span><span class="p">,</span>
 <span class="linenos">109</span>        <span class="n">open_result_with_gui</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># To calculate von Mises stress, set this argument to False. See Femtet Macro Help.</span>
-<span class="linenos">110</span>    <span class="p">)</span>
-<span class="linenos">111</span>
-<span class="linenos">112</span>    <span class="c1"># Initialize the FEMOpt object.</span>
-<span class="linenos">113</span>    <span class="c1"># (establish connection between the optimization problem and Femtet)</span>
-<span class="linenos">114</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
+<span class="linenos">110</span>        <span class="n">export_curves</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">111</span>        <span class="n">export_surfaces</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">112</span>        <span class="n">export_solids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">113</span>        <span class="n">export_flattened_assembly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">114</span>    <span class="p">)</span>
 <span class="linenos">115</span>
-<span class="linenos">116</span>    <span class="c1"># Add design variables to the optimization problem.</span>
-<span class="linenos">117</span>    <span class="c1"># (Specify the variables registered in the femprj file.)</span>
-<span class="linenos">118</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
-<span class="linenos">119</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
-<span class="linenos">120</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
-<span class="linenos">121</span>
-<span class="linenos">122</span>    <span class="c1"># Add the constraint function to the optimization problem.</span>
-<span class="linenos">123</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">C_minus_B</span><span class="p">,</span> <span class="s1">&#39;C&gt;B&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">)</span>
-<span class="linenos">124</span>
-<span class="linenos">125</span>    <span class="c1"># Add the objective function to the optimization problem.</span>
-<span class="linenos">126</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">von_mises</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;von Mises (Pa)&#39;</span><span class="p">)</span>
-<span class="linenos">127</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mass (kg)&#39;</span><span class="p">)</span>
+<span class="linenos">116</span>    <span class="c1"># Initialize the FEMOpt object.</span>
+<span class="linenos">117</span>    <span class="c1"># (establish connection between the optimization problem and Femtet)</span>
+<span class="linenos">118</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
+<span class="linenos">119</span>
+<span class="linenos">120</span>    <span class="c1"># Add design variables to the optimization problem.</span>
+<span class="linenos">121</span>    <span class="c1"># (Specify the variables registered in the femprj file.)</span>
+<span class="linenos">122</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+<span class="linenos">123</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="linenos">124</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+<span class="linenos">125</span>
+<span class="linenos">126</span>    <span class="c1"># Add the constraint function to the optimization problem.</span>
+<span class="linenos">127</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">C_minus_B</span><span class="p">,</span> <span class="s1">&#39;C&gt;B&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">)</span>
 <span class="linenos">128</span>
-<span class="linenos">129</span>    <span class="c1"># Run optimization.</span>
-<span class="linenos">130</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="linenos">131</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="linenos">132</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+<span class="linenos">129</span>    <span class="c1"># Add the objective function to the optimization problem.</span>
+<span class="linenos">130</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">von_mises</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;von Mises (Pa)&#39;</span><span class="p">)</span>
+<span class="linenos">131</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mass (kg)&#39;</span><span class="p">)</span>
+<span class="linenos">132</span>
+<span class="linenos">133</span>    <span class="c1"># Run optimization.</span>
+<span class="linenos">134</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">135</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="linenos">136</span>
+<span class="linenos">137</span>    <span class="c1"># Stop script to keep process alive</span>
+<span class="linenos">138</span>    <span class="c1"># while you check the result in process monitor.</span>
+<span class="linenos">139</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">140</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Finished. Press Enter to quit...&#39;</span><span class="p">)</span>
+<span class="linenos">141</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">142</span>    <span class="nb">input</span><span class="p">()</span>
+<span class="linenos">143</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

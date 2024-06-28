@@ -77,6 +77,7 @@
              
   <h1>pyfemtet.opt.visualization._monitor のソースコード</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
@@ -84,10 +85,11 @@
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">psutil</span>
 <span class="kn">from</span> <span class="nn">plotly.graph_objects</span> <span class="kn">import</span> <span class="n">Figure</span>
-<span class="kn">from</span> <span class="nn">dash</span> <span class="kn">import</span> <span class="n">Dash</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">dcc</span><span class="p">,</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">callback_context</span><span class="p">,</span> <span class="n">no_update</span>
+<span class="kn">from</span> <span class="nn">dash</span> <span class="kn">import</span> <span class="n">Dash</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">dcc</span><span class="p">,</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">callback_context</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">dash_table</span>
 <span class="kn">from</span> <span class="nn">dash.exceptions</span> <span class="kn">import</span> <span class="n">PreventUpdate</span>
 <span class="kn">import</span> <span class="nn">dash_bootstrap_components</span> <span class="k">as</span> <span class="nn">dbc</span>
 
@@ -96,7 +98,6 @@
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization._graphs</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">update_default_figure</span><span class="p">,</span>
     <span class="n">update_hypervolume_plot</span><span class="p">,</span>
-    <span class="n">_CUSTOM_DATA_DICT</span>
 <span class="p">)</span>
 
 
@@ -105,6 +106,8 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;viz&#39;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 
+
+<span class="n">here</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 
 <span class="n">DBC_COLUMN_STYLE_CENTER</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;flex&#39;</span><span class="p">,</span>
@@ -536,7 +539,7 @@
             <span class="n">points_dicts</span> <span class="o">=</span> <span class="n">selection_data</span><span class="p">[</span><span class="s1">&#39;points&#39;</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">points_dict</span> <span class="ow">in</span> <span class="n">points_dicts</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">points_dict</span><span class="p">)</span>
-                <span class="n">trial</span> <span class="o">=</span> <span class="n">points_dict</span><span class="p">[</span><span class="s1">&#39;customdata&#39;</span><span class="p">][</span><span class="n">_CUSTOM_DATA_DICT</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]]</span>
+                <span class="n">trial</span> <span class="o">=</span> <span class="n">points_dict</span><span class="p">[</span><span class="s1">&#39;customdata&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
                 <span class="n">index</span> <span class="o">=</span> <span class="n">trial</span> <span class="o">-</span> <span class="mi">1</span>
                 <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">home</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">local_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;prm_&#39;</span><span class="p">)]</span>
@@ -634,6 +637,7 @@
     <span class="n">ID_GRAPH_TABS</span> <span class="o">=</span> <span class="s1">&#39;home-graph-tabs&#39;</span>
     <span class="n">ID_GRAPH_CARD_BODY</span> <span class="o">=</span> <span class="s1">&#39;home-graph-card-body&#39;</span>
     <span class="n">ID_GRAPH</span> <span class="o">=</span> <span class="s1">&#39;home-graph&#39;</span>
+    <span class="n">ID_GRAPH_TOOLTIP</span> <span class="o">=</span> <span class="s1">&#39;home-graph-hover-tooltip&#39;</span>
     <span class="n">ID_SELECTION_DATA</span> <span class="o">=</span> <span class="s1">&#39;home-selection-data&#39;</span>
 
     <span class="c1"># selection data attribute</span>
@@ -655,7 +659,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">monitor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">:</span> <span class="n">Dash</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">app</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">history</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">local_df</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_graph_card</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_contents</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_layout</span><span class="p">()</span>
@@ -694,7 +697,12 @@
                     <span class="n">children</span><span class="o">=</span><span class="p">[</span>
                         <span class="c1"># Loading : child が Output である callback について、</span>
                         <span class="c1"># それが発火してから return するまでの間 Spinner が出てくる</span>
-                        <span class="n">dcc</span><span class="o">.</span><span class="n">Loading</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH</span><span class="p">)),</span>
+                        <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">([</span>
+                            <span class="n">dcc</span><span class="o">.</span><span class="n">Loading</span><span class="p">(</span>
+                                <span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH</span><span class="p">,</span> <span class="n">clear_on_unhover</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_fig_by_tab_id</span><span class="p">(</span><span class="n">default_tab</span><span class="p">)),</span>
+                            <span class="p">),</span>
+                            <span class="n">dcc</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_TOOLTIP</span><span class="p">),</span>
+                        <span class="p">]),</span>
                     <span class="p">],</span>
                     <span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_CARD_BODY</span><span class="p">,</span>
                 <span class="p">),</span>
@@ -711,7 +719,7 @@
                 <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH</span><span class="p">,</span> <span class="s1">&#39;figure&#39;</span><span class="p">),</span>
             <span class="p">],</span>
             <span class="p">[</span>
-                <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_CARD_BODY</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
+                <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_DUMMY</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
             <span class="p">],</span>
             <span class="p">[</span>
                 <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_TABS</span><span class="p">,</span> <span class="s1">&#39;active_tab&#39;</span><span class="p">),</span>
@@ -756,6 +764,72 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;on_select: </span><span class="si">{</span><span class="n">selected_data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">selected_data</span><span class="p">]</span>
 
+        <span class="c1"># ホバーに画像を表示する callback</span>
+        <span class="nd">@self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_TOOLTIP</span><span class="p">,</span> <span class="s2">&quot;show&quot;</span><span class="p">),</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_TOOLTIP</span><span class="p">,</span> <span class="s2">&quot;bbox&quot;</span><span class="p">),</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_TOOLTIP</span><span class="p">,</span> <span class="s2">&quot;children&quot;</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH</span><span class="p">,</span> <span class="s2">&quot;hoverData&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">display_hover</span><span class="p">(</span><span class="n">hoverData</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">hoverData</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span>
+
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">hoverData</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">bbox</span> <span class="o">=</span> <span class="n">pt</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">]</span>
+
+            <span class="c1"># get row of the history</span>
+            <span class="n">trial</span> <span class="o">=</span> <span class="n">pt</span><span class="p">[</span><span class="s1">&#39;customdata&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">local_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">local_df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">trial</span><span class="p">]</span>
+
+            <span class="c1"># === create hovered data ===</span>
+            <span class="c1"># get encoded image from history.additional_metadata</span>
+            <span class="n">img_url</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Femtet specified processing</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="c1"># get img path</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">femprj_path</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;femprj_path&#39;</span><span class="p">]</span>
+                <span class="n">model_name</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span>
+                <span class="n">femprj_result_dir</span> <span class="o">=</span> <span class="n">femprj_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.femprj&#39;</span><span class="p">,</span> <span class="s1">&#39;.Results&#39;</span><span class="p">)</span>
+                <span class="n">img_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">femprj_result_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">_trial</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s1">.jpg&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
+                    <span class="c1"># create encoded image</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">img_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">content</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                    <span class="n">img_url</span> <span class="o">=</span> <span class="s1">&#39;data:image/jpeg;base64, &#39;</span> <span class="o">+</span> <span class="n">encoded_image</span>
+            <span class="n">html_img</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Img</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">img_url</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="s2">&quot;200px&quot;</span><span class="p">})</span> <span class="k">if</span> <span class="n">img_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">()</span>
+
+            <span class="c1"># parameters</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">float_format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:.4e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;prm&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">columns</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s1">.3e</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">()]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">values</span>
+            <span class="p">))</span>
+
+            <span class="c1"># descript result</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">([</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">H3</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;trial</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkblue&quot;</span><span class="p">}),</span>
+                <span class="n">dash_table</span><span class="o">.</span><span class="n">DataTable</span><span class="p">(</span>
+                    <span class="n">columns</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">col</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">col</span><span class="p">}</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">],</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">])</span>
+
+            <span class="c1"># make output</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">([</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span><span class="n">html_img</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;inline-block&#39;</span><span class="p">,</span> <span class="s1">&#39;margin-right&#39;</span><span class="p">:</span> <span class="s1">&#39;10px&#39;</span><span class="p">,</span> <span class="s1">&#39;vertical-align&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">}),</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;inline-block&#39;</span><span class="p">,</span> <span class="s1">&#39;margin-right&#39;</span><span class="p">:</span> <span class="s1">&#39;10px&#39;</span><span class="p">})</span>
+            <span class="p">])</span>
+
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">children</span>
+
+
     <span class="k">def</span> <span class="nf">get_fig_by_tab_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab_id</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">tab_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">fig_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">[</span><span class="n">tab_id</span><span class="p">][</span><span class="s1">&#39;fig_func&#39;</span><span class="p">]</span>
@@ -790,8 +864,8 @@
             <span class="s1">&#39;---</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="s1">&#39;- 最適化の結果分析画面です。</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="s1">&#39;- 凡例をクリックすると、対応する要素の表示/非表示を切り替えます。</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="s1">&#39;- ブラウザを使用しますが、ネットワーク通信は行いません。</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="s1">&#39;- ブラウザを閉じてもプログラムは終了しません。&#39;</span>
+            <span class="s1">&#39;- ブラウザを使用しますが、解析結果のインターネット通信は行いません。</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;- ブラウザを閉じてもプログラムは終了しません。</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="s1">&#39;  - コマンドプロンプトを閉じるかコマンドプロンプトに `CTRL+C` を入力してプログラムを終了してください。</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
@@ -831,9 +905,10 @@
         <span class="n">note</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span>
             <span class="s1">&#39;---</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="s1">&#39;- 最適化の結果分析画面です。</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="s1">&#39;- ブラウザを使用しますが、ネットワーク通信は行いません。</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;- ブラウザを使用しますが、解析結果のインターネット通信は行いません。</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="s1">&#39;- この画面を閉じても最適化は中断されません。</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;- この画面を再び開くにはブラウザのアドレスバーに「localhost:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">DEFAULT_PORT</span><span class="si">}</span><span class="s1">」と入力して下さい。</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;- __マウスオーバーで表示されるデータを見る場合は、「自動更新を一時停止する」ボタンを押してください。__</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
@@ -910,7 +985,10 @@
             <span class="c1"># 1. interval =&gt; figure を更新する</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">local_df</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">active_tab_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fig_by_tab_id</span><span class="p">(</span><span class="n">active_tab_id</span><span class="p">)</span>
-                <span class="n">ret</span><span class="p">[</span><span class="n">card_body</span><span class="p">]</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH</span><span class="p">)</span>  <span class="c1"># list にせんとダメかも</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">card_body</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH</span><span class="p">,</span> <span class="n">clear_on_unhover</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                    <span class="n">dcc</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID_GRAPH_TOOLTIP</span><span class="p">),</span>
+                <span class="p">]</span>
 
             <span class="c1"># 3. btn toggle =&gt; (toggle の children を切替) and (interval を切替)</span>
             <span class="k">if</span> <span class="n">toggle_n_clicks</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1236,7 +1314,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">local_worker_status_int_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span><span class="p">]</span>
 
             <span class="c1"># terminate_all 指令があれば monitor server をホストするプロセスごと終了する</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">TERMINATE_ALL</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">TERMINATE_ALL</span><span class="p">:</span>
                 <span class="k">return</span> <span class="mi">0</span>  <span class="c1"># take server down with me</span>
 
             <span class="c1"># interval</span>

@@ -238,7 +238,14 @@
 <span class="linenos">123</span>    <span class="c1"># 最適化を実行</span>
 <span class="linenos">124</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
 <span class="linenos">125</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="linenos">126</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+<span class="linenos">126</span>
+<span class="linenos">127</span>    <span class="c1"># プロセスモニタで結果を確認するために</span>
+<span class="linenos">128</span>    <span class="c1"># Enter キーが押されるまで処理を停止します。</span>
+<span class="linenos">129</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">130</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Finished. Press Enter to quit...&#39;</span><span class="p">)</span>
+<span class="linenos">131</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">132</span>    <span class="nb">input</span><span class="p">()</span>
+<span class="linenos">133</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

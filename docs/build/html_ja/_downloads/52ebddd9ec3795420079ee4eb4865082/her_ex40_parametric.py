@@ -134,4 +134,11 @@ if __name__ == '__main__':
 
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=15)
+
+    # プロセスモニタで結果を確認するために
+    # Enter キーが押されるまで処理を停止します。
+    print('================================')
+    print('Finished. Press Enter to quit...')
+    print('================================')
+    input()
     femopt.terminate_all()
