@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-17 10:28+0900\n"
+"POT-Creation-Date: 2024-06-28 14:00+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,6 +29,7 @@ msgstr ""
 msgid "Subpackages"
 msgstr ""
 
+#: ../source/modules/pyfemtet.opt.visualization.rst:5
 #: ../source/modules/pyfemtet.rst:13
 msgid "Submodules"
 msgstr ""
@@ -235,7 +236,7 @@ msgstr ""
 #: ../source/modules/pyfemtet.opt.interface.rst:5
 #: ../source/modules/pyfemtet.opt.opt.rst:5
 #: ../source/modules/pyfemtet.opt.rst:15
-#: ../source/modules/pyfemtet.opt.visualization.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.rst:16
 #: ../source/modules/pyfemtet.rst:40
 msgid "Module contents"
 msgstr ""
@@ -754,6 +755,10 @@ msgstr ""
 msgid "When set to 'auto', first tries 'existing', and if that fails, connects with 'new'. If `pid` is specified and failed to connect, it will not try existing another Femtet process."
 msgstr ""
 
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.create_result_file_content:1
+msgid "Called after solve"
+msgstr ""
+
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:1
 msgid "Returns connected femtet process is existing or not."
 msgstr ""
@@ -795,7 +800,14 @@ msgstr ""
 msgid "The path to the prt file."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:5
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:4
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:6
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:8
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:10
+msgid "Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:13
 msgid "For details of The other arguments, see ``FemtetInterface``."
 msgstr ""
 
@@ -859,6 +871,10 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.rst:2
 msgid "pyfemtet.opt.visualization package"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.rst:8
+msgid "pyfemtet.opt.visualization.result\\_viewer module"
 msgstr ""
 
 #: ../../pyfemtet/opt/visualization/_monitor.py:docstring of pyfemtet.opt.visualization._monitor.ProcessMonitorApp:1
