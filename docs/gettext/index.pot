@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-17 10:52+0900\n"
+"POT-Creation-Date: 2024-07-01 13:32+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../source/index.rst:222
+#: ../source/index.rst:104
 msgid "Home"
 msgstr ""
 
@@ -112,134 +112,6 @@ msgstr ""
 msgid "Below is an example of multi-objective optimization. You can set up the problem with ``add_parameter()`` and ``add_objective()``, and then execute it with ``optimize()``. For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the :doc:`pages/usage` section."
 msgstr ""
 
-#: ../source/index.rst:100
-msgid "Install"
-msgstr ""
-
 #: ../source/index.rst:102
-msgid "PyFemtet is only available for Windows."
-msgstr ""
-
-#: ../source/index.rst:106
-msgid "In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run ``pip install pyfemtet``. The following steps are for a full setup of Python, Femtet and PyFemtet."
-msgstr ""
-
-#: ../source/index.rst:108
-msgid "**Installation of Femtet (version 2023.0 or later)**"
-msgstr ""
-
-#: ../source/index.rst:110
-msgid "For first-time users, please consider using the trial version or personal edition. --> |Femtet|"
-msgstr ""
-
-#: ../source/index.rst:114
-msgid "If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used."
-msgstr ""
-
-#: ../source/index.rst:117
-msgid "**Enabling Femtet macros**"
-msgstr ""
-
-#: ../source/index.rst:124
-msgid "Close Excel and Femtet before following this step."
-msgstr ""
-
-#: ../source/index.rst:127
-msgid "After installing Femtet, **please run 'EnableMacros' from the start menu.** This procedure requires administrator privileges."
-msgstr ""
-
-#: ../source/index.rst:132
-msgid "When you follow this step, the Femtet help window will appear. You do not need to follow the help window, so close it."
-msgstr ""
-
-#: ../source/index.rst:135
-msgid "**Installation of 64bit Python (version 3.9.3 or later)**"
-msgstr ""
-
-#: ../source/index.rst:137
-msgid "Download the installer from the link provided and run it.  --> |Python|"
-msgstr ""
-
-#: ../source/index.rst:141
-msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
-msgstr ""
-
-#: ../source/index.rst:145
-msgid "``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment."
-msgstr ""
-
-#: ../source/index.rst:152
-msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
-msgstr ""
-
-#: ../source/index.rst:156
-msgid "Installer screen."
-msgstr ""
-
-#: ../source/index.rst:159
-msgid "**Installing** ``pyfemtet``"
-msgstr ""
-
-#: ../source/index.rst:161
-msgid "Please launch the command prompt (``cmd``)."
-msgstr ""
-
-#: ../source/index.rst:165
-msgid "Launch cmd via start button."
-msgstr ""
-
-#: ../source/index.rst:168
-msgid "Then run the following command in the command prompt. The download and installation of the library will begin."
-msgstr ""
-
-#: ../source/index.rst:177
-msgid "Run pip command on command prompt."
-msgstr ""
-
-#: ../source/index.rst:180
-msgid "Once the installation is complete, after displaying \"Successfully installed \", control will return to the command prompt."
-msgstr ""
-
-#: ../source/index.rst:184
-msgid "Installing"
-msgstr ""
-
-#: ../source/index.rst:188
-msgid "Installation completed"
-msgstr ""
-
-#: ../source/index.rst:192
-msgid "Depending on the environment, installation may take about 5 minutes."
-msgstr ""
-
-#: ../source/index.rst:196
-msgid "At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues."
-msgstr ""
-
-#: ../source/index.rst:198
-msgid "**Setting Femtet Macro Constants**"
-msgstr ""
-
-#: ../source/index.rst:200
-msgid "Please run the following command in the command prompt.::"
-msgstr ""
-
-#: ../source/index.rst:204
-msgid "Once the setting is complete, control will return to the command prompt."
-msgstr ""
-
-#: ../source/index.rst:208
-msgid "After makepy finishes"
-msgstr ""
-
-#: ../source/index.rst:210
-msgid "That's all."
-msgstr ""
-
-#: ../source/index.rst:215
-msgid "For verification, we recommend that you first view the samples in :doc:`pages/examples`."
-msgstr ""
-
-#: ../source/index.rst:220
 msgid "Table of Contents"
 msgstr ""

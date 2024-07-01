@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-28 14:06+0900\n"
+"POT-Creation-Date: 2024-07-01 13:32+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -513,7 +513,7 @@ msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_p
 msgstr ""
 
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:46
-msgid "wat_ex14_parallel_parametric.py"
+msgid "wat_ex14_parametric_parallel.py"
 msgstr ""
 
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:54

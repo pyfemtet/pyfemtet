@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-24 15:42+0900\n"
+"POT-Creation-Date: 2024-07-01 13:32+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.15.0\n"
 
 #: ../source/pages/LICENSE.rst:2
 msgid "License"
@@ -130,6 +130,206 @@ msgstr "外部 CAD (Solidworks) 連携"
 #: ../source/pages/examples.rst:113
 msgid "Explore the same problem as left with Solidworks integration."
 msgstr "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
+
+#: ../source/pages/installation.rst:2
+msgid "Installation"
+msgstr "インストール"
+
+#: ../source/pages/installation.rst:4
+msgid "PyFemtet supports the following requirements:"
+msgstr "PyFemtet は次の要件をサポートします:"
+
+#: ../source/pages/installation.rst:6
+msgid "windows only"
+msgstr "Windows のみ"
+
+#: ../source/pages/installation.rst:7
+msgid "femtet 2023.0 or later (2024.0 or later recommended)"
+msgstr "femtet 2023.1 以降 (2024.0 以降を推奨)"
+
+#: ../source/pages/installation.rst:8
+msgid "python 3.9.3 or later (3.11 or 3.12 recommended)"
+msgstr "python 3.9.3 以降 (3.11 または 3.12 を推奨)"
+
+#: ../source/pages/installation.rst:11
+msgid "**See below for installation and setup instructions.**"
+msgstr "**インストールとセットアップの手順については以下を参照してください。**"
+
+#: ../source/pages/installation.rst:13
+msgid ":doc:`installation_pages/install_femtet`"
+msgstr ""
+
+#: ../source/pages/installation.rst:14
+msgid ":doc:`installation_pages/install_python`"
+msgstr ""
+
+#: ../source/pages/installation.rst:15
+msgid ":doc:`installation_pages/install_pyfemtet`"
+msgstr ""
+
+#: ../source/pages/installation.rst:18
+msgid "If step 3 fails, try the following additional steps:"
+msgstr "手順 3 が失敗した場合は、次の操作を試してください。"
+
+#: ../source/pages/installation.rst:20
+msgid "a1. :doc:`installation_pages/install_pyfemtet_manually`"
+msgstr ""
+
+#: ../source/pages/installation.rst:21
+msgid "a2. :doc:`installation_pages/setup_femtet_macro`"
+msgstr ""
+
+#: ../source/pages/installation.rst:22
+msgid "a3. :doc:`installation_pages/setup_com_constants`"
+msgstr ""
+
+#: ../source/pages/installation.rst:37
+msgid "For verification, we recommend that you first view the samples in :doc:`examples`."
+msgstr "PyFemtet の動作確認には、:doc:`examples` の確認をお勧めします。"
+
+#: ../source/pages/installation_pages/install_femtet.rst:7
+msgid "Install Femtet"
+msgstr "Femtet のインストール"
+
+#: ../source/pages/installation_pages/install_femtet.rst:9
+msgid "Femtet is CAE software produced and sold by Murata Software. Get a quote and purchase a license, then install Femtet."
+msgstr "Femtet はムラタソフトウェアが製作・販売するCAEソフトウェアです。見積もりを取得してライセンスを購入し、Femtet をインストールしてください。"
+
+#: ../source/pages/installation_pages/install_femtet.rst:12
+msgid "|Femtet|"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_femtet.rst:16
+msgid "For first-time users, please consider to try the free 60-day trial version."
+msgstr "初めてご利用になる方は、60 日間の無料試用版をお試しください。"
+
+#: ../source/pages/installation_pages/install_femtet.rst:21
+msgid "If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used."
+msgstr "最新バージョンではない Femtet を使用すると、PyFemtet の一部の機能が使用できなくなります。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:2
+msgid "Install PyFemtet"
+msgstr "PyFemtet のインストール"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:6
+msgid "You will need administrator privileges to run this step."
+msgstr "この手順を実行するには管理者権限が必要です。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:9
+msgid "Please download and run the script below."
+msgstr "以下のスクリプトをダウンロードして実行してください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:11
+msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:13
+msgid "To run the .ps1 file, right click and select \"run with powershell\"."
+msgstr ".ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:18
+msgid "This script assumes that your Python installation includes `py launcher`."
+msgstr "このスクリプトは、Python インストールに `py launcher` が含まれていることを前提としています。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:23
+msgid "If you are setting up pyfemtet in a virtual environment, change line 20 of the script to `$python_command = \"python\"` and run the script from the command line with your virtual environment active."
+msgstr "仮想環境で pyfemtet を設定する場合は、スクリプトの 20 行目を `$python_command = \"python\"` に変更し、仮想環境をアクティブにした状態でコマンド ラインからスクリプトを実行します。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:28
+msgid "If this step fails, try the following steps manually:"
+msgstr "この手順が失敗した場合は、次の手順を手動で試してください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:2
+msgid "Manually Install PyFemtet"
+msgstr "手動で PyFemtet をインストールする"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:6
+msgid "Launch command prompt"
+msgstr "コマンドプロンプトの起動"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:12
+msgid "Input install command"
+msgstr "インストールコマンドの入力"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:14
+msgid "Run following command::"
+msgstr "下記のコマンドを実行します。"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:22
+msgid "Wait for installation"
+msgstr "インストールの待機"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:24
+msgid "Depending on the environment, the following installation screen may be displayed and may not change for several minutes or even several tens of minutes."
+msgstr "環境によっては、以下のインストール画面が表示され、数分から数十分程度変化しない場合があります。"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:28
+msgid "Installation Screen"
+msgstr "インストール画面"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:31
+msgid "Wait until the \"Installed successfully...\" message appears on the screen."
+msgstr "画面に \"Installed successfully...\" というメッセージが表示されるまでお待ちください。"
+
+#: ../source/pages/installation_pages/install_python.rst:7
+msgid "Install Python"
+msgstr "Python のインストール"
+
+#: ../source/pages/installation_pages/install_python.rst:9
+msgid "Download the installer for windows 64-bit and run it."
+msgstr "64-bit 版 windows 用インストーラをダウンロードして実行します。"
+
+#: ../source/pages/installation_pages/install_python.rst:11
+msgid "|Python|"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_python.rst:16
+msgid "**If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.** PyFemtet itself supports Python 3.9.3 and above."
+msgstr "**GUI最適化設定機能を使用する場合は、3.11または3.12が必要です。** PyFemtet自体はPython 3.9.3以上をサポートしています。"
+
+#: ../source/pages/installation_pages/install_python.rst:22
+msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
+msgstr "最新ではないバージョンの Python をダウンロードする場合は、以下のスクリーンショットを参照して、環境に適したインストーラーをダウンロードしてください。"
+
+#: ../source/pages/installation_pages/install_python.rst:32
+msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
+msgstr "このスクリーンショットは、64 ビット Windows 用の Python 3.11.7 インストーラーへのリンクの場所の例を示しています。"
+
+#: ../source/pages/installation_pages/install_python.rst:37
+msgid "Installer screen."
+msgstr "インストーラ画面"
+
+#: ../source/pages/installation_pages/setup_com_constants.rst:2
+msgid "Manually Set COM Constants"
+msgstr "手動で COM 定数の設定を行う"
+
+#: ../source/pages/installation_pages/setup_com_constants.rst:4
+msgid "Please run the following command in the command prompt.::"
+msgstr "計算 PC で下記コマンドを実行してください。"
+
+#: ../source/pages/installation_pages/setup_com_constants.rst:9
+msgid "Once the setting is complete, control will return to the command prompt."
+msgstr "設定が完了すると、制御はコマンドプロンプトに戻ります。"
+
+#: ../source/pages/installation_pages/setup_com_constants.rst:13
+msgid "After makepy finishes"
+msgstr "makepy コマンドの終了後"
+
+#: ../source/pages/installation_pages/setup_femtet_macro.rst:2
+msgid "Manually Enable Femtet Macro"
+msgstr "手動で Femtet Python マクロを有効化する"
+
+#: ../source/pages/installation_pages/setup_femtet_macro.rst:4
+msgid "This procedure requires administrator privileges."
+msgstr "この手順には管理者権限が必要です。"
+
+#: ../source/pages/installation_pages/setup_femtet_macro.rst:7
+msgid "After installing Femtet, please run **'EnableMacros' from the Windows Start Menu.**"
+msgstr "Femtet をインストールした後、Windows のスタート メニューから **「マクロ機能を有効にする」** を実行してください。"
+
+#: ../source/pages/installation_pages/setup_femtet_macro.rst:14
+msgid "This step will open the Femtet help window. **You don't need to run the help window, so close it.**"
+msgstr "この手順により、Femtet ヘルプ ウィンドウが開きますが、 **ヘルプの内容を実行する必要はないので、閉じてください。**"
 
 #: ../source/pages/usage.rst:2
 msgid "Usage"
