@@ -28,27 +28,5 @@ Copy-Item -Path "$SAMPLES_SOURCE\*" -Destination $SAMPLES_ON_DOC_SOURCE -Recurse
 # copy English installer to doc_source
 Copy-Item -Path $INSTALLER -Destination $INSTALLER_ON_DOC_SOURCE -Force
 
-# build English document
-poetry run python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
-
-# copy and overwrite with Japanese sample files
-Copy-Item -Path "$SAMPLES_SOURCE_JP\*" -Destination $SAMPLES_ON_DOC_SOURCE -Force -Recurse
-$files = Get-ChildItem $SAMPLES_ON_DOC_SOURCE -Recurse
-foreach ($file in $files) {
-    if ($file.BaseName.EndsWith('_jp')) {
-        $newName = $file.BaseName -replace '_jp$', ''
-        $extension = $file.Extension
-        $newPath = Join-Path $file.Directory.FullName ($newName + $extension)
-        write-host "Replace $($newName + $extension) to jp file."
-        if (Test-Path $newPath) {Remove-Item $newPath -Force}
-        Rename-Item -Path $file.FullName -NewName ($newName + $extension) -Force
-    }
-}
-
-# copy Japanese installer to doc_source
-Copy-Item -Path $INSTALLER_JP -Destination $INSTALLER_ON_DOC_SOURCE -Force
-
-# build Japanese document
-poetry run python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
-
-pause
+start http://127.0.0.1:8000
+poetry run sphinx-autobuild .\docs\source .\docs\build
