@@ -101,13 +101,18 @@
 <p>To run the .ps1 file, right click and select “run with powershell”.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This script assumes that your Python installation includes <cite>py launcher</cite>.</p>
+<p>This script assumes that your Python installation includes <cite>py launcher</cite>.
+If you have done a custom installation of Python, make sure that
+your installation configuration includes the <cite>py launcher</cite>.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>If you are setting up pyfemtet in a virtual environment,
-change line 20 of the script to <cite>$python_command = “python”</cite>
-and run the script from the command line with your virtual environment active.</p>
+<p>If you want to configure pyfemtet in a virtual environment,
+change line 20 of the script to the following, activate the
+virtual environment, and run the script from the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$python_command = &quot;python&quot;`
+</pre></div>
+</div>
 </div>
 <p>If this step fails, try the following steps manually:</p>
 <div class="toctree-wrapper compound">

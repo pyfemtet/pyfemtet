@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manually Set COM Constants &mdash; PyFemtet Project  ドキュメント</title>
+  <title>手動で COM 定数の設定を行う &mdash; PyFemtet Project  ドキュメント</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -24,7 +24,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="検索" href="../../search.html" />
     <link rel="next" title="例題" href="../examples.html" />
-    <link rel="prev" title="Manually Enable Femtet Macro" href="setup_femtet_macro.html" /> 
+    <link rel="prev" title="手動で Femtet Python マクロを有効化する" href="setup_femtet_macro.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,13 +48,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="install_femtet.html">Install Femtet</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install_python.html">Install Python</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="install_pyfemtet.html">Install PyFemtet</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="install_pyfemtet_manually.html">Manually Install PyFemtet</a></li>
-<li class="toctree-l3"><a class="reference internal" href="setup_femtet_macro.html">Manually Enable Femtet Macro</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Manually Set COM Constants</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../installation.html">インストール</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install_femtet.html">Femtet のインストール</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_python.html">Python のインストール</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="install_pyfemtet.html">PyFemtet のインストール</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="install_pyfemtet_manually.html">手動で PyFemtet をインストールする</a></li>
+<li class="toctree-l3"><a class="reference internal" href="setup_femtet_macro.html">手動で Femtet Python マクロを有効化する</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">手動で COM 定数の設定を行う</a></li>
 </ul>
 </li>
 </ul>
@@ -79,9 +79,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../installation.html">Installation</a></li>
-          <li class="breadcrumb-item"><a href="install_pyfemtet.html">Install PyFemtet</a></li>
-      <li class="breadcrumb-item active">Manually Set COM Constants</li>
+          <li class="breadcrumb-item"><a href="../installation.html">インストール</a></li>
+          <li class="breadcrumb-item"><a href="install_pyfemtet.html">PyFemtet のインストール</a></li>
+      <li class="breadcrumb-item active">手動で COM 定数の設定を行う</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/pages/installation_pages/setup_com_constants.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,16 +92,16 @@
            <div itemprop="articleBody">
              
   <section id="manually-set-com-constants">
-<h1>Manually Set COM Constants<a class="headerlink" href="#manually-set-com-constants" title="Link to this heading"></a></h1>
-<p>Please run the following command in the command prompt.:</p>
+<h1>手動で COM 定数の設定を行う<a class="headerlink" href="#manually-set-com-constants" title="Link to this heading"></a></h1>
+<p>コマンドプロンプトで下記コマンドを実行してください。</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">makepy</span> <span class="n">FemtetMacro</span>
 </pre></div>
 </div>
-<p>Once the setting is complete, control will return to the command prompt.</p>
+<p>設定が完了すると、制御はコマンドプロンプトに戻ります。</p>
 <figure class="align-default" id="id1">
 <img alt="../../_images/complete_makepy.png" src="../../_images/complete_makepy.png" />
 <figcaption>
-<p><span class="caption-text">After makepy finishes</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+<p><span class="caption-text">makepy コマンドの終了後</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -110,7 +110,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="setup_femtet_macro.html" class="btn btn-neutral float-left" title="Manually Enable Femtet Macro" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="setup_femtet_macro.html" class="btn btn-neutral float-left" title="手動で Femtet Python マクロを有効化する" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../examples.html" class="btn btn-neutral float-right" title="例題" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

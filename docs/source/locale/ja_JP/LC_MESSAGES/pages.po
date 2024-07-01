@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-01 13:32+0900\n"
+"POT-Creation-Date: 2024-07-01 14:18+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -201,7 +201,7 @@ msgstr ""
 
 #: ../source/pages/installation_pages/install_femtet.rst:16
 msgid "For first-time users, please consider to try the free 60-day trial version."
-msgstr "初めてご利用になる方は、60 日間の無料試用版をお試しください。"
+msgstr "初めてご利用になる方は、60 日間の無料試用版の利用をご検討いただけます。"
 
 #: ../source/pages/installation_pages/install_femtet.rst:21
 msgid "If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used."
@@ -228,14 +228,14 @@ msgid "To run the .ps1 file, right click and select \"run with powershell\"."
 msgstr ".ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:18
-msgid "This script assumes that your Python installation includes `py launcher`."
-msgstr "このスクリプトは、Python インストールに `py launcher` が含まれていることを前提としています。"
+msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, make sure that your installation configuration includes the `py launcher`."
+msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、そのインストール構成に `py launcher` が含まれていることを確認してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:23
-msgid "If you are setting up pyfemtet in a virtual environment, change line 20 of the script to `$python_command = \"python\"` and run the script from the command line with your virtual environment active."
-msgstr "仮想環境で pyfemtet を設定する場合は、スクリプトの 20 行目を `$python_command = \"python\"` に変更し、仮想環境をアクティブにした状態でコマンド ラインからスクリプトを実行します。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:25
+msgid "If you want to configure pyfemtet in a virtual environment, change line 20 of the script to the following, activate the virtual environment, and run the script from the command line: ::"
+msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 20 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:28
+#: ../source/pages/installation_pages/install_pyfemtet.rst:32
 msgid "If this step fails, try the following steps manually:"
 msgstr "この手順が失敗した場合は、次の手順を手動で試してください。"
 
@@ -305,7 +305,7 @@ msgstr "手動で COM 定数の設定を行う"
 
 #: ../source/pages/installation_pages/setup_com_constants.rst:4
 msgid "Please run the following command in the command prompt.::"
-msgstr "計算 PC で下記コマンドを実行してください。"
+msgstr "コマンドプロンプトで下記コマンドを実行してください。"
 
 #: ../source/pages/installation_pages/setup_com_constants.rst:9
 msgid "Once the setting is complete, control will return to the command prompt."
@@ -670,4 +670,7 @@ msgstr "目的名、拘束名はスクリプト中で指定しない場合、obj
 
 #~ msgid "pyfemtet の動作確認には、 :doc:`examples` の確認をお勧めします。"
 #~ msgstr ""
+
+#~ msgid "This script assumes that your Python installation includes `py launcher`."
+#~ msgstr "このスクリプトは、Python インストールに `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合はご注意ください。"
 

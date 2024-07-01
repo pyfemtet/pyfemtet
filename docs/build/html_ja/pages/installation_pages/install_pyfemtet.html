@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Install PyFemtet &mdash; PyFemtet Project  ドキュメント</title>
+  <title>PyFemtet のインストール &mdash; PyFemtet Project  ドキュメント</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -23,8 +23,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="検索" href="../../search.html" />
-    <link rel="next" title="Manually Install PyFemtet" href="install_pyfemtet_manually.html" />
-    <link rel="prev" title="Install Python" href="install_python.html" /> 
+    <link rel="next" title="手動で PyFemtet をインストールする" href="install_pyfemtet_manually.html" />
+    <link rel="prev" title="Python のインストール" href="install_python.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,13 +48,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="install_femtet.html">Install Femtet</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install_python.html">Install Python</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Install PyFemtet</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="install_pyfemtet_manually.html">Manually Install PyFemtet</a></li>
-<li class="toctree-l3"><a class="reference internal" href="setup_femtet_macro.html">Manually Enable Femtet Macro</a></li>
-<li class="toctree-l3"><a class="reference internal" href="setup_com_constants.html">Manually Set COM Constants</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../installation.html">インストール</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install_femtet.html">Femtet のインストール</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_python.html">Python のインストール</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">PyFemtet のインストール</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install_pyfemtet_manually.html">手動で PyFemtet をインストールする</a></li>
+<li class="toctree-l3"><a class="reference internal" href="setup_femtet_macro.html">手動で Femtet Python マクロを有効化する</a></li>
+<li class="toctree-l3"><a class="reference internal" href="setup_com_constants.html">手動で COM 定数の設定を行う</a></li>
 </ul>
 </li>
 </ul>
@@ -79,8 +79,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../installation.html">Installation</a></li>
-      <li class="breadcrumb-item active">Install PyFemtet</li>
+          <li class="breadcrumb-item"><a href="../installation.html">インストール</a></li>
+      <li class="breadcrumb-item active">PyFemtet のインストール</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/pages/installation_pages/install_pyfemtet.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -91,30 +91,31 @@
            <div itemprop="articleBody">
              
   <section id="install-pyfemtet">
-<h1>Install PyFemtet<a class="headerlink" href="#install-pyfemtet" title="Link to this heading"></a></h1>
+<h1>PyFemtet のインストール<a class="headerlink" href="#install-pyfemtet" title="Link to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>You will need administrator privileges to run this step.</p>
+<p>この手順を実行するには管理者権限が必要です。</p>
 </div>
-<p>Please download and run the script below.</p>
+<p>以下のスクリプトをダウンロードして実行してください。</p>
 <p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a></p>
-<p>To run the .ps1 file, right click and select 「run with powershell」.</p>
+<p>.ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。</p>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
-<p>This script assumes that your Python installation includes <cite>py launcher</cite>.</p>
+<p>このスクリプトは Python のインストール構成に <cite>py launcher</cite> が含まれていることを前提としています。Python のカスタムインストールを行った場合は、そのインストール構成に <cite>py launcher</cite> が含まれていることを確認してください。</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>If you are setting up pyfemtet in a virtual environment,
-change line 20 of the script to <cite>$python_command = 「python」</cite>
-and run the script from the command line with your virtual environment active.</p>
+<p>仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 20 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$python_command = &quot;python&quot;`
+</pre></div>
 </div>
-<p>If this step fails, try the following steps manually:</p>
+</div>
+<p>この手順が失敗した場合は、次の手順を手動で試してください。</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="install_pyfemtet_manually.html">Manually Install PyFemtet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="setup_femtet_macro.html">Manually Enable Femtet Macro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="setup_com_constants.html">Manually Set COM Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_pyfemtet_manually.html">手動で PyFemtet をインストールする</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_femtet_macro.html">手動で Femtet Python マクロを有効化する</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_com_constants.html">手動で COM 定数の設定を行う</a></li>
 </ul>
 </div>
 </section>
@@ -123,8 +124,8 @@ and run the script from the command line with your virtual environment active.</
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="install_python.html" class="btn btn-neutral float-left" title="Install Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="install_pyfemtet_manually.html" class="btn btn-neutral float-right" title="Manually Install PyFemtet" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="install_python.html" class="btn btn-neutral float-left" title="Python のインストール" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="install_pyfemtet_manually.html" class="btn btn-neutral float-right" title="手動で PyFemtet をインストールする" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
