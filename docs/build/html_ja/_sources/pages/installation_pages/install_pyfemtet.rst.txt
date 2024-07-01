@@ -1,9 +1,13 @@
 Install PyFemtet
 ================
 
-.. note::
+This step requires administrator privileges.
 
-    You will need administrator privileges to run this step.
+.. note::
+    
+    This procedure requires Python 3.11 or 3.12. If you are installing
+    PyFemtet on a different version of Python, follow the manual
+    instructions at the end of this page.
 
 
 Please download and run the script below. 

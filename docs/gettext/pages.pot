@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-01 14:18+0900\n"
+"POT-Creation-Date: 2024-07-01 14:42+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -208,31 +208,36 @@ msgstr ""
 msgid "Install PyFemtet"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:6
-msgid "You will need administrator privileges to run this step."
+#: ../source/pages/installation_pages/install_pyfemtet.rst:4
+#: ../source/pages/installation_pages/setup_femtet_macro.rst:4
+msgid "This step requires administrator privileges."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:9
-msgid "Please download and run the script below."
-msgstr ""
-
-#: ../source/pages/installation_pages/install_pyfemtet.rst:11
-msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:8
+msgid "This procedure requires Python 3.11 or 3.12. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:13
+msgid "Please download and run the script below."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:15
+msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:17
 msgid "To run the .ps1 file, right click and select \"run with powershell\"."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:18
+#: ../source/pages/installation_pages/install_pyfemtet.rst:22
 msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, make sure that your installation configuration includes the `py launcher`."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:25
+#: ../source/pages/installation_pages/install_pyfemtet.rst:29
 msgid "If you want to configure pyfemtet in a virtual environment, change line 20 of the script to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:32
+#: ../source/pages/installation_pages/install_pyfemtet.rst:36
 msgid "If this step fails, try the following steps manually:"
 msgstr ""
 
@@ -314,10 +319,6 @@ msgstr ""
 
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:2
 msgid "Manually Enable Femtet Macro"
-msgstr ""
-
-#: ../source/pages/installation_pages/setup_femtet_macro.rst:4
-msgid "This procedure requires administrator privileges."
 msgstr ""
 
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:7

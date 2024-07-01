@@ -1,7 +1,7 @@
 Manually Enable Femtet Macro
 ============================
 
-This procedure requires administrator privileges.
+This step requires administrator privileges.
 
 
 After installing Femtet, please run **'EnableMacros' from the Windows Start Menu.**

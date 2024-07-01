@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-01 14:18+0900\n"
+"POT-Creation-Date: 2024-07-01 14:42+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -211,31 +211,36 @@ msgstr "最新バージョンではない Femtet を使用すると、PyFemtet �
 msgid "Install PyFemtet"
 msgstr "PyFemtet のインストール"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:6
-msgid "You will need administrator privileges to run this step."
-msgstr "この手順を実行するには管理者権限が必要です。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:4
+#: ../source/pages/installation_pages/setup_femtet_macro.rst:4
+msgid "This step requires administrator privileges."
+msgstr "この手順には管理者権限が必要です。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:9
+#: ../source/pages/installation_pages/install_pyfemtet.rst:8
+msgid "This procedure requires Python 3.11 or 3.12. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
+msgstr "この手順には Python 3.11 または 3.12 が必要です。別のバージョンの Python に PyFemtet をインストールする場合は、このページの最後にある手動の手順に従ってください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:13
 msgid "Please download and run the script below."
 msgstr "以下のスクリプトをダウンロードして実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:11
+#: ../source/pages/installation_pages/install_pyfemtet.rst:15
 msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:13
+#: ../source/pages/installation_pages/install_pyfemtet.rst:17
 msgid "To run the .ps1 file, right click and select \"run with powershell\"."
 msgstr ".ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:18
+#: ../source/pages/installation_pages/install_pyfemtet.rst:22
 msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, make sure that your installation configuration includes the `py launcher`."
 msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、そのインストール構成に `py launcher` が含まれていることを確認してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:25
+#: ../source/pages/installation_pages/install_pyfemtet.rst:29
 msgid "If you want to configure pyfemtet in a virtual environment, change line 20 of the script to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 20 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:32
+#: ../source/pages/installation_pages/install_pyfemtet.rst:36
 msgid "If this step fails, try the following steps manually:"
 msgstr "この手順が失敗した場合は、次の手順を手動で試してください。"
 
@@ -318,10 +323,6 @@ msgstr "makepy コマンドの終了後"
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:2
 msgid "Manually Enable Femtet Macro"
 msgstr "手動で Femtet Python マクロを有効化する"
-
-#: ../source/pages/installation_pages/setup_femtet_macro.rst:4
-msgid "This procedure requires administrator privileges."
-msgstr "この手順には管理者権限が必要です。"
 
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:7
 msgid "After installing Femtet, please run **'EnableMacros' from the Windows Start Menu.**"
@@ -673,4 +674,7 @@ msgstr "目的名、拘束名はスクリプト中で指定しない場合、obj
 
 #~ msgid "This script assumes that your Python installation includes `py launcher`."
 #~ msgstr "このスクリプトは、Python インストールに `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合はご注意ください。"
+
+#~ msgid "You will need administrator privileges to run this step."
+#~ msgstr "この手順を実行するには管理者権限が必要です。"
 
