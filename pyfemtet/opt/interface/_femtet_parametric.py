@@ -1,34 +1,13 @@
+from femtetutils import util
 from pyfemtet.dispatch_extensions import _get_pid
 
-import winreg
 import ctypes
 
 
-def _get_dll(Femtet):
-    femtet_major_version = _get_femtet_major_version(Femtet)
-    dll_path = _get_parametric_dll_path(femtet_major_version)
+def _get_dll():
+    femtet_exe_path = util.get_femtet_exe_path()
+    dll_path = femtet_exe_path.replace('Femtet.exe', 'ParametricIF.dll')
     return ctypes.cdll.LoadLibrary(dll_path)
-
-
-def _get_femtet_major_version(Femtet):
-    from pyfemtet.core import _version
-    version_int8 = _version(Femtet=Femtet)
-    return str(version_int8)[0:4]
-
-
-def _get_parametric_dll_path(femtet_major_version) -> str:
-    key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\FemtetInfo\InstallVersion\x64')
-    _, nValues, _ = winreg.QueryInfoKey(key)
-    for i in range(nValues):
-        name, data, _ = winreg.EnumValue(key, i)
-        if name == str(femtet_major_version):
-            winreg.CloseKey(key)
-            import os
-            dll_path = os.path.join(data, 'Program', 'ParametricIF.dll')
-            return dll_path
-    # ここまで来ていたら失敗
-    winreg.CloseKey(key)
-    raise RuntimeError('パラメトリック解析機能へのアクセスに失敗しました')
 
 
 def _get_dll_with_set_femtet(Femtet):
@@ -40,6 +19,7 @@ def _get_dll_with_set_femtet(Femtet):
 
 
 def _get_prm_result_names(Femtet):
+    """Used by pyfemtet-opt-gui"""
     out = []
 
     # load dll and set target femtet
