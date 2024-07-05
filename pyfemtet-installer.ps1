@@ -2,6 +2,9 @@
 using namespace System.Windows.Forms
 using namespace System.Drawing
 
+# error setting
+$ErrorActionPreference = "Stop"  # "Inquire" for debug.
+
 Add-Type -Assembly System.Windows.Forms
 
 #Enable visual styles
@@ -21,26 +24,50 @@ $python_command = "py"
 
 
 # ===== pre-requirement =====
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) {
+    # check Femtet, Excel and Python process existing
+    $excel_exists = $null -ne (Get-Process Excel -ErrorAction SilentlyContinue)
+    $femtet_exists = $null -ne (Get-Process Femtet -ErrorAction SilentlyContinue)
+    $python_exists = $null -ne (Get-Process Python -ErrorAction SilentlyContinue)
 
-# --runas (reload)
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) { Start-Process powershell.exe "-File `"$PSCommandPath`"" -Verb RunAs; exit }
+    if ($excel_exists -or $femtet_exists) {
+        $msg = "Femtet or Excel processes exist. Please terminate them before install.`r`n`r`nInstallation canceled."
+        $res = [System.Windows.Forms.MessageBox]::Show(
+            $msg,
+            "error"
+        )
+        throw 'Cancel the process.'
+    }
 
-# error setting
-$ErrorActionPreference = "Stop"  # "Inquire" for debug.
+    if (-not $python_exists) {
+        # OK
+        $msg = "Femtet (2023.0 or later) and Python (3.11 or later, less than 3.13) are required. Please make sure they are installed before continuing."
+    } elseif ($excel_exists -or $femtet_exists) {
+        # NG
+        $msg = "Python processes exist. "
+        $msg += "Please certify that no Python processes are using COM (Typically, Femtet Macro or Office Macro)."
+    }
+    $msg += "`r`n`r`ncontinue installation?"
 
-# message
-$res = [System.Windows.Forms.MessageBox]::Show(
-    "Femtet (2023.0 or later) and Python (3.11 or later, less than 3.13) are required. Please make sure they are installed before continuing.",
-    "pre-request",
-    [System.Windows.Forms.MessageBoxButtons]::YesNo
-)
-if ($res -eq [System.Windows.Forms.DialogResult]::No) {
-    throw 'Cancel the process.'
+    $res = [System.Windows.Forms.MessageBox]::Show(
+        $msg,
+        "pre-request",
+        [System.Windows.Forms.MessageBoxButtons]::YesNo
+    )
+    if ($res -eq [System.Windows.Forms.DialogResult]::No) {
+        throw 'Cancel the process.'
+    }
+}
+
+
+# --runas (reload after prerequest)
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) {
+    Start-Process powershell.exe "-File `"$PSCommandPath`"" -Verb RunAs
+    exit
 }
 
 
 # ===== main =====
-
 write-host
 write-host "======================"
 write-host "installing pyfemtet..."
@@ -62,23 +89,47 @@ if (-not ($installed_packages | Select-String -Pattern 'pyfemtet-opt-gui')) {
 
 write-host
 write-host "========================="
+write-host "Checking Femtet Installation ..."
+write-host "========================="
+$software_keys = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" | Get-ItemProperty
+$installed_software = $software_keys | Where-Object { $_.DisplayName }
+$femtet_list = $installed_software | Where-Object { $_.DisplayName -like "*Femtet*" }
+$femtet_list_sorted = $femtet_list | Sort-Object InstallDate
+foreach ($femtet in $femtet_list_sorted) {
+    $femtet_location = $femtet.InstallLocation
+    $femtet_exe_path = Join-Path (Join-Path $femtet_location "Program") "Femtet.exe"
+    if (test-path $femtet_exe_path) {
+        break
+    }
+}
+if (-not (test-path $femtet_exe_path)) {
+    # existing Femtet.exe not found
+    $title = "Error!"
+    $message = "Installed Femtet.exe is not found."
+    [System.Windows.Forms.MessageBox]::Show($message, $title)
+    throw $message
+}
+write-host "found Femtet: " + $femtet_exe_path
+
+
+write-host
+write-host "========================="
 write-host "Enabling Python Macro ..."
 write-host "========================="
-# get Femtet.exe path using femtetuitls
-$femtet_exe_path = & $python_command -c "from femtetutils import util;from logging import disable;disable();print(util.get_femtet_exe_path())"
 # estimate FemtetMacro.dll path
-$femtet_macro_dll_path = $femtet_exe_path.replace("Femtet.exe", "FemtetMacro.dll")
-if (-not (test-path $femtet_macro_dll_path)) {
+$femtet_macro_dll_path_64bit = $femtet_exe_path.replace("Femtet.exe", "FemtetMacro.dll")
+$femtet_macro_dll_path_32bit = $femtet_exe_path.replace("Femtet.exe", (join-path "Macro32" "FemtetMacro.dll"))
+if ((-not (test-path $femtet_macro_dll_path_64bit)) -or (-not (test-path $femtet_macro_dll_path_32bit))) {
     $title = "Error!"
     $message = "Femtet macro interface configuration failed. Please refer to Femtet macro help and follow the Enable macros procedure."
     [System.Windows.Forms.MessageBox]::Show($message, $title)
     throw $message
 } else {
-    write-host "regsvr32 will be OK"
+    write-host "Register typelib will be OK. Please check regsvr32 dialog to certify."
 }
-
 # regsvr
-regsvr32 $femtet_macro_dll_path  # returns nothing, dialog only
+regsvr32 $femtet_macro_dll_path_64bit  # returns nothing, dialog only.
+regsvr32 $femtet_macro_dll_path_32bit  # returns nothing, dialog only. No require to run on WOW64 dir
 
 
 write-host
