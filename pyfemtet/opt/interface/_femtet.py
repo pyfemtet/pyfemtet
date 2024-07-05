@@ -3,15 +3,19 @@ from typing import Optional, List
 import os
 import sys
 from time import sleep, time
-import signal
 
 import pandas as pd
 import psutil
 from dask.distributed import get_worker
 
-from pywintypes import com_error
+# noinspection PyUnresolvedReferences
+from pywintypes import com_error, error
+# noinspection PyUnresolvedReferences
 from pythoncom import CoInitialize, CoUninitialize
+# noinspection PyUnresolvedReferences
 from win32com.client import constants
+import win32con
+import win32gui
 from femtetutils import util
 
 from pyfemtet.core import (
@@ -29,6 +33,10 @@ from pyfemtet.dispatch_extensions import (
     DispatchExtensionException,
 )
 from pyfemtet.opt.interface import FEMInterface, logger
+
+
+def post_activate_message(hwnd):
+    win32gui.PostMessage(hwnd, win32con.WM_ACTIVATE, win32con.WA_ACTIVE, 0)
 
 
 class FemtetInterface(FEMInterface):
@@ -113,7 +121,7 @@ class FemtetInterface(FEMInterface):
         if self.original_femprj_path is None:
             # dask worker でなければ original のはず
             try:
-                worker = get_worker()
+                _ = get_worker()
             except ValueError:
                 self.original_femprj_path = self.femprj_path
 
@@ -252,7 +260,7 @@ class FemtetInterface(FEMInterface):
 
         """
 
-        # FIXME: Gaudi へのアクセスなど、self.Femtet.Gaudi.somefunc() のような場合、この関数を呼び出す前に Gaudi へのアクセスの時点で com_error が起こる
+        # FIXME: Gaudi へのアクセスなど、self.Femtet.Gaudi.SomeFunc() のような場合、この関数を呼び出す前に Gaudi へのアクセスの時点で com_error が起こる
         # FIXME: => 文字列で渡して eval() すればよい。
 
         if args is None:
@@ -282,9 +290,16 @@ class FemtetInterface(FEMInterface):
 
         # API を実行
         try:
-            returns = fun(*args, **kwargs)
-        except com_error:
+            # 解析結果を開いた状態で Gaudi.Activate して ReExecute する場合、ReExecute の前後にアクティブ化イベントが必要
+            if fun.__name__ == 'ReExecute':
+                post_activate_message(self.Femtet.hWnd)  # can raise pywintypes.error
+                returns = fun(*args, **kwargs)
+                post_activate_message(self.Femtet.hWnd)
+            else:
+                returns = fun(*args, **kwargs)
+        except (com_error, error):
             # パターン 2 エラーが生じたことは確定なのでエラーが起こるよう returns を作る
+            # com_error ではなく error の場合はおそらく Femtet が落ちている
             if ret_for_check_idx is None:
                 returns = return_value_if_failed
             else:
@@ -666,6 +681,13 @@ class FemtetInterface(FEMInterface):
         return out
 
     @staticmethod
+    def create_pdt_path(femprj_path, model_name, trial):
+        result_dir = femprj_path.replace('.femprj', '.Results')
+        pdt_path = os.path.join(result_dir, model_name + f'_trial{trial}.pdt')
+        return pdt_path
+
+    # noinspection PyMethodOverriding
+    @staticmethod
     def postprocess_func(
             trial: int,
             original_femprj_path: str,
@@ -676,7 +698,7 @@ class FemtetInterface(FEMInterface):
     ):
         result_dir = original_femprj_path.replace('.femprj', '.Results')
         if pdt_file_content is not None:
-            pdt_path = os.path.join(result_dir, model_name + f'_trial{trial}.pdt')
+            pdt_path = FemtetInterface.create_pdt_path(original_femprj_path, model_name, trial)
             with open(pdt_path, 'wb') as f:
                 f.write(pdt_file_content)
 
@@ -745,6 +767,7 @@ class _UnPicklableNoFEM(FemtetInterface):
     Femtet = None
     quit_when_destruct = False
 
+    # noinspection PyMissingConstructor
     def __init__(self):
         CoInitialize()
         self.unpicklable_member = Dispatch('FemtetMacro.Femtet')
