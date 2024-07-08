@@ -115,6 +115,7 @@ class HomePage(AbstractPage):
         @app.callback(
             Output(self.file_picker_button.id, self.file_picker_button.Prop.children),  # FIXME: Used to show current file and fire callback of alert. Separate them.
             Output(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab),
+            Output(self.femtet_control.connect_femtet_button.id, self.femtet_control.connect_femtet_button.Prop.n_clicks),  # automatically connect to femtet if the metadata of csv is valid
             Input(self.file_picker.id, self.file_picker.Prop.contents),
             State(self.file_picker.id, self.file_picker.Prop.filename),
             State(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab),)
@@ -123,7 +124,7 @@ class HomePage(AbstractPage):
             if callback_context.triggered_id is None:
                 if self.application.history is not None:
                     file_name = os.path.split(self.application.history.path)[1]
-                    return f'current file: {file_name}', no_update
+                    return f'current file: {file_name}', no_update, no_update
 
             if encoded_file_content is None:
                 raise PreventUpdate
@@ -140,7 +141,7 @@ class HomePage(AbstractPage):
                     f.write(file_content)
                 self.application.history = History(csv_path)
 
-            return f'current file: {file_name}', active_tab_id
+            return f'current file: {file_name}', active_tab_id, 1
 
         # ===== open pdt =====
         @app.callback(

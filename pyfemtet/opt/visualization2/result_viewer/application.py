@@ -15,8 +15,7 @@ class ResultViewerApplication(PyFemtetApplicationBase):
         super().setup_callback()
 
 
-if __name__ == '__main__':
-
+def debug():
     import os
     os.chdir(os.path.dirname(__file__))
 
@@ -27,4 +26,19 @@ if __name__ == '__main__':
     g_application.add_page(g_home_page, 0)
     g_application.setup_callback()
 
-    g_application.run(debug=False)
+    g_application.run(debug=True)
+
+
+def main():
+    g_application = ResultViewerApplication()
+
+    g_home_page = HomePage('result')
+
+    g_application.add_page(g_home_page, 0)
+    g_application.setup_callback()
+
+    g_application.run()
+
+
+if __name__ == '__main__':
+    debug()
