@@ -43,7 +43,7 @@ bokeh = "^3.3.3"
 sphinx-intl = "^2.2.0"
 
 [tool.poetry.scripts]
-pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.result_viewer:main'
+pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization2.result_viewer.application:main'
 
 [tool.pytest.ini_options]
 filterwarnings = [
