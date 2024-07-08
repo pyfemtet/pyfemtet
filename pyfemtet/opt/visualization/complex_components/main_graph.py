@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 
 # components
 from dash import dash_table
-from pyfemtet.opt.visualization2.wrapped_components import html, dcc, dbc
+from pyfemtet.opt.visualization.wrapped_components import html, dcc, dbc
 
 # graph
 import pandas as pd
@@ -20,8 +20,8 @@ import base64
 import json
 import numpy as np
 
-from pyfemtet.opt.visualization2.complex_components import main_figure_creator
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage, logger
+from pyfemtet.opt.visualization.complex_components import main_figure_creator
+from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
 
 
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
@@ -254,7 +254,7 @@ class MainGraph(AbstractPage):
             return fig
 
     def data_accessor(self) -> pd.DataFrame:
-        from pyfemtet.opt.visualization2.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:

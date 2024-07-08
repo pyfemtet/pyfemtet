@@ -4,8 +4,8 @@ from threading import Thread
 
 import pandas as pd
 
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, logger
-from pyfemtet.opt.visualization2.process_monitor.pages import HomePage, WorkerPage
+from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, logger
+from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):

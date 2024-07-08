@@ -13,7 +13,7 @@ from dask.distributed import LocalCluster, Client
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
 from pyfemtet.opt.opt import AbstractOptimizer, OptunaOptimizer
-from pyfemtet.opt.visualization2.process_monitor.application import main as process_monitor_main
+from pyfemtet.opt.visualization.process_monitor.application import main as process_monitor_main
 from pyfemtet.opt._femopt_core import (
     _check_bound,
     _is_access_gogh,

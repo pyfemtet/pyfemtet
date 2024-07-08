@@ -1,5 +1,5 @@
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase
-from pyfemtet.opt.visualization2.result_viewer.pages import HomePage
+from pyfemtet.opt.visualization.base import PyFemtetApplicationBase
+from pyfemtet.opt.visualization.result_viewer.pages import HomePage
 
 
 class ResultViewerApplication(PyFemtetApplicationBase):

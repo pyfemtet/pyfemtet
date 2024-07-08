@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 
 # components
 from dash import dash_table
-from pyfemtet.opt.visualization2.wrapped_components import html, dcc, dbc
+from pyfemtet.opt.visualization.wrapped_components import html, dcc, dbc
 
 # graph
 import pandas as pd
@@ -23,10 +23,10 @@ import numpy as np
 # noinspection PyUnresolvedReferences
 from pythoncom import com_error
 
-from pyfemtet.opt.visualization2.complex_components import main_figure_creator
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage, logger
+from pyfemtet.opt.visualization.complex_components import main_figure_creator
+from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
 from pyfemtet.opt.interface._femtet import FemtetInterface
-from pyfemtet.opt.visualization2.complex_components.main_graph import MainGraph
+from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph
 
 
 
