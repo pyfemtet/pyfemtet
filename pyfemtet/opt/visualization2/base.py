@@ -24,7 +24,10 @@ from pyfemtet.logger import get_logger
 
 
 dash_logger = logging.getLogger('werkzeug')
-logger = get_logger('viz')
+dash_logger.setLevel(logging.ERROR)
+
+logger = get_logger('viewer')
+logger.setLevel(logging.ERROR)
 
 
 class AbstractPage(ABC):
@@ -49,6 +52,8 @@ title -->home| |      | |
         self.title = title
         self.application: PyFemtetApplicationBase = None
         self.subpages = []
+        self.setup_component()
+        self.setup_layout()
 
     def add_subpage(self, subpage: 'AbstractPage'):
         subpage.setup_component()
@@ -198,6 +203,20 @@ class SidebarApplicationBase:
 
 
 class PyFemtetApplicationBase(SidebarApplicationBase):
+    """
+        +------+--------+
+        | side | con-   |
+        | bar  | tent   |
+        +--^---+--^-----+
+           │      └─ pages (dict(href: str = layout: Component)])
+           └──────── nav_links (dict(order: float) = NavLink)
+
+        Accessible members:
+        - history: History
+           └ local_df: pd.DataFrame
+        - app: Dash
+
+    """
 
     def __init__(
             self,

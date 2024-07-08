@@ -21,7 +21,7 @@ import json
 import numpy as np
 
 from pyfemtet.opt.visualization2.complex_components import main_figure_creator
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage
+from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage, logger
 
 
 class AlertRegion(AbstractPage):

@@ -24,15 +24,10 @@ import numpy as np
 from pythoncom import com_error
 
 from pyfemtet.opt.visualization2.complex_components import main_figure_creator
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage
+from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage, logger
 from pyfemtet.opt.interface._femtet import FemtetInterface
 from pyfemtet.opt.visualization2.complex_components.main_graph import MainGraph
 
-from pyfemtet.logger import get_logger
-
-
-logger = get_logger('Viewer')
-logger.setLevel(logging.DEBUG)
 
 
 class FemtetState(Enum):

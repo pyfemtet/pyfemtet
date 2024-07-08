@@ -1,38 +1,30 @@
-# type hint
-from dash.development.base_component import Component
-
-# application
-from dash import Dash
-import webbrowser
-
-# callback
-from dash import Output, Input, State, no_update, callback_context
-from dash.exceptions import PreventUpdate
-
-# components
-from dash import html, dcc
-import dash_bootstrap_components as dbc
-
-# graph
-import pandas as pd
-import plotly.express as px
-
-# the others
 from typing import List
 from time import sleep
-import logging
 from threading import Thread
-import psutil
-from pyfemtet.logger import get_logger
 
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase
-
-
-dash_logger = logging.getLogger('werkzeug')
-logger = get_logger('viz')
+from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, logger
+from pyfemtet.opt.visualization2.process_monitor.pages import HomePage
 
 
-class MonitorApplication(PyFemtetApplicationBase):
+class ProcessMonitorApplication(PyFemtetApplicationBase):
+    """
+        +------+--------+
+        | side | con-   |
+        | bar  | tent   |
+        +--^---+--^-----+
+           │      └─ pages (dict(href: str = layout: Component)])
+           └──────── nav_links (dict(order: float) = NavLink)
+
+        Accessible members:
+        - history: History
+           └ local_df: pd.DataFrame
+        - app: Dash
+        - local_entire_status_int: int  <----------------> femopt.statue: OptimizationStatus(Actor)
+        - local_worker_status_int_list: List[int]  <-----> femopt.opt.statue: List[OptimizationStatus(Actor)]
+                                                     ^
+                                                     |
+                                   sync "while" statement in start_server()
+    """
 
     DEFAULT_PORT = 8080
 
@@ -40,29 +32,35 @@ class MonitorApplication(PyFemtetApplicationBase):
             self,
             history,
             status,
-            worker_addresses: List[str],
-            worker_status_list: List["OptimizationStatus"],
+            worker_addresses,
+            worker_status_list,
+            is_debug=False,
     ):
-        self.worker_addresses = worker_addresses
-        self.entire_status = status  # include actor
-        self.worker_status_list = worker_status_list  # include actor
-
-        # start_server で更新するメンバーを一旦初期化
-        self.local_df = history.local_data
-        self.local_entire_status_int = self.entire_status.get()
-        self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
-
         super().__init__(
             title='PyFemtet Monitor',
             subtitle='visualize optimization progress',
             history=history,
         )
 
-    def start_server(
-            self,
-            host=None,
-            port=None,
-    ):
+        self.is_debug = is_debug
+
+        # type hint (avoid circular import)
+        from pyfemtet.opt._femopt_core import OptimizationStatus
+
+        # register arguments
+        self.worker_addresses: List[str] = worker_addresses
+        self.entire_status: OptimizationStatus = status  # include actor
+        self.worker_status_list: List[OptimizationStatus] = worker_status_list  # include actor
+
+        # initialize local members (from actors)
+        self.local_entire_status_int: int = self.entire_status.get()
+        self.local_worker_status_int_list: List[int] = [s.get() for s in self.worker_status_list]
+
+    def setup_callback(self, debug=False):
+        if not debug:
+            super().setup_callback()
+
+    def start_server(self, host=None, port=None):
         """Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"""
         # avoid circular import
         from pyfemtet.opt._femopt_core import OptimizationStatus
@@ -87,11 +85,12 @@ class MonitorApplication(PyFemtetApplicationBase):
                     and (self.local_entire_status_int == OptimizationStatus.INTERRUPTING)  # Application で status を INTERRUPT にした
             ):
                 self.entire_status.set(OptimizationStatus.INTERRUPTING)
+                for worker_status in self.worker_status_list:
+                    worker_status.set(OptimizationStatus.INTERRUPTING)
 
             # status と df を actor から application に反映する
             self.local_entire_status_int = self.entire_status.get()
             self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
-            self.local_df = self.history.actor_data.copy()
 
             # terminate_all 指令があれば flask server をホストするプロセスごと終了する
             if self.entire_status.get() >= OptimizationStatus.TERMINATE_ALL:
@@ -100,4 +99,54 @@ class MonitorApplication(PyFemtetApplicationBase):
             # interval
             sleep(1)
 
+    def get_status_color(self, status_int):
+        # set color
+        if status_int <= OptimizationStatus.SETTING_UP:
+            color = 'secondary'
+        elif status_int <= OptimizationStatus.WAIT_OTHER_WORKERS:
+            color = 'primary'
+        elif status_int <= OptimizationStatus.RUNNING:
+            color = 'primary'
+        elif status_int <= OptimizationStatus.INTERRUPTING:
+            color = 'warning'
+        elif status_int <= OptimizationStatus.TERMINATE_ALL:
+            color = 'dark'
+        elif status_int <= OptimizationStatus.CRASHED:
+            color = 'danger'
+        else:
+            color = 'danger'
+        return color
 
+
+if __name__ == '__main__':
+
+    import os
+    os.chdir(os.path.dirname(__file__))
+
+    from pyfemtet.opt._femopt_core import History, OptimizationStatus
+
+    class _OS(OptimizationStatus):
+        def __init__(self, name):
+            self.name = name
+            self.st = self.INITIALIZING
+        def set(self, status_const):
+            self.st = status_const
+        def get(self) -> int:
+            return self.st
+        def get_text(self) -> int:
+            return self.const_to_str(self.st)
+
+    g_application = ProcessMonitorApplication(
+        history=History(history_path=os.path.join(os.path.dirname(__file__), '..', 'result_viewer', 'sample', 'sample.csv')),
+        status=_OS('entire'),
+        worker_addresses=['worker1', 'worker2', 'worker3'],
+        worker_status_list=[_OS('worker1'), _OS('worker2'), _OS('worker3')],
+        is_debug=True,
+    )
+
+    g_home_page = HomePage('progress')
+
+    g_application.add_page(g_home_page, 0)
+    g_application.setup_callback(debug=False)
+
+    g_application.run(debug=False)

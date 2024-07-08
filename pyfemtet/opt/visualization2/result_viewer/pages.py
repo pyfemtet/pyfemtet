@@ -9,24 +9,20 @@ from dash import Output, Input, State, callback_context, no_update
 from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.visualization2.wrapped_components import dcc, dbc, html
-from pyfemtet.opt.visualization2.base import AbstractPage
+from pyfemtet.opt.visualization2.base import AbstractPage, logger
 from pyfemtet.opt.visualization2.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization2.complex_components.control_femtet import FemtetControl, FemtetState
 from pyfemtet.opt.visualization2.complex_components.alert_region import AlertRegion
 
 from pyfemtet.opt._femopt_core import History
-from pyfemtet.logger import get_logger
 
 
-logger = get_logger('res-view')
 
 
 class HomePage(AbstractPage):
 
     def __init__(self, title, rel_url='/'):
         super().__init__(title, rel_url)
-        self.setup_component()
-        self.setup_layout()
 
     def setup_component(self):
         # control femtet

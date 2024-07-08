@@ -12,6 +12,7 @@ from pyfemtet.opt.visualization2.wrapped_components import html, dcc, dbc
 # graph
 import pandas as pd
 # import plotly.express as px
+import plotly.graph_objs as go
 
 # the others
 import os
@@ -20,7 +21,7 @@ import json
 import numpy as np
 
 from pyfemtet.opt.visualization2.complex_components import main_figure_creator
-from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage
+from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, AbstractPage, logger
 
 
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
@@ -49,8 +50,8 @@ class MainGraph(AbstractPage):
     """
 
     def __init__(self):
-        super().__init__()
         self.setup_figure_creator()
+        super().__init__()
 
     def setup_figure_creator(self):
         # setup figure creators
@@ -70,6 +71,7 @@ class MainGraph(AbstractPage):
 
     def setup_component(self):
         self.dummy = html.Div(id='main-graph-dummy')
+        self.location = dcc.Location(id='main-graph-location', refresh=True)
 
         # setup header
         self.tab_list = [dbc.Tab(label=d['label'], tab_id=d['tab_id']) for d in self.figure_creators]
@@ -78,18 +80,30 @@ class MainGraph(AbstractPage):
 
         # setup body
         self.tooltip = dcc.Tooltip(id='main-graph-tooltip')
-        self.graph = dcc.Graph(
+
+        # set kwargs of Graph to reconstruct Graph in ProcessMonitor.
+        self.graph_kwargs = dict(
             id='main-graph',
-            animate=True,
+            # animate=True,  # THIS CAUSE THE UPDATED DATA / NOT-UPDATED FIGURE STATE.
             clear_on_unhover=True,
             style={
                 # 'flex-grow': '1',  # Uncomment if the plotly's specification if fixed, and we can use dcc.Graph with FlexBox.
-                'height': '70vh',
+                'height': '60vh',
             },
+            figure=go.Figure()
+        )
+
+        self.graph: dcc.Graph = dcc.Graph(
+            **self.graph_kwargs
         )  # Graph make an element by js, so Flexbox CSS cannot apply to the graph (The element can be bigger, but cannot be smaller.)
-        self.loading = dcc.Loading(children=self.graph)  # Loading make an element that doesn't contain a style attribute, so Flexbox CSS cannot apply to the graph
+
+        self.loading = dcc.Loading(
+            children=self.graph,
+            id='loading-main-graph',
+        )  # Loading make an element that doesn't contain a style attribute, so Flexbox CSS cannot apply to the graph
+
         self.card_body = dbc.CardBody(
-            children=[self.loading, self.tooltip],  # If list is passed to CardBody's children, create element that doesn't contain a style attribute, so Flexbox CSS cannot apply to graph
+            children=html.Div([self.loading, self.tooltip]),  # If list is passed to CardBody's children, create element that doesn't contain a style attribute, so Flexbox CSS cannot apply to graph
             id='main-graph-card-body',
             # style=FLEXBOX_STYLE_ALLOW_VERTICAL_FILL,
         )
@@ -98,12 +112,17 @@ class MainGraph(AbstractPage):
         self.selection_data_property = 'data-selection'  # must be starts with "data-"
         self.selection_data = html.Data(id='selection-data', **{self.selection_data_property: {}})
 
+        # set data length
+        self.data_length_prop = 'data-df-length'  # must start with "data-"
+        self.data_length = html.Data(id='df-length-data', **{self.data_length_prop: None})
+
     def setup_layout(self):
         # setup component
         self.graph_card = dbc.Card(
             [
                 self.dummy,
-                self.tooltip,
+                self.location,
+                self.data_length,
                 self.card_header,
                 self.card_body,
                 self.selection_data,
@@ -119,25 +138,18 @@ class MainGraph(AbstractPage):
 
         app = self.application.app
 
-        # ===== Loading =====
+        # ===== Update Graph =====
         @app.callback(
             Output(self.graph.id, 'figure'),
+            Output(self.data_length.id, self.data_length_prop),  # To determine whether Process Monitor should update the graph, the main graph remembers the current amount of data.
+            Input(self.tabs.id, 'active_tab'),
             Input(self.dummy, 'children'),
-            State(self.tabs, 'active_tab'),)
-        def erase_spinner_on_load(_, active_tab_id):
-            # fires only when the page is loaded
-            is_initial_call = callback_context.triggered_id is None
-            if not is_initial_call:
-                raise PreventUpdate
-            return self.get_fig_by_tab_id(active_tab_id)
-
-        # ===== Switch graph by tab =====
-        @app.callback(
-            Output(self.graph.id, 'figure', allow_duplicate=True),
-            Input(self.tabs, 'active_tab'),
-            prevent_initial_call=True,)
-        def switch_graph_by_tab(active_tab_id):
-            return self.get_fig_by_tab_id(active_tab_id)
+            prevent_initial_call=False,)
+        def redraw_main_graph(active_tab_id, _):
+            logger.debug('====================')
+            logger.debug(f'redraw_main_graph called by {callback_context.triggered_id}')
+            figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True)
+            return figure, length
 
         # ===== Save Selection =====
         @app.callback(
@@ -218,12 +230,23 @@ class MainGraph(AbstractPage):
                 img_url = 'data:image/jpeg;base64, ' + encoded_image
         return html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
 
-    def get_fig_by_tab_id(self, tab_id):
+    def get_fig_by_tab_id(self, tab_id, with_length=False):
+        # If the history is not loaded, do nothing
         if self.application.history is None:
             raise PreventUpdate
-        creators = [d['creator'] for d in self.figure_creators if d['tab_id'] == tab_id]
-        if len(creators) == 0:
-            raise PreventUpdate
-        creator = creators[0]
+
+        # else, get creator by tab_id
+        if tab_id == 'default':
+            creator = self.figure_creators[0]['creator']
+        else:
+            creators = [d['creator'] for d in self.figure_creators if d['tab_id'] == tab_id]
+            if len(creators) == 0:
+                raise PreventUpdate
+            creator = creators[0]
+
+        # create figure
         fig = creator(self.application.history)
-        return fig
+        if with_length:
+            return fig, len(self.application.history.local_data)
+        else:
+            return fig
