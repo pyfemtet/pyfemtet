@@ -39,9 +39,7 @@ _cs = _ColorSet()
 _ss = _SymbolSet()
 
 
-def get_hypervolume_plot(history: History, df):
-    # df = history.local_data  # monitor process and history process is different workers, so history.local_data is not updated in monitor process.
-    # df = history.actor_data.copy()  # access to actor from flask callback makes termination unstable.
+def get_hypervolume_plot(_: History, df):
     df = _ls.localize(df)
 
     # create figure
@@ -63,6 +61,8 @@ def get_hypervolume_plot(history: History, df):
 
 
 def get_default_figure(history, df):
+    # df = history.local_data  # monitor process and history process is different workers, so history.local_data is not updated in monitor process.
+    # df = history.actor_data.copy()  # access to actor from flask callback makes termination unstable.
 
     # data setting
     obj_names = history.obj_names

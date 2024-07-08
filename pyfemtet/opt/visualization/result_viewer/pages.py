@@ -17,8 +17,6 @@ from pyfemtet.opt.visualization.complex_components.alert_region import AlertRegi
 from pyfemtet.opt._femopt_core import History
 
 
-
-
 class HomePage(AbstractPage):
 
     def __init__(self, title, rel_url='/'):
@@ -68,6 +66,7 @@ class HomePage(AbstractPage):
 
     # noinspection PyAttributeOutsideInit
     def setup_layout(self):
+        """"""
         """
             =======================
             |  | ---------------- |
@@ -371,4 +370,3 @@ class HomePage(AbstractPage):
                 raise PreventUpdate
 
             return new_alerts
-

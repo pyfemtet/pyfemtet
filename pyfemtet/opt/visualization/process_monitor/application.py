@@ -9,12 +9,13 @@ from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPag
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):
+    """"""
     """
         +------+--------+
         | side | con-   |
         | bar  | tent   |
         +--^---+--^-----+
-           │      └─ pages (dict(href: str = layout: Component)])
+           │      └─ pages (dict(href: str = layout: Component))
            └──────── nav_links (dict(order: float) = NavLink)
 
         Accessible members:
@@ -143,20 +144,25 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         return color
 
 
-def debug():
+def g_debug():
     import os
     os.chdir(os.path.dirname(__file__))
 
     from pyfemtet.opt._femopt_core import History, OptimizationStatus
 
     class _OS(OptimizationStatus):
+
+        # noinspection PyMissingConstructor
         def __init__(self, name):
             self.name = name
             self.st = self.INITIALIZING
+
         def set(self, status_const):
             self.st = status_const
+
         def get(self) -> int:
             return self.st
+
         def get_text(self) -> int:
             return self.const_to_str(self.st)
 
@@ -192,4 +198,4 @@ def main(history, status, worker_addresses, worker_status_list, host=None, port=
 
 
 if __name__ == '__main__':
-    debug()
+    g_debug()

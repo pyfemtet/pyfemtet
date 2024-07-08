@@ -31,7 +31,8 @@ logger.setLevel(logging.ERROR)
 
 
 class AbstractPage(ABC):
-    """Define content.
+    """Define content."""
+    """
 
         =================
         |~:8080/rel_url | <---- page.rel_url
@@ -73,7 +74,7 @@ title -->home| |      | |
         self.layout = self._component
 
     def setup_callback(self):
-        app = self.application.app
+        # app = self.application.app
 
         for subpage in self.subpages:
             subpage.set_application(self.application)
@@ -98,12 +99,13 @@ def _unused_port_number(start=49152):
 
 
 class SidebarApplicationBase:
+    """"""
     """ Define entire layout and callback.
     +------+--------+
     | side | con-   |
     | bar  | tent   |
     +------+--------+
-       │      └─ pages (dict(href: str = layout: Component)])
+       │      └─ pages (dict(href: str = layout: Component))
        └──────── nav_links (dict(order: float) = NavLink)
     """
 
@@ -203,12 +205,13 @@ class SidebarApplicationBase:
 
 
 class PyFemtetApplicationBase(SidebarApplicationBase):
+    """"""
     """
         +------+--------+
         | side | con-   |
         | bar  | tent   |
         +--^---+--^-----+
-           │      └─ pages (dict(href: str = layout: Component)])
+           │      └─ pages (dict(href: str = layout: Component))
            └──────── nav_links (dict(order: float) = NavLink)
 
         Accessible members:

@@ -1,9 +1,3 @@
-import json
-import os
-import tempfile
-import base64
-import logging
-
 import numpy as np
 import pandas as pd
 
@@ -13,11 +7,6 @@ from dash.exceptions import PreventUpdate
 from pyfemtet.opt.visualization.wrapped_components import dcc, dbc, html
 from pyfemtet.opt.visualization.base import AbstractPage, logger
 from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
-from pyfemtet.opt.visualization.complex_components.control_femtet import FemtetControl, FemtetState
-from pyfemtet.opt.visualization.complex_components.alert_region import AlertRegion
-
-from pyfemtet.opt._femopt_core import History
-
 
 
 DBC_COLUMN_STYLE_CENTER = {
@@ -85,6 +74,7 @@ class HomePage(AbstractPage):
         self.interval = dcc.Interval(id='process-monitor-home-interval', interval=1000)
 
     def setup_layout(self):
+        """"""
         """
             =======================
             |  | ---------------- |
@@ -166,7 +156,7 @@ class HomePage(AbstractPage):
             Output(self.entire_status_message.id, 'children'),
             Input(self.interval.id, self.interval.Prop.n_intervals),
             prevent_initial_call=False,)
-        def update_entire_status(*args):
+        def update_entire_status(*_):
             # get status message
             status_int = self.application.local_entire_status_int
             msg = OptimizationStatus.const_to_str(status_int)
@@ -178,7 +168,7 @@ class HomePage(AbstractPage):
             Output(self.interrupt_button.id, self.interrupt_button.Prop.disabled),
             Input(self.interrupt_button.id, self.interrupt_button.Prop.n_clicks),
             prevent_initial_call=False,)
-        def interrupt_optimization(*args):
+        def interrupt_optimization(*_):
             # If page (re)loaded,
             if callback_context.triggered_id is None:
                 # Enable only if the entire_state < INTERRUPTING
@@ -205,7 +195,7 @@ class HomePage(AbstractPage):
             @app.callback(Output(self.interval.id, self.interval.Prop.interval),
                           Input('debug-button-1', 'n_clicks'),
                           prevent_initial_call=True)
-            def status_change(*args):
+            def status_change(*_):
                 self.application.local_entire_status_int += 10
                 for i in range(len(self.application.local_worker_status_int_list)):
                     self.application.local_worker_status_int_list[i] += 10
@@ -217,7 +207,7 @@ class HomePage(AbstractPage):
             @app.callback(Output(self.interval.id, self.interval.Prop.interval, allow_duplicate=True),
                           Input('debug-button-2', 'n_clicks'),
                           prevent_initial_call=True)
-            def add_data(*args):
+            def add_data(*_):
                 metadata = self.application.history.metadata
                 df = self.application.local_data
 
@@ -243,8 +233,10 @@ class WorkerPage(AbstractPage):
         super().__init__(title, rel_url, application)
 
     def setup_component(self):
+        # noinspection PyAttributeOutsideInit
         self.interval = dcc.Interval(id='worker-page-interval', interval=1000)
 
+        # noinspection PyAttributeOutsideInit
         self.worker_status_alerts = []
         for i in range(len(self.application.worker_addresses)):
             id_worker_alert = f'worker-status-alert-{i}'

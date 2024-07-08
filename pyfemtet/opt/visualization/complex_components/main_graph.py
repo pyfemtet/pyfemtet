@@ -33,6 +33,7 @@ FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
 
 # noinspection PyAttributeOutsideInit
 class MainGraph(AbstractPage):
+    """"""
     """
     +=================+
     |tab1|tab2|       | <- CardHeader
@@ -260,4 +261,3 @@ class MainGraph(AbstractPage):
         else:
             df = self.application.history.local_data
         return df
-
