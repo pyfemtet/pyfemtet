@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-01 14:42+0900\n"
+"POT-Creation-Date: 2024-07-08 17:38+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -230,11 +230,11 @@ msgid "To run the .ps1 file, right click and select \"run with powershell\"."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:22
-msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, make sure that your installation configuration includes the `py launcher`."
+msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:29
-msgid "If you want to configure pyfemtet in a virtual environment, change line 20 of the script to the following, activate the virtual environment, and run the script from the command line: ::"
+msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:36

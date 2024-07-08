@@ -2,6 +2,9 @@
 using namespace System.Windows.Forms
 using namespace System.Drawing
 
+# error setting
+$ErrorActionPreference = "Stop"  # "Inquire" for debug.
+
 Add-Type -Assembly System.Windows.Forms
 
 #Enable visual styles
@@ -16,31 +19,59 @@ $Win32Helpers = Add-Type -MemberDefinition $code -Name "Win32Helpers" -PassThru
 $null = $Win32Helpers::SetProcessDPIAware()
 
 
+
 # ===== python command =====
-$python_command = "py"
+$python_command = "py"  # Comment out this line if you don't use py launcher
+# $python_command = "python"  # And uncomment this line
+# ==========================
+
 
 
 # ===== pre-requirement =====
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) {
+    # check Femtet, Excel and Python process existing
+    $excel_exists = $null -ne (Get-Process Excel -ErrorAction SilentlyContinue)
+    $femtet_exists = $null -ne (Get-Process Femtet -ErrorAction SilentlyContinue)
+    $python_exists = $null -ne (Get-Process Python -ErrorAction SilentlyContinue)
 
-# --runas (reload)
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) { Start-Process powershell.exe "-File `"$PSCommandPath`"" -Verb RunAs; exit }
+    if ($excel_exists -or $femtet_exists) {
+        $msg = "Femtet 又は Excel のプロセスが存在します。PyFemtet にインストールおよびセットアップ前にそれらのプロセスを停止してください。`r`n`r`nインストールはキャンセルされます。"
+        $res = [System.Windows.Forms.MessageBox]::Show(
+            $msg,
+            "error"
+        )
+        throw 'Cancel the process.'
+    }
 
-# error setting
-$ErrorActionPreference = "Stop"  # "Inquire" for debug.
+    if (-not $python_exists) {
+        # OK
+        $msg = "Femtet (2023.0 or later) と Python (3.11 or later, less than 3.13) が必要です。続行する前にこれらがインストールされていることを確認してください。"
+    } elseif ($excel_exists -or $femtet_exists) {
+        # NG
+        $msg = "Python プロセスが存在します。"
+        $msg += "Python プロセスが COM 機能（典型的には、Femtet マクロや Excel マクロ）を使用していないことを確認してください。"
+    }
+    $msg += "`r`n`r`nインストールを続行しますか？?"
 
-# message
-$res = [System.Windows.Forms.MessageBox]::Show(
-    "Femtet(2023.1以降), Python(3.11以降, 3.13未満) が必要です。インストールされていることを確認してから続けてください。",
-    "pre-request",
-    [System.Windows.Forms.MessageBoxButtons]::YesNo
-)
-if ($res -eq [System.Windows.Forms.DialogResult]::No) {
-    throw '処理を取り消します。'
+    $res = [System.Windows.Forms.MessageBox]::Show(
+        $msg,
+        "pre-request",
+        [System.Windows.Forms.MessageBoxButtons]::YesNo
+    )
+    if ($res -eq [System.Windows.Forms.DialogResult]::No) {
+        throw 'Cancel the process.'
+    }
+}
+
+
+# --runas (reload after prerequest)
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) {
+    Start-Process powershell.exe "-File `"$PSCommandPath`"" -Verb RunAs
+    exit
 }
 
 
 # ===== main =====
-
 write-host
 write-host "======================"
 write-host "installing pyfemtet..."
@@ -62,23 +93,47 @@ if (-not ($installed_packages | Select-String -Pattern 'pyfemtet-opt-gui')) {
 
 write-host
 write-host "========================="
+write-host "Checking Femtet Installation ..."
+write-host "========================="
+$software_keys = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" | Get-ItemProperty
+$installed_software = $software_keys | Where-Object { $_.DisplayName }
+$femtet_list = $installed_software | Where-Object { $_.DisplayName -like "*Femtet*" }
+$femtet_list_sorted = $femtet_list | Sort-Object InstallDate
+foreach ($femtet in $femtet_list_sorted) {
+    $femtet_location = $femtet.InstallLocation
+    $femtet_exe_path = Join-Path (Join-Path $femtet_location "Program") "Femtet.exe"
+    if (test-path $femtet_exe_path) {
+        break
+    }
+}
+if (-not (test-path $femtet_exe_path)) {
+    # existing Femtet.exe not found
+    $title = "Error!"
+    $message = "Femtet.exe がインストールされていることを検出できませんでした。処理を中断します。"
+    [System.Windows.Forms.MessageBox]::Show($message, $title)
+    throw $message
+}
+write-host "found Femtet: " + $femtet_exe_path
+
+
+write-host
+write-host "========================="
 write-host "Enabling Python Macro ..."
 write-host "========================="
-# get Femtet.exe path using femtetuitls
-$femtet_exe_path = & $python_command -c "from femtetutils import util;from logging import disable;disable();print(util.get_femtet_exe_path())"
 # estimate FemtetMacro.dll path
-$femtet_macro_dll_path = $femtet_exe_path.replace("Femtet.exe", "FemtetMacro.dll")
-if (-not (test-path $femtet_macro_dll_path)) {
+$femtet_macro_dll_path_64bit = $femtet_exe_path.replace("Femtet.exe", "FemtetMacro.dll")
+$femtet_macro_dll_path_32bit = $femtet_exe_path.replace("Femtet.exe", (join-path "Macro32" "FemtetMacro.dll"))
+if ((-not (test-path $femtet_macro_dll_path_64bit)) -or (-not (test-path $femtet_macro_dll_path_32bit))) {
     $title = "Error!"
-    $message = "Femtet マクロインターフェース設定に失敗しました。Femtet マクロヘルプを参照し「マクロの有効化」手順を実行してください。"
+    $message = "Femtet マクロ有効化設定に失敗しました。Femtet マクロヘルプを参照し「マクロの有効化」手順を実行してください。"
     [System.Windows.Forms.MessageBox]::Show($message, $title)
     throw $message
 } else {
-    write-host "regsvr32 will be OK"
+    write-host "Register typelib will be OK. Please check regsvr32 dialog to certify."
 }
-
 # regsvr
-regsvr32 $femtet_macro_dll_path  # returns nothing, dialog only
+regsvr32 $femtet_macro_dll_path_64bit  # returns nothing, dialog only.
+regsvr32 $femtet_macro_dll_path_32bit  # returns nothing, dialog only. No require to run on WOW64 dir
 
 
 write-host
@@ -125,18 +180,17 @@ if ($succeed) {
     catch {
         $succeed = $false
     }
-    # plan to add 0.4.9
-    # try {
-    #     $Shortcut_file = "$env:USERPROFILE\Desktop\pyfemtet-opt-result-viewer.lnk"
-    #     $WScriptShell = New-Object -ComObject WScript.Shell
-    #     $Shortcut = $WScriptShell.CreateShortcut($Shortcut_file)
-    #     $Shortcut.TargetPath = $pyfemtet_opt_result_viewer_path
-    #     $Shortcut.Save()
-    #     write-host "Shortcut of result_viewer is created."
-    # }
-    # catch {
-    #     $succeed = $false
-    # }
+    try {
+        $Shortcut_file = "$env:USERPROFILE\Desktop\pyfemtet-opt-result-viewer.lnk"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($Shortcut_file)
+        $Shortcut.TargetPath = $pyfemtet_opt_result_viewer_path
+        $Shortcut.Save()
+        write-host "Shortcut of result_viewer is created."
+    }
+    catch {
+        $succeed = $false
+    }
 }
 
 if ($succeed) {

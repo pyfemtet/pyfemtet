@@ -20,17 +20,17 @@ To run the .ps1 file, right click and select "run with powershell".
 .. warning::
 
     This script assumes that your Python installation includes `py launcher`.
-    If you have done a custom installation of Python, make sure that
-    your installation configuration includes the `py launcher`.
+    If you have done a custom installation of Python, **make sure that
+    your installation configuration includes the py launcher.**
 
 
 .. tip::
 
-    If you want to configure pyfemtet in a virtual environment,
-    change line 20 of the script to the following, activate the
+    If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`),
+    **change line 24 of the script** to the following, activate the
     virtual environment, and run the script from the command line: ::
 
-        $python_command = "python"`
+        $python_command = "python"
 
 
 If this step fails, try the following steps manually:

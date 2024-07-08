@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-01 14:42+0900\n"
+"POT-Creation-Date: 2024-07-08 17:38+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -233,12 +233,12 @@ msgid "To run the .ps1 file, right click and select \"run with powershell\"."
 msgstr ".ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:22
-msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, make sure that your installation configuration includes the `py launcher`."
-msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、そのインストール構成に `py launcher` が含まれていることを確認してください。"
+msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
+msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、 **そのインストール構成に `py launcher` が含まれていることを確認してください。**"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:29
-msgid "If you want to configure pyfemtet in a virtual environment, change line 20 of the script to the following, activate the virtual environment, and run the script from the command line: ::"
-msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 20 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
+msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
+msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 24 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:36
 msgid "If this step fails, try the following steps manually:"

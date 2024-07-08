@@ -19,8 +19,12 @@ $Win32Helpers = Add-Type -MemberDefinition $code -Name "Win32Helpers" -PassThru
 $null = $Win32Helpers::SetProcessDPIAware()
 
 
+
 # ===== python command =====
-$python_command = "py"
+$python_command = "py"  # Comment out this line if you don't use py launcher
+# $python_command = "python"  # And uncomment this line
+# ==========================
+
 
 
 # ===== pre-requirement =====
@@ -176,18 +180,17 @@ if ($succeed) {
     catch {
         $succeed = $false
     }
-    # plan to add 0.4.9
-    # try {
-    #     $Shortcut_file = "$env:USERPROFILE\Desktop\pyfemtet-opt-result-viewer.lnk"
-    #     $WScriptShell = New-Object -ComObject WScript.Shell
-    #     $Shortcut = $WScriptShell.CreateShortcut($Shortcut_file)
-    #     $Shortcut.TargetPath = $pyfemtet_opt_result_viewer_path
-    #     $Shortcut.Save()
-    #     write-host "Shortcut of result_viewer is created."
-    # }
-    # catch {
-    #     $succeed = $false
-    # }
+    try {
+        $Shortcut_file = "$env:USERPROFILE\Desktop\pyfemtet-opt-result-viewer.lnk"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($Shortcut_file)
+        $Shortcut.TargetPath = $pyfemtet_opt_result_viewer_path
+        $Shortcut.Save()
+        write-host "Shortcut of result_viewer is created."
+    }
+    catch {
+        $succeed = $false
+    }
 }
 
 if ($succeed) {
