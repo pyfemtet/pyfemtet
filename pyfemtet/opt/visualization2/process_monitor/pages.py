@@ -7,7 +7,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from dash import Output, Input, State, callback_context, no_update
+from dash import Output, Input, State, callback_context, no_update, ALL
 from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.visualization2.wrapped_components import dcc, dbc, html
@@ -207,8 +207,9 @@ class HomePage(AbstractPage):
                           prevent_initial_call=True)
             def status_change(*args):
                 self.application.local_entire_status_int += 10
+                for i in range(len(self.application.local_worker_status_int_list)):
+                    self.application.local_worker_status_int_list[i] += 10
                 raise PreventUpdate
-
 
             # increment data
             self.layout.children.append(dbc.Button(children='local_data を増やす', id='debug-button-2'))
@@ -236,12 +237,48 @@ class HomePage(AbstractPage):
 
 class WorkerPage(AbstractPage):
 
+    def __init__(self, title, rel_url, application):
+        from pyfemtet.opt.visualization2.process_monitor.application import ProcessMonitorApplication
+        self.application: ProcessMonitorApplication = None
+        super().__init__(title, rel_url, application)
+
     def setup_component(self):
-        pass
+        self.interval = dcc.Interval(id='worker-page-interval', interval=1000)
+
+        self.worker_status_alerts = []
+        for i in range(len(self.application.worker_addresses)):
+            id_worker_alert = f'worker-status-alert-{i}'
+            alert = dbc.Alert('worker status here', id=id_worker_alert, color='dark')
+            self.worker_status_alerts.append(alert)
 
     def setup_layout(self):
-        pass
+        rows = [self.interval]
+        rows.extend([dbc.Row([dbc.Col(html.Div(dcc.Loading(alert, id={"type": "loading", "index": i})))]) for i, alert in enumerate(self.worker_status_alerts)])
+
+        self.layout = dbc.Container(
+            children=rows,
+            fluid=True,
+        )
 
     def setup_callback(self):
-        pass
+        app = self.application.app
 
+        @app.callback(
+            [Output(alert.id, 'children') for alert in self.worker_status_alerts],
+            [Output(alert.id, 'color') for alert in self.worker_status_alerts],
+            Output({"type": "loading", "index": ALL}, "target_components"),
+            Input(self.interval.id, 'n_intervals'),
+        )
+        def update_worker_state(_):
+            from pyfemtet.opt._femopt_core import OptimizationStatus
+
+            ret = []
+
+            for worker_address, worker_status_int in zip(self.application.worker_addresses, self.application.local_worker_status_int_list):
+                worker_status_message = OptimizationStatus.const_to_str(worker_status_int)
+                ret.append(f'{worker_address} is {worker_status_message}')
+
+            ret.extend([self.application.get_status_color(status_int) for status_int in self.application.local_worker_status_int_list])
+            ret.append([({} if callback_context.triggered_id is None else no_update) for _ in range(len(self.worker_status_alerts))])
+
+            return tuple(ret)

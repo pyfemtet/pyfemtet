@@ -46,11 +46,11 @@ title -->home| |      | |
          sidebar
 
     """
-    def __init__(self, title='base-page', rel_url='/'):
+    def __init__(self, title='base-page', rel_url='/', application=None):
         self.layout: Component = None
         self.rel_url = rel_url
         self.title = title
-        self.application: PyFemtetApplicationBase = None
+        self.application: PyFemtetApplicationBase = application
         self.subpages = []
         self.setup_component()
         self.setup_layout()
