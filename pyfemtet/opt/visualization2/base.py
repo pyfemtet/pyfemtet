@@ -24,10 +24,10 @@ from pyfemtet.logger import get_logger
 
 
 dash_logger = logging.getLogger('werkzeug')
-dash_logger.setLevel(logging.ERROR)
+dash_logger.setLevel(logging.INFO)
 
 logger = get_logger('viewer')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.ERROR)
 
 
 class AbstractPage(ABC):

@@ -218,7 +218,7 @@ class HomePage(AbstractPage):
                           prevent_initial_call=True)
             def add_data(*args):
                 metadata = self.application.history.metadata
-                df = self.application.history.local_data
+                df = self.application.local_data
 
                 new_row = df.iloc[-2:]
                 obj_index = np.where(np.array(metadata) == 'obj')[0]
@@ -226,7 +226,22 @@ class HomePage(AbstractPage):
                     new_row.iloc[:, idx] = np.random.rand(len(new_row))
 
                 df = pd.concat([df, new_row])
+                df.trial = np.array(range(len(df)))
+                logger.debug(df)
 
-                self.application.history.local_data = df
+                self.application.local_data = df
 
                 raise PreventUpdate
+
+
+class WorkerPage(AbstractPage):
+
+    def setup_component(self):
+        pass
+
+    def setup_layout(self):
+        pass
+
+    def setup_callback(self):
+        pass
+

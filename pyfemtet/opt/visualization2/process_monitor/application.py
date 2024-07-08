@@ -5,7 +5,7 @@ from threading import Thread
 import pandas as pd
 
 from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, logger
-from pyfemtet.opt.visualization2.process_monitor.pages import HomePage
+from pyfemtet.opt.visualization2.process_monitor.pages import HomePage, WorkerPage
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):
@@ -44,6 +44,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
             history=history,
         )
 
+        self._should_get_actor_data = False
         self.is_debug = is_debug
 
         # type hint (avoid circular import)
@@ -55,9 +56,25 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         self.worker_status_list: List[OptimizationStatus] = worker_status_list  # include actor
 
         # initialize local members (from actors)
-        self.local_data: pd.DataFrame = self.history.actor_data.copy()
+        self._df: pd.DataFrame = self.local_data
         self.local_entire_status_int: int = self.entire_status.get()
         self.local_worker_status_int_list: List[int] = [s.get() for s in self.worker_status_list]
+
+    @property
+    def local_data(self) -> pd.DataFrame:
+        if self._should_get_actor_data:
+            return self.history.actor_data.copy()
+        else:
+            return self.history.local_data
+
+
+    @local_data.setter
+    def local_data(self, value: pd.DataFrame):
+        if self._should_get_actor_data:
+            raise NotImplementedError('If should_get_actor_data, ProcessMonitorApplication.local_df is read_only.')
+        else:
+            self.history.local_data = value
+
 
     def setup_callback(self, debug=False):
         if not debug:
@@ -65,6 +82,9 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
 
     def start_server(self, host=None, port=None):
         """Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"""
+
+        self._should_get_actor_data = True
+
         # avoid circular import
         from pyfemtet.opt._femopt_core import OptimizationStatus
 
@@ -148,18 +168,20 @@ def debug():
         is_debug=True,
     )
 
-    g_home_page = HomePage('progress')
+    g_home_page = HomePage('Progress')
+    g_worker_page = WorkerPage('Workers', '/workers')
 
     g_application.add_page(g_home_page, 0)
+    g_application.add_page(g_worker_page, 1)
     g_application.setup_callback(debug=False)
 
-    g_application.run(debug=False)
+    g_application.run(debug=True)
 
 
 def main(history, status, worker_addresses, worker_status_list, host=None, port=None):
     g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
 
-    g_home_page = HomePage('progress')
+    g_home_page = HomePage('Progress')
 
     g_application.add_page(g_home_page, 0)
     g_application.setup_callback()
