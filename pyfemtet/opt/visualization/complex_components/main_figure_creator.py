@@ -1,6 +1,8 @@
 import plotly.graph_objs as go
 import plotly.express as px
 
+from pyfemtet.opt._femopt_core import History
+
 
 class _ColorSet:
     non_domi = {True: '#007bff', False: '#6c757d'}  # color
@@ -37,7 +39,9 @@ _cs = _ColorSet()
 _ss = _SymbolSet()
 
 
-def update_hypervolume_plot(history, df):
+def get_hypervolume_plot(history: History, df):
+    # df = history.local_data  # monitor process and history process is different workers, so history.local_data is not updated in monitor process.
+    # df = history.actor_data.copy()  # access to actor from flask callback makes termination unstable.
     df = _ls.localize(df)
 
     # create figure
@@ -58,26 +62,25 @@ def update_hypervolume_plot(history, df):
     return fig
 
 
-def update_default_figure(history, df):
+def get_default_figure(history, df):
 
     # data setting
     obj_names = history.obj_names
 
-    if len(obj_names) == 0:
-        fig = go.Figure()
+    fig = go.Figure()
 
-    elif len(obj_names) == 1:
-        fig = update_single_objective_plot(history, df)
+    if len(obj_names) == 1:
+        fig = _get_single_objective_plot(history, df)
 
     elif len(obj_names) >= 2:
-        fig = update_multi_objective_pairplot(history, df)
+        fig = _get_multi_objective_pairplot(history, df)
 
     fig.update_traces(hoverinfo="none", hovertemplate=None)
 
     return fig
 
 
-def update_single_objective_plot(history, df):
+def _get_single_objective_plot(history, df):
 
     df = _ls.localize(df)
     obj_name = history.obj_names[0]
@@ -125,7 +128,7 @@ def update_single_objective_plot(history, df):
     return fig
 
 
-def update_multi_objective_pairplot(history, df):
+def _get_multi_objective_pairplot(history, df):
     df = _ls.localize(df)
 
     obj_names = history.obj_names
@@ -183,4 +186,3 @@ def update_multi_objective_pairplot(history, df):
     )
 
     return fig
-
