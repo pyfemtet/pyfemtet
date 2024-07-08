@@ -2,6 +2,8 @@ from typing import List
 from time import sleep
 from threading import Thread
 
+import pandas as pd
+
 from pyfemtet.opt.visualization2.base import PyFemtetApplicationBase, logger
 from pyfemtet.opt.visualization2.process_monitor.pages import HomePage
 
@@ -53,6 +55,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         self.worker_status_list: List[OptimizationStatus] = worker_status_list  # include actor
 
         # initialize local members (from actors)
+        self.local_data: pd.DataFrame = self.history.actor_data.copy()
         self.local_entire_status_int: int = self.entire_status.get()
         self.local_worker_status_int_list: List[int] = [s.get() for s in self.worker_status_list]
 
@@ -89,6 +92,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
                     worker_status.set(OptimizationStatus.INTERRUPTING)
 
             # status と df を actor から application に反映する
+            self.local_data = self.history.actor_data.copy()  # local_data の更新はここから見えない
             self.local_entire_status_int = self.entire_status.get()
             self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
 
@@ -100,6 +104,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
             sleep(1)
 
     def get_status_color(self, status_int):
+        from pyfemtet.opt._femopt_core import OptimizationStatus
         # set color
         if status_int <= OptimizationStatus.SETTING_UP:
             color = 'secondary'
@@ -118,8 +123,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         return color
 
 
-if __name__ == '__main__':
-
+def debug():
     import os
     os.chdir(os.path.dirname(__file__))
 
@@ -150,3 +154,18 @@ if __name__ == '__main__':
     g_application.setup_callback(debug=False)
 
     g_application.run(debug=False)
+
+
+def main(history, status, worker_addresses, worker_status_list, host=None, port=None):
+    g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
+
+    g_home_page = HomePage('progress')
+
+    g_application.add_page(g_home_page, 0)
+    g_application.setup_callback()
+
+    g_application.start_server(host, port)
+
+
+if __name__ == '__main__':
+    debug()

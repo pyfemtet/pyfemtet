@@ -177,7 +177,8 @@ class MainGraph(AbstractPage):
 
             # get row of the history from customdata defined in main_figure
             trial = pt['customdata'][0]
-            df = self.application.history.local_data
+
+            df = self.data_accessor()
             row = df[df['trial'] == trial]
 
             # create component
@@ -245,8 +246,18 @@ class MainGraph(AbstractPage):
             creator = creators[0]
 
         # create figure
-        fig = creator(self.application.history)
+        df = self.data_accessor()
+        fig = creator(self.application.history, df)
         if with_length:
-            return fig, len(self.application.history.local_data)
+            return fig, len(df)
         else:
             return fig
+
+    def data_accessor(self) -> pd.DataFrame:
+        from pyfemtet.opt.visualization2.process_monitor.application import ProcessMonitorApplication
+        if isinstance(self.application, ProcessMonitorApplication):
+            df = self.application.local_data
+        else:
+            df = self.application.history.local_data
+        return df
+

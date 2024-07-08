@@ -154,7 +154,7 @@ class HomePage(AbstractPage):
                 raise PreventUpdate
 
             # If new data does not exist, do nothing
-            if len(self.application.history.local_data) <= current_graph_data_length:
+            if len(self.application.local_data) <= current_graph_data_length:
                 raise PreventUpdate
 
             # fire callback

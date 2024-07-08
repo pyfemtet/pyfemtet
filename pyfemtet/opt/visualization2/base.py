@@ -27,7 +27,7 @@ dash_logger = logging.getLogger('werkzeug')
 dash_logger.setLevel(logging.ERROR)
 
 logger = get_logger('viewer')
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 
 class AbstractPage(ABC):
