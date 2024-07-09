@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.visualization.result_viewer.pages &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.visualization.result_viewer.pages</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.visualization.result_viewer.pages</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">dash</span> <span class="kn">import</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">callback_context</span><span class="p">,</span> <span class="n">no_update</span>
+<span class="kn">from</span> <span class="nn">dash.exceptions</span> <span class="kn">import</span> <span class="n">PreventUpdate</span>
+
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.wrapped_components</span> <span class="kn">import</span> <span class="n">dcc</span><span class="p">,</span> <span class="n">dbc</span><span class="p">,</span> <span class="n">html</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">AbstractPage</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.main_graph</span> <span class="kn">import</span> <span class="n">MainGraph</span>  <span class="c1"># , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.control_femtet</span> <span class="kn">import</span> <span class="n">FemtetControl</span><span class="p">,</span> <span class="n">FemtetState</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.alert_region</span> <span class="kn">import</span> <span class="n">AlertRegion</span>
+
+<span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">History</span>
+
+
+<div class="viewcode-block" id="HomePage">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.pages.HomePage">[docs]</a>
+<span class="k">class</span> <span class="nc">HomePage</span><span class="p">(</span><span class="n">AbstractPage</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">rel_url</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">rel_url</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HomePage.setup_component">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_component">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># control femtet</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="p">:</span> <span class="n">FemtetControl</span> <span class="o">=</span> <span class="n">FemtetControl</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_subpage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="p">)</span>
+
+        <span class="c1"># main graph</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="p">:</span> <span class="n">MainGraph</span> <span class="o">=</span> <span class="n">MainGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_subpage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="p">)</span>
+
+        <span class="c1"># alert region</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="p">:</span> <span class="n">AlertRegion</span> <span class="o">=</span> <span class="n">AlertRegion</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_subpage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="p">)</span>
+
+        <span class="c1"># open pdt (or transfer variable to femtet)</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
+            <span class="s1">&#39;Open Result in Femtet&#39;</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;open-pdt-button&#39;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;primary&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># update parameter</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_parameter_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
+            <span class="s1">&#39;Reconstruct Model&#39;</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;update-parameter-button&#39;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;secondary&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># file picker</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;drag and drop or select files&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;file-picker-button&#39;</span><span class="p">,</span> <span class="n">outline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;primary&#39;</span><span class="p">)</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Upload</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;history-file-picker&#39;</span><span class="p">,</span>
+            <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span><span class="p">],</span>
+            <span class="n">multiple</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># noinspection PyAttributeOutsideInit</span>
+<div class="viewcode-block" id="HomePage.setup_layout">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            =======================</span>
+<span class="sd">            |  | ---------------- |</span>
+<span class="sd">            |  | |              | |</span>
+<span class="sd">            |  | |  Main Graph  | |</span>
+<span class="sd">            |  | |              | |</span>
+<span class="sd">            |  | ---------------- |</span>
+<span class="sd">            |  | [] ...       [] &lt;---- Buttons</span>
+<span class="sd">            |  | ---------------- |</span>
+<span class="sd">            |  | | Alert Region | |</span>
+<span class="sd">            | ^| ---------------- |</span>
+<span class="sd">            ==|====================</span>
+<span class="sd">              |</span>
+<span class="sd">              SideBar</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Uncomment if the plotly&#39;s specification if fixed, and we can use dcc.Graph with FlexBox.</span>
+        <span class="c1"># style = {&#39;height&#39;: &#39;95vh&#39;}</span>
+        <span class="c1"># style.update(FLEXBOX_STYLE_ALLOW_VERTICAL_FILL)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span>
+            <span class="n">children</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">layout</span><span class="p">),</span>  <span class="c1"># visible / invisible components</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">layout</span><span class="p">),</span>  <span class="c1"># invisible components</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span>
+                    <span class="n">children</span><span class="o">=</span><span class="p">[</span>
+                        <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;d-flex justify-content-center&#39;</span><span class="p">)),</span>
+                        <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button_spinner</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;d-flex justify-content-center&#39;</span><span class="p">)),</span>
+                        <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_button</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_parameter_button</span><span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;d-flex justify-content-center&#39;</span><span class="p">)),</span>
+                    <span class="p">],</span>
+                    <span class="n">justify</span><span class="o">=</span><span class="s1">&#39;evenly&#39;</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">layout</span><span class="p">),</span>  <span class="c1"># visible / invisible components</span>
+            <span class="p">],</span>
+            <span class="c1"># style=style,</span>
+            <span class="n">fluid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HomePage.setup_callback">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># setup callback of subpages</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">app</span>
+
+        <span class="c1"># ===== read history csv file from file picker ==s===</span>
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">children</span><span class="p">),</span>  <span class="c1"># FIXME: Used to show current file and fire callback of alert. Separate them.</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">active_tab</span><span class="p">),</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">n_clicks</span><span class="p">),</span>  <span class="c1"># automatically connect to femtet if the metadata of csv is valid</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">contents</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">active_tab</span><span class="p">),)</span>
+        <span class="k">def</span> <span class="nf">set_history</span><span class="p">(</span><span class="n">encoded_file_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">active_tab_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;current file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span>
+
+            <span class="k">if</span> <span class="n">encoded_file_content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="c1"># create temporary file from file_content(full path is hidden by browser because of the security reason)</span>
+            <span class="n">content_type</span><span class="p">,</span> <span class="n">content_string</span> <span class="o">=</span> <span class="n">encoded_file_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="n">file_content</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">content_string</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp_dir_path</span><span class="p">:</span>
+                <span class="n">csv_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_content</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">csv_path</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;current file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">active_tab_id</span><span class="p">,</span> <span class="mi">1</span>
+
+        <span class="c1"># ===== open pdt =====</span>
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_button</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">n_clicks</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data_property</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">open_pdt</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">selection_data</span><span class="p">,</span> <span class="n">current_alerts</span><span class="p">):</span>
+            <span class="c1"># open_pdt allows to open &quot;解析結果単体&quot; without opening any femprj.</span>
+
+            <span class="c1"># check Femtet state</span>
+            <span class="n">connection_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">check_femtet_state</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">connection_state</span> <span class="o">==</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">missing</span> <span class="ow">or</span> <span class="n">connection_state</span> <span class="o">==</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">unconnected</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Connection to Femtet is not established. &#39;</span>
+                       <span class="s1">&#39;Launch Femtet and Open a project.&#39;</span><span class="p">)</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="c1"># check selection</span>
+            <span class="k">if</span> <span class="n">selection_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No result plot is selected.&#39;</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="c1"># get femprj in history csv</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">create_femtet_interface_args</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># read metadata from history.</span>
+            <span class="n">femprj_path</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;femprj_path&#39;</span><span class="p">]</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span>
+
+            <span class="c1"># check metadata is valid</span>
+            <span class="k">if</span> <span class="n">femprj_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The femprj file path in the history csv is not found or valid. &#39;</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="k">if</span> <span class="n">model_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The model name in the history csv is not found.&#39;</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="c1"># check pdt_path in selection_data</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">selection_data</span><span class="p">[</span><span class="s1">&#39;points&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">trial</span> <span class="o">=</span> <span class="n">pt</span><span class="p">[</span><span class="s1">&#39;customdata&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># get pdt path</span>
+            <span class="n">pdt_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">create_pdt_path</span><span class="p">(</span><span class="n">femprj_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">trial</span><span class="p">)</span>
+
+            <span class="c1"># check pdt exists</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.pdt file is not found. &#39;</span>
+                       <span class="s1">&#39;Please check the .Results folder. &#39;</span>
+                       <span class="s1">&#39;Note that .pdt file save mode depends on &#39;</span>
+                       <span class="s1">&#39;the `save_pdt` argument of FemtetInterface in optimization script&#39;</span>
+                       <span class="s1">&#39;(default to `all`).&#39;</span><span class="p">)</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="c1"># OpenPDT(PDTFile As String, bOpenWithGUI As Boolean)</span>
+            <span class="n">Femtet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">Femtet</span>
+            <span class="n">succeed</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">OpenPDT</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">succeed</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Failed to open </span><span class="si">{</span><span class="n">pdt_path</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+        <span class="c1"># make a new AnalysisModel that is the &lt;model_name&gt;_trial&lt;n&gt;</span>
+        <span class="c1"># and reconstruct model.</span>
+        <span class="c1"># ===== update parameter =====</span>
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_parameter_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_parameter_button</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">n_clicks</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data_property</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">update_parameter</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">selection_data</span><span class="p">,</span> <span class="n">current_alerts</span><span class="p">):</span>
+
+            <span class="c1"># check Femtet state</span>
+            <span class="n">connection_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">check_femtet_state</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">connection_state</span> <span class="o">!=</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">connected</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Connection to Femtet is not established. &#39;</span>
+                       <span class="s1">&#39;Launch Femtet and Open a project.&#39;</span><span class="p">)</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="c1"># check selection</span>
+            <span class="k">if</span> <span class="n">selection_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No result plot is selected.&#39;</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">Femtet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">Femtet</span>
+
+
+                <span class="c1"># check model to open is included in current project</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">femprj_path</span> <span class="o">!=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Project</span><span class="p">)</span> \
+                        <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetAnalysisModelNames_py</span><span class="p">()):</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> is not in current project. &#39;</span>
+                           <span class="sa">f</span><span class="s1">&#39;Please check opened project. &#39;</span>
+                           <span class="sa">f</span><span class="s1">&#39;For example, not &quot;analysis model only&quot; but your .femprj file.&#39;</span><span class="p">)</span>
+                    <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">alerts</span>
+
+                <span class="c1"># certify opening model</span>
+                <span class="n">Femtet</span><span class="o">.</span><span class="n">LoadProjectAndAnalysisModel</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
+                    <span class="kc">False</span>
+                <span class="p">)</span>
+
+                <span class="c1"># copy analysis model or femprj.</span>
+                <span class="o">...</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown error has occurred in analysis model compatibility check. &#39;</span>
+                       <span class="sa">f</span><span class="s1">&#39;exception message is: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># get nth trial from selection data</span>
+                <span class="n">pt</span> <span class="o">=</span> <span class="n">selection_data</span><span class="p">[</span><span class="s1">&#39;points&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">trial</span> <span class="o">=</span> <span class="n">pt</span><span class="p">[</span><span class="s1">&#39;customdata&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># get parameter and update model</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">local_data</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">trial</span><span class="p">]</span>
+                <span class="n">metadata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metadata</span> <span class="o">==</span> <span class="s1">&#39;prm&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="n">names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">columns</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+                <span class="n">parameter</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="n">values</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+
+                <span class="n">Femtet</span><span class="o">.</span><span class="n">SaveProject</span><span class="p">(</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Project</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">no_update</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown error has occurred in updating model. &#39;</span>
+                       <span class="sa">f</span><span class="s1">&#39;exception message is: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">alerts</span>
+
+        <span class="c1"># ===== update alert (chained from launch femtet) =====</span>
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">femtet_state</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">femtet_state_prop</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">add_alert_by_connect_femtet</span><span class="p">(</span><span class="n">femtet_state_data</span><span class="p">,</span> <span class="n">current_alerts</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">femtet_state_data</span><span class="p">[</span><span class="s1">&#39;alert&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">new_alerts</span>
+
+        <span class="c1"># ===== update alert (chained from read history) =====</span>
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">children</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">add_alert_on_history_set</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">current_alerts</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="c1"># check the corresponding between history and Femtet</span>
+            <span class="c1"># ├ history-side</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">create_femtet_interface_args</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># read metadata from history.</span>
+            <span class="n">femprj_path_history_on_history</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;femprj_path&#39;</span><span class="p">]</span>
+            <span class="n">model_name_on_history</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span>
+            <span class="c1"># ├ Femtet-side</span>
+            <span class="n">Femtet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">Femtet</span>
+            <span class="n">femprj_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Project</span>  <span class="c1"># it can be &#39;解析結果単体.femprj&#39;</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">AnalysisModelName</span>
+            <span class="c1"># └ check</span>
+            <span class="n">is_same_femprj</span> <span class="o">=</span> <span class="p">(</span><span class="n">femprj_path</span> <span class="o">==</span> <span class="n">femprj_path_history_on_history</span><span class="p">)</span> <span class="k">if</span> <span class="n">femprj_path_history_on_history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">True</span>
+            <span class="n">is_same_model</span> <span class="o">=</span> <span class="p">(</span><span class="n">model_name</span> <span class="o">==</span> <span class="n">model_name_on_history</span><span class="p">)</span> <span class="k">if</span> <span class="n">model_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">True</span>
+
+            <span class="c1"># alert</span>
+            <span class="n">new_alerts</span> <span class="o">=</span> <span class="n">current_alerts</span>
+            <span class="k">if</span> <span class="n">femprj_path_history_on_history</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;.femprj file path of the history csv is invalid. Please certify matching between csv and opening .femprj file.&#39;</span>
+                <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_femprj</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;.femprj file path of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and .femprj file.&#39;</span>
+                    <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">model_name_on_history</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Analysis model name of the history csv is invalid. Please certify matching between csv and opening analysis model.&#39;</span>
+                <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_model</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Analysis model name of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and opening analysis model.&#39;</span>
+                    <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">new_alerts</span> <span class="o">==</span> <span class="n">current_alerts</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PreventUpdate</span>
+
+            <span class="k">return</span> <span class="n">new_alerts</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

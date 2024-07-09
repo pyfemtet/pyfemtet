@@ -1,17 +1,16 @@
-"""外部 CAD (SOLIDWORKS) 連携
+"""External CAD (SOLIDWORKS) Integration
 
-Femtet の応力解析ソルバ、および
-Dassault Systemes 社製 CAD ソフト SOLIDWORKS を用いて
-軽量かつ高剛性な H 型鋼の設計を行います。
+Using Femtet's stress analysis solver and Dassault Systemes' CAD software SOLIDWORKS,
+design a lightweight and high-strength H-shaped beam.
 
-事前準備として、下記の手順を実行してください。
-- SOLIDWORKS のインストール
-- C:\temp フォルダを作成する
-    - Note: SOLIDWORKS が .x_t ファイルをこのフォルダに保存します。
-- 以下のファイルを同じフォルダに配置
-    - cad_ex01_SW_jp.py (このファイル)
+As a preliminary step, please perform the following procedures:
+- Install SOLIDWORKS
+- Create a C:\temp folder
+    - Note: SOLIDWORKS will save a .x_t file in this folder.
+- Place the following files in the same folder:
+    - cad_ex01_SW.py (this file)
     - cad_ex01_SW.SLDPRT
-    - cad_ex01_SW_jp.femprj
+    - cad_ex01_SW.femprj
 """
 
 import os
@@ -28,30 +27,32 @@ os.chdir(here)
 
 
 def von_mises(Femtet):
-    """モデルの最大フォン・ミーゼス応力を取得します。
+    """Obtain the maximum von Mises stress of the model.
 
     Note:
-        目的関数または制約関数は、
-        第一引数としてFemtetを受け取り、
-        戻り値としてfloat型を返す必要があります。
+        The objective or constraint function should take Femtet
+        as its first argument and return a float as the output.
 
     Warning:
-        CAD 連携機能では、意図しない位置に境界条件が設定される可能性があります。
+        CAD integration may assign boundary conditions to unintended locations.
 
-        この例では、境界条件が意図したとおりに割り当てられている場合、
-        最大変位は常に負になります。最大変位が正の場合、境界条件の割り当てが
-        失敗したとみなし、ModelError を送出します。
+        In this example, if the boundary conditions are assigned as intended,
+        the maximum z displacement is always negative.
+        If the maximum displacement is not negative, it is assumed that
+        boundary condition assignment has failed.
+        Then this function raises a ModelError.
 
-        最適化中に ModelError、MeshError、または SolveError が発生した場合、
-        最適化プロセスは試行を失敗とみなし、次のトライアルにスキップします。
+        If a ModelError, MeshError, or SolveError occurs during optimization,
+        the optimization process considers the attempt a failure and skips to
+        the next trial.
     """
 
-    # 簡易的な境界条件の正しさチェック
+    # Simple check for the correctness of boundary conditions.
     dx, dy, dz = Femtet.Gogh.Galileo.GetMaxDisplacement_py()
     if dz >= 0:
-        raise ModelError('境界条件の設定が間違っています。')
+        raise ModelError('Assigning unintended boundary conditions.')
 
-    # ミーゼス応力計算
+    # Von Mises stress calculation.
     Gogh = Femtet.Gogh
     Gogh.Galileo.Potential = constants.GALILEO_VON_MISES_C
     succeed, (x, y, z), mises = Gogh.Galileo.GetMAXPotentialPoint_py(constants.CMPX_REAL_C)
@@ -60,37 +61,40 @@ def von_mises(Femtet):
 
 
 def mass(Femtet):
-    """モデルの質量を取得します。"""
+    """Obtain model mass."""
     return Femtet.Gogh.Galileo.GetMass('H_beam')
 
 
 def C_minus_B(Femtet, opt):
-    """C 寸法と B 寸法の差を計算します。
+    """Calculate the difference between C and B dimensions.
 
-    別の例では、次のスニペットを使用して設計変数にアクセスします。
+    Another example uses the following snippet to access design variables:
 
         A = Femtet.GetVariableValue('A')
     
-    ただし、CAD 連携機能を使用する場合、設計変数が .femprj ファイルに
-    設定されていないため、この方法は機能しません。
+    However, when performing CAD integration, this method does not work
+    because the variables are not set in the .femprj file.
 
-    CAD 連携機能を使用する場合、以下の方法で設計変数にアクセスすることができます。
+    In CAD integration, design variables are obtained in the following way.
 
-        # add_parameter() で追加したパラメータの変数名をキーとする辞書を得る方法
+        # How to obtain a dictionary with the variable names of parameters
+        # added by add_parameter() as keys.
         params: dict = opt.get_parameter()
         A = params['A']
 
-    又は
+    Or
 
-        # add_parameter() で追加した順のパラメータの値の配列を得る方法
+        # How to obtain an array of values of parameters added in the order
+        # by add_parameter().
         values: np.ndarray = opt.get_parameter('values')
         A, B, C = values
 
-    目的関数と拘束関数は、最初の引数の後に任意の変数を取ることができます。
-    FEMOpt のメンバ変数 opt には get_parameter() というメソッドがあります。
-    このメソッドによって add_parameter() で追加された設計変数を取得できます。
-    opt を第 2 引数として取ることにより、目的関数または拘束関数内で
-    get_parameter() を実行して設計変数を取得できます。
+    Objective functions and constraint functions can take arbitrary variables
+    after the first argument.
+    The FEMOpt member variable `opt` has a method called get_parameter().
+    This method allows you to retrieve design variables added by add_parameter().
+    By taking `opt` as the second argument, you can execute get_parameter()
+    within the objective or constraint function to retrieve design variables.
     """
     A, B, C = opt.get_parameter('values')
     return C - B
@@ -98,34 +102,36 @@ def C_minus_B(Femtet, opt):
 
 if __name__ == '__main__':
 
-    # NX-Femtet 連携オブジェクトの初期化
-    # この処理により、Python プロセスは Femtet に接続を試みます。
+    # Initialize NX-Femtet integration object.
+    # At this point, Python is connected to the Femtet.
     fem = FemtetWithSolidworksInterface(
         sldprt_path='cad_ex01_SW.SLDPRT',
-        open_result_with_gui=False,
+        open_result_with_gui=False,  # To calculate von Mises stress, set this argument to False. See Femtet Macro Help.
     )
 
-    # FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)
+    # Initialize the FEMOpt object.
+    # (establish connection between the optimization problem and Femtet)
     femopt = FEMOpt(fem=fem)
 
-    # 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)
+    # Add design variables to the optimization problem.
+    # (Specify the variables registered in the femprj file.)
     femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
     femopt.add_parameter('B', 10, lower_bound=1, upper_bound=40)
     femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)
 
-    # 拘束関数を最適化問題に追加
+    # Add the constraint function to the optimization problem.
     femopt.add_constraint(C_minus_B, 'C>B', lower_bound=1, args=femopt.opt)
 
-    # 目的関数を最適化問題に追加
+    # Add the objective function to the optimization problem.
     femopt.add_objective(von_mises, name='von Mises (Pa)')
     femopt.add_objective(mass, name='mass (kg)')
 
-    # 最適化を実行
+    # Run optimization.
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=20)
 
-    # プロセスモニタで結果を確認するために
-    # Enter キーが押されるまで処理を停止します。
+    # Stop script to keep process alive
+    # while you check the result in process monitor.
     print('================================')
     print('Finished. Press Enter to quit...')
     print('================================')

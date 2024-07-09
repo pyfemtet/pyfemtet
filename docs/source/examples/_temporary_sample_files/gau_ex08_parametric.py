@@ -1,38 +1,37 @@
-"""単目的最適化: 有限長ヘリカルコイルの自己インダクタンス
+"""Single-objective optimization: Self-inductance of a finite-length helical coil.
 
-Femtet の磁場解析ソルバを利用して、
-有限長ヘリカルコイルの自己インダクタンスを
-目標の値にする設計を行います。
+Using Femtet's magnetic field analysis solver, design to achieve
+the target value for the self-inductance of a finite-length helical coil.
 
-対応プロジェクト: gau_ex08_parametric_jp.femprj
+Corresponding project: gau_ex08_parametric.femprj
 """
 from optuna.integration.botorch import BoTorchSampler
 from pyfemtet.opt import FEMOpt, OptunaOptimizer
 
 
 def inductance(Femtet):
-    """自己インダクタンスを取得します。
+    """Obtain the self-inductance.
 
     Note:
-        目的関数または制約関数は、
-        第一引数としてFemtetを受け取り、
-        戻り値としてfloat型を返す必要があります。
+        The objective or constraint function should take Femtet
+        as its first argument and return a float as the output.
 
     Params:
-        Femtet: Femtet をマクロで操作するためのインスタンスです。詳細な情報については、「Femtet マクロヘルプ」をご覧ください。
+        Femtet: This is an instance for manipulating Femtet with macros. For detailed information, please refer to "Femtet Macro Help".
 
     Returns:
-        float: 自己インダクタンスです。
+        float: Self-inductance.
     """
     Gogh = Femtet.Gogh
 
     coil_name = Gogh.Gauss.GetCoilList()[0]
-    return Gogh.Gauss.GetL(coil_name, coil_name)  # 単位: F
+    return Gogh.Gauss.GetL(coil_name, coil_name)  # unit: F
 
 
 if __name__ == '__main__':
 
-    # 数値最適化問題の初期化 (最適化手法を決定します)
+    # Initialize the numerical optimization problem.
+    # (determine the optimization method)
     opt = OptunaOptimizer(
         sampler_class=BoTorchSampler,
         sampler_kwargs=dict(
@@ -40,24 +39,26 @@ if __name__ == '__main__':
         )
     )
 
-    # FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)。
+    # Initialize the FEMOpt object.
+    # (establish connection between the optimization problem and Femtet)
     femopt = FEMOpt(opt=opt)
 
-    # 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)。
+    # Add design variables to the optimization problem.
+    # (Specify the variables registered in the femprj file.)
     femopt.add_parameter("helical_pitch", 6, lower_bound=4.2, upper_bound=8)
     femopt.add_parameter("coil_radius", 10, lower_bound=1, upper_bound=10)
     femopt.add_parameter("n_turns", 5, lower_bound=1, upper_bound=5)
 
-    # 目的関数を最適化問題に追加
-    # 目標の自己インダクタンスは 0.1 μF です。
-    femopt.add_objective(inductance, name='自己インダクタンス (F)', direction=1e-7)
+    # Add the objective function to the optimization problem.
+    # The target inductance is 0.1 uF.
+    femopt.add_objective(inductance, name='self-inductance (F)', direction=1e-7)
 
-    # 最適化を実行
+    # Run optimization.
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=20)
 
-    # プロセスモニタで結果を確認するために
-    # Enter キーが押されるまで処理を停止します。
+    # Stop script to keep process alive
+    # while you check the result in process monitor.
     print('================================')
     print('Finished. Press Enter to quit...')
     print('================================')
