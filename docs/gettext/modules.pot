@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-08 17:38+0900\n"
+"POT-Creation-Date: 2024-07-09 11:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -246,7 +246,7 @@ msgstr ""
 #: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.rst:27
-#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:32
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:40
 #: ../source/modules/pyfemtet.rst:40
 msgid "Module contents"
 msgstr ""
@@ -892,57 +892,8 @@ msgstr ""
 msgid "Define content."
 msgstr ""
 
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.AbstractPage:6
-msgid "page.   |    | -------- | title -->home| |      | |"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.AbstractPage:0
-msgid "| |    <-------- sub_page.layout"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.AbstractPage:0
-msgid "| -------- |"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.AbstractPage:0
-msgid "^  |          |<--- page.layout"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.AbstractPage:16
-msgid "==|=============="
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.AbstractPage:13
-msgid "sidebar"
-msgstr ""
-
 #: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.PyFemtetApplicationBase:1
 msgid "Bases: :py:class:`~pyfemtet.opt.visualization.base.SidebarApplicationBase`"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.PyFemtetApplicationBase:5
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.SidebarApplicationBase:6
-#: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:5
-msgid "│      └─ pages (dict(href: str = layout: Component)]) └──────── nav_links (dict(order: float) = NavLink)"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.PyFemtetApplicationBase:8
-#: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:8
-msgid "Accessible members: - history: History"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.PyFemtetApplicationBase:10
-#: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:10
-msgid "└ local_df: pd.DataFrame"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.PyFemtetApplicationBase:11
-#: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:11
-msgid "app: Dash"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/base.py:docstring of pyfemtet.opt.visualization.base.SidebarApplicationBase:1
-msgid "Define entire layout and callback. +------+--------+ | side | con-   | | bar  | tent   | +------+--------+"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:2
@@ -975,6 +926,7 @@ msgid "# femprj_path=None, # model_name=None, # connect_method='auto',  # dask w
 msgstr ""
 
 #: ../../pyfemtet/opt/visualization/complex_components/control_femtet.py:docstring of pyfemtet.opt.visualization.complex_components.control_femtet.FemtetState:1
+#: ../../pyfemtet/opt/visualization/wrapped_components/str_enum.py:docstring of pyfemtet.opt.visualization.wrapped_components.str_enum.ReprEnum:1
 msgid "Bases: :py:class:`~enum.Enum`"
 msgstr ""
 
@@ -984,14 +936,6 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:32
 msgid "pyfemtet.opt.visualization.complex\\_components.main\\_graph module"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/complex_components/main_graph.py:docstring of pyfemtet.opt.visualization.complex_components.main_graph.MainGraph:1
-msgid "+=================+ |tab1|tab2|       | <- CardHeader |    +------------+ | +-------------+ | | | Loading     | | <- CardBody | | +---------+ | | | | |  graph <-------- ToolTip | | +---------+ | | | +-------------+ | +=================+"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/complex_components/main_graph.py:docstring of pyfemtet.opt.visualization.complex_components.main_graph.MainGraph:12
-msgid "Data(data-selection)"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:2
@@ -1007,64 +951,12 @@ msgstr ""
 msgid "Bases: :py:class:`~pyfemtet.opt.visualization.base.PyFemtetApplicationBase`"
 msgstr ""
 
-#: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:12
-msgid "local_entire_status_int: int  <----------------> femopt.statue: OptimizationStatus(Actor)"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:17
-msgid "local_worker_status_int_list: List[int]  <-----> femopt.opt.statue: List[OptimizationStatus(Actor)]"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:16
-msgid "sync \"while\" statement in start_server()"
-msgstr ""
-
 #: ../../pyfemtet/opt/visualization/process_monitor/application.py:docstring of pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication.start_server:1
 msgid "Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:16
 msgid "pyfemtet.opt.visualization.process\\_monitor.pages module"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:4
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:4
-msgid "| |  Main Graph  | |"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:5
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:5
-msgid "| |              | |"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:6
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:8
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:6
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:8
-msgid "| ---------------- |"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:7
-msgid "| [stop][interrupt]<---- Buttons"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:9
-msgid "| | Status       | |"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:10
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:10
-msgid "^| ---------------- |"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:12
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:12
-msgid "==|===================="
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage.setup_layout:13
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:13
-msgid "SideBar"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:2
@@ -1077,14 +969,6 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:16
 msgid "pyfemtet.opt.visualization.result\\_viewer.pages module"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:7
-msgid "| [] ...       [] <---- Buttons"
-msgstr ""
-
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage.setup_layout:9
-msgid "| | Alert Region | |"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:2
@@ -1316,7 +1200,7 @@ msgstr ""
 #: ../../pyfemtet/opt/visualization/wrapped_components/html.py:docstring of pyfemtet.opt.visualization.wrapped_components.html.Video.Prop:1
 #: ../../pyfemtet/opt/visualization/wrapped_components/html.py:docstring of pyfemtet.opt.visualization.wrapped_components.html.Wbr.Prop:1
 #: ../../pyfemtet/opt/visualization/wrapped_components/html.py:docstring of pyfemtet.opt.visualization.wrapped_components.html.Xmp.Prop:1
-msgid "Bases: :py:class:`~enum.StrEnum`"
+msgid "Bases: :py:class:`~pyfemtet.opt.visualization.wrapped_components.str_enum.StrEnum`"
 msgstr ""
 
 #: ../../pyfemtet/opt/visualization/wrapped_components/dbc.py:docstring of pyfemtet.opt.visualization.wrapped_components.dbc.AccordionItem:1
@@ -2189,4 +2073,24 @@ msgstr ""
 
 #: ../../pyfemtet/opt/visualization/wrapped_components/html.py:docstring of pyfemtet.opt.visualization.wrapped_components.html.Xmp:1
 msgid "Bases: :py:class:`~dash.html.Xmp.Xmp`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:32
+msgid "pyfemtet.opt.visualization.wrapped\\_components.str\\_enum module"
+msgstr ""
+
+#: ../../pyfemtet/opt/visualization/wrapped_components/str_enum.py:docstring of pyfemtet.opt.visualization.wrapped_components.str_enum:1
+msgid "Copy of StrEnum for python <= 3.10 support."
+msgstr ""
+
+#: ../../pyfemtet/opt/visualization/wrapped_components/str_enum.py:docstring of pyfemtet.opt.visualization.wrapped_components.str_enum.ReprEnum:1
+msgid "Only changes the repr(), leaving str() and format() to the mixed-in type."
+msgstr ""
+
+#: ../../pyfemtet/opt/visualization/wrapped_components/str_enum.py:docstring of pyfemtet.opt.visualization.wrapped_components.str_enum.StrEnum:1
+msgid "Bases: :py:class:`str`, :py:class:`~pyfemtet.opt.visualization.wrapped_components.str_enum.ReprEnum`"
+msgstr ""
+
+#: ../../pyfemtet/opt/visualization/wrapped_components/str_enum.py:docstring of pyfemtet.opt.visualization.wrapped_components.str_enum.StrEnum:1
+msgid "Enum where members are also (and must be) strings"
 msgstr ""

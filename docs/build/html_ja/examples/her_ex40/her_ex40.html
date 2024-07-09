@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>円形パッチアンテナの共振周波数 &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="基板上の発熱体" href="../wat_ex14/wat_ex14.html" />
+    <link rel="prev" title="ソレノイドコイルの自己インダクタンス" href="../gau_ex08/gau_ex08.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">例題</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#single-objective-optimization">単目的最適化</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../gau_ex08/gau_ex08.html">ソレノイドコイルの自己インダクタンス</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">円形パッチアンテナの共振周波数</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sample-file">サンプルファイル</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-variables">設計変数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#objective-function">目的関数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sample-code">サンプルコード</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">サンプルコードの実行結果</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#multi-objective-optimization">多目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#parallel-computing">並列計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#cad-integration">CAD 連携</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../pages/examples.html">例題</a></li>
+      <li class="breadcrumb-item active">円形パッチアンテナの共振周波数</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/her_ex40/her_ex40.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="resonant-frequency-of-a-circular-patch-antenna">
+<h1>円形パッチアンテナの共振周波数<a class="headerlink" href="#resonant-frequency-of-a-circular-patch-antenna" title="Link to this heading"></a></h1>
+<p>Femtet の電磁波解析ソルバーを用い、 円形パッチアンテナの共振周波数を 特定の値にする例題を解説します。</p>
+<section id="sample-file">
+<h2>サンプルファイル<a class="headerlink" href="#sample-file" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><a class="reference download internal" download="" href="../../_downloads/3200852850b2778421ce17fdd435a183/her_ex40_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> を Femtet で開いたまま、 <a class="reference download internal" download="" href="../../_downloads/52ebddd9ec3795420079ee4eb4865082/her_ex40_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> をダブルクリックして実行してください。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>FEM 問題としての詳細については、FemtetHelp / 例題集 / 電磁波解析 / 例題40 を参照してください。</p>
+</div>
+</section>
+<section id="design-variables">
+<h2>設計変数<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
+<img alt="../../_images/her_ex40_model.png" src="../../_images/her_ex40_model.png" />
+<figcaption>
+<p><span class="caption-text">モデルの外観</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ant_r</p></td>
+<td><p>円形アンテナの半径</p></td>
+</tr>
+<tr class="row-odd"><td><p>sx</p></td>
+<td><p>基板のサイズ</p></td>
+</tr>
+<tr class="row-even"><td><p>xf</p></td>
+<td><p>給電ポートの位置</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="objective-function">
+<h2>目的関数<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
+<p>S(1,1) の第一ピークを与える共振周波数</p>
+</section>
+<section id="sample-code">
+<h2>サンプルコード<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">her_ex40_parametric.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="sd">&quot;&quot;&quot;単目的最適化: 円形パッチアンテナの共振周波数</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="sd">Femtet の電磁波解析ソルバを利用して、円形パッチアンテナの</span>
+<span class="linenos">  4</span><span class="sd">電磁波調和解析を行い、共振特性を目標の値にする設計を行います。</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="sd">対応プロジェクト: her_ex40_parametric_jp.femprj</span>
+<span class="linenos">  7</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">  8</span><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="linenos">  9</span>
+<span class="linenos"> 10</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 11</span><span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span>
+<span class="linenos"> 12</span><span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="linenos"> 13</span><span class="kn">from</span> <span class="nn">optuna.integration.botorch</span> <span class="kn">import</span> <span class="n">BoTorchSampler</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">SolveError</span>
+<span class="linenos"> 16</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">OptunaOptimizer</span><span class="p">,</span> <span class="n">FEMOpt</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span>
+<span class="linenos"> 19</span><span class="k">class</span> <span class="nc">SParameterCalculator</span><span class="p">:</span>
+<span class="linenos"> 20</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Sパラメータ計算用クラス&quot;&quot;&quot;</span>
+<span class="linenos"> 21</span>    
+<span class="linenos"> 22</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos"> 23</span>        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos"> 24</span>        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos"> 25</span>        <span class="bp">self</span><span class="o">.</span><span class="n">interpolated_function</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos"> 26</span>        <span class="bp">self</span><span class="o">.</span><span class="n">resonance_frequency</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos"> 27</span>        <span class="bp">self</span><span class="o">.</span><span class="n">minimum_S</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos"> 28</span>
+<span class="linenos"> 29</span>    <span class="k">def</span> <span class="nf">_get_freq_and_S_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 30</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;周波数とSパラメータの関係を取得します。&quot;&quot;&quot;</span>
+<span class="linenos"> 31</span>
+<span class="linenos"> 32</span>        <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
+<span class="linenos"> 33</span>        
+<span class="linenos"> 34</span>        <span class="n">freq_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos"> 35</span>        <span class="n">dB_S_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos"> 36</span>        <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Hertz</span><span class="o">.</span><span class="n">nMode</span><span class="p">),</span> <span class="s1">&#39;周波数と S(1, 1) の関係を取得&#39;</span><span class="p">):</span>
+<span class="linenos"> 37</span>            <span class="c1"># 周波数モード設定</span>
+<span class="linenos"> 38</span>            <span class="n">Gogh</span><span class="o">.</span><span class="n">Hertz</span><span class="o">.</span><span class="n">Mode</span> <span class="o">=</span> <span class="n">mode</span>
+<span class="linenos"> 39</span>            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="linenos"> 40</span>
+<span class="linenos"> 41</span>            <span class="c1"># 周波数を取得</span>
+<span class="linenos"> 42</span>            <span class="n">freq</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Hertz</span><span class="o">.</span><span class="n">GetFreq</span><span class="p">()</span><span class="o">.</span><span class="n">Real</span>
+<span class="linenos"> 43</span>
+<span class="linenos"> 44</span>            <span class="c1"># S(1, 1) を取得</span>
+<span class="linenos"> 45</span>            <span class="n">comp_S</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Hertz</span><span class="o">.</span><span class="n">GetSMatrix</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 46</span>            <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="n">comp_S</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">comp_S</span><span class="o">.</span><span class="n">Imag</span><span class="p">))</span>
+<span class="linenos"> 47</span>            <span class="n">dB_S</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
+<span class="linenos"> 48</span>
+<span class="linenos"> 49</span>            <span class="c1"># 結果を保存</span>
+<span class="linenos"> 50</span>            <span class="n">freq_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+<span class="linenos"> 51</span>            <span class="n">dB_S_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dB_S</span><span class="p">)</span>
+<span class="linenos"> 52</span>
+<span class="linenos"> 53</span>        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="n">freq_list</span>
+<span class="linenos"> 54</span>        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">dB_S_list</span>
+<span class="linenos"> 55</span>
+<span class="linenos"> 56</span>    <span class="k">def</span> <span class="nf">_calc_resonance_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos"> 57</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Sパラメータの第一ピークを与える周波数を取得します。&quot;&quot;&quot;</span>
+<span class="linenos"> 58</span>        <span class="n">peaks</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">),</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prominence</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wlen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">plateau_size</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="linenos"> 59</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos"> 60</span>            <span class="k">raise</span> <span class="n">SolveError</span><span class="p">(</span><span class="s1">&#39;S(1,1) のピークを取得できませんでした。&#39;</span><span class="p">)</span>
+<span class="linenos"> 61</span>        <span class="bp">self</span><span class="o">.</span><span class="n">resonance_frequency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">[</span><span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="linenos"> 62</span>        <span class="bp">self</span><span class="o">.</span><span class="n">minimum_S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">[</span><span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="linenos"> 63</span>
+<span class="linenos"> 64</span>    <span class="k">def</span> <span class="nf">get_resonance_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 65</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;パッチアンテナの共振周波数を計算します。</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span><span class="sd">        Note:</span>
+<span class="linenos"> 68</span><span class="sd">            目的関数または制約関数は、</span>
+<span class="linenos"> 69</span><span class="sd">            第一引数としてFemtetを受け取り、</span>
+<span class="linenos"> 70</span><span class="sd">            戻り値としてfloat型を返す必要があります。</span>
+<span class="linenos"> 71</span>
+<span class="linenos"> 72</span><span class="sd">        Params:</span>
+<span class="linenos"> 73</span><span class="sd">            Femtet: Femtet をマクロで操作するためのインスタンスです。詳細な情報については、「Femtet マクロヘルプ」をご覧ください。</span>
+<span class="linenos"> 74</span><span class="sd">        </span>
+<span class="linenos"> 75</span><span class="sd">        Returns:</span>
+<span class="linenos"> 76</span><span class="sd">            float: パッチアンテナの共振周波数。</span>
+<span class="linenos"> 77</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos"> 78</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_get_freq_and_S_parameter</span><span class="p">(</span><span class="n">Femtet</span><span class="p">)</span>
+<span class="linenos"> 79</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_resonance_frequency</span><span class="p">()</span>
+<span class="linenos"> 80</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resonance_frequency</span>  <span class="c1"># 単位: Hz</span>
+<span class="linenos"> 81</span>        
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span><span class="k">def</span> <span class="nf">antenna_is_smaller_than_substrate</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 84</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;アンテナの大きさと基板の大きさの関係を計算します。</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span><span class="sd">    この関数は、変数の更新によってモデル形状が破綻しないように</span>
+<span class="linenos"> 87</span><span class="sd">    変数の組み合わせを拘束するために使われます。</span>
+<span class="linenos"> 88</span>
+<span class="linenos"> 89</span><span class="sd">    Params:</span>
+<span class="linenos"> 90</span><span class="sd">        Femtet: Femtet をマクロで操作するためのインスタンスです。詳細な情報については、「Femtet マクロヘルプ」をご覧ください。</span>
+<span class="linenos"> 91</span><span class="sd">    </span>
+<span class="linenos"> 92</span><span class="sd">    Returns:</span>
+<span class="linenos"> 93</span><span class="sd">        float: 基板エッジとアンテナエッジの間隙。1 mm 以上が必要です。</span>
+<span class="linenos"> 94</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 95</span>    <span class="n">r</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;antenna_radius&#39;</span><span class="p">)</span>
+<span class="linenos"> 96</span>    <span class="n">w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">)</span>
+<span class="linenos"> 97</span>    <span class="k">return</span> <span class="n">w</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">r</span>  <span class="c1"># 単位: mm</span>
+<span class="linenos"> 98</span>
+<span class="linenos"> 99</span>
+<span class="linenos">100</span><span class="k">def</span> <span class="nf">port_is_inside_antenna</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos">101</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;給電ポートの位置とアンテナの大きさの関係を計算します。&quot;&quot;&quot;</span>
+<span class="linenos">102</span>    <span class="n">r</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;antenna_radius&#39;</span><span class="p">)</span>
+<span class="linenos">103</span>    <span class="n">x</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;port_x&#39;</span><span class="p">)</span>
+<span class="linenos">104</span>    <span class="k">return</span> <span class="n">r</span> <span class="o">-</span> <span class="n">x</span>  <span class="c1"># 単位: mm。1 mm 以上が必要です。</span>
+<span class="linenos">105</span>
+<span class="linenos">106</span>
+<span class="linenos">107</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">108</span>    <span class="c1"># 周波数特性を計算するためのオブジェクトを初期化</span>
+<span class="linenos">109</span>    <span class="n">s</span> <span class="o">=</span> <span class="n">SParameterCalculator</span><span class="p">()</span>
+<span class="linenos">110</span>
+<span class="linenos">111</span>    <span class="c1"># 数値最適化問題の初期化 (最適化手法を決定します)</span>
+<span class="linenos">112</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
+<span class="linenos">113</span>        <span class="n">sampler_class</span><span class="o">=</span><span class="n">BoTorchSampler</span><span class="p">,</span>
+<span class="linenos">114</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<span class="linenos">115</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="linenos">116</span>        <span class="p">)</span>
+<span class="linenos">117</span>    <span class="p">)</span>
+<span class="linenos">118</span>    
+<span class="linenos">119</span>    <span class="c1"># FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)</span>
+<span class="linenos">120</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
+<span class="linenos">121</span>    
+<span class="linenos">122</span>    <span class="c1"># 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)</span>
+<span class="linenos">123</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;antenna_radius&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="linenos">124</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="linenos">125</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;port_x&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="linenos">126</span>
+<span class="linenos">127</span>    <span class="c1"># 拘束関数を最適化問題に追加</span>
+<span class="linenos">128</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">antenna_is_smaller_than_substrate</span><span class="p">,</span> <span class="s1">&#39;アンテナと基板エッジの間隙&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">129</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">port_is_inside_antenna</span><span class="p">,</span> <span class="s1">&#39;アンテナエッジと給電ポートの間隙&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">130</span>
+<span class="linenos">131</span>    <span class="c1"># 目的関数を最適化問題に追加</span>
+<span class="linenos">132</span>    <span class="c1"># 共振周波数の目標は 3.0 GHz です。</span>
+<span class="linenos">133</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">get_resonance_frequency</span><span class="p">,</span> <span class="s1">&#39;第一共振周波数(Hz)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">3.0</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">)</span>
+<span class="linenos">134</span>
+<span class="linenos">135</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">136</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="linenos">137</span>
+<span class="linenos">138</span>    <span class="c1"># プロセスモニタで結果を確認するために</span>
+<span class="linenos">139</span>    <span class="c1"># Enter キーが押されるまで処理を停止します。</span>
+<span class="linenos">140</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">141</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Finished. Press Enter to quit...&#39;</span><span class="p">)</span>
+<span class="linenos">142</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">143</span>    <span class="nb">input</span><span class="p">()</span>
+<span class="linenos">144</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="execution-result-of-the-sample-code">
+<h2>サンプルコードの実行結果<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../../_images/her_ex40_result.png"><img alt="../../_images/her_ex40_result.png" src="../../_images/her_ex40_result.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">her_ex40_parametric.py の実行結果。 横軸が試行回数、 縦軸が共振周波数です。</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>20 回の反復計算の結果、 最良の共振周波数は 2.991 GHz となります。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Femtet, PyFemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gau_ex08/gau_ex08.html" class="btn btn-neutral float-left" title="ソレノイドコイルの自己インダクタンス" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../wat_ex14/wat_ex14.html" class="btn btn-neutral float-right" title="基板上の発熱体" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

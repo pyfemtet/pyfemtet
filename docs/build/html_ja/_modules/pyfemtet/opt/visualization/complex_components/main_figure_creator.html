@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.visualization.complex_components.main_figure_creator &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.visualization.complex_components.main_figure_creator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>pyfemtet.opt.visualization.complex_components.main_figure_creator のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+
+<span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">History</span>
+
+
+<span class="k">class</span> <span class="nc">_ColorSet</span><span class="p">:</span>
+    <span class="n">non_domi</span> <span class="o">=</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="s1">&#39;#007bff&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s1">&#39;#6c757d&#39;</span><span class="p">}</span>  <span class="c1"># color</span>
+
+
+<span class="k">class</span> <span class="nc">_SymbolSet</span><span class="p">:</span>
+    <span class="n">feasible</span> <span class="o">=</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="s1">&#39;circle&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s1">&#39;circle-open&#39;</span><span class="p">}</span>  <span class="c1"># style</span>
+
+
+<span class="k">class</span> <span class="nc">_LanguageSet</span><span class="p">:</span>
+
+    <span class="n">feasible</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;feasible&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+    <span class="n">non_domi</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;non_domi&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ja&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ja&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feasible</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;拘束条件&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="s1">&#39;満足&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s1">&#39;違反&#39;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">non_domi</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;最適性&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="s1">&#39;非劣解&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s1">&#39;劣解&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">localize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="c1"># 元のオブジェクトを変更しないようにコピー</span>
+        <span class="n">cdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># feasible, non_domi の localize</span>
+        <span class="n">cdf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cdf</span><span class="p">[</span><span class="s1">&#39;feasible&#39;</span><span class="p">]]</span>
+        <span class="n">cdf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cdf</span><span class="p">[</span><span class="s1">&#39;non_domi&#39;</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">cdf</span>
+
+
+<span class="n">_ls</span> <span class="o">=</span> <span class="n">_LanguageSet</span><span class="p">(</span><span class="s1">&#39;ja&#39;</span><span class="p">)</span>
+<span class="n">_cs</span> <span class="o">=</span> <span class="n">_ColorSet</span><span class="p">()</span>
+<span class="n">_ss</span> <span class="o">=</span> <span class="n">_SymbolSet</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="get_hypervolume_plot">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.complex_components.html#pyfemtet.opt.visualization.complex_components.main_figure_creator.get_hypervolume_plot">[ドキュメント]</a>
+<span class="k">def</span> <span class="nf">get_hypervolume_plot</span><span class="p">(</span><span class="n">_</span><span class="p">:</span> <span class="n">History</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">_ls</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="c1"># create figure</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;trial&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="s2">&quot;hypervolume&quot;</span><span class="p">,</span>
+        <span class="n">markers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">custom_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;ハイパーボリュームプロット&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+
+<div class="viewcode-block" id="get_default_figure">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.complex_components.html#pyfemtet.opt.visualization.complex_components.main_figure_creator.get_default_figure">[ドキュメント]</a>
+<span class="k">def</span> <span class="nf">get_default_figure</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="c1"># df = history.local_data  # monitor process and history process is different workers, so history.local_data is not updated in monitor process.</span>
+    <span class="c1"># df = history.actor_data.copy()  # access to actor from flask callback makes termination unstable.</span>
+
+    <span class="c1"># data setting</span>
+    <span class="n">obj_names</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">obj_names</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">_get_single_objective_plot</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">_get_multi_objective_pairplot</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">hovertemplate</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_get_single_objective_plot</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">_ls</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">obj_name</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; / &#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;BR&gt;/ &#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="n">obj_name</span> <span class="o">=</span> <span class="n">obj_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; / &#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;BR&gt;/ &#39;</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="s1">&#39;trial&#39;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+        <span class="n">symbol</span><span class="o">=</span><span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
+        <span class="n">symbol_map</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">True</span><span class="p">]:</span> <span class="n">_ss</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">False</span><span class="p">]:</span> <span class="n">_ss</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">False</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="n">hover_data</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;trial&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">custom_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">obj_name</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span>
+                <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6c757d&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;目的プロット&quot;</span><span class="p">,</span>
+            <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;解析実行回数(回)&quot;</span><span class="p">,</span>
+            <span class="n">yaxis_title</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
+
+
+<span class="k">def</span> <span class="nf">_get_multi_objective_pairplot</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">_ls</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">obj_names</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">obj_names</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; / &#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;BR&gt;/ &#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="n">obj_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; / &#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;BR&gt;/ &#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">obj_names</span><span class="p">]</span>
+
+    <span class="n">common_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">_ls</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
+        <span class="n">color_discrete_map</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="kc">True</span><span class="p">]:</span> <span class="n">_cs</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="kc">False</span><span class="p">]:</span> <span class="n">_cs</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="kc">False</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="n">symbol</span><span class="o">=</span><span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
+        <span class="n">symbol_map</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">True</span><span class="p">]:</span> <span class="n">_ss</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">False</span><span class="p">]:</span> <span class="n">_ss</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">False</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="n">custom_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">],</span>
+        <span class="n">category_orders</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]:</span> <span class="p">(</span><span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">False</span><span class="p">],</span> <span class="n">_ls</span><span class="o">.</span><span class="n">feasible</span><span class="p">[</span><span class="kc">True</span><span class="p">]),</span>
+            <span class="n">_ls</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]:</span> <span class="p">(</span><span class="n">_ls</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="kc">False</span><span class="p">],</span> <span class="n">_ls</span><span class="o">.</span><span class="n">non_domi</span><span class="p">[</span><span class="kc">True</span><span class="p">]),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">data_frame</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">obj_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">obj_names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="o">**</span><span class="n">common_kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">xaxis_title</span><span class="o">=</span><span class="n">obj_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">yaxis_title</span><span class="o">=</span><span class="n">obj_names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter_matrix</span><span class="p">(</span>
+            <span class="n">data_frame</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">dimensions</span><span class="o">=</span><span class="n">obj_names</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">common_kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span>
+            <span class="n">patch</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;diagonal.visible&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+            <span class="n">showupperhalf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;多目的ペアプロット&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
