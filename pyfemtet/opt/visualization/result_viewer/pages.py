@@ -23,32 +23,32 @@ class HomePage(AbstractPage):
     def __init__(self, title, rel_url='/'):
         super().__init__(title, rel_url)
 
+    # noinspection PyAttributeOutsideInit
     def setup_component(self):
-        # control femtet
-        # noinspection PyAttributeOutsideInit
+
+        self.location = dcc.Location(id='result-viewer-location')
+
+        # control femtet subpage
         self.femtet_control: FemtetControl = FemtetControl()
         self.add_subpage(self.femtet_control)
 
-        # main graph
-        # noinspection PyAttributeOutsideInit
+        # main graph subpage
         self.main_graph: MainGraph = MainGraph()
         self.add_subpage(self.main_graph)
 
-        # alert region
-        # noinspection PyAttributeOutsideInit
+        # alert region subpage
         self.alert_region: AlertRegion = AlertRegion()
         self.add_subpage(self.alert_region)
 
         # open pdt (or transfer variable to femtet)
-        # noinspection PyAttributeOutsideInit
         self.open_pdt_button = dbc.Button(
             'Open Result in Femtet',
             id='open-pdt-button',
             color='primary',
+            className="position-relative",  # need to show badge
         )
 
         # update parameter
-        # noinspection PyAttributeOutsideInit
         self.update_parameter_button = dbc.Button(
             'Reconstruct Model',
             id='update-parameter-button',
@@ -56,90 +56,21 @@ class HomePage(AbstractPage):
         )
 
         # file picker
-        # noinspection PyAttributeOutsideInit
         self.file_picker_button = dbc.Button(
             'drag and drop or select files',
             id='file-picker-button',
-            color='primary'
+            color='primary',
         )
-        # noinspection PyAttributeOutsideInit
         self.file_picker = dcc.Upload(
             id='history-file-picker',
             children=[self.file_picker_button],
             multiple=False,
+            style={'display': 'inline'},
         )
 
-        # tutorial mode
-        # noinspection PyAttributeOutsideInit
-        self.tutorial_mode_switch = dbc.Checklist(['tutorial mode'], id='tutorial-mode-switch', switch=True, value=False)
-        # noinspection PyAttributeOutsideInit
-        self.click_me_badge = self.create_badge('Click Me!')
-        # noinspection PyAttributeOutsideInit
-        self.load_sample_csv_button = dbc.Button(
-            ['load sample csv', self.click_me_badge],
-            id='load-tutorial-csv',
-            color='primary',
-            className="position-relative",  # need to show badge
-        )
-        # noinspection PyAttributeOutsideInit
-        self.load_csv_popover = dbc.Popover(
-            children=[
-                dbc.PopoverHeader('Load CSV'),
-                dbc.PopoverBody(
-                    'Open your optimization result. Then connecting to femtet will start automatically. '
-                    'Note that in tutorial mode, this button loads the ready-made sample csv and open sample femprj.'
-                ),
-            ],
-            id='load-csv-popover',
-            target=self.file_picker.id,
-            is_open=False,
-            placement='top',
-        )
-        # noinspection PyAttributeOutsideInit
-        self.load_csv_component_div = html.Div(
-            children=[self.file_picker, self.load_csv_popover],
-            id='load-csv-component-holder',
-        )
-        # noinspection PyAttributeOutsideInit
-        self.open_pdt_popover = dbc.Popover(
-            children=[
-                dbc.PopoverHeader('Open FEM Result'),
-                dbc.PopoverBody(
-                    'Click here after selecting a plot in the graph above '
-                    'to open corresponding FEM result in Femtet.'
-                ),
-            ],
-            id='open-pdt-popover',
-            target=self.open_pdt_button.id,
-            is_open=False,
-            placement='top',
-        )
-        # noinspection PyAttributeOutsideInit
-        self.main_graph_popover = dbc.Popover(
-            children=[
-                dbc.PopoverHeader('Main Graph'),
-                dbc.PopoverBody(
-                    'Here the optimization history is shown. '
-                    'Each plot represents single FEM result. '
-                    'You can pick a result to open the corresponding result in Femtet. '
-                ),
-            ],
-            id='main-graph-popover',
-            target=self.main_graph.tabs.id,
-            is_open=False,
-            placement='bottom',
-            hide_arrow=True,
-        )
-        # noinspection PyAttributeOutsideInit
-        self.connect_femtet_popover = dbc.Popover(
-            children=[
-                dbc.PopoverBody('You can re-make connection to Femtet if it misses.'),
-            ],
-            id='connect-femtet-popover',
-            target=self.femtet_control.connect_femtet_button.id,
-            is_open=False,
-            placement='bottom',
-        )
+        # tutorial subpage (after setup self components)
+        self.tutorial: Tutorial = Tutorial(self, self.main_graph, self.femtet_control)
+        self.add_subpage(self.tutorial)
 
     # noinspection PyAttributeOutsideInit
     def setup_layout(self):
@@ -165,14 +96,14 @@ class HomePage(AbstractPage):
         # style.update(FLEXBOX_STYLE_ALLOW_VERTICAL_FILL)
         self.layout = dbc.Container(
             children=[
-                dbc.Row([self.main_graph.layout, self.main_graph_popover]),  # visible / invisible components
+                dbc.Row([self.location, self.main_graph.layout, self.tutorial.graph_popover, self.tutorial.control_visibility_input_dummy]),  # visible / invisible components
                 dbc.Row(self.femtet_control.layout),  # invisible components
                 dbc.Row(
                     children=[
-                        dbc.Col(html.Div(self.tutorial_mode_switch, className='d-flex justify-content-center')),
-                        dbc.Col(html.Div(self.load_csv_component_div, className='d-flex justify-content-center',),),
-                        dbc.Col(html.Div([self.femtet_control.connect_femtet_button_spinner, self.connect_femtet_popover], className='d-flex justify-content-center')),
-                        dbc.Col(html.Div([self.open_pdt_button, self.update_parameter_button, self.open_pdt_popover], className='d-flex justify-content-center')),
+                        dbc.Col(html.Div([self.tutorial.tutorial_mode_switch], className='d-flex justify-content-center')),
+                        dbc.Col(html.Div([self.file_picker, self.tutorial.load_sample_csv_div], className='d-flex justify-content-center',),),
+                        dbc.Col(html.Div([self.femtet_control.connect_femtet_button_spinner, self.tutorial.connect_femtet_popover], className='d-flex justify-content-center')),
+                        dbc.Col(html.Div([self.open_pdt_button, self.update_parameter_button, self.tutorial.open_pdt_popover], className='d-flex justify-content-center')),
                     ],
                     justify='evenly',
                 ),
@@ -187,74 +118,6 @@ class HomePage(AbstractPage):
         super().setup_callback()
 
         app = self.application.app
-
-        # =============
-        # tutorial mode
-        # =============
-
-        # ===== switch tutorial mode =====
-        @app.callback(
-            Output(self.load_csv_component_div, 'children'),
-            Output(self.load_csv_popover, 'target'),
-            Output(self.load_csv_popover, self.load_csv_popover.Prop.is_open),
-            Output(self.open_pdt_popover, self.open_pdt_popover.Prop.is_open),
-            Output(self.main_graph_popover, self.main_graph_popover.Prop.is_open),
-            Output(self.connect_femtet_popover, self.connect_femtet_popover.Prop.is_open),
-            # Output(self.click_me_badge, 'hidden', allow_duplicate=True),  # when clicked, show badge
-            Input(self.tutorial_mode_switch, self.tutorial_mode_switch.Prop.value),
-            prevent_initial_call=True,
-        )
-        def switch_tutorial_mode(is_tutorial_mode):
-            if is_tutorial_mode:
-                return [self.load_sample_csv_button, self.load_csv_popover], self.load_sample_csv_button.id, True, True, True, True  #, False
-            else:
-                return [self.file_picker, self.load_csv_popover], self.file_picker.id, False, False, False, False  #, True
-
-        # ===== tutorial mode load sample csv button =====
-        @app.callback(
-            Output(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab, allow_duplicate=True),  # when clicked, update graph
-            Output(self.load_csv_popover, self.load_csv_popover.Prop.is_open, allow_duplicate=True),  # when clicked, hide popover
-            Output(self.femtet_control.connect_femtet_button, 'n_clicks', allow_duplicate=True),  # when clicked, automatically connect to femtet
-            # Output(self.click_me_badge, 'hidden', allow_duplicate=True),  # when clicked, hide badge
-            # Output(self.main_graph_popover, 'children', allow_duplicate=True),  # when clicked, show badge on main-graph
-            Input(self.load_sample_csv_button, self.load_sample_csv_button.Prop.n_clicks),
-            State(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab),
-            State(self.main_graph_popover, 'children'),  # when clicked, show badge on main-graph
-            prevent_initial_call=True,
-        )
-        def load_sample_csv(n_clicks, active_tab, current_children):
-            """Load sample csv and hide popup"""
-            # When the component is loaded by switcher, fire this callback.
-            # Seems to cannot prevent it, but the `n_clicks` property is reset to None.
-            # `loading_state` property is always None.
-            if n_clicks is None:
-                raise PreventUpdate
-
-            path = os.path.join(os.path.dirname(__file__), 'tutorial', 'tutorial.csv')
-            self.application.history = History(path)
-            self.application.history.metadata[0] = json.dumps(
-                dict(
-                    femprj_path=path.replace('tutorial.csv', 'wat_ex14_parametric.femprj'),
-                    model_name='Ex14',
-                )
-            )
-
-            badge = self.create_badge('Choose a Plot!')
-            children = list(current_children)
-            children.append(badge)
-
-            return active_tab, False, 1  # , True  # , children
-
-        # ===== tutorial mode hide main-graph popup =====
-        @app.callback(
-            Output(self.main_graph_popover, 'is_open', allow_duplicate=True),
-            Input(self.main_graph.selection_data, self.main_graph.selection_data_property),
-            prevent_initial_call=True,
-        )
-        def hide_main_graph_popover(_):
-            if callback_context.triggered_id is None:
-                raise PreventUpdate
-            return False
 
         # ===== read history csv file from file picker =====
         @app.callback(
@@ -294,7 +157,6 @@ class HomePage(AbstractPage):
         # ===== open pdt =====
         @app.callback(
             Output(self.alert_region.alert_region.id, 'children', allow_duplicate=True),
-            Output(self.open_pdt_popover.id, 'is_open', allow_duplicate=True),
             Input(self.open_pdt_button.id, self.open_pdt_button.Prop.n_clicks),
             State(self.main_graph.selection_data.id, self.main_graph.selection_data_property),
             State(self.alert_region.alert_region.id, 'children'),
@@ -309,13 +171,13 @@ class HomePage(AbstractPage):
                 msg = ('Connection to Femtet is not established. '
                        'Launch Femtet and Open a project.')
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
-                return alerts, no_update
+                return alerts
 
             # check selection
             if selection_data is None:
                 msg = 'No result plot is selected.'
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
-                return alerts, no_update
+                return alerts
 
             # get femprj in history csv
             kwargs = self.femtet_control.create_femtet_interface_args()[0]  # read metadata from history.
@@ -326,12 +188,12 @@ class HomePage(AbstractPage):
             if femprj_path is None:
                 msg = 'The femprj file path in the history csv is not found or valid. '
                 alerts = self.alert_region.create_alerts(msg, color='danger')
-                return alerts, no_update
+                return alerts
 
             if model_name is None:
                 msg = 'The model name in the history csv is not found.'
                 alerts = self.alert_region.create_alerts(msg, color='danger')
-                return alerts, no_update
+                return alerts
 
             # check pdt_path in selection_data
             pt = selection_data['points'][0]
@@ -348,7 +210,7 @@ class HomePage(AbstractPage):
                        'the `save_pdt` argument of FemtetInterface in optimization script'
                        '(default to `all`).')
                 alerts = self.alert_region.create_alerts(msg, color='danger')
-                return alerts, no_update
+                return alerts
 
             # OpenPDT(PDTFile As String, bOpenWithGUI As Boolean)
             Femtet = self.femtet_control.fem.Femtet
@@ -357,9 +219,9 @@ class HomePage(AbstractPage):
             if not succeed:
                 msg = f'Failed to open {pdt_path}.'
                 alerts = self.alert_region.create_alerts(msg, color='danger')
-                return alerts, no_update
+                return alerts
 
-            return no_update, False
+            return no_update
 
         # ===== reconstruct model with updating parameter =====
         @app.callback(
@@ -519,12 +381,283 @@ class HomePage(AbstractPage):
 
             return new_alerts
 
+
+class Tutorial(AbstractPage):
+
+    # noinspection PyMissingConstructor
+    def __init__(self, home_page, main_graph, femtet_control):
+        self.home_page: HomePage = home_page
+        self.main_graph: MainGraph = main_graph
+        self.femtet_control: FemtetControl = femtet_control
+
+    # noinspection PyAttributeOutsideInit
+    def setup_component(self):
+
+        self.control_visibility_input_dummy = html.Div(hidden=True)
+
+        self.tutorial_state_prop = 'data-tutorial-state'
+        self.tutorial_state = html.Data(
+            id='tutorial-state',
+            **{self.tutorial_state_prop: dict(
+                is_tutorial=False,
+                has_history=None,
+                point_selected=None,
+            )}
+        )
+
+        # switch tutorial mode (always visible)
+        self.tutorial_mode_switch = dbc.Checklist(
+            ['tutorial mode'],
+            id='tutorial-mode-switch',
+            switch=True,
+            value=False
+        )
+
+        # load sample csv
+        self.load_sample_csv_badge = self.create_badge('Click Me!', 'load-sample-csv-badge')
+        self.load_sample_csv_button = dbc.Button(
+            children=['Load sample csv', self.load_sample_csv_badge],
+            id='load-sample-csv-button',
+            className="position-relative",  # need to show badge
+        )
+        self.load_sample_csv_popover = dbc.Popover(
+            children=[
+                dbc.PopoverHeader('Load CSV'),
+                dbc.PopoverBody(
+                    'Open your optimization result. Then connecting to femtet will start automatically. '
+                    'Note that in tutorial mode, this button loads the ready-made sample csv and open sample femprj.'
+                ),
+            ],
+            id='load-sample-csv-popover',
+            target=self.load_sample_csv_button.id,
+            is_open=False,
+            placement='top',
+        )
+        self.load_sample_csv_div = html.Span(
+            children=[self.load_sample_csv_button, self.load_sample_csv_popover],
+            id='load-sample-csv-div',
+            style={'display': 'none'},
+        )
+
+        # popover and badge of main graph
+        self.graph_badge = self.create_badge('Choose a Point!', 'graph-badge')
+        self.graph_popover = dbc.Popover(
+            children=[
+                dbc.PopoverHeader('Main Graph'),
+                dbc.PopoverBody(
+                    children=[
+                        'Here the optimization history is shown. '
+                        'Each plot represents single FEM result. '
+                        'You can pick a result to open the corresponding result in Femtet. ',
+                        self.graph_badge
+                    ],
+                    className="position-relative",  # need to show badge
+                ),
+            ],
+            id='graph-popover',
+            target=self.main_graph.tabs.id,
+            is_open=False,
+            placement='bottom',
+        )
+
+        # popover and badge of open pdt
+        self.open_pdt_badge = self.create_badge('Click Me!', 'open-pdt-badge')
+        self.open_pdt_popover = dbc.Popover(
+            children=[
+                dbc.PopoverHeader('Open Result'),
+                dbc.PopoverBody(
+                    'After pick a point in the main graph, '
+                    'This button shows the corresponding FEM result in Femtet.'
+                ),
+            ],
+            id='open-pdt-popover',
+            target=self.home_page.open_pdt_button.id,
+            is_open=False,
+            placement='top',
+        )
+        # popover of connect-femtet
+        self.connect_femtet_popover = dbc.Popover(
+            children=[
+                dbc.PopoverBody('You can re-make connection to Femtet if it misses.'),
+            ],
+            id='connect-femtet-popover',
+            target=self.femtet_control.connect_femtet_button.id,
+            is_open=False,
+            placement='bottom',
+        )
+
+
+    def setup_layout(self):
+        pass
+
+    def setup_callback(self):
+        app = self.application.app
+
+
+        @app.callback(
+            Output(self.home_page.open_pdt_button, 'children'),
+            Input(self.home_page.location, self.home_page.location.Prop.pathname),
+            State(self.home_page.open_pdt_button, 'children'),
+            prevent_initial_call=False,
+        )
+        def add_badge_to_button_init(_, current_children):
+            children = current_children if isinstance(current_children, list) else [current_children]
+            if self.open_pdt_badge not in children:
+                children.append(self.open_pdt_badge)
+            return children
+
+        @app.callback(
+            Output(self.load_sample_csv_badge, 'style'),  # switch visibility
+            Output(self.load_sample_csv_popover, 'is_open'),  # switch visibility
+            Output(self.load_sample_csv_div, 'style'),  # switch visibility
+            Output(self.home_page.file_picker, 'style'),  # switch visibility
+            Output(self.graph_badge, 'style'),  # switch visibility
+            Output(self.graph_popover, 'is_open'),  # switch visibility
+            Output(self.open_pdt_badge, 'style'),  # switch visibility
+            Output(self.open_pdt_popover, 'is_open'),  # switch visibility
+            Output(self.connect_femtet_popover, 'is_open'),  # switch visibility
+            Input(self.tutorial_mode_switch, 'value'),
+            Input(self.load_sample_csv_button, 'n_clicks'),  # load button clicked
+            Input(self.main_graph.selection_data, self.main_graph.selection_data_property),  # selection changed
+            Input(self.control_visibility_input_dummy, 'children'),
+            State(self.load_sample_csv_badge, 'style'),  # switch visibility
+            State(self.load_sample_csv_div, 'style'),  # switch visibility
+            State(self.home_page.file_picker, 'style'),  # switch visibility
+            State(self.graph_badge, 'style'),  # switch visibility
+            State(self.open_pdt_badge, 'style'),  # switch visibility
+            prevent_initial_call=True,
+        )
+        def control_visibility(
+                is_tutorial,
+                _1,
+                selection_data,
+                _2,
+                load_sample_csv_badge_current_style,
+                load_sample_csv_div_current_style,
+                file_picker_current_style,
+                graph_badge_current_style,
+                open_pdt_badge_current_style,
+        ):
+            ret = {
+                (load_sample_csv_badge_style := 0): no_update,
+                (load_sample_csv_popover_visible := 1): no_update,
+                (load_sample_csv_div_style := 2): no_update,
+                (file_picker_style := 3): no_update,
+                (graph_badge_style := 4): no_update,
+                (graph_popover_visible := 5): no_update,
+                (open_pdt_badge_style := 6): no_update,
+                (open_pdt_popover_visible := 7): no_update,
+                (connect_femtet_popover_visible := 8): no_update,
+            }
+
+            # prevent unexpected update
+            if callback_context.triggered_id is None:
+                raise PreventUpdate
+
+            # ===== initialize =====
+            # non-tutorial component
+            ret[file_picker_style] = self.control_visibility_by_style(True, file_picker_current_style)
+            # tutorial component
+            ret[load_sample_csv_badge_style] = self.control_visibility_by_style(False, load_sample_csv_badge_current_style)
+            ret[load_sample_csv_popover_visible] = False
+            ret[load_sample_csv_div_style] = self.control_visibility_by_style(False, load_sample_csv_div_current_style)
+            ret[graph_badge_style] = self.control_visibility_by_style(False, graph_badge_current_style)
+            ret[graph_popover_visible] = False
+            ret[open_pdt_badge_style] = self.control_visibility_by_style(False, open_pdt_badge_current_style)
+            ret[open_pdt_popover_visible] = False
+            ret[connect_femtet_popover_visible] = False
+
+            # if not tutorial, disable all anyway
+            if not is_tutorial:
+                return tuple(ret.values())
+
+            # else, visible popover
+            else:
+                ret[file_picker_style] = self.control_visibility_by_style(False, file_picker_current_style)
+                ret[load_sample_csv_div_style] = self.control_visibility_by_style(True, load_sample_csv_div_current_style)
+                ret[load_sample_csv_popover_visible] = True
+                ret[graph_popover_visible] = True
+                ret[connect_femtet_popover_visible] = True
+                ret[open_pdt_popover_visible] = True
+
+            # if history is None, show badge to load csv
+            if self.application.history is None:
+                ret[load_sample_csv_badge_style] = self.control_visibility_by_style(
+                    True,
+                    load_sample_csv_badge_current_style
+                )
+
+            # if history is not None,
+            else:
+                # if a point is already selected, show badge to open-pdt
+                if self.check_point_selected(selection_data):
+                    ret[open_pdt_badge_style] = self.control_visibility_by_style(
+                        True,
+                        open_pdt_badge_current_style,
+                    )
+
+                # selection not yet, show badge to main-graph
+                else:
+                    ret[graph_badge_style] = self.control_visibility_by_style(
+                        True,
+                        graph_badge_current_style,
+                    )
+
+            return tuple(ret.values())
+
+        @app.callback(
+            Output(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab, allow_duplicate=True),
+            Output(self.control_visibility_input_dummy, 'children'),
+            Output(self.femtet_control.connect_femtet_button, 'n_clicks', allow_duplicate=True),
+            Input(self.load_sample_csv_button, 'n_clicks'),
+            State(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab),
+            prevent_initial_call=True,
+        )
+        def load_sample_csv(n_clicks, active_tab):
+            """Load sample csv"""
+            if callback_context.triggered_id is None:
+                raise PreventUpdate
+
+            path = os.path.join(os.path.dirname(__file__), 'tutorial', 'tutorial.csv')
+            self.application.history = History(path)
+            self.application.history.metadata[0] = json.dumps(
+                dict(
+                    femprj_path=path.replace('tutorial.csv', 'wat_ex14_parametric.femprj'),
+                    model_name='Ex14',
+                )
+            )
+
+            return active_tab, 1, 1
+
     @staticmethod
-    def create_badge(text):
-        return dbc.Badge(
-            text,
+    def check_point_selected(data):
+        if data is None:
+            return False
+        if len(data['points']) == 0:
+            return False
+        return True
+
+    @staticmethod
+    def create_badge(text, id):
+        badge = dbc.Badge(
+            children=text,
             color="danger",
             pill=True,
             text_color="white",
+            style={'display': 'none'},
             className="position-absolute top-0 start-100 translate-middle",
         )
+        return badge
+
+    @staticmethod
+    def control_visibility_by_style(visible: bool, current_style: dict):
+
+        visibility = 'inline' if visible else 'none'
+        part = {'display': visibility}
+
+        if current_style is None:
+            return part
+
+        else:
+            current_style.update(part)
+            return current_style
