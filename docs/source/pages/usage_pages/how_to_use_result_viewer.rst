@@ -37,5 +37,5 @@ open corresponding FEM result in Femtet.
 
 .. note::
 
-    To learn usage with ready-made sample project, you can use `demo mode` in tool.
+    To learn usage with ready-made sample project, you can use `tutorial mode` in tool.
     It starts few minutes journy to explain how to use the tool.
