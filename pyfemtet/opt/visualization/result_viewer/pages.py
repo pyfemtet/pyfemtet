@@ -5,12 +5,13 @@ import base64
 
 import numpy as np
 import pandas as pd
+import shutil
 
 from dash import Output, Input, State, callback_context, no_update
 from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.visualization.wrapped_components import dcc, dbc, html
-from pyfemtet.opt.visualization.base import AbstractPage, logger
+from pyfemtet.opt.visualization.base import AbstractPage  # , logger
 from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization.complex_components.control_femtet import FemtetControl, FemtetState
 from pyfemtet.opt.visualization.complex_components.alert_region import AlertRegion
@@ -121,7 +122,7 @@ class HomePage(AbstractPage):
 
         # ===== read history csv file from file picker =====
         @app.callback(
-            Output(self.file_picker_button.id, self.file_picker_button.Prop.children),  # FIXME: Used to show current file and fire callback of alert. Separate them.
+            Output(self.file_picker_button.id, self.file_picker_button.Prop.children),
             Output(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab, allow_duplicate=False),
             Output(self.femtet_control.connect_femtet_button.id, self.femtet_control.connect_femtet_button.Prop.n_clicks),  # automatically connect to femtet if the metadata of csv is valid
             Input(self.file_picker.id, self.file_picker.Prop.contents),
@@ -605,29 +606,56 @@ class Tutorial(AbstractPage):
 
             return tuple(ret.values())
 
+        # ===== load sample csv =====
+        alert_region = self.home_page.alert_region.alert_region
+
         @app.callback(
             Output(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab, allow_duplicate=True),
             Output(self.control_visibility_input_dummy, 'children'),
             Output(self.femtet_control.connect_femtet_button, 'n_clicks', allow_duplicate=True),
+            Output(alert_region, 'children', allow_duplicate=True),
             Input(self.load_sample_csv_button, 'n_clicks'),
             State(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab),
+            State(alert_region, 'children'),
             prevent_initial_call=True,
         )
-        def load_sample_csv(n_clicks, active_tab):
+        def load_sample_csv(_, active_tab, current_alerts):
             """Load sample csv"""
             if callback_context.triggered_id is None:
                 raise PreventUpdate
 
             path = os.path.join(os.path.dirname(__file__), 'tutorial', 'tutorial.csv')
+
+            if not os.path.exists(path):
+                msg = 'Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
+                alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
+                return no_update, no_update, no_update, alerts
             self.application.history = History(path)
+
+            source_file = path.replace('tutorial.csv', 'wat_ex14_parametric.femprj')
+            if not os.path.exists(source_file):
+                msg = 'Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
+                alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
+                return no_update, no_update, no_update, alerts
+            destination_file = path.replace('tutorial.csv', 'tutorial.femprj')
+            shutil.copyfile(source_file, destination_file)
+
+            source_folder = path.replace('tutorial.csv', 'wat_ex14_parametric.Results')
+            if not os.path.exists(source_file):
+                msg = 'Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
+                alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
+                return no_update, no_update, no_update, alerts
+            destination_folder = path.replace('tutorial.csv', 'tutorial.Results')
+            shutil.copytree(source_folder, destination_folder, dirs_exist_ok=True)
+
             self.application.history.metadata[0] = json.dumps(
                 dict(
-                    femprj_path=path.replace('tutorial.csv', 'wat_ex14_parametric.femprj'),
+                    femprj_path=destination_file,
                     model_name='Ex14',
                 )
             )
 
-            return active_tab, 1, 1
+            return active_tab, 1, 1, no_update
 
     @staticmethod
     def check_point_selected(data):
@@ -646,6 +674,7 @@ class Tutorial(AbstractPage):
             text_color="white",
             style={'display': 'none'},
             className="position-absolute top-0 start-100 translate-middle",
+            id=id,
         )
         return badge
 
