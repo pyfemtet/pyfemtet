@@ -24,7 +24,7 @@ from pyfemtet.logger import get_logger
 
 
 dash_logger = logging.getLogger('werkzeug')
-dash_logger.setLevel(logging.INFO)
+dash_logger.setLevel(logging.ERROR)
 
 logger = get_logger('viewer')
 logger.setLevel(logging.ERROR)

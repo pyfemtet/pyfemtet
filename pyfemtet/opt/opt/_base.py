@@ -65,10 +65,15 @@ class AbstractOptimizer(ABC):
 
         # x の更新
         self.parameters['value'] = x
+        logger.info(f'Start calculation with input: {x}')
 
         # FEM の更新
         logger.debug('fem.update() start')
-        self.fem.update(self.parameters)
+        try:
+            self.fem.update(self.parameters)
+        except Exception as e:
+            logger.warning('An exception has occurred during FEM update.')
+            raise e
 
         # y, _y, c の更新
         logger.debug('calculate y start')
@@ -93,6 +98,9 @@ class AbstractOptimizer(ABC):
         )
 
         logger.debug('history.record end')
+
+        logger.info(f'End calculation with output: {_y}')
+
         return np.array(y), np.array(_y), np.array(c)
 
     def _reconstruct_fem(self, skip_reconstruct=False):
