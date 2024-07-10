@@ -76,6 +76,7 @@ def get_default_figure(history, df):
         fig = _get_multi_objective_pairplot(history, df)
 
     fig.update_traces(hoverinfo="none", hovertemplate=None)
+    fig.update_layout(clickmode='event+select')
 
     return fig
 
