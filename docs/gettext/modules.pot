@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-09 11:28+0900\n"
+"POT-Creation-Date: 2024-07-10 17:35+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -910,6 +910,7 @@ msgstr ""
 #: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage:1
 #: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.WorkerPage:1
 #: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage:1
+#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.Tutorial:1
 msgid "Bases: :py:class:`~pyfemtet.opt.visualization.base.AbstractPage`"
 msgstr ""
 

@@ -160,6 +160,7 @@
         <span class="n">fig</span> <span class="o">=</span> <span class="n">_get_multi_objective_pairplot</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">hovertemplate</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">clickmode</span><span class="o">=</span><span class="s1">&#39;event+select&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span></div>
 

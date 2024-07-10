@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-09 11:28+0900\n"
+"POT-Creation-Date: 2024-07-10 17:35+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -653,8 +653,7 @@ msgid "Finally, you can select each solution plot and open corresponding FEM res
 msgstr ""
 
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:40
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:41
-msgid "To learn usage with ready-made sample project, you can use `demo mode` in tool. It starts few minutes journy to explain how to use the tool."
+msgid "To learn usage with ready-made sample project, you can use `tutorial mode` in tool. It starts few minutes journy to explain how to use the tool."
 msgstr ""
 
 #: ../source/pages/usage_pages/how_to_use_script_builder.rst:2
@@ -685,22 +684,22 @@ msgstr ""
 msgid "Finally, you will get a ``.py`` script to run optimization with your ``.femprj`` file."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:47
+#: ../source/pages/usage_pages/how_to_use_script_builder.rst:42
 msgid "Manual Installation"
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:49
+#: ../source/pages/usage_pages/how_to_use_script_builder.rst:44
 msgid "If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::"
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:53
+#: ../source/pages/usage_pages/how_to_use_script_builder.rst:48
 msgid "If you have no icon on your desktop, search `pyfemtet-opt.exe` in `Scripts` folder of your python environment."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:55
+#: ../source/pages/usage_pages/how_to_use_script_builder.rst:50
 msgid "To check where your python environment is, run following command in `cmd`::"
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:59
+#: ../source/pages/usage_pages/how_to_use_script_builder.rst:54
 msgid "The command above returns full path of your `python.exe` file. Typically the `Scripts` folder exists in where the `python.exe` exists."
 msgstr ""

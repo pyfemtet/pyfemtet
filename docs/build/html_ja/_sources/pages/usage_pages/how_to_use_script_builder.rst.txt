@@ -36,11 +36,6 @@ Then Launch the tool and setup optimization problem following the tool's explana
 
 Finally, you will get a ``.py`` script to run optimization with your ``.femprj`` file.
 
-.. note::
-
-    To learn usage with ready-made sample project, you can use `demo mode` in tool.
-    It starts few minutes journy to explain how to use the tool.
-
 
 .. _manualinstallation:
 Manual Installation
