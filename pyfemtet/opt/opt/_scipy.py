@@ -89,13 +89,8 @@ class ScipyOptimizer(AbstractOptimizer):
             logger.info('以下の変数で FEM 解析に失敗しました。')
             print(self.get_parameter('dict'))
 
-            # # check interruption command
-            # if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
-            #     self.worker_status.set(OptimizationStatus.INTERRUPTING)
-            #     raise StopOptimize
-            #
-            # # skip
-            # ...
+            # 現状、エラーが起きたらスキップできない
+            raise StopIteration2
 
         # constraints
         ...
