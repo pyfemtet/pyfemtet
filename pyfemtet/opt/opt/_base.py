@@ -82,6 +82,14 @@ class OptimizationMethodChecker:
         else:
             logger.warning(message)
 
+    def check_incomplete_bounds(self, raise_error=True):
+        function = 'optimize with no or incomplete bounds'
+        message = f'{type(self.opt)} is not implement "{function}"'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
 
 class AbstractOptimizer(ABC):
     """Abstract base class for an interface of optimization library.
@@ -263,10 +271,10 @@ class AbstractOptimizer(ABC):
         try:
             self.run()
         except Exception as e:
-            logger.error("================================")
-            logger.error("An unexpected error has occured!")
-            logger.error("================================")
-            logger.error(e)
+            logger.error("=================================")
+            logger.error("An unexpected error has occurred!")
+            logger.error("=================================")
+            logger.error(f'{type(e)}: {e}')
             self._is_error_exit = True
             self.worker_status.set(OptimizationStatus.CRASHED)
         finally:
