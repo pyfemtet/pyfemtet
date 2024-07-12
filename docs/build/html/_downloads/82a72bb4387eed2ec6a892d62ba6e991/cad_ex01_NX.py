@@ -107,6 +107,10 @@ if __name__ == '__main__':
     fem = FemtetWithNXInterface(
         prt_path='cad_ex01_NX.prt',
         open_result_with_gui=False,  # To calculate von Mises stress, set this argument to False. See Femtet Macro Help.
+        export_curves=False,
+        export_surfaces=False,
+        export_solids=True,
+        export_flattened_assembly=False,
     )
 
     # Initialize the FEMOpt object.
@@ -129,4 +133,11 @@ if __name__ == '__main__':
     # Run optimization.
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=20)
+
+    # Stop script to keep process alive
+    # while you check the result in process monitor.
+    print('================================')
+    print('Finished. Press Enter to quit...')
+    print('================================')
+    input()
     femopt.terminate_all()

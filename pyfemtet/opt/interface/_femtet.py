@@ -3,15 +3,19 @@ from typing import Optional, List
 import os
 import sys
 from time import sleep, time
-import signal
 
 import pandas as pd
 import psutil
 from dask.distributed import get_worker
 
-from pywintypes import com_error
+# noinspection PyUnresolvedReferences
+from pywintypes import com_error, error
+# noinspection PyUnresolvedReferences
 from pythoncom import CoInitialize, CoUninitialize
+# noinspection PyUnresolvedReferences
 from win32com.client import constants
+import win32con
+import win32gui
 from femtetutils import util
 
 from pyfemtet.core import (
@@ -29,6 +33,10 @@ from pyfemtet.dispatch_extensions import (
     DispatchExtensionException,
 )
 from pyfemtet.opt.interface import FEMInterface, logger
+
+
+def post_activate_message(hwnd):
+    win32gui.PostMessage(hwnd, win32con.WM_ACTIVATE, win32con.WA_ACTIVE, 0)
 
 
 class FemtetInterface(FEMInterface):
@@ -59,9 +67,10 @@ class FemtetInterface(FEMInterface):
             self,
             femprj_path=None,
             model_name=None,
-            connect_method='auto',
-            strictly_pid_specify=True,
-            allow_without_project=False,
+            connect_method='auto',  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
+            save_pdt='all',  # 'all' or None
+            strictly_pid_specify=True,  # dask worker では True にしたいので super() の引数にしない。
+            allow_without_project=False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui=True,
             parametric_output_indexes_use_as_objective=None,
             **kwargs  # 継承されたクラスからの引数
@@ -80,6 +89,7 @@ class FemtetInterface(FEMInterface):
         self.allow_without_project = allow_without_project
         self.original_femprj_path = self.femprj_path
         self.open_result_with_gui = open_result_with_gui
+        self.save_pdt = save_pdt
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None
@@ -106,6 +116,15 @@ class FemtetInterface(FEMInterface):
         # 開かれたモデルに応じて femprj_path と model を更新する
         self._connect_and_open_femtet()
 
+        # original_fem_prj が None なら必ず
+        # dask worker でないプロセスがオリジナルファイルを開いている
+        if self.original_femprj_path is None:
+            # dask worker でなければ original のはず
+            try:
+                _ = get_worker()
+            except ValueError:
+                self.original_femprj_path = self.femprj_path
+
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
         self.quit_when_destruct = self.connected_method == 'new'
 
@@ -117,26 +136,13 @@ class FemtetInterface(FEMInterface):
             model_name=self.model_name,
             open_result_with_gui=self.open_result_with_gui,
             parametric_output_indexes_use_as_objective=self.parametric_output_indexes_use_as_objective,
+            save_pdt=self.save_pdt,
             **kwargs
         )
 
     def __del__(self):
         if self.quit_when_destruct:
-            try:
-                # 強制終了 TODO: 自動保存を回避する
-                hwnd = self.Femtet.hWnd
-                pid = _get_pid(hwnd)
-                util.close_femtet(hwnd, 1, True)
-                start = time()
-                while psutil.pid_exists(pid):
-                    if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
-                        os.kill(pid, signal.SIGKILL)
-                        break
-                    sleep(1)
-                sleep(1)
-
-            except (AttributeError, OSError):  # already dead
-                pass
+            self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
     def _connect_new_femtet(self):
@@ -254,7 +260,7 @@ class FemtetInterface(FEMInterface):
 
         """
 
-        # FIXME: Gaudi へのアクセスなど、self.Femtet.Gaudi.somefunc() のような場合、この関数を呼び出す前に Gaudi へのアクセスの時点で com_error が起こる
+        # FIXME: Gaudi へのアクセスなど、self.Femtet.Gaudi.SomeFunc() のような場合、この関数を呼び出す前に Gaudi へのアクセスの時点で com_error が起こる
         # FIXME: => 文字列で渡して eval() すればよい。
 
         if args is None:
@@ -284,9 +290,16 @@ class FemtetInterface(FEMInterface):
 
         # API を実行
         try:
-            returns = fun(*args, **kwargs)
-        except com_error:
+            # 解析結果を開いた状態で Gaudi.Activate して ReExecute する場合、ReExecute の前後にアクティブ化イベントが必要
+            if fun.__name__ == 'ReExecute':
+                post_activate_message(self.Femtet.hWnd)  # can raise pywintypes.error
+                returns = fun(*args, **kwargs)
+                post_activate_message(self.Femtet.hWnd)
+            else:
+                returns = fun(*args, **kwargs)
+        except (com_error, error):
             # パターン 2 エラーが生じたことは確定なのでエラーが起こるよう returns を作る
+            # com_error ではなく error の場合はおそらく Femtet が落ちている
             if ret_for_check_idx is None:
                 returns = return_value_if_failed
             else:
@@ -626,8 +639,25 @@ class FemtetInterface(FEMInterface):
                 print('================')
                 input('終了するには Enter を押してください。')
                 raise e
+
         else:
-            util.close_femtet(self.Femtet.hWnd, timeout, force)
+            hwnd = self.Femtet.hWnd
+
+            # terminate
+            util.close_femtet(hwnd, timeout, force)
+
+            try:
+                pid = _get_pid(hwnd)
+                start = time()
+                while psutil.pid_exists(pid):
+                    if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
+                        logger.error('Femtet の終了に失敗しました。')
+                        break
+                    sleep(1)
+                sleep(1)
+
+            except (AttributeError, OSError):  # already dead
+                pass
 
     def _setup_before_parallel(self, client):
         client.upload_file(
@@ -637,3 +667,135 @@ class FemtetInterface(FEMInterface):
 
     def _version(self):
         return _version(Femtet=self.Femtet)
+
+    def create_postprocess_args(self):
+        file_content = self.create_result_file_content()
+        jpg_content = self.create_jpg_content()
+
+        out = dict(
+            original_femprj_path=self.original_femprj_path,
+            model_name=self.model_name,
+            pdt_file_content=file_content,
+            jpg_file_content=jpg_content,
+        )
+        return out
+
+    @staticmethod
+    def create_pdt_path(femprj_path, model_name, trial):
+        result_dir = femprj_path.replace('.femprj', '.Results')
+        pdt_path = os.path.join(result_dir, model_name + f'_trial{trial}.pdt')
+        return pdt_path
+
+    # noinspection PyMethodOverriding
+    @staticmethod
+    def postprocess_func(
+            trial: int,
+            original_femprj_path: str,
+            model_name: str,
+            pdt_file_content=None,
+            jpg_file_content=None,
+            dask_scheduler=None
+    ):
+        result_dir = original_femprj_path.replace('.femprj', '.Results')
+        if pdt_file_content is not None:
+            pdt_path = FemtetInterface.create_pdt_path(original_femprj_path, model_name, trial)
+            with open(pdt_path, 'wb') as f:
+                f.write(pdt_file_content)
+
+        if jpg_file_content is not None:
+            jpg_path = os.path.join(result_dir, model_name + f'_trial{trial}.jpg')
+            with open(jpg_path, 'wb') as f:
+                f.write(jpg_file_content)
+
+    def create_result_file_content(self):
+        """Called after solve"""
+        if self.save_pdt == 'all':
+            # save to worker space
+            result_dir = self.femprj_path.replace('.femprj', '.Results')
+            pdt_path = os.path.join(result_dir, self.model_name + '.pdt')
+            succeed = self.Femtet.SavePDT(pdt_path, True)
+
+            # convert .pdt to ByteIO
+            if succeed:
+                with open(pdt_path, 'rb') as f:
+                    content = f.read()
+                return content
+
+            else:
+                raise Exception('pdt ファイルの保存でエラーが発生しました。')
+
+        else:
+            return None
+
+    def create_jpg_content(self):
+        result_dir = self.femprj_path.replace('.femprj', '.Results')
+        jpg_path = os.path.join(result_dir, self.model_name + '.jpg')
+
+        # モデル表示画面の設定
+        self.Femtet.SetWindowSize(600, 600)
+        self.Femtet.Fit()
+
+        # ---モデルの画面を保存---
+        self.Femtet.Redraw()  # 再描画
+        succeed = self.Femtet.SavePicture(jpg_path, 600, 600, 80)
+
+        self.Femtet.RedrawMode = True  # 逐一の描画をオン
+
+        if not succeed:
+            raise Exception('jpg ファイルの保存でエラーが発生しました。')
+
+        if not os.path.exists(jpg_path):
+            raise Exception('保存した jpg ファイルが見つかりませんでした。')
+
+        with open(jpg_path, 'rb') as f:
+            content = f.read()
+
+        return content
+
+
+from win32com.client import Dispatch, constants
+
+
+class _UnPicklableNoFEM(FemtetInterface):
+
+
+    original_femprj_path = 'dummy'
+    model_name = 'dummy'
+    parametric_output_indexes_use_as_objective = None
+    kwargs = dict()
+    Femtet = None
+    quit_when_destruct = False
+
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        CoInitialize()
+        self.unpicklable_member = Dispatch('FemtetMacro.Femtet')
+        self.cns = constants
+
+    def _setup_before_parallel(self, *args, **kwargs):
+        pass
+
+    def check_param_value(self, *args, **kwargs):
+        pass
+
+    def update_parameter(self, *args, **kwargs):
+        pass
+
+    def update(self, *args, **kwargs):
+        pass
+
+    def create_result_file_content(self):
+        """Called after solve"""
+
+        # save to worker space
+        with open(__file__, 'rb') as f:
+            content = f.read()
+
+        return content
+
+    def create_file_path(self, trial: int):
+        # return path of scheduler environment
+        here = os.path.dirname(__file__)
+        pdt_path = os.path.join(here, f'trial{trial}.pdt')
+        return pdt_path
+

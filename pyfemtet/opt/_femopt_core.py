@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats.qmc import LatinHypercube
 from optuna._hypervolume import WFG
-from dask.distributed import Lock
+from dask.distributed import Lock, get_client
 
 # win32com
 from win32com.client import constants, Constants
@@ -532,7 +532,17 @@ class History:
 
         return columns, metadata
 
-    def record(self, parameters, objectives, constraints, obj_values, cns_values, message):
+    def record(
+            self,
+            parameters,
+            objectives,
+            constraints,
+            obj_values,
+            cns_values,
+            message,
+            postprocess_func,
+            postprocess_args,
+    ):
         """Records the optimization results in the history.
 
         Record only. NOT save.
@@ -544,7 +554,8 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
-
+            postprocess_func (Callable): fem method to call after solving. i.e. save result file. Must take trial(int) for 1st argument.
+            postprocess_args (dict): arguments for `postprocess_func`. i.e. create binary data of result file in the worker process.
         """
 
         # create row
@@ -590,6 +601,12 @@ class History:
             self._calc_non_domi(objectives)  # update self.local_data
             self._calc_hypervolume(objectives)  # update self.local_data
             self.actor_data = self.local_data
+
+            # save file
+            if postprocess_args is not None:
+                trial = self.local_data['trial'].values[-1]
+                client = get_client()  # always returns valid client
+                client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
 
     def _calc_non_domi(self, objectives):
 
@@ -696,8 +713,8 @@ class OptimizationStatus:
     RUNNING = 30
     INTERRUPTING = 40
     TERMINATED = 50
-    CRASHED = 55
     TERMINATE_ALL = 60
+    CRASHED = 70
 
     def __init__(self, client, name='entire'):
         self._future = client.submit(_OptimizationStatusActor, actor=True)

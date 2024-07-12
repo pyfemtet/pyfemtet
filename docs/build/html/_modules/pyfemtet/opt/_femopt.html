@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API reference</a></li>
@@ -91,7 +92,7 @@
 <span class="c1"># pyfemtet relative</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">FemtetInterface</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.opt</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization._monitor</span> <span class="kn">import</span> <span class="n">ProcessMonitorApp</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.application</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">process_monitor_main</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_check_bound</span><span class="p">,</span>
     <span class="n">_is_access_gogh</span><span class="p">,</span>
@@ -616,10 +617,7 @@
         <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># terminate monitor process</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_error_exit</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">CRASHED</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">TERMINATE_ALL</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">TERMINATE_ALL</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor_process_future</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
         <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
@@ -682,8 +680,14 @@
         <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="n">monitor</span> <span class="o">=</span> <span class="n">ProcessMonitorApp</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">worker_addresses</span><span class="p">,</span> <span class="n">worker_status_list</span><span class="p">)</span>
-    <span class="n">monitor</span><span class="o">.</span><span class="n">start_server</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+    <span class="n">process_monitor_main</span><span class="p">(</span>
+        <span class="n">history</span><span class="p">,</span>
+        <span class="n">status</span><span class="p">,</span>
+        <span class="n">worker_addresses</span><span class="p">,</span>
+        <span class="n">worker_status_list</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">,</span>
+        <span class="n">port</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="s1">&#39;Exit monitor server process gracefully&#39;</span>
 </pre></div>
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-17 10:28+0900\n"
+"POT-Creation-Date: 2024-07-01 13:32+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -509,7 +509,11 @@ msgid "Parallelize wat_ex14_parametric with 3 Femtet instances. Other items, exc
 msgstr ""
 
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:12
-msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parallel_parametric.py>` to execute it."
+msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parametric_parallel.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:46
+msgid "wat_ex14_parametric_parallel.py"
 msgstr ""
 
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:54

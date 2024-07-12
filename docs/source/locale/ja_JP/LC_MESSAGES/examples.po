@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-24 13:29+0900\n"
+"POT-Creation-Date: 2024-06-28 14:06+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -16,565 +16,570 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.15.0\n"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:2
+#: ../source/examples/NX_ex01/NX_ex01.rst:2
 msgid "External CAD (NX) Integration"
 msgstr "外部 CAD (NX) 連携"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:4
+#: ../source/examples/NX_ex01/NX_ex01.rst:4
 msgid "PyFemtet allows parametric optimization even for analysis models created with external CAD (NX) and imported into Femtet."
 msgstr "PyFemtet では外部 CAD (NX) で作成したモデルを Femtet にインポートする解析モデルにおいても、パラメトリック最適化を行うことができます。"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:8
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:15
-#: ../../source/examples/gau_ex08/gau_ex08.rst:8
-#: ../../source/examples/her_ex40/her_ex40.rst:8
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:16
-#: ../../source/examples/wat_ex14/wat_ex14.rst:8
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:9
+#: ../source/examples/NX_ex01/NX_ex01.rst:8
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:15
+#: ../source/examples/gau_ex08/gau_ex08.rst:8
+#: ../source/examples/her_ex40/her_ex40.rst:8
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:16
+#: ../source/examples/wat_ex14/wat_ex14.rst:8
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:9
 msgid "Sample File"
 msgstr "サンプルファイル"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:11
+#: ../source/examples/NX_ex01/NX_ex01.rst:11
 msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_NX.prt>` and :download:`sample project<../_temporary_sample_files/cad_ex01_NX.femprj>` in the same folder. Keep the project open in Femtet, then double-click on the :download:`sample code<../_temporary_sample_files/cad_ex01_NX.py>` to execute it."
 msgstr ":download:`サンプルモデル<../_temporary_sample_files/cad_ex01_NX.prt>` と :download:`サンプルプロジェクト<../_temporary_sample_files/cad_ex01_NX.femprj>` を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/cad_ex01_NX.py>` をダブルクリックして実行してください。"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:22
+#: ../source/examples/NX_ex01/NX_ex01.rst:22
 msgid "Details as a FEM Problem"
 msgstr "FEM 問題としての詳細"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:27
+#: ../source/examples/NX_ex01/NX_ex01.rst:27
 msgid "Appearance of the Model (and Analysis Conditions)"
 msgstr "モデルの外観 (解析条件)"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:29
+#: ../source/examples/NX_ex01/NX_ex01.rst:29
 msgid "fix ... Fully Fixed"
 msgstr "fix ... 完全固定"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:30
+#: ../source/examples/NX_ex01/NX_ex01.rst:30
 msgid "load ... Load in the -Z direction (1N)"
 msgstr "load ... Load in the -Z direction (1N)"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:31
+#: ../source/examples/NX_ex01/NX_ex01.rst:31
 msgid "mirror ... Symmetrical to the XZ plane"
 msgstr "mirror ... Symmetrical to the XZ plane"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:35
-#: ../../source/examples/gau_ex08/gau_ex08.rst:21
-#: ../../source/examples/her_ex40/her_ex40.rst:21
-#: ../../source/examples/wat_ex14/wat_ex14.rst:21
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:22
+#: ../source/examples/NX_ex01/NX_ex01.rst:35
+#: ../source/examples/gau_ex08/gau_ex08.rst:21
+#: ../source/examples/her_ex40/her_ex40.rst:21
+#: ../source/examples/wat_ex14/wat_ex14.rst:21
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:22
 msgid "Design Variables"
 msgstr "設計変数"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:40
+#: ../source/examples/NX_ex01/NX_ex01.rst:40
 msgid "Appearance of the Model Section (and Design Variables)"
 msgstr "モデルの外観 (設計変数)"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:43
-#: ../../source/examples/gau_ex08/gau_ex08.rst:28
-#: ../../source/examples/her_ex40/her_ex40.rst:28
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:37
-#: ../../source/examples/wat_ex14/wat_ex14.rst:28
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
+#: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/gau_ex08/gau_ex08.rst:28
+#: ../source/examples/her_ex40/her_ex40.rst:28
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:37
+#: ../source/examples/wat_ex14/wat_ex14.rst:28
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
 msgid "Variable Name"
 msgstr "変数名"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:43
-#: ../../source/examples/gau_ex08/gau_ex08.rst:28
-#: ../../source/examples/her_ex40/her_ex40.rst:28
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:37
-#: ../../source/examples/wat_ex14/wat_ex14.rst:28
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
+#: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/gau_ex08/gau_ex08.rst:28
+#: ../source/examples/her_ex40/her_ex40.rst:28
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:37
+#: ../source/examples/wat_ex14/wat_ex14.rst:28
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
 msgid "Description"
 msgstr "説明"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:45
+#: ../source/examples/NX_ex01/NX_ex01.rst:45
 msgid "A"
 msgstr ""
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:45
+#: ../source/examples/NX_ex01/NX_ex01.rst:45
 msgid "Web Tickness"
 msgstr "ウェブ板厚"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:46
+#: ../source/examples/NX_ex01/NX_ex01.rst:46
 msgid "B"
 msgstr ""
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:46
+#: ../source/examples/NX_ex01/NX_ex01.rst:46
 msgid "Flange Tickness"
 msgstr "フランジ板厚"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:47
+#: ../source/examples/NX_ex01/NX_ex01.rst:47
 msgid "C"
 msgstr ""
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:47
+#: ../source/examples/NX_ex01/NX_ex01.rst:47
 msgid "Flange Bending"
 msgstr "フランジ曲げ"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:52
-#: ../../source/examples/gau_ex08/gau_ex08.rst:37
-#: ../../source/examples/her_ex40/her_ex40.rst:37
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:46
-#: ../../source/examples/wat_ex14/wat_ex14.rst:36
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:36
+#: ../source/examples/NX_ex01/NX_ex01.rst:52
+#: ../source/examples/gau_ex08/gau_ex08.rst:37
+#: ../source/examples/her_ex40/her_ex40.rst:37
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:46
+#: ../source/examples/wat_ex14/wat_ex14.rst:36
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:36
 msgid "Objective Function"
 msgstr "目的関数"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:54
+#: ../source/examples/NX_ex01/NX_ex01.rst:54
 msgid "Maximum Displacement in the Z direction (set to 0)"
 msgstr "Z 方向最大変位（0 にする）"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:55
+#: ../source/examples/NX_ex01/NX_ex01.rst:55
 msgid "Volume (minimize)"
 msgstr "体積（最小にする）"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:59
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:25
-#: ../../source/examples/gau_ex08/gau_ex08.rst:43
-#: ../../source/examples/her_ex40/her_ex40.rst:43
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:54
-#: ../../source/examples/wat_ex14/wat_ex14.rst:44
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:44
+#: ../source/examples/NX_ex01/NX_ex01.rst:59
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:25
+#: ../source/examples/gau_ex08/gau_ex08.rst:43
+#: ../source/examples/her_ex40/her_ex40.rst:43
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:54
+#: ../source/examples/wat_ex14/wat_ex14.rst:44
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:44
 msgid "Sample Code"
 msgstr "サンプルコード"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:61
+#: ../source/examples/NX_ex01/NX_ex01.rst:61
 msgid "cad_ex01_NX.py"
 msgstr ""
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:68
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:34
-#: ../../source/examples/gau_ex08/gau_ex08.rst:52
-#: ../../source/examples/her_ex40/her_ex40.rst:52
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:63
-#: ../../source/examples/wat_ex14/wat_ex14.rst:53
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:58
+#: ../source/examples/NX_ex01/NX_ex01.rst:68
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:34
+#: ../source/examples/gau_ex08/gau_ex08.rst:52
+#: ../source/examples/her_ex40/her_ex40.rst:52
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:63
+#: ../source/examples/wat_ex14/wat_ex14.rst:53
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:58
 msgid "Execution Result of the Sample Code"
 msgstr "サンプルコードの実行結果"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:73
+#: ../source/examples/NX_ex01/NX_ex01.rst:73
 msgid "Execution result of NX_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass."
 msgstr "NX_ex01.py の実行結果。 横軸が ミーゼス応力、 縦軸が 質量 です。"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:75
+#: ../source/examples/NX_ex01/NX_ex01.rst:75
 msgid "After the 20 trials, a Pareto set of von Mises stress and mass is obtained."
 msgstr "20 回の反復計算の結果、 ミーゼス応力と質量のパレート集合が得られます。"
 
-#: ../../source/examples/NX_ex01/NX_ex01.rst:80
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:46
-#: ../../source/examples/gau_ex08/gau_ex08.rst:63
-#: ../../source/examples/her_ex40/her_ex40.rst:63
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:103
-#: ../../source/examples/wat_ex14/wat_ex14.rst:81
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:90
+#: ../source/examples/NX_ex01/NX_ex01.rst:80
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:46
+#: ../source/examples/gau_ex08/gau_ex08.rst:63
+#: ../source/examples/her_ex40/her_ex40.rst:63
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:103
+#: ../source/examples/wat_ex14/wat_ex14.rst:81
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:90
 msgid "Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on."
 msgstr "Femtet, PyFemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。"
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:2
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:2
 msgid "External CAD (Solidworks) Integration"
 msgstr "外部 CAD (Solidworks) 連携"
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:4
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:4
 msgid "PyFemtet allows parametric optimization even for analysis models created with external CAD (Solidworks) and imported into Femtet."
 msgstr "PyFemtet では外部 CAD (Solidworks) で作成したモデルを Femtet にインポートしたモデルにおいても、パラメトリック最適化を実行することができます。"
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:6
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:6
 msgid "An example will be explained using an H-shaped steel that was parametrically modeled in an external CAD (Solidworks) and analyzed using Femtet's stress analysis solver to minimize volume while minimizing displacement."
 msgstr "Femtet の応力解析ソルバーを用いて 外部 CAD (Solidworks) でパラメトリックモデリングを行った H 型鋼について 体積を最小化しつつ 変位を最小にする 例題を解説します。"
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:10
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:10
 msgid "Other than the sample code and execution results, the items are the same as in :doc:`../NX_ex01/NX_ex01`."
 msgstr "サンプルコード及び実行結果以外の項目は :doc:`../NX_ex01/NX_ex01` と同じです。"
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:18
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:18
 msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_SW.SLDPRT>` and :download:`sample project<../_temporary_sample_files/cad_ex01_SW.femprj>` in the same folder, keep the project open in Femtet, and double-click on :download:`sample code<../_temporary_sample_files/cad_ex01_SW.py>` to execute."
 msgstr ":download:`サンプルモデル<../_temporary_sample_files/cad_ex01_SW.SLDPRT>` と :download:`サンプルプロジェクト<../_temporary_sample_files/cad_ex01_SW.femprj>` を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/cad_ex01_SW.py>` をダブルクリックして実行してください。"
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:27
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:27
 msgid "cad_ex01_SW.py"
 msgstr ""
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:39
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:39
 msgid "Execution result of Sldworks_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass."
 msgstr "Sldworks_ex01.py の実行結果。 横軸が ミーゼス応力 、 縦軸が 質量 です。"
 
-#: ../../source/examples/Sldworks_ex01/Sldworks_ex01.rst:41
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:41
 msgid "After 20 trials, a Pareto set of von Mises stress and mass is obtained."
 msgstr "20 回の反復計算の結果、 ミーゼス応力と質量のパレート集合が得られます。"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:2
+#: ../source/examples/gau_ex08/gau_ex08.rst:2
 msgid "Self-inductance of a solenoid coil"
 msgstr "ソレノイドコイルの自己インダクタンス"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:4
+#: ../source/examples/gau_ex08/gau_ex08.rst:4
 msgid "An example will be explained using Femtet's magnetic field analysis solver to determine the self-inductance of a finite-length solenoid coil to a specific value."
 msgstr "Femtet の磁場解析ソルバーを用い、有限長ソレノイドコイルの 自己インダクタンスを特定の値にする例題を解説します。"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:11
+#: ../source/examples/gau_ex08/gau_ex08.rst:11
 msgid "Keep the :download:`sample project<../_temporary_sample_files/gau_ex08_parametric.femprj>` open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/gau_ex08_parametric.py>` to execute it."
 msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/gau_ex08_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/gau_ex08_parametric.py>` をダブルクリックして実行してください。"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:17
+#: ../source/examples/gau_ex08/gau_ex08.rst:17
 msgid "For more details on the FEM problem, please refer to FemtetHelp / Example Collection / Magnetic Analysis / Example 8."
 msgstr "FEM 問題としての詳細については、FemtetHelp / 例題集 / 磁場解析 / 例題8 を参照してください。"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:25
-#: ../../source/examples/her_ex40/her_ex40.rst:25
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:34
-#: ../../source/examples/wat_ex14/wat_ex14.rst:25
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:26
+#: ../source/examples/gau_ex08/gau_ex08.rst:25
+#: ../source/examples/her_ex40/her_ex40.rst:25
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:34
+#: ../source/examples/wat_ex14/wat_ex14.rst:25
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:26
 msgid "Appearance of the Model"
 msgstr "モデルの外観"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:30
+#: ../source/examples/gau_ex08/gau_ex08.rst:30
 msgid "h"
 msgstr ""
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:30
+#: ../source/examples/gau_ex08/gau_ex08.rst:30
 msgid "Pitch per 1 turn"
 msgstr "1巻きあたりのピッチ"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:31
+#: ../source/examples/gau_ex08/gau_ex08.rst:31
 msgid "r"
 msgstr ""
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:31
+#: ../source/examples/gau_ex08/gau_ex08.rst:31
 msgid "Radius of the coil"
 msgstr "コイルの半径"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:32
+#: ../source/examples/gau_ex08/gau_ex08.rst:32
 msgid "n"
 msgstr ""
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:32
+#: ../source/examples/gau_ex08/gau_ex08.rst:32
 msgid "Number of turns in the coil"
 msgstr "コイルの巻き数"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:39
+#: ../source/examples/gau_ex08/gau_ex08.rst:39
 msgid "Self-inductance of the coil."
 msgstr "コイルの自己インダクタンス"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:45
+#: ../source/examples/gau_ex08/gau_ex08.rst:45
 msgid "gau_ex08_parametric.py"
 msgstr ""
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:57
+#: ../source/examples/gau_ex08/gau_ex08.rst:57
 msgid "Execution result of gau_ex08_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is self-inductance."
 msgstr "gau_ex08_parametric.py の実行結果。 横軸が試行回数、縦軸が自己インダクタンスです。"
 
-#: ../../source/examples/gau_ex08/gau_ex08.rst:59
+#: ../source/examples/gau_ex08/gau_ex08.rst:59
 msgid "After 20 iterations, the self-inductance was calculated to be 0.103 µF."
 msgstr "20 回の反復計算の結果、自己インダクタンスは 0.103 μF となります。"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:2
+#: ../source/examples/her_ex40/her_ex40.rst:2
 msgid "Resonant frequency of a circular patch antenna"
 msgstr "円形パッチアンテナの共振周波数"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:4
+#: ../source/examples/her_ex40/her_ex40.rst:4
 msgid "Using Femtet's electromagnetic wave analysis solver, we explain an example of setting the resonant frequency of a circular patch antenna to a specific value."
 msgstr "Femtet の電磁波解析ソルバーを用い、 円形パッチアンテナの共振周波数を 特定の値にする例題を解説します。"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:11
+#: ../source/examples/her_ex40/her_ex40.rst:11
 msgid "Keep the :download:`sample project<../_temporary_sample_files/her_ex40_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/her_ex40_parametric.py>` to execute it."
 msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/her_ex40_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/her_ex40_parametric.py>` をダブルクリックして実行してください。"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:17
+#: ../source/examples/her_ex40/her_ex40.rst:17
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Electromagnetic Wave Analysis / Example 40."
 msgstr "FEM 問題としての詳細については、FemtetHelp / 例題集 / 電磁波解析 / 例題40 を参照してください。"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:30
+#: ../source/examples/her_ex40/her_ex40.rst:30
 msgid "ant_r"
 msgstr ""
 
-#: ../../source/examples/her_ex40/her_ex40.rst:30
+#: ../source/examples/her_ex40/her_ex40.rst:30
 msgid "Radius of the circular antenna"
 msgstr "円形アンテナの半径"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:31
+#: ../source/examples/her_ex40/her_ex40.rst:31
 msgid "sx"
 msgstr ""
 
-#: ../../source/examples/her_ex40/her_ex40.rst:31
+#: ../source/examples/her_ex40/her_ex40.rst:31
 msgid "Size of the substrate"
 msgstr "基板のサイズ"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:32
+#: ../source/examples/her_ex40/her_ex40.rst:32
 msgid "xf"
 msgstr ""
 
-#: ../../source/examples/her_ex40/her_ex40.rst:32
+#: ../source/examples/her_ex40/her_ex40.rst:32
 msgid "Power port location"
 msgstr "給電ポートの位置"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:39
+#: ../source/examples/her_ex40/her_ex40.rst:39
 msgid "Resonant frequency giving the first peak of S(1,1)"
 msgstr "S(1,1) の第一ピークを与える共振周波数"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:45
+#: ../source/examples/her_ex40/her_ex40.rst:45
 msgid "her_ex40_parametric.py"
 msgstr ""
 
-#: ../../source/examples/her_ex40/her_ex40.rst:57
+#: ../source/examples/her_ex40/her_ex40.rst:57
 msgid "Execution result of her_ex40_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is the resonant frequency."
 msgstr "her_ex40_parametric.py の実行結果。 横軸が試行回数、 縦軸が共振周波数です。"
 
-#: ../../source/examples/her_ex40/her_ex40.rst:59
+#: ../source/examples/her_ex40/her_ex40.rst:59
 msgid "After 20 iterations, the the best frequency was calculated to be 2.991 GHz."
 msgstr "20 回の反復計算の結果、 最良の共振周波数は 2.991 GHz となります。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:2
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:2
 msgid "Air cooling of IC substrate"
 msgstr "IC 基板の空冷"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:6
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:6
 msgid "Using Femtet's simple fluid-thermal analysis solver, we explain an example of searching for the substrate dimensions and its angle that minimize the size of the substrate while keeping the maximum temperature of an IC chip on the substrate to a minimum."
 msgstr "Femtet の熱伝導ソルバー・簡易流体解析ソルバーの連成解析を用い 基板上の IC チップの最高温度を最小にしつつ 基板のサイズを最小にする 基板寸法と冷却風角度を探索する例題を解説します。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:12
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:12
 msgid "Related example: :doc:`../wat_ex14/wat_ex14`"
 msgstr "関係する例題: :doc:`../wat_ex14/wat_ex14`"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:19
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:19
 msgid "Keep the :download:`sample project<../_temporary_sample_files/paswat_ex1_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/paswat_ex1_parametric.py>` to execute it."
 msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/paswat_ex1_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parametric.py>` をダブルクリックして実行してください。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:25
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:25
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Simple Fluid-Thermal Analysis / Example 1."
 msgstr "FEM 問題としての詳細については、FemtetHelp / 例題集 / 簡易熱流体解析 / 例題1 を参照してください。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:29
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:29
 msgid "Analysis Model and Design Variables"
 msgstr "解析モデルの概要と設計変数"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:39
-#: ../../source/examples/wat_ex14/wat_ex14.rst:30
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:31
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:39
+#: ../source/examples/wat_ex14/wat_ex14.rst:30
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:31
 msgid "substrate_w"
 msgstr ""
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:39
-#: ../../source/examples/wat_ex14/wat_ex14.rst:30
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:31
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:39
+#: ../source/examples/wat_ex14/wat_ex14.rst:30
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:31
 msgid "Width of the substrate"
 msgstr "基板の幅"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:40
-#: ../../source/examples/wat_ex14/wat_ex14.rst:31
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:32
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:40
+#: ../source/examples/wat_ex14/wat_ex14.rst:31
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:32
 msgid "substrate_d"
 msgstr ""
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:40
-#: ../../source/examples/wat_ex14/wat_ex14.rst:31
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:32
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:40
+#: ../source/examples/wat_ex14/wat_ex14.rst:31
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:32
 msgid "Depth of the substrate"
 msgstr "基板の奥行き"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:41
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:41
 msgid "rot"
 msgstr ""
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:41
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:41
 msgid "Rotation angle of the substrate"
 msgstr "基板の回転角"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:48
-#: ../../source/examples/wat_ex14/wat_ex14.rst:38
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:38
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:48
+#: ../source/examples/wat_ex14/wat_ex14.rst:38
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:38
 msgid "Maximum temperature of the main chip (to minimize)"
 msgstr "メインチップの最高温度（最小にする）"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:49
-#: ../../source/examples/wat_ex14/wat_ex14.rst:39
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:39
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:49
+#: ../source/examples/wat_ex14/wat_ex14.rst:39
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:39
 msgid "Maximum temperature of the sub chip (to minimize)"
 msgstr "サブチップの最高温度（最小にする）"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:50
-#: ../../source/examples/wat_ex14/wat_ex14.rst:40
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:40
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:50
+#: ../source/examples/wat_ex14/wat_ex14.rst:40
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:40
 msgid "Occupied area on the substrate plane (to minimize)"
 msgstr "基板の平面上の専有面積（最小にする）"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:56
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:56
 msgid "|SAMPLE_NAME| _parametric.py"
 msgstr ""
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:68
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:68
 msgid "Execution result of |SAMPLE_NAME| _parametric.py. This is a pair plot with the combination of each objective function on the vertical axis and horizontal axis."
 msgstr "|SAMPLE_NAME| _parametric.py の実行結果。 各目的関数の組み合わせが縦軸、横軸となる ペアプロットです。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:74
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:74
 msgid "From this result, we can see the following:"
 msgstr "反復計算の結果、以下のことがわかります。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:72
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:72
 msgid "MAINCHIP temperature and SUBCHIP temperature have a positive correlation."
 msgstr "MAINCHIP 温度と SUBCHIP 温度には正の相関があります。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:73
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:73
 msgid "Substrate size and CHIP temperature have a negative correlation and cannot be reduced at the same time."
 msgstr "基板サイズと各CHIP温度は負の相関関係があり、同時に小さくすることはできません。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:74
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:74
 msgid "Depending on the combination of design variables, there are conditions under which MAINCHIP and SUBCHIP temperatures can be further reduced even with the same substrate size."
 msgstr "設計変数の組み合わせによっては、同じ基板サイズでも MAINCHIP と SUBCHIP の温度をさらに下げることができる条件があります。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:76
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:76
 msgid "In multi-objective optimization, a solution for which all objective function values are far from the goal compared to other solutions (that is, there is no reason to choose it) is called a **\"dominated solution.\"**"
 msgstr "多目的最適化では、すべての目的関数の値が他の解と比較して目標から遠い (つまり、それを選択する理由がない) 解は、**「劣解」** と呼ばれます。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:80
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:80
 msgid "On the other hand, the set of **\"non-dominated solutions\"** is called the **Pareto set**."
 msgstr "一方、**「非劣解」** の集合は **パレート集合** と呼ばれます。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:82
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:82
 msgid "Pareto sets generally have tradeoffs. In parameter optimization for product design, the Pareto set is determined by the rough design of the product and how variables are set."
 msgstr "パレート集合には一般にトレードオフがあります。製品設計のパラメータ最適化では、製品の大まかな設計と変数の設定方法によってパレート集合が決まります。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:85
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:85
 msgid "Therefore, it is important for the designer to perform a rough design so that the entire Pareto set approaches the target values of all objective functions."
 msgstr "したがって、設計者はパレート集合全体がすべての目的関数の目標値に近づくように大まかな設計を行うことが重要です。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:88
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:88
 msgid "Finally, select a solution from the Pareto set and reflect it in the design."
 msgstr "最後にパレートセットから解を選択し、設計に反映させます。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:93
-#: ../../source/examples/wat_ex14/wat_ex14.rst:71
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:93
+#: ../source/examples/wat_ex14/wat_ex14.rst:71
 msgid "In multi-objective optimization, it is possible that the optimization of objective functions may not be compatible. In such cases, the designer needs to select the appropriate design from among the trade-off solutions."
 msgstr "多目的最適化では、目的関数同士の最適化が両立しないことがあります。 こうした場合、設計者が各トレードオフ解の中から 適した設計を選択する必要があります。"
 
-#: ../../source/examples/paswat_ex1/paswat_ex1.rst:98
-#: ../../source/examples/wat_ex14/wat_ex14.rst:75
+#: ../source/examples/paswat_ex1/paswat_ex1.rst:98
+#: ../source/examples/wat_ex14/wat_ex14.rst:75
 msgid "Since the physical reasons for these trade-offs cannot be derived from optimization algorithms, designers need to interpret the analysis results of Femtet."
 msgstr "こうしたトレードオフが生じる物理的理由は最適化アルゴリズムからは導けないため、 設計者が Femtet の解析結果を分析するなどして解釈する必要があります。"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:2
+#: ../source/examples/wat_ex14/wat_ex14.rst:2
 msgid "Heating element on the substrate"
 msgstr "基板上の発熱体"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:4
+#: ../source/examples/wat_ex14/wat_ex14.rst:4
 msgid "Using Femtet's heat conduction analysis solver, we explain an example of searching for the substrate dimensions that minimize the size of the substrate while keeping the maximum temperature of an IC chip on the substrate to a minimum."
 msgstr "Femtet の熱伝導解析ソルバーを用い 基板上の IC チップの最高温度を最小にしつつ 基板のサイズを最小にする 基板寸法を探索する例題を解説します。"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:11
+#: ../source/examples/wat_ex14/wat_ex14.rst:11
 msgid "Keep the :download:`sample project<../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/wat_ex14_parametric.py>` to execute it."
 msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parametric.py>` をダブルクリックして実行してください。"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:17
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:18
+#: ../source/examples/wat_ex14/wat_ex14.rst:17
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:18
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Heat Conduction Analysis / Example 14."
 msgstr "FEM 問題としての詳細については、FemtetHelp / 例題集 / 熱伝導解析 / 例題14 を参照してください。"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:46
+#: ../source/examples/wat_ex14/wat_ex14.rst:46
 msgid "wat_ex14_parametric.py"
 msgstr ""
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:58
+#: ../source/examples/wat_ex14/wat_ex14.rst:58
 msgid "Execution result of wat_ex14_parametric.py. This is a pair plot with the combination of each objective function on the vertical axis and horizontal axis."
 msgstr "wat_ex14_parametric.py の実行結果。 各目的関数の組み合わせが縦軸、横軸となる ペアプロットです。"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:61
+#: ../source/examples/wat_ex14/wat_ex14.rst:61
 msgid "From the results of the 20 trials, the following can be observed."
 msgstr "20 回の反復計算の結果、以下のことがわかります。"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:63
+#: ../source/examples/wat_ex14/wat_ex14.rst:63
 msgid "The temperature of the main chip and the temperature of the sub chip can both be reduced by decreasing one of them."
 msgstr "メインチップ温度とサブチップ温度は片方を小さくしてももう片方も小さくできる"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:64
+#: ../source/examples/wat_ex14/wat_ex14.rst:64
 msgid "Reducing the substrate size increases the temperature of the main chip."
 msgstr "基板サイズを小さくすると、メインチップ温度は大きくなってしまう"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:65
+#: ../source/examples/wat_ex14/wat_ex14.rst:65
 msgid "Reducing the substrate size increases the temperature of the sub chip."
 msgstr "基板サイズを小さくすると、サブチップ温度は大きくなってしまう"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:67
+#: ../source/examples/wat_ex14/wat_ex14.rst:67
 msgid "From this, it can be seen that it is possible to design both the main chip and the sub chip to minimize temperature, but there is a trade-off relationship between the temperature of each chip and the substrate size, and it is understood that these minimizations are not compatible."
 msgstr "このことから、メインチップとサブチップはともに温度を最小化する設計が可能であるのに対し それぞれのチップ温度と基板サイズはトレードオフの関係にあり、これらの最小化は両立しないことがわかります。"
 
-#: ../../source/examples/wat_ex14/wat_ex14.rst:77
+#: ../source/examples/wat_ex14/wat_ex14.rst:77
 msgid "In this problem, it can be inferred that the reduced substrate size has decreased the heat dissipation capacity to the environment, causing the chip temperature to rise because heat is not escaping from the substrate."
 msgstr "今回の問題では、基板サイズが小さくなったことで環境への放熱能力が小さくなり、 熱が基板から逃げないためにチップ温度が上昇しているものと考察できます。"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:2
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:2
 msgid "Heat-generating elements on the substrate (parallel computation)"
 msgstr "基板上の発熱体（並列計算）"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:5
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:5
 msgid "Parallelize wat_ex14_parametric with 3 Femtet instances. Other items, except for sample code and execution results, are the same as :doc:`../wat_ex14/wat_ex14`."
 msgstr "wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します。 サンプルコード及び実行結果以外の項目は :doc:`../wat_ex14/wat_ex14` と同じです。"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:12
-msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parallel_parametric.py>` to execute it."
-msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parallel_parametric.py>` をダブルクリックして実行してください。"
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:12
+#, fuzzy
+msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parametric_parallel.py>` to execute it."
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parametric_parallel.py>` をダブルクリックして実行してください。"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:54
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:46
+msgid "wat_ex14_parametric_parallel.py"
+msgstr ""
+
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:54
 msgid "To parallelize, simply pass the desired number of parallelizations to the ``n_parallel`` argument of the ``optimize()`` method."
 msgstr "optimize() メソッドの引数 n_parallel に並列化したい数を渡すだけです。"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:60
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:60
 msgid "Execution Environment"
 msgstr "実行環境"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:63
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:63
 msgid "OS"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:63
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:63
 msgid "windows 10"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:65
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:65
 msgid "CPU"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:65
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:65
 msgid "Intel Core-i7 12700 (12 cores, 20 threads)"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:67
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:67
 msgid "Memory"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:67
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:67
 msgid "32 GB"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:71
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:71
 msgid "Execution Results"
 msgstr "実行結果"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:74
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:74
 msgid "Without Parallelization"
 msgstr "並列化なし"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:74
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:74
 msgid "With 3 Parallelizations"
 msgstr "3 並列"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:75
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:75
 msgid "117 sec"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:75
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:75
 msgid "74 sec"
 msgstr ""
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:78
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:78
 msgid "In this demo, calculations were performed with 3 Femtet instances. For the problem in :doc:`../wat_ex14/wat_ex14`, without using parallelization in the above execution environment, it took 117 seconds for 20 trials. However, in this demo, 21 trials were completed in 74 seconds, reducing the execution time by 37%."
 msgstr "このデモでは 3 つの Femtet インスタンスでの計算を行いました。 :doc:`../wat_ex14/wat_ex14` の問題について、 上記実行環境で並列を用いない場合は 20 回の解析に 117 秒を要しましたが、 このデモでは 74 秒で 21 回の試行が終了し、実行時間を 37% 低減しています。"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:82
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:82
 msgid "Generally, when parallelizing numerical calculations by N, the execution time does not simply become 1/N."
 msgstr "一般に数値計算を N 並列した場合、実行時間は単純に 1/N にはなりません。"
 
-#: ../../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:86
+#: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:86
 msgid "The acceleration effect of parallelization varies depending on the execution environment and analysis model."
 msgstr "実行環境や解析モデルによって並列化による高速化効果は変動します。"
 
@@ -586,4 +591,7 @@ msgstr "実行環境や解析モデルによって並列化による高速化効
 
 #~ msgid "wat_ex14_parallel_parametric.py"
 #~ msgstr ""
+
+#~ msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parallel_parametric.py>` to execute it."
+#~ msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parallel_parametric.py>` をダブルクリックして実行してください。"
 

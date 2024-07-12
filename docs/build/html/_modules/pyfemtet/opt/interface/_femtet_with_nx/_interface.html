@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
@@ -97,6 +98,10 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        prt_path: The path to the prt file.</span>
+<span class="sd">        export_curves(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
+<span class="sd">        export_surfaces(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
+<span class="sd">        export_solids(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
+<span class="sd">        export_flattened_assembly(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
 
 <span class="sd">    For details of The other arguments, see ``FemtetInterface``.</span>
 
@@ -107,9 +112,12 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">prt_path</span><span class="p">,</span>
+            <span class="n">export_curves</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_surfaces</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_solids</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_flattened_assembly</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-
         <span class="c1"># check NX installation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_journal_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;UGII_BASE_DIR&#39;</span><span class="p">),</span> <span class="s1">&#39;NXBIN&#39;</span><span class="p">,</span> <span class="s1">&#39;run_journal.exe&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_journal_path</span><span class="p">):</span>
@@ -125,10 +133,19 @@
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># get_worker に失敗した場合</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">prt_path</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_curves</span> <span class="o">=</span> <span class="n">export_curves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_surfaces</span> <span class="o">=</span> <span class="n">export_surfaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_solids</span> <span class="o">=</span> <span class="n">export_solids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_flattened_assembly</span> <span class="o">=</span> <span class="n">export_flattened_assembly</span>
+
         <span class="c1"># FemtetInterface の設定 (femprj_path, model_name の更新など)</span>
         <span class="c1"># + restore 情報の上書き</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">prt_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">,</span>
+            <span class="n">export_curves</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_curves</span><span class="p">,</span>
+            <span class="n">export_surfaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_surfaces</span><span class="p">,</span>
+            <span class="n">export_solids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_solids</span><span class="p">,</span>
+            <span class="n">export_flattened_assembly</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_flattened_assembly</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
 
@@ -171,10 +188,27 @@
             <span class="n">tmp_dict</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
         <span class="n">str_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">)</span>
 
+        <span class="c1"># create dumped json of export settings</span>
+        <span class="n">tmp_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">include_curves</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_curves</span><span class="p">,</span>
+            <span class="n">include_surfaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_surfaces</span><span class="p">,</span>
+            <span class="n">include_solids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_solids</span><span class="p">,</span>
+            <span class="n">flatten_assembly</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_flattened_assembly</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dumped_json_export_settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">)</span>
+
         <span class="c1"># NX journal を使ってモデルを編集する</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">run_journal_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_JOURNAL_PATH</span><span class="p">,</span> <span class="s1">&#39;-args&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">,</span> <span class="n">str_json</span><span class="p">,</span> <span class="n">x_t_path</span><span class="p">],</span>
+            <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_journal_path</span><span class="p">,</span>  <span class="c1"># run_journal.exe</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_JOURNAL_PATH</span><span class="p">,</span>  <span class="c1"># update_model.py</span>
+                <span class="s1">&#39;-args&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">,</span>
+                <span class="n">str_json</span><span class="p">,</span>
+                <span class="n">x_t_path</span><span class="p">,</span>
+                <span class="n">dumped_json_export_settings</span><span class="p">,</span>
+            <span class="p">],</span>
             <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
             <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">cwd</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">)</span>

@@ -18,6 +18,10 @@ from pyfemtet.core import MeshError, ModelError, SolveError
 # filter warnings
 import warnings
 from optuna.exceptions import ExperimentalWarning
+
+
+optuna.logging.set_verbosity(optuna.logging.ERROR)
+
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 

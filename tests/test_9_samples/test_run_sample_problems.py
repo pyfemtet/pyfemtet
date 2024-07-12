@@ -1,16 +1,8 @@
 import os
 import sys
-from glob import glob
-from time import sleep
-from multiprocessing import Process
-from subprocess import run
-
-from tqdm import tqdm
-from femtetutils import util
-from win32com.client import Dispatch
+import subprocess
 
 import pyfemtet
-from pyfemtet.dispatch_extensions import _get_hwnds
 
 from pyfemtet import _test_util
 
@@ -19,6 +11,8 @@ LIBRARY_ROOT = os.path.dirname(pyfemtet.__file__)
 SAMPLE_DIR = os.path.join(LIBRARY_ROOT, 'opt', 'femprj_sample')
 
 RECORD_MODE = False
+
+os.chdir(LIBRARY_ROOT)
 
 
 def main(py_script_path):
@@ -30,10 +24,49 @@ def main(py_script_path):
     try:
 
         # run script
-        run([sys.executable, py_script_path], check=True)
+        # run([sys.executable, py_script_path], check=True)
+        process = subprocess.Popen(
+            [sys.executable, py_script_path],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        # press enter to skip input() in sample script
+        process.stdin.write(b'\n')
+        process.stdin.flush()
+
+        # wait for the subprocess
+        out, err = process.communicate()
+
+        try:
+            out = out.decode('cp932')
+        except UnicodeDecodeError:
+            out = out.decode('utf-8')
+        try:
+            err = err.decode('cp932')
+        except UnicodeDecodeError:
+            err = err.decode('utf-8')
+
+        # check stdout and stderr
+        print('===== stdout =====')
+        print(out)
+        print()
+        print('===== stderr =====')
+        print(err)
+        print()
+
+        # if include Exception, raise Exception
+        # [x]test: continue if succeed
+        # [x]test: continue if logger (all logger were stderr)
+        # [x]test: stop if raise error in script
+        # [x]test: stop if raise error in module (raise RuntimeError in terminate_all())
+        if 'Traceback (most recent call last):' in err:
+            raise Exception(f'Unexpected Error has occurred in {py_script_path}')
 
         # search generated csv
         generated_csv_path = _test_util.find_latest_csv()
+
         if RECORD_MODE:
             # copy to same directory
             _test_util.record_result(
@@ -50,7 +83,11 @@ def main(py_script_path):
             # raise assertion error if needed
             _test_util.is_equal_result(
                 generated_csv_path,
-                recorded_csv
+                recorded_csv,
+                os.path.join(
+                    os.path.dirname(__file__),
+                    os.path.basename(py_script_path).replace('.py', '.txt')
+                )
             )
 
         # shutdown Femtet
@@ -102,4 +139,4 @@ if __name__ == '__main__':
     #     print(path)
     #     if not 'cad' in path:
     #         main(path)
-    test_sample_gau_ex08_parametric()
+    test_sample_gal_ex58_parametric()

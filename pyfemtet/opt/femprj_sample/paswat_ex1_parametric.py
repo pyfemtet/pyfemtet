@@ -58,4 +58,11 @@ if __name__ == '__main__':
     # Run optimization.
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=15)
+
+    # Stop script to keep process alive
+    # while you check the result in process monitor.
+    print('================================')
+    print('Finished. Press Enter to quit...')
+    print('================================')
+    input()
     femopt.terminate_all()

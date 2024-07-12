@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-17 10:28+0900\n"
+"POT-Creation-Date: 2024-07-09 11:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -27,10 +27,17 @@ msgstr ""
 msgid "pyfemtet package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.rst:5 ../source/modules/pyfemtet.rst:5
+#: ../source/modules/pyfemtet.opt.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.rst:5
+#: ../source/modules/pyfemtet.rst:5
 msgid "Subpackages"
 msgstr ""
 
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.rst:16
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:5
 #: ../source/modules/pyfemtet.rst:13
 msgid "Submodules"
 msgstr ""
@@ -84,6 +91,7 @@ msgid "Raises when (specific) Femtet process doesn't exist."
 msgstr ""
 
 #: of pyfemtet.dispatch_extensions.IFemtet:1 pyfemtet.opt._femopt.FEMOpt:1
+#: pyfemtet.opt.visualization.base.SidebarApplicationBase:1
 msgid "Bases: :py:class:`object`"
 msgstr ""
 
@@ -232,7 +240,11 @@ msgstr ""
 #: ../source/modules/pyfemtet.opt.interface.rst:5
 #: ../source/modules/pyfemtet.opt.opt.rst:5
 #: ../source/modules/pyfemtet.opt.rst:15
-#: ../source/modules/pyfemtet.opt.visualization.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:40
+#: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:24
+#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:24
+#: ../source/modules/pyfemtet.opt.visualization.rst:27
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:40
 #: ../source/modules/pyfemtet.rst:40
 msgid "Module contents"
 msgstr ""
@@ -243,6 +255,7 @@ msgstr ""
 
 #: of pyfemtet.opt.interface._base.FEMInterface:1
 #: pyfemtet.opt.opt._base.AbstractOptimizer:1
+#: pyfemtet.opt.visualization.base.AbstractPage:1
 msgid "Bases: :py:class:`~abc.ABC`"
 msgstr ""
 
@@ -750,6 +763,11 @@ msgstr ""
 msgid "When set to 'auto', first tries 'existing', and if that fails, connects with 'new'. If `pid` is specified and failed to connect, it will not try existing another Femtet process."
 msgstr ""
 
+#: of
+#: pyfemtet.opt.interface._femtet.FemtetInterface.create_result_file_content:1
+msgid "Called after solve"
+msgstr ""
+
 #: of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:1
 msgid "Returns connected femtet process is existing or not."
 msgstr ""
@@ -791,7 +809,15 @@ msgstr ""
 msgid "The path to the prt file."
 msgstr ""
 
-#: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:5
+#: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:4
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:6
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:8
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:10
+msgid "Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None."
+msgstr ""
+
+#: of
+#: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:13
 msgid "For details of The other arguments, see ``FemtetInterface``."
 msgstr ""
 
@@ -862,8 +888,1306 @@ msgstr ""
 msgid "pyfemtet.opt.visualization package"
 msgstr ""
 
-#: of pyfemtet.opt.visualization._monitor.ProcessMonitorApp:1
-#: pyfemtet.opt.visualization._monitor.ResultViewerApp:1
-msgid "Bases: :py:class:`~pyfemtet.opt.visualization._monitor.AppBase`"
+#: ../source/modules/pyfemtet.opt.visualization.rst:19
+msgid "pyfemtet.opt.visualization.base module"
 msgstr ""
+
+#: of pyfemtet.opt.visualization.base.AbstractPage:1
+msgid "Define content."
+msgstr ""
+
+#: of pyfemtet.opt.visualization.base.PyFemtetApplicationBase:1
+msgid "Bases: :py:class:`~pyfemtet.opt.visualization.base.SidebarApplicationBase`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:2
+msgid "pyfemtet.opt.visualization.complex\\_components package"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:8
+msgid "pyfemtet.opt.visualization.complex\\_components.alert\\_region module"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.complex_components.alert_region.AlertRegion:1
+#: pyfemtet.opt.visualization.complex_components.control_femtet.FemtetControl:1
+#: pyfemtet.opt.visualization.complex_components.main_graph.MainGraph:1
+#: pyfemtet.opt.visualization.process_monitor.pages.HomePage:1
+#: pyfemtet.opt.visualization.process_monitor.pages.WorkerPage:1
+#: pyfemtet.opt.visualization.result_viewer.pages.HomePage:1
+msgid "Bases: :py:class:`~pyfemtet.opt.visualization.base.AbstractPage`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:16
+msgid "pyfemtet.opt.visualization.complex\\_components.control\\_femtet module"
+msgstr ""
+
+#: of
+#: pyfemtet.opt.visualization.complex_components.control_femtet.FemtetControl.create_femtet_interface_args:1
+msgid "Returns the argument of FemtetInterface and warning message"
+msgstr ""
+
+#: of
+#: pyfemtet.opt.visualization.complex_components.control_femtet.FemtetControl.create_femtet_interface_args:3
+msgid "# femprj_path=None, # model_name=None, # connect_method='auto',  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない） # save_pdt='all',  # 'all' or None # strictly_pid_specify=True,  # dask worker では True にしたいので super() の引数にしない。 # allow_without_project=False,  # main でのみ True を許容したいので super() の引数にしない。 # open_result_with_gui=True, # parametric_output_indexes_use_as_objective=None,"
+msgstr ""
+
+#: of
+#: pyfemtet.opt.visualization.complex_components.control_femtet.FemtetState:1
+#: pyfemtet.opt.visualization.wrapped_components.str_enum.ReprEnum:1
+msgid "Bases: :py:class:`~enum.Enum`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:24
+msgid "pyfemtet.opt.visualization.complex\\_components.main\\_figure\\_creator module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:32
+msgid "pyfemtet.opt.visualization.complex\\_components.main\\_graph module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:2
+msgid "pyfemtet.opt.visualization.process\\_monitor package"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:8
+msgid "pyfemtet.opt.visualization.process\\_monitor.application module"
+msgstr ""
+
+#: of
+#: pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication:1
+#: pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication:1
+msgid "Bases: :py:class:`~pyfemtet.opt.visualization.base.PyFemtetApplicationBase`"
+msgstr ""
+
+#: of
+#: pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication.start_server:1
+msgid "Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:16
+msgid "pyfemtet.opt.visualization.process\\_monitor.pages module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:2
+msgid "pyfemtet.opt.visualization.result\\_viewer package"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:8
+msgid "pyfemtet.opt.visualization.result\\_viewer.application module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:16
+msgid "pyfemtet.opt.visualization.result\\_viewer.pages module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:2
+msgid "pyfemtet.opt.visualization.wrapped\\_components package"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:8
+msgid "pyfemtet.opt.visualization.wrapped\\_components.dbc module"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Accordion:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Accordion.Accordion`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Accordion.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.AccordionItem.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Alert.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Badge.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Breadcrumb.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Button.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.ButtonGroup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Card.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.CardBody.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.CardFooter.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.CardGroup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.CardHeader.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.CardImg.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.CardImgOverlay.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.CardLink.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Carousel.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Checkbox.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Checklist.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Col.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Collapse.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Container.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.DropdownMenu.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.DropdownMenuItem.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Fade.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Form.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.FormFeedback.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.FormFloating.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.FormText.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Input.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.InputGroup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.InputGroupText.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Label.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.ListGroup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.ListGroupItem.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Modal.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.ModalBody.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.ModalFooter.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.ModalHeader.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.ModalTitle.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Nav.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.NavItem.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.NavLink.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Navbar.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.NavbarBrand.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.NavbarSimple.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.NavbarToggler.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Offcanvas.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Pagination.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Placeholder.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Popover.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.PopoverBody.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.PopoverHeader.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Progress.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.RadioButton.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.RadioItems.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Row.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Select.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Spinner.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Stack.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Switch.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Tab.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Table.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Tabs.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Textarea.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Toast.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dbc.Tooltip.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Checklist.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Clipboard.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialog.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialogProvider.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerRange.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerSingle.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Download.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Dropdown.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Geolocation.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Graph.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Input.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Interval.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Link.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Loading.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Location.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.LogoutButton.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Markdown.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.RadioItems.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.RangeSlider.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Slider.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Store.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Tab.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Tabs.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Textarea.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Tooltip.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.dcc.Upload.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.A.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Abbr.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Acronym.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Address.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Area.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Article.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Aside.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Audio.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.B.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Base.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Basefont.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Bdi.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Bdo.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Big.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Blink.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Blockquote.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Br.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Button.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Canvas.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Caption.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Center.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Cite.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Code.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Col.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Colgroup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Content.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Data.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Datalist.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Dd.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Del.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Details.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Dfn.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Dialog.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Div.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Dl.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Dt.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Em.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Embed.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Fieldset.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Figcaption.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Figure.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Font.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Footer.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Form.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Frame.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Frameset.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.H1.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.H2.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.H3.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.H4.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.H5.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.H6.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Header.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Hgroup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Hr.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.I.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Iframe.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Img.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Ins.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Kbd.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Keygen.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Label.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Legend.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Li.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Link.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Main.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.MapEl.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Mark.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Marquee.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Meta.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Meter.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Nav.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Nobr.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Noscript.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.ObjectEl.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Ol.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Optgroup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Option.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Output.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.P.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Param.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Picture.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Plaintext.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Pre.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Progress.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Q.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Rb.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Rp.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Rt.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Rtc.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Ruby.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.S.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Samp.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Script.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Section.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Select.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Shadow.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Slot.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Small.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Source.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Spacer.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Span.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Strike.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Strong.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Sub.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Summary.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Sup.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Table.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Tbody.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Td.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Template.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Textarea.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Tfoot.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Th.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Thead.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Time.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Title.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Tr.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Track.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.U.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Ul.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Var.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Video.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Wbr.Prop:1
+#: pyfemtet.opt.visualization.wrapped_components.html.Xmp.Prop:1
+msgid "Bases: :py:class:`~pyfemtet.opt.visualization.wrapped_components.str_enum.StrEnum`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.AccordionItem:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.AccordionItem.AccordionItem`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Alert:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Alert.Alert`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Badge:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Badge.Badge`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Breadcrumb:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Breadcrumb.Breadcrumb`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Button:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Button.Button`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.ButtonGroup:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.ButtonGroup.ButtonGroup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Card:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Card.Card`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.CardBody:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.CardBody.CardBody`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.CardFooter:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.CardFooter.CardFooter`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.CardGroup:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.CardGroup.CardGroup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.CardHeader:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.CardHeader.CardHeader`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.CardImg:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.CardImg.CardImg`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.CardImgOverlay:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.CardImgOverlay.CardImgOverlay`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.CardLink:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.CardLink.CardLink`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Carousel:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Carousel.Carousel`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Checkbox:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Checkbox.Checkbox`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Checklist:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Checklist.Checklist`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Col:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Col.Col`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Collapse:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Collapse.Collapse`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Container:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Container.Container`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.DropdownMenu:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.DropdownMenu.DropdownMenu`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.DropdownMenuItem:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.DropdownMenuItem.DropdownMenuItem`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Fade:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Fade.Fade`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Form:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Form.Form`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.FormFeedback:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.FormFeedback.FormFeedback`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.FormFloating:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.FormFloating.FormFloating`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.FormText:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.FormText.FormText`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Input:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Input.Input`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.InputGroup:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.InputGroup.InputGroup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.InputGroupText:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.InputGroupText.InputGroupText`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Label:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Label.Label`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.ListGroup:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.ListGroup.ListGroup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.ListGroupItem:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.ListGroupItem.ListGroupItem`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Modal:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Modal.Modal`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.ModalBody:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.ModalBody.ModalBody`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.ModalFooter:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.ModalFooter.ModalFooter`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.ModalHeader:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.ModalHeader.ModalHeader`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.ModalTitle:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.ModalTitle.ModalTitle`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Nav:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Nav.Nav`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.NavItem:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.NavItem.NavItem`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.NavLink:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.NavLink.NavLink`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Navbar:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Navbar.Navbar`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.NavbarBrand:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.NavbarBrand.NavbarBrand`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.NavbarSimple:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.NavbarSimple.NavbarSimple`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.NavbarToggler:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.NavbarToggler.NavbarToggler`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Offcanvas:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Offcanvas.Offcanvas`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Pagination:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Pagination.Pagination`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Placeholder:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Placeholder.Placeholder`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Popover:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Popover.Popover`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.PopoverBody:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.PopoverBody.PopoverBody`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.PopoverHeader:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.PopoverHeader.PopoverHeader`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Progress:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Progress.Progress`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.RadioButton:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.RadioButton.RadioButton`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.RadioItems:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.RadioItems.RadioItems`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Row:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Row.Row`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Select:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Select.Select`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Spinner:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Spinner.Spinner`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Stack:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Stack.Stack`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Switch:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Switch.Switch`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Tab:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Tab.Tab`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Table:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Table.Table`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Tabs:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Tabs.Tabs`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Textarea:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Textarea.Textarea`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Toast:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Toast.Toast`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dbc.Tooltip:1
+msgid "Bases: :py:class:`~dash_bootstrap_components._components.Tooltip.Tooltip`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:16
+msgid "pyfemtet.opt.visualization.wrapped\\_components.dcc module"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Checklist:1
+msgid "Bases: :py:class:`~dash.dcc.Checklist.Checklist`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Clipboard:1
+msgid "Bases: :py:class:`~dash.dcc.Clipboard.Clipboard`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialog:1
+msgid "Bases: :py:class:`~dash.dcc.ConfirmDialog.ConfirmDialog`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialogProvider:1
+msgid "Bases: :py:class:`~dash.dcc.ConfirmDialogProvider.ConfirmDialogProvider`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerRange:1
+msgid "Bases: :py:class:`~dash.dcc.DatePickerRange.DatePickerRange`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerSingle:1
+msgid "Bases: :py:class:`~dash.dcc.DatePickerSingle.DatePickerSingle`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Download:1
+msgid "Bases: :py:class:`~dash.dcc.Download.Download`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Dropdown:1
+msgid "Bases: :py:class:`~dash.dcc.Dropdown.Dropdown`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Geolocation:1
+msgid "Bases: :py:class:`~dash.dcc.Geolocation.Geolocation`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Graph:1
+msgid "Bases: :py:class:`~dash.dcc.Graph.Graph`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Input:1
+msgid "Bases: :py:class:`~dash.dcc.Input.Input`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Interval:1
+msgid "Bases: :py:class:`~dash.dcc.Interval.Interval`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Link:1
+msgid "Bases: :py:class:`~dash.dcc.Link.Link`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Loading:1
+msgid "Bases: :py:class:`~dash.dcc.Loading.Loading`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Location:1
+msgid "Bases: :py:class:`~dash.dcc.Location.Location`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.LogoutButton:1
+msgid "Bases: :py:class:`~dash.dcc.LogoutButton.LogoutButton`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Markdown:1
+msgid "Bases: :py:class:`~dash.dcc.Markdown.Markdown`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.RadioItems:1
+msgid "Bases: :py:class:`~dash.dcc.RadioItems.RadioItems`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.RangeSlider:1
+msgid "Bases: :py:class:`~dash.dcc.RangeSlider.RangeSlider`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Slider:1
+msgid "Bases: :py:class:`~dash.dcc.Slider.Slider`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Store:1
+msgid "Bases: :py:class:`~dash.dcc.Store.Store`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Tab:1
+msgid "Bases: :py:class:`~dash.dcc.Tab.Tab`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Tabs:1
+msgid "Bases: :py:class:`~dash.dcc.Tabs.Tabs`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Textarea:1
+msgid "Bases: :py:class:`~dash.dcc.Textarea.Textarea`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Tooltip:1
+msgid "Bases: :py:class:`~dash.dcc.Tooltip.Tooltip`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.dcc.Upload:1
+msgid "Bases: :py:class:`~dash.dcc.Upload.Upload`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:24
+msgid "pyfemtet.opt.visualization.wrapped\\_components.html module"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.A:1
+msgid "Bases: :py:class:`~dash.html.A.A`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Abbr:1
+msgid "Bases: :py:class:`~dash.html.Abbr.Abbr`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Acronym:1
+msgid "Bases: :py:class:`~dash.html.Acronym.Acronym`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Address:1
+msgid "Bases: :py:class:`~dash.html.Address.Address`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Area:1
+msgid "Bases: :py:class:`~dash.html.Area.Area`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Article:1
+msgid "Bases: :py:class:`~dash.html.Article.Article`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Aside:1
+msgid "Bases: :py:class:`~dash.html.Aside.Aside`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Audio:1
+msgid "Bases: :py:class:`~dash.html.Audio.Audio`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.B:1
+msgid "Bases: :py:class:`~dash.html.B.B`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Base:1
+msgid "Bases: :py:class:`~dash.html.Base.Base`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Basefont:1
+msgid "Bases: :py:class:`~dash.html.Basefont.Basefont`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Bdi:1
+msgid "Bases: :py:class:`~dash.html.Bdi.Bdi`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Bdo:1
+msgid "Bases: :py:class:`~dash.html.Bdo.Bdo`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Big:1
+msgid "Bases: :py:class:`~dash.html.Big.Big`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Blink:1
+msgid "Bases: :py:class:`~dash.html.Blink.Blink`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Blockquote:1
+msgid "Bases: :py:class:`~dash.html.Blockquote.Blockquote`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Br:1
+msgid "Bases: :py:class:`~dash.html.Br.Br`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Button:1
+msgid "Bases: :py:class:`~dash.html.Button.Button`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Canvas:1
+msgid "Bases: :py:class:`~dash.html.Canvas.Canvas`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Caption:1
+msgid "Bases: :py:class:`~dash.html.Caption.Caption`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Center:1
+msgid "Bases: :py:class:`~dash.html.Center.Center`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Cite:1
+msgid "Bases: :py:class:`~dash.html.Cite.Cite`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Code:1
+msgid "Bases: :py:class:`~dash.html.Code.Code`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Col:1
+msgid "Bases: :py:class:`~dash.html.Col.Col`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Colgroup:1
+msgid "Bases: :py:class:`~dash.html.Colgroup.Colgroup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Content:1
+msgid "Bases: :py:class:`~dash.html.Content.Content`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Data:1
+msgid "Bases: :py:class:`~dash.html.Data.Data`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Datalist:1
+msgid "Bases: :py:class:`~dash.html.Datalist.Datalist`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Dd:1
+msgid "Bases: :py:class:`~dash.html.Dd.Dd`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Del:1
+msgid "Bases: :py:class:`~dash.html.Del.Del`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Details:1
+msgid "Bases: :py:class:`~dash.html.Details.Details`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Dfn:1
+msgid "Bases: :py:class:`~dash.html.Dfn.Dfn`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Dialog:1
+msgid "Bases: :py:class:`~dash.html.Dialog.Dialog`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Div:1
+msgid "Bases: :py:class:`~dash.html.Div.Div`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Dl:1
+msgid "Bases: :py:class:`~dash.html.Dl.Dl`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Dt:1
+msgid "Bases: :py:class:`~dash.html.Dt.Dt`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Em:1
+msgid "Bases: :py:class:`~dash.html.Em.Em`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Embed:1
+msgid "Bases: :py:class:`~dash.html.Embed.Embed`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Fieldset:1
+msgid "Bases: :py:class:`~dash.html.Fieldset.Fieldset`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Figcaption:1
+msgid "Bases: :py:class:`~dash.html.Figcaption.Figcaption`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Figure:1
+msgid "Bases: :py:class:`~dash.html.Figure.Figure`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Font:1
+msgid "Bases: :py:class:`~dash.html.Font.Font`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Footer:1
+msgid "Bases: :py:class:`~dash.html.Footer.Footer`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Form:1
+msgid "Bases: :py:class:`~dash.html.Form.Form`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Frame:1
+msgid "Bases: :py:class:`~dash.html.Frame.Frame`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Frameset:1
+msgid "Bases: :py:class:`~dash.html.Frameset.Frameset`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.H1:1
+msgid "Bases: :py:class:`~dash.html.H1.H1`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.H2:1
+msgid "Bases: :py:class:`~dash.html.H2.H2`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.H3:1
+msgid "Bases: :py:class:`~dash.html.H3.H3`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.H4:1
+msgid "Bases: :py:class:`~dash.html.H4.H4`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.H5:1
+msgid "Bases: :py:class:`~dash.html.H5.H5`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.H6:1
+msgid "Bases: :py:class:`~dash.html.H6.H6`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Header:1
+msgid "Bases: :py:class:`~dash.html.Header.Header`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Hgroup:1
+msgid "Bases: :py:class:`~dash.html.Hgroup.Hgroup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Hr:1
+msgid "Bases: :py:class:`~dash.html.Hr.Hr`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.I:1
+msgid "Bases: :py:class:`~dash.html.I.I`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Iframe:1
+msgid "Bases: :py:class:`~dash.html.Iframe.Iframe`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Img:1
+msgid "Bases: :py:class:`~dash.html.Img.Img`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Ins:1
+msgid "Bases: :py:class:`~dash.html.Ins.Ins`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Kbd:1
+msgid "Bases: :py:class:`~dash.html.Kbd.Kbd`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Keygen:1
+msgid "Bases: :py:class:`~dash.html.Keygen.Keygen`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Label:1
+msgid "Bases: :py:class:`~dash.html.Label.Label`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Legend:1
+msgid "Bases: :py:class:`~dash.html.Legend.Legend`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Li:1
+msgid "Bases: :py:class:`~dash.html.Li.Li`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Link:1
+msgid "Bases: :py:class:`~dash.html.Link.Link`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Main:1
+msgid "Bases: :py:class:`~dash.html.Main.Main`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.MapEl:1
+msgid "Bases: :py:class:`~dash.html.MapEl.MapEl`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Mark:1
+msgid "Bases: :py:class:`~dash.html.Mark.Mark`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Marquee:1
+msgid "Bases: :py:class:`~dash.html.Marquee.Marquee`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Meta:1
+msgid "Bases: :py:class:`~dash.html.Meta.Meta`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Meter:1
+msgid "Bases: :py:class:`~dash.html.Meter.Meter`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Nav:1
+msgid "Bases: :py:class:`~dash.html.Nav.Nav`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Nobr:1
+msgid "Bases: :py:class:`~dash.html.Nobr.Nobr`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Noscript:1
+msgid "Bases: :py:class:`~dash.html.Noscript.Noscript`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.ObjectEl:1
+msgid "Bases: :py:class:`~dash.html.ObjectEl.ObjectEl`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Ol:1
+msgid "Bases: :py:class:`~dash.html.Ol.Ol`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Optgroup:1
+msgid "Bases: :py:class:`~dash.html.Optgroup.Optgroup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Option:1
+msgid "Bases: :py:class:`~dash.html.Option.Option`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Output:1
+msgid "Bases: :py:class:`~dash.html.Output.Output`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.P:1
+msgid "Bases: :py:class:`~dash.html.P.P`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Param:1
+msgid "Bases: :py:class:`~dash.html.Param.Param`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Picture:1
+msgid "Bases: :py:class:`~dash.html.Picture.Picture`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Plaintext:1
+msgid "Bases: :py:class:`~dash.html.Plaintext.Plaintext`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Pre:1
+msgid "Bases: :py:class:`~dash.html.Pre.Pre`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Progress:1
+msgid "Bases: :py:class:`~dash.html.Progress.Progress`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Q:1
+msgid "Bases: :py:class:`~dash.html.Q.Q`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Rb:1
+msgid "Bases: :py:class:`~dash.html.Rb.Rb`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Rp:1
+msgid "Bases: :py:class:`~dash.html.Rp.Rp`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Rt:1
+msgid "Bases: :py:class:`~dash.html.Rt.Rt`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Rtc:1
+msgid "Bases: :py:class:`~dash.html.Rtc.Rtc`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Ruby:1
+msgid "Bases: :py:class:`~dash.html.Ruby.Ruby`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.S:1
+msgid "Bases: :py:class:`~dash.html.S.S`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Samp:1
+msgid "Bases: :py:class:`~dash.html.Samp.Samp`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Script:1
+msgid "Bases: :py:class:`~dash.html.Script.Script`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Section:1
+msgid "Bases: :py:class:`~dash.html.Section.Section`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Select:1
+msgid "Bases: :py:class:`~dash.html.Select.Select`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Shadow:1
+msgid "Bases: :py:class:`~dash.html.Shadow.Shadow`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Slot:1
+msgid "Bases: :py:class:`~dash.html.Slot.Slot`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Small:1
+msgid "Bases: :py:class:`~dash.html.Small.Small`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Source:1
+msgid "Bases: :py:class:`~dash.html.Source.Source`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Spacer:1
+msgid "Bases: :py:class:`~dash.html.Spacer.Spacer`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Span:1
+msgid "Bases: :py:class:`~dash.html.Span.Span`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Strike:1
+msgid "Bases: :py:class:`~dash.html.Strike.Strike`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Strong:1
+msgid "Bases: :py:class:`~dash.html.Strong.Strong`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Sub:1
+msgid "Bases: :py:class:`~dash.html.Sub.Sub`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Summary:1
+msgid "Bases: :py:class:`~dash.html.Summary.Summary`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Sup:1
+msgid "Bases: :py:class:`~dash.html.Sup.Sup`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Table:1
+msgid "Bases: :py:class:`~dash.html.Table.Table`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Tbody:1
+msgid "Bases: :py:class:`~dash.html.Tbody.Tbody`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Td:1
+msgid "Bases: :py:class:`~dash.html.Td.Td`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Template:1
+msgid "Bases: :py:class:`~dash.html.Template.Template`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Textarea:1
+msgid "Bases: :py:class:`~dash.html.Textarea.Textarea`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Tfoot:1
+msgid "Bases: :py:class:`~dash.html.Tfoot.Tfoot`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Th:1
+msgid "Bases: :py:class:`~dash.html.Th.Th`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Thead:1
+msgid "Bases: :py:class:`~dash.html.Thead.Thead`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Time:1
+msgid "Bases: :py:class:`~dash.html.Time.Time`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Title:1
+msgid "Bases: :py:class:`~dash.html.Title.Title`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Tr:1
+msgid "Bases: :py:class:`~dash.html.Tr.Tr`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Track:1
+msgid "Bases: :py:class:`~dash.html.Track.Track`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.U:1
+msgid "Bases: :py:class:`~dash.html.U.U`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Ul:1
+msgid "Bases: :py:class:`~dash.html.Ul.Ul`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Var:1
+msgid "Bases: :py:class:`~dash.html.Var.Var`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Video:1
+msgid "Bases: :py:class:`~dash.html.Video.Video`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Wbr:1
+msgid "Bases: :py:class:`~dash.html.Wbr.Wbr`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.html.Xmp:1
+msgid "Bases: :py:class:`~dash.html.Xmp.Xmp`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:32
+msgid "pyfemtet.opt.visualization.wrapped\\_components.str\\_enum module"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.str_enum:1
+msgid "Copy of StrEnum for python <= 3.10 support."
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.str_enum.ReprEnum:1
+msgid "Only changes the repr(), leaving str() and format() to the mixed-in type."
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.str_enum.StrEnum:1
+msgid "Bases: :py:class:`str`, :py:class:`~pyfemtet.opt.visualization.wrapped_components.str_enum.ReprEnum`"
+msgstr ""
+
+#: of pyfemtet.opt.visualization.wrapped_components.str_enum.StrEnum:1
+msgid "Enum where members are also (and must be) strings"
+msgstr ""
+
+#~ msgid "pyfemtet.opt.visualization.result\\_viewer module"
+#~ msgstr ""
+
+#~ msgid "Bases: :py:class:`~pyfemtet.opt.visualization._monitor.AppBase`"
+#~ msgstr ""
+
+#~ msgid "page.   |    | -------- | title -->home| |      | |"
+#~ msgstr ""
+
+#~ msgid "| |    <-------- sub_page.layout"
+#~ msgstr ""
+
+#~ msgid "| -------- |"
+#~ msgstr ""
+
+#~ msgid "^  |          |<--- page.layout"
+#~ msgstr ""
+
+#~ msgid "==|=============="
+#~ msgstr ""
+
+#~ msgid "sidebar"
+#~ msgstr ""
+
+#~ msgid "│      └─ pages (dict(href: str = layout: Component)]) └──────── nav_links (dict(order: float) = NavLink)"
+#~ msgstr ""
+
+#~ msgid "Accessible members: - history: History"
+#~ msgstr ""
+
+#~ msgid "└ local_df: pd.DataFrame"
+#~ msgstr ""
+
+#~ msgid "app: Dash"
+#~ msgstr ""
+
+#~ msgid "Define entire layout and callback. +------+--------+ | side | con-   | | bar  | tent   | +------+--------+"
+#~ msgstr ""
+
+#~ msgid "+=================+ |tab1|tab2|       | <- CardHeader |    +------------+ | +-------------+ | | | Loading     | | <- CardBody | | +---------+ | | | | |  graph <-------- ToolTip | | +---------+ | | | +-------------+ | +=================+"
+#~ msgstr ""
+
+#~ msgid "Data(data-selection)"
+#~ msgstr ""
+
+#~ msgid "local_entire_status_int: int  <----------------> femopt.statue: OptimizationStatus(Actor)"
+#~ msgstr ""
+
+#~ msgid "local_worker_status_int_list: List[int]  <-----> femopt.opt.statue: List[OptimizationStatus(Actor)]"
+#~ msgstr ""
+
+#~ msgid "sync \"while\" statement in start_server()"
+#~ msgstr ""
+
+#~ msgid "| |  Main Graph  | |"
+#~ msgstr ""
+
+#~ msgid "| |              | |"
+#~ msgstr ""
+
+#~ msgid "| ---------------- |"
+#~ msgstr ""
+
+#~ msgid "| [stop][interrupt]<---- Buttons"
+#~ msgstr ""
+
+#~ msgid "| | Status       | |"
+#~ msgstr ""
+
+#~ msgid "^| ---------------- |"
+#~ msgstr ""
+
+#~ msgid "==|===================="
+#~ msgstr ""
+
+#~ msgid "SideBar"
+#~ msgstr ""
+
+#~ msgid "| [] ...       [] <---- Buttons"
+#~ msgstr ""
+
+#~ msgid "| | Alert Region | |"
+#~ msgstr ""
+
+#~ msgid "Bases: :py:class:`~enum.StrEnum`"
+#~ msgstr ""
 

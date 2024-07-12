@@ -103,6 +103,10 @@ if __name__ == '__main__':
     fem = FemtetWithNXInterface(
         prt_path='cad_ex01_NX.prt',
         open_result_with_gui=False,
+        export_curves=False,
+        export_surfaces=False,
+        export_solids=True,
+        export_flattened_assembly=False,
     )
 
     # FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)
@@ -123,4 +127,11 @@ if __name__ == '__main__':
     # 最適化を実行
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=20)
+
+    # プロセスモニタで結果を確認するために
+    # Enter キーが押されるまで処理を停止します。
+    print('================================')
+    print('Finished. Press Enter to quit...')
+    print('================================')
+    input()
     femopt.terminate_all()

@@ -96,124 +96,6 @@ Below is an example of multi-objective optimization. You can set up the problem 
        femopt.optimize(n_trials=20)
 
 
-Install
----------------
-
-.. note:: PyFemtet is only available for Windows.
-
-.. note::
-    
-    In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run ``pip install pyfemtet``. The following steps are for a full setup of Python, Femtet and PyFemtet.
-
-1. **Installation of Femtet (version 2023.0 or later)**
-    
-    For first-time users, please consider using the trial version or personal edition. --> |Femtet|
-
-    .. note::
-
-        If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used.
-
-    
-2. **Enabling Femtet macros**
-
-    .. figure:: images/enableMacrosIcon.png
-
-
-    .. note::
-
-        Close Excel and Femtet before following this step.
-
-
-    After installing Femtet, **please run 'EnableMacros' from the start menu.** This procedure requires administrator privileges.
-
-
-    .. note::
-
-        When you follow this step, the Femtet help window will appear. You do not need to follow the help window, so close it.
-
-
-3. **Installation of 64bit Python (version 3.9.3 or later)**
-
-    Download the installer from the link provided and run it.  --> |Python|
-
-    .. tip::
-
-        To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment.
-
-    .. tip::
-
-        ``pyfemtet.opt`` is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment.
-
-    .. figure:: images/python_download.png
-
-    .. figure:: images/python_3.11.png
-        :scale: 50%
-
-        This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows.
-
-    .. figure:: images/python_install.png
-
-        Installer screen.
-
-
-4. **Installing** ``pyfemtet``
-
-    Please launch the command prompt (``cmd``).
-
-    .. figure:: images/launch_cmd.png
-
-        Launch cmd via start button.
-
-
-    Then run the following command in the command prompt. The download and installation of the library will begin.
-
-    .. code-block::
-
-        py -m pip install pyfemtet --no-warn-script-location
-
-
-    .. figure:: images/pip_on_cmd.png
-
-        Run pip command on command prompt.
-
-
-    Once the installation is complete, after displaying "Successfully installed ", control will return to the command prompt.
-
-    .. figure:: images/pip_while_install.png
-
-        Installing
-
-    .. figure:: images/pip_complete_install.png
-
-        Installation completed
-
-    .. note::
-
-        Depending on the environment, installation may take about 5 minutes.
-
-    .. note::
-
-        At the end of the installation, you may see a message such as ``[notice] A new release of pip is available:`` . This is not an error and can be ignored without any issues.
-
-5. **Setting Femtet Macro Constants**
-
-    Please run the following command in the command prompt.::
-
-        py -m win32com.client.makepy FemtetMacro
-
-    Once the setting is complete, control will return to the command prompt.
-
-    .. figure:: images/complete_makepy.png
-
-        After makepy finishes
-
-That's all.
-
-
-.. tip::
-    
-    For verification, we recommend that you first view the samples in :doc:`pages/examples`.
-
 
 
 Table of Contents
@@ -223,6 +105,7 @@ Table of Contents
     :maxdepth: 2
 
     Home <self>
+    pages/installation
     pages/examples
     pages/usage
     pages/api

@@ -48,6 +48,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#single-objective-optimization">Single Objective Optimization</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#multi-objective-optimization">Multi-Objective Optimization</a><ul class="current">
@@ -217,7 +218,14 @@ to execute it.</p>
 <span class="linenos">58</span>    <span class="c1"># Run optimization.</span>
 <span class="linenos">59</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
 <span class="linenos">60</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-<span class="linenos">61</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
+<span class="linenos">61</span>
+<span class="linenos">62</span>    <span class="c1"># Stop script to keep process alive</span>
+<span class="linenos">63</span>    <span class="c1"># while you check the result in process monitor.</span>
+<span class="linenos">64</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">65</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Finished. Press Enter to quit...&#39;</span><span class="p">)</span>
+<span class="linenos">66</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================================&#39;</span><span class="p">)</span>
+<span class="linenos">67</span>    <span class="nb">input</span><span class="p">()</span>
+<span class="linenos">68</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">terminate_all</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

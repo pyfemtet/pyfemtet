@@ -23,7 +23,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Examples" href="pages/examples.html" /> 
+    <link rel="next" title="Installation" href="pages/installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,6 +47,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/api.html">API reference</a></li>
@@ -166,139 +167,12 @@ Resonant frequency of a circular patch antenna</div>
 </pre></div>
 </div>
 </section>
-<section id="install">
-<h2>Install<a class="headerlink" href="#install" title="Link to this heading"></a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>PyFemtet is only available for Windows.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In an environment where Python and Femtet are installed and Femtet macros are enabled, simply run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyfemtet</span></code>. The following steps are for a full setup of Python, Femtet and PyFemtet.</p>
-</div>
-<ol class="arabic">
-<li><p><strong>Installation of Femtet (version 2023.0 or later)</strong></p>
-<blockquote>
-<div><p>For first-time users, please consider using the trial version or personal edition. –&gt; <a href="https://www.muratasoftware.com/" target="_blank">muratasoftware.com</a></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you use Femtet that is not the latest version, some functions of PyFemtet cannot be used.</p>
-</div>
-</div></blockquote>
-</li>
-<li><p><strong>Enabling Femtet macros</strong></p>
-<blockquote>
-<div><figure class="align-default">
-<img alt="_images/enableMacrosIcon.png" src="_images/enableMacrosIcon.png" />
-</figure>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Close Excel and Femtet before following this step.</p>
-</div>
-<p>After installing Femtet, <strong>please run ‘EnableMacros’ from the start menu.</strong> This procedure requires administrator privileges.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>When you follow this step, the Femtet help window will appear. You do not need to follow the help window, so close it.</p>
-</div>
-</div></blockquote>
-</li>
-<li><p><strong>Installation of 64bit Python (version 3.9.3 or later)</strong></p>
-<blockquote>
-<div><p>Download the installer from the link provided and run it.  –&gt; <a href="https://www.python.org/" target="_blank">python.org</a></p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment.</p>
-</div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p><code class="docutils literal notranslate"><span class="pre">pyfemtet.opt</span></code> is currently primarily developed in a Python 3.11 environment, so if you encounter any issues with installation or running the examples, consider setting up a Python 3.11 environment.</p>
-</div>
-<figure class="align-default">
-<img alt="_images/python_download.png" src="_images/python_download.png" />
-</figure>
-<figure class="align-default" id="id1">
-<a class="reference internal image-reference" href="_images/python_3.11.png"><img alt="_images/python_3.11.png" src="_images/python_3.11.png" style="width: 297.5px; height: 404.0px;" /></a>
-<figcaption>
-<p><span class="caption-text">This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<figure class="align-default" id="id2">
-<img alt="_images/python_install.png" src="_images/python_install.png" />
-<figcaption>
-<p><span class="caption-text">Installer screen.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-</div></blockquote>
-</li>
-<li><p><strong>Installing</strong> <code class="docutils literal notranslate"><span class="pre">pyfemtet</span></code></p>
-<blockquote>
-<div><p>Please launch the command prompt (<code class="docutils literal notranslate"><span class="pre">cmd</span></code>).</p>
-<figure class="align-default" id="id3">
-<img alt="_images/launch_cmd.png" src="_images/launch_cmd.png" />
-<figcaption>
-<p><span class="caption-text">Launch cmd via start button.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<p>Then run the following command in the command prompt. The download and installation of the library will begin.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyfemtet</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">warn</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">location</span>
-</pre></div>
-</div>
-<figure class="align-default" id="id4">
-<img alt="_images/pip_on_cmd.png" src="_images/pip_on_cmd.png" />
-<figcaption>
-<p><span class="caption-text">Run pip command on command prompt.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<p>Once the installation is complete, after displaying “Successfully installed “, control will return to the command prompt.</p>
-<figure class="align-default" id="id5">
-<img alt="_images/pip_while_install.png" src="_images/pip_while_install.png" />
-<figcaption>
-<p><span class="caption-text">Installing</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<figure class="align-default" id="id6">
-<img alt="_images/pip_complete_install.png" src="_images/pip_complete_install.png" />
-<figcaption>
-<p><span class="caption-text">Installation completed</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Depending on the environment, installation may take about 5 minutes.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>At the end of the installation, you may see a message such as <code class="docutils literal notranslate"><span class="pre">[notice]</span> <span class="pre">A</span> <span class="pre">new</span> <span class="pre">release</span> <span class="pre">of</span> <span class="pre">pip</span> <span class="pre">is</span> <span class="pre">available:</span></code> . This is not an error and can be ignored without any issues.</p>
-</div>
-</div></blockquote>
-</li>
-<li><p><strong>Setting Femtet Macro Constants</strong></p>
-<blockquote>
-<div><p>Please run the following command in the command prompt.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">makepy</span> <span class="n">FemtetMacro</span>
-</pre></div>
-</div>
-<p>Once the setting is complete, control will return to the command prompt.</p>
-<figure class="align-default" id="id7">
-<img alt="_images/complete_makepy.png" src="_images/complete_makepy.png" />
-<figcaption>
-<p><span class="caption-text">After makepy finishes</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-</div></blockquote>
-</li>
-</ol>
-<p>That’s all.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>For verification, we recommend that you first view the samples in <a class="reference internal" href="pages/examples.html"><span class="doc">Examples</span></a>.</p>
-</div>
-</section>
 <section id="table-of-contents">
 <h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/examples.html">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pages/examples.html#single-objective-optimization">Single Objective Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pages/examples.html#multi-objective-optimization">Multi-Objective Optimization</a></li>
@@ -307,6 +181,8 @@ Resonant frequency of a circular patch antenna</div>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pages/usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_use_script_builder.html">Script Builder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_use_result_viewer.html">Result Viewer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_optimize_your_project.html">Procedure for executing optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pages/usage_pages/how_to_deploy_cluster.html">Procedure for Running Cluster Calculations (Experimental Feature)</a></li>
 </ul>
@@ -325,7 +201,7 @@ Resonant frequency of a circular patch antenna</div>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pages/examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pages/installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
