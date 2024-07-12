@@ -54,7 +54,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # candidate x
         x = []
         for i, row in self.parameters.iterrows():
-            v = trial.suggest_float(row['name'], row['lb'], row['ub'])
+            v = trial.suggest_float(row['name'], row['lb'], row['ub'], step=row['step'])
             x.append(v)
         x = np.array(x).astype(float)
 

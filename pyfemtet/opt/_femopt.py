@@ -107,6 +107,7 @@ class FEMOpt:
             initial_value: float or None = None,
             lower_bound: float or None = None,
             upper_bound: float or None = None,
+            step: float or None = None,
             memo: str = ''
     ):
         """Adds a parameter to the optimization problem.
@@ -135,6 +136,7 @@ class FEMOpt:
             'value': float(initial_value),
             'lb': float(lower_bound),
             'ub': float(upper_bound),
+            'step': float(step) if step is not None else None,
             'memo': memo,
         }
         pdf = pd.DataFrame(d, index=[0], dtype=object)
