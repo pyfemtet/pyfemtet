@@ -134,8 +134,8 @@ class FEMOpt:
         d = {
             'name': name,
             'value': float(initial_value),
-            'lb': float(lower_bound),
-            'ub': float(upper_bound),
+            'lb': float(lower_bound) if lower_bound is not None else None,
+            'ub': float(upper_bound) if upper_bound is not None else None,
             'step': float(step) if step is not None else None,
             'memo': memo,
         }
@@ -315,6 +315,34 @@ class FEMOpt:
             So **it is recommended to close all other Femtet processes before running.**
 
         """
+
+        # method checker
+        if n_parallel > 1:
+            self.opt.method_checker.check_parallel()
+
+        if timeout is not None:
+            self.opt.method_checker.check_timeout()
+
+        if len(self.opt.objectives) > 1:
+            self.opt.method_checker.check_multi_objective()
+
+        if len(self.opt.constraints) > 0:
+            self.opt.method_checker.check_constraint()
+
+        for key, value in self.opt.constraints.items():
+            if value.strict:
+                self.opt.method_checker.check_strict_constraint()
+                break
+
+        if self.opt.seed is not None:
+            self.opt.method_checker.check_seed()
+
+        is_incomplete_bounds = False
+        for _, row in self.opt.parameters.iterrows():
+            lb, ub = row['lb'], row['ub']
+            is_incomplete_bounds = is_incomplete_bounds + (lb is None) + (ub is None)
+        if is_incomplete_bounds:
+            self.opt.method_checker.check_incomplete_bounds()
 
         # 共通引数
         self.opt.n_trials = n_trials
