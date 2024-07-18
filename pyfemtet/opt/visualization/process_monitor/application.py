@@ -5,7 +5,7 @@ from threading import Thread
 import pandas as pd
 
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, logger
-from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage
+from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, RSMPage
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):
@@ -176,9 +176,11 @@ def g_debug():
 
     g_home_page = HomePage('Progress')
     g_worker_page = WorkerPage('Workers', '/workers', g_application)
+    g_rsm_page = RSMPage('RSM', '/RSM', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_worker_page, 1)
+    g_application.add_page(g_rsm_page, 2)
     g_application.setup_callback(debug=False)
 
     g_application.run(debug=True)

@@ -7,6 +7,7 @@ from dash.exceptions import PreventUpdate
 from pyfemtet.opt.visualization.wrapped_components import dcc, dbc, html
 from pyfemtet.opt.visualization.base import AbstractPage, logger
 from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
+from pyfemtet.opt.visualization.complex_components.rsm_graph import RSMGraph
 
 
 DBC_COLUMN_STYLE_CENTER = {
@@ -274,3 +275,19 @@ class WorkerPage(AbstractPage):
             ret.append([({} if callback_context.triggered_id is None else no_update) for _ in range(len(self.worker_status_alerts))])
 
             return tuple(ret)
+
+
+class RSMPage(AbstractPage):
+    """"""
+
+    def __init__(self, title, rel_url, application):
+        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        self.application: ProcessMonitorApplication = None
+        super().__init__(title, rel_url, application)
+
+    def setup_component(self):
+        self.rsm_graph: RSMGraph = RSMGraph()
+        self.add_subpage(self.rsm_graph)
+
+    def setup_layout(self):
+        self.layout = self.rsm_graph.layout
