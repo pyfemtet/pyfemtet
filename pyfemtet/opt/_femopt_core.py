@@ -499,8 +499,9 @@ class History:
         metadata.append(self.additional_metadata)
 
         # parameter
-        columns.extend(self.prm_names)
-        metadata.extend(['prm'] * len(self.prm_names))
+        for prm_name in self.prm_names:
+            columns.extend([prm_name, prm_name + '_lower_bound', prm_name + '_upper_bound'])
+            metadata.extend(['prm', 'prm_lb', 'prm_ub'])
 
         # objective relative
         for name in self.obj_names:
@@ -565,7 +566,10 @@ class History:
         row.append(-1)
 
         # parameters
-        row.extend(parameters['value'].values)
+        for i, _row in parameters.iterrows():
+            row.append(_row['value'])
+            row.append(_row['lb'])
+            row.append(_row['ub'])
 
         # objectives and their direction
         for (_, obj), obj_value in zip(objectives.items(), obj_values):  # objectives, direction
