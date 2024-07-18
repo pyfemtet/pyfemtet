@@ -240,7 +240,7 @@ class Objective(Function):
 
     default_name = 'obj'
 
-    def __init__(self, fun, name, direction, args, kwargs):
+    def __init__(self, fun, name, direction, args, kwargs, with_symlog=False):
         """Initializes an Objective instance.
 
         Args:
@@ -261,6 +261,7 @@ class Objective(Function):
         """
         self._check_direction(direction)
         self.direction = direction
+        self.with_symlog = with_symlog
         super().__init__(fun, name, args, kwargs)
 
     def convert(self, value: float):
@@ -290,10 +291,12 @@ class Objective(Function):
         elif self.direction == 'maximize':
             ret = -value
 
-        ret = symlog(ret)
+        if self.with_symlog:
+            ret = symlog(ret)
 
         return float(ret)
 
+    @staticmethod
     def _check_direction(self, direction):
         message = '評価関数の direction は "minimize", "maximize", 又は数値でなければなりません.'
         message += f'与えられた値は {direction} です.'
