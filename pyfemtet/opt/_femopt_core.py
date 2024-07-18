@@ -297,7 +297,7 @@ class Objective(Function):
         return float(ret)
 
     @staticmethod
-    def _check_direction(self, direction):
+    def _check_direction(direction):
         message = '評価関数の direction は "minimize", "maximize", 又は数値でなければなりません.'
         message += f'与えられた値は {direction} です.'
         if isinstance(direction, float) or isinstance(direction, int):
