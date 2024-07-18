@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.visualization.wrapped_components.dcc &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.visualization.wrapped_components.dcc</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.visualization.wrapped_components.dcc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># auto created module</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.wrapped_components.str_enum</span> <span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="c1"># from enum import StrEnum</span>
+<span class="kn">import</span> <span class="nn">dash</span>
+<span class="kn">import</span> <span class="nn">dash_bootstrap_components</span>
+
+
+<div class="viewcode-block" id="Checklist">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Checklist">[docs]</a>
+<span class="k">class</span> <span class="nc">Checklist</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Checklist</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Checklist.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Checklist.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="s2">&quot;options&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">inline</span> <span class="o">=</span> <span class="s2">&quot;inline&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">inputStyle</span> <span class="o">=</span> <span class="s2">&quot;inputStyle&quot;</span>
+        <span class="n">inputClassName</span> <span class="o">=</span> <span class="s2">&quot;inputClassName&quot;</span>
+        <span class="n">labelStyle</span> <span class="o">=</span> <span class="s2">&quot;labelStyle&quot;</span>
+        <span class="n">labelClassName</span> <span class="o">=</span> <span class="s2">&quot;labelClassName&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Clipboard">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Clipboard">[docs]</a>
+<span class="k">class</span> <span class="nc">Clipboard</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Clipboard</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Clipboard.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Clipboard.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">target_id</span> <span class="o">=</span> <span class="s2">&quot;target_id&quot;</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;content&quot;</span>
+        <span class="n">n_clicks</span> <span class="o">=</span> <span class="s2">&quot;n_clicks&quot;</span>
+        <span class="n">html_content</span> <span class="o">=</span> <span class="s2">&quot;html_content&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;title&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ConfirmDialog">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialog">[docs]</a>
+<span class="k">class</span> <span class="nc">ConfirmDialog</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">ConfirmDialog</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ConfirmDialog.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialog.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;message&quot;</span>
+        <span class="n">submit_n_clicks</span> <span class="o">=</span> <span class="s2">&quot;submit_n_clicks&quot;</span>
+        <span class="n">submit_n_clicks_timestamp</span> <span class="o">=</span> <span class="s2">&quot;submit_n_clicks_timestamp&quot;</span>
+        <span class="n">cancel_n_clicks</span> <span class="o">=</span> <span class="s2">&quot;cancel_n_clicks&quot;</span>
+        <span class="n">cancel_n_clicks_timestamp</span> <span class="o">=</span> <span class="s2">&quot;cancel_n_clicks_timestamp&quot;</span>
+        <span class="n">displayed</span> <span class="o">=</span> <span class="s2">&quot;displayed&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ConfirmDialogProvider">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialogProvider">[docs]</a>
+<span class="k">class</span> <span class="nc">ConfirmDialogProvider</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">ConfirmDialogProvider</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ConfirmDialogProvider.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.ConfirmDialogProvider.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;message&quot;</span>
+        <span class="n">submit_n_clicks</span> <span class="o">=</span> <span class="s2">&quot;submit_n_clicks&quot;</span>
+        <span class="n">submit_n_clicks_timestamp</span> <span class="o">=</span> <span class="s2">&quot;submit_n_clicks_timestamp&quot;</span>
+        <span class="n">cancel_n_clicks</span> <span class="o">=</span> <span class="s2">&quot;cancel_n_clicks&quot;</span>
+        <span class="n">cancel_n_clicks_timestamp</span> <span class="o">=</span> <span class="s2">&quot;cancel_n_clicks_timestamp&quot;</span>
+        <span class="n">displayed</span> <span class="o">=</span> <span class="s2">&quot;displayed&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DatePickerRange">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerRange">[docs]</a>
+<span class="k">class</span> <span class="nc">DatePickerRange</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">DatePickerRange</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="DatePickerRange.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerRange.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;start_date&quot;</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;end_date&quot;</span>
+        <span class="n">min_date_allowed</span> <span class="o">=</span> <span class="s2">&quot;min_date_allowed&quot;</span>
+        <span class="n">max_date_allowed</span> <span class="o">=</span> <span class="s2">&quot;max_date_allowed&quot;</span>
+        <span class="n">disabled_days</span> <span class="o">=</span> <span class="s2">&quot;disabled_days&quot;</span>
+        <span class="n">minimum_nights</span> <span class="o">=</span> <span class="s2">&quot;minimum_nights&quot;</span>
+        <span class="n">updatemode</span> <span class="o">=</span> <span class="s2">&quot;updatemode&quot;</span>
+        <span class="n">start_date_placeholder_text</span> <span class="o">=</span> <span class="s2">&quot;start_date_placeholder_text&quot;</span>
+        <span class="n">end_date_placeholder_text</span> <span class="o">=</span> <span class="s2">&quot;end_date_placeholder_text&quot;</span>
+        <span class="n">initial_visible_month</span> <span class="o">=</span> <span class="s2">&quot;initial_visible_month&quot;</span>
+        <span class="n">clearable</span> <span class="o">=</span> <span class="s2">&quot;clearable&quot;</span>
+        <span class="n">reopen_calendar_on_clear</span> <span class="o">=</span> <span class="s2">&quot;reopen_calendar_on_clear&quot;</span>
+        <span class="n">display_format</span> <span class="o">=</span> <span class="s2">&quot;display_format&quot;</span>
+        <span class="n">month_format</span> <span class="o">=</span> <span class="s2">&quot;month_format&quot;</span>
+        <span class="n">first_day_of_week</span> <span class="o">=</span> <span class="s2">&quot;first_day_of_week&quot;</span>
+        <span class="n">show_outside_days</span> <span class="o">=</span> <span class="s2">&quot;show_outside_days&quot;</span>
+        <span class="n">stay_open_on_select</span> <span class="o">=</span> <span class="s2">&quot;stay_open_on_select&quot;</span>
+        <span class="n">calendar_orientation</span> <span class="o">=</span> <span class="s2">&quot;calendar_orientation&quot;</span>
+        <span class="n">number_of_months_shown</span> <span class="o">=</span> <span class="s2">&quot;number_of_months_shown&quot;</span>
+        <span class="n">with_portal</span> <span class="o">=</span> <span class="s2">&quot;with_portal&quot;</span>
+        <span class="n">with_full_screen_portal</span> <span class="o">=</span> <span class="s2">&quot;with_full_screen_portal&quot;</span>
+        <span class="n">day_size</span> <span class="o">=</span> <span class="s2">&quot;day_size&quot;</span>
+        <span class="n">is_RTL</span> <span class="o">=</span> <span class="s2">&quot;is_RTL&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">start_date_id</span> <span class="o">=</span> <span class="s2">&quot;start_date_id&quot;</span>
+        <span class="n">end_date_id</span> <span class="o">=</span> <span class="s2">&quot;end_date_id&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DatePickerSingle">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerSingle">[docs]</a>
+<span class="k">class</span> <span class="nc">DatePickerSingle</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">DatePickerSingle</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="DatePickerSingle.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.DatePickerSingle.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="s2">&quot;date&quot;</span>
+        <span class="n">min_date_allowed</span> <span class="o">=</span> <span class="s2">&quot;min_date_allowed&quot;</span>
+        <span class="n">max_date_allowed</span> <span class="o">=</span> <span class="s2">&quot;max_date_allowed&quot;</span>
+        <span class="n">disabled_days</span> <span class="o">=</span> <span class="s2">&quot;disabled_days&quot;</span>
+        <span class="n">placeholder</span> <span class="o">=</span> <span class="s2">&quot;placeholder&quot;</span>
+        <span class="n">initial_visible_month</span> <span class="o">=</span> <span class="s2">&quot;initial_visible_month&quot;</span>
+        <span class="n">clearable</span> <span class="o">=</span> <span class="s2">&quot;clearable&quot;</span>
+        <span class="n">reopen_calendar_on_clear</span> <span class="o">=</span> <span class="s2">&quot;reopen_calendar_on_clear&quot;</span>
+        <span class="n">display_format</span> <span class="o">=</span> <span class="s2">&quot;display_format&quot;</span>
+        <span class="n">month_format</span> <span class="o">=</span> <span class="s2">&quot;month_format&quot;</span>
+        <span class="n">first_day_of_week</span> <span class="o">=</span> <span class="s2">&quot;first_day_of_week&quot;</span>
+        <span class="n">show_outside_days</span> <span class="o">=</span> <span class="s2">&quot;show_outside_days&quot;</span>
+        <span class="n">stay_open_on_select</span> <span class="o">=</span> <span class="s2">&quot;stay_open_on_select&quot;</span>
+        <span class="n">calendar_orientation</span> <span class="o">=</span> <span class="s2">&quot;calendar_orientation&quot;</span>
+        <span class="n">number_of_months_shown</span> <span class="o">=</span> <span class="s2">&quot;number_of_months_shown&quot;</span>
+        <span class="n">with_portal</span> <span class="o">=</span> <span class="s2">&quot;with_portal&quot;</span>
+        <span class="n">with_full_screen_portal</span> <span class="o">=</span> <span class="s2">&quot;with_full_screen_portal&quot;</span>
+        <span class="n">day_size</span> <span class="o">=</span> <span class="s2">&quot;day_size&quot;</span>
+        <span class="n">is_RTL</span> <span class="o">=</span> <span class="s2">&quot;is_RTL&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Download">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Download">[docs]</a>
+<span class="k">class</span> <span class="nc">Download</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Download</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Download.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Download.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>
+        <span class="n">base64</span> <span class="o">=</span> <span class="s2">&quot;base64&quot;</span>
+        <span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Dropdown">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Dropdown">[docs]</a>
+<span class="k">class</span> <span class="nc">Dropdown</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Dropdown.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Dropdown.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="s2">&quot;options&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">multi</span> <span class="o">=</span> <span class="s2">&quot;multi&quot;</span>
+        <span class="n">clearable</span> <span class="o">=</span> <span class="s2">&quot;clearable&quot;</span>
+        <span class="n">searchable</span> <span class="o">=</span> <span class="s2">&quot;searchable&quot;</span>
+        <span class="n">search_value</span> <span class="o">=</span> <span class="s2">&quot;search_value&quot;</span>
+        <span class="n">placeholder</span> <span class="o">=</span> <span class="s2">&quot;placeholder&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">optionHeight</span> <span class="o">=</span> <span class="s2">&quot;optionHeight&quot;</span>
+        <span class="n">maxHeight</span> <span class="o">=</span> <span class="s2">&quot;maxHeight&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Geolocation">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Geolocation">[docs]</a>
+<span class="k">class</span> <span class="nc">Geolocation</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Geolocation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Geolocation.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Geolocation.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">local_date</span> <span class="o">=</span> <span class="s2">&quot;local_date&quot;</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="s2">&quot;timestamp&quot;</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span>
+        <span class="n">position_error</span> <span class="o">=</span> <span class="s2">&quot;position_error&quot;</span>
+        <span class="n">show_alert</span> <span class="o">=</span> <span class="s2">&quot;show_alert&quot;</span>
+        <span class="n">update_now</span> <span class="o">=</span> <span class="s2">&quot;update_now&quot;</span>
+        <span class="n">high_accuracy</span> <span class="o">=</span> <span class="s2">&quot;high_accuracy&quot;</span>
+        <span class="n">maximum_age</span> <span class="o">=</span> <span class="s2">&quot;maximum_age&quot;</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="s2">&quot;timeout&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Graph">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Graph">[docs]</a>
+<span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Graph.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Graph.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">responsive</span> <span class="o">=</span> <span class="s2">&quot;responsive&quot;</span>
+        <span class="n">clickData</span> <span class="o">=</span> <span class="s2">&quot;clickData&quot;</span>
+        <span class="n">clickAnnotationData</span> <span class="o">=</span> <span class="s2">&quot;clickAnnotationData&quot;</span>
+        <span class="n">hoverData</span> <span class="o">=</span> <span class="s2">&quot;hoverData&quot;</span>
+        <span class="n">clear_on_unhover</span> <span class="o">=</span> <span class="s2">&quot;clear_on_unhover&quot;</span>
+        <span class="n">selectedData</span> <span class="o">=</span> <span class="s2">&quot;selectedData&quot;</span>
+        <span class="n">relayoutData</span> <span class="o">=</span> <span class="s2">&quot;relayoutData&quot;</span>
+        <span class="n">extendData</span> <span class="o">=</span> <span class="s2">&quot;extendData&quot;</span>
+        <span class="n">prependData</span> <span class="o">=</span> <span class="s2">&quot;prependData&quot;</span>
+        <span class="n">restyleData</span> <span class="o">=</span> <span class="s2">&quot;restyleData&quot;</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="s2">&quot;figure&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">mathjax</span> <span class="o">=</span> <span class="s2">&quot;mathjax&quot;</span>
+        <span class="n">animate</span> <span class="o">=</span> <span class="s2">&quot;animate&quot;</span>
+        <span class="n">animation_options</span> <span class="o">=</span> <span class="s2">&quot;animation_options&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Input">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Input">[docs]</a>
+<span class="k">class</span> <span class="nc">Input</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Input</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Input.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Input.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span>
+        <span class="n">debounce</span> <span class="o">=</span> <span class="s2">&quot;debounce&quot;</span>
+        <span class="n">placeholder</span> <span class="o">=</span> <span class="s2">&quot;placeholder&quot;</span>
+        <span class="n">n_submit</span> <span class="o">=</span> <span class="s2">&quot;n_submit&quot;</span>
+        <span class="n">n_submit_timestamp</span> <span class="o">=</span> <span class="s2">&quot;n_submit_timestamp&quot;</span>
+        <span class="n">inputMode</span> <span class="o">=</span> <span class="s2">&quot;inputMode&quot;</span>
+        <span class="n">autoComplete</span> <span class="o">=</span> <span class="s2">&quot;autoComplete&quot;</span>
+        <span class="n">readOnly</span> <span class="o">=</span> <span class="s2">&quot;readOnly&quot;</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="s2">&quot;required&quot;</span>
+        <span class="n">autoFocus</span> <span class="o">=</span> <span class="s2">&quot;autoFocus&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="nb">list</span> <span class="o">=</span> <span class="s2">&quot;list&quot;</span>
+        <span class="n">multiple</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+        <span class="n">spellCheck</span> <span class="o">=</span> <span class="s2">&quot;spellCheck&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
+        <span class="n">minLength</span> <span class="o">=</span> <span class="s2">&quot;minLength&quot;</span>
+        <span class="n">maxLength</span> <span class="o">=</span> <span class="s2">&quot;maxLength&quot;</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="s2">&quot;pattern&quot;</span>
+        <span class="n">selectionStart</span> <span class="o">=</span> <span class="s2">&quot;selectionStart&quot;</span>
+        <span class="n">selectionEnd</span> <span class="o">=</span> <span class="s2">&quot;selectionEnd&quot;</span>
+        <span class="n">selectionDirection</span> <span class="o">=</span> <span class="s2">&quot;selectionDirection&quot;</span>
+        <span class="n">n_blur</span> <span class="o">=</span> <span class="s2">&quot;n_blur&quot;</span>
+        <span class="n">n_blur_timestamp</span> <span class="o">=</span> <span class="s2">&quot;n_blur_timestamp&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="s2">&quot;size&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Interval">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Interval">[docs]</a>
+<span class="k">class</span> <span class="nc">Interval</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Interval</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Interval.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Interval.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">n_intervals</span> <span class="o">=</span> <span class="s2">&quot;n_intervals&quot;</span>
+        <span class="n">max_intervals</span> <span class="o">=</span> <span class="s2">&quot;max_intervals&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Link">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Link">[docs]</a>
+<span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Link</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Link.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Link.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="n">href</span> <span class="o">=</span> <span class="s2">&quot;href&quot;</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;target&quot;</span>
+        <span class="n">refresh</span> <span class="o">=</span> <span class="s2">&quot;refresh&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;title&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Loading">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Loading">[docs]</a>
+<span class="k">class</span> <span class="nc">Loading</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Loading</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Loading.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Loading.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span>
+        <span class="n">fullscreen</span> <span class="o">=</span> <span class="s2">&quot;fullscreen&quot;</span>
+        <span class="n">debug</span> <span class="o">=</span> <span class="s2">&quot;debug&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">parent_className</span> <span class="o">=</span> <span class="s2">&quot;parent_className&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">parent_style</span> <span class="o">=</span> <span class="s2">&quot;parent_style&quot;</span>
+        <span class="n">overlay_style</span> <span class="o">=</span> <span class="s2">&quot;overlay_style&quot;</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;color&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">display</span> <span class="o">=</span> <span class="s2">&quot;display&quot;</span>
+        <span class="n">delay_hide</span> <span class="o">=</span> <span class="s2">&quot;delay_hide&quot;</span>
+        <span class="n">delay_show</span> <span class="o">=</span> <span class="s2">&quot;delay_show&quot;</span>
+        <span class="n">show_initially</span> <span class="o">=</span> <span class="s2">&quot;show_initially&quot;</span>
+        <span class="n">target_components</span> <span class="o">=</span> <span class="s2">&quot;target_components&quot;</span>
+        <span class="n">custom_spinner</span> <span class="o">=</span> <span class="s2">&quot;custom_spinner&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Location">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Location">[docs]</a>
+<span class="k">class</span> <span class="nc">Location</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Location</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Location.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Location.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">pathname</span> <span class="o">=</span> <span class="s2">&quot;pathname&quot;</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="s2">&quot;search&quot;</span>
+        <span class="nb">hash</span> <span class="o">=</span> <span class="s2">&quot;hash&quot;</span>
+        <span class="n">href</span> <span class="o">=</span> <span class="s2">&quot;href&quot;</span>
+        <span class="n">refresh</span> <span class="o">=</span> <span class="s2">&quot;refresh&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LogoutButton">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.LogoutButton">[docs]</a>
+<span class="k">class</span> <span class="nc">LogoutButton</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">LogoutButton</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="LogoutButton.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.LogoutButton.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;label&quot;</span>
+        <span class="n">logout_url</span> <span class="o">=</span> <span class="s2">&quot;logout_url&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;method&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Markdown">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Markdown">[docs]</a>
+<span class="k">class</span> <span class="nc">Markdown</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Markdown.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Markdown.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">mathjax</span> <span class="o">=</span> <span class="s2">&quot;mathjax&quot;</span>
+        <span class="n">dangerously_allow_html</span> <span class="o">=</span> <span class="s2">&quot;dangerously_allow_html&quot;</span>
+        <span class="n">link_target</span> <span class="o">=</span> <span class="s2">&quot;link_target&quot;</span>
+        <span class="n">dedent</span> <span class="o">=</span> <span class="s2">&quot;dedent&quot;</span>
+        <span class="n">highlight_config</span> <span class="o">=</span> <span class="s2">&quot;highlight_config&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RadioItems">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.RadioItems">[docs]</a>
+<span class="k">class</span> <span class="nc">RadioItems</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">RadioItems</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="RadioItems.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.RadioItems.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="s2">&quot;options&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">inline</span> <span class="o">=</span> <span class="s2">&quot;inline&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">inputStyle</span> <span class="o">=</span> <span class="s2">&quot;inputStyle&quot;</span>
+        <span class="n">inputClassName</span> <span class="o">=</span> <span class="s2">&quot;inputClassName&quot;</span>
+        <span class="n">labelStyle</span> <span class="o">=</span> <span class="s2">&quot;labelStyle&quot;</span>
+        <span class="n">labelClassName</span> <span class="o">=</span> <span class="s2">&quot;labelClassName&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RangeSlider">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.RangeSlider">[docs]</a>
+<span class="k">class</span> <span class="nc">RangeSlider</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">RangeSlider</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="RangeSlider.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.RangeSlider.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
+        <span class="n">marks</span> <span class="o">=</span> <span class="s2">&quot;marks&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">drag_value</span> <span class="o">=</span> <span class="s2">&quot;drag_value&quot;</span>
+        <span class="n">allowCross</span> <span class="o">=</span> <span class="s2">&quot;allowCross&quot;</span>
+        <span class="n">pushable</span> <span class="o">=</span> <span class="s2">&quot;pushable&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="s2">&quot;count&quot;</span>
+        <span class="n">dots</span> <span class="o">=</span> <span class="s2">&quot;dots&quot;</span>
+        <span class="n">included</span> <span class="o">=</span> <span class="s2">&quot;included&quot;</span>
+        <span class="n">tooltip</span> <span class="o">=</span> <span class="s2">&quot;tooltip&quot;</span>
+        <span class="n">updatemode</span> <span class="o">=</span> <span class="s2">&quot;updatemode&quot;</span>
+        <span class="n">vertical</span> <span class="o">=</span> <span class="s2">&quot;vertical&quot;</span>
+        <span class="n">verticalHeight</span> <span class="o">=</span> <span class="s2">&quot;verticalHeight&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Slider">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Slider">[docs]</a>
+<span class="k">class</span> <span class="nc">Slider</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Slider</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Slider.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Slider.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
+        <span class="n">marks</span> <span class="o">=</span> <span class="s2">&quot;marks&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">drag_value</span> <span class="o">=</span> <span class="s2">&quot;drag_value&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">dots</span> <span class="o">=</span> <span class="s2">&quot;dots&quot;</span>
+        <span class="n">included</span> <span class="o">=</span> <span class="s2">&quot;included&quot;</span>
+        <span class="n">tooltip</span> <span class="o">=</span> <span class="s2">&quot;tooltip&quot;</span>
+        <span class="n">updatemode</span> <span class="o">=</span> <span class="s2">&quot;updatemode&quot;</span>
+        <span class="n">vertical</span> <span class="o">=</span> <span class="s2">&quot;vertical&quot;</span>
+        <span class="n">verticalHeight</span> <span class="o">=</span> <span class="s2">&quot;verticalHeight&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Store">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Store">[docs]</a>
+<span class="k">class</span> <span class="nc">Store</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Store</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Store.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Store.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">storage_type</span> <span class="o">=</span> <span class="s2">&quot;storage_type&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>
+        <span class="n">clear_data</span> <span class="o">=</span> <span class="s2">&quot;clear_data&quot;</span>
+        <span class="n">modified_timestamp</span> <span class="o">=</span> <span class="s2">&quot;modified_timestamp&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Tab">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Tab">[docs]</a>
+<span class="k">class</span> <span class="nc">Tab</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Tab</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Tab.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Tab.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;label&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">disabled_style</span> <span class="o">=</span> <span class="s2">&quot;disabled_style&quot;</span>
+        <span class="n">disabled_className</span> <span class="o">=</span> <span class="s2">&quot;disabled_className&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">selected_className</span> <span class="o">=</span> <span class="s2">&quot;selected_className&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">selected_style</span> <span class="o">=</span> <span class="s2">&quot;selected_style&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Tabs">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Tabs">[docs]</a>
+<span class="k">class</span> <span class="nc">Tabs</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Tabs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Tabs.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Tabs.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">content_className</span> <span class="o">=</span> <span class="s2">&quot;content_className&quot;</span>
+        <span class="n">parent_className</span> <span class="o">=</span> <span class="s2">&quot;parent_className&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">parent_style</span> <span class="o">=</span> <span class="s2">&quot;parent_style&quot;</span>
+        <span class="n">content_style</span> <span class="o">=</span> <span class="s2">&quot;content_style&quot;</span>
+        <span class="n">vertical</span> <span class="o">=</span> <span class="s2">&quot;vertical&quot;</span>
+        <span class="n">mobile_breakpoint</span> <span class="o">=</span> <span class="s2">&quot;mobile_breakpoint&quot;</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="s2">&quot;colors&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Textarea">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Textarea">[docs]</a>
+<span class="k">class</span> <span class="nc">Textarea</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Textarea</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Textarea.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Textarea.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">autoFocus</span> <span class="o">=</span> <span class="s2">&quot;autoFocus&quot;</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="s2">&quot;cols&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="s2">&quot;form&quot;</span>
+        <span class="n">maxLength</span> <span class="o">=</span> <span class="s2">&quot;maxLength&quot;</span>
+        <span class="n">minLength</span> <span class="o">=</span> <span class="s2">&quot;minLength&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span>
+        <span class="n">placeholder</span> <span class="o">=</span> <span class="s2">&quot;placeholder&quot;</span>
+        <span class="n">readOnly</span> <span class="o">=</span> <span class="s2">&quot;readOnly&quot;</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="s2">&quot;required&quot;</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="s2">&quot;rows&quot;</span>
+        <span class="n">wrap</span> <span class="o">=</span> <span class="s2">&quot;wrap&quot;</span>
+        <span class="n">accessKey</span> <span class="o">=</span> <span class="s2">&quot;accessKey&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">contentEditable</span> <span class="o">=</span> <span class="s2">&quot;contentEditable&quot;</span>
+        <span class="n">contextMenu</span> <span class="o">=</span> <span class="s2">&quot;contextMenu&quot;</span>
+        <span class="nb">dir</span> <span class="o">=</span> <span class="s2">&quot;dir&quot;</span>
+        <span class="n">draggable</span> <span class="o">=</span> <span class="s2">&quot;draggable&quot;</span>
+        <span class="n">hidden</span> <span class="o">=</span> <span class="s2">&quot;hidden&quot;</span>
+        <span class="n">lang</span> <span class="o">=</span> <span class="s2">&quot;lang&quot;</span>
+        <span class="n">spellCheck</span> <span class="o">=</span> <span class="s2">&quot;spellCheck&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">tabIndex</span> <span class="o">=</span> <span class="s2">&quot;tabIndex&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;title&quot;</span>
+        <span class="n">n_blur</span> <span class="o">=</span> <span class="s2">&quot;n_blur&quot;</span>
+        <span class="n">n_blur_timestamp</span> <span class="o">=</span> <span class="s2">&quot;n_blur_timestamp&quot;</span>
+        <span class="n">n_clicks</span> <span class="o">=</span> <span class="s2">&quot;n_clicks&quot;</span>
+        <span class="n">n_clicks_timestamp</span> <span class="o">=</span> <span class="s2">&quot;n_clicks_timestamp&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span>
+        <span class="n">persistence</span> <span class="o">=</span> <span class="s2">&quot;persistence&quot;</span>
+        <span class="n">persisted_props</span> <span class="o">=</span> <span class="s2">&quot;persisted_props&quot;</span>
+        <span class="n">persistence_type</span> <span class="o">=</span> <span class="s2">&quot;persistence_type&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Tooltip">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Tooltip">[docs]</a>
+<span class="k">class</span> <span class="nc">Tooltip</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Tooltip.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Tooltip.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="s2">&quot;bbox&quot;</span>
+        <span class="n">show</span> <span class="o">=</span> <span class="s2">&quot;show&quot;</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;direction&quot;</span>
+        <span class="n">border_color</span> <span class="o">=</span> <span class="s2">&quot;border_color&quot;</span>
+        <span class="n">background_color</span> <span class="o">=</span> <span class="s2">&quot;background_color&quot;</span>
+        <span class="n">loading_text</span> <span class="o">=</span> <span class="s2">&quot;loading_text&quot;</span>
+        <span class="n">zindex</span> <span class="o">=</span> <span class="s2">&quot;zindex&quot;</span>
+        <span class="n">targetable</span> <span class="o">=</span> <span class="s2">&quot;targetable&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Upload">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Upload">[docs]</a>
+<span class="k">class</span> <span class="nc">Upload</span><span class="p">(</span><span class="n">dash</span><span class="o">.</span><span class="n">dcc</span><span class="o">.</span><span class="n">Upload</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Upload.Prop">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.wrapped_components.html#pyfemtet.opt.visualization.wrapped_components.dcc.Upload.Prop">[docs]</a>
+    <span class="k">class</span> <span class="nc">Prop</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="s2">&quot;children&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="s2">&quot;contents&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;filename&quot;</span>
+        <span class="n">last_modified</span> <span class="o">=</span> <span class="s2">&quot;last_modified&quot;</span>
+        <span class="n">accept</span> <span class="o">=</span> <span class="s2">&quot;accept&quot;</span>
+        <span class="n">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>
+        <span class="n">disable_click</span> <span class="o">=</span> <span class="s2">&quot;disable_click&quot;</span>
+        <span class="n">max_size</span> <span class="o">=</span> <span class="s2">&quot;max_size&quot;</span>
+        <span class="n">min_size</span> <span class="o">=</span> <span class="s2">&quot;min_size&quot;</span>
+        <span class="n">multiple</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="s2">&quot;className&quot;</span>
+        <span class="n">className_active</span> <span class="o">=</span> <span class="s2">&quot;className_active&quot;</span>
+        <span class="n">className_reject</span> <span class="o">=</span> <span class="s2">&quot;className_reject&quot;</span>
+        <span class="n">className_disabled</span> <span class="o">=</span> <span class="s2">&quot;className_disabled&quot;</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;style&quot;</span>
+        <span class="n">style_active</span> <span class="o">=</span> <span class="s2">&quot;style_active&quot;</span>
+        <span class="n">style_reject</span> <span class="o">=</span> <span class="s2">&quot;style_reject&quot;</span>
+        <span class="n">style_disabled</span> <span class="o">=</span> <span class="s2">&quot;style_disabled&quot;</span>
+        <span class="n">loading_state</span> <span class="o">=</span> <span class="s2">&quot;loading_state&quot;</span></div>
+</div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

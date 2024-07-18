@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.interface._femtet_with_sldworks &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.interface._femtet_with_sldworks</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>pyfemtet.opt.interface._femtet_with_sldworks のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">get_worker</span>
+
+<span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">DispatchEx</span>
+<span class="kn">from</span> <span class="nn">pythoncom</span> <span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span>
+
+<span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetInterface</span><span class="p">,</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="FemtetWithSolidworksInterface">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface">[ドキュメント]</a>
+<span class="k">class</span> <span class="nc">FemtetWithSolidworksInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">):</span>
+    <span class="c1"># 定数の宣言</span>
+    <span class="n">swThisConfiguration</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swInConfigurationOpts_e.html</span>
+    <span class="n">swAllConfiguration</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">swSpecifyConfiguration</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># use with ConfigName argument</span>
+    <span class="n">swSaveAsCurrentVersion</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">swSaveAsOptions_Copy</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1">#</span>
+    <span class="n">swSaveAsOptions_Silent</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># https://help.solidworks.com/2021/english/api/swconst/solidworks.interop.swconst~solidworks.interop.swconst.swsaveasoptions_e.html</span>
+    <span class="n">swSaveWithReferencesOptions_None</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># https://help-solidworks-com.translate.goog/2023/english/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swSaveWithReferencesOptions_e.html?_x_tr_sl=auto&amp;_x_tr_tl=ja&amp;_x_tr_hl=ja&amp;_x_tr_pto=wapp</span>
+    <span class="n">swDocPART</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swDocumentTypes_e.html</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">sldprt_path</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="c1"># 引数の処理</span>
+        <span class="c1"># dask サブプロセスのときは space 直下の sldprt_path を参照する</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">worker</span> <span class="o">=</span> <span class="n">get_worker</span><span class="p">()</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">local_directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sldprt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sldprt_path</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># get_worker に失敗した場合</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sldprt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">sldprt_path</span><span class="p">)</span>
+
+        <span class="c1"># FemtetInterface の設定 (femprj_path, model_name の更新など)</span>
+        <span class="c1"># + restore 情報の上書き</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">sldprt_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sldprt_path</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="FemtetWithSolidworksInterface.initialize_sldworks_connection">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.initialize_sldworks_connection">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">initialize_sldworks_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># SolidWorks を捕まえ、ファイルを開く</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swApp</span> <span class="o">=</span> <span class="n">DispatchEx</span><span class="p">(</span><span class="s1">&#39;SLDWORKS.Application&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swApp</span><span class="o">.</span><span class="n">Visible</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># open model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swApp</span><span class="o">.</span><span class="n">OpenDoc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sldprt_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">swDocPART</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swApp</span><span class="o">.</span><span class="n">ActiveDoc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swModel</span><span class="o">.</span><span class="n">GetEquationMgr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nEquation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">GetCount</span></div>
+
+
+<div class="viewcode-block" id="FemtetWithSolidworksInterface.check_param_value">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.check_param_value">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">check_param_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override FemtetInterface.check_param_value().</span>
+
+<span class="sd">        Do nothing because the parameter can be registered</span>
+<span class="sd">        to not only .femprj but also .SLDPRT.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;sldprt_path&#39;</span><span class="p">],</span>
+            <span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">CoInitialize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_sldworks_connection</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FemtetWithSolidworksInterface.update_model">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_model">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update .x_t&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Femtet が参照している x_t パスを取得する</span>
+        <span class="n">x_t_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">LastXTPath</span>
+
+        <span class="c1"># 前のが存在するならば消しておく</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">x_t_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x_t_path</span><span class="p">)</span>
+
+        <span class="c1"># solidworks のモデルの更新</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_sw_model</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="c1"># export as x_t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swModel</span><span class="o">.</span><span class="n">SaveAs</span><span class="p">(</span><span class="n">x_t_path</span><span class="p">)</span>
+
+        <span class="c1"># 30 秒待っても x_t ができてなければエラー(COM なので)</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">x_t_path</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s1">&#39;モデル再構築に失敗しました&#39;</span><span class="p">)</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># モデルの再インポート</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">ReExecute</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">,</span>
+            <span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
+            <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;モデル再構築に失敗しました.&#39;</span><span class="p">,</span>
+            <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 処理を確定</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Redraw</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">,</span>  <span class="c1"># 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい</span>
+            <span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
+            <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;モデル再構築に失敗しました.&#39;</span><span class="p">,</span>
+            <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># femprj モデルの変数も更新</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FemtetWithSolidworksInterface.update_sw_model">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_sw_model">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">update_sw_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update .sldprt&quot;&quot;&quot;</span>
+        <span class="c1"># df を dict に変換</span>
+        <span class="n">user_param_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">user_param_dict</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+
+        <span class="c1"># プロパティを退避</span>
+        <span class="n">buffer_aso</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">AutomaticSolveOrder</span>
+        <span class="n">buffer_ar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">AutomaticRebuild</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">AutomaticSolveOrder</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">AutomaticRebuild</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nEquation</span><span class="p">):</span>
+            <span class="c1"># name, equation の取得</span>
+            <span class="n">current_equation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">Equation</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">current_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_name_from_equation</span><span class="p">(</span><span class="n">current_equation</span><span class="p">)</span>
+            <span class="c1"># 対象なら処理</span>
+            <span class="k">if</span> <span class="n">current_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">user_param_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">new_equation</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">current_name</span><span class="si">}</span><span class="s1">&quot; = </span><span class="si">{</span><span class="n">user_param_dict</span><span class="p">[</span><span class="n">current_name</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">Equation</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">new_equation</span><span class="p">)</span>
+
+        <span class="c1"># 式の計算</span>
+        <span class="c1"># noinspection PyStatementEffect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">EvaluateAll</span>  <span class="c1"># always returns -1</span>
+
+        <span class="c1"># プロパティをもとに戻す</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">AutomaticSolveOrder</span> <span class="o">=</span> <span class="n">buffer_aso</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">swEqnMgr</span><span class="o">.</span><span class="n">AutomaticRebuild</span> <span class="o">=</span> <span class="n">buffer_ar</span>
+
+        <span class="c1"># 更新する（ここで失敗はしうる）</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">swModel</span><span class="o">.</span><span class="n">EditRebuild3</span>  <span class="c1"># モデル再構築</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s1">&#39;モデル再構築に失敗しました&#39;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_name_from_equation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equation</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^\s*&quot;(.+?)&quot;\s*$&#39;</span>
+        <span class="n">matched</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">equation</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">matched</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -732,13 +732,12 @@ class FemtetInterface(FEMInterface):
         jpg_path = os.path.join(result_dir, self.model_name + '.jpg')
 
         # モデル表示画面の設定
-        self.Femtet.SetWindowSize(200, 200)
+        self.Femtet.SetWindowSize(600, 600)
         self.Femtet.Fit()
-        self.Femtet.ViewNumeric.SetCoord(1, 1, 1)
 
         # ---モデルの画面を保存---
         self.Femtet.Redraw()  # 再描画
-        succeed = self.Femtet.SavePicture(jpg_path, 200, 200, 80)
+        succeed = self.Femtet.SavePicture(jpg_path, 600, 600, 80)
 
         self.Femtet.RedrawMode = True  # 逐一の描画をオン
 

@@ -20,6 +20,77 @@ logger = get_logger('opt')
 logger.setLevel(logging.INFO)
 
 
+class OptimizationMethodChecker:
+    """Check implementation of PyFemtet functions."""
+
+    def __init__(self, opt):
+        self.opt = opt
+
+    def check_parallel(self, raise_error=True):
+        function = 'parallel computing'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_timeout(self, raise_error=True):
+        function = 'timeout'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_multi_objective(self, raise_error=True):
+        function = 'multi-objective'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_strict_constraint(self, raise_error=True):
+        function = 'strict_constraint'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_constraint(self, raise_error=True):
+        function = 'strict_constraint'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_skip(self, raise_error=True):
+        function = 'skip'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_seed(self, raise_error=True):
+        function = 'random seed setting'
+        message = f'{type(self.opt)} is not implement {function}'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+    def check_incomplete_bounds(self, raise_error=True):
+        function = 'optimize with no or incomplete bounds'
+        message = f'{type(self.opt)} is not implement "{function}"'
+        if raise_error:
+            raise NotImplementedError(message)
+        else:
+            logger.warning(message)
+
+
 class AbstractOptimizer(ABC):
     """Abstract base class for an interface of optimization library.
 
@@ -45,9 +116,9 @@ class AbstractOptimizer(ABC):
         self.fem = None
         self.fem_class = None
         self.fem_kwargs = dict()
-        self.parameters = pd.DataFrame()
-        self.objectives = dict()
-        self.constraints = dict()
+        self.parameters: pd.DataFrame = pd.DataFrame()
+        self.objectives: dict = dict()
+        self.constraints: dict = dict()
         self.entire_status = None  # actor
         self.history = None  # actor
         self.worker_status = None  # actor
@@ -58,6 +129,7 @@ class AbstractOptimizer(ABC):
         self.is_cluster = False
         self.subprocess_idx = None
         self._is_error_exit = False
+        self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
 
     def f(self, x):
         """Get x, update fem analysis, return objectives (and constraints)."""
@@ -65,10 +137,15 @@ class AbstractOptimizer(ABC):
 
         # x の更新
         self.parameters['value'] = x
+        logger.info(f'Start calculation with input: {x}')
 
         # FEM の更新
         logger.debug('fem.update() start')
-        self.fem.update(self.parameters)
+        try:
+            self.fem.update(self.parameters)
+        except Exception as e:
+            logger.warning('An exception has occurred during FEM update.')
+            raise e
 
         # y, _y, c の更新
         logger.debug('calculate y start')
@@ -93,6 +170,9 @@ class AbstractOptimizer(ABC):
         )
 
         logger.debug('history.record end')
+
+        logger.info(f'End calculation with output: {_y}')
+
         return np.array(y), np.array(_y), np.array(c)
 
     def _reconstruct_fem(self, skip_reconstruct=False):
@@ -191,10 +271,10 @@ class AbstractOptimizer(ABC):
         try:
             self.run()
         except Exception as e:
-            logger.error("================================")
-            logger.error("An unexpected error has occured!")
-            logger.error("================================")
-            logger.error(e)
+            logger.error("=================================")
+            logger.error("An unexpected error has occurred!")
+            logger.error("=================================")
+            logger.error(f'{type(e)}: {e}')
             self._is_error_exit = True
             self.worker_status.set(OptimizationStatus.CRASHED)
         finally:

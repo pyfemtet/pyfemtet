@@ -12,13 +12,27 @@ from optuna.study import MaxTrialsCallback
 
 # pyfemtet relative
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
-from pyfemtet.opt.opt import AbstractOptimizer, logger
+from pyfemtet.opt.opt import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
 
 # filter warnings
 import warnings
 from optuna.exceptions import ExperimentalWarning
+
+
+optuna.logging.set_verbosity(optuna.logging.ERROR)
+
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
+
+
+class OptunaMethodChecker(OptimizationMethodChecker):
+    def check_multi_objective(self, raise_error=True): return True
+    def check_timeout(self, raise_error=True): return True
+    def check_parallel(self, raise_error=True): return True
+    def check_constraint(self, raise_error=True): return True
+    def check_strict_constraint(self, raise_error=True): return True
+    def check_skip(self, raise_error=True): return True
+    def check_seed(self, raise_error=True): return True
 
 
 class OptunaOptimizer(AbstractOptimizer):
@@ -38,6 +52,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.sampler_kwargs = dict() if sampler_kwargs is None else sampler_kwargs
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
+        self.method_checker = OptunaMethodChecker(self)
 
     def _objective(self, trial):
 
@@ -50,7 +65,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # candidate x
         x = []
         for i, row in self.parameters.iterrows():
-            v = trial.suggest_float(row['name'], row['lb'], row['ub'])
+            v = trial.suggest_float(row['name'], row['lb'], row['ub'], step=row['step'])
             x.append(v)
         x = np.array(x).astype(float)
 

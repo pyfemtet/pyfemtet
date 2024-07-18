@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.visualization.base &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.visualization.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>pyfemtet.opt.visualization.base のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="c1"># type hint</span>
+<span class="kn">from</span> <span class="nn">dash.development.base_component</span> <span class="kn">import</span> <span class="n">Component</span>
+
+<span class="c1"># application</span>
+<span class="kn">from</span> <span class="nn">dash</span> <span class="kn">import</span> <span class="n">Dash</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+
+<span class="c1"># callback</span>
+<span class="kn">from</span> <span class="nn">dash</span> <span class="kn">import</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Input</span>  <span class="c1"># , State, no_update, callback_context</span>
+<span class="c1"># from dash.exceptions import PreventUpdate</span>
+
+<span class="c1"># components</span>
+<span class="c1"># from dash import html, dcc</span>
+<span class="kn">import</span> <span class="nn">dash_bootstrap_components</span>
+
+<span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">History</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.wrapped_components</span> <span class="kn">import</span> <span class="n">html</span><span class="p">,</span> <span class="n">dcc</span><span class="p">,</span> <span class="n">dbc</span>
+
+<span class="c1"># the others</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.logger</span> <span class="kn">import</span> <span class="n">get_logger</span>
+
+
+<span class="n">dash_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;werkzeug&#39;</span><span class="p">)</span>
+<span class="n">dash_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;viewer&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AbstractPage">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.AbstractPage">[ドキュメント]</a>
+<span class="k">class</span> <span class="nc">AbstractPage</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define content.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        =================</span>
+<span class="sd">        |~:8080/rel_url | &lt;---- page.rel_url</span>
+<span class="sd">        =================</span>
+<span class="sd">page.   |    | -------- |</span>
+<span class="sd">title --&gt;home| |      | |</span>
+<span class="sd">        |    | |    &lt;-------- sub_page.layout</span>
+<span class="sd">        |    | -------- |</span>
+<span class="sd">        | ^  |          |&lt;--- page.layout</span>
+<span class="sd">        ==|==============</span>
+<span class="sd">          |</span>
+<span class="sd">         sidebar</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;base-page&#39;</span><span class="p">,</span> <span class="n">rel_url</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">:</span> <span class="n">Component</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rel_url</span> <span class="o">=</span> <span class="n">rel_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">:</span> <span class="n">PyFemtetApplicationBase</span> <span class="o">=</span> <span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subpages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_component</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_layout</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AbstractPage.add_subpage">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.AbstractPage.add_subpage">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">add_subpage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subpage</span><span class="p">:</span> <span class="s1">&#39;AbstractPage&#39;</span><span class="p">):</span>
+        <span class="n">subpage</span><span class="o">.</span><span class="n">setup_component</span><span class="p">()</span>
+        <span class="n">subpage</span><span class="o">.</span><span class="n">setup_layout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subpages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subpage</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractPage.set_application">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.AbstractPage.set_application">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">set_application</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">app</span></div>
+
+
+<div class="viewcode-block" id="AbstractPage.setup_component">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.AbstractPage.setup_component">[ドキュメント]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">setup_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyAttributeOutsideInit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span><span class="s1">&#39;This is a abstract page.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractPage.setup_layout">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.AbstractPage.setup_layout">[ドキュメント]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">setup_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component</span></div>
+
+
+<div class="viewcode-block" id="AbstractPage.setup_callback">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.AbstractPage.setup_callback">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">setup_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># app = self.application.app</span>
+
+        <span class="k">for</span> <span class="n">subpage</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subpages</span><span class="p">:</span>
+            <span class="n">subpage</span><span class="o">.</span><span class="n">set_application</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">)</span>
+            <span class="n">subpage</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span></div>
+</div>
+
+
+        <span class="c1"># @app.callback(...)</span>
+        <span class="c1"># def do_something():</span>
+        <span class="c1">#     return ...</span>
+
+
+<span class="k">def</span> <span class="nf">_unused_port_number</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">49152</span><span class="p">):</span>
+    <span class="c1"># &quot;LISTEN&quot; 状態のポート番号をリスト化</span>
+    <span class="n">used_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">conn</span><span class="o">.</span><span class="n">laddr</span><span class="o">.</span><span class="n">port</span> <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">psutil</span><span class="o">.</span><span class="n">net_connections</span><span class="p">()</span> <span class="k">if</span> <span class="n">conn</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;LISTEN&#39;</span><span class="p">]</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">start</span>
+    <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">65535</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># 未使用のポート番号ならreturn</span>
+        <span class="k">if</span> <span class="n">port</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">used_ports</span><span class="p">):</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="n">port</span> <span class="o">!=</span> <span class="n">start</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Specified port &quot;</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1">&quot; seems to be used. Port &quot;</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s1">&quot; is used instead.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">port</span>
+
+
+<div class="viewcode-block" id="SidebarApplicationBase">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.SidebarApplicationBase">[ドキュメント]</a>
+<span class="k">class</span> <span class="nc">SidebarApplicationBase</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Define entire layout and callback.</span>
+<span class="sd">    +------+--------+</span>
+<span class="sd">    | side | con-   |</span>
+<span class="sd">    | bar  | tent   |</span>
+<span class="sd">    +------+--------+</span>
+<span class="sd">       │      └─ pages (dict(href: str = layout: Component))</span>
+<span class="sd">       └──────── nav_links (dict(order: float) = NavLink)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># port</span>
+    <span class="n">DEFAULT_PORT</span> <span class="o">=</span> <span class="mi">49152</span>
+
+    <span class="c1"># members for sidebar application</span>
+    <span class="n">SIDEBAR_STYLE</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;bottom&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="s2">&quot;16rem&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;padding&quot;</span><span class="p">:</span> <span class="s2">&quot;2rem 1rem&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;background-color&quot;</span><span class="p">:</span> <span class="s2">&quot;#f8f9fa&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">CONTENT_STYLE</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;margin-left&quot;</span><span class="p">:</span> <span class="s2">&quot;18rem&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;margin-right&quot;</span><span class="p">:</span> <span class="s2">&quot;2rem&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;padding&quot;</span><span class="p">:</span> <span class="s2">&quot;2rem 1rem&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subtitle</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># define app</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span> <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;App&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span> <span class="o">=</span> <span class="n">subtitle</span> <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">Dash</span><span class="p">(</span>
+            <span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">external_stylesheets</span><span class="o">=</span><span class="p">[</span><span class="n">dash_bootstrap_components</span><span class="o">.</span><span class="n">themes</span><span class="o">.</span><span class="n">BOOTSTRAP</span><span class="p">],</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">update_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pages</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_links</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_objects</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="SidebarApplicationBase.add_page">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.SidebarApplicationBase.add_page">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">add_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="n">AbstractPage</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">page</span><span class="o">.</span><span class="n">set_application</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="n">page</span><span class="o">.</span><span class="n">rel_url</span><span class="p">]</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">layout</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_links</span><span class="p">[</span><span class="n">order</span><span class="p">]</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">NavLink</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">rel_url</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SidebarApplicationBase.setup_callback">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.SidebarApplicationBase.setup_callback">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">setup_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_objects</span><span class="p">:</span>
+            <span class="n">page</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_setup_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># setup sidebar</span>
+        <span class="c1"># https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/</span>
+
+        <span class="c1"># sidebar に表示される順に並び替え</span>
+        <span class="n">ordered_items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_links</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ordered_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ordered_items</span><span class="p">]</span>
+
+        <span class="c1"># sidebar と contents から app 全体の layout を作成</span>
+        <span class="n">sidebar</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">H2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;display-4&#39;</span><span class="p">),</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">Hr</span><span class="p">(),</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;lead&#39;</span><span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Nav</span><span class="p">(</span><span class="n">ordered_links</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pills</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="p">],</span>
+            <span class="n">style</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SIDEBAR_STYLE</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;page-content&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CONTENT_STYLE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">([</span><span class="n">dcc</span><span class="o">.</span><span class="n">Location</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;url&quot;</span><span class="p">),</span> <span class="n">sidebar</span><span class="p">,</span> <span class="n">content</span><span class="p">])</span>
+
+        <span class="c1"># sidebar によるページ遷移のための callback</span>
+        <span class="nd">@self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">Output</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;children&quot;</span><span class="p">),</span> <span class="p">[</span><span class="n">Input</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="s2">&quot;pathname&quot;</span><span class="p">)])</span>
+        <span class="k">def</span> <span class="nf">switch_page_content</span><span class="p">(</span><span class="n">pathname</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">pathname</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="n">pathname</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">html</span><span class="o">.</span><span class="n">H1</span><span class="p">(</span><span class="s2">&quot;404: Not found&quot;</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s2">&quot;text-danger&quot;</span><span class="p">),</span>
+                        <span class="n">html</span><span class="o">.</span><span class="n">Hr</span><span class="p">(),</span>
+                        <span class="n">html</span><span class="o">.</span><span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The pathname </span><span class="si">{</span><span class="n">pathname</span><span class="si">}</span><span class="s2"> was not recognised...&quot;</span><span class="p">),</span>
+                    <span class="p">],</span>
+                    <span class="n">className</span><span class="o">=</span><span class="s2">&quot;p-3 bg-light rounded-3&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+<div class="viewcode-block" id="SidebarApplicationBase.run">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.SidebarApplicationBase.run">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_layout</span><span class="p">()</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">port</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_PORT</span>
+        <span class="c1"># port を検証</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">_unused_port_number</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="c1"># ブラウザを起動</span>
+        <span class="k">if</span> <span class="n">host</span> <span class="o">==</span> <span class="s1">&#39;0.0.0.0&#39;</span><span class="p">:</span>
+            <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;http://localhost:</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;http://</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PyFemtetApplicationBase">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.PyFemtetApplicationBase">[ドキュメント]</a>
+<span class="k">class</span> <span class="nc">PyFemtetApplicationBase</span><span class="p">(</span><span class="n">SidebarApplicationBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        +------+--------+</span>
+<span class="sd">        | side | con-   |</span>
+<span class="sd">        | bar  | tent   |</span>
+<span class="sd">        +--^---+--^-----+</span>
+<span class="sd">           │      └─ pages (dict(href: str = layout: Component))</span>
+<span class="sd">           └──────── nav_links (dict(order: float) = NavLink)</span>
+
+<span class="sd">        Accessible members:</span>
+<span class="sd">        - history: History</span>
+<span class="sd">           └ local_df: pd.DataFrame</span>
+<span class="sd">        - app: Dash</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">subtitle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># register arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">history</span>  <span class="c1"># include actor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">subtitle</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="check_page_layout">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.check_page_layout">[ドキュメント]</a>
+<span class="k">def</span> <span class="nf">check_page_layout</span><span class="p">(</span><span class="n">page_cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">):</span>
+    <span class="n">home_page</span> <span class="o">=</span> <span class="n">page_cls</span><span class="p">()</span>  <span class="c1"># required</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="n">PyFemtetApplicationBase</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;test-app&#39;</span><span class="p">)</span>
+    <span class="n">application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">application</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c1"># template</span>
+    <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">AbstractPage</span><span class="p">(</span><span class="s1">&#39;home-page&#39;</span><span class="p">)</span>  <span class="c1"># required</span>
+    <span class="n">g_page1</span> <span class="o">=</span> <span class="n">AbstractPage</span><span class="p">(</span><span class="s1">&#39;page-1&#39;</span><span class="p">,</span> <span class="s1">&#39;/page-1&#39;</span><span class="p">)</span>
+
+    <span class="n">g_application</span> <span class="o">=</span> <span class="n">SidebarApplicationBase</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;test-app&#39;</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_page1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># g_application.setup_callback()</span>
+
+    <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

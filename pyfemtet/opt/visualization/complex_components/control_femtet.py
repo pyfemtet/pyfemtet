@@ -46,6 +46,8 @@ class FemtetControl(AbstractPage):
         self.connect_femtet_button = dbc.Button(
             children='Connect to Femtet',
             id='connect-femtet-button',
+            outline=True,
+            color='primary',
         )
 
         # noinspection PyAttributeOutsideInit
@@ -110,7 +112,6 @@ class FemtetControl(AbstractPage):
             }
 
             return state_data, no_update
-
 
     def create_femtet_interface_args(self) -> [dict, str]:
         """Returns the argument of FemtetInterface and warning message

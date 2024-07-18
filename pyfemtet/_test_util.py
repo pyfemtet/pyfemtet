@@ -15,6 +15,32 @@ from femtetutils import util
 from pyfemtet.opt import FEMOpt
 
 
+class SuperSphere:
+    def __init__(self, n):
+        self.n = n
+
+    def x(self, radius, *angles):
+        assert len(angles) == self.n - 1, 'invalid angles length'
+
+        out = []
+
+        for i in range(self.n):
+            if i == 0:
+                out.append(radius * np.cos(angles[0]))
+            elif i < self.n - 1:
+                product = radius
+                for j in range(i):
+                    product *= np.sin(angles[j])
+                product *= np.cos(angles[i])
+                out.append(product)
+            else:
+                product = radius
+                for j in range(i):
+                    product *= np.sin(angles[j])
+                out.append(product)
+        return out
+
+
 def _open_femprj(femprj_path):
     Femtet = Dispatch('FemtetMacro.Femtet')
     for _ in tqdm(range(5), 'wait for dispatch Femtet'):

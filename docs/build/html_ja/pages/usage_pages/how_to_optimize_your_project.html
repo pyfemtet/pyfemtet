@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>最適化の実行手順 &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="（実験的機能）クラスタ計算の実行手順" href="how_to_deploy_cluster.html" />
+    <link rel="prev" title="結果ビューア" href="how_to_use_result_viewer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">例題</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../usage.html">使い方</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_use_script_builder.html">最適化問題セットアップツール</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_use_result_viewer.html">結果ビューア</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">最適化の実行手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_deploy_cluster.html">（実験的機能）クラスタ計算の実行手順</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../usage.html">使い方</a></li>
+      <li class="breadcrumb-item active">最適化の実行手順</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/pages/usage_pages/how_to_optimize_your_project.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="procedure-for-executing-optimization">
+<h1>最適化の実行手順<a class="headerlink" href="#procedure-for-executing-optimization" title="Link to this heading"></a></h1>
+<p>このページでは、ご自身のプロジェクトに <code class="docutils literal notranslate"><span class="pre">pyfemtet.opt</span></code> を適用して最適設計を行う際の プログラム作成方法を示します。</p>
+<ol class="arabic">
+<li><p>Femtet プロジェクトの作成</p>
+<blockquote>
+<div><p>Femtet 上で解析モデルを作成します。 <strong>最適化したいパラメータを変数として登録してください。</strong> パラメータを用いた解析設定の詳細については Femtet ヘルプ / プロジェクトの作成 / 変数 をご覧ください。</p>
+</div></blockquote>
+</li>
+<li><p>目的関数の設定</p>
+<blockquote>
+<div><p>最適化問題では、評価したい指標を目的関数と呼びます。 解析結果やモデル形状から目的関数を計算する処理を Femtet の Python マクロを用いて記述してください。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example to calculate max displacement (for your obejctive function).</span>
+<span class="sd">The scripts after Dispatch are Femtet&#39;s Python macros.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">Dispatch</span>
+
+<span class="c1"># Get object to control Femtet.</span>
+<span class="n">Femtet</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s2">&quot;FemtetMacro.Femtet&quot;</span><span class="p">)</span>
+
+<span class="c1"># Open analysis result by Femtet.</span>
+<span class="n">Femtet</span><span class="o">.</span><span class="n">OpenCurrentResult</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
+
+<span class="c1"># ex.) Get max displacement from analysis deresult.</span>
+<span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Femtet の Python マクロ文法は、Femtet マクロヘルプ又は <a class="reference external" href="https://www.muratasoftware.com/support/macro/">サンプルマクロ事例</a> をご覧ください。</p>
+</div>
+</div></blockquote>
+</li>
+<li><p>メインスクリプトの作成</p>
+<blockquote>
+<div><p>上記で定義した設計変数と目的関数とを用い、メインスクリプトを作成します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;The minimum code example to execute parameter optimization using PyFemtet.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
+
+<span class="k">def</span> <span class="nf">max_displacement</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Objective function&quot;&quot;&quot;</span>
+    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">dy</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># prepareing optimization object</span>
+    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">()</span>
+
+    <span class="c1"># parameter setting</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="c1"># objective setting</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">max_displacement</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># run optimization</span>
+    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>For this script to actually work, you need a Femtet stress analysis project with variables <code class="docutils literal notranslate"><span class="pre">w</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>目的関数は第一引数に Femtet インスタンスを取る必要がありますが、このインスタンスは <code class="docutils literal notranslate"><span class="pre">FEMOpt</span></code> クラス内で生成されるので、スクリプト内で明示的に定義する必要はありません。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p><code class="docutils literal notranslate"><span class="pre">add_parameter()</span></code> は Femtet 内で定数式を設定した変数にのみ行い、 文字式を設定した変数に対しては行わないでください。文字式が失われます。</p>
+</div>
+</div></blockquote>
+</li>
+<li><p>スクリプトを実行します。</p>
+<blockquote>
+<div><p>スクリプトが実行されると、進捗および結果が csv ファイルに保存されます。 csv ファイルの各行は一回の解析試行結果を示しています。各列の意味は以下の通りです。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>列名</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>trial</p></td>
+<td><p>その試行が何度目の試行であるか</p></td>
+</tr>
+<tr class="row-odd"><td><p>&lt;変数名&gt;</p></td>
+<td><p>スクリプトで指定した変数の値</p></td>
+</tr>
+<tr class="row-even"><td><p>&lt;目的名&gt;</p></td>
+<td><p>スクリプトで指定した目的関数の計算結果</p></td>
+</tr>
+<tr class="row-odd"><td><p>&lt;目的名&gt;_direction</p></td>
+<td><p>スクリプトで指定した目的関数の目標</p></td>
+</tr>
+<tr class="row-even"><td><p>&lt;拘束名&gt;</p></td>
+<td><p>スクリプトで指定した拘束関数の計算結果</p></td>
+</tr>
+<tr class="row-odd"><td><p>&lt;拘束名&gt;_lb</p></td>
+<td><p>スクリプトで指定した拘束関数の下限</p></td>
+</tr>
+<tr class="row-even"><td><p>&lt;拘束名&gt;_ub</p></td>
+<td><p>スクリプトで指定した拘束関数の上限</p></td>
+</tr>
+<tr class="row-odd"><td><p>feasible</p></td>
+<td><p>その試行がすべての拘束を満たすか</p></td>
+</tr>
+<tr class="row-even"><td><p>hypervolume</p></td>
+<td><p>（目的関数が2以上の場合のみ）その試行までの hypervolume</p></td>
+</tr>
+<tr class="row-odd"><td><p>message</p></td>
+<td><p>最適化プロセスによる特記事項</p></td>
+</tr>
+<tr class="row-even"><td><p>time</p></td>
+<td><p>試行が完了した時刻</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>&lt;&gt; で囲まれた項目はスクリプトに応じて内容と数が変化することを示しています。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>目的名、拘束名はスクリプト中で指定しない場合、obj_1, cns_1 などの値が自動で割り当てられます。</p>
+</div>
+</div></blockquote>
+</li>
+</ol>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="how_to_use_result_viewer.html" class="btn btn-neutral float-left" title="結果ビューア" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="how_to_deploy_cluster.html" class="btn btn-neutral float-right" title="（実験的機能）クラスタ計算の実行手順" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
