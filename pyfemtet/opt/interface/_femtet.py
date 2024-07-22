@@ -292,9 +292,9 @@ class FemtetInterface(FEMInterface):
         try:
             # 解析結果を開いた状態で Gaudi.Activate して ReExecute する場合、ReExecute の前後にアクティブ化イベントが必要
             if fun.__name__ == 'ReExecute':
-                post_activate_message(self.Femtet.hWnd)  # can raise pywintypes.error
+                if self.open_result_with_gui: post_activate_message(self.Femtet.hWnd)  # can raise pywintypes.error
                 returns = fun(*args, **kwargs)
-                post_activate_message(self.Femtet.hWnd)
+                if self.open_result_with_gui: post_activate_message(self.Femtet.hWnd)
             else:
                 returns = fun(*args, **kwargs)
         except (com_error, error):

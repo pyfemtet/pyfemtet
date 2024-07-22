@@ -1,7 +1,12 @@
-from femtetutils import util
+import logging
+
+from femtetutils import util, logger
 from pyfemtet.dispatch_extensions import _get_pid
 
 import ctypes
+
+
+logger.setLevel(logging.ERROR)
 
 
 def _get_dll():
@@ -11,7 +16,7 @@ def _get_dll():
 
 
 def _get_dll_with_set_femtet(Femtet):
-    dll = _get_dll(Femtet)
+    dll = _get_dll()
     pid = _get_pid(Femtet.hWnd)
     dll.SetCurrentFemtet.restype = ctypes.c_bool
     dll.SetCurrentFemtet(pid)
