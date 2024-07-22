@@ -10,7 +10,7 @@ from pyfemtet import _test_util
 LIBRARY_ROOT = os.path.dirname(pyfemtet.__file__)
 SAMPLE_DIR = os.path.join(LIBRARY_ROOT, 'opt', 'femprj_sample')
 
-RECORD_MODE = True
+RECORD_MODE = False
 
 os.chdir(LIBRARY_ROOT)
 
@@ -144,4 +144,5 @@ if __name__ == '__main__':
     #     print(path)
     #     if not 'cad' in path:
     #         main(path)
-    test_sample_parametric()
+    test_sample_gau_ex08_parametric()
+    test_sample_her_ex40_parametric()
