@@ -5,7 +5,7 @@ $yamlPath = Join-Path $yamlFolder $yamlBaseName".yaml"
 
 write-host $yamlPath
 
-poetry run pytest ./tests -s -k "sample" --progress-path=$yamlPath
+poetry run pytest ./tests -s -k "sample" --progress-path=$yamlPath  # --collect-only
 pause
 exit
 
