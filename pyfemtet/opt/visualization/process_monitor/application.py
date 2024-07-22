@@ -176,11 +176,11 @@ def g_debug():
 
     g_home_page = HomePage('Progress')
     g_worker_page = WorkerPage('Workers', '/workers', g_application)
-    g_rsm_page = RSMPage('RSM', '/RSM', g_application)
+    g_rsm_page = RSMPage('RSM', '/rsm', g_application)
 
     g_application.add_page(g_home_page, 0)
-    g_application.add_page(g_worker_page, 1)
-    g_application.add_page(g_rsm_page, 2)
+    g_application.add_page(g_rsm_page, 1)
+    g_application.add_page(g_worker_page, 2)
     g_application.setup_callback(debug=False)
 
     g_application.run(debug=True)
@@ -190,10 +190,12 @@ def main(history, status, worker_addresses, worker_status_list, host=None, port=
     g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
 
     g_home_page = HomePage('Progress')
+    g_rsm_page = RSMPage('RSM', '/rsm', g_application)
     g_worker_page = WorkerPage('Workers', '/workers', g_application)
 
     g_application.add_page(g_home_page, 0)
-    g_application.add_page(g_worker_page, 1)
+    g_application.add_page(g_rsm_page, 1)
+    g_application.add_page(g_worker_page, 2)
     g_application.setup_callback()
 
     g_application.start_server(host, port)

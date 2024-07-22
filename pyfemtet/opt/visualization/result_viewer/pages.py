@@ -15,6 +15,7 @@ from pyfemtet.opt.visualization.base import AbstractPage  # , logger
 from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization.complex_components.control_femtet import FemtetControl, FemtetState
 from pyfemtet.opt.visualization.complex_components.alert_region import AlertRegion
+from pyfemtet.opt.visualization.complex_components.rsm_graph import RSMGraph
 
 from pyfemtet.opt._femopt_core import History
 
@@ -487,7 +488,6 @@ class Tutorial(AbstractPage):
             placement='bottom',
         )
 
-
     def setup_layout(self):
         pass
 
@@ -624,28 +624,34 @@ class Tutorial(AbstractPage):
             if callback_context.triggered_id is None:
                 raise PreventUpdate
 
-            path = os.path.join(os.path.dirname(__file__), 'tutorial', 'tutorial.csv')
+            # get sample file
+            import pyfemtet
+            package_root = os.path.dirname(pyfemtet.__file__)
+            sample_dir = os.path.join(package_root, 'opt', 'femprj_sample')  # FIXME: locale によってパスを変える
+            path = os.path.join(sample_dir, 'wat_ex14_parametric_test_result.reccsv')
 
             if not os.path.exists(path):
                 msg = 'Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, no_update, alerts
-            self.application.history = History(path)
+            destination_file = path.replace('wat_ex14_parametric_test_result.reccsv', 'tutorial.csv')
+            shutil.copyfile(path, destination_file)
+            self.application.history = History(destination_file)
 
-            source_file = path.replace('tutorial.csv', 'wat_ex14_parametric.femprj')
+            source_file = path.replace('_test_result.reccsv', '.femprj')
             if not os.path.exists(source_file):
                 msg = 'Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, no_update, alerts
-            destination_file = path.replace('tutorial.csv', 'tutorial.femprj')
+            destination_file = source_file.replace('wat_ex14_parametric', 'tutorial')
             shutil.copyfile(source_file, destination_file)
 
-            source_folder = path.replace('tutorial.csv', 'wat_ex14_parametric.Results')
+            source_folder = path.replace('_test_result.reccsv', '.Results')
             if not os.path.exists(source_file):
                 msg = 'Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, no_update, alerts
-            destination_folder = path.replace('tutorial.csv', 'tutorial.Results')
+            destination_folder = source_folder.replace('wat_ex14_parametric', 'tutorial')
             shutil.copytree(source_folder, destination_folder, dirs_exist_ok=True)
 
             self.application.history.metadata[0] = json.dumps(
@@ -690,3 +696,19 @@ class Tutorial(AbstractPage):
         else:
             current_style.update(part)
             return current_style
+
+
+class RSMPage(AbstractPage):
+    """"""
+
+    def __init__(self, title, rel_url, application):
+        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        self.application: ProcessMonitorApplication = None
+        super().__init__(title, rel_url, application)
+
+    def setup_component(self):
+        self.rsm_graph: RSMGraph = RSMGraph()
+        self.add_subpage(self.rsm_graph)
+
+    def setup_layout(self):
+        self.layout = self.rsm_graph.layout

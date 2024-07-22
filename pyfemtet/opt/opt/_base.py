@@ -191,7 +191,7 @@ class AbstractOptimizer(ABC):
         """Returns the parameters in the specified format.
 
         Args:
-            format (str, optional): The desired format of the parameters. Can be 'df' (DataFrame), 'values', or 'dict'. Defaults to 'dict'.
+            format (str, optional): The desired format of the parameters. Can be 'df' (DataFrame), 'value' (alias of values), 'values' (np.ndarray), or 'dict'. Defaults to 'dict'.
 
         Returns:
             object: The parameters in the specified format.
