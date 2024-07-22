@@ -10,7 +10,7 @@ from pyfemtet import _test_util
 LIBRARY_ROOT = os.path.dirname(pyfemtet.__file__)
 SAMPLE_DIR = os.path.join(LIBRARY_ROOT, 'opt', 'femprj_sample')
 
-RECORD_MODE = False
+RECORD_MODE = True
 
 os.chdir(LIBRARY_ROOT)
 
