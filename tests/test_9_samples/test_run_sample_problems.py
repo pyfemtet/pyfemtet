@@ -134,9 +134,14 @@ def test_cad_sample_sldworks_ex01():
     main(py_script_path)
 
 
+def test_sample_parametric():
+    py_script_path = os.path.join(SAMPLE_DIR, 'ParametricIF.py')
+    main(py_script_path)
+
+
 if __name__ == '__main__':
     # for path in glob(os.path.join(SAMPLE_DIR, '*.py'), recursive=True):
     #     print(path)
     #     if not 'cad' in path:
     #         main(path)
-    test_sample_gal_ex58_parametric()
+    test_sample_parametric()
