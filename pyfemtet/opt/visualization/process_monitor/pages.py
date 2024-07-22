@@ -8,6 +8,7 @@ from pyfemtet.opt.visualization.wrapped_components import dcc, dbc, html
 from pyfemtet.opt.visualization.base import AbstractPage, logger
 from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization.complex_components.pm_graph import PredictionModelGraph
+from pyfemtet.message import Msg
 
 
 DBC_COLUMN_STYLE_CENTER = {
@@ -41,7 +42,7 @@ class HomePage(AbstractPage):
         # entire optimization status
         # noinspection PyAttributeOutsideInit
         self.entire_status_message = html.H4(
-            'Optimization status will be shown here.',
+            Msg.DEFAULT_STATUS_ALERT,
             className='alert-heading',
             id='optimization-entire-status-message',
         )
@@ -55,7 +56,7 @@ class HomePage(AbstractPage):
         # stop update button
         # noinspection PyAttributeOutsideInit
         self.toggle_update_graph_button = dbc.Checkbox(
-            label='Auto-update graph',
+            label=Msg.LABEL_AUTO_UPDATE,
             class_name='form-switch',
             id='toggle-update-graph',
             value=True,
@@ -64,7 +65,7 @@ class HomePage(AbstractPage):
         # interrupt button
         # noinspection PyAttributeOutsideInit
         self.interrupt_button = dbc.Button(
-            children='Interrupt Optimization',
+            children=Msg.LABEL_INTERRUPT,
             color='danger',
             id='interrupt-optimization-button',
             disabled=True,
@@ -72,7 +73,7 @@ class HomePage(AbstractPage):
 
         # sync interval
         # noinspection PyAttributeOutsideInit
-        self.interval = dcc.Interval(id='process-monitor-home-interval', interval=1000)
+        self.interval = dcc.Interval(id='process-monitor-home-interval', interval=3000)
 
     def setup_layout(self):
         """"""
@@ -132,9 +133,6 @@ class HomePage(AbstractPage):
             State(self.main_graph.data_length.id, self.main_graph.data_length_prop),  # check should update or not
             prevent_initial_call=True,)
         def update_graph(_, update_switch, current_graph_data_length):
-            logger.debug('====================')
-            logger.debug(f'update_graph called by {callback_context.triggered_id}')
-
             current_graph_data_length = 0 if current_graph_data_length is None else current_graph_data_length
 
             if callback_context.triggered_id is None:

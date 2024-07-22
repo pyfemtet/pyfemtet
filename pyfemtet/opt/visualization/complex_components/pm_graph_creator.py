@@ -11,6 +11,7 @@ from pyfemtet.opt._femopt_core import History
 
 from pyfemtet.opt.prediction.base import PyFemtetPredictionModel
 from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
+from pyfemtet.message import Msg
 
 
 class PredictionModelCreator:
@@ -139,7 +140,7 @@ class PredictionModelCreator:
 
             # layout
             fig.update_layout(
-                title='Objective Function Surface',
+                title=Msg.GRAPH_TITLE_PREDICTION_MODEL,
                 scene=dict(
                     xaxis_title=prm_name_1,
                     yaxis_title=prm_name_2,
@@ -151,7 +152,7 @@ class PredictionModelCreator:
 
         else:
             fig.add_trace(
-                go.Scatter(x=xx, y=zz_mean, name='prediction model')
+                go.Scatter(x=xx, y=zz_mean, name=Msg.LEGEND_LABEL_PREDICTION_MODEL)
             )
             # std
             fig.add_trace(
@@ -160,9 +161,8 @@ class PredictionModelCreator:
                     y=np.concatenate([zz_upper, zz_lower[::-1]]),
                     opacity=0.3,
                     fill='toself',
-                    name='std. dev. of model',
+                    name=Msg.LEGEND_LABEL_PREDICTION_MODEL_STDDEV,
                 )
             )
-
 
         return fig

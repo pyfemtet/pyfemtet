@@ -43,7 +43,7 @@ def main(
         try:
             exp = workPart.Expressions.FindObject(k)
         except NXOpen.NXException:
-            print(f'├ 変数{k}は .prt ファイルに含まれていません。無視されます。')
+            print(f'├ .prt does not contain parameter{k}. {k} is ignored.')
             continue
 
         workPart.Expressions.Edit(exp, str(v))
@@ -54,10 +54,10 @@ def main(
         # 更新に失敗
         except NXOpen.NXException as e:
             print(f'├ ERROR! {e}')
-            print(f'└ 形状が破綻しました。操作を取り消します。')
+            print(f'└ Failed to update model.')
             return None
 
-    print('│ model 更新に成功しました。')
+    print('│ Model updated successfully.')
 
     try:
         # parasolid のエクスポート
@@ -84,17 +84,17 @@ def main(
 
     except Exception as e:
         print(f'├ ERROR! {e}')
-        print(f'└ parasolid 更新に失敗しました。')
+        print(f'└ Failed to update parasolid file.')
         return None
 
-    print('└ parasolid 更新が正常に終了しました。')
+    print('└ Parasolid file updates successfully.')
     return None
 
 
 
 if __name__ == "__main__":
     print('---NX started---')
-    print('current directory: ', os.getcwd())
+    # print('current directory: ', os.getcwd())
     print('arguments: ')
     for arg in sys.argv[1:]:
         print('│ ', arg)

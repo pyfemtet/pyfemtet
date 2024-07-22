@@ -6,6 +6,7 @@ import pandas as pd
 
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, logger
 from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, PredictionModelPage
+from pyfemtet.message import Msg
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):
@@ -173,9 +174,9 @@ def g_debug():
         is_debug=False,
     )
 
-    g_home_page = HomePage('Progress')
-    g_worker_page = WorkerPage('Workers', '/workers', g_application)
-    g_rsm_page = PredictionModelPage('Predict', '/prediction-model', g_application)
+    g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
+    g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)
+    g_worker_page = WorkerPage(Msg.PAGE_TITLE_WORKERS, '/workers', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_rsm_page, 1)
@@ -188,9 +189,9 @@ def g_debug():
 def main(history, status, worker_addresses, worker_status_list, host=None, port=None):
     g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
 
-    g_home_page = HomePage('Progress')
-    g_rsm_page = PredictionModelPage('Predict', '/prediction-model', g_application)
-    g_worker_page = WorkerPage('Workers', '/workers', g_application)
+    g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
+    g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)
+    g_worker_page = WorkerPage(Msg.PAGE_TITLE_WORKERS, '/workers', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_rsm_page, 1)

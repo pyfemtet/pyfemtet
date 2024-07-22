@@ -20,6 +20,10 @@ from multiprocessing.managers import SyncManager
 
 import logging
 from .logger import get_logger
+
+from pyfemtet.message import Msg
+
+
 logger = get_logger('dispatch')
 logger.setLevel(logging.INFO)
 

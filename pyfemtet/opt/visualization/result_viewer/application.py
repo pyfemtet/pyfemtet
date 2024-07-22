@@ -1,5 +1,6 @@
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase
 from pyfemtet.opt.visualization.result_viewer.pages import HomePage, PredictionModelPage
+from pyfemtet.message import Msg
 
 
 class ResultViewerApplication(PyFemtetApplicationBase):
@@ -21,8 +22,8 @@ def debug():
 
     g_application = ResultViewerApplication()
 
-    g_home_page = HomePage('result')
-    g_rsm_page = PredictionModelPage('Predict', '/prediction-model', g_application)
+    g_home_page = HomePage(Msg.PAGE_TITLE_RESULT)
+    g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_rsm_page, 1)
@@ -34,8 +35,8 @@ def debug():
 def main():
     g_application = ResultViewerApplication()
 
-    g_home_page = HomePage('result')
-    g_rsm_page = PredictionModelPage('Predict', '/prediction-model', g_application)
+    g_home_page = HomePage(Msg.PAGE_TITLE_RESULT)
+    g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_rsm_page, 1)

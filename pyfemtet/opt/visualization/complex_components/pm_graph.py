@@ -22,6 +22,7 @@ import numpy as np
 
 from pyfemtet.opt.visualization.complex_components.pm_graph_creator import PredictionModelCreator
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
+from pyfemtet.message import Msg
 
 
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
@@ -67,7 +68,7 @@ class PredictionModelGraph(AbstractPage):
         self.location = dcc.Location(id='rsm-graph-location', refresh=True)
 
         # setup header
-        self.tab_list = [dbc.Tab(label='Prediction Model')]
+        self.tab_list = [dbc.Tab(label=Msg.TAB_LABEL_PREDICTION_MODEL)]
         self.tabs = dbc.Tabs(self.tab_list)
 
         # setup body
@@ -97,9 +98,9 @@ class PredictionModelGraph(AbstractPage):
 
         # update rsm button
         self.fit_rsm_button_spinner = dbc.Spinner(size='sm', spinner_style={'display': 'none'})
-        self.fit_rsm_button = dbc.Button([self.fit_rsm_button_spinner, ' Recalculate Model'], color='success')
+        self.fit_rsm_button = dbc.Button([self.fit_rsm_button_spinner, Msg.LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON], color='success')
         self.redraw_graph_button_spinner = dbc.Spinner(size='sm', spinner_style={'display': 'none'})
-        self.redraw_graph_button = dbc.Button([self.redraw_graph_button_spinner, ' Redraw graph'])
+        self.redraw_graph_button = dbc.Button([self.redraw_graph_button_spinner, Msg.LABEL_OF_REDRAW_PREDICTION_MODEL_GRAPH_BUTTON])
 
         # # set data length (to notify data updated to application)
         # self.data_length_prop = 'data-df-length'  # must start with "data-"
@@ -128,9 +129,9 @@ class PredictionModelGraph(AbstractPage):
         )
 
         dropdown_rows = [
-            dbc.Row([dbc.Col(html.Span('prm-axis'), align='center', style={'text-align': 'end'}, width=2), dbc.Col(self.axis_controllers[0])]),
-            dbc.Row([dbc.Col(html.Span('prm-axis-2'), align='center', style={'text-align': 'end'}, width=2), dbc.Col(self.axis_controllers[1])], id='prm-axis-2-dropdown'),
-            dbc.Row([dbc.Col(html.Span('obj-axis'), align='center', style={'text-align': 'end'}, width=2), dbc.Col(self.axis_controllers[2])]),
+            dbc.Row([dbc.Col(html.Span(Msg.LABEL_OF_AXIS1_SELECTION), align='center', style={'text-align': 'end'}, width=2), dbc.Col(self.axis_controllers[0])]),
+            dbc.Row([dbc.Col(html.Span(Msg.LABEL_OF_AXIS2_SELECTION), align='center', style={'text-align': 'end'}, width=2), dbc.Col(self.axis_controllers[1])], id='prm-axis-2-dropdown'),
+            dbc.Row([dbc.Col(html.Span(Msg.LABEL_OF_AXIS3_SELECTION), align='center', style={'text-align': 'end'}, width=2), dbc.Col(self.axis_controllers[2])]),
         ]
 
         self.card_footer = dbc.CardFooter(
@@ -229,18 +230,18 @@ class PredictionModelGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error('No history is selected.')
+                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
                 return go.Figure()  # to re-enable buttons, fire callback chain
             prm_names = self.application.history.prm_names
 
             # check history
             if len(self.data_accessor()) == 0:
-                logger.error('No FEM result.')
+                logger.error(Msg.ERR_NO_FEM_RESULT)
                 return go.Figure()  # to re-enable buttons, fire callback chain
 
             # check fit
             if not hasattr(self.rsm_creator, 'history'):
-                logger.error('Prediction model is not calculated yet.')
+                logger.error(Msg.ERR_NO_PREDICTION_MODEL)
                 return go.Figure()  # to re-enable buttons, fire callback chain
 
             # get indices to remove
@@ -300,7 +301,7 @@ class PredictionModelGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error('No history selected.')
+                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
                 raise PreventUpdate
 
             # add dropdown item to dropdown
@@ -391,7 +392,7 @@ class PredictionModelGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error('No history selected.')
+                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
                 raise PreventUpdate
             prm_names = self.application.history.prm_names
             obj_names = self.application.history.obj_names
@@ -427,14 +428,14 @@ class PredictionModelGraph(AbstractPage):
                     if new_label != current_ax2_label:
                         ret[ax1_label_key] = new_label
                     else:
-                        logger.error('Cannot select same parameter as axis 2.')
+                        logger.error(Msg.ERR_CANNOT_SELECT_SAME_PARAMETER)
 
                 # ax2
                 elif callback_context.triggered_id['type'] == 'axis2-dropdown-menu-item':
                     if new_label != current_ax1_label:
                         ret[ax2_label_key] = new_label
                     else:
-                        logger.error('Cannot select same parameter as axis 1.')
+                        logger.error(Msg.ERR_CANNOT_SELECT_SAME_PARAMETER)
 
                 # ax3
                 elif callback_context.triggered_id['type'] == 'axis3-dropdown-menu-item':

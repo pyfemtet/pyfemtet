@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 
 # built-in
-import json
+import traceback
 from time import sleep
 
 # 3rd-party
@@ -12,6 +12,7 @@ import pandas as pd
 # pyfemtet relative
 from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt._femopt_core import OptimizationStatus
+from pyfemtet.message import Msg
 
 # logger
 import logging
@@ -27,8 +28,10 @@ class OptimizationMethodChecker:
         self.opt = opt
 
     def check_parallel(self, raise_error=True):
-        function = 'parallel computing'
-        message = f'{type(self.opt)} is not implement {function}'
+        function = 'parallel-processing'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
@@ -36,7 +39,9 @@ class OptimizationMethodChecker:
 
     def check_timeout(self, raise_error=True):
         function = 'timeout'
-        message = f'{type(self.opt)} is not implement {function}'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
@@ -44,23 +49,29 @@ class OptimizationMethodChecker:
 
     def check_multi_objective(self, raise_error=True):
         function = 'multi-objective'
-        message = f'{type(self.opt)} is not implement {function}'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
             logger.warning(message)
 
     def check_strict_constraint(self, raise_error=True):
-        function = 'strict_constraint'
-        message = f'{type(self.opt)} is not implement {function}'
+        function = 'strict-constraint'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
             logger.warning(message)
 
     def check_constraint(self, raise_error=True):
-        function = 'strict_constraint'
-        message = f'{type(self.opt)} is not implement {function}'
+        function = 'constraint'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
@@ -68,7 +79,9 @@ class OptimizationMethodChecker:
 
     def check_skip(self, raise_error=True):
         function = 'skip'
-        message = f'{type(self.opt)} is not implement {function}'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
@@ -76,7 +89,9 @@ class OptimizationMethodChecker:
 
     def check_seed(self, raise_error=True):
         function = 'random seed setting'
-        message = f'{type(self.opt)} is not implement {function}'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
@@ -84,7 +99,9 @@ class OptimizationMethodChecker:
 
     def check_incomplete_bounds(self, raise_error=True):
         function = 'optimize with no or incomplete bounds'
-        message = f'{type(self.opt)} is not implement "{function}"'
+        method = str(type(self.opt))
+        message = (Msg.ERR_NOT_IMPLEMENTED
+                   + f'method:{method}, function:{function}')
         if raise_error:
             raise NotImplementedError(message)
         else:
@@ -137,15 +154,18 @@ class AbstractOptimizer(ABC):
 
         # x の更新
         self.parameters['value'] = x
-        logger.info(f'Start calculation with input: {x}')
+        logger.info('---------------------')
+        logger.info(f'input: {x}')
 
         # FEM の更新
         logger.debug('fem.update() start')
         try:
             self.fem.update(self.parameters)
         except Exception as e:
-            logger.warning('An exception has occurred during FEM update.')
-            raise e
+            logger.info(type(e).__name__, ':', e)
+            logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
+            logger.info(x)
+            raise e  # may be just a ModelError, etc.
 
         # y, _y, c の更新
         logger.debug('calculate y start')
@@ -171,7 +191,7 @@ class AbstractOptimizer(ABC):
 
         logger.debug('history.record end')
 
-        logger.info(f'End calculation with output: {_y}')
+        logger.info(f'output: {_y}')
 
         return np.array(y), np.array(_y), np.array(c)
 
@@ -210,7 +230,7 @@ class AbstractOptimizer(ABC):
                 ret[row['name']] = row.value
             return ret
         else:
-            raise ValueError('get_parameter() got invalid format: {format}')
+            raise ValueError(f'get_parameter() got invalid format: {format}')
 
     def _check_interruption(self):
         """"""
@@ -274,7 +294,8 @@ class AbstractOptimizer(ABC):
             logger.error("=================================")
             logger.error("An unexpected error has occurred!")
             logger.error("=================================")
-            logger.error(f'{type(e)}: {e}')
+            logger.error(f'{type(e).__name__}: {e}')
+            traceback.print_exc()
             self._is_error_exit = True
             self.worker_status.set(OptimizationStatus.CRASHED)
         finally:
@@ -284,7 +305,7 @@ class AbstractOptimizer(ABC):
 
     @abstractmethod
     def run(self) -> None:
-        """Start calcuration using optimization library."""
+        """Start calculation using optimization library."""
         pass
 
     @abstractmethod

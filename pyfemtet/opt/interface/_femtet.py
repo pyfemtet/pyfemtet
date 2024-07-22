@@ -33,6 +33,7 @@ from pyfemtet.dispatch_extensions import (
     DispatchExtensionException,
 )
 from pyfemtet.opt.interface import FEMInterface, logger
+from pyfemtet.message import Msg
 
 
 def post_activate_message(hwnd):
@@ -204,17 +205,15 @@ class FemtetInterface(FEMInterface):
         if not hasattr(constants, 'STATIC_C'):
             cmd = f'{sys.executable} -m win32com.client.makepy FemtetMacro'
             os.system(cmd)
-            message = 'Femtet python マクロ定数の設定が完了してないことを検出しました.'
-            message += '設定は自動で行われました（python -m win32com.client.makepy FemtetMacro）.'
-            message += 'プログラムを再起動してください.'
+            message = Msg.ERR_NO_MAKEPY
             print('================')
             print(message)
             print('================')
-            input('終了するには Enter を押してください。')
+            input('Press enter to finish...')
             raise RuntimeError(message)
 
         if self.Femtet is None:
-            raise RuntimeError('Femtet との接続に失敗しました.')
+            raise RuntimeError(Msg.ERR_FEMTET_CONNECTION_FAILED)
 
     def _call_femtet_api(
             self,
@@ -291,10 +290,11 @@ class FemtetInterface(FEMInterface):
         # API を実行
         try:
             # 解析結果を開いた状態で Gaudi.Activate して ReExecute する場合、ReExecute の前後にアクティブ化イベントが必要
+            # さらに、プロジェクトツリーが開いていないとアクティブ化イベントも意味がないらしい。
             if fun.__name__ == 'ReExecute':
                 if self.open_result_with_gui or self.parametric_output_indexes_use_as_objective:
-                    post_activate_message(self.Femtet.hWnd)  # can raise pywintypes.error
-                returns = fun(*args, **kwargs)
+                    post_activate_message(self.Femtet.hWnd)
+                returns = fun(*args, **kwargs)  # can raise pywintypes.error
                 if self.open_result_with_gui or self.parametric_output_indexes_use_as_objective:
                     post_activate_message(self.Femtet.hWnd)
             else:
@@ -333,20 +333,19 @@ class FemtetInterface(FEMInterface):
                 # 再起動試行回数の上限に達していたら諦める
                 logger.debug(' ' * print_indent + f'現在の Femtet 再起動回数: {recourse_depth}')
                 if recourse_depth >= self.max_api_retry:
-                    raise Exception('Femtet のプロセスが異常終了し、正常に再起動できませんでした.')
+                    raise Exception(Msg.ERR_FEMTET_CRASHED_AND_RESTART_FAILED)
 
                 # 再起動
-                logger.warn('Femtet プロセスの異常終了が検知されました. 回復を試みます.')
+                logger.warn(' ' * print_indent + Msg.WARN_FEMTET_CRASHED_AND_TRY_RESTART)
                 CoInitialize()
                 self.connect_femtet(connect_method='new')
                 self.open(self.femprj_path, self.model_name)
 
                 # 状態を復元するために一度変数を渡して解析を行う（fun.__name__がSolveなら2度手間だが）
-                logger.info(' ' * print_indent + f'Femtet が再起動されました。解析を行い、状態回復を試みます。')
+                logger.info(' ' * print_indent + Msg.INFO_FEMTET_CRASHED_AND_RESTARTED)
                 self.update(self.parameters)
 
                 # 与えられた API の再帰的再試行
-                logger.info(' ' * print_indent + f'Femtet が回復されました。コマンド {fun.__name__} を再試行します。')
                 return self._call_femtet_api(
                     fun,
                     return_value_if_failed,
@@ -425,16 +424,15 @@ class FemtetInterface(FEMInterface):
                     (self.connect_method == 'new')
                     and (not self.allow_without_project)
             ):
-                raise RuntimeError(
-                    'femprj_path を指定せず Femtet の connect_method に "new" を指定する場合、"allow_without_project" 引数を True に設定してください。')
+                raise RuntimeError(Msg.ERR_NEW_FEMTET_BUT_NO_FEMPRJ)
+
             # さらに auto の場合は Femtet が存在しなければ new と同じ挙動になるので同様の処理
             if (
                     (self.connect_method == 'auto')
                     and (len(_get_pids(process_name='Femtet.exe')) == 0)
                     and (not self.allow_without_project)
             ):
-                raise RuntimeError(
-                    'femprj_path を指定せず Femtet の connect_method を指定しない（又は "auto" に指定する）場合、Femtet を起動して処理したい .femprj ファイルを開いた状態にしてください。')
+                raise RuntimeError(Msg.ERR_NEW_FEMTET_BUT_NO_FEMPRJ)
             self.connect_femtet(self.connect_method)
 
         # 最終的に接続した Femtet の femprj_path と model を インスタンスに戻す
@@ -454,25 +452,22 @@ class FemtetInterface(FEMInterface):
             try:
                 variable_names = self.Femtet.GetVariableNames_py()
             except AttributeError as e:
-                message = 'GetVariableNames_py' + 'にアクセスできません。'
-                f'Femtet {major}.{minor}.{bugfix} 以降で「マクロの有効化」が行われていない可能性があります。'
-                'スタートメニューから、インストールされいてる Femtet と同一バージョンの「マクロ機能を有効化する」コマンドを管理者権限で実行してください。'
                 print('================')
-                logger.error(message)
+                logger.error(Msg.ERR_CANNOT_ACCESS_API + 'GetVariableNames_py')
+                logger.error(Msg.CERTIFY_MACRO_VERSION)
                 print('================')
-                input('終了するには Enter を押してください。')
+                input(Msg.ENTER_TO_QUIT)
                 raise e
                 
             if variable_names is not None:
                 if param_name in variable_names:
                     return self.Femtet.GetVariableValue(param_name)
-            message = f'Femtet 解析モデルに変数 {param_name} がありません.'
-            message += f'現在のモデルに設定されている変数は {variable_names} です.'
-            message += '大文字・小文字の区別に注意してください.'
+            message = Msg.ERR_NO_SUCH_PARAMETER_IN_FEMTET
             print('================')
             logger.error(message)
+            logger.error(f'`{param_name}` not in {variable_names}')
             print('================')
-            input('終了するには Enter を押してください。')
+            input(Msg.ENTER_TO_QUIT)
             raise RuntimeError(message)
         else:
             return None
@@ -487,7 +482,7 @@ class FemtetInterface(FEMInterface):
             self.Femtet.Gaudi.Activate,
             True,  # 戻り値を持たないのでここは無意味で None 以外なら何でもいい
             Exception,  # 生きてるのに開けない場合
-            error_message='解析モデルが開かれていません',
+            error_message=Msg.NO_ANALYSIS_MODEL_IS_OPEN,
         )
 
         major, minor, bugfix = 2023, 1, 1
@@ -497,14 +492,14 @@ class FemtetInterface(FEMInterface):
                 fun=self.Femtet.GetVariableNames_py,
                 return_value_if_failed=False,  # 意味がない
                 if_error=ModelError,  # 生きてるのに失敗した場合
-                error_message=f'GetVariableNames_py に失敗しました。',
+                error_message=f'GetVariableNames_py failed.',
                 is_Gaudi_method=True,
             )
 
             # 変数を含まないプロジェクトである場合
             if existing_variable_names is None:
                 if with_warning:
-                    return ['解析モデルに変数が含まれていません。']
+                    return [Msg.FEMTET_ANALYSIS_MODEL_WITH_NO_PARAMETER]
                 else:
                     return None
 
@@ -518,12 +513,12 @@ class FemtetInterface(FEMInterface):
                         fun=self.Femtet.UpdateVariable,
                         return_value_if_failed=False,
                         if_error=ModelError,  # 生きてるのに失敗した場合
-                        error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
+                        error_message=Msg.ERR_FAILED_TO_UPDATE_VARIABLE + f'{value} -> {name}',
                         is_Gaudi_method=True,
                         args=(name, value),
                     )
                 else:
-                    msg = f'変数 {name} は 解析モデル {self.model_name} に含まれていません。無視されます。'
+                    msg = f'{name} not in {self.model_name}: ' + Msg.WARN_IGNORE_PARAMETER_NOT_CONTAINED
                     warnings.append(msg)
                     logger.warn(msg)
 
@@ -537,7 +532,7 @@ class FemtetInterface(FEMInterface):
                     fun=self.Femtet.UpdateVariable,
                     return_value_if_failed=False,
                     if_error=ModelError,  # 生きてるのに失敗した場合
-                    error_message=f'変数の更新に失敗しました：変数{name}, 値{value}',
+                    error_message=Msg.ERR_FAILED_TO_UPDATE_VARIABLE + f'{value} -> {name}',
                     is_Gaudi_method=True,
                     args=(name, value),
                 )
@@ -561,7 +556,7 @@ class FemtetInterface(FEMInterface):
             self.Femtet.Gaudi.ReExecute,
             False,
             ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
+            error_message=Msg.ERR_RE_EXECUTE_MODEL_FAILED,
             is_Gaudi_method=True,
         )
 
@@ -570,7 +565,7 @@ class FemtetInterface(FEMInterface):
             self.Femtet.Redraw,
             False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
             ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
+            error_message=Msg.ERR_MODEL_REDRAW_FAILED,
             is_Gaudi_method=True,
         )
 
@@ -584,7 +579,7 @@ class FemtetInterface(FEMInterface):
             self.Femtet.Gaudi.Mesh,
             0,
             MeshError,
-            'メッシュ生成に失敗しました',
+            Msg.ERR_MODEL_MESH_FAILED,
             is_Gaudi_method=True,
         )
 
@@ -594,7 +589,7 @@ class FemtetInterface(FEMInterface):
                 fun=solve_via_parametric_dll,
                 return_value_if_failed=False,
                 if_error=SolveError,
-                error_message='パラメトリック解析を用いたソルブに失敗しました',
+                error_message=Msg.ERR_PARAMETRIC_SOLVE_FAILED,
                 is_Gaudi_method=True,
                 args=(self.Femtet,),
             )
@@ -604,7 +599,7 @@ class FemtetInterface(FEMInterface):
                 self.Femtet.Solve,
                 False,
                 SolveError,
-                'ソルブに失敗しました',
+                Msg.ERR_SOLVE_FAILED,
                 is_Gaudi_method=True,
             )
 
@@ -613,7 +608,7 @@ class FemtetInterface(FEMInterface):
             self.Femtet.OpenCurrentResult,
             False,
             SolveError,  # 生きてるのに開けない場合
-            error_message='解析結果のオープンに失敗しました',
+            error_message=Msg.ERR_OPEN_RESULT_FAILED,
             is_Gaudi_method=True,
             args=(self.open_result_with_gui,),
         )
@@ -633,13 +628,11 @@ class FemtetInterface(FEMInterface):
             try:
                 self.Femtet.Exit(True)
             except AttributeError as e:
-                message = 'Femtet.Exit()' + 'にアクセスできません。'
-                f'Femtet {major}.{minor}.{bugfix} 以降で「マクロの有効化」が行われていない可能性があります。'
-                'スタートメニューから、インストールされいてる Femtet と同一バージョンの「マクロ機能を有効化する」コマンドを管理者権限で実行してください。'
                 print('================')
-                logger.error(message)
+                logger.error(Msg.ERR_CANNOT_ACCESS_API + 'Femtet.Exit()')
+                logger.error(Msg.CERTIFY_MACRO_VERSION)
                 print('================')
-                input('終了するには Enter を押してください。')
+                input(Msg.ENTER_TO_QUIT)
                 raise e
 
         else:
@@ -653,7 +646,7 @@ class FemtetInterface(FEMInterface):
                 start = time()
                 while psutil.pid_exists(pid):
                     if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
-                        logger.error('Femtet の終了に失敗しました。')
+                        logger.error(Msg.ERR_CLOSE_FEMTET_FAILED)
                         break
                     sleep(1)
                 sleep(1)
@@ -724,7 +717,7 @@ class FemtetInterface(FEMInterface):
                 return content
 
             else:
-                raise Exception('pdt ファイルの保存でエラーが発生しました。')
+                raise Exception(Msg.ERR_FAILED_TO_SAVE_PDT)
 
         else:
             return None
@@ -744,10 +737,10 @@ class FemtetInterface(FEMInterface):
         self.Femtet.RedrawMode = True  # 逐一の描画をオン
 
         if not succeed:
-            raise Exception('jpg ファイルの保存でエラーが発生しました。')
+            raise Exception(Msg.ERR_FAILED_TO_SAVE_JPG)
 
         if not os.path.exists(jpg_path):
-            raise Exception('保存した jpg ファイルが見つかりませんでした。')
+            raise Exception(Msg.ERR_JPG_NOT_FOUND)
 
         with open(jpg_path, 'rb') as f:
             content = f.read()

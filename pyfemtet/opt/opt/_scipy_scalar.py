@@ -51,10 +51,6 @@ class ScipyScalarOptimizer(AbstractOptimizer):
         try:
             _, obj_values, cns_values = self.f(x)
         except (ModelError, MeshError, SolveError) as e:
-            logger.info(e)
-            logger.info('以下の変数で FEM 解析に失敗しました。')
-            print(self.get_parameter('dict'))
-
             # 現状、エラーが起きたらスキップできない
             raise StopIteration
 

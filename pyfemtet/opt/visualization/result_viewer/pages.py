@@ -19,6 +19,8 @@ from pyfemtet.opt.visualization.complex_components.pm_graph import PredictionMod
 
 from pyfemtet.opt._femopt_core import History
 
+from pyfemtet.message import Msg
+
 
 class HomePage(AbstractPage):
 
@@ -44,7 +46,7 @@ class HomePage(AbstractPage):
 
         # open pdt (or transfer variable to femtet)
         self.open_pdt_button = dbc.Button(
-            'Open Result in Femtet',
+            Msg.LABEL_OPEN_PDT_BUTTON,
             id='open-pdt-button',
             color='primary',
             className="position-relative",  # need to show badge
@@ -52,14 +54,14 @@ class HomePage(AbstractPage):
 
         # update parameter
         self.update_parameter_button = dbc.Button(
-            'Reconstruct Model',
+            Msg.LABEL_RECONSTRUCT_MODEL_BUTTON,
             id='update-parameter-button',
             color='secondary',
         )
 
         # file picker
         self.file_picker_button = dbc.Button(
-            'drag and drop or select files',
+            Msg.LABEL_FILE_PICKER,
             id='file-picker-button',
             color='primary',
         )
@@ -170,14 +172,13 @@ class HomePage(AbstractPage):
             # check Femtet state
             connection_state = self.femtet_control.check_femtet_state()
             if connection_state == FemtetState.missing or connection_state == FemtetState.unconnected:
-                msg = ('Connection to Femtet is not established. '
-                       'Launch Femtet and Open a project.')
+                msg = Msg.ERR_NO_CONNECTION_ESTABLISHED
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return alerts
 
             # check selection
             if selection_data is None:
-                msg = 'No result plot is selected.'
+                msg = Msg.ERR_NO_SOLUTION_SELECTED
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return alerts
 
@@ -188,12 +189,12 @@ class HomePage(AbstractPage):
 
             # check metadata is valid
             if femprj_path is None:
-                msg = 'The femprj file path in the history csv is not found or valid. '
+                msg = Msg.ERR_FEMPRJ_IN_CSV_NOT_FOUND
                 alerts = self.alert_region.create_alerts(msg, color='danger')
                 return alerts
 
             if model_name is None:
-                msg = 'The model name in the history csv is not found.'
+                msg = Msg.ERR_MODEL_IN_CSV_NOT_FOUND
                 alerts = self.alert_region.create_alerts(msg, color='danger')
                 return alerts
 
@@ -219,7 +220,7 @@ class HomePage(AbstractPage):
             succeed = Femtet.OpenPDT(pdt_path, True)
 
             if not succeed:
-                msg = f'Failed to open {pdt_path}.'
+                msg = Msg.ERR_FAILED_TO_OPEN_PREFIX + pdt_path
                 alerts = self.alert_region.create_alerts(msg, color='danger')
                 return alerts
 
@@ -238,27 +239,23 @@ class HomePage(AbstractPage):
             # check Femtet state
             connection_state = self.femtet_control.check_femtet_state()
             if connection_state != FemtetState.connected:
-                msg = ('Connection to Femtet is not established. '
-                       'Launch Femtet and Open a project.')
+                msg = Msg.ERR_NO_CONNECTION_ESTABLISHED
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return alerts
 
             # check selection
             if selection_data is None:
-                msg = 'No result plot is selected.'
+                msg = Msg.ERR_NO_SOLUTION_SELECTED
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return alerts
 
             try:
                 Femtet = self.femtet_control.fem.Femtet
 
-
                 # check model to open is included in current project
                 if (self.femtet_control.fem.femprj_path != Femtet.Project) \
                         or (self.femtet_control.fem.model_name not in Femtet.GetAnalysisModelNames_py()):
-                    msg = (f'{self.femtet_control.fem.model_name} is not in current project. '
-                           f'Please check opened project. '
-                           f'For example, not "analysis model only" but your .femprj file.')
+                    msg = Msg.ERR_NO_SUCH_MODEL_IN_FEMPRJ + f' model name: {self.femtet_control.fem.model_name}'
                     alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                     return alerts
 
@@ -363,19 +360,19 @@ class HomePage(AbstractPage):
             # alert
             new_alerts = current_alerts
             if femprj_path_history_on_history is None:
-                msg = '.femprj file path of the history csv is invalid. Please certify matching between csv and opening .femprj file.'
+                msg = Msg.WARN_INCONSISTENT_FEMPRJ_PATH
                 new_alerts = self.alert_region.create_alerts(msg, 'warning', new_alerts)
             else:
                 if not is_same_femprj:
-                    msg = '.femprj file path of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and .femprj file.'
+                    msg = Msg.WARN_INCONSISTENT_FEMPRJ_PATH
                     new_alerts = self.alert_region.create_alerts(msg, 'warning', new_alerts)
 
             if model_name_on_history is None:
-                msg = 'Analysis model name of the history csv is invalid. Please certify matching between csv and opening analysis model.'
+                msg = Msg.WARN_INVALID_MODEL_NAME
                 new_alerts = self.alert_region.create_alerts(msg, 'warning', new_alerts)
             else:
                 if not is_same_model:
-                    msg = 'Analysis model name of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and opening analysis model.'
+                    msg = Msg.WARN_INCONSISTENT_MODEL_NAME
                     new_alerts = self.alert_region.create_alerts(msg, 'warning', new_alerts)
 
             if new_alerts == current_alerts:
@@ -409,7 +406,7 @@ class Tutorial(AbstractPage):
 
         # switch tutorial mode (always visible)
         self.tutorial_mode_switch = dbc.Checklist(
-            ['tutorial mode'],
+            [Msg.LABEL_TUTORIAL_MODE_SWITCH],
             id='tutorial-mode-switch',
             switch=True,
             value=False
@@ -418,17 +415,14 @@ class Tutorial(AbstractPage):
         # load sample csv
         self.load_sample_csv_badge = self.create_badge('Click Me!', 'load-sample-csv-badge')
         self.load_sample_csv_button = dbc.Button(
-            children=['Load sample csv', self.load_sample_csv_badge],
+            children=[Msg.LABEL_LOAD_SAMPLE_CSV, self.load_sample_csv_badge],
             id='load-sample-csv-button',
             className="position-relative",  # need to show badge
         )
         self.load_sample_csv_popover = dbc.Popover(
             children=[
-                dbc.PopoverHeader('Load CSV'),
-                dbc.PopoverBody(
-                    'Open your optimization result. Then connecting to femtet will start automatically. '
-                    'Note that in tutorial mode, this button loads the ready-made sample csv and open sample femprj.'
-                ),
+                dbc.PopoverHeader(Msg.LOAD_CSV_POPOVER_HEADER),
+                dbc.PopoverBody(Msg.LOAD_CSV_POPOVER_BODY),
             ],
             id='load-sample-csv-popover',
             target=self.load_sample_csv_button.id,
@@ -445,12 +439,10 @@ class Tutorial(AbstractPage):
         self.graph_badge = self.create_badge('Choose a Point!', 'graph-badge')
         self.graph_popover = dbc.Popover(
             children=[
-                dbc.PopoverHeader('Main Graph'),
+                dbc.PopoverHeader(Msg.MAIN_GRAPH_POPOVER_HEADER),
                 dbc.PopoverBody(
                     children=[
-                        'Here the optimization history is shown. '
-                        'Each plot represents single FEM result. '
-                        'You can pick a result to open the corresponding result in Femtet. ',
+                        Msg.MAIN_GRAPH_POPOVER_BODY,
                         self.graph_badge
                     ],
                     className="position-relative",  # need to show badge
@@ -460,17 +452,15 @@ class Tutorial(AbstractPage):
             target=self.main_graph.tabs.id,
             is_open=False,
             placement='bottom',
+            hide_arrow=True,
         )
 
         # popover and badge of open pdt
         self.open_pdt_badge = self.create_badge('Click Me!', 'open-pdt-badge')
         self.open_pdt_popover = dbc.Popover(
             children=[
-                dbc.PopoverHeader('Open Result'),
-                dbc.PopoverBody(
-                    'After pick a point in the main graph, '
-                    'This button shows the corresponding FEM result in Femtet.'
-                ),
+                dbc.PopoverHeader(Msg.OPEN_PDT_POPOVER_HEADER),
+                dbc.PopoverBody(Msg.OPEN_PDT_POPOVER_BODY),
             ],
             id='open-pdt-popover',
             target=self.home_page.open_pdt_button.id,
@@ -480,7 +470,7 @@ class Tutorial(AbstractPage):
         # popover of connect-femtet
         self.connect_femtet_popover = dbc.Popover(
             children=[
-                dbc.PopoverBody('You can re-make connection to Femtet if it misses.'),
+                dbc.PopoverBody(Msg.CONNECT_FEMTET_POPOVER_BODY),
             ],
             id='connect-femtet-popover',
             target=self.femtet_control.connect_femtet_button.id,
@@ -631,7 +621,7 @@ class Tutorial(AbstractPage):
             path = os.path.join(sample_dir, 'wat_ex14_parametric_test_result.reccsv')
 
             if not os.path.exists(path):
-                msg = 'Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
+                msg = Msg.ERR_SAMPLE_CSV_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, no_update, alerts
             destination_file = path.replace('wat_ex14_parametric_test_result.reccsv', 'tutorial.csv')
@@ -640,7 +630,7 @@ class Tutorial(AbstractPage):
 
             source_file = path.replace('_test_result.reccsv', '.femprj')
             if not os.path.exists(source_file):
-                msg = 'Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
+                msg = Msg.ERR_SAMPLE_FEMPRJ_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, no_update, alerts
             destination_file = source_file.replace('wat_ex14_parametric', 'tutorial')
@@ -648,7 +638,7 @@ class Tutorial(AbstractPage):
 
             source_folder = path.replace('_test_result.reccsv', '.Results')
             if not os.path.exists(source_file):
-                msg = 'Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`'
+                msg = Msg.ERR_FEMPRJ_RESULT_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, no_update, alerts
             destination_folder = source_folder.replace('wat_ex14_parametric', 'tutorial')

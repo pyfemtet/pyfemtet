@@ -22,6 +22,7 @@ import numpy as np
 
 from pyfemtet.opt.visualization.complex_components import main_figure_creator
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
+from pyfemtet.message import Msg
 
 
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
@@ -60,12 +61,12 @@ class MainGraph(AbstractPage):
         self.figure_creators = [
             dict(
                 tab_id='tab-objective-plot',
-                label='objectives',
+                label=Msg.TAB_LABEL_OBJECTIVES,
                 creator=main_figure_creator.get_default_figure,
             ),
             dict(
                 tab_id='tab-hypervolume-plot',
-                label='hypervolume',
+                label='Hypervolume',
                 creator=main_figure_creator.get_hypervolume_plot,
             ),
         ]
@@ -147,8 +148,6 @@ class MainGraph(AbstractPage):
             Input(self.dummy, 'children'),
             prevent_initial_call=False,)
         def redraw_main_graph(active_tab_id, _):
-            logger.debug('====================')
-            logger.debug(f'redraw_main_graph called by {callback_context.triggered_id}')
             figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True)
             return figure, length
 

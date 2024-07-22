@@ -2,6 +2,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 
 from pyfemtet.opt._femopt_core import History
+from pyfemtet.message import Msg
 
 
 class _ColorSet:
@@ -17,11 +18,17 @@ class _LanguageSet:
     feasible = {'label': 'feasible', True: True, False: False}
     non_domi = {'label': 'non_domi', True: True, False: False}
 
-    def __init__(self, language: str = 'ja'):
-        self.lang = language
-        if self.lang.lower() == 'ja':
-            self.feasible = {'label': '拘束条件', True: '満足', False: '違反'}
-            self.non_domi = {'label': '最適性', True: '非劣解', False: '劣解'}
+    def __init__(self):
+        self.feasible = {
+            'label': Msg.LEGEND_LABEL_CONSTRAINT,
+            True: Msg.LEGEND_LABEL_FEASIBLE,
+            False: Msg.LEGEND_LABEL_INFEASIBLE,
+        }
+        self.non_domi = {
+            'label': Msg.LEGEND_LABEL_OPTIMAL,
+            True: Msg.LEGEND_LABEL_NON_DOMI,
+            False: Msg.LEGEND_LABEL_DOMI,
+        }
 
     def localize(self, df):
         # 元のオブジェクトを変更しないようにコピー
@@ -34,7 +41,7 @@ class _LanguageSet:
         return cdf
 
 
-_ls = _LanguageSet('ja')
+_ls = _LanguageSet()
 _cs = _ColorSet()
 _ss = _SymbolSet()
 
@@ -53,8 +60,10 @@ def get_hypervolume_plot(_: History, df):
 
     fig.update_layout(
         dict(
-            title_text="ハイパーボリュームプロット",
+            title_text=Msg.GRAPH_TITLE_HYPERVOLUME,
             transition_duration=1000,
+            xaxis_title=Msg.GRAPH_AXIS_LABEL_TRIAL,
+            yaxis_title='hypervolume',
         )
     )
 
@@ -124,8 +133,8 @@ def _get_single_objective_plot(history, df):
 
     fig.update_layout(
         dict(
-            title_text="目的プロット",
-            xaxis_title="解析実行回数(回)",
+            title_text=Msg.GRAPH_TITLE_SINGLE_OBJECTIVE,
+            xaxis_title=Msg.GRAPH_AXIS_LABEL_TRIAL,
             yaxis_title=obj_name,
         )
     )
@@ -186,7 +195,7 @@ def _get_multi_objective_pairplot(history, df):
 
     fig.update_layout(
         dict(
-            title_text="多目的ペアプロット",
+            title_text=Msg.GRAPH_TITLE_MULTI_OBJECTIVE,
         )
     )
 

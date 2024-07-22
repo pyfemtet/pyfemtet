@@ -21,6 +21,7 @@ from win32com.client import constants, Constants
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
+from pyfemtet.message import encoding, Msg
 
 # logger
 import logging
@@ -124,9 +125,7 @@ def symlog(x: float or np.ndarray):
 
 
 def _check_bound(lb, ub, name=None):
-    message = f'下限{lb} > 上限{ub} です.'
-    if name is not None:
-        message = f'{name}に対して' + message
+    message = Msg.ERR_CHECK_MINMAX
     if (lb is not None) and (ub is not None):
         if lb > ub:
             raise ValueError(message)
@@ -298,8 +297,7 @@ class Objective(Function):
 
     @staticmethod
     def _check_direction(direction):
-        message = '評価関数の direction は "minimize", "maximize", 又は数値でなければなりません.'
-        message += f'与えられた値は {direction} です.'
+        message = Msg.ERR_CHECK_DIRECTION
         if isinstance(direction, float) or isinstance(direction, int):
             pass
         elif isinstance(direction, str):
@@ -378,7 +376,7 @@ class History:
     """
 
     HEADER_ROW = 2
-    ENCODING = 'cp932'
+    ENCODING = encoding
     prm_names = []
     obj_names = []
     cns_names = []
@@ -440,13 +438,13 @@ class History:
                 with tempfile.TemporaryFile() as f:
                     self.save(_f=f)
             except UnicodeEncodeError:
-                raise ValueError('変数名、目的名または拘束名にエンコードできない文字が含まれています。環境依存文字は使用しないでください。')
+                raise ValueError(Msg.ERR_CANNOT_ENCODING)
 
         # visualization only の場合
         else:
             # csv が存在しなければおかしい
             if not os.path.isfile(self.path):
-                raise FileNotFoundError(f'{self.path} が見つかりません。')
+                raise FileNotFoundError(self.path)
 
             # csv の local_data へと、names への読み込み
             self.load()
@@ -470,9 +468,9 @@ class History:
 
         # is_restart の場合、読み込んだ names と引数の names が一致するか確認しておく
         if self.is_restart:
-            if prm_names != self.prm_names: raise ValueError(f'実行中の設定が csv ファイルの設定と一致しません。')
-            if obj_names != self.obj_names: raise ValueError(f'実行中の設定が csv ファイルの設定と一致しません。')
-            if cns_names != self.cns_names: raise ValueError(f'実行中の設定が csv ファイルの設定と一致しません。')
+            if prm_names != self.prm_names: raise ValueError(Msg.ERR_PROBLEM_MISMATCH)
+            if obj_names != self.obj_names: raise ValueError(Msg.ERR_PROBLEM_MISMATCH)
+            if cns_names != self.cns_names: raise ValueError(Msg.ERR_PROBLEM_MISMATCH)
 
         # visualization only の場合、読み込んだ names をも load する
         if not self.is_processing:

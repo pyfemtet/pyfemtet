@@ -23,6 +23,7 @@ from pyfemtet.opt._femopt_core import (
     OptimizationStatus,
     logger,
 )
+from pyfemtet.message import Msg, encoding
 
 
 class FEMOpt:
@@ -117,6 +118,7 @@ class FEMOpt:
             initial_value (float or None, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.
             lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
+            step (float or None, optional): The step of parameter. Defaults to None.
             memo (str, optional): Additional information about the parameter. Defaults to ''.
         Raises:
             ValueError: If initial_value is not specified and the value for the given name is also not specified.
@@ -243,9 +245,7 @@ class FEMOpt:
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
         if strict:
             if _is_access_gogh(fun):
-                message = f'関数 {fun.__name__} に Gogh （Femtet 解析結果）へのアクセスがあります.'
-                message += 'デフォルトでは constraint は解析前に評価され, 条件を満たさない場合解析を行いません.'
-                message += '拘束に解析結果を含めたい場合は, strict=False を設定してください.'
+                message = Msg.ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT
                 raise Exception(message)
 
         self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
@@ -361,7 +361,7 @@ class FEMOpt:
 
             # worker が足りない場合はエラー
             if n_parallel > len(worker_addresses):
-                raise RuntimeError(f'n_parallel({n_parallel}) > n_workers({len(worker_addresses)}). Worker 数が不足しています。')
+                raise RuntimeError(f'n_parallel({n_parallel}) > n_workers({len(worker_addresses)}). There are insufficient number of workers.')
 
             # worker が多い場合は閉じる
             if n_parallel < len(worker_addresses):
@@ -501,7 +501,7 @@ class FEMOpt:
                 try:
                     self.history.save()
                 except PermissionError:
-                    logger.warning(f'{self.history.path} が使用中のため書き込みできません。プログラム終了までにこのファイルを解放してください。履歴データが失われます。')
+                    logger.warning(Msg.WARN_HISTORY_CSV_NOT_ACCESSIBLE)
                 if self.status.get() >= OptimizationStatus.TERMINATED:
                     break
 
@@ -522,8 +522,10 @@ class FEMOpt:
         # 一応
         t_save_history.join()
 
-        logger.info(f'計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.')
-        logger.info(f'結果は{self.history.path}を確認してください.')
+        # logger.info(f'計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.')
+        # logger.info(f'結果は{self.history.path}を確認してください.')
+        logger.info(Msg.OPTIMIZATION_FINISHED)
+        logger.info(self.history.path)
 
         # ひとつでも crashed ならばフラグを立てる
         if any(opt_crashed_list):
@@ -554,8 +556,6 @@ class FEMOpt:
             self.client.cancel(worker_status._future, force=True)
         logger.info('Terminate actors.')
         sleep(1)
-
-        # これがないと dash app が落ちないとか問題あるの？
 
         # terminate monitor worker
         n_workers = len(self.client.nthreads())

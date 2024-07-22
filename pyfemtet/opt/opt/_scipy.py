@@ -15,6 +15,7 @@ from scipy.optimize import minimize, OptimizeResult
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
 from pyfemtet.opt.opt import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
+from pyfemtet.message import Msg
 
 
 class StopIteration2(Exception):
@@ -85,11 +86,8 @@ class ScipyOptimizer(AbstractOptimizer):
         try:
             _, obj_values, cns_values = self.f(x)
         except (ModelError, MeshError, SolveError) as e:
-            logger.info(e)
-            logger.info('以下の変数で FEM 解析に失敗しました。')
-            print(self.get_parameter('dict'))
-
-            # 現状、エラーが起きたらスキップできない
+            # 現在の技術的にエラーが起きたらスキップできない
+            logger.error(Msg.ERR_FEM_FAILED_AND_CANNOT_CONTINUE)
             raise StopIteration2
 
         # constraints
@@ -134,9 +132,7 @@ class ScipyOptimizer(AbstractOptimizer):
             )
         except StopIteration2:
             res = None
-            logger.warn('Optimization has been interrupted. '
-                        'Note that you cannot acquire the OptimizationResult '
-                        'in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.')
+            logger.warn(Msg.WARN_INTERRUPTED_IN_SCIPY)
 
         if res is None:
             self.res = self.stop_iteration_callback.res

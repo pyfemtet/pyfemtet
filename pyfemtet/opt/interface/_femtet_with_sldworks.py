@@ -10,6 +10,7 @@ from pythoncom import CoInitialize, CoUninitialize
 
 from pyfemtet.core import ModelError
 from pyfemtet.opt.interface import FemtetInterface, logger
+from pyfemtet.message import Msg
 
 
 class FemtetWithSolidworksInterface(FemtetInterface):
@@ -100,7 +101,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             if os.path.isfile(x_t_path):
                 break
             if time() - start > timeout:
-                raise ModelError('モデル再構築に失敗しました')
+                raise ModelError(Msg.ERR_MODEL_UPDATE_FAILED)
             sleep(1)
 
         # モデルの再インポート
@@ -108,7 +109,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             self.Femtet.Gaudi.ReExecute,
             False,
             ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
+            error_message=Msg.ERR_RE_EXECUTE_MODEL_FAILED,
             is_Gaudi_method=True,
         )
 
@@ -117,7 +118,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
             self.Femtet.Redraw,
             False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
             ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
+            error_message=Msg.ERR_MODEL_REDRAW_FAILED,
             is_Gaudi_method=True,
         )
 
@@ -157,7 +158,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         # 更新する（ここで失敗はしうる）
         result = self.swModel.EditRebuild3  # モデル再構築
         if not result:
-            raise ModelError('モデル再構築に失敗しました')
+            raise ModelError(Msg.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED)
 
     def _get_name_from_equation(self, equation: str):
         pattern = r'^\s*"(.+?)"\s*$'

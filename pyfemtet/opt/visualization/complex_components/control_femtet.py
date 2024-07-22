@@ -18,6 +18,7 @@ from pythoncom import com_error
 
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
 from pyfemtet.opt.interface._femtet import FemtetInterface
+from pyfemtet.message import Msg
 
 
 class FemtetState(Enum):
@@ -44,7 +45,7 @@ class FemtetControl(AbstractPage):
         # button
         # noinspection PyAttributeOutsideInit
         self.connect_femtet_button = dbc.Button(
-            children='Connect to Femtet',
+            children=Msg.LABEL_CONNECT_FEMTET_BUTTON,
             id='connect-femtet-button',
             outline=True,
             color='primary',
@@ -101,7 +102,7 @@ class FemtetControl(AbstractPage):
                 # model_name is not included in femprj
                 kwargs.update(dict(model_name=None))
                 self.fem = FemtetInterface(**kwargs)
-                warning_msg = 'Analysis model name described in csv does not exist in project.'
+                warning_msg = Msg.WARN_CSV_MODEL_NAME_IS_INVALID
 
             # if 'new' femtet, Interface try to terminate Femtet when the self.fem is reconstructed.
             self.fem.quit_when_destruct = False
@@ -136,39 +137,36 @@ class FemtetControl(AbstractPage):
 
         # check holding history
         if self.application.history is None:
-            return kwargs, 'History csv is not read yet. Open your project manually.'
+            return kwargs, Msg.ERR_HISTORY_CSV_NOT_READ
 
         # get metadata
         additional_metadata = self.application.history.metadata[0]
 
         # check metadata exists
         if additional_metadata == '':
-            return kwargs, 'Cannot read project data from csv. Open your project manually.'
+            return kwargs, Msg.WARN_INVALID_METADATA
 
         # check the metadata is valid json
         try:
             d = json.loads(additional_metadata)
             femprj_path = os.path.abspath(d['femprj_path'])
         except (TypeError, json.decoder.JSONDecodeError, KeyError):
-            return kwargs, ('Cannot read project data from csv because of the invalid format. '
-                            'Valid format is like: '
-                            '"{""femprj_path"": ""c:\\path\\to\\sample.femprj"", ""model_name"": ""<model_name>""}". ' 
-                            'Open your project manually.')
+            return kwargs, Msg.WARN_INVALID_METADATA
 
         # check containing femprj
         if femprj_path is None:
-            return kwargs, 'Cannot read project data from csv. Open your project manually.'
+            return kwargs, Msg.WARN_INVALID_METADATA
 
         # check femprj exists
         if not os.path.exists(femprj_path):
-            return kwargs, '.femprj file described in csv is not found. Open your project manually.'
+            return kwargs, Msg.WARN_FEMPRJ_IN_CSV_NOT_FOUND
 
         # at this point, femprj is valid at least.
         kwargs.update({'femprj_path': femprj_path})
 
         # check model name
         model_name = d['model_name'] if 'model_name' in d.keys() else None
-        msg = '' if model_name is not None else 'Analysis model name is not specified. Open your model in the project manually.'
+        msg = '' if model_name is not None else Msg.WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ
         kwargs.update({'model_name': model_name})
         return kwargs, msg
 

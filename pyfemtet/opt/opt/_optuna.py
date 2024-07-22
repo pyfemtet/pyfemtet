@@ -14,6 +14,7 @@ from optuna.study import MaxTrialsCallback
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
 from pyfemtet.opt.opt import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
+from pyfemtet.message import Msg
 
 # filter warnings
 import warnings
@@ -86,18 +87,15 @@ class OptunaOptimizer(AbstractOptimizer):
             if cns.ub is not None:
                 feasible = feasible and (cns.ub >= cns_value)
             if not feasible:
-                logger.info(f'以下の変数で拘束 {cns.name} が満たされませんでした。')
-                print(self.get_parameter('dict'))
+                logger.info(Msg.INFO_INFEASIBLE)
+                logger.info(f'Constraint: {cns.name}')
+                logger.info(self.get_parameter('dict'))
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
         try:
-            _, _y, c = self.f(x)
+            _, _y, c = self.f(x)  # f の中で info は出している
         except (ModelError, MeshError, SolveError) as e:
-            logger.info(e)
-            logger.info('以下の変数で FEM 解析に失敗しました。')
-            print(self.get_parameter('dict'))
-
             # 中断の確認 (解析中に interrupt されている場合対策)
             if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
                 self.worker_status.set(OptimizationStatus.INTERRUPTING)
@@ -171,9 +169,9 @@ class OptunaOptimizer(AbstractOptimizer):
                 # add_initial_parameter で追加された初期値
                 for prm, prm_set_name in self.additional_initial_parameter:
                     if type(prm) is dict:
-                        assert prm.keys() == params.keys(), '設定されたパラメータ名と add_init_parameter で追加されたパラメータ名が一致しません。'
+                        assert prm.keys() == params.keys(), Msg.ERR_INCONSISTENT_PARAMETER
                     else:
-                        assert len(prm) == len(params.keys()), '設定されたパラメータ数と add_init_parameter で追加されたパラメータ数が一致しません。'
+                        assert len(prm) == len(params.keys()), Msg.ERR_INCONSISTENT_PARAMETER
                         prm = dict(zip(params.keys(), prm))
 
                     self.study.enqueue_trial(
@@ -202,10 +200,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # if is_restart, load study
         else:
             if not os.path.exists(storage_path):
-                msg = f'{storage_path} が見つかりません。'
-                msg += '.db ファイルは .csv ファイルと同じフォルダに生成されます。'
-                msg += 'クラスター解析の場合は、スケジューラを起動したフォルダに生成されます。'
-                raise FileNotFoundError(msg)
+                raise FileNotFoundError(storage_path)
             self.storage = optuna.integration.dask.DaskStorage(
                 f'sqlite:///{storage_path}',
             )

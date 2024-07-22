@@ -7,6 +7,7 @@ from dask.distributed import get_worker
 
 from pyfemtet.core import ModelError
 from pyfemtet.opt.interface import FemtetInterface, logger
+from pyfemtet.message import Msg
 
 
 here, me = os.path.split(__file__)
@@ -40,8 +41,7 @@ class FemtetWithNXInterface(FemtetInterface):
         # check NX installation
         self.run_journal_path = os.path.join(os.environ.get('UGII_BASE_DIR'), 'NXBIN', 'run_journal.exe')
         if not os.path.isfile(self.run_journal_path):
-            raise FileNotFoundError(
-                r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" が見つかりませんでした。環境変数 UGII_BASE_DIR 又は NX のインストール状態を確認してください。')
+            raise FileNotFoundError(Msg.ERR_RUN_JOURNAL_NOT_FOUND)
 
         # 引数の処理
         # dask サブプロセスのときは prt_path を worker space から取るようにする
@@ -137,7 +137,7 @@ class FemtetWithNXInterface(FemtetInterface):
             self.Femtet.Gaudi.ReExecute,
             False,
             ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
+            error_message=Msg.ERR_MODEL_RECONSTRUCTION_FAILED,
             is_Gaudi_method=True,
         )
 
@@ -146,7 +146,7 @@ class FemtetWithNXInterface(FemtetInterface):
             self.Femtet.Redraw,
             False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
             ModelError,  # 生きてるのに失敗した場合
-            error_message=f'モデル再構築に失敗しました.',
+            error_message=Msg.ERR_MODEL_UPDATE_FAILED,
             is_Gaudi_method=True,
         )
 
