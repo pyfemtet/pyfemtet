@@ -54,6 +54,7 @@ def get_hypervolume_plot(_: History, df):
     fig.update_layout(
         dict(
             title_text="ハイパーボリュームプロット",
+            transition_duration=1000,
         )
     )
 
@@ -76,7 +77,10 @@ def get_default_figure(history, df):
         fig = _get_multi_objective_pairplot(history, df)
 
     fig.update_traces(hoverinfo="none", hovertemplate=None)
-    fig.update_layout(clickmode='event+select')
+    fig.update_layout(
+        clickmode='event+select',
+        transition_duration=1000,
+    )
 
     return fig
 

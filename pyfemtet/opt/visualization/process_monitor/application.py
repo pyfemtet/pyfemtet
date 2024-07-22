@@ -5,7 +5,7 @@ from threading import Thread
 import pandas as pd
 
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, logger
-from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, RSMPage
+from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, PredictionModelPage
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):
@@ -68,14 +68,12 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         else:
             return self.history.local_data
 
-
     @local_data.setter
     def local_data(self, value: pd.DataFrame):
         if self._should_get_actor_data:
             raise NotImplementedError('If should_get_actor_data, ProcessMonitorApplication.local_df is read_only.')
         else:
             self.history.local_data = value
-
 
     def setup_callback(self, debug=False):
         if not debug:
@@ -124,7 +122,8 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
             # interval
             sleep(1)
 
-    def get_status_color(self, status_int):
+    @staticmethod
+    def get_status_color(status_int):
         from pyfemtet.opt._femopt_core import OptimizationStatus
         # set color
         if status_int <= OptimizationStatus.SETTING_UP:
@@ -171,26 +170,26 @@ def g_debug():
         status=_OS('entire'),
         worker_addresses=['worker1', 'worker2', 'worker3'],
         worker_status_list=[_OS('worker1'), _OS('worker2'), _OS('worker3')],
-        is_debug=True,
+        is_debug=False,
     )
 
     g_home_page = HomePage('Progress')
     g_worker_page = WorkerPage('Workers', '/workers', g_application)
-    g_rsm_page = RSMPage('RSM', '/rsm', g_application)
+    g_rsm_page = PredictionModelPage('Predict', '/prediction-model', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_rsm_page, 1)
     g_application.add_page(g_worker_page, 2)
     g_application.setup_callback(debug=False)
 
-    g_application.run(debug=True)
+    g_application.run(debug=False)
 
 
 def main(history, status, worker_addresses, worker_status_list, host=None, port=None):
     g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
 
     g_home_page = HomePage('Progress')
-    g_rsm_page = RSMPage('RSM', '/rsm', g_application)
+    g_rsm_page = PredictionModelPage('Predict', '/prediction-model', g_application)
     g_worker_page = WorkerPage('Workers', '/workers', g_application)
 
     g_application.add_page(g_home_page, 0)

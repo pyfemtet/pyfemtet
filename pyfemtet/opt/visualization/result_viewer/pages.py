@@ -15,7 +15,7 @@ from pyfemtet.opt.visualization.base import AbstractPage  # , logger
 from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization.complex_components.control_femtet import FemtetControl, FemtetState
 from pyfemtet.opt.visualization.complex_components.alert_region import AlertRegion
-from pyfemtet.opt.visualization.complex_components.rsm_graph import RSMGraph
+from pyfemtet.opt.visualization.complex_components.pm_graph import PredictionModelGraph
 
 from pyfemtet.opt._femopt_core import History
 
@@ -698,7 +698,7 @@ class Tutorial(AbstractPage):
             return current_style
 
 
-class RSMPage(AbstractPage):
+class PredictionModelPage(AbstractPage):
     """"""
 
     def __init__(self, title, rel_url, application):
@@ -707,7 +707,7 @@ class RSMPage(AbstractPage):
         super().__init__(title, rel_url, application)
 
     def setup_component(self):
-        self.rsm_graph: RSMGraph = RSMGraph()
+        self.rsm_graph: PredictionModelGraph = PredictionModelGraph()
         self.add_subpage(self.rsm_graph)
 
     def setup_layout(self):

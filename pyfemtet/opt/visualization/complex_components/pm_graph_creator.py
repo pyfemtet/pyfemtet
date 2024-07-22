@@ -9,11 +9,11 @@ import plotly.express as px
 
 from pyfemtet.opt._femopt_core import History
 
-from pyfemtet.opt.metamodel.base import PyFemtetMetaModel
-from pyfemtet.opt.metamodel.single_task_gp import SingleTaskGPModel
+from pyfemtet.opt.prediction.base import PyFemtetPredictionModel
+from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
 
 
-class RSMCreator:
+class PredictionModelCreator:
 
     # noinspection PyAttributeOutsideInit
     def fit(self, history, df):
@@ -21,7 +21,7 @@ class RSMCreator:
         self.history = history  # used to check fit or not
         self.df = df
         # method specific
-        self.pmm = PyFemtetMetaModel(history, df, SingleTaskGPModel)
+        self.pmm = PyFemtetPredictionModel(history, df, SingleTaskGPModel)
         self.pmm.fit()
 
     def create_figure(
@@ -151,7 +151,7 @@ class RSMCreator:
 
         else:
             fig.add_trace(
-                go.Scatter(x=xx, y=zz_mean, name='RSM')
+                go.Scatter(x=xx, y=zz_mean, name='prediction model')
             )
             # std
             fig.add_trace(
@@ -160,7 +160,7 @@ class RSMCreator:
                     y=np.concatenate([zz_upper, zz_lower[::-1]]),
                     opacity=0.3,
                     fill='toself',
-                    name='std. dev. of RSM',
+                    name='std. dev. of model',
                 )
             )
 

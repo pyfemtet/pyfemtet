@@ -6,7 +6,7 @@ import pandas as pd
 from pyfemtet.opt._femopt_core import History
 
 
-class MetaModelBase(ABC):
+class PredictionModelBase(ABC):
 
     @abstractmethod
     def fit(self, x: np.ndarray, y: np.ndarray):
@@ -17,7 +17,7 @@ class MetaModelBase(ABC):
         """
 
     @abstractmethod
-    def predict(self, x: np.ndarray) -> list[np.ndarray, np.ndarray]:
+    def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
         Parameters:
             x (np.ndarray): Input. (Point number) rows and (variable number) columns.
@@ -26,11 +26,11 @@ class MetaModelBase(ABC):
         """
 
 
-class PyFemtetMetaModel:
+class PyFemtetPredictionModel:
 
     def __init__(self, history: History, df: pd.DataFrame, MetaModel: type):
-        assert issubclass(MetaModel, MetaModelBase)
-        self.meta_model: MetaModelBase = MetaModel()
+        assert issubclass(MetaModel, PredictionModelBase)
+        self.meta_model: PredictionModelBase = MetaModel()
         self.obj_names = history.obj_names
         self.prm_names = history.prm_names
         self.df = df
@@ -46,7 +46,7 @@ class PyFemtetMetaModel:
     def fit(self) -> None:
         self.meta_model.fit(self.x, self.y)
 
-    def predict(self, x: np.ndarray) -> list[np.ndarray, np.ndarray]:
+    def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 2
         assert x.shape[1] == len(self.prm_names)
         return self.meta_model.predict(x)

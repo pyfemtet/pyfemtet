@@ -20,7 +20,7 @@ import base64
 import json
 import numpy as np
 
-from pyfemtet.opt.visualization.complex_components.rsm_graph_creator import RSMCreator
+from pyfemtet.opt.visualization.complex_components.pm_graph_creator import PredictionModelCreator
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
 
 
@@ -32,7 +32,7 @@ FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
 
 
 # noinspection PyAttributeOutsideInit
-class RSMGraph(AbstractPage):
+class PredictionModelGraph(AbstractPage):
     """"""
     """
     +=================+
@@ -60,14 +60,14 @@ class RSMGraph(AbstractPage):
     """
 
     def __init__(self):
-        self.rsm_creator: RSMCreator = RSMCreator()
+        self.rsm_creator: PredictionModelCreator = PredictionModelCreator()
         super().__init__()
 
     def setup_component(self):
         self.location = dcc.Location(id='rsm-graph-location', refresh=True)
 
         # setup header
-        self.tab_list = [dbc.Tab(label='RSM')]
+        self.tab_list = [dbc.Tab(label='Prediction Model')]
         self.tabs = dbc.Tabs(self.tab_list)
 
         # setup body
@@ -97,7 +97,7 @@ class RSMGraph(AbstractPage):
 
         # update rsm button
         self.fit_rsm_button_spinner = dbc.Spinner(size='sm', spinner_style={'display': 'none'})
-        self.fit_rsm_button = dbc.Button([self.fit_rsm_button_spinner, ' Recalculate RSM'], color='success')
+        self.fit_rsm_button = dbc.Button([self.fit_rsm_button_spinner, ' Recalculate Model'], color='success')
         self.redraw_graph_button_spinner = dbc.Spinner(size='sm', spinner_style={'display': 'none'})
         self.redraw_graph_button = dbc.Button([self.redraw_graph_button_spinner, ' Redraw graph'])
 
@@ -240,7 +240,7 @@ class RSMGraph(AbstractPage):
 
             # check fit
             if not hasattr(self.rsm_creator, 'history'):
-                logger.error('RSM was not calculated.')
+                logger.error('Prediction model is not calculated yet.')
                 return go.Figure()  # to re-enable buttons, fire callback chain
 
             # get indices to remove

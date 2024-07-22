@@ -6,7 +6,7 @@ from botorch.models import SingleTaskGP
 from botorch.fit import fit_gpytorch_mll
 from gpytorch.mlls import ExactMarginalLogLikelihood
 
-from pyfemtet.opt.metamodel.base import MetaModelBase
+from pyfemtet.opt.prediction.base import PredictionModelBase
 
 
 class MyStandardScaler:
@@ -45,7 +45,7 @@ class MyMinMaxScaler:
         return torch.tensor(x.numpy() * (self.max - self.min)**2).double()
 
 
-class SingleTaskGPModel(MetaModelBase):
+class SingleTaskGPModel(PredictionModelBase):
 
     # noinspection PyAttributeOutsideInit
     def fit(self, x: np.ndarray, y: np.ndarray):
