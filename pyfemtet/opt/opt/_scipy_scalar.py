@@ -21,7 +21,7 @@ class ScipyScalarMethodChecker(OptimizationMethodChecker):
     def check_incomplete_bounds(self, raise_error=True): return True
 
 
-class ScipyOptimizer(AbstractOptimizer):
+class ScipyScalarOptimizer(AbstractOptimizer):
 
     def __init__(
             self,
