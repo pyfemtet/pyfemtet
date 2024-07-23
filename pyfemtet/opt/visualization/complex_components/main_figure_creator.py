@@ -61,7 +61,7 @@ def get_hypervolume_plot(_: History, df):
     fig.update_layout(
         dict(
             title_text=Msg.GRAPH_TITLE_HYPERVOLUME,
-            transition_duration=1000,
+            # transition_duration=1000,  # Causes graph freeze on tab change
             xaxis_title=Msg.GRAPH_AXIS_LABEL_TRIAL,
             yaxis_title='hypervolume',
         )
