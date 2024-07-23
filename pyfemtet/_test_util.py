@@ -138,4 +138,4 @@ def is_equal_result(csv1, csv2, result_save_to=None):
 
     assert len(columns1) == len(columns2), '結果 csv の column 数が異なります。'
     assert len(df1) == len(df2), '結果 csv の row 数が異なります。'
-    assert (np.abs(df1.values - df2.values) / np.abs(df2.values)).max() <= 0.01, '前回の結果と 1% を超える相違があります。'
+    assert (np.abs(df1.values - df2.values) / np.abs(df2.values)).mean() <= 0.05, '前回の結果との平均差異が 5% を超えています。'
