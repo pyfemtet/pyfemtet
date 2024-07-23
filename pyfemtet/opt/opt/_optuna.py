@@ -125,7 +125,18 @@ class OptunaOptimizer(AbstractOptimizer):
         return tuple(_y)
 
     def _constraint(self, trial):
-        return trial.user_attrs['constraint']
+        # if break trial without weak constraint calculation, return 1 (as infeasible).
+        if 'constraint' in trial.user_attrs.keys():
+            return trial.user_attrs['constraint']
+        else:
+            _c = []
+            for (name, cns) in zip(self.constraints.items()):
+                lb, ub = cns.lb, cns.ub
+                if lb is not None:
+                    _c.append(1.)
+                if ub is not None:
+                    _c.append(1.)
+            return _c
 
     def _setup_before_parallel(self):
         """Create storage, study and set initial parameter."""
