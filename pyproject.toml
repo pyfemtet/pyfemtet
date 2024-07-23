@@ -30,6 +30,7 @@ botorch = [
     {version = ">=0.9.5", python = ">=3.12,<3.13"},
     ]
 pytest-dashboard = "^0.1.2"
+babel = "^2.15.0"
 
 [tool.poetry.group.dev.dependencies]
 pip-licenses = "^4.3.3"
