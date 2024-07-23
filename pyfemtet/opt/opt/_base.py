@@ -162,7 +162,7 @@ class AbstractOptimizer(ABC):
         try:
             self.fem.update(self.parameters)
         except Exception as e:
-            logger.info(type(e).__name__, ':', e)
+            logger.info(f'{type(e).__name__} : {e}')
             logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
             logger.info(x)
             raise e  # may be just a ModelError, etc.
