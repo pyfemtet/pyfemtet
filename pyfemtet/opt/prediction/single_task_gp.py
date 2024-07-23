@@ -52,6 +52,9 @@ class SingleTaskGPModel(PredictionModelBase):
         train_x = torch.tensor(x).double()
         train_y = torch.tensor(y).double()
 
+        # check y shape (if single objective problem, output dimension is (n,) )
+        self._is_single_objective = len(y[0]) == 1
+
         # Normalize the input data to the unit cube
         self.scaler_x = MyMinMaxScaler()
         train_x = self.scaler_x.fit_transform(train_x)
@@ -73,10 +76,14 @@ class SingleTaskGPModel(PredictionModelBase):
             scaled_x = self.scaler_x.transform(x)
             # predict
             pred = self.gp(scaled_x)
-            scaled_mean = torch.permute(pred.mean, (1, 0))
-            scaled_var = torch.permute(pred.variance, (1, 0))
-        # unscaling
-        mean = self.scaler_y.inverse_transform_mean(scaled_mean).numpy()
-        var = self.scaler_y.inverse_transform_var(scaled_var).numpy()
+            if self._is_single_objective:
+                scaled_mean = pred.mean.reshape((-1, 1))
+                scaled_var = pred.variance.reshape((-1, 1))
+            else:
+                scaled_mean = torch.permute(pred.mean, (1, 0))
+                scaled_var = torch.permute(pred.variance, (1, 0))
+            # unscaling
+            mean = self.scaler_y.inverse_transform_mean(scaled_mean).numpy()
+            var = self.scaler_y.inverse_transform_var(scaled_var).numpy()
         std = np.sqrt(var)
         return mean, std
