@@ -619,8 +619,12 @@ class FemtetInterface(FEMInterface):
         self.update_model(parameters)
         self.preprocess(self.Femtet)
         self.solve()
+        self.postprocess(self.Femtet)
 
     def preprocess(self, Femtet):
+        pass
+
+    def postprocess(self, Femtet):
         pass
 
     def quit(self, timeout=1, force=True):
