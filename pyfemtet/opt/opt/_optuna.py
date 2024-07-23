@@ -105,14 +105,15 @@ class OptunaOptimizer(AbstractOptimizer):
             raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 拘束 attr の更新
-        _c = []  # 非正なら OK
-        for (name, cns), c_value in zip(self.constraints.items(), c):
-            lb, ub = cns.lb, cns.ub
-            if lb is not None:  # fun >= lb  <=>  lb - fun <= 0
-                _c.append(lb - c_value)
-            if ub is not None:  # ub >= fun  <=>  fun - ub <= 0
-                _c.append(c_value - ub)
-        trial.set_user_attr('constraint', _c)
+        if len(self.constraints) > 0:
+            _c = []  # 非正なら OK
+            for (name, cns), c_value in zip(self.constraints.items(), c):
+                lb, ub = cns.lb, cns.ub
+                if lb is not None:  # fun >= lb  <=>  lb - fun <= 0
+                    _c.append(lb - c_value)
+                if ub is not None:  # ub >= fun  <=>  fun - ub <= 0
+                    _c.append(c_value - ub)
+            trial.set_user_attr('constraint', _c)
 
         # 中断の確認 (解析中に interrupt されている場合対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
@@ -124,7 +125,7 @@ class OptunaOptimizer(AbstractOptimizer):
         return tuple(_y)
 
     def _constraint(self, trial):
-        return trial.user_attrs['constraint'] if 'constraint' in trial.user_attrs.keys() else (1,)  # infeasible
+        return trial.user_attrs['constraint']
 
     def _setup_before_parallel(self):
         """Create storage, study and set initial parameter."""
@@ -235,9 +236,15 @@ class OptunaOptimizer(AbstractOptimizer):
                 seed += self.subprocess_idx
 
         # restore sampler
+        if len(self.constraints) > 0:
+            self.sampler_kwargs.update(
+                constraints_func=self._constraint
+            )
+        if seed is not None:
+            self.sampler_kwargs.update(
+                seed=seed
+            )
         sampler = self.sampler_class(
-            seed=seed,
-            constraints_func=self._constraint,
             **self.sampler_kwargs
         )
 
