@@ -617,8 +617,11 @@ class FemtetInterface(FEMInterface):
         """See :func:`FEMInterface.update`"""
         self.parameters = parameters.copy()
         self.update_model(parameters)
-        # TODO: CAD 連携における座標を基にした境界条件の割当直しなどの処理をここに挟めるようにする
+        self.preprocess(self.Femtet)
         self.solve()
+
+    def preprocess(self, Femtet):
+        pass
 
     def quit(self, timeout=1, force=True):
         """Force to terminate connected Femtet."""
