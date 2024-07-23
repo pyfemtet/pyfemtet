@@ -2,7 +2,7 @@
 from dash.development.base_component import Component
 
 # callback
-from dash import Output, Input, State, no_update, callback_context, ALL, MATCH
+from dash import Output, Input, State, no_update, callback_context, ALL
 from dash.exceptions import PreventUpdate
 
 # components
@@ -15,13 +15,14 @@ import pandas as pd
 import plotly.graph_objs as go
 
 # the others
+from enum import Enum, auto
 import os
 import base64
 import json
 import numpy as np
 
 from pyfemtet.opt.visualization.complex_components.pm_graph_creator import PredictionModelCreator
-from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
+from pyfemtet.opt.visualization.base import AbstractPage, logger
 from pyfemtet.message import Msg
 
 
@@ -60,6 +61,11 @@ class PredictionModelGraph(AbstractPage):
 
     """
 
+    class CommandState(Enum):
+        ready = auto()
+        recalc = auto()
+        redraw = auto()
+
     def __init__(self):
         self.rsm_creator: PredictionModelCreator = PredictionModelCreator()
         super().__init__()
@@ -97,6 +103,8 @@ class PredictionModelGraph(AbstractPage):
         # self.selection_data = html.Data(id='selection-data', **{self.selection_data_property: {}})
 
         # update rsm button
+        self.command_manager_prop = 'data-command-manager'
+        self.command_manager = html.Data(**{self.command_manager_prop: self.CommandState.ready.value})
         self.fit_rsm_button_spinner = dbc.Spinner(size='sm', spinner_style={'display': 'none'})
         self.fit_rsm_button = dbc.Button([self.fit_rsm_button_spinner, Msg.LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON], color='success')
         self.redraw_graph_button_spinner = dbc.Spinner(size='sm', spinner_style={'display': 'none'})
@@ -136,7 +144,13 @@ class PredictionModelGraph(AbstractPage):
 
         self.card_footer = dbc.CardFooter(
             children=[
-                dbc.Stack([self.fit_rsm_button, self.redraw_graph_button], direction='horizontal', gap=2),
+                dbc.Stack(
+                    children=[
+                        self.fit_rsm_button,
+                        self.redraw_graph_button,
+                        self.command_manager
+                    ],
+                    direction='horizontal', gap=2),
                 *dropdown_rows,
                 self.slider_container,
                 self.slider_stack_data,
@@ -166,12 +180,19 @@ class PredictionModelGraph(AbstractPage):
 
         app = self.application.app
 
+        # ===== control button disabled and calculation =====
+        """
+        [fit button clicked] ────┬──> [disabled] ─┬─> [calc] ─╮
+        [redraw button clicked] ─┘                └───────────┴─> [redraw] ─> [enabled]
+        """
+
         # ===== disable fit buttons when clicked =====
         @app.callback(
             Output(self.fit_rsm_button_spinner, 'spinner_style', allow_duplicate=True),
             Output(self.fit_rsm_button, 'disabled', allow_duplicate=True),
             Output(self.redraw_graph_button_spinner, 'spinner_style', allow_duplicate=True),
             Output(self.redraw_graph_button, 'disabled', allow_duplicate=True),
+            Output(self.command_manager, self.command_manager_prop, allow_duplicate=True),
             Input(self.fit_rsm_button, 'n_clicks'),
             Input(self.redraw_graph_button, 'n_clicks'),
             State(self.fit_rsm_button_spinner, 'spinner_style'),
@@ -179,28 +200,41 @@ class PredictionModelGraph(AbstractPage):
             prevent_initial_call=True,
         )
         def disable_fit_button(_1, _2, state1, state2):
+            # spinner visibility
             if 'display' in state1.keys(): state1.pop('display')
             if 'display' in state2.keys(): state2.pop('display')
-            return state1, True, state2, True
+
+            # recalc or redraw
+            if callback_context.triggered_id == self.fit_rsm_button.id:
+                command = self.CommandState.recalc.value
+            else:
+                command = self.CommandState.redraw.value
+
+            return state1, True, state2, True, command
 
         # ===== recreate RSM =====
         @app.callback(
-            Output(self.redraw_graph_button, 'n_clicks'),
-            Input(self.fit_rsm_button, 'n_clicks'),
+            Output(self.command_manager, self.command_manager_prop, allow_duplicate=True),
+            Output(self.graph, 'figure', allow_duplicate=True),  # for show spinner during calculation
+            Input(self.command_manager, self.command_manager_prop),
             prevent_initial_call=True,
         )
-        def recalculate_rsm(*args):
+        def recalculate_rsm(command):
             # just in case
             if callback_context.triggered_id is None:
                 raise PreventUpdate
 
+            # check command
+            if command != self.CommandState.recalc.value:
+                raise PreventUpdate
+
             # load history
             if self.application.history is None:
-                return 1  # error handling in the next `redraw_graph()` callback
+                return self.CommandState.redraw.value, no_update  # error handling in the next `redraw_graph()` callback
 
             # check history
             if len(self.data_accessor()) == 0:
-                return 1  # error handling in the next `redraw_graph()` callback
+                return self.CommandState.redraw.value, no_update  # error handling in the next `redraw_graph()` callback
 
             # create model
             self.rsm_creator.fit(
@@ -208,13 +242,14 @@ class PredictionModelGraph(AbstractPage):
                 self.data_accessor(),
             )
 
-            return 1
+            return self.CommandState.redraw.value, no_update
 
         # ===== Update Graph =====
         @app.callback(
             Output(self.graph, 'figure'),
+            Output(self.command_manager, self.command_manager_prop),
             # Output(self.data_length.id, self.data_length_prop),  # To determine whether Process Monitor should update the graph, the main graph remembers the current amount of data.
-            Input(self.redraw_graph_button, 'n_clicks'),
+            Input(self.command_manager, self.command_manager_prop),
             State(self.tabs, 'active_tab'),
             State(self.axis1_prm_dropdown, 'label'),
             State(self.axis2_prm_dropdown, 'label'),
@@ -223,26 +258,30 @@ class PredictionModelGraph(AbstractPage):
             State({'type': 'prm-slider', 'index': ALL}, 'value'),
             prevent_initial_call=True,
         )
-        def redraw_graph(_1, active_tab_id, axis1_label, axis2_label, axis3_label, _2, prm_values):
+        def redraw_graph(command, active_tab_id, axis1_label, axis2_label, axis3_label, _2, prm_values):
             # just in case
             if callback_context.triggered_id is None:
+                raise PreventUpdate
+
+            # check command
+            if command != self.CommandState.redraw.value:
                 raise PreventUpdate
 
             # load history
             if self.application.history is None:
                 logger.error(Msg.ERR_NO_HISTORY_SELECTED)
-                return go.Figure()  # to re-enable buttons, fire callback chain
+                return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
             prm_names = self.application.history.prm_names
 
             # check history
             if len(self.data_accessor()) == 0:
                 logger.error(Msg.ERR_NO_FEM_RESULT)
-                return go.Figure()  # to re-enable buttons, fire callback chain
+                return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
 
             # check fit
             if not hasattr(self.rsm_creator, 'history'):
                 logger.error(Msg.ERR_NO_PREDICTION_MODEL)
-                return go.Figure()  # to re-enable buttons, fire callback chain
+                return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
 
             # get indices to remove
             idx1 = prm_names.index(axis1_label) if axis1_label in prm_names else None
@@ -266,7 +305,7 @@ class PredictionModelGraph(AbstractPage):
                 prm_name_2=axis2_label,
             )
 
-            return fig
+            return fig, self.CommandState.ready.value
 
         # ===== When the graph is updated, enable buttons =====
         @app.callback(
@@ -274,12 +313,14 @@ class PredictionModelGraph(AbstractPage):
             Output(self.fit_rsm_button_spinner, 'spinner_style', allow_duplicate=True),
             Output(self.redraw_graph_button, 'disabled', allow_duplicate=True),
             Output(self.redraw_graph_button_spinner, 'spinner_style', allow_duplicate=True),
-            Input(self.graph, 'figure'),
+            Input(self.command_manager, self.command_manager_prop),
             State(self.fit_rsm_button_spinner, 'spinner_style'),
             State(self.redraw_graph_button_spinner, 'spinner_style'),
             prevent_initial_call=True,
         )
-        def enable_buttons(_, state1, state2):
+        def enable_buttons(command, state1, state2):
+            if command != self.CommandState.ready.value:
+                raise PreventUpdate
             state1.update({'display': 'none'})
             state2.update({'display': 'none'})
             return False, state1, False, state2
@@ -369,7 +410,7 @@ class PredictionModelGraph(AbstractPage):
             Output(self.axis3_obj_dropdown, 'label'),
             Output({'type': 'prm-slider-stack', 'index': ALL}, 'style'),  # visibility of slider
             Output('prm-axis-2-dropdown', 'hidden'),
-            Input({'type': 'axis1-dropdown-menu-item', 'index': ALL}, 'n_clicks'), # when the dropdown item is clicked
+            Input({'type': 'axis1-dropdown-menu-item', 'index': ALL}, 'n_clicks'),  # when the dropdown item is clicked
             Input({'type': 'axis2-dropdown-menu-item', 'index': ALL}, 'n_clicks'),
             Input({'type': 'axis3-dropdown-menu-item', 'index': ALL}, 'n_clicks'),
             Input(self.axis1_prm_dropdown, 'children'),  # for callback chain timing
@@ -383,7 +424,7 @@ class PredictionModelGraph(AbstractPage):
             # argument processing
             current_ax1_label = args[4]
             current_ax2_label = args[5]
-            current_ax3_label = args[6]
+            # current_ax3_label = args[6]
             current_styles: list[dict] = args[7]
 
             # just in case
@@ -452,204 +493,6 @@ class PredictionModelGraph(AbstractPage):
                     ret[slider_style_list_key][idx] = current_styles[idx]
 
             return tuple(ret.values())
-
-        # # # ===== update axis1-prm-dropdown =====
-        # # @app.callback(
-        # #     Output(self.axis1_prm_dropdown, 'label', allow_duplicate=True),
-        # #     Input(self.location, self.location.Prop.pathname),
-        # #     [Input(item, 'n_clicks') for item in self.prm1_items],
-        # #     State(self.axis2_prm_dropdown, 'label'),
-        # #     prevent_initial_call=True,
-        # # )
-        # # def update_prm1_dropdown_menu_label(*args):
-        # #     prm2_label = args[-1]
-        # #
-        # #     # 一応
-        # #     if callback_context.triggered_id is None:
-        # #         raise PreventUpdate
-        # #
-        # #     # load history
-        # #     if self.application.history is None:
-        # #         return 'History is not selected.'
-        # #     prm_names = self.application.history.prm_names
-        # #
-        # #     # 1st parameter on loaded
-        # #     if callback_context.triggered_id == self.location.id:
-        # #         return prm_names[0]
-        # #
-        # #     # clicked
-        # #     for i, item in enumerate(self.prm1_items):
-        # #         if item.id == callback_context.triggered_id:
-        # #             if prm_names[i] != prm2_label:
-        # #                 return prm_names[i]
-        # #             else:
-        # #                 logger.error('Cannot select same parameter')
-        # #                 raise PreventUpdate
-        # #
-        # #     # something wrong
-        # #     # logger.debug('something wrong in `update_dropdown_menu_label`')
-        # #     raise PreventUpdate
-        # #
-        # # # ===== update axis2-prm-dropdown =====
-        # # @app.callback(
-        # #     Output(self.axis2_prm_dropdown, 'label', allow_duplicate=True),
-        # #     Output(self.axis2_prm_dropdown, 'hidden', allow_duplicate=True),
-        # #     Input(self.location, self.location.Prop.pathname),
-        # #     [Input(item, 'n_clicks') for item in self.prm2_items],
-        # #     State(self.axis1_prm_dropdown, 'label'),
-        # #     prevent_initial_call=True,
-        # # )
-        # # def update_prm2_dropdown_menu_label(*args):
-        # #     prm1_label = args[-1]
-        # #
-        # #     # 一応
-        # #     if callback_context.triggered_id is None:
-        # #         raise PreventUpdate
-        # #
-        # #     # load history
-        # #     if self.application.history is None:
-        # #         return 'History is not selected.', no_update
-        # #     prm_names = self.application.history.prm_names
-        # #
-        # #     # disable axis2 if only 1 parameter optimization
-        # #     if len(prm_names) == 1:
-        # #         return no_update, True
-        # #
-        # #     # 2nd parameter on loaded
-        # #     if callback_context.triggered_id == self.location.id:
-        # #         return prm_names[1], False
-        # #
-        # #     # clicked
-        # #     for i, item in enumerate(self.prm2_items):
-        # #         if item.id == callback_context.triggered_id:
-        # #             if prm_names[i] != prm1_label:
-        # #                 return prm_names[i], False
-        # #             else:
-        # #                 logger.error('Cannot select same parameter')
-        # #                 raise PreventUpdate
-        # #
-        # #     # something wrong
-        # #     # logger.debug('something wrong in `update_dropdown_menu_label`')
-        # #     raise PreventUpdate
-        # #
-        # # # ===== update axis3-obj-dropdown =====
-        # # @app.callback(
-        # #     Output(self.axis3_obj_dropdown, 'label', allow_duplicate=True),
-        # #     Input(self.location, self.location.Prop.pathname),
-        # #     [Input(item, 'n_clicks') for item in self.obj_items],
-        # #     prevent_initial_call=True,
-        # # )
-        # # def update_obj_dropdown_menu_label(*args):
-        # #     # 一応
-        # #     if callback_context.triggered_id is None:
-        # #         raise PreventUpdate
-        # #
-        # #     if self.application.history is None:
-        # #         return 'History is not selected.'
-        # #
-        # #     obj_names = self.application.history.obj_names
-        # #
-        # #     # 1st objective on loaded
-        # #     if callback_context.triggered_id == self.location.id:
-        # #         return obj_names[0]
-        # #
-        # #     # clicked
-        # #     for i, item in enumerate(self.obj_items):
-        # #         if item.id == callback_context.triggered_id:
-        # #             return obj_names[i]
-        # #
-        # #     # something wrong
-        # #     # logger.debug('something wrong in `update_dropdown_menu_label`')
-        # #     raise PreventUpdate
-        #
-        # # ===== setup sliders =====
-        # @app.callback(
-        #     Output(self.slider_container, 'children'),
-        #     Output(self.slider_stack_data, self.slider_stack_data_prop),
-        #     Input(self.location, self.location.Prop.pathname),
-        #     Input(self.axis1_prm_dropdown, 'label'),
-        #     Input(self.axis2_prm_dropdown, 'label'),
-        #     State(self.slider_stack_data, self.slider_stack_data_prop),
-        #     prevent_initial_call=True,
-        # )
-        # def update_sliders(_, label1, label2, slider_values):
-        #     # Just in case
-        #     if callback_context.triggered_id is None:
-        #         raise PreventUpdate
-        #
-        #     # load history
-        #     if self.application.history is None:
-        #         return 'History is not selected.', no_update
-        #     prm_names: list = list(self.application.history.prm_names)  # shallow copy
-        #
-        #     prm_names.remove(label1) if label1 in prm_names else None
-        #     prm_names.remove(label2) if label2 in prm_names else None
-        #
-        #     out = []
-        #     for prm_name in prm_names:
-        #         # get ub and lb
-        #         lb_column = prm_name + '_lower_bound'
-        #         ub_column = prm_name + '_upper_bound'
-        #         # get minimum lb and maximum ub
-        #         df = self.data_accessor()
-        #         lb = df[lb_column].min()
-        #         ub = df[ub_column].max()
-        #         # if lb or ub is not specified, use value instead
-        #         lb = df[prm_name].min() if np.isnan(lb) else lb
-        #         ub = df[prm_name].max() if np.isnan(ub) else ub
-        #         # create slider
-        #         if prm_name in slider_values.keys():
-        #             value = slider_values[prm_name]
-        #             print('-----')
-        #             print(slider_values)
-        #         else:
-        #             value = (lb + ub) / 2
-        #             slider_values.update({'value': value})
-        #             print('ooooo')
-        #             print(lb, ub)
-        #         print('=====')
-        #         print(value)
-        #         stack = dbc.Stack(
-        #             children=[
-        #                 html.Div(f'{prm_name}: '),
-        #                 dcc.Slider(
-        #                     lb,
-        #                     ub,
-        #                     marks=None,
-        #                     value=value,
-        #                     id={'type': f'prm-slider', 'index': prm_name},
-        #                     tooltip={"placement": "bottom", "always_visible": True},
-        #                 )
-        #             ]
-        #         )
-        #         out.append(stack)
-        #
-        #     return out, slider_values
-        #
-        # # ===== update slider values =====
-        # @app.callback(
-        #     Output(self.slider_stack_data, self.slider_stack_data_prop, allow_duplicate=True),
-        #     Input([{'type': 'prm-slider', 'index': prm_name}, 'value') ],
-        #     prevent_initial_call=True,
-        # )
-        # def update_slider_values(values):
-        #     # Just in case
-        #     if callback_context.triggered_id is None:
-        #         raise PreventUpdate
-        #
-        #     # load history
-        #     if self.application.history is None:
-        #         return 'History is not selected.', no_update
-        #     prm_names = self.application.history.prm_names
-        #
-        #     print('==========')
-        #     print(callback_context.triggered_id)
-        #     print(callback_context.triggered_prop_ids)
-        #     print(callback_context.triggered)
-        #     print(values)
-        #     float = callback_context.triggered[0]['value'][0]
-        #
-        #     return {}
 
     def create_formatted_parameter(self, row) -> Component:
         metadata = self.application.history.metadata
