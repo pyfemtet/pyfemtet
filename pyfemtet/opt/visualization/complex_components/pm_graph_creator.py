@@ -117,7 +117,7 @@ class PredictionModelCreator:
 
         # set opacity by its distance
         def set_opacity(trace):
-            trace.marker.color = [f'rgba(0, 0, 0, {o})' for o in opacity]
+            trace.marker.color = [f'rgba(0, 0, 0, {o: .2f})' for o in opacity]
         fig.for_each_trace(set_opacity)
 
         # main RSM
