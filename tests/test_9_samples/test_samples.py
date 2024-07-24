@@ -28,6 +28,7 @@ def run(py_script_path, log_path):
             stdin=subprocess.PIPE,
             stdout=f,
             stderr=f,
+            cwd=os.path.dirname(py_script_path),
         )
 
         # press enter to skip input() in sample script
@@ -37,7 +38,7 @@ def run(py_script_path, log_path):
 
 
 def postprocess(py_script_path, log_path):
-    created_csv_path = _test_util.find_latest_csv(dir_path=os.getcwd())
+    created_csv_path = _test_util.find_latest_csv(dir_path=os.path.dirname(py_script_path))
     reccsv_path = _test_util.py_to_reccsv(py_script_path, suffix='_test_result')
     if RECORD_MODE:
         if os.path.exists(reccsv_path): os.remove(reccsv_path)
@@ -52,18 +53,25 @@ def check_traceback(log_path):
     with open(log_path, 'r', encoding='utf-8', newline='\n') as f:
         lines = f.readlines()
 
-    # remove ignored traceback
-    out = []
-    skip_next = False
+    # remove after 'Finished. Press Enter to quit...'
+    out1 = []
     for line in lines:
+        if 'Finished. Press Enter to quit...' in line:
+            break
+        out1.append(line)
+
+    # remove ignored traceback
+    out2 = []
+    skip_next = False
+    for line in out1:
         if skip_next:
             skip_next = False
             continue
         skip_next = 'Exception ignored in: ' in line
-        out.append(line)
+        out2.append(line)
 
     # check traceback
-    log = '\n'.join(out)
+    log = '\n'.join(out2)
     assert 'Traceback' not in log, '実行したスクリプトの出力に無視されていない例外があります。'
 
 
@@ -139,16 +147,20 @@ def test_test():
 
 
 if __name__ == '__main__':
-    # test()
 
-    test_sample_gau_ex08_parametric()
+    RECORD_MODE = True
 
-    # for path in glob(os.path.join(SAMPLE_DIR, '*.femprj'), recursive=True):
-    #     if 'tutorial' in path: continue
-    #     if 'cad' in path: continue
-    #     if 'gal' in path: continue
-    #     if 'gau' in path: continue
-    #     # if 'her' in path: continue
-    #     if 'ParametricIF' in path: continue
-    #     if 'ParametricIF - True' in path: continue
-    #     if 'paswat' in path: continue
+    # main()
+
+    # test_sample_gau_ex08_parametric()
+
+    for path in glob(os.path.join(SAMPLE_DIR, '*.femprj'), recursive=True):
+        if 'tutorial' in path: continue
+        if 'ParametricIF - True' in path: continue
+        # if 'cad' in path: continue
+        # if 'gal' in path: continue
+        # if 'gau' in path: continue
+        # if 'her' in path: continue
+        # if 'ParametricIF' in path: continue
+        # if 'paswat' in path: continue
+        main(path)
