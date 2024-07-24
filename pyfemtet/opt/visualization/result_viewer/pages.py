@@ -127,7 +127,7 @@ class HomePage(AbstractPage):
         @app.callback(
             Output(self.file_picker_button.id, self.file_picker_button.Prop.children),
             Output(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab, allow_duplicate=False),
-            Output(self.femtet_control.connect_femtet_button.id, self.femtet_control.connect_femtet_button.Prop.n_clicks),  # automatically connect to femtet if the metadata of csv is valid
+            # Output(self.femtet_control.connect_femtet_button.id, self.femtet_control.connect_femtet_button.Prop.n_clicks),  # automatically connect to femtet is now deprecated because use view-only without femtet license
             Input(self.file_picker.id, self.file_picker.Prop.contents),
             State(self.file_picker.id, self.file_picker.Prop.filename),
             State(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab),
@@ -139,7 +139,7 @@ class HomePage(AbstractPage):
             if callback_context.triggered_id is None:
                 if self.application.history is not None:
                     file_name = os.path.split(self.application.history.path)[1]
-                    return f'current file: {file_name}', no_update, no_update
+                    return f'current file: {file_name}', no_update
 
             if encoded_file_content is None:
                 raise PreventUpdate
@@ -156,7 +156,7 @@ class HomePage(AbstractPage):
                     f.write(file_content)
                 self.application.history = History(csv_path)
 
-            return f'current file: {file_name}', active_tab_id, 1
+            return f'current file: {file_name}', active_tab_id
 
         # ===== open pdt =====
         @app.callback(
@@ -602,7 +602,7 @@ class Tutorial(AbstractPage):
         @app.callback(
             Output(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab, allow_duplicate=True),
             Output(self.control_visibility_input_dummy, 'children'),
-            Output(self.femtet_control.connect_femtet_button, 'n_clicks', allow_duplicate=True),
+            # Output(self.femtet_control.connect_femtet_button, 'n_clicks', allow_duplicate=True),  # automatically open femtet is now deprecated because enable to use analytical functions without using license.
             Output(alert_region, 'children', allow_duplicate=True),
             Input(self.load_sample_csv_button, 'n_clicks'),
             State(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab),
@@ -623,7 +623,7 @@ class Tutorial(AbstractPage):
             if not os.path.exists(path):
                 msg = Msg.ERR_SAMPLE_CSV_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
-                return no_update, no_update, no_update, alerts
+                return no_update, no_update, alerts
             destination_file = path.replace('wat_ex14_parametric_test_result.reccsv', 'tutorial.csv')
             shutil.copyfile(path, destination_file)
             self.application.history = History(destination_file)
@@ -632,7 +632,7 @@ class Tutorial(AbstractPage):
             if not os.path.exists(source_file):
                 msg = Msg.ERR_SAMPLE_FEMPRJ_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
-                return no_update, no_update, no_update, alerts
+                return no_update, no_update, alerts
             destination_file = source_file.replace('wat_ex14_parametric', 'tutorial')
             shutil.copyfile(source_file, destination_file)
 
@@ -640,7 +640,7 @@ class Tutorial(AbstractPage):
             if not os.path.exists(source_file):
                 msg = Msg.ERR_FEMPRJ_RESULT_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
-                return no_update, no_update, no_update, alerts
+                return no_update, no_update, alerts
             destination_folder = source_folder.replace('wat_ex14_parametric', 'tutorial')
             shutil.copytree(source_folder, destination_folder, dirs_exist_ok=True)
 
@@ -651,7 +651,7 @@ class Tutorial(AbstractPage):
                 )
             )
 
-            return active_tab, 1, 1, no_update
+            return active_tab, 1, no_update
 
     @staticmethod
     def check_point_selected(data):
