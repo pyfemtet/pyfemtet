@@ -216,7 +216,7 @@ msgstr "解析モデル名が指定されていません。目的の解析モデ
 
 #: pyfemtet/message/messages.py:100
 msgid "Constraint"
-msgstr "拘束"
+msgstr "拘束条件"
 
 #: pyfemtet/message/messages.py:101
 msgid "feasible"
@@ -228,19 +228,19 @@ msgstr "満たさない"
 
 #: pyfemtet/message/messages.py:103
 msgid "Optimality"
-msgstr "最適かどうか"
+msgstr "最適性"
 
 #: pyfemtet/message/messages.py:104
 msgid "non dominated"
-msgstr "非劣解"
+msgstr "適"
 
 #: pyfemtet/message/messages.py:105
 msgid "dominated"
-msgstr "劣解"
+msgstr "不適"
 
 #: pyfemtet/message/messages.py:106
 msgid "Hypervolume Plot"
-msgstr "超体積プロット"
+msgstr "Hypervolume プロット"
 
 #: pyfemtet/message/messages.py:107
 msgid "Objective Plot"
