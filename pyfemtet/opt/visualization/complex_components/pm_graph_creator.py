@@ -58,7 +58,14 @@ class PredictionModelCreator:
             xx = np.linspace(lb1, ub1, N)  # shape: (N,)
 
         # create raveled grid data
-        tmp_df = pd.DataFrame(columns=history.prm_names)
+        tmp_df = pd.DataFrame(
+            columns=history.prm_names,
+            index=range(len(xx.ravel())),  # index で df の長さを指定しないと remaining_x の代入で工夫が必要になる
+        )
+
+        # 変数名ごとに見ていって、
+        # 横軸に使う変数ならグリッド値を入れ、
+        # そうでなければ remaining_x の値を入れる（シリーズになる）
         idx = 0
         for prm_name in history.prm_names:
             if prm_name == prm_name_1:
@@ -129,7 +136,7 @@ class PredictionModelCreator:
                 ),
                 y=dict(
                     highlight=True, show=True, color='blue',
-                    start=lb2, end=ub2, size=(ub1-lb1)/N
+                    start=lb2, end=ub2, size=(ub2-lb2)/N
                 ),
                 z=dict(highlight=False, show=False),
             )
