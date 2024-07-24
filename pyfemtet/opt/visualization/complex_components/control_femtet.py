@@ -49,6 +49,7 @@ class FemtetControl(AbstractPage):
             id='connect-femtet-button',
             outline=True,
             color='primary',
+            className="position-relative",  # need to show badge
         )
 
         # noinspection PyAttributeOutsideInit

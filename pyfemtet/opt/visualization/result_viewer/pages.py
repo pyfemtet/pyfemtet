@@ -518,6 +518,7 @@ class Tutorial(AbstractPage):
             Output(self.open_pdt_badge, 'style'),  # switch visibility
             Output(self.open_pdt_popover, 'is_open'),  # switch visibility
             Output(self.connect_femtet_popover, 'is_open'),  # switch visibility
+            Output(self.connect_femtet_badge, 'style'),  # switch visibility
             Input(self.tutorial_mode_switch, 'value'),
             Input(self.load_sample_csv_button, 'n_clicks'),  # load button clicked
             Input(self.main_graph.selection_data, self.main_graph.selection_data_property),  # selection changed
@@ -527,6 +528,7 @@ class Tutorial(AbstractPage):
             State(self.home_page.file_picker, 'style'),  # switch visibility
             State(self.graph_badge, 'style'),  # switch visibility
             State(self.open_pdt_badge, 'style'),  # switch visibility
+            State(self.connect_femtet_badge, 'style'),  # switch visibility
             prevent_initial_call=True,
         )
         def control_visibility(
@@ -539,6 +541,7 @@ class Tutorial(AbstractPage):
                 file_picker_current_style,
                 graph_badge_current_style,
                 open_pdt_badge_current_style,
+                connect_femtet_badge_current_style,
         ):
             ret = {
                 (load_sample_csv_badge_style := 0): no_update,
@@ -550,6 +553,7 @@ class Tutorial(AbstractPage):
                 (open_pdt_badge_style := 6): no_update,
                 (open_pdt_popover_visible := 7): no_update,
                 (connect_femtet_popover_visible := 8): no_update,
+                (connect_femtet_badge_style := 9): no_update,
             }
 
             # prevent unexpected update
@@ -568,6 +572,7 @@ class Tutorial(AbstractPage):
             ret[open_pdt_badge_style] = self.control_visibility_by_style(False, open_pdt_badge_current_style)
             ret[open_pdt_popover_visible] = False
             ret[connect_femtet_popover_visible] = False
+            ret[connect_femtet_badge_style] = self.control_visibility_by_style(False, connect_femtet_badge_current_style)
 
             # if not tutorial, disable all anyway
             if not is_tutorial:
@@ -591,12 +596,25 @@ class Tutorial(AbstractPage):
 
             # if history is not None,
             else:
-                # if a point is already selected, show badge to open-pdt
+                print('=====')
+                # if a point is already selected, show badge to open-pdt or connect-femtet
                 if self.check_point_selected(selection_data):
-                    ret[open_pdt_badge_style] = self.control_visibility_by_style(
-                        True,
-                        open_pdt_badge_current_style,
-                    )
+                    print(1)
+                    # if femtet is connected, show badge to open-pdt
+                    if self.femtet_control.check_femtet_state() is FemtetState.connected:
+                        print(2)
+                        ret[open_pdt_badge_style] = self.control_visibility_by_style(
+                            True,
+                            open_pdt_badge_current_style,
+                        )
+
+                    # else, show femtet-connect badge
+                    else:
+                        print('3')
+                        ret[connect_femtet_badge_style] = self.control_visibility_by_style(
+                            True,
+                            connect_femtet_badge_current_style,
+                        )
 
                 # selection not yet, show badge to main-graph
                 else:
