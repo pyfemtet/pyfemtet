@@ -124,19 +124,31 @@ class PredictionModelCreator:
         if prm_name_2:
             contours = dict(
                 x=dict(
-                    highlight=False, show=True, color='blue',
+                    highlight=True, show=True, color='blue',
                     start=lb1, end=ub1, size=(ub1-lb1)/N,
                 ),
                 y=dict(
-                    highlight=False, show=True, color='blue',
+                    highlight=True, show=True, color='blue',
                     start=lb2, end=ub2, size=(ub1-lb1)/N
                 ),
                 z=dict(highlight=False, show=False),
             )
-            fig.add_trace(go.Surface(z=zz_mean, x=xx, y=yy, contours=contours))
+            fig.add_trace(
+                go.Surface(
+                    z=zz_mean, x=xx, y=yy,
+                    contours=contours,
+                    showlegend=True,
+                    name=Msg.LEGEND_LABEL_PREDICTION_MODEL,
+                    colorbar=dict(
+                        x=0.2,
+                        xref="container",
+                        # orientation='h',
+                    )
+                )
+            )
             # std
-            fig.add_trace(go.Surface(z=zz_upper, x=xx, y=yy, showscale=False, opacity=0.3))
-            fig.add_trace(go.Surface(z=zz_lower, x=xx, y=yy, showscale=False, opacity=0.3))
+            fig.add_trace(go.Surface(z=zz_upper, x=xx, y=yy, showscale=False, opacity=0.3, showlegend=True, name=Msg.LEGEND_LABEL_PREDICTION_MODEL_STDDEV))
+            fig.add_trace(go.Surface(z=zz_lower, x=xx, y=yy, showscale=False, opacity=0.3, showlegend=True, name=Msg.LEGEND_LABEL_PREDICTION_MODEL_STDDEV))
 
             # layout
             fig.update_layout(
@@ -146,9 +158,8 @@ class PredictionModelCreator:
                     yaxis_title=prm_name_2,
                     zaxis_title=obj_name
                 ),
-                margin=dict(l=0, r=0, b=0, t=0),
+                margin=dict(l=0, r=0, b=0, t=30),
             )
-
 
         else:
             fig.add_trace(
