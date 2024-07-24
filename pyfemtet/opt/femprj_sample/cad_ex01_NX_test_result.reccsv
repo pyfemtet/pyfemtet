@@ -1,4 +1,4 @@
-"{""femprj_path"": ""E:\\pyfemtet\\pyfemtet\\pyfemtet\\opt\\femprj_sample\\cad_ex01_NX.femprj"", ""model_name"": ""Analysis Model""}",prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,obj,obj_direction,obj,obj_direction,,cns,cns_lb,cns_ub,,,,
+"{""femprj_path"": null, ""model_name"": ""Analysis Model""}",prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,obj,obj_direction,obj,obj_direction,,cns,cns_lb,cns_ub,,,,
 ,,,,,,,,,,,,,,,,,,,,,
 trial,A,A_lower_bound,A_upper_bound,B,B_lower_bound,B_upper_bound,C,C_lower_bound,C_upper_bound,von Mises (Pa),von Mises (Pa)_direction,mass (kg),mass (kg)_direction,non_domi,C>B,C>B_lower_bound,C>B_upper_bound,feasible,hypervolume,message,time
 1,10.0,1.0,59.0,10.0,1.0,40.0,20.0,5.0,59.0,12187480208.414427,minimize,5.615241407210086,minimize,True,10.0,1,,True,0.0,initial,2024-07-24 09:50:32.097923

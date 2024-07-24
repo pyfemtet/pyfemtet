@@ -1,4 +1,4 @@
-"{""femprj_path"": ""E:\\pyfemtet\\pyfemtet\\pyfemtet\\opt\\femprj_sample\\paswat_ex1_parametric.femprj"", ""model_name"": ""Ex1""}",prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,obj,obj_direction,obj,obj_direction,obj,obj_direction,,,,,
+"{""femprj_path"": null, ""model_name"": ""Ex1""}",prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,obj,obj_direction,obj,obj_direction,obj,obj_direction,,,,,
 ,,,,,,,,,,,,,,,,,,,,
 trial,substrate_w,substrate_w_lower_bound,substrate_w_upper_bound,substrate_d,substrate_d_lower_bound,substrate_d_upper_bound,rot,rot_lower_bound,rot_upper_bound,max temp. of<br>MAINCHIP (degree),max temp. of<br>MAINCHIP (degree)_direction,max temp. of<br>SUBCHIP (degree),max temp. of<br>SUBCHIP (degree)_direction,substrate size (mm2),substrate size (mm2)_direction,non_domi,feasible,hypervolume,message,time
 1,40.0,22.0,60.0,60.0,34.0,60.0,0.0,0.0,180.0,33.67695768585457,minimize,33.95371403109053,minimize,2400.0,minimize,True,True,0.0,initial,2024-07-24 10:05:57.757339

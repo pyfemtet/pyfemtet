@@ -102,10 +102,12 @@ def record_result(src: FEMOpt or str, py_path, suffix=''):
     copy(src_csv_path, dst_csv_path)
 
 
-def _get_obj_from_csv(csv_path):
-    df = pd.read_csv(csv_path, encoding='cp932', header=2)
+def _get_obj_from_csv(csv_path, encoding='cp932'):
+    print('=====')
+    print(csv_path)
+    df = pd.read_csv(csv_path, encoding=encoding, header=2)
     columns = df.columns
-    with open(csv_path, mode='r', encoding='cp932', newline='\n') as f:
+    with open(csv_path, mode='r', encoding=encoding, newline='\n') as f:
         reader = csv.reader(f, delimiter=',')
         meta = reader.__next__()
     obj_indices = np.where(np.array(meta) == 'obj')[0]

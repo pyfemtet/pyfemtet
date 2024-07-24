@@ -7,6 +7,8 @@ from glob import glob
 import pyfemtet
 
 from pyfemtet import _test_util
+# from pyfemtet.message import encoding
+encoding = 'utf-8'
 
 
 here = os.path.dirname(__file__)
@@ -21,7 +23,7 @@ os.chdir(here)
 
 
 def run(py_script_path, log_path):
-    with open(log_path, 'w') as f:
+    with open(log_path, 'w', encoding=encoding) as f:
         # run sample script
         process = subprocess.Popen(
             [sys.executable, py_script_path],
@@ -29,10 +31,11 @@ def run(py_script_path, log_path):
             stdout=f,
             stderr=f,
             cwd=os.path.dirname(py_script_path),
+            encoding=encoding,
         )
 
         # press enter to skip input() in sample script
-        process.stdin.write(b'\n')
+        process.stdin.write('\n')
         process.stdin.flush()
         process.communicate()
 
@@ -40,17 +43,18 @@ def run(py_script_path, log_path):
 def postprocess(py_script_path, log_path):
     created_csv_path = _test_util.find_latest_csv(dir_path=os.path.dirname(py_script_path))
     reccsv_path = _test_util.py_to_reccsv(py_script_path, suffix='_test_result')
+
     if RECORD_MODE:
         if os.path.exists(reccsv_path): os.remove(reccsv_path)
         os.rename(created_csv_path, reccsv_path)
     else:
         if py_script_path != test_script:
-            _test_util.is_equal_result(created_csv_path, reccsv_path, log_path)
+            _test_util.is_equal_result(reccsv_path, created_csv_path, log_path)
 
 
 def check_traceback(log_path):
     # get log
-    with open(log_path, 'r', encoding='utf-8', newline='\n') as f:
+    with open(log_path, 'r', encoding=encoding, newline='\n') as f:
         lines = f.readlines()
 
     # remove after 'Finished. Press Enter to quit...'
@@ -148,19 +152,15 @@ def test_test():
 
 if __name__ == '__main__':
 
-    RECORD_MODE = True
+    RECORD_MODE = False
 
     # main()
 
-    # test_sample_gau_ex08_parametric()
-
-    for path in glob(os.path.join(SAMPLE_DIR, '*.femprj'), recursive=True):
-        if 'tutorial' in path: continue
-        if 'ParametricIF - True' in path: continue
-        # if 'cad' in path: continue
-        # if 'gal' in path: continue
-        # if 'gau' in path: continue
-        # if 'her' in path: continue
-        # if 'ParametricIF' in path: continue
-        # if 'paswat' in path: continue
-        main(path)
+    test_sample_gau_ex08_parametric()
+    test_sample_her_ex40_parametric()
+    test_sample_wat_ex14_parametric()
+    test_sample_paswat_ex1_parametric()
+    test_sample_gal_ex58_parametric()
+    test_cad_sample_nx_ex01()
+    test_cad_sample_sldworks_ex01()
+    test_sample_parametric()

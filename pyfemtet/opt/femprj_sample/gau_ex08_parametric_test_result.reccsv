@@ -1,4 +1,4 @@
-"{""femprj_path"": ""E:\\pyfemtet\\pyfemtet\\pyfemtet\\opt\\femprj_sample\\gau_ex08_parametric.femprj"", ""model_name"": ""ex8""}",prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,obj,obj_direction,,,,,
+"{""femprj_path"": null, ""model_name"": ""ex8""}",prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,prm,prm_lb,prm_ub,obj,obj_direction,,,,,
 ,,,,,,,,,,,,,,,,
 trial,helical_pitch,helical_pitch_lower_bound,helical_pitch_upper_bound,coil_radius,coil_radius_lower_bound,coil_radius_upper_bound,n_turns,n_turns_lower_bound,n_turns_upper_bound,self-inductance (F),self-inductance (F)_direction,non_domi,feasible,hypervolume,message,time
 1,6.0,4.2,8.0,10.0,1.0,10.0,5.0,1.0,5.0,2.2519131001615743e-07,1e-07,False,True,-1.0,initial,2024-07-24 09:58:15.358912

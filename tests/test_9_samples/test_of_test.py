@@ -2,7 +2,7 @@ from pyfemtet.opt import FEMOpt, NoFEM, AbstractOptimizer
 
 n_input = 3
 n_trials = 5
-error_timing = 3
+error_timing = 10
 
 counter = 0
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     # run
     femopt.optimize(n_trials=n_trials)
 
-    print('input required')
-    input()
+    print('Finished. Press Enter to quit...')  # required
+    input()  # required
 
     femopt.terminate_all()
