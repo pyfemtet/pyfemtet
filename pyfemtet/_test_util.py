@@ -59,12 +59,13 @@ def launch_femtet(femprj_path):
     # open femprj in a different process
     # to release Femtet for sample program
     print('Opening femprj...')
-    p = Process(
-        target=_open_femprj,
-        args=(femprj_path,),
-    )
-    p.start()
-    p.join()
+    if femprj_path:
+        p = Process(
+            target=_open_femprj,
+            args=(femprj_path,),
+        )
+        p.start()
+        p.join()
 
 
 def taskkill_femtet():
@@ -112,30 +113,23 @@ def _get_obj_from_csv(csv_path):
     return out, columns
 
 
-def is_equal_result(csv1, csv2, result_save_to=None):
+def is_equal_result(ref_path, dif_path, log_path):
     """Check the equality of two result csv files."""
-    df1, columns1 = _get_obj_from_csv(csv1)
-    df2, columns2 = _get_obj_from_csv(csv2)
+    ref_df, ref_columns = _get_obj_from_csv(ref_path)
+    dif_df, dif_columns = _get_obj_from_csv(dif_path)
 
-    if result_save_to is not None:
-        import datetime
-        with open(result_save_to, 'a', encoding='utf-8', newline='\n') as f:
-            name = os.path.basename(csv1)
-            content = [
-                f'===== result of {name} =====\n',
-                f'{datetime.datetime.now()}\n',
-                f'----- column numbers -----\n',
-                f'csv1: {len(columns1)} columns\n',
-                f'csv2: {len(columns2)} columns\n',
-                f'----- row numbers -----\n',
-                f'csv1: {len(df1)} columns\n',
-                f'csv2: {len(df2)} columns\n',
-                f'----- difference -----\n',
-                f'max difference ratio: {(np.abs(df1.values - df2.values) / np.abs(df2.values)).max() * 100}%\n',
-                '\n'
-            ]
-            f.writelines(content)
+    with open(log_path, 'a', newline='\n') as f:
+        f.write('\n\n===== 結果の分析 =====\n\n')
+        f.write(f'        \tref\tdif\n')
+        f.write(f'---------------------\n')
+        f.write(f'len(col)\t{len(ref_columns)}\t{len(dif_columns)}\n')
+        f.write(f'len(df) \t{len(ref_df)}\t{len(dif_df)}\n')
+        try:
+            difference = (np.abs(ref_df.values - dif_df.values) / np.abs(dif_df.values)).mean()
+            f.write(f'diff    \t{int(difference*100)}%\n')
+        except Exception:
+            f.write(f'diff    \tcannot calc\n')
 
-    assert len(columns1) == len(columns2), '結果 csv の column 数が異なります。'
-    assert len(df1) == len(df2), '結果 csv の row 数が異なります。'
-    assert (np.abs(df1.values - df2.values) / np.abs(df2.values)).mean() <= 0.05, '前回の結果との平均差異が 5% を超えています。'
+    assert len(ref_columns) == len(dif_columns), '結果 csv の column 数が異なります。'
+    assert len(ref_df) == len(dif_df), '結果 csv の row 数が異なります。'
+    assert difference <= 0.05, '前回の結果との平均差異が 5% を超えています。'
