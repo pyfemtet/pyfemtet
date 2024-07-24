@@ -467,7 +467,9 @@ class Tutorial(AbstractPage):
             is_open=False,
             placement='top',
         )
+
         # popover of connect-femtet
+        self.connect_femtet_badge = self.create_badge('Click Me!', 'connect-femtet-badge')
         self.connect_femtet_popover = dbc.Popover(
             children=[
                 dbc.PopoverBody(Msg.CONNECT_FEMTET_POPOVER_BODY),
@@ -484,18 +486,27 @@ class Tutorial(AbstractPage):
     def setup_callback(self):
         app = self.application.app
 
-
+        # ===== add tutorial badge to subpage's components =====
         @app.callback(
             Output(self.home_page.open_pdt_button, 'children'),
+            Output(self.femtet_control.connect_femtet_button, 'children', allow_duplicate=True),
             Input(self.home_page.location, self.home_page.location.Prop.pathname),
             State(self.home_page.open_pdt_button, 'children'),
-            prevent_initial_call=False,
+            State(self.femtet_control.connect_femtet_button, 'children'),
+            prevent_initial_call=True,
         )
-        def add_badge_to_button_init(_, current_children):
-            children = current_children if isinstance(current_children, list) else [current_children]
-            if self.open_pdt_badge not in children:
-                children.append(self.open_pdt_badge)
-            return children
+        def add_badge_to_button_init(_, current_children_pdt, current_children_femtet):
+            # open pdt button
+            children_pdt = current_children_pdt if isinstance(current_children_pdt, list) else [current_children_pdt]
+            if self.open_pdt_badge not in children_pdt:
+                children_pdt.append(self.open_pdt_badge)
+
+            # connect femtet button
+            children_femtet = current_children_femtet if isinstance(current_children_femtet, list) else [current_children_femtet]
+            if self.connect_femtet_badge not in children_femtet:
+                children_femtet.append(self.connect_femtet_badge)
+
+            return children_pdt, children_femtet
 
         @app.callback(
             Output(self.load_sample_csv_badge, 'style'),  # switch visibility
