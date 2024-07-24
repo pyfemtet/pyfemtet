@@ -130,7 +130,7 @@ class OptunaOptimizer(AbstractOptimizer):
             return trial.user_attrs['constraint']
         else:
             _c = []
-            for (name, cns) in zip(self.constraints.items()):
+            for name, cns in self.constraints.items():
                 lb, ub = cns.lb, cns.ub
                 if lb is not None:
                     _c.append(1.)
