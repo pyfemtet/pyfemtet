@@ -569,8 +569,8 @@ class History:
         # parameters
         for i, _row in parameters.iterrows():
             row.append(_row['value'])
-            row.append(_row['lb'])
-            row.append(_row['ub'])
+            row.append(_row['lower_bound'])
+            row.append(_row['upper_bound'])
 
         # objectives and their direction
         for (_, obj), obj_value in zip(objectives.items(), obj_values):  # objectives, direction

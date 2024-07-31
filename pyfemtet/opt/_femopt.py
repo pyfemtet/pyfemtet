@@ -1,4 +1,5 @@
 # built-in
+from typing import Optional, Any, Callable
 import os
 import datetime
 from time import time, sleep
@@ -24,6 +25,7 @@ from pyfemtet.opt._femopt_core import (
     logger,
 )
 from pyfemtet.message import Msg, encoding
+from pyfemtet.opt.parameter import Parameter, Expression
 
 
 class FEMOpt:
@@ -109,7 +111,8 @@ class FEMOpt:
             lower_bound: float or None = None,
             upper_bound: float or None = None,
             step: float or None = None,
-            memo: str = ''
+            property: Optional[dict] = None,
+            direct_to_fem: Optional[bool] = True,
     ):
         """Adds a parameter to the optimization problem.
 
@@ -119,34 +122,52 @@ class FEMOpt:
             lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             step (float or None, optional): The step of parameter. Defaults to None.
-            memo (str, optional): Additional information about the parameter. Defaults to ''.
+            property (dict, optional): Additional information about the parameter. Defaults to None.
+            direct_to_fem (bool, optional): If the FEM project file contains the parameter or not. Set False when this parameter is just an input of expressions. Defaults to True.
         Raises:
             ValueError: If initial_value is not specified and the value for the given name is also not specified.
 
         """
 
         _check_bound(lower_bound, upper_bound, name)
-        value = self.fem.check_param_value(name)
-        if initial_value is None:
-            if value is not None:
-                initial_value = value
-            else:
+
+        if direct_to_fem:
+            value = self.fem.check_param_value(name)
+            if initial_value is None:
+                if value is not None:
+                    initial_value = value
+                else:
+                    raise ValueError('initial_value を指定してください.')
+        else:
+            if initial_value is None:
                 raise ValueError('initial_value を指定してください.')
 
-        d = {
-            'name': name,
-            'value': float(initial_value),
-            'lb': float(lower_bound) if lower_bound is not None else None,
-            'ub': float(upper_bound) if upper_bound is not None else None,
-            'step': float(step) if step is not None else None,
-            'memo': memo,
-        }
-        pdf = pd.DataFrame(d, index=[0], dtype=object)
+        prm = Parameter(
+            name=name,
+            value=float(initial_value),
+            lower_bound=float(lower_bound) if lower_bound is not None else None,
+            upper_bound=float(upper_bound) if upper_bound is not None else None,
+            step=float(step) if step is not None else None,
+            is_direct_to_fem=direct_to_fem,
+            properties=property,
+        )
+        self.opt.variables.add_parameter(prm)
 
-        if len(self.opt.parameters) == 0:
-            self.opt.parameters = pdf
-        else:
-            self.opt.parameters = pd.concat([self.opt.parameters, pdf], ignore_index=True)
+    def add_expression(
+            self,
+            name: str,
+            fun: Callable[[Any], float],
+            kwargs: Optional[dict] = None,
+            direct_to_fem=True,
+    ):
+        exp = Expression(
+            name=name,
+            value=None,
+            fun=fun,
+            kwargs=kwargs if kwargs else {},
+            is_direct_to_fem=direct_to_fem,
+        )
+        self.opt.variables.add_expression(exp)
 
     def add_objective(
             self,
@@ -250,20 +271,8 @@ class FEMOpt:
 
         self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
 
-    def get_parameter(self, format='dict') -> pd.DataFrame or dict or np.ndarray:
-        """Returns the parameter in a specified format.
-
-        Args:
-            format (str, optional): The desired output format. Defaults to 'dict'. Valid formats are 'values', 'df' and 'dict'.
-
-        Returns:
-            pd.DataFrame or dict or np.ndarray: The parameter data converted into the specified format.
-
-        Raises:
-            ValueError: If an invalid format is provided.
-
-        """
-        return self.opt.get_parameter(format)
+    def get_parameter(self, format='dict'):
+        raise DeprecationWarning('FEMOpt.get_parameter() was deprecated. Use Femopt.opt.get_parameter() instead.')
 
     def set_monitor_host(self, host=None, port=None):
         """Sets up the monitor server with the specified host and port.
@@ -338,8 +347,9 @@ class FEMOpt:
             self.opt.method_checker.check_seed()
 
         is_incomplete_bounds = False
-        for _, row in self.opt.parameters.iterrows():
-            lb, ub = row['lb'], row['ub']
+        prm: Parameter = None
+        for prm in self.opt.variables.parameters.values():
+            lb, ub = prm.lower_bound, prm.upper_bound
             is_incomplete_bounds = is_incomplete_bounds + (lb is None) + (ub is None)
         if is_incomplete_bounds:
             self.opt.method_checker.check_incomplete_bounds()
@@ -347,6 +357,10 @@ class FEMOpt:
         # 共通引数
         self.opt.n_trials = n_trials
         self.opt.timeout = timeout
+
+        # resolve expression dependencies
+        self.opt.variables.resolve()
+        self.opt.variables.evaluate()
 
         # クラスターの設定
         self.opt.is_cluster = self.scheduler_address is not None
@@ -427,7 +441,7 @@ class FEMOpt:
         self.status.set(OptimizationStatus.SETTING_UP)
         self.history = History(
             self.history_path,
-            self.opt.parameters['name'].to_list(),
+            self.opt.variables.get_parameter_names(),
             list(self.opt.objectives.keys()),
             list(self.opt.constraints.keys()),
             self.client,

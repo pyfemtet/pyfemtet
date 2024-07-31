@@ -63,19 +63,25 @@ class OptunaOptimizer(AbstractOptimizer):
             trial.study.stop()  # 現在実行中の trial を最後にする
             return None  # set TrialState FAIL
 
-        # candidate x
-        x = []
-        for i, row in self.parameters.iterrows():
-            v = trial.suggest_float(row['name'], row['lb'], row['ub'], step=row['step'])
-            x.append(v)
-        x = np.array(x).astype(float)
+        # candidate x and update parameters
+        for prm in self.variables.get_variables(format='list_of_Variables', parameter_only=True):
+            value = trial.suggest_float(
+                name=prm.name,
+                low=prm.lower_bound,
+                high=prm.upper_bound,
+                step=prm.step,
+            )
+            self.variables.variables[prm.name].value = value
+
+        # update expressions
+        self.variables.evaluate()
 
         # message の設定
         self.message = trial.user_attrs['message'] if 'message' in trial.user_attrs.keys() else ''
 
-        # fem や opt 経由で変数を取得して constraint を計算する時のためにアップデート
-        self.parameters['value'] = x
-        self.fem.update_parameter(self.parameters)
+        # fem 経由で変数を取得して constraint を計算する時のためにアップデート
+        df_fem = self.variables.get_variables(format='df', direct_to_fem_only=True)
+        self.fem.update_parameter(df_fem)
 
         # strict 拘束
         strict_constraints = [cns for cns in self.constraints.values() if cns.strict]
@@ -89,10 +95,11 @@ class OptunaOptimizer(AbstractOptimizer):
             if not feasible:
                 logger.info(Msg.INFO_INFEASIBLE)
                 logger.info(f'Constraint: {cns.name}')
-                logger.info(self.get_parameter('dict'))
+                logger.info(self.variables.get_variables('dict', parameter_only=True))
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
+        x = self.variables.get_variables(format='values', parameter_only=True)
         try:
             _, _y, c = self.f(x)  # f の中で info は出している
         except (ModelError, MeshError, SolveError) as e:
@@ -175,7 +182,7 @@ class OptunaOptimizer(AbstractOptimizer):
             # 初期値の設定
             if len(self.study.trials) == 0:  # リスタートでなければ
                 # ユーザーの指定した初期値
-                params = self.get_parameter('dict')
+                params = self.variables.get_variables('dict', parameter_only=True)
                 self.study.enqueue_trial(params, user_attrs={"message": "initial"})
 
                 # add_initial_parameter で追加された初期値
@@ -197,8 +204,8 @@ class OptunaOptimizer(AbstractOptimizer):
                     bounds = []
                     for i, row in self.parameters.iterrows():
                         names.append(row['name'])
-                        lb = row['lb']
-                        ub = row['ub']
+                        lb = row['lower_bound']
+                        ub = row['upper_bound']
                         bounds.append([lb, ub])
                     data = generate_lhs(bounds, seed=self.seed)
                     for datum in data:

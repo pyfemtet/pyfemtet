@@ -143,9 +143,9 @@ def simple():
 if __name__ == '__main__':
     # min_sleep_sec = 3
     # random_max_sleep_sec = 1
-    # simple()
+    simple()
 
-    test_2_2_restart()
+    # test_2_2_restart()
 
     # record = False
     # test_2_NoFEM_random_seed()
