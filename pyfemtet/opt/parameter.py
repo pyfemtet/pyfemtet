@@ -48,12 +48,15 @@ class ExpressionEvaluator:
 
 
 
-        # params = inspect.signature(exp.fun).parameters  # FIXME: この実装だと特殊文字が使えない
-        params = get_accessed_keys(exp.fun)  # FIXME: この実装だと問題が多い
+        params = inspect.signature(exp.fun).parameters  # FIXME: この実装だと特殊文字が使えない
+        self.dependencies[exp.name] = set(params) - set(exp.kwargs.keys())
+
+
+        # params = get_accessed_keys(exp.fun)  # FIXME: この実装だと問題が多い
+        # self.dependencies[exp.name] = set(params)
 
 
 
-        self.dependencies[exp.name] = set(params)
         # self.variables[exp.name] = exp
 
     def resolve(self):
@@ -66,17 +69,17 @@ class ExpressionEvaluator:
             if var_name in self.expressions.keys():
 
                 # FIXME: この実装だと特殊文字が使えない
-                # # 現在の variable(即ち expression)に関して param 部分の引数を作成
-                # prm_kwargs = {param: self.variables[param].value for param in self.dependencies[var_name]}
-                # # expression の value を更新
-                # exp: Expression = self.expressions[var_name]
-                # kwargs = exp.kwargs
-                # kwargs.update(prm_kwargs)
-                # exp.value = exp.fun(**exp.kwargs)
+                # 現在の variable(即ち expression)に関して param 部分の引数を作成
+                prm_kwargs = {param: self.variables[param].value for param in self.dependencies[var_name]}
+                # expression の value を更新
+                exp: Expression = self.expressions[var_name]
+                kwargs = exp.kwargs
+                kwargs.update(prm_kwargs)
+                exp.value = exp.fun(**exp.kwargs)
 
                 # FIXME: この実装だと問題が多い
-                exp: Expression = self.expressions[var_name]
-                exp.value = exp.fun(self.get_variables(format='dict'), **exp.kwargs)
+                # exp: Expression = self.expressions[var_name]
+                # exp.value = exp.fun(self.get_variables(format='dict'), **exp.kwargs)
 
                 self.variables[var_name] = exp
 

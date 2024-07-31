@@ -30,7 +30,7 @@ def no_fem():
     # parameter の準備
     femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, property={'unit': 'mm'})
     femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, property={'unit': 'radian'}, direct_to_fem=False)
-    femopt.add_expression('fai', fai, direct_to_fem=True)
+    femopt.add_expression('fai', fai2, direct_to_fem=True)
 
     # objective の準備
     femopt.add_objective(obj, 'x', args=(femopt.opt, 0))
@@ -50,6 +50,10 @@ def no_fem():
 
 def fai(prm):
     return float(prm['fai_virtual']) / pi * 180
+
+
+def fai2(fai_virtual):
+    return float(fai_virtual) / pi * 180
 
 
 def femtet():
