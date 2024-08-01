@@ -32,9 +32,9 @@ def no_fem():
     femopt = FEMOpt(fem=fem)
 
     # parameter の準備
-    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, property={'unit': 'mm'})
-    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, property={'unit': 'radian'}, direct_to_fem=False)
-    femopt.add_expression('fai', fai2, direct_to_fem=True)
+    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1)
+    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, properties={'unit': 'radian'}, direct_to_fem=False)
+    femopt.add_expression('fai', fai2, direct_to_fem=True, properties={'unit': 'degree'})
 
     # objective の準備
     femopt.add_objective(obj, 'x', args=(femopt.opt, 0))
@@ -77,8 +77,8 @@ def femtet():
     femopt = FEMOpt(fem=fem)
 
     # parameter の準備
-    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, property={'unit': 'mm'})
-    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, property={'unit': 'radian'}, direct_to_fem=False)
+    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, properties={'unit': 'mm'})
+    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, properties={'unit': 'radian'}, direct_to_fem=False)
     femopt.add_expression('fai', fai, direct_to_fem=True)
 
     # constraints の準備
@@ -102,8 +102,8 @@ def no_fem_2():
     femopt = FEMOpt(fem=fem)
 
     # parameter の準備
-    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, property={'unit': 'mm'})
-    femopt.add_parameter('ファイ', 180, 90, 270, property={'unit': 'degree'}, direct_to_fem=False)
+    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, properties={'unit': 'mm'})
+    femopt.add_parameter('ファイ', 180, 90, 270, properties={'unit': 'degree'}, direct_to_fem=False)
 
     # objective の準備
     femopt.add_objective(obj_2, 'x', args=(femopt.opt, 0))
@@ -130,8 +130,8 @@ def no_fem_3():
     femopt = FEMOpt(fem=fem)
 
     # parameter の準備
-    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, property={'unit': 'mm'})
-    femopt.add_parameter('fai_virtual', 180, 90, 270, property={'unit': 'degree'}, direct_to_fem=False)
+    femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, properties={'unit': 'mm'})
+    femopt.add_parameter('fai_virtual', 180, 90, 270, properties={'unit': 'degree'}, direct_to_fem=False)
     femopt.add_expression('fai', fai3)
 
     # objective の準備
@@ -148,7 +148,7 @@ def no_fem_3():
 
 
 if __name__ == '__main__':
-    # no_fem()
+    no_fem()
     # no_fem_2()
-    no_fem_3()
+    # no_fem_3()
     # femtet()

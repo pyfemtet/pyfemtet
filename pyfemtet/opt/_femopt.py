@@ -111,7 +111,7 @@ class FEMOpt:
             lower_bound: float or None = None,
             upper_bound: float or None = None,
             step: float or None = None,
-            property: Optional[dict] = None,
+            properties: Optional[dict] = None,
             direct_to_fem: Optional[bool] = True,
     ):
         """Adds a parameter to the optimization problem.
@@ -122,7 +122,7 @@ class FEMOpt:
             lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             step (float or None, optional): The step of parameter. Defaults to None.
-            property (dict, optional): Additional information about the parameter. Defaults to None.
+            properties (dict, optional): Additional information about the parameter. Defaults to None.
             direct_to_fem (bool, optional): If the FEM project file contains the parameter or not. Set False when this parameter is just an input of expressions. Defaults to True.
         Raises:
             ValueError: If initial_value is not specified and the value for the given name is also not specified.
@@ -149,7 +149,7 @@ class FEMOpt:
             upper_bound=float(upper_bound) if upper_bound is not None else None,
             step=float(step) if step is not None else None,
             is_direct_to_fem=direct_to_fem,
-            properties=property,
+            properties=properties,
         )
         self.opt.variables.add_parameter(prm)
 
@@ -157,12 +157,14 @@ class FEMOpt:
             self,
             name: str,
             fun: Callable[[Any], float],
+            properties=property,
             kwargs: Optional[dict] = None,
             direct_to_fem=True,
     ):
         exp = Expression(
             name=name,
             value=None,
+            properties=properties,
             fun=fun,
             kwargs=kwargs if kwargs else {},
             is_direct_to_fem=direct_to_fem,
