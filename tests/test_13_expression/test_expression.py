@@ -33,8 +33,8 @@ def no_fem():
 
     # parameter の準備
     femopt.add_parameter('radius', 0.5, 0, 1, step=0.1)
-    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, properties={'unit': 'radian'}, direct_to_fem=False)
-    femopt.add_expression('fai', fai2, direct_to_fem=True, properties={'unit': 'degree'})
+    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, properties={'unit': 'radian'}, pass_to_fem=False)
+    femopt.add_expression('fai', fai2, pass_to_fem=True, properties={'unit': 'degree'})
 
     # objective の準備
     femopt.add_objective(obj, 'x', args=(femopt.opt, 0))
@@ -52,8 +52,8 @@ def no_fem():
     femopt.terminate_all()
 
 
-def fai(prm):
-    return float(prm['fai_virtual']) / pi * 180
+def fai(fai_virtual):
+    return float(fai_virtual) / pi * 180
 
 
 def fai2(fai_virtual):
@@ -78,8 +78,8 @@ def femtet():
 
     # parameter の準備
     femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, properties={'unit': 'mm'})
-    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, properties={'unit': 'radian'}, direct_to_fem=False)
-    femopt.add_expression('fai', fai, direct_to_fem=True)
+    femopt.add_parameter('fai_virtual', pi, pi/2, 3/2*pi, properties={'unit': 'radian'}, pass_to_fem=False)
+    femopt.add_expression('fai', fai, pass_to_fem=True)
 
     # constraints の準備
     femopt.add_constraint(cns1, upper_bound=0.8, strict=True)
@@ -103,7 +103,7 @@ def no_fem_2():
 
     # parameter の準備
     femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, properties={'unit': 'mm'})
-    femopt.add_parameter('ファイ', 180, 90, 270, properties={'unit': 'degree'}, direct_to_fem=False)
+    femopt.add_parameter('ファイ', 180, 90, 270, properties={'unit': 'degree'}, pass_to_fem=False)
 
     # objective の準備
     femopt.add_objective(obj_2, 'x', args=(femopt.opt, 0))
@@ -131,7 +131,7 @@ def no_fem_3():
 
     # parameter の準備
     femopt.add_parameter('radius', 0.5, 0, 1, step=0.1, properties={'unit': 'mm'})
-    femopt.add_parameter('fai_virtual', 180, 90, 270, properties={'unit': 'degree'}, direct_to_fem=False)
+    femopt.add_parameter('fai_virtual', 180, 90, 270, properties={'unit': 'degree'}, pass_to_fem=False)
     femopt.add_expression('fai', fai3)
 
     # objective の準備
@@ -151,4 +151,4 @@ if __name__ == '__main__':
     no_fem()
     # no_fem_2()
     # no_fem_3()
-    # femtet()
+    femtet()

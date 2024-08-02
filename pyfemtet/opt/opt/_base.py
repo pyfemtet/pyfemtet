@@ -168,7 +168,7 @@ class AbstractOptimizer(ABC):
         try:
             df_to_fem = self.variables.get_variables(
                 format='df',
-                direct_to_fem_only=True
+                filter_pass_to_fem=True
             )
             self.fem.update(df_to_fem)
 
@@ -192,7 +192,7 @@ class AbstractOptimizer(ABC):
 
         df_to_opt = self.variables.get_variables(
             format='df',
-            parameter_only=True,
+            filter_parameter=True,
         )
 
         self.history.record(

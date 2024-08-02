@@ -64,7 +64,7 @@ class OptunaOptimizer(AbstractOptimizer):
             return None  # set TrialState FAIL
 
         # candidate x and update parameters
-        for prm in self.variables.get_variables(format='list_of_Variables', parameter_only=True):
+        for prm in self.variables.get_variables(format='raw', filter_parameter=True):
             value = trial.suggest_float(
                 name=prm.name,
                 low=prm.lower_bound,
@@ -80,7 +80,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.message = trial.user_attrs['message'] if 'message' in trial.user_attrs.keys() else ''
 
         # fem 経由で変数を取得して constraint を計算する時のためにアップデート
-        df_fem = self.variables.get_variables(format='df', direct_to_fem_only=True)
+        df_fem = self.variables.get_variables(format='df', filter_pass_to_fem=True)
         self.fem.update_parameter(df_fem)
 
         # strict 拘束
@@ -95,11 +95,11 @@ class OptunaOptimizer(AbstractOptimizer):
             if not feasible:
                 logger.info(Msg.INFO_INFEASIBLE)
                 logger.info(f'Constraint: {cns.name}')
-                logger.info(self.variables.get_variables('dict', parameter_only=True))
+                logger.info(self.variables.get_variables('dict', filter_parameter=True))
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
-        x = self.variables.get_variables(format='values', parameter_only=True)
+        x = self.variables.get_variables(format='values', filter_parameter=True)
         try:
             _, _y, c = self.f(x)  # f の中で info は出している
         except (ModelError, MeshError, SolveError) as e:
@@ -182,7 +182,7 @@ class OptunaOptimizer(AbstractOptimizer):
             # 初期値の設定
             if len(self.study.trials) == 0:  # リスタートでなければ
                 # ユーザーの指定した初期値
-                params = self.variables.get_variables('dict', parameter_only=True)
+                params = self.variables.get_variables('dict', filter_parameter=True)
                 self.study.enqueue_trial(params, user_attrs={"message": "initial"})
 
                 # add_initial_parameter で追加された初期値

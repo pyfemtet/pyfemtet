@@ -112,7 +112,7 @@ class FEMOpt:
             upper_bound: float or None = None,
             step: float or None = None,
             properties: Optional[dict] = None,
-            direct_to_fem: Optional[bool] = True,
+            pass_to_fem: Optional[bool] = True,
     ):
         """Adds a parameter to the optimization problem.
 
@@ -123,7 +123,7 @@ class FEMOpt:
             upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
             step (float or None, optional): The step of parameter. Defaults to None.
             properties (dict, optional): Additional information about the parameter. Defaults to None.
-            direct_to_fem (bool, optional): If the FEM project file contains the parameter or not. Set False when this parameter is just an input of expressions. Defaults to True.
+            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
         Raises:
             ValueError: If initial_value is not specified and the value for the given name is also not specified.
 
@@ -131,7 +131,7 @@ class FEMOpt:
 
         _check_bound(lower_bound, upper_bound, name)
 
-        if direct_to_fem:
+        if pass_to_fem:
             value = self.fem.check_param_value(name)
             if initial_value is None:
                 if value is not None:
@@ -148,7 +148,7 @@ class FEMOpt:
             lower_bound=float(lower_bound) if lower_bound is not None else None,
             upper_bound=float(upper_bound) if upper_bound is not None else None,
             step=float(step) if step is not None else None,
-            is_direct_to_fem=direct_to_fem,
+            pass_to_fem=pass_to_fem,
             properties=properties,
         )
         self.opt.variables.add_parameter(prm)
@@ -159,15 +159,24 @@ class FEMOpt:
             fun: Callable[[Any], float],
             properties=property,
             kwargs: Optional[dict] = None,
-            direct_to_fem=True,
+            pass_to_fem=True,
     ):
+        """Add expression to the optimization problem.
+
+        Args:
+            name (str): The name of the variable.
+            fun (Callable[[Any], float]): An expression function. The arguments that you want to use as input variables must be the same with ``name`` of Variable objects added by ``add_parameter()`` or ``add_expression()``. If you use other objects as argument of the function, you must specify ``kwargs``.
+            properties ([type], optional): Property names and their values of the variable. Defaults to property.
+            kwargs (Optional[dict], optional): Remaining arguments of ``fun``. Defaults to None.
+            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True.
+        """
         exp = Expression(
             name=name,
             value=None,
             properties=properties,
             fun=fun,
             kwargs=kwargs if kwargs else {},
-            is_direct_to_fem=direct_to_fem,
+            pass_to_fem=pass_to_fem,
         )
         self.opt.variables.add_expression(exp)
 
