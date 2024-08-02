@@ -1,5 +1,6 @@
 # typing
 from abc import ABC, abstractmethod
+from typing import Optional
 
 # built-in
 import traceback
@@ -13,6 +14,7 @@ import pandas as pd
 from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt._femopt_core import OptimizationStatus
 from pyfemtet.message import Msg
+from pyfemtet.opt.parameter import ExpressionEvaluator
 
 # logger
 import logging
@@ -134,6 +136,7 @@ class AbstractOptimizer(ABC):
         self.fem_class = None
         self.fem_kwargs = dict()
         self.parameters: pd.DataFrame = pd.DataFrame()
+        self.variables: ExpressionEvaluator = ExpressionEvaluator()
         self.objectives: dict = dict()
         self.constraints: dict = dict()
         self.entire_status = None  # actor
@@ -153,14 +156,22 @@ class AbstractOptimizer(ABC):
         # interruption の実装は具象クラスに任せる
 
         # x の更新
-        self.parameters['value'] = x
+        prm_names = self.variables.get_parameter_names()
+        for name, value in zip(prm_names, x):
+            self.variables.variables[name].value = value
+
         logger.info('---------------------')
         logger.info(f'input: {x}')
 
         # FEM の更新
         logger.debug('fem.update() start')
         try:
-            self.fem.update(self.parameters)
+            df_to_fem = self.variables.get_variables(
+                format='df',
+                filter_pass_to_fem=True
+            )
+            self.fem.update(df_to_fem)
+
         except Exception as e:
             logger.info(f'{type(e).__name__} : {e}')
             logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
@@ -178,8 +189,14 @@ class AbstractOptimizer(ABC):
         c = [cns.calc(self.fem) for cns in self.constraints.values()]
 
         logger.debug('history.record start')
+
+        df_to_opt = self.variables.get_variables(
+            format='df',
+            filter_parameter=True,
+        )
+
         self.history.record(
-            self.parameters,
+            df_to_opt,
             self.objectives,
             self.constraints,
             y,
@@ -220,17 +237,7 @@ class AbstractOptimizer(ABC):
             ValueError: If an invalid format is provided.
 
         """
-        if format == 'df':
-            return self.parameters
-        elif format == 'values' or format == 'value':
-            return self.parameters.value.values
-        elif format == 'dict':
-            ret = {}
-            for i, row in self.parameters.iterrows():
-                ret[row['name']] = row.value
-            return ret
-        else:
-            raise ValueError(f'get_parameter() got invalid format: {format}')
+        return self.variables.get_variables(format=format)
 
     def _check_interruption(self):
         """"""

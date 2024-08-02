@@ -114,7 +114,7 @@ class ScipyOptimizer(AbstractOptimizer):
         if 'bounds' not in self.minimize_kwargs.keys():
             bounds = []
             for i, row in self.parameters.iterrows():
-                lb, ub = row['lb'], row['ub']
+                lb, ub = row['lower_buond'], row['upper_bound']
                 if lb is None: lb = -np.inf
                 if ub is None: ub = np.inf
                 bounds.append([lb, ub])
