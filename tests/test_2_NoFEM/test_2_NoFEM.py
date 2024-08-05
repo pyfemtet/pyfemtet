@@ -4,6 +4,7 @@ from subprocess import run
 import os
 from time import sleep
 import numpy as np
+import optuna.integration
 import pandas as pd
 from pyfemtet.opt import FEMOpt, OptunaOptimizer, NoFEM
 
@@ -119,23 +120,32 @@ def test_2_2_restart():
     assert len(df) == 10
 
 
+def parameter_constraint(theta, fai):
+    return min(theta, fai) - np.pi/6  # >= 0 (fai, theta > 0.52...)
+
+
 def simple():
     """シンプルな動作確認"""
 
     fem = NoFEM()
-    opt = OptunaOptimizer()
+    opt = OptunaOptimizer(sampler_class=optuna.integration.BoTorchSampler, sampler_kwargs=dict(n_startup_trials=0))
+
     femopt = FEMOpt(fem, opt, scheduler_address=None)
 
     femopt.add_parameter('r', .5, 0, 1)
-    femopt.add_parameter('theta', -np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
+    femopt.add_parameter('theta', np.pi/3, -np.pi/2, np.pi/2)  # 空間上で xy 平面となす角
     femopt.add_parameter('fai', (7/6)*np.pi, 0, 2*np.pi)  # xy 平面上で x 軸となす角
     femopt.add_objective(objective_x, 'x', args=femopt.opt)
     femopt.add_objective(objective_y, 'y座標', args=femopt.opt)
     # femopt.add_objective(objective_z, 'z', args=femopt.opt)
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
-    femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
+    # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
+
+
+    opt.add_parameter_constraints(parameter_constraint)
+
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=30, n_parallel=3, wait_setup=True)
+    femopt.optimize(n_trials=30, n_parallel=1, wait_setup=True)
     # input('enter to quit...')
     femopt.terminate_all()
 

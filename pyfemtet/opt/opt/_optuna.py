@@ -54,6 +54,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
         self.method_checker = OptunaMethodChecker(self)
+        self.parameter_constraints = []
 
     def _objective(self, trial):
 
@@ -273,9 +274,25 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler=sampler,
         )
 
+        # monkey patch
+        if isinstance(sampler, optuna.integration.BoTorchSampler):
+            if len(self.parameter_constraints) > 0:
+                from pyfemtet.opt.opt._optuna_botorch_helper import OptunaBotorchWithParameterConstraintMonkeyPatch
+                mp = OptunaBotorchWithParameterConstraintMonkeyPatch(
+                    study,
+                    self,
+                )
+                for p_cns in self.parameter_constraints:
+                    mp.add_nonlinear_constraint(p_cns[0], p_cns[1])
+                mp.do_monkey_patch()
+
         # run
         study.optimize(
             self._objective,
             timeout=self.timeout,
             callbacks=self.optimize_callbacks,
         )
+
+    def add_parameter_constraints(self, fun, kwargs=None):
+        kwargs = kwargs if kwargs is not None else {}
+        self.parameter_constraints.append([fun, kwargs])
