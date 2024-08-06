@@ -162,8 +162,12 @@ def constraint(fai1, fai2, fai3, fai4, fai5, fai6):
     return np.pi/2 - max(fai1, fai2, fai3, fai4, fai5, fai6)  # np.pi/2 > max(...)
 
 
-def constraint2(fai1, fai2, fai3, fai4, fai5, fai6):
-    return max(fai1, fai2, fai3, fai4, fai5, fai6)  # np.pi/2 > max(...)
+def constraint2(fai1, fai2):
+    return max(fai1, fai2)
+
+
+def constraint3(fai7, fai8):
+    return min(fai7, fai8)
 
 
 def parameter_constraint_test():
@@ -172,7 +176,7 @@ def parameter_constraint_test():
     femopt = FEMOpt(fem, opt, scheduler_address=None)
     femopt.add_parameter('r', .5, 0, 1)
     for i in range(1, 13):
-        femopt.add_parameter(name=f'fai{i}', initial_value=0, lower_bound=0, upper_bound=np.pi)
+        femopt.add_parameter(name=f'fai{i}', initial_value=np.pi/2, lower_bound=0, upper_bound=np.pi)
     femopt.add_parameter(name=f'fai14', initial_value=0, lower_bound=0, upper_bound=2*np.pi)
 
     femopt.add_objective(hypersphere_x, 'x0', args=(femopt.opt, 0))
@@ -181,13 +185,13 @@ def parameter_constraint_test():
     femopt.add_objective(hypersphere_x, 'x4', args=(femopt.opt, 3))
 
     # opt.add_parameter_constraints(constraint)
-    femopt.add_parameter_constraint(constraint, upper_bound=np.pi/2)
+    femopt.add_parameter_constraint(constraint2, upper_bound=np.pi*2/3)
+    femopt.add_parameter_constraint(constraint3, lower_bound=np.pi/3)
 
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=30, n_parallel=1, wait_setup=True)
+    femopt.optimize(n_trials=90, n_parallel=1, wait_setup=True)
     # input('enter to quit...')
     femopt.terminate_all()
-
 
 
 if __name__ == '__main__':
