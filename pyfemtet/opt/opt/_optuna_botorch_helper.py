@@ -3,6 +3,7 @@ from functools import partial
 import inspect
 
 import numpy as np
+import optuna.study
 import torch
 from torch import Tensor
 from botorch.optim.initializers import gen_batch_initial_conditions
@@ -25,45 +26,41 @@ class NonOverwritablePartial(partial):
 
 
 class ConvertedConstraintFunction:
-    def __init__(self, fun, kwargs, variables: ExpressionEvaluator):
+    def __init__(self, fun, prm_args, kwargs, variables: ExpressionEvaluator, study: optuna.study.Study):
         self.fun = fun
+        self.prm_args = prm_args
         self.kwargs = kwargs
         self.variables = variables
+        self.study = study
 
-        # fun の引数を取得
-        signature = inspect.signature(fun)
+        self.bounds = None
+        self.prm_name_seq = None
+
+        # fun の prm として使う引数が指定されていなければ fun の引数を取得
+        if self.prm_args is None:
+            signature = inspect.signature(fun)
+            prm_inputs = set([a.name for a in signature.parameters.values()])
+        else:
+            prm_inputs = set(self.prm_args)
 
         # 引数の set から kwargs の key を削除
-        self.prm_arg_names = set([a.name for a in signature.parameters.values()]) - set(kwargs.keys())
-
-        # そうして得た set は順番がおかしいので variables に登録されている順番に直す
-        self.prm_arg_names = [n for n in variables.get_parameter_names() if n in self.prm_arg_names]
+        self.prm_arg_names = prm_inputs - set(kwargs.keys())
 
         # 変な引数が残っていないか確認
         assert all([(arg in variables.get_parameter_names()) for arg in self.prm_arg_names])
 
-        # フィルタされた prm_names に対する bounds を取得
-        df = variables.get_variables(format='df', filter_parameter=True)
-        idx = list(map(lambda _x: _x in self.prm_arg_names, self.variables.get_parameter_names()))
-        bounds = df[idx][['lower_bound', 'upper_bound']].values
-
-        # Tensor に変換して保持
-        self.bounds: Tensor = torch.tensor(bounds.T).double()
-
     def __call__(self, x: Tensor or np.ndarray):
-        # x: all of normalized parameters
+        # x: all of normalized parameters whose sequence is sorted by optuna
 
         if not isinstance(x, Tensor):
             x = torch.tensor(np.array(x)).double()
 
-        # fun で使うパラメータのみ value を取得
-        idx = list(map(lambda _x: _x in self.prm_arg_names, self.variables.get_parameter_names()))
-        x_filtered = x[idx]
-        x_unnorm = unnormalize(x_filtered, self.bounds)
+        x = unnormalize(x, self.bounds)
 
+        # fun で使うパラメータのみ value を取得
         kwargs = self.kwargs
         kwargs.update(
-            {k: v for k, v in zip(self.prm_arg_names, x_unnorm)}
+            {k: v for k, v in zip(self.prm_name_seq, x) if k in self.prm_arg_names}
         )
 
         return self.fun(**kwargs)
@@ -89,9 +86,17 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
             nonlinear_inequality_constraints=nonlinear_inequality_constraints,
             ic_generator=self.generate_initial_conditions,
         )
+        self.bounds = None
+        self.prm_name_seq = None
 
-    def add_nonlinear_constraint(self, fun, kwargs):
-        f = ConvertedConstraintFunction(fun, kwargs, self.opt.variables)
+    def add_nonlinear_constraint(self, fun, prm_args, kwargs):
+        f = ConvertedConstraintFunction(
+            fun,
+            prm_args,
+            kwargs,
+            self.opt.variables,
+            self.study,
+        )
 
         # 初期化
         self.nonlinear_inequality_constraints = self.nonlinear_inequality_constraints or []
@@ -104,6 +109,19 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
             nonlinear_inequality_constraints=self.nonlinear_inequality_constraints
         )
 
+    def detect_prm_seq_if_needed(self):
+        # study から distribution の情報を復元する。
+        if self.bounds is None or self.prm_name_seq is None:
+            from optuna._transform import _transform_search_space
+            # sample_relative の後に呼ばれているから最後の trial は search_space を持つはず
+            search_space: dict = self.study.sampler.infer_relative_search_space(self.study, self.study.trials[-1])
+            self.bounds = _transform_search_space(search_space, False, False)[0].T
+            self.prm_name_seq = list(search_space.keys())
+
+            for cns in self.nonlinear_inequality_constraints:
+                cns[0].bounds = torch.tensor(self.bounds)
+                cns[0].prm_name_seq = self.prm_name_seq
+
     def generate_initial_conditions(
         self,
         *args,
@@ -111,7 +129,8 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
     ):
         batch_initial_conditions_feasible = []
 
-        # とても遅い。精度がどうなっているかも要検証。
+        self.detect_prm_seq_if_needed()
+
         # n 回 batch_initial_conditions を行い、feasible のもののみ抽出
         counter = 0
         n = 2
@@ -136,14 +155,11 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
         # study の履歴からも initial conditions を作成。
         # 内部で acquisition function が更新されるので同じ値が提案されてもよい
         for trial in self.study.best_trials:
-            bounds = [[], []]  # [[lower_values], [upper_values]]
+            # BoTorchSampler 内部実装の並びと trial.params の並びは一致しないので並び替える
             prm_names, values = list(trial.params.keys()), list(trial.params.values())
-            for prm_name in prm_names:
-                dist = trial.distributions[prm_name]
-                bounds[0].append(dist.low)
-                bounds[1].append(dist.high)
-            bounds = np.array(bounds).astype(float)
-            normalized_values = (np.array(values).astype(float) - bounds[0]) / (bounds[1] - bounds[0])
+            indices = [prm_names.index(seq) for seq in self.prm_name_seq]
+            sorted_values = [values[idx] for idx in indices]
+            normalized_values = (np.array(sorted_values).astype(float) - self.bounds[0]) / (self.bounds[1] - self.bounds[0])
 
             # すべての非線形拘束について
             for cns in self.nonlinear_inequality_constraints:
@@ -152,8 +168,6 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
                 if f(normalized_values) < 0:
                     break
             else:
-
-
                 batch_initial_conditions_feasible.append([normalized_values])
 
         # もしここで feasible なものがなければ、どうしようもない
@@ -178,7 +192,7 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
         options.update(dict(batch_limit=1))
 
         # for gen_candidates_scipy()
-        options.update(dict(method='COBYLA'))  # use COBYLA instead of SLSQP. This is the only method that can process dict format constraints.
+        options.update(dict(method='SLSQP'))  # use COBYLA instead of SLSQP. This is the only method that can process dict format constraints. COBYLA is a bit stable but slow
 
         # make partial of optimize_acqf used in optuna_integration.botorch and replace to it.
         original_fun = optuna_integration.botorch.optimize_acqf

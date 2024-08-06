@@ -50,6 +50,7 @@ class Message:
                                         'Please free this file before exiting the program, '
                                         'otherwise history data will be lost.')
     OPTIMIZATION_FINISHED = _('Optimization finished. Results were saved in following:')
+    ERR_NO_BOUNDS = _('No bounds specified.')
 
     # ===== pyfemtet.opt.interface =====
     ERR_RUN_JOURNAL_NOT_FOUND = _(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" is not found. Make sure you have NX installed and the environment variable UGII_BASE_DIR is set.')
@@ -87,6 +88,7 @@ class Message:
     INFO_INFEASIBLE = _('The constraints were not satisfied for the following sets of variables:')
     ERR_FEM_FAILED_AND_CANNOT_CONTINUE = _('Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated.')
     WARN_INTERRUPTED_IN_SCIPY = _('Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.')
+    ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH = _('You can use parameter constraint only with BoTorchSampler.')
 
     # ===== pyfemtet.opt.visualization =====
     # control_femtet.py

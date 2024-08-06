@@ -128,7 +128,7 @@ def simple():
     """シンプルな動作確認"""
 
     fem = NoFEM()
-    opt = OptunaOptimizer(sampler_class=optuna.integration.BoTorchSampler, sampler_kwargs=dict(n_startup_trials=0))
+    opt = OptunaOptimizer()
 
     femopt = FEMOpt(fem, opt, scheduler_address=None)
 
@@ -141,8 +141,47 @@ def simple():
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt)
     # femopt.add_constraint(objective_z, 'z<=0', upper_bound=0, args=femopt.opt, strict=False)
 
+    femopt.set_random_seed(42)
+    femopt.optimize(n_trials=30, n_parallel=1, wait_setup=True)
+    # input('enter to quit...')
+    femopt.terminate_all()
 
-    opt.add_parameter_constraints(parameter_constraint)
+
+
+from pyfemtet._test_util import SuperSphere
+
+s = SuperSphere(14)
+
+
+def hypersphere_x(opt, idx):
+    radius, *fai = opt.get_parameter('values')
+    return s.x(radius, *fai)[idx]
+
+
+def constraint(fai1, fai2, fai3, fai4, fai5, fai6):
+    return np.pi/2 - max(fai1, fai2, fai3, fai4, fai5, fai6)  # np.pi/2 > max(...)
+
+
+def constraint2(fai1, fai2, fai3, fai4, fai5, fai6):
+    return max(fai1, fai2, fai3, fai4, fai5, fai6)  # np.pi/2 > max(...)
+
+
+def parameter_constraint_test():
+    fem = NoFEM()
+    opt = OptunaOptimizer(sampler_class=optuna.integration.BoTorchSampler, sampler_kwargs=dict(n_startup_trials=0))
+    femopt = FEMOpt(fem, opt, scheduler_address=None)
+    femopt.add_parameter('r', .5, 0, 1)
+    for i in range(1, 13):
+        femopt.add_parameter(name=f'fai{i}', initial_value=0, lower_bound=0, upper_bound=np.pi)
+    femopt.add_parameter(name=f'fai14', initial_value=0, lower_bound=0, upper_bound=2*np.pi)
+
+    femopt.add_objective(hypersphere_x, 'x0', args=(femopt.opt, 0))
+    femopt.add_objective(hypersphere_x, 'x1', args=(femopt.opt, 1))
+    femopt.add_objective(hypersphere_x, 'x3', args=(femopt.opt, 2))
+    femopt.add_objective(hypersphere_x, 'x4', args=(femopt.opt, 3))
+
+    # opt.add_parameter_constraints(constraint)
+    femopt.add_parameter_constraint(constraint, upper_bound=np.pi/2)
 
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=30, n_parallel=1, wait_setup=True)
@@ -150,10 +189,12 @@ def simple():
     femopt.terminate_all()
 
 
+
 if __name__ == '__main__':
     # min_sleep_sec = 3
     # random_max_sleep_sec = 1
-    simple()
+    # simple()
+    parameter_constraint_test()
 
     # test_2_2_restart()
 
