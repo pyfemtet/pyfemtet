@@ -1,4 +1,5 @@
 # built-in
+import inspect
 from typing import Optional, Any, Callable, List
 import os
 import datetime
@@ -317,14 +318,11 @@ class FEMOpt:
         from pyfemtet.opt._femopt_core import ParameterConstraint
         self.opt.constraints[name] = ParameterConstraint(fun, name, lower_bound, upper_bound, self.opt)
         if hasattr(self.opt, 'add_parameter_constraints'):
+            prm_args = [p.name for p in inspect.signature(fun).parameters.values()]
             if lower_bound is not None:
-
-                # lambda だと args が渡されてしまうので、新しい callable クラスを作って
-                # prm_args を指定できるようにする。
-
-                self.opt.add_parameter_constraints(lambda *args: fun(*args) - lower_bound)
+                self.opt.add_parameter_constraints(lambda *args, **kwargs: fun(*args, **kwargs) - lower_bound, prm_args=prm_args)
             if upper_bound is not None:
-                self.opt.add_parameter_constraints(lambda *args: lower_bound - fun(*args))
+                self.opt.add_parameter_constraints(lambda *args, **kwargs: upper_bound - fun(*args, **kwargs), prm_args=prm_args)
 
     def get_parameter(self, format='dict'):
         raise DeprecationWarning('FEMOpt.get_parameter() was deprecated. Use Femopt.opt.get_parameter() instead.')
