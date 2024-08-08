@@ -632,11 +632,11 @@ class History:
 
     def _calc_hypervolume(self, objectives):
 
-        # タイピングが面倒
         df = self.local_data
 
-        # パレート集合の抽出
+        # filter non-dominated and feasible solutions
         idx = df['non_domi'].values
+        idx = idx * df['feasible'].values  # *= を使うと non_domi 列の値が変わる
         pdf = df[idx]
         pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数
@@ -671,16 +671,24 @@ class History:
             hvs.append(hv)
 
         # 計算結果を履歴の一部に割り当て
-        df.loc[idx, 'hypervolume'] = np.array(hvs)
-
-        # dominated の行に対して、上に見ていって
-        # 最初に見つけた non-domi 行の hypervolume の値を割り当てます
+        # idx: [False, True, False, True, True, False, ...]
+        # hvs: [          1,           2,    3,        ...]
+        # want:[   0,     1,     1,    2,    3,     3, ...]
+        hvs_index = -1
         for i in range(len(df)):
-            if not df.loc[i, 'non_domi']:
-                try:
-                    df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
-                except IndexError:
-                    df.loc[i, 'hypervolume'] = 0
+
+            # process hvs index
+            if idx[i]:
+                hvs_index += 1
+
+            # get hv
+            if hvs_index < 0:
+                hypervolume = 0.
+            else:
+                hypervolume = hvs[hvs_index]
+
+            df.loc[i, 'hypervolume'] = hypervolume
+
 
     def save(self, _f=None):
         """Save csv file."""
