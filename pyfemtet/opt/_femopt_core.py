@@ -13,6 +13,7 @@ import ctypes
 import numpy as np
 import pandas as pd
 from scipy.stats.qmc import LatinHypercube
+import optuna
 from optuna._hypervolume import WFG
 from dask.distributed import Lock, get_client
 
@@ -689,7 +690,6 @@ class History:
 
             df.loc[i, 'hypervolume'] = hypervolume
 
-
     def save(self, _f=None):
         """Save csv file."""
 
@@ -703,6 +703,42 @@ class History:
                 self.actor_data.to_csv(f, index=None, encoding=self.ENCODING, lineterminator='\n')
         else:  # test
             self.actor_data.to_csv(_f, index=None, encoding=self.ENCODING, lineterminator='\n')
+
+    def create_optuna_study(self):
+        # create study
+        kwargs = dict(
+            storage='sqlite:///' + os.path.basename(self.path) + '_dummy.db',
+            sampler=None, pruner=None, study_name='dummy',
+            load_if_exists=True,
+        )
+
+        if len(self.obj_names) == 1:
+            kwargs.update(dict(direction='minimize'))
+        else:
+            kwargs.update(dict(directions=['minimize']*len(self.obj_names)))
+
+        study = optuna.create_study(**kwargs)
+
+        # add trial to study
+        df: pd.DataFrame = self.actor_data
+        for i, row in df.iterrows():
+            FD = optuna.distributions.FloatDistribution
+            kwargs = dict(
+                state=optuna.trial.TrialState.COMPLETE,
+                params={k: v for k, v in zip(self.prm_names, row[self.prm_names])},
+                distributions={k: FD(row[f'{k}_lower_bound'], row[f'{k}_upper_bound']) for k in self.prm_names},
+                user_attrs=None,  # TODO: add constraint information by row['feasible']
+            )
+
+            # objective or objectives
+            if len(self.obj_names) == 1:
+                kwargs.update(dict(value=row[self.obj_names].values[0]))
+            else:
+                kwargs.update(dict(values=row[self.obj_names].values))
+            trial = optuna.create_trial(**kwargs)
+            study.add_trial(trial)
+
+        return study
 
 
 class _OptimizationStatusActor:
