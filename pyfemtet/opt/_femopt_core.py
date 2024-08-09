@@ -707,7 +707,7 @@ class History:
     def create_optuna_study(self):
         # create study
         kwargs = dict(
-            storage='sqlite:///' + os.path.basename(self.path) + '_dummy.db',
+            # storage='sqlite:///' + os.path.basename(self.path) + '_dummy.db',
             sampler=None, pruner=None, study_name='dummy',
             load_if_exists=True,
         )
@@ -720,7 +720,7 @@ class History:
         study = optuna.create_study(**kwargs)
 
         # add trial to study
-        df: pd.DataFrame = self.actor_data
+        df: pd.DataFrame = self.local_data
         for i, row in df.iterrows():
             FD = optuna.distributions.FloatDistribution
             kwargs = dict(
