@@ -289,3 +289,64 @@ class PredictionModelPage(AbstractPage):
 
     def setup_layout(self):
         self.layout = self.rsm_graph.layout
+
+
+class OptunaVisualizerPage(AbstractPage):
+
+    def __init__(self, title, rel_url, application):
+        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        self.application: ProcessMonitorApplication = None
+        super().__init__(title, rel_url, application)
+
+    def setup_component(self):
+        import optuna
+        study = self.application.history.create_optuna_study()
+        prm_names = self.application.history.prm_names
+        obj_names = self.application.history.obj_names
+
+        self.graphs = []
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_optimization_history(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            self.graphs.append(dcc.Graph(figure=fig))
+
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_parallel_coordinate(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            self.graphs.append(dcc.Graph(figure=fig))
+
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_contour(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            self.graphs.append(dcc.Graph(figure=fig))
+
+        import itertools
+        for (i, j) in itertools.combinations(range(len(obj_names)), 2):
+            fig = optuna.visualization.plot_pareto_front(
+                study,
+                targets=lambda t: (t.values[i], t.values[j]),
+                target_names=[obj_names[i], obj_names[j]],
+            )
+            self.graphs.append(dcc.Graph(figure=fig))
+
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_slice(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            self.graphs.append(dcc.Graph(figure=fig))
+
+    def setup_layout(self):
+        self.layout = dbc.Container(
+            self.graphs
+        )
