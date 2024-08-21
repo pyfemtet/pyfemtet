@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from dash import dcc
 import dash_bootstrap_components as dbc
 
-from pyfemtet.opt.dash_ui.base_application import BaseComplexComponent
+from dash_application import BaseComplexComponent
 
 
 class FlexboxGraph(BaseComplexComponent):
@@ -96,9 +96,9 @@ class FlexboxGraph(BaseComplexComponent):
 
 
 if __name__ == '__main__':
-    from pyfemtet.opt.dash_ui.base_application import BaseMultiPageApplication
+    from dash_application import MultiPageApplication
 
-    g_application = BaseMultiPageApplication()
+    g_application = MultiPageApplication()
 
 
     class Page(BaseComplexComponent):

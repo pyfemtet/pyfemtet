@@ -1,23 +1,32 @@
 import os
 import webbrowser
-from typing import Any, Dict, Optional
 import threading
-from time import sleep
 from abc import ABC, abstractmethod
 
 import pandas as pd
 
 from flask import Flask
 
-from dash import Dash, dcc, html, Input, Output, State
+from dash import Dash, html, Input, Output, State
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 from dash.development.base_component import Component
 
-from pyfemtet.opt._femopt_core import History
-from pyfemtet.opt.dash_ui import utils
+from dash_application import utils
 
 
 class BaseApplication(object):
+    """Base application class containing flask server and dash app.
+
+    If not debug mode, the app runs on daemon thread.
+    Release BaseApplication.lock_to_terminate to
+    terminate dash app when the main process exit.
+
+    Notes:
+
+        Cannot terminate dash app by ctrl+c.
+
+    """
 
     def __init__(self) -> None:
         """Set app with external stylesheets."""
@@ -87,12 +96,35 @@ class BaseApplication(object):
             self.lock_to_terminate.release()
 
 
-class BaseMultiPageApplication(BaseApplication):
+class MultiPageApplication(BaseApplication):
+    # noinspection GrazieInspection
+    """
+
+            Notes:
+
+                Basic structure of ui is following.
+
+            ::
+
+                  +---------------- header of sidebar
+                  |
+                +-v-----------+
+                |   | [     ]<----- hidden_layout
+                |---| +-----+ |
+                |   | |#####|<----- layout
+                |   | +-----+ |
+                +-------------+
+                  ^      ^
+                  |      +--------- content
+                  +---------------- sidebar
+
+        """
+
 
     def __init__(self, app_title: str = None, app_description: str = None):
         super().__init__()
-        self.nav_links: Dict[int, "dbc.NavLink"] = dict()  # order on sidebar -> link (contains rel_url)
-        self.pages: Dict[str: "BaseComplexComponent"] = dict()  # rel_url -> page (contains layout)
+        self.nav_links: dict[int, "dbc.NavLink"] = dict()  # order on sidebar -> link (contains rel_url)
+        self.pages: dict[str: "BaseComplexComponent"] = dict()  # rel_url -> page (contains layout)
         self.app_title: str = app_title or 'Dash UI'
         self.app_description: str = app_description or 'Dash UI with a sidebar containing navigation links.'
 
@@ -130,21 +162,11 @@ class BaseMultiPageApplication(BaseApplication):
         super().run(host, debug, launch_browser)
 
     def _create_sidebar(self) -> None:
-        """Create sidebar
-
-        Args:
-            app_title (str):
-            app_description (str):
-
-        Returns:
-            None
-
-        """
 
         # sidebar に表示される順に並び替え
         ordered_nav_links = [v for k, v in sorted(self.nav_links.items(), key=lambda x: x[0])]
 
-        # sidebar と contents から app 全体の layout を作成
+        # sidebar の header を作成
         sidebar_header = dbc.Row(
             [
                 dbc.Col(html.H2(self.app_title, className="display-4")),
@@ -182,6 +204,7 @@ class BaseMultiPageApplication(BaseApplication):
             ]
         )
 
+        # sidebar を作成
         sidebar = html.Div(
             [
                 sidebar_header,
@@ -210,13 +233,20 @@ class BaseMultiPageApplication(BaseApplication):
             id="sidebar",
         )
 
+        # content を作成
         content = html.Div(id="page-content")
+
+        # 全体 layout を作成
         self.app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
+        # content の切り替え callback
         @self.app.callback(Output("page-content", "children"), [Input("url", "pathname")])
         def render_page_content(pathname):
             if pathname in list(self.pages.keys()):
-                return self.pages[pathname].layout
+                return [
+                    html.Div(self.pages[pathname].layout),
+                    html.Div(self.pages[pathname].hidden_layout)
+                ]
 
             # If the user tries to reach a different page, return a 404 message
             return html.Div(
@@ -228,6 +258,7 @@ class BaseMultiPageApplication(BaseApplication):
                 className="p-3 bg-light rounded-3",
             )
 
+        # sidebar の折り畳み callback
         @self.app.callback(
             Output("sidebar", "className"),
             [Input("sidebar-toggle", "n_clicks")],
@@ -238,6 +269,7 @@ class BaseMultiPageApplication(BaseApplication):
                 return "collapsed"
             return ""
 
+        # sidebar の折り畳み callback その 2
         @self.app.callback(
             Output("collapse", "is_open"),
             [Input("navbar-toggle", "n_clicks")],
@@ -249,52 +281,13 @@ class BaseMultiPageApplication(BaseApplication):
             return is_open
 
 
-class BasePyFemtetApplication(BaseMultiPageApplication):
-
-    def __init__(self, history: History):
-        super().__init__()
-        self.history = history
-        self._df = history.get_df()
-
-    def get_df(self) -> pd.DataFrame:
-        """Get df from history.
-
-        Please note that history.get_df() accesses Actor,
-        but the dash callback cannot access to Actor,
-        so the _df should be updated by self._sync().
-
-        """
-        return self._df
-
-    def run(self, host=None, debug=False, launch_browser=False):
-        # _sync も app と同様 **デーモンスレッドで** 並列実行
-        sync_thread = threading.Thread(
-            target=self._sync,
-            args=(),
-            kwargs={},
-            daemon=True,
-        )
-        sync_thread.start()
-        super().run(host, debug, launch_browser)
-
-    def _sync(self):
-        while True:
-            # df はここでのみ上書きされ、dashboard から書き戻されることはない
-            self._df = self.history.get_df()
-
-            # status は...
-            print('status の共有方法をまだ実装していません。')
-
-            # lock が release されていれば、これ以上 sync が実行される必要はない
-            if not self.lock_to_terminate.locked():
-                break
-            sleep(1)
-
-
 class BaseComplexComponent(ABC):
+    """Class for complex components."""
+
     def __init__(self, application: BaseApplication):
         # declare
-        self.layout: Component = ...
+        self.layout: Component or list[Component] = html.Div()
+        self.hidden_layout: Component or list[Component] = html.Div()  # html.Data など、アプリケーションに含めたいが非表示にしたいもの
         self.application: BaseApplication = application
 
         # init
@@ -312,94 +305,38 @@ class BaseComplexComponent(ABC):
     def setup_layout(self) -> None: ...
 
 
+class DebugPage(BaseComplexComponent):
+
+    def __init__(
+            self,
+            application,
+            components: list[Component] = None,
+            hidden_components: list[Component] = None,
+            complex_components: list[BaseComplexComponent] = None,
+    ):
+        super().__init__(application)
+        self.layout = components or []
+        self.hidden_layout = hidden_components or []
+        complex_components = complex_components or []
+        self.layout.extend(c.layout for c in complex_components)
+        self.hidden_layout.extend(c.hidden_layout for c in complex_components)
+
+    def setup_components(self): pass
+    def setup_callbacks(self): pass
+    def setup_layout(self): pass
+
+
 if __name__ == '__main__':
-    import numpy as np
-    from dash import dcc
-    import plotly.express as px
 
+    g_application = MultiPageApplication()
 
-    class SubPage(BaseComplexComponent):
-        # noinspection PyAttributeOutsideInit
-        def setup_components(self) -> None:
-            df = pd.DataFrame(dict(a=[0, 1, 2], b=[0, 1, 4]))
-            fig = px.scatter(df, x='a', y='b')
-            self.graph = dcc.Graph(
-                figure=fig,
-                style={'width': "100%", 'height': "100%", },
-            )
-            self.location = dcc.Location(id='location' + str(np.random.randint(0, 100)))
-
-        def setup_callbacks(self) -> None:
-            # @self.application.app.callback(
-            #     Output(..., ...),
-            #     Output(..., ..., allow_duplicate=True),
-            #     Input(..., ...),
-            #     State(..., ...),
-            #     prevent_initial_call=True,
-            # )
-            # def some_callback(*args, **kwargs) -> Any: ...
-
-            @self.application.app.callback(
-                # Output({'type': 'example-graph', 'index': 2}, 'figure'),
-                Output(self.graph, 'figure'),
-                # Input(self.location, 'pathname'),  # 遷移前と遷移後の両方で実行される
-                # Input('url', 'pathname'),  # 一個前しか実行しない
-                Input(self.graph, 'children'),  # ページがロードされたときに実行される
-                # Input(self.location, 'children'),  # ページがロードされたときに実行される
-                # prevent_initial_call=True,
-            )
-            def update_graph(*args, **kwargs):
-                df = pd.DataFrame(dict(a=np.random.rand(5), b=np.random.rand(5)))
-                fig = px.scatter(df, x='a', y='b')
-                return fig
-
-            pass
-
-        def setup_layout(self) -> None:
-            container = dbc.Container(
-                children=[
-                    self.location,
-                    dbc.Row(
-                        children=[
-                            dbc.Col(
-                                children=[
-                                    dcc.Loading(
-                                        self.graph,
-                                        style={'width': "100%", 'height': "100%", },
-                                        parent_style={'width': "100%", 'height': "100%", },
-                                        overlay_style={'width': "100%", 'height': "100%", },
-                                    )
-                                ],
-                                style={'display': 'flex', 'flex-direction': 'column', 'flex': '1 1 auto',
-                                       'overflow': 'hidden'},
-                            )
-                        ],
-                        style={'display': 'flex', 'flex-direction': 'column', 'flex': '1 1 auto', 'overflow': 'hidden'},
-                    ),
-                ],
-                style={'height': '90vh', 'display': 'flex', 'flex-direction': 'column', 'overflow': 'hidden'},
-                fluid=True,
-            )
-            self.layout = container
-
-
-    class SubPage2(SubPage):
-        pass
-
-
-    class SubPage3(SubPage):
-        pass
-
-
-    g_application = BaseMultiPageApplication()
-
-    g_home_page = SubPage(g_application)
+    g_home_page = DebugPage(g_application)
     g_application.add_page(g_home_page, 'home', "/")
 
-    g_sub_page = SubPage2(g_application)
+    g_sub_page = DebugPage(g_application)
     g_application.add_page(g_sub_page, 'sub', "/sub")
 
-    g_sub_page2 = SubPage3(g_application)
+    g_sub_page2 = DebugPage(g_application)
     g_application.add_page(g_sub_page2, 'sub2', "/sub2")
 
     g_application.run(launch_browser=True, debug=False)
