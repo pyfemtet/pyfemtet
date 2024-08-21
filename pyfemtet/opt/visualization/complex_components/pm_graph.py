@@ -554,5 +554,5 @@ class PredictionModelGraph(AbstractPage):
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:
-            df = self.application.history.get_df()
+            df = self.application.history.local_data
         return df

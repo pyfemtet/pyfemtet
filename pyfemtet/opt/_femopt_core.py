@@ -13,7 +13,6 @@ import ctypes
 import numpy as np
 import pandas as pd
 from scipy.stats.qmc import LatinHypercube
-import optuna
 from optuna._hypervolume import WFG
 from dask.distributed import Lock, get_client
 
@@ -383,9 +382,8 @@ class History:
     cns_names = []
     is_restart = False
     is_processing = False
-    _df = None  # in case without client
-    _future = None  # in case with client
-    _actor_data = None  # in case with client
+    _future = None
+    _actor_data = None
 
     def __init__(
             self,
@@ -403,6 +401,9 @@ class History:
         self.obj_names = obj_names
         self.cns_names = cns_names
         self.additional_metadata = additional_metadata or ''
+
+        # 初期化
+        self.local_data = pd.DataFrame()
 
         # 最適化実行中かどうか
         self.is_processing = client is not None
@@ -424,11 +425,12 @@ class History:
             # そうでなければ df を初期化
             else:
                 columns, metadata = self.create_df_columns()
-                df = pd.DataFrame()
                 for c in columns:
-                    df[c] = None
+                    self.local_data[c] = None
                 self.metadata = metadata
-                self.set_df(df)
+
+            # actor_data の初期化
+            self.actor_data = self.local_data
 
             # 一時ファイルに書き込みを試み、UnicodeEncodeError が出ないかチェック
             import tempfile
@@ -451,7 +453,7 @@ class History:
         """Load existing result csv."""
 
         # df を読み込む
-        df = pd.read_csv(self.path, encoding=self.ENCODING, header=self.HEADER_ROW)
+        self.local_data = pd.read_csv(self.path, encoding=self.ENCODING, header=self.HEADER_ROW)
 
         # metadata を読み込む
         with open(self.path, mode='r', encoding=self.ENCODING, newline='\n') as f:
@@ -459,7 +461,7 @@ class History:
             self.metadata = reader.__next__()
 
         # 最適化問題を読み込む
-        columns = df.columns
+        columns = self.local_data.columns
         prm_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'prm']
         obj_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'obj']
         cns_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'cns']
@@ -476,19 +478,13 @@ class History:
             self.obj_names = obj_names
             self.cns_names = cns_names
 
-        self.set_df(df)
+    @property
+    def actor_data(self):
+        return self._actor_data.get_df().result()
 
-    def get_df(self) -> pd.DataFrame:
-        if self._actor_data is None:
-            return self._df
-        else:
-            return self._actor_data.get_df().result()
-
-    def set_df(self, df: pd.DataFrame):
-        if self._actor_data is None:
-            self._df = df
-        else:
-            self._actor_data.set_df(df).result()
+    @actor_data.setter
+    def actor_data(self, df):
+        self._actor_data.set_df(df).result()
 
     def create_df_columns(self):
         """Create columns of history."""
@@ -598,33 +594,29 @@ class History:
         row.append(datetime.datetime.now())  # time
 
         with Lock('calc-history'):
-
-            df = self.get_df()
-
             # append
-            if len(df) == 0:
-                df = pd.DataFrame([row], columns=df.columns)
+            if len(self.actor_data) == 0:
+                self.local_data = pd.DataFrame([row], columns=self.actor_data.columns)
             else:
-                df.loc[len(df)] = row
+                self.local_data = self.actor_data
+                self.local_data.loc[len(self.local_data)] = row
 
             # calc
-            df['trial'] = np.arange(len(df)) + 1  # 1 始まり
-            self._calc_non_domi(objectives, df)  # update df
-            self._calc_hypervolume(objectives, df)  # update df
-
-            self.set_df(df)
+            self.local_data['trial'] = np.arange(len(self.local_data)) + 1  # 1 始まり
+            self._calc_non_domi(objectives)  # update self.local_data
+            self._calc_hypervolume(objectives)  # update self.local_data
+            self.actor_data = self.local_data
 
             # save file
             if postprocess_args is not None:
-                df = self.get_df()
-                trial = df['trial'].values[-1]
+                trial = self.local_data['trial'].values[-1]
                 client = get_client()  # always returns valid client
                 client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
 
-    def _calc_non_domi(self, objectives, df):
+    def _calc_non_domi(self, objectives):
 
         # 目的関数の履歴を取り出してくる
-        solution_set = df[self.obj_names]
+        solution_set = self.local_data[self.obj_names]
 
         # 最小化問題の座標空間に変換する
         for obj_column, (_, objective) in zip(self.obj_names, objectives.items()):
@@ -636,13 +628,15 @@ class History:
             non_domi.append((row > solution_set).product(axis=1).sum(axis=0) == 0)
 
         # 非劣解の登録
-        df['non_domi'] = non_domi
+        self.local_data['non_domi'] = non_domi
 
-    def _calc_hypervolume(self, objectives, df):
+    def _calc_hypervolume(self, objectives):
 
-        # filter non-dominated and feasible solutions
+        # タイピングが面倒
+        df = self.local_data
+
+        # パレート集合の抽出
         idx = df['non_domi'].values
-        idx = idx * df['feasible'].values  # *= を使うと non_domi 列の値が変わる
         pdf = df[idx]
         pareto_set = pdf[self.obj_names].values
         n = len(pareto_set)  # 集合の要素数
@@ -677,28 +671,19 @@ class History:
             hvs.append(hv)
 
         # 計算結果を履歴の一部に割り当て
-        # idx: [False, True, False, True, True, False, ...]
-        # hvs: [          1,           2,    3,        ...]
-        # want:[   0,     1,     1,    2,    3,     3, ...]
-        hvs_index = -1
+        df.loc[idx, 'hypervolume'] = np.array(hvs)
+
+        # dominated の行に対して、上に見ていって
+        # 最初に見つけた non-domi 行の hypervolume の値を割り当てます
         for i in range(len(df)):
-
-            # process hvs index
-            if idx[i]:
-                hvs_index += 1
-
-            # get hv
-            if hvs_index < 0:
-                hypervolume = 0.
-            else:
-                hypervolume = hvs[hvs_index]
-
-            df.loc[i, 'hypervolume'] = hypervolume
+            if not df.loc[i, 'non_domi']:
+                try:
+                    df.loc[i, 'hypervolume'] = df.loc[:i][df.loc[:i]['non_domi']].iloc[-1]['hypervolume']
+                except IndexError:
+                    df.loc[i, 'hypervolume'] = 0
 
     def save(self, _f=None):
         """Save csv file."""
-
-        df = self.get_df()
 
         if _f is None:
             # save df with columns with prefix
@@ -707,9 +692,9 @@ class History:
                 writer.writerow(self.metadata)
                 for i in range(self.HEADER_ROW-1):
                     writer.writerow([''] * len(self.metadata))
-                df.to_csv(f, index=None, encoding=self.ENCODING, lineterminator='\n')
+                self.actor_data.to_csv(f, index=None, encoding=self.ENCODING, lineterminator='\n')
         else:  # test
-            df.to_csv(_f, index=None, encoding=self.ENCODING, lineterminator='\n')
+            self.actor_data.to_csv(_f, index=None, encoding=self.ENCODING, lineterminator='\n')
 
 
 class _OptimizationStatusActor:

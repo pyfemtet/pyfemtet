@@ -1,7 +1,5 @@
 # built-in
-import inspect
-import warnings
-from typing import Optional, Any, Callable, List
+from typing import Optional, Any, Callable
 import os
 import datetime
 from time import time, sleep
@@ -28,29 +26,6 @@ from pyfemtet.opt._femopt_core import (
 )
 from pyfemtet.message import Msg, encoding
 from pyfemtet.opt.parameter import Parameter, Expression
-
-
-def add_worker(client, worker_name):
-    import sys
-    from subprocess import Popen, DEVNULL
-
-    current_n_workers = len(client.nthreads().keys())
-
-    Popen(
-        f'{sys.executable} -m dask worker '
-        f'{client.scheduler.address} '
-        f'--nthreads 1 '
-        f'--nworkers 1 '
-        f'--name {worker_name} '
-        f'--no-nanny',
-        shell=True,
-        stderr=DEVNULL,
-        stdout=DEVNULL,
-    )
-
-    # monitor 用 worker が増えるまで待つ
-    client.wait_for_workers(n_workers=current_n_workers + 1)
-
 
 
 class FEMOpt:
@@ -337,7 +312,6 @@ class FEMOpt:
             n_parallel=1,
             timeout=None,
             wait_setup=True,
-            confirm_exit=True,
     ):
         """Runs the main optimization process.
 
@@ -346,7 +320,6 @@ class FEMOpt:
             n_parallel (int, optional): The number of parallel processes. Defaults to 1.
             timeout (float or None, optional): The maximum amount of time in seconds that each trial can run. Defaults to None.
             wait_setup (bool, optional): Wait for all workers launching FEM system. Defaults to True.
-            confirm_exit (bool, optional): Insert stop before exit to continue to show process monitor.
 
         Tip:
             If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080.
@@ -425,7 +398,16 @@ class FEMOpt:
             # monitor worker の設定
             logger.info('Launching monitor server. This may take a few seconds.')
             self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor%Y%m%d%H%M%S")
-            add_worker(self.client, self.monitor_process_worker_name)
+            current_n_workers = len(self.client.nthreads().keys())
+            from subprocess import Popen
+            import sys
+            Popen(
+                f'{sys.executable} -m dask worker {self.client.scheduler.address} --nthreads 1 --nworkers 1 --name {self.monitor_process_worker_name} --no-nanny',
+                shell=True
+            )
+
+            # monitor 用 worker が増えるまで待つ
+            self.client.wait_for_workers(n_workers=current_n_workers + 1)
 
         else:
             # ローカルクラスターを構築
@@ -443,162 +425,200 @@ class FEMOpt:
             self.monitor_process_worker_name = worker_addresses[0]
             worker_addresses[0] = 'Main'
 
-        with self.client.cluster as _cluster, self.client as _client:
-
-            # Femtet 特有の処理
-            metadata = None
-            if isinstance(self.fem, FemtetInterface):
-                # 結果 csv に記載する femprj に関する情報
-                metadata = json.dumps(
-                    dict(
-                        femprj_path=self.fem.original_femprj_path,
-                        model_name=self.fem.model_name
-                    )
+        # Femtet 特有の処理
+        metadata = None
+        if isinstance(self.fem, FemtetInterface):
+            # 結果 csv に記載する femprj に関する情報
+            metadata = json.dumps(
+                dict(
+                    femprj_path=self.fem.original_femprj_path,
+                    model_name=self.fem.model_name
                 )
-                # Femtet の parametric 設定を目的関数に用いるかどうか
-                if self.fem.parametric_output_indexes_use_as_objective is not None:
-                    from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
-                    indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
-                    directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
-                    add_parametric_results_as_objectives(
-                        self,
-                        indexes,
-                        directions,
-                    )
-
-            # actor の設定
-            self.status = OptimizationStatus(_client)
-            self.worker_status_list = [OptimizationStatus(_client, name) for name in worker_addresses]  # tqdm 検討
-            self.status.set(OptimizationStatus.SETTING_UP)
-            self.history = History(
-                self.history_path,
-                self.opt.variables.get_parameter_names(),
-                list(self.opt.objectives.keys()),
-                list(self.opt.constraints.keys()),
-                _client,
-                metadata,
             )
-
-            # launch monitor
-            self.monitor_process_future = _client.submit(
-                # func
-                _start_monitor_server,
-                # args
-                self.history,
-                self.status,
-                worker_addresses,
-                self.worker_status_list,
-                # kwargs
-                **self.monitor_server_kwargs,
-                # kwargs of submit
-                workers=self.monitor_process_worker_name,
-                allow_other_workers=False
-            )
-
-            # fem
-            self.fem._setup_before_parallel(_client)
-
-            # opt
-            self.opt.fem_class = type(self.fem)
-            self.opt.fem_kwargs = self.fem.kwargs
-            self.opt.entire_status = self.status
-            self.opt.history = self.history
-            self.opt._setup_before_parallel()
-
-            # クラスターでの計算開始
-            self.status.set(OptimizationStatus.LAUNCHING_FEM)
-            start = time()
-            calc_futures = _client.map(
-                self.opt._run,
-                subprocess_indices,
-                [self.worker_status_list] * len(subprocess_indices),
-                [wait_setup] * len(subprocess_indices),
-                workers=worker_addresses,
-                allow_other_workers=False,
-            )
-
-            t_main = None
-            if not self.opt.is_cluster:
-                # ローカルプロセスでの計算(opt._main 相当の処理)
-                subprocess_idx = 0
-
-                # set_fem
-                self.opt.fem = self.fem
-                self.opt._reconstruct_fem(skip_reconstruct=True)
-
-                t_main = Thread(
-                    target=self.opt._run,
-                    args=(
-                        subprocess_idx,
-                        self.worker_status_list,
-                        wait_setup,
-                    ),
-                    kwargs=dict(
-                        skip_set_fem=True,
-                    )
+            # Femtet の parametric 設定を目的関数に用いるかどうか
+            if self.fem.parametric_output_indexes_use_as_objective is not None:
+                from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
+                indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
+                directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
+                add_parametric_results_as_objectives(
+                    self,
+                    indexes,
+                    directions,
                 )
-                t_main.start()
 
-            # save history
-            def save_history():
-                while True:
-                    sleep(2)
-                    try:
-                        self.history.save()
-                    except PermissionError:
-                        logger.warning(Msg.WARN_HISTORY_CSV_NOT_ACCESSIBLE)
-                    if self.status.get() >= OptimizationStatus.TERMINATED:
-                        break
-
-            t_save_history = Thread(target=save_history)
-            t_save_history.start()
-
-            # 終了を待つ
-            local_opt_crashed = False
-            opt_crashed_list = _client.gather(calc_futures)
-            if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
-                if t_main is not None:
-                    t_main.join()
-                    local_opt_crashed = self.opt._is_error_exit
-            opt_crashed_list.append(local_opt_crashed)
-            self.status.set(OptimizationStatus.TERMINATED)
-            end = time()
-
-            # 一応
-            t_save_history.join()
-
-            # logger.info(f'計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.')
-            # logger.info(f'結果は{self.history.path}を確認してください.')
-            logger.info(Msg.OPTIMIZATION_FINISHED)
-            logger.info(self.history.path)
-
-            # ひとつでも crashed ならばフラグを立てる
-            if any(opt_crashed_list):
-                self._is_error_exit = True
-
-            # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
-            self.status.set(OptimizationStatus.TERMINATE_ALL)
-            logger.info(self.monitor_process_future.result())
-            sleep(1)
-
-            if confirm_exit:
-                print()
-                print('='*len(Msg.CONFIRM_BEFORE_EXIT))
-                print(Msg.CONFIRM_BEFORE_EXIT)
-                print('='*len(Msg.CONFIRM_BEFORE_EXIT))
-                input()
-
-            return self.history.get_df()  # with 文を抜けると actor は消えるが .copy() はこの段階では不要
-
-    @staticmethod
-    def terminate_all():
-        warnings.warn(
-            "terminate_all() is deprecated and will be removed in a future version. "
-            "In current and later versions, the equivalent of terminate_all() will be executed when optimize() finishes. "
-            "Therefore, remove terminate_all() from your code.",
-            DeprecationWarning,
-            stacklevel=2
+        # actor の設定
+        self.status = OptimizationStatus(self.client)
+        self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
+        self.status.set(OptimizationStatus.SETTING_UP)
+        self.history = History(
+            self.history_path,
+            self.opt.variables.get_parameter_names(),
+            list(self.opt.objectives.keys()),
+            list(self.opt.constraints.keys()),
+            self.client,
+            metadata,
         )
+
+        # launch monitor
+        self.monitor_process_future = self.client.submit(
+            # func
+            _start_monitor_server,
+            # args
+            self.history,
+            self.status,
+            worker_addresses,
+            self.worker_status_list,
+            # kwargs
+            **self.monitor_server_kwargs,
+            # kwargs of submit
+            workers=self.monitor_process_worker_name,
+            allow_other_workers=False
+        )
+
+        # fem
+        self.fem._setup_before_parallel(self.client)
+
+        # opt
+        self.opt.fem_class = type(self.fem)
+        self.opt.fem_kwargs = self.fem.kwargs
+        self.opt.entire_status = self.status
+        self.opt.history = self.history
+        self.opt._setup_before_parallel()
+
+        # クラスターでの計算開始
+        self.status.set(OptimizationStatus.LAUNCHING_FEM)
+        start = time()
+        calc_futures = self.client.map(
+            self.opt._run,
+            subprocess_indices,
+            [self.worker_status_list] * len(subprocess_indices),
+            [wait_setup] * len(subprocess_indices),
+            workers=worker_addresses,
+            allow_other_workers=False,
+        )
+
+        t_main = None
+        if not self.opt.is_cluster:
+            # ローカルプロセスでの計算(opt._main 相当の処理)
+            subprocess_idx = 0
+
+            # set_fem
+            self.opt.fem = self.fem
+            self.opt._reconstruct_fem(skip_reconstruct=True)
+
+            t_main = Thread(
+                target=self.opt._run,
+                args=(
+                    subprocess_idx,
+                    self.worker_status_list,
+                    wait_setup,
+                ),
+                kwargs=dict(
+                    skip_set_fem=True,
+                )
+            )
+            t_main.start()
+
+        # save history
+        def save_history():
+            while True:
+                sleep(2)
+                try:
+                    self.history.save()
+                except PermissionError:
+                    logger.warning(Msg.WARN_HISTORY_CSV_NOT_ACCESSIBLE)
+                if self.status.get() >= OptimizationStatus.TERMINATED:
+                    break
+
+        t_save_history = Thread(target=save_history)
+        t_save_history.start()
+
+        # 終了を待つ
+        local_opt_crashed = False
+        opt_crashed_list = self.client.gather(calc_futures)
+        if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
+            if t_main is not None:
+                t_main.join()
+                local_opt_crashed = self.opt._is_error_exit
+        opt_crashed_list.append(local_opt_crashed)
+        self.status.set(OptimizationStatus.TERMINATED)
+        end = time()
+
+        # 一応
+        t_save_history.join()
+
+        # logger.info(f'計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.')
+        # logger.info(f'結果は{self.history.path}を確認してください.')
+        logger.info(Msg.OPTIMIZATION_FINISHED)
+        logger.info(self.history.path)
+
+        # ひとつでも crashed ならばフラグを立てる
+        if any(opt_crashed_list):
+            self._is_error_exit = True
+        
+        return self.history.local_data
+
+
+    def terminate_all(self):
+        """Try to terminate all launched processes.
+
+        If distributed computing, Scheduler and Workers will NOT be terminated.
+
+        """
+
+        # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
+        sleep(1)
+
+        # terminate monitor process
+        self.status.set(OptimizationStatus.TERMINATE_ALL)
+        logger.info(self.monitor_process_future.result())
+        sleep(1)
+
+        # terminate actors
+        self.client.cancel(self.history._future, force=True)
+        self.client.cancel(self.status._future, force=True)
+        for worker_status in self.worker_status_list:
+            self.client.cancel(worker_status._future, force=True)
+        logger.info('Terminate actors.')
+        sleep(1)
+
+        # terminate monitor worker
+        n_workers = len(self.client.nthreads())
+
+        found_worker_dict = self.client.retire_workers(
+            names=[self.monitor_process_worker_name],  # name
+            close_workers=True,
+            remove=True,
+        )
+
+        if len(found_worker_dict) == 0:
+            found_worker_dict = self.client.retire_workers(
+                workers=[self.monitor_process_worker_name],  # address
+                close_workers=True,
+                remove=True,
+            )
+
+        if len(found_worker_dict) > 0:
+            while n_workers == len(self.client.nthreads()):
+                sleep(1)
+            logger.info('Terminate monitor processes worker.')
+            sleep(1)
+        else:
+            logger.warn('Monitor process worker not found.')
+
+        # close FEM (if specified to quit when deconstruct)
+        del self.fem
+        logger.info('Terminate FEM.')
+        sleep(1)
+
+        # close scheduler, other workers(, cluster)
+        self.client.shutdown()
+        logger.info('Terminate all relative processes.')
+        sleep(3)
+
+        # if optimization was crashed, raise Exception
+        if self._is_error_exit:
+            raise RuntimeError('At least 1 of optimization processes have been crashed. See console log.')
 
 
 def _start_monitor_server(
