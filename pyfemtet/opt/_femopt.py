@@ -7,6 +7,7 @@ import datetime
 from time import time, sleep
 from threading import Thread
 import json
+from traceback import print_exception
 
 # 3rd-party
 import numpy as np
@@ -48,7 +49,7 @@ def add_worker(client, worker_name):
         stdout=DEVNULL,
     )
 
-    # monitor 用 worker が増えるまで待つ
+    # worker が増えるまで待つ
     client.wait_for_workers(n_workers=current_n_workers + 1)
 
 
@@ -109,7 +110,6 @@ class FEMOpt:
         self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
         self.monitor_process_worker_name = None
-        self._is_error_exit = False
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -553,34 +553,44 @@ class FEMOpt:
             t_save_history = Thread(target=save_history)
             t_save_history.start()
 
-            # 終了を待つ
-            local_opt_crashed = False
-            opt_crashed_list = _client.gather(calc_futures)
-            if not self.opt.is_cluster:  # 既存の fem を使っているならそれも待つ
+            # ===== 終了 =====
+
+            # クラスターの Unexpected Exception のリストを取得
+            opt_exceptions: list[Exception or None] = _client.gather(calc_futures)  # gather() で終了待ちも兼ねる
+
+            # ローカルの opt で計算している場合、その Exception も取得
+            local_opt_exception: Exception or None = None
+            if not self.opt.is_cluster:
                 if t_main is not None:
-                    t_main.join()
-                    local_opt_crashed = self.opt._is_error_exit
-            opt_crashed_list.append(local_opt_crashed)
+                    t_main.join()  # 終了待ち
+                    local_opt_exception = self.opt._exception  # Exception を取得
+            opt_exceptions.append(local_opt_exception)
+
+            # 終了
             self.status.set(OptimizationStatus.TERMINATED)
             end = time()
 
             # 一応
             t_save_history.join()
 
-            # logger.info(f'計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.')
-            # logger.info(f'結果は{self.history.path}を確認してください.')
+            # 結果通知
             logger.info(Msg.OPTIMIZATION_FINISHED)
             logger.info(self.history.path)
 
-            # ひとつでも crashed ならばフラグを立てる
-            if any(opt_crashed_list):
-                self._is_error_exit = True
-
-            # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
+            # monitor worker を終了する準備
+            # 実際の終了は monitor worker の終了時
             self.status.set(OptimizationStatus.TERMINATE_ALL)
             logger.info(self.monitor_process_future.result())
-            sleep(1)
+            sleep(1)  # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
 
+            # 全ての Exception を再表示
+            for i, opt_exception in enumerate(opt_exceptions):
+                if opt_exception is not None:
+                    print(f'===== unexpected exception raised on worker {i} =====')
+                    print_exception(opt_exception)
+                    print()
+
+            # monitor worker を残してユーザーが結果を確認できるようにする
             if confirm_exit:
                 print()
                 print('='*len(Msg.CONFIRM_BEFORE_EXIT))
