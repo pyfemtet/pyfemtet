@@ -120,6 +120,7 @@ class Message:
     ERR_NO_FEM_RESULT = _('No FEM result (yet).')
     ERR_NO_PREDICTION_MODEL = _('Prediction model is not calculated yet.')
     ERR_CANNOT_SELECT_SAME_PARAMETER = _('Cannot select same parameter')
+    LABEL_SWITCH_PREDICTION_MODEL_3D = _('3D graph (two or more parameters required)')
     # pm_graph_creator
     GRAPH_TITLE_PREDICTION_MODEL = _('Prediction Model of Objective')
     LEGEND_LABEL_PREDICTION_MODEL = _('prediction model')
