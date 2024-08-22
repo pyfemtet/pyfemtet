@@ -7,8 +7,8 @@ from glob import glob
 import pyfemtet
 
 from pyfemtet import _test_util
-# from pyfemtet.message import encoding
-encoding = 'utf-8'
+from pyfemtet.message import encoding
+# encoding = 'utf-8'
 
 
 here = os.path.dirname(__file__)
