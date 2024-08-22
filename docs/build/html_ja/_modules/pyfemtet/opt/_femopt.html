@@ -78,6 +78,7 @@
              
   <h1>pyfemtet.opt._femopt のソースコード</h1><div class="highlight"><pre>
 <span></span><span class="c1"># built-in</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
@@ -102,6 +103,8 @@
     <span class="n">OptimizationStatus</span><span class="p">,</span>
     <span class="n">logger</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span><span class="p">,</span> <span class="n">encoding</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Expression</span>
 
 
 <div class="viewcode-block" id="FEMOpt">
@@ -193,7 +196,9 @@
             <span class="n">initial_value</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">memo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a parameter to the optimization problem.</span>
 
@@ -202,33 +207,67 @@
 <span class="sd">            initial_value (float or None, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.</span>
 <span class="sd">            lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.</span>
 <span class="sd">            upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.</span>
-<span class="sd">            memo (str, optional): Additional information about the parameter. Defaults to &#39;&#39;.</span>
+<span class="sd">            step (float or None, optional): The step of parameter. Defaults to None.</span>
+<span class="sd">            properties (dict, optional): Additional information about the parameter. Defaults to None.</span>
+<span class="sd">            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.</span>
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If initial_value is not specified and the value for the given name is also not specified.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">_check_bound</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">check_param_value</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">initial_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">initial_value</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">pass_to_fem</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">check_param_value</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">initial_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">initial_value</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;initial_value を指定してください.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">initial_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;initial_value を指定してください.&#39;</span><span class="p">)</span>
 
-        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">initial_value</span><span class="p">),</span>
-            <span class="s1">&#39;lb&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">),</span>
-            <span class="s1">&#39;ub&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">upper_bound</span><span class="p">),</span>
-            <span class="s1">&#39;memo&#39;</span><span class="p">:</span> <span class="n">memo</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="n">pdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">prm</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_value</span><span class="p">),</span>
+            <span class="n">lower_bound</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">)</span> <span class="k">if</span> <span class="n">lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">upper_bound</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">upper_bound</span><span class="p">)</span> <span class="k">if</span> <span class="n">upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">step</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="o">=</span><span class="n">pass_to_fem</span><span class="p">,</span>
+            <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span></div>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pdf</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">pdf</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FEMOpt.add_expression">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt.add_expression">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">add_expression</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">properties</span><span class="o">=</span><span class="nb">property</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add expression to the optimization problem.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the variable.</span>
+<span class="sd">            fun (Callable[[Any], float]): An expression function. The arguments that you want to use as input variables must be the same with ``name`` of Variable objects added by ``add_parameter()`` or ``add_expression()``. If you use other objects as argument of the function, you must specify ``kwargs``.</span>
+<span class="sd">            properties ([type], optional): Property names and their values of the variable. Defaults to property.</span>
+<span class="sd">            kwargs (Optional[dict], optional): Remaining arguments of ``fun``. Defaults to None.</span>
+<span class="sd">            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">exp</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
+            <span class="n">fun</span><span class="o">=</span><span class="n">fun</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span> <span class="k">if</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="p">{},</span>
+            <span class="n">pass_to_fem</span><span class="o">=</span><span class="n">pass_to_fem</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">add_expression</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FEMOpt.add_objective">
@@ -333,9 +372,7 @@
         <span class="c1"># strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる</span>
         <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">_is_access_gogh</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;関数 </span><span class="si">{</span><span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> に Gogh （Femtet 解析結果）へのアクセスがあります.&#39;</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;デフォルトでは constraint は解析前に評価され, 条件を満たさない場合解析を行いません.&#39;</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;拘束に解析結果を含めたい場合は, strict=False を設定してください.&#39;</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
@@ -343,20 +380,8 @@
 
 <div class="viewcode-block" id="FEMOpt.get_parameter">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt.get_parameter">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="ow">or</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the parameter in a specified format.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            format (str, optional): The desired output format. Defaults to &#39;dict&#39;. Valid formats are &#39;values&#39;, &#39;df&#39; and &#39;dict&#39;.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame or dict or np.ndarray: The parameter data converted into the specified format.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If an invalid format is provided.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s1">&#39;FEMOpt.get_parameter() was deprecated. Use Femopt.opt.get_parameter() instead.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FEMOpt.set_monitor_host">
@@ -415,9 +440,42 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># method checker</span>
+        <span class="k">if</span> <span class="n">n_parallel</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">method_checker</span><span class="o">.</span><span class="n">check_parallel</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">method_checker</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">method_checker</span><span class="o">.</span><span class="n">check_multi_objective</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">method_checker</span><span class="o">.</span><span class="n">check_constraint</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">method_checker</span><span class="o">.</span><span class="n">check_strict_constraint</span><span class="p">()</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">method_checker</span><span class="o">.</span><span class="n">check_seed</span><span class="p">()</span>
+
+        <span class="n">is_incomplete_bounds</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">prm</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">prm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">prm</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">prm</span><span class="o">.</span><span class="n">upper_bound</span>
+            <span class="n">is_incomplete_bounds</span> <span class="o">=</span> <span class="n">is_incomplete_bounds</span> <span class="o">+</span> <span class="p">(</span><span class="n">lb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">ub</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_incomplete_bounds</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">method_checker</span><span class="o">.</span><span class="n">check_incomplete_bounds</span><span class="p">()</span>
+
         <span class="c1"># 共通引数</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="n">n_trials</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+
+        <span class="c1"># resolve expression dependencies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 
         <span class="c1"># クラスターの設定</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">is_cluster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_address</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -432,7 +490,7 @@
 
             <span class="c1"># worker が足りない場合はエラー</span>
             <span class="k">if</span> <span class="n">n_parallel</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">worker_addresses</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;n_parallel(</span><span class="si">{</span><span class="n">n_parallel</span><span class="si">}</span><span class="s1">) &gt; n_workers(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">worker_addresses</span><span class="p">)</span><span class="si">}</span><span class="s1">). Worker 数が不足しています。&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;n_parallel(</span><span class="si">{</span><span class="n">n_parallel</span><span class="si">}</span><span class="s1">) &gt; n_workers(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">worker_addresses</span><span class="p">)</span><span class="si">}</span><span class="s1">). There are insufficient number of workers.&#39;</span><span class="p">)</span>
 
             <span class="c1"># worker が多い場合は閉じる</span>
             <span class="k">if</span> <span class="n">n_parallel</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">worker_addresses</span><span class="p">):</span>
@@ -498,7 +556,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">SETTING_UP</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">history_path</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">(),</span>
             <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
             <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
@@ -572,7 +630,7 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s1"> が使用中のため書き込みできません。プログラム終了までにこのファイルを解放してください。履歴データが失われます。&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">WARN_HISTORY_CSV_NOT_ACCESSIBLE</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">TERMINATED</span><span class="p">:</span>
                     <span class="k">break</span>
 
@@ -593,8 +651,10 @@
         <span class="c1"># 一応</span>
         <span class="n">t_save_history</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;計算が終了しました. 実行時間は </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="p">)</span><span class="si">}</span><span class="s1"> 秒でした。ウィンドウを閉じると終了します.&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;結果は</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s1">を確認してください.&#39;</span><span class="p">)</span>
+        <span class="c1"># logger.info(f&#39;計算が終了しました. 実行時間は {int(end - start)} 秒でした。ウィンドウを閉じると終了します.&#39;)</span>
+        <span class="c1"># logger.info(f&#39;結果は{self.history.path}を確認してください.&#39;)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">OPTIMIZATION_FINISHED</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="c1"># ひとつでも crashed ならばフラグを立てる</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">opt_crashed_list</span><span class="p">):</span>
@@ -628,8 +688,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">worker_status</span><span class="o">.</span><span class="n">_future</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Terminate actors.&#39;</span><span class="p">)</span>
         <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># これがないと dash app が落ちないとか問題あるの？</span>
 
         <span class="c1"># terminate monitor worker</span>
         <span class="n">n_workers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">nthreads</span><span class="p">())</span>

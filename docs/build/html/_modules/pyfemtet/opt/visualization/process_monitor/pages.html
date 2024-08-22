@@ -86,6 +86,8 @@
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.wrapped_components</span> <span class="kn">import</span> <span class="n">dcc</span><span class="p">,</span> <span class="n">dbc</span><span class="p">,</span> <span class="n">html</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">AbstractPage</span><span class="p">,</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.main_graph</span> <span class="kn">import</span> <span class="n">MainGraph</span>  <span class="c1"># , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.pm_graph</span> <span class="kn">import</span> <span class="n">PredictionModelGraph</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <span class="n">DBC_COLUMN_STYLE_CENTER</span> <span class="o">=</span> <span class="p">{</span>
@@ -126,7 +128,7 @@
         <span class="c1"># entire optimization status</span>
         <span class="c1"># noinspection PyAttributeOutsideInit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entire_status_message</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span>
-            <span class="s1">&#39;Optimization status will be shown here.&#39;</span><span class="p">,</span>
+            <span class="n">Msg</span><span class="o">.</span><span class="n">DEFAULT_STATUS_ALERT</span><span class="p">,</span>
             <span class="n">className</span><span class="o">=</span><span class="s1">&#39;alert-heading&#39;</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;optimization-entire-status-message&#39;</span><span class="p">,</span>
         <span class="p">)</span>
@@ -140,7 +142,7 @@
         <span class="c1"># stop update button</span>
         <span class="c1"># noinspection PyAttributeOutsideInit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_update_graph_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span>
-            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Auto-update graph&#39;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_AUTO_UPDATE</span><span class="p">,</span>
             <span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;form-switch&#39;</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;toggle-update-graph&#39;</span><span class="p">,</span>
             <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -149,7 +151,7 @@
         <span class="c1"># interrupt button</span>
         <span class="c1"># noinspection PyAttributeOutsideInit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interrupt_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
-            <span class="n">children</span><span class="o">=</span><span class="s1">&#39;Interrupt Optimization&#39;</span><span class="p">,</span>
+            <span class="n">children</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_INTERRUPT</span><span class="p">,</span>
             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;interrupt-optimization-button&#39;</span><span class="p">,</span>
             <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -157,7 +159,7 @@
 
         <span class="c1"># sync interval</span>
         <span class="c1"># noinspection PyAttributeOutsideInit</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;process-monitor-home-interval&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;process-monitor-home-interval&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">3000</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HomePage.setup_layout">
@@ -223,9 +225,6 @@
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">data_length</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">data_length_prop</span><span class="p">),</span>  <span class="c1"># check should update or not</span>
             <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
         <span class="k">def</span> <span class="nf">update_graph</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">update_switch</span><span class="p">,</span> <span class="n">current_graph_data_length</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;====================&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;update_graph called by </span><span class="si">{</span><span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
             <span class="n">current_graph_data_length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">current_graph_data_length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">current_graph_data_length</span>
 
             <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -378,6 +377,31 @@
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([({}</span> <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">no_update</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_status_alerts</span><span class="p">))])</span>
 
             <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PredictionModelPage">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.process_monitor.html#pyfemtet.opt.visualization.process_monitor.pages.PredictionModelPage">[docs]</a>
+<span class="k">class</span> <span class="nc">PredictionModelPage</span><span class="p">(</span><span class="n">AbstractPage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">rel_url</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.application</span> <span class="kn">import</span> <span class="n">ProcessMonitorApplication</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">:</span> <span class="n">ProcessMonitorApplication</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">rel_url</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PredictionModelPage.setup_component">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.process_monitor.html#pyfemtet.opt.visualization.process_monitor.pages.PredictionModelPage.setup_component">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rsm_graph</span><span class="p">:</span> <span class="n">PredictionModelGraph</span> <span class="o">=</span> <span class="n">PredictionModelGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_subpage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rsm_graph</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PredictionModelPage.setup_layout">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.process_monitor.html#pyfemtet.opt.visualization.process_monitor.pages.PredictionModelPage.setup_layout">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rsm_graph</span><span class="o">.</span><span class="n">layout</span></div>
 </div>
 
 </pre></div>

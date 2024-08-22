@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-09 11:28+0900\n"
+"POT-Creation-Date: 2024-08-22 11:35+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -33,16 +33,19 @@ msgstr ""
 msgid "Subpackages"
 msgstr ""
 
+#: ../source/modules/pyfemtet.message.rst:5
+#: ../source/modules/pyfemtet.opt.prediction.rst:5
+#: ../source/modules/pyfemtet.opt.rst:16
 #: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.rst:16
 #: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:5
-#: ../source/modules/pyfemtet.rst:13
+#: ../source/modules/pyfemtet.rst:14
 msgid "Submodules"
 msgstr ""
 
-#: ../source/modules/pyfemtet.rst:16
+#: ../source/modules/pyfemtet.rst:17
 msgid "pyfemtet.core module"
 msgstr ""
 
@@ -73,7 +76,7 @@ msgstr ""
 msgid "Exception raised for errors in the solver."
 msgstr ""
 
-#: ../source/modules/pyfemtet.rst:24
+#: ../source/modules/pyfemtet.rst:25
 msgid "pyfemtet.dispatch\\_extensions module"
 msgstr ""
 
@@ -90,8 +93,15 @@ msgstr ""
 msgid "Raises when (specific) Femtet process doesn't exist."
 msgstr ""
 
-#: of pyfemtet.dispatch_extensions.IFemtet:1 pyfemtet.opt._femopt.FEMOpt:1
+#: of pyfemtet.dispatch_extensions.IFemtet:1
+#: pyfemtet.message.messages.Message:1 pyfemtet.opt._femopt.FEMOpt:1
+#: pyfemtet.opt.parameter.ExpressionEvaluator:1
+#: pyfemtet.opt.parameter.Variable:1
+#: pyfemtet.opt.prediction.base.PyFemtetPredictionModel:1
+#: pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler:1
+#: pyfemtet.opt.prediction.single_task_gp.MyStandardScaler:1
 #: pyfemtet.opt.visualization.base.SidebarApplicationBase:1
+#: pyfemtet.opt.visualization.complex_components.pm_graph_creator.PredictionModelCreator:1
 msgid "Bases: :py:class:`object`"
 msgstr ""
 
@@ -120,9 +130,9 @@ msgstr ""
 #: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
 #: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
 #: pyfemtet.opt._femopt.FEMOpt pyfemtet.opt._femopt.FEMOpt.add_constraint
+#: pyfemtet.opt._femopt.FEMOpt.add_expression
 #: pyfemtet.opt._femopt.FEMOpt.add_objective
 #: pyfemtet.opt._femopt.FEMOpt.add_parameter
-#: pyfemtet.opt._femopt.FEMOpt.get_parameter
 #: pyfemtet.opt._femopt.FEMOpt.optimize
 #: pyfemtet.opt._femopt.FEMOpt.set_monitor_host
 #: pyfemtet.opt._femopt.FEMOpt.set_random_seed
@@ -132,6 +142,10 @@ msgstr ""
 #: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface
 #: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
 #: pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter
+#: pyfemtet.opt.prediction.base.PredictionModelBase.fit
+#: pyfemtet.opt.prediction.base.PredictionModelBase.predict
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict
 msgid "Parameters"
 msgstr ""
 
@@ -150,7 +164,6 @@ msgstr ""
 #: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
 #: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
 #: pyfemtet.opt._femopt.FEMOpt.add_parameter
-#: pyfemtet.opt._femopt.FEMOpt.get_parameter
 #: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
 msgid "Raises"
 msgstr ""
@@ -163,8 +176,9 @@ msgstr ""
 #: pyfemtet.dispatch_extensions.dispatch_specific_femtet
 #: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
 #: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
-#: pyfemtet.opt._femopt.FEMOpt.get_parameter
 #: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+#: pyfemtet.opt.prediction.base.PredictionModelBase.predict
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict
 msgid "Return type"
 msgstr ""
 
@@ -229,7 +243,7 @@ msgstr ""
 msgid "Launched Femtet is not found for some reason (i.e. failed to launch Femtet)."
 msgstr ""
 
-#: ../source/modules/pyfemtet.rst:32
+#: ../source/modules/pyfemtet.rst:33
 msgid "pyfemtet.logger module"
 msgstr ""
 
@@ -237,24 +251,47 @@ msgstr ""
 msgid "Return a logger with a default ColoredFormatter."
 msgstr ""
 
+#: ../source/modules/pyfemtet.message.rst:16
 #: ../source/modules/pyfemtet.opt.interface.rst:5
 #: ../source/modules/pyfemtet.opt.opt.rst:5
-#: ../source/modules/pyfemtet.opt.rst:15
-#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:40
+#: ../source/modules/pyfemtet.opt.prediction.rst:24
+#: ../source/modules/pyfemtet.opt.rst:27
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:56
 #: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.rst:27
 #: ../source/modules/pyfemtet.opt.visualization.wrapped_components.rst:40
-#: ../source/modules/pyfemtet.rst:40
+#: ../source/modules/pyfemtet.rst:41
 msgid "Module contents"
+msgstr ""
+
+#: ../source/modules/pyfemtet.message.rst:2
+msgid "pyfemtet.message package"
+msgstr ""
+
+#: ../source/modules/pyfemtet.message.rst:8
+msgid "pyfemtet.message.messages module"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.rst:2
 msgid "pyfemtet.opt package"
 msgstr ""
 
+#: ../source/modules/pyfemtet.opt.rst:19
+msgid "pyfemtet.opt.parameter module"
+msgstr ""
+
+#: of pyfemtet.opt.parameter.Expression:1 pyfemtet.opt.parameter.Parameter:1
+msgid "Bases: :py:class:`~pyfemtet.opt.parameter.Variable`"
+msgstr ""
+
+#: of pyfemtet.opt.parameter.ExpressionEvaluator.get_variables:1
+msgid "format: dict, values, df, raw(list of Variable object)"
+msgstr ""
+
 #: of pyfemtet.opt.interface._base.FEMInterface:1
 #: pyfemtet.opt.opt._base.AbstractOptimizer:1
+#: pyfemtet.opt.prediction.base.PredictionModelBase:1
 #: pyfemtet.opt.visualization.base.AbstractPage:1
 msgid "Bases: :py:class:`~abc.ABC`"
 msgstr ""
@@ -377,11 +414,12 @@ msgid "Returns the parameters in the specified format."
 msgstr ""
 
 #: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:3
-msgid "The desired format of the parameters. Can be 'df' (DataFrame), 'values', or 'dict'. Defaults to 'dict'."
+msgid "The desired format of the parameters. Can be 'df' (DataFrame), 'value' (alias of values), 'values' (np.ndarray), or 'dict'. Defaults to 'dict'."
 msgstr ""
 
-#: of pyfemtet.opt._femopt.FEMOpt.get_parameter
-#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+#: pyfemtet.opt.prediction.base.PredictionModelBase.predict
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict
 msgid "Returns"
 msgstr ""
 
@@ -389,13 +427,14 @@ msgstr ""
 msgid "The parameters in the specified format."
 msgstr ""
 
-#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:9
-#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:9
+#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:9
 msgid "If an invalid format is provided."
 msgstr ""
 
 #: of pyfemtet.opt.opt._base.AbstractOptimizer.run:1
-msgid "Start calcuration using optimization library."
+#: pyfemtet.opt.opt._scipy.ScipyOptimizer.run:1
+#: pyfemtet.opt.opt._scipy_scalar.ScipyScalarOptimizer.run:1
+msgid "Start calculation using optimization library."
 msgstr ""
 
 #: of pyfemtet.opt.interface._base.FEMInterface:1
@@ -425,6 +464,10 @@ msgstr ""
 
 #: of pyfemtet.opt.interface._base.FEMInterface.update_parameter:1
 msgid "Updates only FEM variables (if implemented in concrete class)."
+msgstr ""
+
+#: of pyfemtet.opt.interface._base.FEMInterface.update_parameter:3
+msgid "If this method is implemented, it is able to get parameter via FEMInterface."
 msgstr ""
 
 #: of pyfemtet.opt._femopt.FEMOpt:1
@@ -542,6 +585,30 @@ msgstr ""
 msgid "If name is None, name is a string with the prefix `\"cns_\"` followed by a sequential number."
 msgstr ""
 
+#: of pyfemtet.opt._femopt.FEMOpt.add_expression:1
+msgid "Add expression to the optimization problem."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_expression:3
+msgid "The name of the variable."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_expression:5
+msgid "An expression function. The arguments that you want to use as input variables must be the same with ``name`` of Variable objects added by ``add_parameter()`` or ``add_expression()``. If you use other objects as argument of the function, you must specify ``kwargs``."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_expression:7
+msgid "Property names and their values of the variable. Defaults to property."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_expression:9
+msgid "Remaining arguments of ``fun``. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_expression:11
+msgid "If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True."
+msgstr ""
+
 #: of pyfemtet.opt._femopt.FEMOpt.add_objective:1
 msgid "Adds an objective to the optimization problem."
 msgstr ""
@@ -591,23 +658,19 @@ msgid "The upper bound of the parameter. Defaults to None. However, this argumen
 msgstr ""
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_parameter:11
-msgid "Additional information about the parameter. Defaults to ''."
+msgid "The step of parameter. Defaults to None."
 msgstr ""
 
-#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:14
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:13
+msgid "Additional information about the parameter. Defaults to None."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:15
+msgid "If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True."
+msgstr ""
+
+#: of pyfemtet.opt._femopt.FEMOpt.add_parameter:18
 msgid "If initial_value is not specified and the value for the given name is also not specified."
-msgstr ""
-
-#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:1
-msgid "Returns the parameter in a specified format."
-msgstr ""
-
-#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:3
-msgid "The desired output format. Defaults to 'dict'. Valid formats are 'values', 'df' and 'dict'."
-msgstr ""
-
-#: of pyfemtet.opt._femopt.FEMOpt.get_parameter:6
-msgid "The parameter data converted into the specified format."
 msgstr ""
 
 #: of pyfemtet.opt._femopt.FEMOpt.optimize:1
@@ -853,6 +916,8 @@ msgid "Interface with no FEM for debug."
 msgstr ""
 
 #: of pyfemtet.opt.opt._optuna.OptunaOptimizer:1
+#: pyfemtet.opt.opt._scipy.ScipyOptimizer:1
+#: pyfemtet.opt.opt._scipy_scalar.ScipyScalarOptimizer:1
 msgid "Bases: :py:class:`~pyfemtet.opt.opt._base.AbstractOptimizer`"
 msgstr ""
 
@@ -884,6 +949,39 @@ msgstr ""
 msgid "pyfemtet.opt.opt package"
 msgstr ""
 
+#: ../source/modules/pyfemtet.opt.prediction.rst:2
+msgid "pyfemtet.opt.prediction package"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.prediction.rst:8
+msgid "pyfemtet.opt.prediction.base module"
+msgstr ""
+
+#: of pyfemtet.opt.prediction.base.PredictionModelBase.fit:1
+#: pyfemtet.opt.prediction.base.PredictionModelBase.predict:1
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit:1
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:1
+msgid "Input. (Point number) rows and (variable number) columns."
+msgstr ""
+
+#: of pyfemtet.opt.prediction.base.PredictionModelBase.fit:3
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit:3
+msgid "Output. (Point number) rows and (objective number) columns."
+msgstr ""
+
+#: of pyfemtet.opt.prediction.base.PredictionModelBase.predict:4
+#: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:4
+msgid "(Point number) rows and (objective number) columns. Index 0 is mean and index 1 is std."
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.prediction.rst:16
+msgid "pyfemtet.opt.prediction.single\\_task\\_gp module"
+msgstr ""
+
+#: of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel:1
+msgid "Bases: :py:class:`~pyfemtet.opt.prediction.base.PredictionModelBase`"
+msgstr ""
+
 #: ../source/modules/pyfemtet.opt.visualization.rst:2
 msgid "pyfemtet.opt.visualization package"
 msgstr ""
@@ -911,9 +1009,13 @@ msgstr ""
 #: of pyfemtet.opt.visualization.complex_components.alert_region.AlertRegion:1
 #: pyfemtet.opt.visualization.complex_components.control_femtet.FemtetControl:1
 #: pyfemtet.opt.visualization.complex_components.main_graph.MainGraph:1
+#: pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph:1
 #: pyfemtet.opt.visualization.process_monitor.pages.HomePage:1
+#: pyfemtet.opt.visualization.process_monitor.pages.PredictionModelPage:1
 #: pyfemtet.opt.visualization.process_monitor.pages.WorkerPage:1
 #: pyfemtet.opt.visualization.result_viewer.pages.HomePage:1
+#: pyfemtet.opt.visualization.result_viewer.pages.PredictionModelPage:1
+#: pyfemtet.opt.visualization.result_viewer.pages.Tutorial:1
 msgid "Bases: :py:class:`~pyfemtet.opt.visualization.base.AbstractPage`"
 msgstr ""
 
@@ -933,6 +1035,7 @@ msgstr ""
 
 #: of
 #: pyfemtet.opt.visualization.complex_components.control_femtet.FemtetState:1
+#: pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState:1
 #: pyfemtet.opt.visualization.wrapped_components.str_enum.ReprEnum:1
 msgid "Bases: :py:class:`~enum.Enum`"
 msgstr ""
@@ -943,6 +1046,14 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:32
 msgid "pyfemtet.opt.visualization.complex\\_components.main\\_graph module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:40
+msgid "pyfemtet.opt.visualization.complex\\_components.pm\\_graph module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:48
+msgid "pyfemtet.opt.visualization.complex\\_components.pm\\_graph\\_creator module"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.process_monitor.rst:2
@@ -2189,5 +2300,23 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Bases: :py:class:`~enum.StrEnum`"
+#~ msgstr ""
+
+#~ msgid "The desired format of the parameters. Can be 'df' (DataFrame), 'values', or 'dict'. Defaults to 'dict'."
+#~ msgstr ""
+
+#~ msgid "Start calcuration using optimization library."
+#~ msgstr ""
+
+#~ msgid "Additional information about the parameter. Defaults to ''."
+#~ msgstr ""
+
+#~ msgid "Returns the parameter in a specified format."
+#~ msgstr ""
+
+#~ msgid "The desired output format. Defaults to 'dict'. Valid formats are 'values', 'df' and 'dict'."
+#~ msgstr ""
+
+#~ msgid "The parameter data converted into the specified format."
 #~ msgstr ""
 

@@ -78,7 +78,8 @@
              
   <h1>pyfemtet.opt.visualization.result_viewer.application のソースコード</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.result_viewer.pages</span> <span class="kn">import</span> <span class="n">HomePage</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.result_viewer.pages</span> <span class="kn">import</span> <span class="n">HomePage</span><span class="p">,</span> <span class="n">PredictionModelPage</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <div class="viewcode-block" id="ResultViewerApplication">
@@ -108,9 +109,11 @@
 
     <span class="n">g_application</span> <span class="o">=</span> <span class="n">ResultViewerApplication</span><span class="p">()</span>
 
-    <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="s1">&#39;result&#39;</span><span class="p">)</span>
+    <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_RESULT</span><span class="p">)</span>
+    <span class="n">g_rsm_page</span> <span class="o">=</span> <span class="n">PredictionModelPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PREDICTION_MODEL</span><span class="p">,</span> <span class="s1">&#39;/prediction-model&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_rsm_page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
@@ -122,9 +125,11 @@
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">g_application</span> <span class="o">=</span> <span class="n">ResultViewerApplication</span><span class="p">()</span>
 
-    <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="s1">&#39;result&#39;</span><span class="p">)</span>
+    <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_RESULT</span><span class="p">)</span>
+    <span class="n">g_rsm_page</span> <span class="o">=</span> <span class="n">PredictionModelPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PREDICTION_MODEL</span><span class="p">,</span> <span class="s1">&#39;/prediction-model&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_rsm_page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>

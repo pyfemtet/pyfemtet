@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.message.messages &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">pyfemtet.message.messages</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>pyfemtet.message.messages のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="n">loc</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">locale</span><span class="o">.</span><span class="n">getlocale</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># set target to create .pot</span>
+    <span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># get translation</span>
+    <span class="k">if</span> <span class="s1">&#39;japanese&#39;</span> <span class="ow">in</span> <span class="n">loc</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="kn">from</span> <span class="nn">babel.support</span> <span class="kn">import</span> <span class="n">Translations</span>
+
+        <span class="n">translations</span> <span class="o">=</span> <span class="n">Translations</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;locales&#39;</span><span class="p">),</span>
+            <span class="n">locales</span><span class="o">=</span><span class="s1">&#39;ja&#39;</span>
+        <span class="p">)</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">translations</span><span class="o">.</span><span class="n">gettext</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+
+<div class="viewcode-block" id="Message">
+<a class="viewcode-back" href="../../../modules/pyfemtet.message.html#pyfemtet.message.messages.Message">[ドキュメント]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Message</span><span class="p">:</span>
+    <span class="c1"># syntax</span>
+    <span class="n">HELLO</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;hello!&#39;</span><span class="p">)</span>
+    <span class="c1"># This is ignored by babel</span>
+<div class="viewcode-block" id="Message.some_string">
+<a class="viewcode-back" href="../../../modules/pyfemtet.message.html#pyfemtet.message.messages.Message.some_string">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">some_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span> <span class="k">return</span> <span class="n">_</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;value is </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ===== common =====</span>
+    <span class="n">ENTER_TO_QUIT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Press enter to quit...&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ===== pyfemtet.opt femopt core =====</span>
+    <span class="n">ERR_CHECK_MINMAX</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The magnitude relationship is incorrect.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_CHECK_DIRECTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;The direction of the objective function must be &#39;minimize&#39;, &#39;maximize&#39; or a number. &quot;</span><span class="p">)</span>
+    <span class="n">ERR_CANNOT_ENCODING</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The variable name, object name, or constraint name contains characters that cannot be encoded. Do not use environment-dependent characters.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_PROBLEM_MISMATCH</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The running configuration does not match the configuration in the csv file.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ===== pyfemtet.opt FEMOpt =====</span>
+    <span class="n">ERR_NO_INITIAL_VALUE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Please specify initial_value.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Constraint functions are evaluated before analysis is performed, &#39;</span>
+                                                     <span class="s1">&#39;so do not access Femtet.Gogh. If you want your &#39;</span>
+                                                     <span class="s1">&#39;constraints to include values after analysis is performed, set &#39;</span>
+                                                     <span class="s1">&#39;the `strict` argument to False.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_HISTORY_CSV_NOT_ACCESSIBLE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;History csv file is in use and cannot be written to. &#39;</span>
+                                        <span class="s1">&#39;Please free this file before exiting the program, &#39;</span>
+                                        <span class="s1">&#39;otherwise history data will be lost.&#39;</span><span class="p">)</span>
+    <span class="n">OPTIMIZATION_FINISHED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Optimization finished. Results were saved in following:&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ===== pyfemtet.opt.interface =====</span>
+    <span class="n">ERR_RUN_JOURNAL_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&quot;%UGII_BASE_DIR%\NXBIN\run_journal.exe&quot; is not found. Make sure you have NX installed and the environment variable UGII_BASE_DIR is set.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_MODEL_RECONSTRUCTION_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Model reconstruction failed.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_MODEL_UPDATE_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Model update failed.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_MAKEPY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;It was detected that the configuration of Femtet python macro constants has not been completed. The configuration was done automatically (python -m win32com.client.makepy FemtetMacro). Please restart the program.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FEMTET_CONNECTION_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to connect to Femtet.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FEMTET_CRASHED_AND_RESTART_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The Femtet process crashed and could not be restarted successfully.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_FEMTET_CRASHED_AND_TRY_RESTART</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;An abnormal termination of the Femtet process has been detected. Recovery will be attempted.&#39;</span><span class="p">)</span>
+    <span class="n">INFO_FEMTET_CRASHED_AND_RESTARTED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Femtet has been restarted and will perform analysis and attempt to recover.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NEW_FEMTET_BUT_NO_FEMPRJ</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;If you specify &#39;new&#39; as the &#39;connect_method&#39; argument, set the &#39;femprj_path&#39; argument to existing femprj file path.&quot;</span><span class="p">)</span>
+    <span class="n">ERR_NO_SUCH_PARAMETER_IN_FEMTET</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The specified variable is not included in the Femtet analysis model. Note the capitalization of the variable.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_CANNOT_ACCESS_API</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The following APIs are not accessible: &#39;</span><span class="p">)</span>
+    <span class="n">CERTIFY_MACRO_VERSION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Macros may not be enabled in the installed version of Femtet. Please run the &quot;Enable Macros&quot; command from the start menu with administrator privileges in the same version of Femtet that is installed.&#39;</span><span class="p">)</span>
+    <span class="n">NO_ANALYSIS_MODEL_IS_OPEN</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;No analysis model is open&#39;</span><span class="p">)</span>
+    <span class="n">FEMTET_ANALYSIS_MODEL_WITH_NO_PARAMETER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The analysis model does not contain any variables.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FAILED_TO_UPDATE_VARIABLE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to update variables:&#39;</span><span class="p">)</span>
+    <span class="n">WARN_IGNORE_PARAMETER_NOT_CONTAINED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The specified variable is not included in the analysis model and will be ignored.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_RE_EXECUTE_MODEL_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Model history re-execute failed.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_MODEL_REDRAW_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Model redraw failed.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_MODEL_MESH_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Mesh generation failed&#39;</span><span class="p">)</span>
+    <span class="n">ERR_PARAMETRIC_SOLVE_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Parametric solve failed&#39;</span><span class="p">)</span>
+    <span class="n">ERR_SOLVE_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Solve failed.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_OPEN_RESULT_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Open result failed.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_CLOSE_FEMTET_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to close Femtet.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FAILED_TO_SAVE_PDT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to save result (.pdt) file.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FAILED_TO_SAVE_JPG</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to save screenshot (.jpg).&#39;</span><span class="p">)</span>
+    <span class="n">ERR_JPG_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Screenshot (.jpg) is not found.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_UPDATE_SOLIDWORKS_MODEL_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to update model in solidworks.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ===== pyfemtet.opt.opt =====</span>
+    <span class="n">ERR_NOT_IMPLEMENTED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The following features are not supported by the specified optimization method. &#39;</span><span class="p">)</span>
+    <span class="n">ERR_INCONSISTENT_PARAMETER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The parameter set does not match the one added with add_init_parameter.&#39;</span><span class="p">)</span>
+    <span class="n">INFO_EXCEPTION_DURING_FEM_ANALYSIS</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;An exception has occurred during FEM update. Current parameters are: &#39;</span><span class="p">)</span>
+    <span class="n">INFO_INFEASIBLE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The constraints were not satisfied for the following sets of variables:&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FEM_FAILED_AND_CANNOT_CONTINUE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_INTERRUPTED_IN_SCIPY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ===== pyfemtet.opt.visualization =====</span>
+    <span class="c1"># control_femtet.py</span>
+    <span class="n">LABEL_CONNECT_FEMTET_BUTTON</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Connect to Femtet&#39;</span><span class="p">)</span>
+    <span class="n">WARN_CSV_MODEL_NAME_IS_INVALID</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Analysis model name described in csv does not exist in project.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_HISTORY_CSV_NOT_READ</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;History csv is not read yet. Open your project manually.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_INVALID_METADATA</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Cannot read project data from csv. Open your project manually.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_FEMPRJ_IN_CSV_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;.femprj file described in csv is not found. Open your project manually.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Analysis model name is not specified. Open your model in the project manually.&#39;</span><span class="p">)</span>
+    <span class="c1"># main_figure_creator.py</span>
+    <span class="n">LEGEND_LABEL_CONSTRAINT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Constraint&#39;</span><span class="p">)</span>
+    <span class="n">LEGEND_LABEL_FEASIBLE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;feasible&#39;</span><span class="p">)</span>
+    <span class="n">LEGEND_LABEL_INFEASIBLE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;infeasible&#39;</span><span class="p">)</span>
+    <span class="n">LEGEND_LABEL_OPTIMAL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Optimality&#39;</span><span class="p">)</span>
+    <span class="n">LEGEND_LABEL_NON_DOMI</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;non dominated&#39;</span><span class="p">)</span>
+    <span class="n">LEGEND_LABEL_DOMI</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;dominated&#39;</span><span class="p">)</span>
+    <span class="n">GRAPH_TITLE_HYPERVOLUME</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Hypervolume Plot&#39;</span><span class="p">)</span>
+    <span class="n">GRAPH_TITLE_SINGLE_OBJECTIVE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Objective Plot&#39;</span><span class="p">)</span>
+    <span class="n">GRAPH_TITLE_MULTI_OBJECTIVE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Multi Objective Pair Plot&#39;</span><span class="p">)</span>
+    <span class="n">GRAPH_AXIS_LABEL_TRIAL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;trial number&#39;</span><span class="p">)</span>
+    <span class="c1"># main_graph.py</span>
+    <span class="n">TAB_LABEL_OBJECTIVES</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Objectives&#39;</span><span class="p">)</span>
+    <span class="c1"># pm_graph.py</span>
+    <span class="n">TAB_LABEL_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction Model&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39; Recalculate Model&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_OF_REDRAW_PREDICTION_MODEL_GRAPH_BUTTON</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39; Redraw graph&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_OF_AXIS1_SELECTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Parameter&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_OF_AXIS2_SELECTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Parameter2&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_OF_AXIS3_SELECTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Objective&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_HISTORY_SELECTED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;No history selected.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_FEM_RESULT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;No FEM result (yet).&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction model is not calculated yet.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_CANNOT_SELECT_SAME_PARAMETER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Cannot select same parameter&#39;</span><span class="p">)</span>
+    <span class="c1"># pm_graph_creator</span>
+    <span class="n">GRAPH_TITLE_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction Model of Objective&#39;</span><span class="p">)</span>
+    <span class="n">LEGEND_LABEL_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;prediction model&#39;</span><span class="p">)</span>
+    <span class="n">LEGEND_LABEL_PREDICTION_MODEL_STDDEV</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;std. dev. of model&#39;</span><span class="p">)</span>
+    <span class="c1"># process_monitor application</span>
+    <span class="n">PAGE_TITLE_PROGRESS</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Progress&#39;</span><span class="p">)</span>
+    <span class="n">PAGE_TITLE_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction&#39;</span><span class="p">)</span>
+    <span class="n">PAGE_TITLE_WORKERS</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Workers&#39;</span><span class="p">)</span>
+    <span class="c1"># process monitor pages</span>
+    <span class="n">DEFAULT_STATUS_ALERT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Optimization status will be shown here.&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_AUTO_UPDATE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Auto-update graph&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_INTERRUPT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Interrupt Optimization&#39;</span><span class="p">)</span>
+    <span class="c1"># result viewer application</span>
+    <span class="n">PAGE_TITLE_RESULT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Result&#39;</span><span class="p">)</span>
+    <span class="c1"># result viewer pages</span>
+    <span class="n">LABEL_OPEN_PDT_BUTTON</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Open Result in Femtet&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_RECONSTRUCT_MODEL_BUTTON</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Reconstruct Model&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_FILE_PICKER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Drag and drop or select csv file&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_CONNECTION_ESTABLISHED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Connection to Femtet is not established. Launch Femtet and Open a project.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_SOLUTION_SELECTED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;No result plot is selected.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FEMPRJ_IN_CSV_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The femprj file path in the history csv is not found or valid.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_MODEL_IN_CSV_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The model name in the history csv is not found.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_PDT_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;.pdt file is not found. &#39;</span>
+                          <span class="s1">&#39;Please check the .Results folder. &#39;</span>
+                          <span class="s1">&#39;Note that .pdt file save mode depends on &#39;</span>
+                          <span class="s1">&#39;the `save_pdt` argument of FemtetInterface in optimization script&#39;</span>
+                          <span class="s1">&#39;(default to `all`).&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FAILED_TO_OPEN_PREFIX</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to open &#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_SUCH_MODEL_IN_FEMPRJ</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Specified model is not in current project. &#39;</span>
+                                    <span class="s1">&#39;Please check opened project. &#39;</span>
+                                    <span class="s1">&#39;For example, not &quot;analysis model only&quot; but your .femprj file.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_INCONSISTENT_FEMPRJ_PATH</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;.femprj file path of the history csv is invalid. Please certify matching between csv and opening .femprj file.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_INVALID_MODEL_NAME</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Analysis model name of the history csv is invalid. Please certify matching between csv and opening analysis model.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_INCONSISTENT_MODEL_NAME</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Analysis model name of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and opening analysis model.&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_TUTORIAL_MODE_SWITCH</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;tutorial mode&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_LOAD_SAMPLE_CSV</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Load Sample CSV&#39;</span><span class="p">)</span>
+    <span class="n">LOAD_CSV_POPOVER_HEADER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Load CSV&#39;</span><span class="p">)</span>
+    <span class="n">LOAD_CSV_POPOVER_BODY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Open your optimization result. Then connecting to femtet will start automatically. &#39;</span>
+                              <span class="s1">&#39;Note that in tutorial mode, this button loads the ready-made sample csv and open sample femprj.&#39;</span><span class="p">)</span>
+    <span class="n">MAIN_GRAPH_POPOVER_HEADER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Main Graph&#39;</span><span class="p">)</span>
+    <span class="n">MAIN_GRAPH_POPOVER_BODY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Here the optimization history is shown. &#39;</span>
+                                <span class="s1">&#39;Each plot represents single FEM result. &#39;</span>
+                                <span class="s1">&#39;You can pick a result to open the corresponding result in Femtet. &#39;</span><span class="p">)</span>
+    <span class="n">OPEN_PDT_POPOVER_HEADER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Open Result&#39;</span><span class="p">)</span>
+    <span class="n">OPEN_PDT_POPOVER_BODY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;After pick a point in the main graph, &#39;</span>
+                              <span class="s1">&#39;This button shows the corresponding FEM result in Femtet.&#39;</span><span class="p">)</span>
+    <span class="n">CONNECT_FEMTET_POPOVER_BODY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Re-connect to Femtet.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_SAMPLE_CSV_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span><span class="p">)</span>
+    <span class="n">ERR_SAMPLE_FEMPRJ_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span><span class="p">)</span>
+    <span class="n">ERR_FEMPRJ_RESULT_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span><span class="p">)</span></div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

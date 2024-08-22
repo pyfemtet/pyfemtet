@@ -9,7 +9,19 @@ Subpackages
 
    pyfemtet.opt.interface
    pyfemtet.opt.opt
+   pyfemtet.opt.prediction
    pyfemtet.opt.visualization
+
+Submodules
+----------
+
+pyfemtet.opt.parameter module
+-----------------------------
+
+.. automodule:: pyfemtet.opt.parameter
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
