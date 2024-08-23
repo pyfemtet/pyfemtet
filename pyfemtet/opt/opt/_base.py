@@ -148,7 +148,7 @@ class AbstractOptimizer(ABC):
         self.n_trials = None
         self.is_cluster = False
         self.subprocess_idx = None
-        self._is_error_exit = False
+        self._exception = None
         self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
 
     def f(self, x):
@@ -260,7 +260,7 @@ class AbstractOptimizer(ABC):
             worker_status_list,
             wait_setup,
             skip_set_fem=False,
-    ) -> bool:
+    ) -> Optional[Exception]:
 
         # 自分の worker_status の取得
         self.subprocess_idx = subprocess_idx
@@ -303,12 +303,12 @@ class AbstractOptimizer(ABC):
             logger.error("=================================")
             logger.error(f'{type(e).__name__}: {e}')
             traceback.print_exc()
-            self._is_error_exit = True
+            self._exception = e
             self.worker_status.set(OptimizationStatus.CRASHED)
         finally:
             self._finalize()
 
-        return self._is_error_exit
+        return self._exception
 
     @abstractmethod
     def run(self) -> None:
