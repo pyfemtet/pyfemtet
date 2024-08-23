@@ -50,6 +50,8 @@ class Message:
                                         'Please free this file before exiting the program, '
                                         'otherwise history data will be lost.')
     OPTIMIZATION_FINISHED = _('Optimization finished. Results were saved in following:')
+    ERR_NO_BOUNDS = _('No bounds specified.')
+    CONFIRM_BEFORE_EXIT = _('The optimization is now complete. You can view the results on the monitor until you press Enter to exit the program.')
 
     # ===== pyfemtet.opt.interface =====
     ERR_RUN_JOURNAL_NOT_FOUND = _(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" is not found. Make sure you have NX installed and the environment variable UGII_BASE_DIR is set.')

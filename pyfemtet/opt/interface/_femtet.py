@@ -215,6 +215,24 @@ class FemtetInterface(FEMInterface):
         if self.Femtet is None:
             raise RuntimeError(Msg.ERR_FEMTET_CONNECTION_FAILED)
 
+    def _check_gaudi_accessible(self) -> bool:
+        try:
+            _ = self.Femtet.Gaudi
+        except com_error:
+            # モデルが開かれていないかFemtetが起動していない
+            return False
+        return True
+
+    # noinspection PyMethodMayBeStatic
+    def _construct_femtet_api(self, string):  # static にしてはいけない
+        if isinstance(string, str):
+            if string.startswith('self.'):
+                return eval(string)
+            else:
+                return eval('self.' + string)
+        else:
+            return string  # Callable
+
     def _call_femtet_api(
             self,
             fun,
@@ -232,7 +250,7 @@ class FemtetInterface(FEMInterface):
 
         Parameters
         ----------
-        fun : Callable
+        fun : Callable or str
             Femtet API
         return_value_if_failed : Any
             API が失敗した時の戻り値
@@ -271,36 +289,62 @@ class FemtetInterface(FEMInterface):
         # 1. 結果に関わらず戻り値が None で API 実行時に com_error を送出する
         # 2. API 実行時に成功失敗を示す戻り値を返し、ShowLastError で例外にアクセスできる状態になる
 
+        # 実行する API をデバッグ出力
+        if isinstance(fun, str):
+            logger.debug(' ' * print_indent + f'Femtet API:{fun}, args:{args}, kwargs:{kwargs}')
+        else:
+            logger.debug(' ' * print_indent + f'Femtet API:{fun.__name__}, args:{args}, kwargs:{kwargs}')
+
         # Gaudi コマンドなら Gaudi.Activate する
-        logger.debug(' ' * print_indent + f'Femtet API:{fun.__name__}, args:{args}, kwargs:{kwargs}')
         if is_Gaudi_method:  # Optimizer は Gogh に触らないので全部にこれをつけてもいい気がする
             try:
-                self._call_femtet_api(
-                    self.Femtet.Gaudi.Activate,
-                    False,  # None 以外なら何でもいい
-                    Exception,
-                    'Gaudi のオープンに失敗しました',
-                    print_indent=print_indent + 1
-                )
+                # まず Gaudi にアクセスできるか
+                gaudi_accessible = self._check_gaudi_accessible()
+                if gaudi_accessible:
+                    # Gaudi にアクセスできるなら Gaudi を Activate する
+                    fun = self._construct_femtet_api(fun)  # (str) -> Callable
+                    if fun.__name__ != 'Activate':
+                        # 再帰ループにならないように
+                        self._call_femtet_api(
+                            self.Femtet.Gaudi.Activate,
+                            False,  # None 以外なら何でもいい
+                            Exception,
+                            'Gaudi のオープンに失敗しました',
+                            print_indent=print_indent + 1
+                        )
+
+                else:
+                    # Gaudi にアクセスできないならば次の API 実行でエラーになる
+                    pass
+
             except com_error:
-                # Gaudi へのアクセスだけで com_error が生じうる
-                # そういう場合は次の API 実行で間違いなくエラーになるので放っておく
                 pass
 
         # API を実行
         try:
+            # gaudi のメソッドかどうかにかかわらず、gaudi へのアクセスでエラーが出るか
+            if not self._check_gaudi_accessible():
+                raise com_error
+
+            # gaudi_accessible なので関数が何であろうが安全にアクセスはできる
+            if isinstance(fun, str):
+                fun = self._construct_femtet_api(fun)  # (str) -> Callable
+
             # 解析結果を開いた状態で Gaudi.Activate して ReExecute する場合、ReExecute の前後にアクティブ化イベントが必要
             # さらに、プロジェクトツリーが開いていないとアクティブ化イベントも意味がないらしい。
             if fun.__name__ == 'ReExecute':
                 if self.open_result_with_gui or self.parametric_output_indexes_use_as_objective:
                     post_activate_message(self.Femtet.hWnd)
+                # API を実行
                 returns = fun(*args, **kwargs)  # can raise pywintypes.error
                 if self.open_result_with_gui or self.parametric_output_indexes_use_as_objective:
                     post_activate_message(self.Femtet.hWnd)
             else:
                 returns = fun(*args, **kwargs)
+
+        # API の実行に失敗
         except (com_error, error):
-            # パターン 2 エラーが生じたことは確定なのでエラーが起こるよう returns を作る
+            # 後続の処理でエラー判定されるように returns を作る
             # com_error ではなく error の場合はおそらく Femtet が落ちている
             if ret_for_check_idx is None:
                 returns = return_value_if_failed
@@ -361,7 +405,7 @@ class FemtetInterface(FEMInterface):
 
     def femtet_is_alive(self) -> bool:
         """Returns connected femtet process is existing or not."""
-        return _get_pid(self.Femtet.hWnd) > 0
+        return _get_pid(self.Femtet.hWnd) > 0  # hWnd の値はすでに Femtet が終了している場合は 0
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
         """Open specific analysis model with connected Femtet."""
@@ -479,7 +523,7 @@ class FemtetInterface(FEMInterface):
         # 変数更新のための処理
         sleep(0.1)  # Gaudi がおかしくなる時がある対策
         self._call_femtet_api(
-            self.Femtet.Gaudi.Activate,
+            'self.Femtet.Gaudi.Activate',
             True,  # 戻り値を持たないのでここは無意味で None 以外なら何でもいい
             Exception,  # 生きてるのに開けない場合
             error_message=Msg.NO_ANALYSIS_MODEL_IS_OPEN,
@@ -553,7 +597,7 @@ class FemtetInterface(FEMInterface):
 
         # 設計変数に従ってモデルを再構築
         self._call_femtet_api(
-            self.Femtet.Gaudi.ReExecute,
+            'self.Femtet.Gaudi.ReExecute',
             False,
             ModelError,  # 生きてるのに失敗した場合
             error_message=Msg.ERR_RE_EXECUTE_MODEL_FAILED,
@@ -576,7 +620,7 @@ class FemtetInterface(FEMInterface):
         """Execute FEM analysis."""
         # # メッシュを切る
         self._call_femtet_api(
-            self.Femtet.Gaudi.Mesh,
+            'self.Femtet.Gaudi.Mesh',
             0,
             MeshError,
             Msg.ERR_MODEL_MESH_FAILED,
@@ -630,6 +674,11 @@ class FemtetInterface(FEMInterface):
     def quit(self, timeout=1, force=True):
         """Force to terminate connected Femtet."""
         major, minor, bugfix = 2024, 0, 1
+
+        # すでに終了しているならば何もしない
+        if not self.femtet_is_alive():
+            return
+
         if self._version() >= _version(major, minor, bugfix):
             # gracefully termination method without save project available from 2024.0.1
             try:
@@ -715,16 +764,20 @@ class FemtetInterface(FEMInterface):
             # save to worker space
             result_dir = self.femprj_path.replace('.femprj', '.Results')
             pdt_path = os.path.join(result_dir, self.model_name + '.pdt')
-            succeed = self.Femtet.SavePDT(pdt_path, True)
 
-            # convert .pdt to ByteIO
-            if succeed:
-                with open(pdt_path, 'rb') as f:
-                    content = f.read()
-                return content
+            self._call_femtet_api(
+                fun=self.Femtet.SavePDT,
+                args=(pdt_path, True),
+                return_value_if_failed=False,
+                if_error=SolveError,
+                error_message=Msg.ERR_FAILED_TO_SAVE_PDT,
+                is_Gaudi_method=False,
+            )
 
-            else:
-                raise Exception(Msg.ERR_FAILED_TO_SAVE_PDT)
+            # convert .pdt to ByteIO and return it
+            with open(pdt_path, 'rb') as f:
+                content = f.read()
+            return content
 
         else:
             return None

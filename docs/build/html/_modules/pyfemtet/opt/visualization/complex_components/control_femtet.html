@@ -97,6 +97,7 @@
 
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span><span class="p">,</span> <span class="n">AbstractPage</span><span class="p">,</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface._femtet</span> <span class="kn">import</span> <span class="n">FemtetInterface</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <div class="viewcode-block" id="FemtetState">
@@ -130,10 +131,11 @@
         <span class="c1"># button</span>
         <span class="c1"># noinspection PyAttributeOutsideInit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
-            <span class="n">children</span><span class="o">=</span><span class="s1">&#39;Connect to Femtet&#39;</span><span class="p">,</span>
+            <span class="n">children</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_CONNECT_FEMTET_BUTTON</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;connect-femtet-button&#39;</span><span class="p">,</span>
             <span class="n">outline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;primary&#39;</span><span class="p">,</span>
+            <span class="n">className</span><span class="o">=</span><span class="s2">&quot;position-relative&quot;</span><span class="p">,</span>  <span class="c1"># need to show badge</span>
         <span class="p">)</span>
 
         <span class="c1"># noinspection PyAttributeOutsideInit</span>
@@ -193,7 +195,7 @@
                 <span class="c1"># model_name is not included in femprj</span>
                 <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-                <span class="n">warning_msg</span> <span class="o">=</span> <span class="s1">&#39;Analysis model name described in csv does not exist in project.&#39;</span>
+                <span class="n">warning_msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_CSV_MODEL_NAME_IS_INVALID</span>
 
             <span class="c1"># if &#39;new&#39; femtet, Interface try to terminate Femtet when the self.fem is reconstructed.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">quit_when_destruct</span> <span class="o">=</span> <span class="kc">False</span>
@@ -231,39 +233,36 @@
 
         <span class="c1"># check holding history</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;History csv is not read yet. Open your project manually.&#39;</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_HISTORY_CSV_NOT_READ</span>
 
         <span class="c1"># get metadata</span>
         <span class="n">additional_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># check metadata exists</span>
         <span class="k">if</span> <span class="n">additional_metadata</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;Cannot read project data from csv. Open your project manually.&#39;</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_INVALID_METADATA</span>
 
         <span class="c1"># check the metadata is valid json</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">additional_metadata</span><span class="p">)</span>
             <span class="n">femprj_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;femprj_path&#39;</span><span class="p">])</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Cannot read project data from csv because of the invalid format. &#39;</span>
-                            <span class="s1">&#39;Valid format is like: &#39;</span>
-                            <span class="s1">&#39;&quot;{&quot;&quot;femprj_path&quot;&quot;: &quot;&quot;c:</span><span class="se">\\</span><span class="s1">path</span><span class="se">\\</span><span class="s1">to</span><span class="se">\\</span><span class="s1">sample.femprj&quot;&quot;, &quot;&quot;model_name&quot;&quot;: &quot;&quot;&lt;model_name&gt;&quot;&quot;}&quot;. &#39;</span> 
-                            <span class="s1">&#39;Open your project manually.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_INVALID_METADATA</span>
 
         <span class="c1"># check containing femprj</span>
         <span class="k">if</span> <span class="n">femprj_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;Cannot read project data from csv. Open your project manually.&#39;</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_INVALID_METADATA</span>
 
         <span class="c1"># check femprj exists</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">femprj_path</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;.femprj file described in csv is not found. Open your project manually.&#39;</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_FEMPRJ_IN_CSV_NOT_FOUND</span>
 
         <span class="c1"># at this point, femprj is valid at least.</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;femprj_path&#39;</span><span class="p">:</span> <span class="n">femprj_path</span><span class="p">})</span>
 
         <span class="c1"># check model name</span>
         <span class="n">model_name</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;model_name&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">model_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;Analysis model name is not specified. Open your model in the project manually.&#39;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">model_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">msg</span></div>
 

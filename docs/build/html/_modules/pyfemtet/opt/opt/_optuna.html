@@ -91,13 +91,28 @@
 
 <span class="c1"># pyfemtet relative</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span><span class="p">,</span> <span class="n">generate_lhs</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.opt</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.opt</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">OptimizationMethodChecker</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">MeshError</span><span class="p">,</span> <span class="n">ModelError</span><span class="p">,</span> <span class="n">SolveError</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 <span class="c1"># filter warnings</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">optuna.exceptions</span> <span class="kn">import</span> <span class="n">ExperimentalWarning</span>
+
+
+<span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ExperimentalWarning</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">OptunaMethodChecker</span><span class="p">(</span><span class="n">OptimizationMethodChecker</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check_multi_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_strict_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="OptunaOptimizer">
@@ -119,6 +134,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">sampler_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sampler_kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_parameter</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_methods</span> <span class="o">=</span> <span class="n">add_init_method</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">add_init_method</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">add_init_method</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method_checker</span> <span class="o">=</span> <span class="n">OptunaMethodChecker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
 
@@ -128,19 +144,25 @@
             <span class="n">trial</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>  <span class="c1"># 現在実行中の trial を最後にする</span>
             <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># set TrialState FAIL</span>
 
-        <span class="c1"># candidate x</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lb&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ub&#39;</span><span class="p">])</span>
-            <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="c1"># candidate x and update parameters</span>
+        <span class="k">for</span> <span class="n">prm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="n">filter_parameter</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">prm</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">low</span><span class="o">=</span><span class="n">prm</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span>
+                <span class="n">high</span><span class="o">=</span><span class="n">prm</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">,</span>
+                <span class="n">step</span><span class="o">=</span><span class="n">prm</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">prm</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># update expressions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 
         <span class="c1"># message の設定</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;message&#39;</span> <span class="ow">in</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
 
-        <span class="c1"># fem や opt 経由で変数を取得して constraint を計算する時のためにアップデート</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="c1"># fem 経由で変数を取得して constraint を計算する時のためにアップデート</span>
+        <span class="n">df_fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;df&#39;</span><span class="p">,</span> <span class="n">filter_pass_to_fem</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">df_fem</span><span class="p">)</span>
 
         <span class="c1"># strict 拘束</span>
         <span class="n">strict_constraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">cns</span> <span class="k">for</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">strict</span><span class="p">]</span>
@@ -152,18 +174,16 @@
             <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">feasible</span> <span class="o">=</span> <span class="n">feasible</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cns</span><span class="o">.</span><span class="n">ub</span> <span class="o">&gt;=</span> <span class="n">cns_value</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">feasible</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;以下の変数で拘束 </span><span class="si">{</span><span class="n">cns</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> が満たされませんでした。&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_INFEASIBLE</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Constraint: </span><span class="si">{</span><span class="n">cns</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="n">filter_parameter</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
                 <span class="k">raise</span> <span class="n">optuna</span><span class="o">.</span><span class="n">TrialPruned</span><span class="p">()</span>  <span class="c1"># set TrialState PRUNED because FAIL causes similar candidate loop.</span>
 
         <span class="c1"># 計算</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="n">filter_parameter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># f の中で info は出している</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">ModelError</span><span class="p">,</span> <span class="n">MeshError</span><span class="p">,</span> <span class="n">SolveError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;以下の変数で FEM 解析に失敗しました。&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">))</span>
-
             <span class="c1"># 中断の確認 (解析中に interrupt されている場合対策)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">)</span>
@@ -173,14 +193,15 @@
             <span class="k">raise</span> <span class="n">optuna</span><span class="o">.</span><span class="n">TrialPruned</span><span class="p">()</span>  <span class="c1"># set TrialState PRUNED because FAIL causes similar candidate loop.</span>
 
         <span class="c1"># 拘束 attr の更新</span>
-        <span class="n">_c</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 非正なら OK</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">cns</span><span class="p">),</span> <span class="n">c_value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">c</span><span class="p">):</span>
-            <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">lb</span><span class="p">,</span> <span class="n">cns</span><span class="o">.</span><span class="n">ub</span>
-            <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># fun &gt;= lb  &lt;=&gt;  lb - fun &lt;= 0</span>
-                <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lb</span> <span class="o">-</span> <span class="n">c_value</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># ub &gt;= fun  &lt;=&gt;  fun - ub &lt;= 0</span>
-                <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c_value</span> <span class="o">-</span> <span class="n">ub</span><span class="p">)</span>
-        <span class="n">trial</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span><span class="s1">&#39;constraint&#39;</span><span class="p">,</span> <span class="n">_c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_c</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 非正なら OK</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">cns</span><span class="p">),</span> <span class="n">c_value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">c</span><span class="p">):</span>
+                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">lb</span><span class="p">,</span> <span class="n">cns</span><span class="o">.</span><span class="n">ub</span>
+                <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># fun &gt;= lb  &lt;=&gt;  lb - fun &lt;= 0</span>
+                    <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lb</span> <span class="o">-</span> <span class="n">c_value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># ub &gt;= fun  &lt;=&gt;  fun - ub &lt;= 0</span>
+                    <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c_value</span> <span class="o">-</span> <span class="n">ub</span><span class="p">)</span>
+            <span class="n">trial</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span><span class="s1">&#39;constraint&#39;</span><span class="p">,</span> <span class="n">_c</span><span class="p">)</span>
 
         <span class="c1"># 中断の確認 (解析中に interrupt されている場合対策)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">:</span>
@@ -192,7 +213,18 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_y</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s1">&#39;constraint&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;constraint&#39;</span> <span class="ow">in</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>  <span class="c1"># infeasible</span>
+        <span class="c1"># if break trial without weak constraint calculation, return 1 (as infeasible).</span>
+        <span class="k">if</span> <span class="s1">&#39;constraint&#39;</span> <span class="ow">in</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s1">&#39;constraint&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_c</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">lb</span><span class="p">,</span> <span class="n">cns</span><span class="o">.</span><span class="n">ub</span>
+                <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_c</span>
 
     <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create storage, study and set initial parameter.&quot;&quot;&quot;</span>
@@ -231,15 +263,15 @@
             <span class="c1"># 初期値の設定</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">trials</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># リスタートでなければ</span>
                 <span class="c1"># ユーザーの指定した初期値</span>
-                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="n">filter_parameter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">user_attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;initial&quot;</span><span class="p">})</span>
 
                 <span class="c1"># add_initial_parameter で追加された初期値</span>
                 <span class="k">for</span> <span class="n">prm</span><span class="p">,</span> <span class="n">prm_set_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_initial_parameter</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
-                        <span class="k">assert</span> <span class="n">prm</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s1">&#39;設定されたパラメータ名と add_init_parameter で追加されたパラメータ名が一致しません。&#39;</span>
+                        <span class="k">assert</span> <span class="n">prm</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_INCONSISTENT_PARAMETER</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="s1">&#39;設定されたパラメータ数と add_init_parameter で追加されたパラメータ数が一致しません。&#39;</span>
+                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_INCONSISTENT_PARAMETER</span>
                         <span class="n">prm</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">prm</span><span class="p">))</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span>
@@ -253,8 +285,8 @@
                     <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
                         <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
-                        <span class="n">lb</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lb&#39;</span><span class="p">]</span>
-                        <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ub&#39;</span><span class="p">]</span>
+                        <span class="n">lb</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lower_bound&#39;</span><span class="p">]</span>
+                        <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;upper_bound&#39;</span><span class="p">]</span>
                         <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">])</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">generate_lhs</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">datum</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
@@ -268,10 +300,7 @@
         <span class="c1"># if is_restart, load study</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">storage_path</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">storage_path</span><span class="si">}</span><span class="s1"> が見つかりません。&#39;</span>
-                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;.db ファイルは .csv ファイルと同じフォルダに生成されます。&#39;</span>
-                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;クラスター解析の場合は、スケジューラを起動したフォルダに生成されます。&#39;</span>
-                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">storage_path</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">integration</span><span class="o">.</span><span class="n">dask</span><span class="o">.</span><span class="n">DaskStorage</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
             <span class="p">)</span>
@@ -311,9 +340,15 @@
                 <span class="n">seed</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subprocess_idx</span>
 
         <span class="c1"># restore sampler</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">constraints_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraint</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">seed</span><span class="o">=</span><span class="n">seed</span>
+            <span class="p">)</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="p">(</span>
-            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-            <span class="n">constraints_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraint</span><span class="p">,</span>
             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span>
         <span class="p">)</span>
 

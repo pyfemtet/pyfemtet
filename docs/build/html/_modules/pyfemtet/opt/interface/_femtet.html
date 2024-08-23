@@ -112,6 +112,7 @@
     <span class="n">DispatchExtensionException</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <span class="k">def</span> <span class="nf">post_activate_message</span><span class="p">(</span><span class="n">hwnd</span><span class="p">):</span>
@@ -287,18 +288,34 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">constants</span><span class="p">,</span> <span class="s1">&#39;STATIC_C&#39;</span><span class="p">):</span>
             <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s1"> -m win32com.client.makepy FemtetMacro&#39;</span>
             <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Femtet python マクロ定数の設定が完了してないことを検出しました.&#39;</span>
-            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;設定は自動で行われました（python -m win32com.client.makepy FemtetMacro）.&#39;</span>
-            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;プログラムを再起動してください.&#39;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_MAKEPY</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
-            <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;終了するには Enter を押してください。&#39;</span><span class="p">)</span>
+            <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Press enter to finish...&#39;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Femtet との接続に失敗しました.&#39;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FEMTET_CONNECTION_FAILED</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span> <span class="nf">_check_gaudi_accessible</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span>
+        <span class="k">except</span> <span class="n">com_error</span><span class="p">:</span>
+            <span class="c1"># モデルが開かれていないかFemtetが起動していない</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># noinspection PyMethodMayBeStatic</span>
+    <span class="k">def</span> <span class="nf">_construct_femtet_api</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>  <span class="c1"># static にしてはいけない</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;self.&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;self.&#39;</span> <span class="o">+</span> <span class="n">string</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">string</span>  <span class="c1"># Callable</span>
 
     <span class="k">def</span> <span class="nf">_call_femtet_api</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -317,7 +334,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        fun : Callable</span>
+<span class="sd">        fun : Callable or str</span>
 <span class="sd">            Femtet API</span>
 <span class="sd">        return_value_if_failed : Any</span>
 <span class="sd">            API が失敗した時の戻り値</span>
@@ -356,33 +373,62 @@
         <span class="c1"># 1. 結果に関わらず戻り値が None で API 実行時に com_error を送出する</span>
         <span class="c1"># 2. API 実行時に成功失敗を示す戻り値を返し、ShowLastError で例外にアクセスできる状態になる</span>
 
+        <span class="c1"># 実行する API をデバッグ出力</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Femtet API:</span><span class="si">{</span><span class="n">fun</span><span class="si">}</span><span class="s1">, args:</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">, kwargs:</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Femtet API:</span><span class="si">{</span><span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, args:</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">, kwargs:</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
         <span class="c1"># Gaudi コマンドなら Gaudi.Activate する</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Femtet API:</span><span class="si">{</span><span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, args:</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">, kwargs:</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">is_Gaudi_method</span><span class="p">:</span>  <span class="c1"># Optimizer は Gogh に触らないので全部にこれをつけてもいい気がする</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">Activate</span><span class="p">,</span>
-                    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># None 以外なら何でもいい</span>
-                    <span class="ne">Exception</span><span class="p">,</span>
-                    <span class="s1">&#39;Gaudi のオープンに失敗しました&#39;</span><span class="p">,</span>
-                    <span class="n">print_indent</span><span class="o">=</span><span class="n">print_indent</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="p">)</span>
+                <span class="c1"># まず Gaudi にアクセスできるか</span>
+                <span class="n">gaudi_accessible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_gaudi_accessible</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">gaudi_accessible</span><span class="p">:</span>
+                    <span class="c1"># Gaudi にアクセスできるなら Gaudi を Activate する</span>
+                    <span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_femtet_api</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>  <span class="c1"># (str) -&gt; Callable</span>
+                    <span class="k">if</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">&#39;Activate&#39;</span><span class="p">:</span>
+                        <span class="c1"># 再帰ループにならないように</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">Activate</span><span class="p">,</span>
+                            <span class="kc">False</span><span class="p">,</span>  <span class="c1"># None 以外なら何でもいい</span>
+                            <span class="ne">Exception</span><span class="p">,</span>
+                            <span class="s1">&#39;Gaudi のオープンに失敗しました&#39;</span><span class="p">,</span>
+                            <span class="n">print_indent</span><span class="o">=</span><span class="n">print_indent</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Gaudi にアクセスできないならば次の API 実行でエラーになる</span>
+                    <span class="k">pass</span>
+
             <span class="k">except</span> <span class="n">com_error</span><span class="p">:</span>
-                <span class="c1"># Gaudi へのアクセスだけで com_error が生じうる</span>
-                <span class="c1"># そういう場合は次の API 実行で間違いなくエラーになるので放っておく</span>
                 <span class="k">pass</span>
 
         <span class="c1"># API を実行</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># gaudi のメソッドかどうかにかかわらず、gaudi へのアクセスでエラーが出るか</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_gaudi_accessible</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">com_error</span>
+
+            <span class="c1"># gaudi_accessible なので関数が何であろうが安全にアクセスはできる</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_femtet_api</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>  <span class="c1"># (str) -&gt; Callable</span>
+
             <span class="c1"># 解析結果を開いた状態で Gaudi.Activate して ReExecute する場合、ReExecute の前後にアクティブ化イベントが必要</span>
+            <span class="c1"># さらに、プロジェクトツリーが開いていないとアクティブ化イベントも意味がないらしい。</span>
             <span class="k">if</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;ReExecute&#39;</span><span class="p">:</span>
-                <span class="n">post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>  <span class="c1"># can raise pywintypes.error</span>
-                <span class="n">returns</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-                <span class="n">post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span>
+                    <span class="n">post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
+                <span class="c1"># API を実行</span>
+                <span class="n">returns</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># can raise pywintypes.error</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span>
+                    <span class="n">post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">returns</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># API の実行に失敗</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">com_error</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
-            <span class="c1"># パターン 2 エラーが生じたことは確定なのでエラーが起こるよう returns を作る</span>
+            <span class="c1"># 後続の処理でエラー判定されるように returns を作る</span>
             <span class="c1"># com_error ではなく error の場合はおそらく Femtet が落ちている</span>
             <span class="k">if</span> <span class="n">ret_for_check_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">returns</span> <span class="o">=</span> <span class="n">return_value_if_failed</span>
@@ -415,20 +461,19 @@
                 <span class="c1"># 再起動試行回数の上限に達していたら諦める</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;現在の Femtet 再起動回数: </span><span class="si">{</span><span class="n">recourse_depth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">recourse_depth</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_api_retry</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Femtet のプロセスが異常終了し、正常に再起動できませんでした.&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FEMTET_CRASHED_AND_RESTART_FAILED</span><span class="p">)</span>
 
                 <span class="c1"># 再起動</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Femtet プロセスの異常終了が検知されました. 回復を試みます.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_FEMTET_CRASHED_AND_TRY_RESTART</span><span class="p">)</span>
                 <span class="n">CoInitialize</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet</span><span class="p">(</span><span class="n">connect_method</span><span class="o">=</span><span class="s1">&#39;new&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span>
 
                 <span class="c1"># 状態を復元するために一度変数を渡して解析を行う（fun.__name__がSolveなら2度手間だが）</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Femtet が再起動されました。解析を行い、状態回復を試みます。&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="n">Msg</span><span class="o">.</span><span class="n">INFO_FEMTET_CRASHED_AND_RESTARTED</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
 
                 <span class="c1"># 与えられた API の再帰的再試行</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Femtet が回復されました。コマンド </span><span class="si">{</span><span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> を再試行します。&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
                     <span class="n">fun</span><span class="p">,</span>
                     <span class="n">return_value_if_failed</span><span class="p">,</span>
@@ -446,7 +491,7 @@
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.femtet_is_alive">[docs]</a>
     <span class="k">def</span> <span class="nf">femtet_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns connected femtet process is existing or not.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">_get_pid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+        <span class="k">return</span> <span class="n">_get_pid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># hWnd の値はすでに Femtet が終了している場合は 0</span></div>
 
 
 <div class="viewcode-block" id="FemtetInterface.open">
@@ -513,16 +558,15 @@
                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_method</span> <span class="o">==</span> <span class="s1">&#39;new&#39;</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_without_project</span><span class="p">)</span>
             <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s1">&#39;femprj_path を指定せず Femtet の connect_method に &quot;new&quot; を指定する場合、&quot;allow_without_project&quot; 引数を True に設定してください。&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NEW_FEMTET_BUT_NO_FEMPRJ</span><span class="p">)</span>
+
             <span class="c1"># さらに auto の場合は Femtet が存在しなければ new と同じ挙動になるので同様の処理</span>
             <span class="k">if</span> <span class="p">(</span>
                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_method</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_get_pids</span><span class="p">(</span><span class="n">process_name</span><span class="o">=</span><span class="s1">&#39;Femtet.exe&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_without_project</span><span class="p">)</span>
             <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s1">&#39;femprj_path を指定せず Femtet の connect_method を指定しない（又は &quot;auto&quot; に指定する）場合、Femtet を起動して処理したい .femprj ファイルを開いた状態にしてください。&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NEW_FEMTET_BUT_NO_FEMPRJ</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_method</span><span class="p">)</span>
 
         <span class="c1"># 最終的に接続した Femtet の femprj_path と model を インスタンスに戻す</span>
@@ -544,25 +588,22 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableNames_py</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;GetVariableNames_py&#39;</span> <span class="o">+</span> <span class="s1">&#39;にアクセスできません。&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;Femtet </span><span class="si">{</span><span class="n">major</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">minor</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">bugfix</span><span class="si">}</span><span class="s1"> 以降で「マクロの有効化」が行われていない可能性があります。&#39;</span>
-                <span class="s1">&#39;スタートメニューから、インストールされいてる Femtet と同一バージョンの「マクロ機能を有効化する」コマンドを管理者権限で実行してください。&#39;</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CANNOT_ACCESS_API</span> <span class="o">+</span> <span class="s1">&#39;GetVariableNames_py&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">CERTIFY_MACRO_VERSION</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
-                <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;終了するには Enter を押してください。&#39;</span><span class="p">)</span>
+                <span class="nb">input</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ENTER_TO_QUIT</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">e</span>
                 
             <span class="k">if</span> <span class="n">variable_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="p">:</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Femtet 解析モデルに変数 </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> がありません.&#39;</span>
-            <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;現在のモデルに設定されている変数は </span><span class="si">{</span><span class="n">variable_names</span><span class="si">}</span><span class="s1"> です.&#39;</span>
-            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;大文字・小文字の区別に注意してください.&#39;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_SUCH_PARAMETER_IN_FEMTET</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;`</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1">` not in </span><span class="si">{</span><span class="n">variable_names</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
-            <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;終了するには Enter を押してください。&#39;</span><span class="p">)</span>
+            <span class="nb">input</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ENTER_TO_QUIT</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span></div>
@@ -577,10 +618,10 @@
         <span class="c1"># 変数更新のための処理</span>
         <span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># Gaudi がおかしくなる時がある対策</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">Activate</span><span class="p">,</span>
+            <span class="s1">&#39;self.Femtet.Gaudi.Activate&#39;</span><span class="p">,</span>
             <span class="kc">True</span><span class="p">,</span>  <span class="c1"># 戻り値を持たないのでここは無意味で None 以外なら何でもいい</span>
             <span class="ne">Exception</span><span class="p">,</span>  <span class="c1"># 生きてるのに開けない場合</span>
-            <span class="n">error_message</span><span class="o">=</span><span class="s1">&#39;解析モデルが開かれていません&#39;</span><span class="p">,</span>
+            <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">NO_ANALYSIS_MODEL_IS_OPEN</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">bugfix</span> <span class="o">=</span> <span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
@@ -590,14 +631,14 @@
                 <span class="n">fun</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableNames_py</span><span class="p">,</span>
                 <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># 意味がない</span>
                 <span class="n">if_error</span><span class="o">=</span><span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
-                <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;GetVariableNames_py に失敗しました。&#39;</span><span class="p">,</span>
+                <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;GetVariableNames_py failed.&#39;</span><span class="p">,</span>
                 <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># 変数を含まないプロジェクトである場合</span>
             <span class="k">if</span> <span class="n">existing_variable_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">with_warning</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;解析モデルに変数が含まれていません。&#39;</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="p">[</span><span class="n">Msg</span><span class="o">.</span><span class="n">FEMTET_ANALYSIS_MODEL_WITH_NO_PARAMETER</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">return</span> <span class="kc">None</span>
 
@@ -611,12 +652,12 @@
                         <span class="n">fun</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">UpdateVariable</span><span class="p">,</span>
                         <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">if_error</span><span class="o">=</span><span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
-                        <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;変数の更新に失敗しました：変数</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">, 値</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                        <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_UPDATE_VARIABLE</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
                         <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;変数 </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> は 解析モデル </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> に含まれていません。無視されます。&#39;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> not in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s1">: &#39;</span> <span class="o">+</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_IGNORE_PARAMETER_NOT_CONTAINED</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
@@ -630,7 +671,7 @@
                     <span class="n">fun</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">UpdateVariable</span><span class="p">,</span>
                     <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">if_error</span><span class="o">=</span><span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
-                    <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;変数の更新に失敗しました：変数</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">, 値</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_UPDATE_VARIABLE</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
                     <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
                 <span class="p">)</span>
@@ -654,10 +695,10 @@
 
         <span class="c1"># 設計変数に従ってモデルを再構築</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">ReExecute</span><span class="p">,</span>
+            <span class="s1">&#39;self.Femtet.Gaudi.ReExecute&#39;</span><span class="p">,</span>
             <span class="kc">False</span><span class="p">,</span>
             <span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
-            <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;モデル再構築に失敗しました.&#39;</span><span class="p">,</span>
+            <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_RE_EXECUTE_MODEL_FAILED</span><span class="p">,</span>
             <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -666,7 +707,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Redraw</span><span class="p">,</span>
             <span class="kc">False</span><span class="p">,</span>  <span class="c1"># 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい</span>
             <span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
-            <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;モデル再構築に失敗しました.&#39;</span><span class="p">,</span>
+            <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_MODEL_REDRAW_FAILED</span><span class="p">,</span>
             <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -680,10 +721,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute FEM analysis.&quot;&quot;&quot;</span>
         <span class="c1"># # メッシュを切る</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">Mesh</span><span class="p">,</span>
+            <span class="s1">&#39;self.Femtet.Gaudi.Mesh&#39;</span><span class="p">,</span>
             <span class="mi">0</span><span class="p">,</span>
             <span class="n">MeshError</span><span class="p">,</span>
-            <span class="s1">&#39;メッシュ生成に失敗しました&#39;</span><span class="p">,</span>
+            <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_MODEL_MESH_FAILED</span><span class="p">,</span>
             <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -693,7 +734,7 @@
                 <span class="n">fun</span><span class="o">=</span><span class="n">solve_via_parametric_dll</span><span class="p">,</span>
                 <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">if_error</span><span class="o">=</span><span class="n">SolveError</span><span class="p">,</span>
-                <span class="n">error_message</span><span class="o">=</span><span class="s1">&#39;パラメトリック解析を用いたソルブに失敗しました&#39;</span><span class="p">,</span>
+                <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_PARAMETRIC_SOLVE_FAILED</span><span class="p">,</span>
                 <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">,),</span>
             <span class="p">)</span>
@@ -703,7 +744,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Solve</span><span class="p">,</span>
                 <span class="kc">False</span><span class="p">,</span>
                 <span class="n">SolveError</span><span class="p">,</span>
-                <span class="s1">&#39;ソルブに失敗しました&#39;</span><span class="p">,</span>
+                <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_SOLVE_FAILED</span><span class="p">,</span>
                 <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -712,7 +753,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">OpenCurrentResult</span><span class="p">,</span>
             <span class="kc">False</span><span class="p">,</span>
             <span class="n">SolveError</span><span class="p">,</span>  <span class="c1"># 生きてるのに開けない場合</span>
-            <span class="n">error_message</span><span class="o">=</span><span class="s1">&#39;解析結果のオープンに失敗しました&#39;</span><span class="p">,</span>
+            <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_OPEN_RESULT_FAILED</span><span class="p">,</span>
             <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span><span class="p">,),</span>
         <span class="p">)</span></div>
@@ -724,8 +765,21 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;See :func:`FEMInterface.update`&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-        <span class="c1"># TODO: CAD 連携における座標を基にした境界条件の割当直しなどの処理をここに挟めるようにする</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FemtetInterface.preprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.preprocess">[docs]</a>
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="FemtetInterface.postprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.postprocess">[docs]</a>
+    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="FemtetInterface.quit">
@@ -733,18 +787,21 @@
     <span class="k">def</span> <span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Force to terminate connected Femtet.&quot;&quot;&quot;</span>
         <span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">bugfix</span> <span class="o">=</span> <span class="mi">2024</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+
+        <span class="c1"># すでに終了しているならば何もしない</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_is_alive</span><span class="p">():</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">_version</span><span class="p">(</span><span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">bugfix</span><span class="p">):</span>
             <span class="c1"># gracefully termination method without save project available from 2024.0.1</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Exit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Femtet.Exit()&#39;</span> <span class="o">+</span> <span class="s1">&#39;にアクセスできません。&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;Femtet </span><span class="si">{</span><span class="n">major</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">minor</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">bugfix</span><span class="si">}</span><span class="s1"> 以降で「マクロの有効化」が行われていない可能性があります。&#39;</span>
-                <span class="s1">&#39;スタートメニューから、インストールされいてる Femtet と同一バージョンの「マクロ機能を有効化する」コマンドを管理者権限で実行してください。&#39;</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CANNOT_ACCESS_API</span> <span class="o">+</span> <span class="s1">&#39;Femtet.Exit()&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">CERTIFY_MACRO_VERSION</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
-                <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;終了するには Enter を押してください。&#39;</span><span class="p">)</span>
+                <span class="nb">input</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ENTER_TO_QUIT</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">e</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -758,7 +815,7 @@
                 <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
                 <span class="k">while</span> <span class="n">psutil</span><span class="o">.</span><span class="n">pid_exists</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">:</span>  <span class="c1"># 30 秒経っても存在するのは何かおかしい</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Femtet の終了に失敗しました。&#39;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CLOSE_FEMTET_FAILED</span><span class="p">)</span>
                         <span class="k">break</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -832,16 +889,20 @@
             <span class="c1"># save to worker space</span>
             <span class="n">result_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.femprj&#39;</span><span class="p">,</span> <span class="s1">&#39;.Results&#39;</span><span class="p">)</span>
             <span class="n">pdt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.pdt&#39;</span><span class="p">)</span>
-            <span class="n">succeed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SavePDT</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-            <span class="c1"># convert .pdt to ByteIO</span>
-            <span class="k">if</span> <span class="n">succeed</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                    <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                <span class="k">return</span> <span class="n">content</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
+                <span class="n">fun</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SavePDT</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">if_error</span><span class="o">=</span><span class="n">SolveError</span><span class="p">,</span>
+                <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_SAVE_PDT</span><span class="p">,</span>
+                <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
 
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;pdt ファイルの保存でエラーが発生しました。&#39;</span><span class="p">)</span>
+            <span class="c1"># convert .pdt to ByteIO and return it</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">content</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span></div>
@@ -854,21 +915,20 @@
         <span class="n">jpg_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.jpg&#39;</span><span class="p">)</span>
 
         <span class="c1"># モデル表示画面の設定</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Fit</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">ViewNumeric</span><span class="o">.</span><span class="n">SetCoord</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># ---モデルの画面を保存---</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Redraw</span><span class="p">()</span>  <span class="c1"># 再描画</span>
-        <span class="n">succeed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SavePicture</span><span class="p">(</span><span class="n">jpg_path</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="n">succeed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SavePicture</span><span class="p">(</span><span class="n">jpg_path</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">RedrawMode</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># 逐一の描画をオン</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">succeed</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;jpg ファイルの保存でエラーが発生しました。&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_SAVE_JPG</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">jpg_path</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;保存した jpg ファイルが見つかりませんでした。&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_JPG_NOT_FOUND</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jpg_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>

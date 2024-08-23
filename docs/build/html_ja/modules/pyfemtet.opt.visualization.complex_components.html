@@ -263,6 +263,85 @@
 </dd></dl>
 
 </section>
+<section id="module-pyfemtet.opt.visualization.complex_components.pm_graph">
+<span id="pyfemtet-opt-visualization-complex-components-pm-graph-module"></span><h2>pyfemtet.opt.visualization.complex_components.pm_graph module<a class="headerlink" href="#module-pyfemtet.opt.visualization.complex_components.pm_graph" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.visualization.complex_components.pm_graph.</span></span><span class="sig-name descname"><span class="pre">PredictionModelGraph</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="pyfemtet.opt.visualization.html#pyfemtet.opt.visualization.base.AbstractPage" title="pyfemtet.opt.visualization.base.AbstractPage"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPage</span></code></a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CommandState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph.CommandState"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState.ready">
+<span class="sig-name descname"><span class="pre">ready</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState.ready" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState.recalc">
+<span class="sig-name descname"><span class="pre">recalc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState.recalc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState.redraw">
+<span class="sig-name descname"><span class="pre">redraw</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.CommandState.redraw" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.create_formatted_parameter">
+<span class="sig-name descname"><span class="pre">create_formatted_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Component</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph.create_formatted_parameter"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.create_formatted_parameter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.create_image_content_if_femtet">
+<span class="sig-name descname"><span class="pre">create_image_content_if_femtet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Component</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph.create_image_content_if_femtet"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.create_image_content_if_femtet" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.data_accessor">
+<span class="sig-name descname"><span class="pre">data_accessor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph.data_accessor"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.data_accessor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.setup_callback">
+<span class="sig-name descname"><span class="pre">setup_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph.setup_callback"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.setup_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.setup_component">
+<span class="sig-name descname"><span class="pre">setup_component</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph.setup_component"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.setup_component" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.setup_layout">
+<span class="sig-name descname"><span class="pre">setup_layout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph.html#PredictionModelGraph.setup_layout"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph.setup_layout" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pyfemtet.opt.visualization.complex_components.pm_graph_creator">
+<span id="pyfemtet-opt-visualization-complex-components-pm-graph-creator-module"></span><h2>pyfemtet.opt.visualization.complex_components.pm_graph_creator module<a class="headerlink" href="#module-pyfemtet.opt.visualization.complex_components.pm_graph_creator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph_creator.PredictionModelCreator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.visualization.complex_components.pm_graph_creator.</span></span><span class="sig-name descname"><span class="pre">PredictionModelCreator</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph_creator.html#PredictionModelCreator"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph_creator.PredictionModelCreator" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph_creator.PredictionModelCreator.create_figure">
+<span class="sig-name descname"><span class="pre">create_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prm_name_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">remaining_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prm_name_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph_creator.html#PredictionModelCreator.create_figure"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph_creator.PredictionModelCreator.create_figure" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.visualization.complex_components.pm_graph_creator.PredictionModelCreator.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/visualization/complex_components/pm_graph_creator.html#PredictionModelCreator.fit"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.visualization.complex_components.pm_graph_creator.PredictionModelCreator.fit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-pyfemtet.opt.visualization.complex_components">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.opt.visualization.complex_components" title="Link to this heading"></a></h2>
 </section>

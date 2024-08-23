@@ -36,6 +36,22 @@ pyfemtet.opt.visualization.complex\_components.main\_graph module
    :undoc-members:
    :show-inheritance:
 
+pyfemtet.opt.visualization.complex\_components.pm\_graph module
+---------------------------------------------------------------
+
+.. automodule:: pyfemtet.opt.visualization.complex_components.pm_graph
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyfemtet.opt.visualization.complex\_components.pm\_graph\_creator module
+------------------------------------------------------------------------
+
+.. automodule:: pyfemtet.opt.visualization.complex_components.pm_graph_creator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

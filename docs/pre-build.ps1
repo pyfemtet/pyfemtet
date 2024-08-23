@@ -28,6 +28,9 @@ Copy-Item -Path "$SAMPLES_SOURCE\*" -Destination $SAMPLES_ON_DOC_SOURCE -Recurse
 # copy English installer to doc_source
 Copy-Item -Path $INSTALLER -Destination $INSTALLER_ON_DOC_SOURCE -Force
 
+# update api references
+poetry run sphinx-apidoc -f -o docs/source/modules pyfemtet
+
 # build English document
 poetry run python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
 
@@ -47,6 +50,9 @@ foreach ($file in $files) {
 
 # copy Japanese installer to doc_source
 Copy-Item -Path $INSTALLER_JP -Destination $INSTALLER_ON_DOC_SOURCE -Force
+
+# update api references
+poetry run sphinx-apidoc -f -o docs/source/modules pyfemtet
 
 # build Japanese document
 poetry run python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
