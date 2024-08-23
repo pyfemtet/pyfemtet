@@ -337,7 +337,7 @@ class FEMOpt:
             n_parallel=1,
             timeout=None,
             wait_setup=True,
-            confirm_exit=True,
+            confirm_before_exit=True,
     ):
         """Runs the main optimization process.
 
@@ -346,7 +346,7 @@ class FEMOpt:
             n_parallel (int, optional): The number of parallel processes. Defaults to 1.
             timeout (float or None, optional): The maximum amount of time in seconds that each trial can run. Defaults to None.
             wait_setup (bool, optional): Wait for all workers launching FEM system. Defaults to True.
-            confirm_exit (bool, optional): Insert stop before exit to continue to show process monitor.
+            confirm_before_exit (bool, optional): Insert stop before exit to continue to show process monitor.
 
         Tip:
             If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080.
@@ -591,7 +591,7 @@ class FEMOpt:
                     print()
 
             # monitor worker を残してユーザーが結果を確認できるようにする
-            if confirm_exit:
+            if confirm_before_exit:
                 print()
                 print('='*len(Msg.CONFIRM_BEFORE_EXIT))
                 print(Msg.CONFIRM_BEFORE_EXIT)
@@ -605,7 +605,9 @@ class FEMOpt:
         warnings.warn(
             "terminate_all() is deprecated and will be removed in a future version. "
             "In current and later versions, the equivalent of terminate_all() will be executed when optimize() finishes. "
-            "Therefore, remove terminate_all() from your code.",
+            "Therefore, you can simply remove terminate_all() from your code. "
+            "If you want to stop program before terminating monitor process, "
+            "use ``confirm_before_exit`` argument like ``FEMOpt.optimize(confirm_before_exit=True)``",
             DeprecationWarning,
             stacklevel=2
         )
