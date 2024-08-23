@@ -1,5 +1,7 @@
 # built-in
-from typing import Optional, Any, Callable
+import inspect
+import warnings
+from typing import Optional, Any, Callable, List
 import os
 import datetime
 from time import time, sleep
@@ -335,6 +337,7 @@ class FEMOpt:
             n_parallel=1,
             timeout=None,
             wait_setup=True,
+            confirm_exit=True,
     ):
         """Runs the main optimization process.
 
@@ -343,6 +346,7 @@ class FEMOpt:
             n_parallel (int, optional): The number of parallel processes. Defaults to 1.
             timeout (float or None, optional): The maximum amount of time in seconds that each trial can run. Defaults to None.
             wait_setup (bool, optional): Wait for all workers launching FEM system. Defaults to True.
+            confirm_exit (bool, optional): Insert stop before exit to continue to show process monitor.
 
         Tip:
             If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080.
@@ -421,16 +425,7 @@ class FEMOpt:
             # monitor worker の設定
             logger.info('Launching monitor server. This may take a few seconds.')
             self.monitor_process_worker_name = datetime.datetime.now().strftime("Monitor%Y%m%d%H%M%S")
-            current_n_workers = len(self.client.nthreads().keys())
-            from subprocess import Popen
-            import sys
-            Popen(
-                f'{sys.executable} -m dask worker {self.client.scheduler.address} --nthreads 1 --nworkers 1 --name {self.monitor_process_worker_name} --no-nanny',
-                shell=True
-            )
-
-            # monitor 用 worker が増えるまで待つ
-            self.client.wait_for_workers(n_workers=current_n_workers + 1)
+            add_worker(self.client, self.monitor_process_worker_name)
 
         else:
             # ローカルクラスターを構築
@@ -448,113 +443,115 @@ class FEMOpt:
             self.monitor_process_worker_name = worker_addresses[0]
             worker_addresses[0] = 'Main'
 
-        # Femtet 特有の処理
-        metadata = None
-        if isinstance(self.fem, FemtetInterface):
-            # 結果 csv に記載する femprj に関する情報
-            metadata = json.dumps(
-                dict(
-                    femprj_path=self.fem.original_femprj_path,
-                    model_name=self.fem.model_name
+        with self.client.cluster as _cluster, self.client as _client:
+
+            # Femtet 特有の処理
+            metadata = None
+            if isinstance(self.fem, FemtetInterface):
+                # 結果 csv に記載する femprj に関する情報
+                metadata = json.dumps(
+                    dict(
+                        femprj_path=self.fem.original_femprj_path,
+                        model_name=self.fem.model_name
+                    )
                 )
+                # Femtet の parametric 設定を目的関数に用いるかどうか
+                if self.fem.parametric_output_indexes_use_as_objective is not None:
+                    from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
+                    indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
+                    directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
+                    add_parametric_results_as_objectives(
+                        self,
+                        indexes,
+                        directions,
+                    )
+
+            # actor の設定
+            self.status = OptimizationStatus(_client)
+            self.worker_status_list = [OptimizationStatus(_client, name) for name in worker_addresses]  # tqdm 検討
+            self.status.set(OptimizationStatus.SETTING_UP)
+            self.history = History(
+                self.history_path,
+                self.opt.variables.get_parameter_names(),
+                list(self.opt.objectives.keys()),
+                list(self.opt.constraints.keys()),
+                _client,
+                metadata,
             )
-            # Femtet の parametric 設定を目的関数に用いるかどうか
-            if self.fem.parametric_output_indexes_use_as_objective is not None:
-                from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
-                indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
-                directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
-                add_parametric_results_as_objectives(
-                    self,
-                    indexes,
-                    directions,
-                )
 
-        # actor の設定
-        self.status = OptimizationStatus(self.client)
-        self.worker_status_list = [OptimizationStatus(self.client, name) for name in worker_addresses]  # tqdm 検討
-        self.status.set(OptimizationStatus.SETTING_UP)
-        self.history = History(
-            self.history_path,
-            self.opt.variables.get_parameter_names(),
-            list(self.opt.objectives.keys()),
-            list(self.opt.constraints.keys()),
-            self.client,
-            metadata,
-        )
-
-        # launch monitor
-        self.monitor_process_future = self.client.submit(
-            # func
-            _start_monitor_server,
-            # args
-            self.history,
-            self.status,
-            worker_addresses,
-            self.worker_status_list,
-            # kwargs
-            **self.monitor_server_kwargs,
-            # kwargs of submit
-            workers=self.monitor_process_worker_name,
-            allow_other_workers=False
-        )
-
-        # fem
-        self.fem._setup_before_parallel(self.client)
-
-        # opt
-        self.opt.fem_class = type(self.fem)
-        self.opt.fem_kwargs = self.fem.kwargs
-        self.opt.entire_status = self.status
-        self.opt.history = self.history
-        self.opt._setup_before_parallel()
-
-        # クラスターでの計算開始
-        self.status.set(OptimizationStatus.LAUNCHING_FEM)
-        start = time()
-        calc_futures = self.client.map(
-            self.opt._run,
-            subprocess_indices,
-            [self.worker_status_list] * len(subprocess_indices),
-            [wait_setup] * len(subprocess_indices),
-            workers=worker_addresses,
-            allow_other_workers=False,
-        )
-
-        t_main = None
-        if not self.opt.is_cluster:
-            # ローカルプロセスでの計算(opt._main 相当の処理)
-            subprocess_idx = 0
-
-            # set_fem
-            self.opt.fem = self.fem
-            self.opt._reconstruct_fem(skip_reconstruct=True)
-
-            t_main = Thread(
-                target=self.opt._run,
-                args=(
-                    subprocess_idx,
-                    self.worker_status_list,
-                    wait_setup,
-                ),
-                kwargs=dict(
-                    skip_set_fem=True,
-                )
+            # launch monitor
+            self.monitor_process_future = _client.submit(
+                # func
+                _start_monitor_server,
+                # args
+                self.history,
+                self.status,
+                worker_addresses,
+                self.worker_status_list,
+                # kwargs
+                **self.monitor_server_kwargs,
+                # kwargs of submit
+                workers=self.monitor_process_worker_name,
+                allow_other_workers=False
             )
-            t_main.start()
 
-        # save history
-        def save_history():
-            while True:
-                sleep(2)
-                try:
-                    self.history.save()
-                except PermissionError:
-                    logger.warning(Msg.WARN_HISTORY_CSV_NOT_ACCESSIBLE)
-                if self.status.get() >= OptimizationStatus.TERMINATED:
-                    break
+            # fem
+            self.fem._setup_before_parallel(_client)
 
-        t_save_history = Thread(target=save_history)
-        t_save_history.start()
+            # opt
+            self.opt.fem_class = type(self.fem)
+            self.opt.fem_kwargs = self.fem.kwargs
+            self.opt.entire_status = self.status
+            self.opt.history = self.history
+            self.opt._setup_before_parallel()
+
+            # クラスターでの計算開始
+            self.status.set(OptimizationStatus.LAUNCHING_FEM)
+            start = time()
+            calc_futures = _client.map(
+                self.opt._run,
+                subprocess_indices,
+                [self.worker_status_list] * len(subprocess_indices),
+                [wait_setup] * len(subprocess_indices),
+                workers=worker_addresses,
+                allow_other_workers=False,
+            )
+
+            t_main = None
+            if not self.opt.is_cluster:
+                # ローカルプロセスでの計算(opt._main 相当の処理)
+                subprocess_idx = 0
+
+                # set_fem
+                self.opt.fem = self.fem
+                self.opt._reconstruct_fem(skip_reconstruct=True)
+
+                t_main = Thread(
+                    target=self.opt._run,
+                    args=(
+                        subprocess_idx,
+                        self.worker_status_list,
+                        wait_setup,
+                    ),
+                    kwargs=dict(
+                        skip_set_fem=True,
+                    )
+                )
+                t_main.start()
+
+            # save history
+            def save_history():
+                while True:
+                    sleep(2)
+                    try:
+                        self.history.save()
+                    except PermissionError:
+                        logger.warning(Msg.WARN_HISTORY_CSV_NOT_ACCESSIBLE)
+                    if self.status.get() >= OptimizationStatus.TERMINATED:
+                        break
+
+            t_save_history = Thread(target=save_history)
+            t_save_history.start()
 
             # ===== 終了 =====
 
@@ -573,8 +570,8 @@ class FEMOpt:
             self.status.set(OptimizationStatus.TERMINATED)
             end = time()
 
-        # 一応
-        t_save_history.join()
+            # 一応
+            t_save_history.join()
 
             # 結果通知
             logger.info(Msg.OPTIMIZATION_FINISHED)
