@@ -122,6 +122,7 @@ class Message:
     ERR_NO_FEM_RESULT = _('No FEM result (yet).')
     ERR_NO_PREDICTION_MODEL = _('Prediction model is not calculated yet.')
     ERR_CANNOT_SELECT_SAME_PARAMETER = _('Cannot select same parameter')
+    LABEL_SWITCH_PREDICTION_MODEL_3D = _('3D graph (two or more parameters required)')
     # pm_graph_creator
     GRAPH_TITLE_PREDICTION_MODEL = _('Prediction Model of Objective')
     LEGEND_LABEL_PREDICTION_MODEL = _('prediction model')
@@ -130,6 +131,7 @@ class Message:
     PAGE_TITLE_PROGRESS = _('Progress')
     PAGE_TITLE_PREDICTION_MODEL = _('Prediction')
     PAGE_TITLE_WORKERS = _('Workers')
+    PAGE_TITLE_OPTUNA_VISUALIZATION = _('Details')
     # process monitor pages
     DEFAULT_STATUS_ALERT = _('Optimization status will be shown here.')
     LABEL_AUTO_UPDATE = _('Auto-update graph')
@@ -172,5 +174,14 @@ class Message:
     ERR_SAMPLE_CSV_NOT_FOUND = _('Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`')
     ERR_SAMPLE_FEMPRJ_NOT_FOUND = _('Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`')
     ERR_FEMPRJ_RESULT_NOT_FOUND = _('Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`')
-
+    # DETAIL VISUALIZATION PAGES
+    DETAIL_PAGE_TEXT_BEFORE_LOADING = _('Loading data...')
+    DETAIL_PAGE_HISTORY_HEADER = _('Plots of objectives versus trials')
+    DETAIL_PAGE_HISTORY_DESCRIPTION = _('The vertical axis is the objective, and the horizontal axis is the number of trials.')
+    DETAIL_PAGE_PARALLEL_COOR_HEADER = _('Parallel coordinate plots')
+    DETAIL_PAGE_PARALLEL_COOR_DESCRIPTION = _('The vertical axis is an objective or parameters, and one polyline indicates one result.')
+    DETAIL_PAGE_CONTOUR_HEADER = _('The heatmap of objectives')
+    DETAIL_PAGE_CONTOUR_DESCRIPTION = _('The axes are parameters, and the color shows objective value.')
+    DETAIL_PAGE_SLICE_HEADER = _('The response of an objective versus one parameter')
+    DETAIL_PAGE_SLICE_DESCRIPTION = _('The vertical axis is objective, and the horizontal axis is parameter.')
 

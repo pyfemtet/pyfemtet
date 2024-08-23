@@ -129,6 +129,19 @@ class PredictionModelGraph(AbstractPage):
         self.slider_stack_data = html.Data(**{self.slider_stack_data_prop: {}})
         self.slider_container = html.Div()
 
+        # 2d or 3d
+        self.switch_3d = dbc.Checklist(
+            options=[
+                dict(
+                    label=Msg.LABEL_SWITCH_PREDICTION_MODEL_3D,
+                    disabled=False,
+                    value=False,
+                )
+            ],
+            switch=True,
+            value=[],
+        )
+
     def setup_layout(self):
         self.card_header = dbc.CardHeader(self.tabs)
 
@@ -151,6 +164,7 @@ class PredictionModelGraph(AbstractPage):
                         self.command_manager
                     ],
                     direction='horizontal', gap=2),
+                self.switch_3d,
                 *dropdown_rows,
                 self.slider_container,
                 self.slider_stack_data,
@@ -193,13 +207,15 @@ class PredictionModelGraph(AbstractPage):
             Output(self.redraw_graph_button_spinner, 'spinner_style', allow_duplicate=True),
             Output(self.redraw_graph_button, 'disabled', allow_duplicate=True),
             Output(self.command_manager, self.command_manager_prop, allow_duplicate=True),
+            Output(self.switch_3d, 'options', allow_duplicate=True),
             Input(self.fit_rsm_button, 'n_clicks'),
             Input(self.redraw_graph_button, 'n_clicks'),
             State(self.fit_rsm_button_spinner, 'spinner_style'),
             State(self.redraw_graph_button_spinner, 'spinner_style'),
+            State(self.switch_3d, 'options'),
             prevent_initial_call=True,
         )
-        def disable_fit_button(_1, _2, state1, state2):
+        def disable_fit_button(_1, _2, state1, state2, switch_options):
             # spinner visibility
             if 'display' in state1.keys(): state1.pop('display')
             if 'display' in state2.keys(): state2.pop('display')
@@ -210,7 +226,12 @@ class PredictionModelGraph(AbstractPage):
             else:
                 command = self.CommandState.redraw.value
 
-            return state1, True, state2, True, command
+            # disable switch
+            option = switch_options[0]
+            option.update({'disabled': True})
+            switch_options[0] = option
+
+            return state1, True, state2, True, command, switch_options
 
         # ===== recreate RSM =====
         @app.callback(
@@ -256,9 +277,10 @@ class PredictionModelGraph(AbstractPage):
             State(self.axis3_obj_dropdown, 'label'),
             State(self.slider_container, 'children'),  # for callback chain
             State({'type': 'prm-slider', 'index': ALL}, 'value'),
+            State(self.switch_3d, 'value'),
             prevent_initial_call=True,
         )
-        def redraw_graph(command, active_tab_id, axis1_label, axis2_label, axis3_label, _2, prm_values):
+        def redraw_graph(command, active_tab_id, axis1_label, axis2_label, axis3_label, _2, prm_values, is_3d):
             # just in case
             if callback_context.triggered_id is None:
                 raise PreventUpdate
@@ -282,6 +304,9 @@ class PredictionModelGraph(AbstractPage):
             if not hasattr(self.rsm_creator, 'history'):
                 logger.error(Msg.ERR_NO_PREDICTION_MODEL)
                 return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
+
+            if not is_3d:
+                axis2_label = None
 
             # get indices to remove
             idx1 = prm_names.index(axis1_label) if axis1_label in prm_names else None
@@ -307,23 +332,31 @@ class PredictionModelGraph(AbstractPage):
 
             return fig, self.CommandState.ready.value
 
-        # ===== When the graph is updated, enable buttons =====
+        # ===== re-enable buttons when the graph is updated,  =====
         @app.callback(
             Output(self.fit_rsm_button, 'disabled', allow_duplicate=True),
             Output(self.fit_rsm_button_spinner, 'spinner_style', allow_duplicate=True),
             Output(self.redraw_graph_button, 'disabled', allow_duplicate=True),
             Output(self.redraw_graph_button_spinner, 'spinner_style', allow_duplicate=True),
+            Output(self.switch_3d, 'options', allow_duplicate=True),
             Input(self.command_manager, self.command_manager_prop),
             State(self.fit_rsm_button_spinner, 'spinner_style'),
             State(self.redraw_graph_button_spinner, 'spinner_style'),
+            State(self.switch_3d, 'options'),
             prevent_initial_call=True,
         )
-        def enable_buttons(command, state1, state2):
+        def enable_buttons(command, state1, state2, switch_options):
             if command != self.CommandState.ready.value:
                 raise PreventUpdate
             state1.update({'display': 'none'})
             state2.update({'display': 'none'})
-            return False, state1, False, state2
+
+            # enable switch
+            option = switch_options[0]
+            option.update({'disabled': False})
+            switch_options[0] = option
+
+            return False, state1, False, state2, switch_options
 
         # ===== setup dropdown and sliders from history =====
         @app.callback(
@@ -414,6 +447,7 @@ class PredictionModelGraph(AbstractPage):
             Input({'type': 'axis2-dropdown-menu-item', 'index': ALL}, 'n_clicks'),
             Input({'type': 'axis3-dropdown-menu-item', 'index': ALL}, 'n_clicks'),
             Input(self.axis1_prm_dropdown, 'children'),  # for callback chain timing
+            Input(self.switch_3d, 'value'),
             State(self.axis1_prm_dropdown, 'label'),
             State(self.axis2_prm_dropdown, 'label'),
             State(self.axis3_obj_dropdown, 'label'),
@@ -422,10 +456,10 @@ class PredictionModelGraph(AbstractPage):
         )
         def update_controller(*args):
             # argument processing
-            current_ax1_label = args[4]
-            current_ax2_label = args[5]
-            # current_ax3_label = args[6]
-            current_styles: list[dict] = args[7]
+            current_ax1_label = args[5]
+            current_ax2_label = args[6]
+            current_styles: list[dict] = args[8]
+            is_3d = args[4]
 
             # just in case
             if callback_context.triggered_id is None:
@@ -451,6 +485,10 @@ class PredictionModelGraph(AbstractPage):
             if len(prm_names) < 2:
                 ret[ax2_hidden] = True
 
+            # ===== hide dropdown of axis 2 if not is_3d =====
+            if not is_3d:
+                ret[ax2_hidden] = True
+
             # ===== update dropdown label =====
 
             # by callback chain on loaded after setup_dropdown_and_sliders()
@@ -466,29 +504,43 @@ class PredictionModelGraph(AbstractPage):
 
                 # ax1
                 if callback_context.triggered_id['type'] == 'axis1-dropdown-menu-item':
-                    if new_label != current_ax2_label:
-                        ret[ax1_label_key] = new_label
-                    else:
-                        logger.error(Msg.ERR_CANNOT_SELECT_SAME_PARAMETER)
+                    ret[ax1_label_key] = new_label
+                    if new_label == current_ax2_label:
+                        ret[ax2_label_key] = current_ax1_label
+
 
                 # ax2
                 elif callback_context.triggered_id['type'] == 'axis2-dropdown-menu-item':
-                    if new_label != current_ax1_label:
-                        ret[ax2_label_key] = new_label
-                    else:
-                        logger.error(Msg.ERR_CANNOT_SELECT_SAME_PARAMETER)
+                    ret[ax2_label_key] = new_label
+                    if new_label == current_ax1_label:
+                        ret[ax1_label_key] = current_ax2_label
+
 
                 # ax3
                 elif callback_context.triggered_id['type'] == 'axis3-dropdown-menu-item':
                     ret[ax3_label_key] = new_label
 
             # ===== update visibility of sliders =====
-            for label_key, current_label in zip((ax1_label_key, ax2_label_key), (current_ax1_label, current_ax2_label)):
-                # get label of output
-                label = ret[label_key] if ret[label_key] != no_update else current_label
-                # update display style of slider
-                idx = prm_names.index(label) if label in prm_names else None
-                if idx is not None:
+
+            # invisible the slider correspond to the dropdown-1
+            label_key, current_label = ax1_label_key, current_ax1_label
+            # get label of output
+            label = ret[label_key] if ret[label_key] != no_update else current_label
+            # update display style of slider
+            idx = prm_names.index(label) if label in prm_names else None
+            if idx is not None:
+                current_styles[idx].update({'display': 'none'})
+                ret[slider_style_list_key][idx] = current_styles[idx]
+
+            # invisible the slider correspond to the dropdown-2
+            label_key, current_label = ax2_label_key, current_ax2_label
+            # get label of output
+            label = ret[label_key] if ret[label_key] != no_update else current_label
+            # update display style of slider
+            idx = prm_names.index(label) if label in prm_names else None
+            if idx is not None:
+                # if 2d, should not disable the slider correspond to dropdown-2.
+                if is_3d:
                     current_styles[idx].update({'display': 'none'})
                     ret[slider_style_list_key][idx] = current_styles[idx]
 

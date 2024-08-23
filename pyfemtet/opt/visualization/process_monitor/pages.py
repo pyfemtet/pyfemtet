@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+import optuna
+
 from dash import Output, Input, State, callback_context, no_update, ALL
 from dash.exceptions import PreventUpdate
 
@@ -289,3 +291,103 @@ class PredictionModelPage(AbstractPage):
 
     def setup_layout(self):
         self.layout = self.rsm_graph.layout
+
+
+class OptunaVisualizerPage(AbstractPage):
+
+    def __init__(self, title, rel_url, application):
+        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        self.application: ProcessMonitorApplication = None
+        super().__init__(title, rel_url, application)
+
+    def setup_component(self):
+        self.location = dcc.Location(id='optuna-page-location', refresh=True)
+        self._layout = html.Div(children=[Msg.DETAIL_PAGE_TEXT_BEFORE_LOADING])
+        self.layout = [self.location, self._layout]
+
+    def _setup_layout(self):
+
+        study = self.application.history.create_optuna_study()
+        prm_names = self.application.history.prm_names
+        obj_names = self.application.history.obj_names
+
+        layout = []
+
+        layout.append(html.H2(Msg.DETAIL_PAGE_HISTORY_HEADER))
+        layout.append(html.H4(Msg.DETAIL_PAGE_HISTORY_DESCRIPTION))
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_optimization_history(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
+
+        layout.append(html.H2(Msg.DETAIL_PAGE_PARALLEL_COOR_HEADER))
+        layout.append(html.H4(Msg.DETAIL_PAGE_PARALLEL_COOR_DESCRIPTION))
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_parallel_coordinate(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
+
+        layout.append(html.H2(Msg.DETAIL_PAGE_CONTOUR_HEADER))
+        layout.append(html.H4(Msg.DETAIL_PAGE_CONTOUR_DESCRIPTION))
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_contour(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            layout.append(dcc.Graph(figure=fig, style={'height': '90vh'}))
+
+        # import itertools
+        # for (i, j) in itertools.combinations(range(len(obj_names)), 2):
+        #     fig = optuna.visualization.plot_pareto_front(
+        #         study,
+        #         targets=lambda t: (t.values[i], t.values[j]),
+        #         target_names=[obj_names[i], obj_names[j]],
+        #     )
+        #     self.graphs.append(dcc.Graph(figure=fig, style={'height': '50vh'}))
+
+        layout.append(html.H2(Msg.DETAIL_PAGE_SLICE_HEADER))
+        layout.append(html.H4(Msg.DETAIL_PAGE_SLICE_DESCRIPTION))
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_slice(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
+
+        return layout
+
+    def setup_callback(self):
+        app = self.application.app
+
+        @app.callback(
+            Output(self._layout, 'children'),
+            Input(self.location, 'pathname'),  # on page load
+        )
+        def update_page(_):
+            if self.application.history is None:
+                return Msg.ERR_NO_HISTORY_SELECTED
+
+            if len(self.data_accessor()) == 0:
+                return Msg.ERR_NO_FEM_RESULT
+
+            return self._setup_layout()
+
+
+    def setup_layout(self):
+        pass
+
+    def data_accessor(self) -> pd.DataFrame:
+        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        if isinstance(self.application, ProcessMonitorApplication):
+            df = self.application.local_data
+        else:
+            df = self.application.history.local_data
+        return df

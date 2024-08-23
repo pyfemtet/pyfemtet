@@ -5,7 +5,7 @@ from threading import Thread
 import pandas as pd
 
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, logger
-from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, PredictionModelPage
+from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
 from pyfemtet.message import Msg
 
 
@@ -176,11 +176,13 @@ def g_debug():
 
     g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
     g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)
+    g_optuna = OptunaVisualizerPage(Msg.PAGE_TITLE_OPTUNA_VISUALIZATION, '/optuna', g_application)
     g_worker_page = WorkerPage(Msg.PAGE_TITLE_WORKERS, '/workers', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_rsm_page, 1)
-    g_application.add_page(g_worker_page, 2)
+    g_application.add_page(g_optuna, 2)
+    g_application.add_page(g_worker_page, 3)
     g_application.setup_callback(debug=False)
 
     g_application.run(debug=False)
@@ -191,11 +193,13 @@ def main(history, status, worker_addresses, worker_status_list, host=None, port=
 
     g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
     g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)
+    g_optuna = OptunaVisualizerPage(Msg.PAGE_TITLE_OPTUNA_VISUALIZATION, '/optuna', g_application)
     g_worker_page = WorkerPage(Msg.PAGE_TITLE_WORKERS, '/workers', g_application)
 
     g_application.add_page(g_home_page, 0)
     g_application.add_page(g_rsm_page, 1)
-    g_application.add_page(g_worker_page, 2)
+    g_application.add_page(g_optuna, 2)
+    g_application.add_page(g_worker_page, 3)
     g_application.setup_callback()
 
     g_application.start_server(host, port)
