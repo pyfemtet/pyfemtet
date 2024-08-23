@@ -127,52 +127,71 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
         *args,
         **kwargs,
     ):
+        from time import time
+        start = time()
+
         batch_initial_conditions_feasible = []
 
         self.detect_prm_seq_if_needed()
 
-        # n 回 batch_initial_conditions を行い、feasible のもののみ抽出
-        counter = 0
-        n = 2
-        batch_initial_conditions = gen_batch_initial_conditions(*args, **kwargs)
-        while True:
-            counter += 1
-            if counter > n:
-                break
+        if len(batch_initial_conditions_feasible) == 0:
 
-            # 各初期値提案について
-            for ic_candidate in batch_initial_conditions:
+            # n 回 batch_initial_conditions を行い、feasible のもののみ抽出
+            counter = 0
+            n = 1
+            start2 = time()
+            # print(kwargs)
+            # print(len(self.prm_name_seq))
+            num_restarts = max(20, len(self.prm_name_seq))  # デフォルトである 20 以上
+            num_random_points_before_concider_heuristic = max(num_restarts, 0)  # 関数が num_restarts 以上を必要とする。デフォルト 1024 は多すぎる。
+            kwargs.update(dict(num_restarts=num_restarts))  # 20
+            kwargs.update(dict(raw_samples=num_random_points_before_concider_heuristic))  # 1024
+            batch_initial_conditions = gen_batch_initial_conditions(*args, **kwargs)
+            print(f'  DEBUG: batch_initial_conditions: {int(time() - start2)} sec')
+            while True:
+                counter += 1
+                if counter > n:
+                    break
+
+                # 各初期値提案について
+                for ic_candidate in batch_initial_conditions:
+                    # すべての非線形拘束について
+                    for cns in self.nonlinear_inequality_constraints:
+                        # ひとつでも拘束を満たしていなければ初期値提案の処理を抜ける
+                        f: ConvertedConstraintFunction = cns[0]
+                        if f(*ic_candidate) < 0:
+                            break
+                    else:
+                        # 初期値提案がすべての非線形拘束を満たしたら feasible に入れる
+                        batch_initial_conditions_feasible.append(ic_candidate.numpy())
+
+        if len(batch_initial_conditions_feasible) == 0:
+
+            # study の履歴から initial conditions を作成。
+            # 内部で acquisition function が更新されるので同じ値が提案されてもよい
+            for trial in self.study.best_trials:
+                # BoTorchSampler 内部実装の並びと trial.params の並びは一致しないので並び替える
+                prm_names, values = list(trial.params.keys()), list(trial.params.values())
+                indices = [prm_names.index(seq) for seq in self.prm_name_seq]
+                sorted_values = [values[idx] for idx in indices]
+                normalized_values = (np.array(sorted_values).astype(float) - self.bounds[0]) / (self.bounds[1] - self.bounds[0])
+
                 # すべての非線形拘束について
                 for cns in self.nonlinear_inequality_constraints:
                     # ひとつでも拘束を満たしていなければ初期値提案の処理を抜ける
                     f: ConvertedConstraintFunction = cns[0]
-                    if f(*ic_candidate) < 0:
+                    if f(normalized_values) < 0:
                         break
                 else:
-                    # 初期値提案がすべての非線形拘束を満たしたら feasible に入れる
-                    batch_initial_conditions_feasible.append(ic_candidate.numpy())
-
-        # study の履歴からも initial conditions を作成。
-        # 内部で acquisition function が更新されるので同じ値が提案されてもよい
-        for trial in self.study.best_trials:
-            # BoTorchSampler 内部実装の並びと trial.params の並びは一致しないので並び替える
-            prm_names, values = list(trial.params.keys()), list(trial.params.values())
-            indices = [prm_names.index(seq) for seq in self.prm_name_seq]
-            sorted_values = [values[idx] for idx in indices]
-            normalized_values = (np.array(sorted_values).astype(float) - self.bounds[0]) / (self.bounds[1] - self.bounds[0])
-
-            # すべての非線形拘束について
-            for cns in self.nonlinear_inequality_constraints:
-                # ひとつでも拘束を満たしていなければ初期値提案の処理を抜ける
-                f: ConvertedConstraintFunction = cns[0]
-                if f(normalized_values) < 0:
-                    break
-            else:
-                batch_initial_conditions_feasible.append([normalized_values])
+                    batch_initial_conditions_feasible.append([normalized_values])
 
         # もしここで feasible なものがなければ、どうしようもない
         if len(batch_initial_conditions_feasible) == 0:
             raise RuntimeError("candidate 探索のための拘束を満たす初期値を提案できませんでした。")
+
+        end = time()
+
+        print(f'DEBUG: generate_initial_conditions: {int(end-start)} sec')
 
         return torch.tensor(np.array(batch_initial_conditions_feasible)).double()
 
