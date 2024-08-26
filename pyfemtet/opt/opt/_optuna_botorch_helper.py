@@ -77,7 +77,7 @@ class AcqWithConstraint(AcquisitionFunction):
         self._nonlinear_constraints = nonlinear_constraints
 
     def forward(self, X: Tensor) -> Tensor:
-        base = self.org_acq_function.forward(X)
+        base = self._org_acq_function.forward(X)
 
         is_feasible = all([cons(X[0][0]) > 0 for cons, _ in self._nonlinear_constraints])
         if is_feasible:
@@ -136,7 +136,7 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
             nonlinear_inequality_constraints=self.nonlinear_inequality_constraints
         )
 
-    def detect_prm_seq_if_needed(self):
+    def _detect_prm_seq_if_needed(self):
         # study から distribution の情報を復元する。
         if self.bounds is None or self.prm_name_seq is None:
             from optuna._transform import _transform_search_space
@@ -150,7 +150,7 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
                 cns[0].prm_name_seq = self.prm_name_seq
 
     def generate_initial_conditions(self, *args, **kwargs):
-        self.detect_prm_seq_if_needed()
+        self._detect_prm_seq_if_needed()
 
         # acqf_function を 上書きし、拘束を満たさないならば 0 を返すようにする
         org_acq_function = kwargs['acq_function']
