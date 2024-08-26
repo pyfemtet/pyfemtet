@@ -9,8 +9,8 @@ from torch import Tensor
 from botorch.optim.initializers import gen_batch_initial_conditions
 from botorch.utils.transforms import unnormalize
 from optuna.study import Study
+from botorch.acquisition import AcquisitionFunction
 
-from pyfemtet.opt._femopt_core import History
 from pyfemtet.opt.opt import AbstractOptimizer
 from pyfemtet.opt.parameter import ExpressionEvaluator
 
@@ -18,6 +18,7 @@ from pyfemtet.opt.parameter import ExpressionEvaluator
 import optuna_integration
 
 
+# モンキーパッチを実行するため、optimize_acqf の引数を MonkyPatch クラスで定義し optuna に上書きされないようにするためのクラス
 class NonOverwritablePartial(partial):
     def __call__(self, /, *args, **keywords):
         stored_kwargs = self.keywords
@@ -25,6 +26,7 @@ class NonOverwritablePartial(partial):
         return self.func(*self.args, *args, **keywords)
 
 
+# prm_name を引数に取る関数を optimize_acqf の nonlinear_inequality_constraints に入れられる形に変換する関数
 class ConvertedConstraintFunction:
     def __init__(self, fun, prm_args, kwargs, variables: ExpressionEvaluator, study: optuna.study.Study):
         self.fun = fun
@@ -66,26 +68,51 @@ class ConvertedConstraintFunction:
         return self.fun(**kwargs)
 
 
+# 与えられた獲得関数に拘束を満たさない場合 0 を返すよう加工された獲得関数
+class AcqWithConstraint(AcquisitionFunction):
+
+    # noinspection PyAttributeOutsideInit
+    def set(self, _org_acq_function: AcquisitionFunction, nonlinear_constraints):
+        self._org_acq_function = _org_acq_function
+        self._nonlinear_constraints = nonlinear_constraints
+
+    def forward(self, X: Tensor) -> Tensor:
+        base = self.org_acq_function.forward(X)
+
+        is_feasible = all([cons(X[0][0]) > 0 for cons, _ in self._nonlinear_constraints])
+        if is_feasible:
+            return base
+        else:
+            # penalty = torch.Tensor(size=base.shape)
+            # penalty = torch.fill(penalty, -1e10)
+            # return base * penalty
+            return base * 0.
+
+
+def remove_infeasible(_ic_batch, nonlinear_constraints):
+    # infeasible なものを削除
+    remove_indices = []
+    for i, ic in enumerate(_ic_batch):  # ic: 1 x len(params) tensor
+        # cons: Callable[["Tensor"], "Tensor"]
+        is_feasible = all([cons(ic[0]) > 0 for cons, _ in nonlinear_constraints])
+        if not is_feasible:
+            # ic_batch[i] = torch.nan  # これで無視にならない
+            remove_indices.append(i)
+    for i in remove_indices[::-1]:
+        _ic_batch = torch.cat((_ic_batch[:i], _ic_batch[i + 1:]))
+    return _ic_batch
+
+
 class OptunaBotorchWithParameterConstraintMonkeyPatch:
 
-    def __init__(
-            self,
-            study: Study,
-            opt: AbstractOptimizer,
-            inequality_constraints: Optional[List[Tuple[Tensor, Tensor, float]]] = None,
-            equality_constraints: Optional[List[Tuple[Tensor, Tensor, float]]] = None,
-            nonlinear_inequality_constraints: Optional[List[Tuple[Callable, bool]]] = None,
-    ):
+    def __init__(self, study: Study, opt: AbstractOptimizer):
+        self.num_restarts: int = 20
+        self.raw_samples_additional: int = 512
+        self.eta: float = 2.0
         self.study = study
         self.opt = opt
-        self.nonlinear_inequality_constraints = nonlinear_inequality_constraints
-        self.additional_kwargs = dict(
-            q=1,
-            inequality_constraints=inequality_constraints,
-            equality_constraints=equality_constraints,
-            nonlinear_inequality_constraints=nonlinear_inequality_constraints,
-            ic_generator=self.generate_initial_conditions,
-        )
+        self.nonlinear_inequality_constraints = []
+        self.additional_kwargs = dict()
         self.bounds = None
         self.prm_name_seq = None
 
@@ -122,78 +149,32 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
                 cns[0].bounds = torch.tensor(self.bounds)
                 cns[0].prm_name_seq = self.prm_name_seq
 
-    def generate_initial_conditions(
-        self,
-        *args,
-        **kwargs,
-    ):
-        from time import time
-        start = time()
-
-        batch_initial_conditions_feasible = []
-
+    def generate_initial_conditions(self, *args, **kwargs):
         self.detect_prm_seq_if_needed()
 
-        if len(batch_initial_conditions_feasible) == 0:
+        # acqf_function を 上書きし、拘束を満たさないならば 0 を返すようにする
+        org_acq_function = kwargs['acq_function']
+        new_acqf = AcqWithConstraint(None)
+        new_acqf.set(org_acq_function, self.nonlinear_inequality_constraints)
+        kwargs['acq_function'] = new_acqf
 
-            # n 回 batch_initial_conditions を行い、feasible のもののみ抽出
-            counter = 0
-            n = 1
-            start2 = time()
-            # print(kwargs)
-            # print(len(self.prm_name_seq))
-            num_restarts = max(20, len(self.prm_name_seq))  # デフォルトである 20 以上
-            num_random_points_before_concider_heuristic = max(num_restarts, 0)  # 関数が num_restarts 以上を必要とする。デフォルト 1024 は多すぎる。
-            kwargs.update(dict(num_restarts=num_restarts))  # 20
-            kwargs.update(dict(raw_samples=num_random_points_before_concider_heuristic))  # 1024
-            batch_initial_conditions = gen_batch_initial_conditions(*args, **kwargs)
-            print(f'  DEBUG: batch_initial_conditions: {int(time() - start2)} sec')
-            while True:
-                counter += 1
-                if counter > n:
-                    break
+        # initial condition の提案 batch を作成
+        # ic: `num_restarts x q x d` tensor of initial conditions.
+        # q = 1, d = len(params)
+        ic_batch = gen_batch_initial_conditions(*args, **kwargs)
 
-                # 各初期値提案について
-                for ic_candidate in batch_initial_conditions:
-                    # すべての非線形拘束について
-                    for cns in self.nonlinear_inequality_constraints:
-                        # ひとつでも拘束を満たしていなければ初期値提案の処理を抜ける
-                        f: ConvertedConstraintFunction = cns[0]
-                        if f(*ic_candidate) < 0:
-                            break
-                    else:
-                        # 初期値提案がすべての非線形拘束を満たしたら feasible に入れる
-                        batch_initial_conditions_feasible.append(ic_candidate.numpy())
+        # 拘束を満たさないものを削除
+        ic_batch = remove_infeasible(ic_batch, self.nonlinear_inequality_constraints)
 
-        if len(batch_initial_conditions_feasible) == 0:
+        # 全部なくなっているならばランダムに生成
+        if len(ic_batch) == 0:
+            print('拘束を満たす組み合わせがなかったのでランダムサンプリングします')
+        while len(ic_batch) == 0:
+            size = ic_batch.shape
+            ic_batch = torch.rand(size=[100, *size[1:]])  # 正規化された変数の組合せ
+            ic_batch = remove_infeasible(ic_batch, self.nonlinear_inequality_constraints)
 
-            # study の履歴から initial conditions を作成。
-            # 内部で acquisition function が更新されるので同じ値が提案されてもよい
-            for trial in self.study.best_trials:
-                # BoTorchSampler 内部実装の並びと trial.params の並びは一致しないので並び替える
-                prm_names, values = list(trial.params.keys()), list(trial.params.values())
-                indices = [prm_names.index(seq) for seq in self.prm_name_seq]
-                sorted_values = [values[idx] for idx in indices]
-                normalized_values = (np.array(sorted_values).astype(float) - self.bounds[0]) / (self.bounds[1] - self.bounds[0])
-
-                # すべての非線形拘束について
-                for cns in self.nonlinear_inequality_constraints:
-                    # ひとつでも拘束を満たしていなければ初期値提案の処理を抜ける
-                    f: ConvertedConstraintFunction = cns[0]
-                    if f(normalized_values) < 0:
-                        break
-                else:
-                    batch_initial_conditions_feasible.append([normalized_values])
-
-        # もしここで feasible なものがなければ、どうしようもない
-        if len(batch_initial_conditions_feasible) == 0:
-            raise RuntimeError("candidate 探索のための拘束を満たす初期値を提案できませんでした。")
-
-        end = time()
-
-        print(f'DEBUG: generate_initial_conditions: {int(end-start)} sec')
-
-        return torch.tensor(np.array(batch_initial_conditions_feasible)).double()
+        return ic_batch
 
     def do_monkey_patch(self):
         """optuna_integration.botorch には optimize_acqf に constraints を渡す方法が用意されていないので、モンキーパッチして渡す
@@ -204,20 +185,25 @@ class OptunaBotorchWithParameterConstraintMonkeyPatch:
 
         """
 
-        # reconstruct argument ``options`` for optimize_acqf
+        # === reconstruct argument ``options`` for optimize_acqf ===
         options = dict()  # initialize
 
         # for nonlinear-constraint
         options.update(dict(batch_limit=1))
 
         # for gen_candidates_scipy()
-        options.update(dict(method='SLSQP'))  # use COBYLA instead of SLSQP. This is the only method that can process dict format constraints. COBYLA is a bit stable but slow
+        # use COBYLA or SLSQP only.
+        options.update(dict(method='SLSQP'))
 
         # make partial of optimize_acqf used in optuna_integration.botorch and replace to it.
         original_fun = optuna_integration.botorch.optimize_acqf
         overwritten_fun = NonOverwritablePartial(
             original_fun,
+            q=1,  # for nonlinear constraints
             options=options,
-            **self.additional_kwargs,
+            num_restarts=20,  # gen_batch_initial_conditions に渡すべきで、self.generate_initial_conditions に渡される変数。
+            raw_samples=512,  # gen_batch_initial_conditions に渡すべきで、self.generate_initial_conditions に渡される変数。
+            nonlinear_inequality_constraints=self.nonlinear_inequality_constraints,
+            ic_generator=self.generate_initial_conditions,
         )
         optuna_integration.botorch.optimize_acqf = overwritten_fun
