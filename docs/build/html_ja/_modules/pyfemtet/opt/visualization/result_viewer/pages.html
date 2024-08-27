@@ -94,8 +94,11 @@
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.main_graph</span> <span class="kn">import</span> <span class="n">MainGraph</span>  <span class="c1"># , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.control_femtet</span> <span class="kn">import</span> <span class="n">FemtetControl</span><span class="p">,</span> <span class="n">FemtetState</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.alert_region</span> <span class="kn">import</span> <span class="n">AlertRegion</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components.pm_graph</span> <span class="kn">import</span> <span class="n">PredictionModelGraph</span>
 
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">History</span>
+
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <div class="viewcode-block" id="HomePage">
@@ -126,7 +129,7 @@
 
         <span class="c1"># open pdt (or transfer variable to femtet)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
-            <span class="s1">&#39;Open Result in Femtet&#39;</span><span class="p">,</span>
+            <span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_OPEN_PDT_BUTTON</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;open-pdt-button&#39;</span><span class="p">,</span>
             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;primary&#39;</span><span class="p">,</span>
             <span class="n">className</span><span class="o">=</span><span class="s2">&quot;position-relative&quot;</span><span class="p">,</span>  <span class="c1"># need to show badge</span>
@@ -134,14 +137,14 @@
 
         <span class="c1"># update parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_parameter_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
-            <span class="s1">&#39;Reconstruct Model&#39;</span><span class="p">,</span>
+            <span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_RECONSTRUCT_MODEL_BUTTON</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;update-parameter-button&#39;</span><span class="p">,</span>
             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;secondary&#39;</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># file picker</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
-            <span class="s1">&#39;drag and drop or select files&#39;</span><span class="p">,</span>
+            <span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_FILE_PICKER</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;file-picker-button&#39;</span><span class="p">,</span>
             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;primary&#39;</span><span class="p">,</span>
         <span class="p">)</span>
@@ -213,7 +216,7 @@
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_picker_button</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">children</span><span class="p">),</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">active_tab</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">n_clicks</span><span class="p">),</span>  <span class="c1"># automatically connect to femtet if the metadata of csv is valid</span>
+            <span class="c1"># Output(self.femtet_control.connect_femtet_button.id, self.femtet_control.connect_femtet_button.Prop.n_clicks),  # automatically connect to femtet is now deprecated because use view-only without femtet license</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">contents</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_picker</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">active_tab</span><span class="p">),</span>
@@ -225,7 +228,7 @@
             <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;current file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;current file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">no_update</span>
 
             <span class="k">if</span> <span class="n">encoded_file_content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">PreventUpdate</span>
@@ -242,7 +245,7 @@
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_content</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">csv_path</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;current file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">active_tab_id</span><span class="p">,</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;current file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">active_tab_id</span>
 
         <span class="c1"># ===== open pdt =====</span>
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
@@ -258,14 +261,13 @@
             <span class="c1"># check Femtet state</span>
             <span class="n">connection_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">check_femtet_state</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">connection_state</span> <span class="o">==</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">missing</span> <span class="ow">or</span> <span class="n">connection_state</span> <span class="o">==</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">unconnected</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Connection to Femtet is not established. &#39;</span>
-                       <span class="s1">&#39;Launch Femtet and Open a project.&#39;</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_CONNECTION_ESTABLISHED</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">alerts</span>
 
             <span class="c1"># check selection</span>
             <span class="k">if</span> <span class="n">selection_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No result plot is selected.&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_SOLUTION_SELECTED</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">alerts</span>
 
@@ -276,12 +278,12 @@
 
             <span class="c1"># check metadata is valid</span>
             <span class="k">if</span> <span class="n">femprj_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The femprj file path in the history csv is not found or valid. &#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FEMPRJ_IN_CSV_NOT_FOUND</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">alerts</span>
 
             <span class="k">if</span> <span class="n">model_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The model name in the history csv is not found.&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_MODEL_IN_CSV_NOT_FOUND</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">alerts</span>
 
@@ -307,7 +309,7 @@
             <span class="n">succeed</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">OpenPDT</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">succeed</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Failed to open </span><span class="si">{</span><span class="n">pdt_path</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_OPEN_PREFIX</span> <span class="o">+</span> <span class="n">pdt_path</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">alerts</span>
 
@@ -326,27 +328,23 @@
             <span class="c1"># check Femtet state</span>
             <span class="n">connection_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">check_femtet_state</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">connection_state</span> <span class="o">!=</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">connected</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Connection to Femtet is not established. &#39;</span>
-                       <span class="s1">&#39;Launch Femtet and Open a project.&#39;</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_CONNECTION_ESTABLISHED</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">alerts</span>
 
             <span class="c1"># check selection</span>
             <span class="k">if</span> <span class="n">selection_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No result plot is selected.&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_SOLUTION_SELECTED</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">alerts</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">Femtet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">Femtet</span>
 
-
                 <span class="c1"># check model to open is included in current project</span>
                 <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">femprj_path</span> <span class="o">!=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Project</span><span class="p">)</span> \
                         <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetAnalysisModelNames_py</span><span class="p">()):</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> is not in current project. &#39;</span>
-                           <span class="sa">f</span><span class="s1">&#39;Please check opened project. &#39;</span>
-                           <span class="sa">f</span><span class="s1">&#39;For example, not &quot;analysis model only&quot; but your .femprj file.&#39;</span><span class="p">)</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_SUCH_MODEL_IN_FEMPRJ</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; model name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s1">&#39;</span>
                     <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
                     <span class="k">return</span> <span class="n">alerts</span>
 
@@ -451,19 +449,19 @@
             <span class="c1"># alert</span>
             <span class="n">new_alerts</span> <span class="o">=</span> <span class="n">current_alerts</span>
             <span class="k">if</span> <span class="n">femprj_path_history_on_history</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;.femprj file path of the history csv is invalid. Please certify matching between csv and opening .femprj file.&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_INCONSISTENT_FEMPRJ_PATH</span>
                 <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_femprj</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;.femprj file path of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and .femprj file.&#39;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_INCONSISTENT_FEMPRJ_PATH</span>
                     <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">model_name_on_history</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Analysis model name of the history csv is invalid. Please certify matching between csv and opening analysis model.&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_INVALID_MODEL_NAME</span>
                 <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_model</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Analysis model name of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and opening analysis model.&#39;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WARN_INCONSISTENT_MODEL_NAME</span>
                     <span class="n">new_alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">new_alerts</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">new_alerts</span> <span class="o">==</span> <span class="n">current_alerts</span><span class="p">:</span>
@@ -503,7 +501,7 @@
 
         <span class="c1"># switch tutorial mode (always visible)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tutorial_mode_switch</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Checklist</span><span class="p">(</span>
-            <span class="p">[</span><span class="s1">&#39;tutorial mode&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_TUTORIAL_MODE_SWITCH</span><span class="p">],</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;tutorial-mode-switch&#39;</span><span class="p">,</span>
             <span class="n">switch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">value</span><span class="o">=</span><span class="kc">False</span>
@@ -512,17 +510,14 @@
         <span class="c1"># load sample csv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_badge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_badge</span><span class="p">(</span><span class="s1">&#39;Click Me!&#39;</span><span class="p">,</span> <span class="s1">&#39;load-sample-csv-badge&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_button</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
-            <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Load sample csv&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_badge</span><span class="p">],</span>
+            <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_LOAD_SAMPLE_CSV</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_badge</span><span class="p">],</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;load-sample-csv-button&#39;</span><span class="p">,</span>
             <span class="n">className</span><span class="o">=</span><span class="s2">&quot;position-relative&quot;</span><span class="p">,</span>  <span class="c1"># need to show badge</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_popover</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Popover</span><span class="p">(</span>
             <span class="n">children</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverHeader</span><span class="p">(</span><span class="s1">&#39;Load CSV&#39;</span><span class="p">),</span>
-                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverBody</span><span class="p">(</span>
-                    <span class="s1">&#39;Open your optimization result. Then connecting to femtet will start automatically. &#39;</span>
-                    <span class="s1">&#39;Note that in tutorial mode, this button loads the ready-made sample csv and open sample femprj.&#39;</span>
-                <span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverHeader</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">LOAD_CSV_POPOVER_HEADER</span><span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverBody</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">LOAD_CSV_POPOVER_BODY</span><span class="p">),</span>
             <span class="p">],</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;load-sample-csv-popover&#39;</span><span class="p">,</span>
             <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
@@ -539,12 +534,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">graph_badge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_badge</span><span class="p">(</span><span class="s1">&#39;Choose a Point!&#39;</span><span class="p">,</span> <span class="s1">&#39;graph-badge&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">graph_popover</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Popover</span><span class="p">(</span>
             <span class="n">children</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverHeader</span><span class="p">(</span><span class="s1">&#39;Main Graph&#39;</span><span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverHeader</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">MAIN_GRAPH_POPOVER_HEADER</span><span class="p">),</span>
                 <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverBody</span><span class="p">(</span>
                     <span class="n">children</span><span class="o">=</span><span class="p">[</span>
-                        <span class="s1">&#39;Here the optimization history is shown. &#39;</span>
-                        <span class="s1">&#39;Each plot represents single FEM result. &#39;</span>
-                        <span class="s1">&#39;You can pick a result to open the corresponding result in Femtet. &#39;</span><span class="p">,</span>
+                        <span class="n">Msg</span><span class="o">.</span><span class="n">MAIN_GRAPH_POPOVER_BODY</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">graph_badge</span>
                     <span class="p">],</span>
                     <span class="n">className</span><span class="o">=</span><span class="s2">&quot;position-relative&quot;</span><span class="p">,</span>  <span class="c1"># need to show badge</span>
@@ -554,34 +547,33 @@
             <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="n">is_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
+            <span class="n">hide_arrow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># popover and badge of open pdt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_badge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_badge</span><span class="p">(</span><span class="s1">&#39;Click Me!&#39;</span><span class="p">,</span> <span class="s1">&#39;open-pdt-badge&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_popover</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Popover</span><span class="p">(</span>
             <span class="n">children</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverHeader</span><span class="p">(</span><span class="s1">&#39;Open Result&#39;</span><span class="p">),</span>
-                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverBody</span><span class="p">(</span>
-                    <span class="s1">&#39;After pick a point in the main graph, &#39;</span>
-                    <span class="s1">&#39;This button shows the corresponding FEM result in Femtet.&#39;</span>
-                <span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverHeader</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">OPEN_PDT_POPOVER_HEADER</span><span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverBody</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">OPEN_PDT_POPOVER_BODY</span><span class="p">),</span>
             <span class="p">],</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;open-pdt-popover&#39;</span><span class="p">,</span>
             <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">open_pdt_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="n">is_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
         <span class="p">)</span>
+
         <span class="c1"># popover of connect-femtet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_badge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_badge</span><span class="p">(</span><span class="s1">&#39;Click Me!&#39;</span><span class="p">,</span> <span class="s1">&#39;connect-femtet-badge&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_popover</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Popover</span><span class="p">(</span>
             <span class="n">children</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverBody</span><span class="p">(</span><span class="s1">&#39;You can re-make connection to Femtet if it misses.&#39;</span><span class="p">),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">PopoverBody</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">CONNECT_FEMTET_POPOVER_BODY</span><span class="p">),</span>
             <span class="p">],</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;connect-femtet-popover&#39;</span><span class="p">,</span>
             <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="n">is_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
         <span class="p">)</span></div>
-
 
 
 <div class="viewcode-block" id="Tutorial.setup_layout">
@@ -595,18 +587,27 @@
     <span class="k">def</span> <span class="nf">setup_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">app</span>
 
-
+        <span class="c1"># ===== add tutorial badge to subpage&#39;s components =====</span>
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">open_pdt_button</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">pathname</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">open_pdt_button</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
-            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">def</span> <span class="nf">add_badge_to_button_init</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">current_children</span><span class="p">):</span>
-            <span class="n">children</span> <span class="o">=</span> <span class="n">current_children</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current_children</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">current_children</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_badge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-                <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_badge</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">children</span>
+        <span class="k">def</span> <span class="nf">add_badge_to_button_init</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">current_children_pdt</span><span class="p">,</span> <span class="n">current_children_femtet</span><span class="p">):</span>
+            <span class="c1"># open pdt button</span>
+            <span class="n">children_pdt</span> <span class="o">=</span> <span class="n">current_children_pdt</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current_children_pdt</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">current_children_pdt</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_badge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">children_pdt</span><span class="p">:</span>
+                <span class="n">children_pdt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_badge</span><span class="p">)</span>
+
+            <span class="c1"># connect femtet button</span>
+            <span class="n">children_femtet</span> <span class="o">=</span> <span class="n">current_children_femtet</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current_children_femtet</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">current_children_femtet</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_badge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">children_femtet</span><span class="p">:</span>
+                <span class="n">children_femtet</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_badge</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">children_pdt</span><span class="p">,</span> <span class="n">children_femtet</span>
 
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_badge</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
@@ -618,6 +619,7 @@
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_badge</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_popover</span><span class="p">,</span> <span class="s1">&#39;is_open&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_popover</span><span class="p">,</span> <span class="s1">&#39;is_open&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_badge</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tutorial_mode_switch</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_button</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>  <span class="c1"># load button clicked</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data_property</span><span class="p">),</span>  <span class="c1"># selection changed</span>
@@ -627,6 +629,7 @@
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">file_picker</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph_badge</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pdt_badge</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_femtet_badge</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
             <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">def</span> <span class="nf">control_visibility</span><span class="p">(</span>
@@ -639,6 +642,7 @@
                 <span class="n">file_picker_current_style</span><span class="p">,</span>
                 <span class="n">graph_badge_current_style</span><span class="p">,</span>
                 <span class="n">open_pdt_badge_current_style</span><span class="p">,</span>
+                <span class="n">connect_femtet_badge_current_style</span><span class="p">,</span>
         <span class="p">):</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="p">(</span><span class="n">load_sample_csv_badge_style</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">):</span> <span class="n">no_update</span><span class="p">,</span>
@@ -650,6 +654,7 @@
                 <span class="p">(</span><span class="n">open_pdt_badge_style</span> <span class="o">:=</span> <span class="mi">6</span><span class="p">):</span> <span class="n">no_update</span><span class="p">,</span>
                 <span class="p">(</span><span class="n">open_pdt_popover_visible</span> <span class="o">:=</span> <span class="mi">7</span><span class="p">):</span> <span class="n">no_update</span><span class="p">,</span>
                 <span class="p">(</span><span class="n">connect_femtet_popover_visible</span> <span class="o">:=</span> <span class="mi">8</span><span class="p">):</span> <span class="n">no_update</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">connect_femtet_badge_style</span> <span class="o">:=</span> <span class="mi">9</span><span class="p">):</span> <span class="n">no_update</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="c1"># prevent unexpected update</span>
@@ -668,6 +673,7 @@
             <span class="n">ret</span><span class="p">[</span><span class="n">open_pdt_badge_style</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_by_style</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">open_pdt_badge_current_style</span><span class="p">)</span>
             <span class="n">ret</span><span class="p">[</span><span class="n">open_pdt_popover_visible</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="p">[</span><span class="n">connect_femtet_popover_visible</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">connect_femtet_badge_style</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_by_style</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">connect_femtet_badge_current_style</span><span class="p">)</span>
 
             <span class="c1"># if not tutorial, disable all anyway</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_tutorial</span><span class="p">:</span>
@@ -691,12 +697,25 @@
 
             <span class="c1"># if history is not None,</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># if a point is already selected, show badge to open-pdt</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=====&#39;</span><span class="p">)</span>
+                <span class="c1"># if a point is already selected, show badge to open-pdt or connect-femtet</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_point_selected</span><span class="p">(</span><span class="n">selection_data</span><span class="p">):</span>
-                    <span class="n">ret</span><span class="p">[</span><span class="n">open_pdt_badge_style</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_by_style</span><span class="p">(</span>
-                        <span class="kc">True</span><span class="p">,</span>
-                        <span class="n">open_pdt_badge_current_style</span><span class="p">,</span>
-                    <span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="c1"># if femtet is connected, show badge to open-pdt</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">check_femtet_state</span><span class="p">()</span> <span class="ow">is</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">connected</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                        <span class="n">ret</span><span class="p">[</span><span class="n">open_pdt_badge_style</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_by_style</span><span class="p">(</span>
+                            <span class="kc">True</span><span class="p">,</span>
+                            <span class="n">open_pdt_badge_current_style</span><span class="p">,</span>
+                        <span class="p">)</span>
+
+                    <span class="c1"># else, show femtet-connect badge</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;3&#39;</span><span class="p">)</span>
+                        <span class="n">ret</span><span class="p">[</span><span class="n">connect_femtet_badge_style</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_by_style</span><span class="p">(</span>
+                            <span class="kc">True</span><span class="p">,</span>
+                            <span class="n">connect_femtet_badge_current_style</span><span class="p">,</span>
+                        <span class="p">)</span>
 
                 <span class="c1"># selection not yet, show badge to main-graph</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -713,7 +732,7 @@
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">active_tab</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_input_dummy</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
-            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">connect_femtet_button</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="c1"># Output(self.femtet_control.connect_femtet_button, &#39;n_clicks&#39;, allow_duplicate=True),  # automatically open femtet is now deprecated because enable to use analytical functions without using license.</span>
             <span class="n">Output</span><span class="p">(</span><span class="n">alert_region</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_button</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">Prop</span><span class="o">.</span><span class="n">active_tab</span><span class="p">),</span>
@@ -725,28 +744,34 @@
             <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">PreventUpdate</span>
 
-            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial.csv&#39;</span><span class="p">)</span>
+            <span class="c1"># get sample file</span>
+            <span class="kn">import</span> <span class="nn">pyfemtet</span>
+            <span class="n">package_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pyfemtet</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
+            <span class="n">sample_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_root</span><span class="p">,</span> <span class="s1">&#39;opt&#39;</span><span class="p">,</span> <span class="s1">&#39;femprj_sample&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: locale によってパスを変える</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_dir</span><span class="p">,</span> <span class="s1">&#39;wat_ex14_parametric_test_result.reccsv&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_SAMPLE_CSV_NOT_FOUND</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">alerts</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">alerts</span>
+            <span class="n">destination_file</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;wat_ex14_parametric_test_result.reccsv&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial.csv&#39;</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">destination_file</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">destination_file</span><span class="p">)</span>
 
-            <span class="n">source_file</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;tutorial.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;wat_ex14_parametric.femprj&#39;</span><span class="p">)</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_test_result.reccsv&#39;</span><span class="p">,</span> <span class="s1">&#39;.femprj&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">source_file</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_SAMPLE_FEMPRJ_NOT_FOUND</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">alerts</span>
-            <span class="n">destination_file</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;tutorial.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial.femprj&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">alerts</span>
+            <span class="n">destination_file</span> <span class="o">=</span> <span class="n">source_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;wat_ex14_parametric&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial&#39;</span><span class="p">)</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">source_file</span><span class="p">,</span> <span class="n">destination_file</span><span class="p">)</span>
 
-            <span class="n">source_folder</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;tutorial.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;wat_ex14_parametric.Results&#39;</span><span class="p">)</span>
+            <span class="n">source_folder</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_test_result.reccsv&#39;</span><span class="p">,</span> <span class="s1">&#39;.Results&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">source_file</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FEMPRJ_RESULT_NOT_FOUND</span>
                 <span class="n">alerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">home_page</span><span class="o">.</span><span class="n">alert_region</span><span class="o">.</span><span class="n">create_alerts</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;danger&#39;</span><span class="p">,</span> <span class="n">current_alerts</span><span class="o">=</span><span class="n">current_alerts</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">alerts</span>
-            <span class="n">destination_folder</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;tutorial.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial.Results&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">no_update</span><span class="p">,</span> <span class="n">alerts</span>
+            <span class="n">destination_folder</span> <span class="o">=</span> <span class="n">source_folder</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;wat_ex14_parametric&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial&#39;</span><span class="p">)</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">source_folder</span><span class="p">,</span> <span class="n">destination_folder</span><span class="p">,</span> <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
@@ -756,7 +781,7 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">active_tab</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">no_update</span></div>
+            <span class="k">return</span> <span class="n">active_tab</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">no_update</span></div>
 
 
 <div class="viewcode-block" id="Tutorial.check_point_selected">
@@ -800,6 +825,31 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">current_style</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">current_style</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PredictionModelPage">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.pages.PredictionModelPage">[ドキュメント]</a>
+<span class="k">class</span> <span class="nc">PredictionModelPage</span><span class="p">(</span><span class="n">AbstractPage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">rel_url</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.application</span> <span class="kn">import</span> <span class="n">ProcessMonitorApplication</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">:</span> <span class="n">ProcessMonitorApplication</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">rel_url</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PredictionModelPage.setup_component">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.pages.PredictionModelPage.setup_component">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">setup_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rsm_graph</span><span class="p">:</span> <span class="n">PredictionModelGraph</span> <span class="o">=</span> <span class="n">PredictionModelGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_subpage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rsm_graph</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PredictionModelPage.setup_layout">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.pages.PredictionModelPage.setup_layout">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">setup_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rsm_graph</span><span class="o">.</span><span class="n">layout</span></div>
 </div>
 
 </pre></div>

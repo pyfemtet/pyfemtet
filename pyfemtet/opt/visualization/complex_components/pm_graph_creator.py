@@ -183,4 +183,11 @@ class PredictionModelCreator:
                 )
             )
 
+            # layout
+            fig.update_layout(
+                title=Msg.GRAPH_TITLE_PREDICTION_MODEL,
+                xaxis_title=prm_name_1,
+                yaxis_title=obj_name,
+            )
+
         return fig

@@ -101,6 +101,7 @@
 
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.complex_components</span> <span class="kn">import</span> <span class="n">main_figure_creator</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span><span class="p">,</span> <span class="n">AbstractPage</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <span class="n">FLEXBOX_STYLE_ALLOW_VERTICAL_FILL</span> <span class="o">=</span> <span class="p">{</span>
@@ -143,12 +144,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">figure_creators</span> <span class="o">=</span> <span class="p">[</span>
             <span class="nb">dict</span><span class="p">(</span>
                 <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;tab-objective-plot&#39;</span><span class="p">,</span>
-                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;objectives&#39;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">TAB_LABEL_OBJECTIVES</span><span class="p">,</span>
                 <span class="n">creator</span><span class="o">=</span><span class="n">main_figure_creator</span><span class="o">.</span><span class="n">get_default_figure</span><span class="p">,</span>
             <span class="p">),</span>
             <span class="nb">dict</span><span class="p">(</span>
                 <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;tab-hypervolume-plot&#39;</span><span class="p">,</span>
-                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;hypervolume&#39;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Hypervolume&#39;</span><span class="p">,</span>
                 <span class="n">creator</span><span class="o">=</span><span class="n">main_figure_creator</span><span class="o">.</span><span class="n">get_hypervolume_plot</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">]</span></div>
@@ -239,8 +240,6 @@
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dummy</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
             <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">False</span><span class="p">,)</span>
         <span class="k">def</span> <span class="nf">redraw_main_graph</span><span class="p">(</span><span class="n">active_tab_id</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;====================&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;redraw_main_graph called by </span><span class="si">{</span><span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">figure</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fig_by_tab_id</span><span class="p">(</span><span class="n">active_tab_id</span><span class="p">,</span> <span class="n">with_length</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">figure</span><span class="p">,</span> <span class="n">length</span>
 

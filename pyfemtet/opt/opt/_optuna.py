@@ -161,7 +161,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
             # restart である場合、追加 N 回と見做す
             if self.history.is_restart:
-                n_existing_trials = len(self.history.actor_data)
+                n_existing_trials = len(self.history.get_df())
                 n_trials += n_existing_trials
 
             self.optimize_callbacks.append(MaxTrialsCallback(n_trials, states=(TrialState.COMPLETE,)))

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.message package &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="pyfemtet.opt package" href="pyfemtet.opt.html" />
+    <link rel="prev" title="pyfemtet package" href="pyfemtet.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">使い方</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">pyfemtet</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.core">pyfemtet.core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.dispatch_extensions">pyfemtet.dispatch_extensions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.logger">pyfemtet.logger module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../pages/api.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyfemtet</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet package</a></li>
+      <li class="breadcrumb-item active">pyfemtet.message package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/pyfemtet.message.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pyfemtet-message-package">
+<h1>pyfemtet.message package<a class="headerlink" href="#pyfemtet-message-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-pyfemtet.message.messages">
+<span id="pyfemtet-message-messages-module"></span><h2>pyfemtet.message.messages module<a class="headerlink" href="#module-pyfemtet.message.messages" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.message.messages.</span></span><span class="sig-name descname"><span class="pre">Message</span></span><a class="reference internal" href="../_modules/pyfemtet/message/messages.html#Message"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.message.messages.Message" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.CERTIFY_MACRO_VERSION">
+<span class="sig-name descname"><span class="pre">CERTIFY_MACRO_VERSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'マクロのバージョンがインストールされている</span> <span class="pre">Femtet</span> <span class="pre">のバージョンと異なる可能性があります。利用中の</span> <span class="pre">Femtet</span> <span class="pre">のバージョンのフォルダに含まれる「マクロ機能を有効化する」コマンドを管理者権限で実行してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.CERTIFY_MACRO_VERSION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.CONNECT_FEMTET_POPOVER_BODY">
+<span class="sig-name descname"><span class="pre">CONNECT_FEMTET_POPOVER_BODY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'手動で</span> <span class="pre">Femtet</span> <span class="pre">と接続します。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.CONNECT_FEMTET_POPOVER_BODY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DEFAULT_STATUS_ALERT">
+<span class="sig-name descname"><span class="pre">DEFAULT_STATUS_ALERT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適化の状態がここに表示されます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DEFAULT_STATUS_ALERT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ENTER_TO_QUIT">
+<span class="sig-name descname"><span class="pre">ENTER_TO_QUIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'終了するには</span> <span class="pre">Enter</span> <span class="pre">を押してください...'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ENTER_TO_QUIT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_CANNOT_ACCESS_API">
+<span class="sig-name descname"><span class="pre">ERR_CANNOT_ACCESS_API</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'以下の</span> <span class="pre">API</span> <span class="pre">にアクセスできませんでした。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_CANNOT_ACCESS_API" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_CANNOT_ENCODING">
+<span class="sig-name descname"><span class="pre">ERR_CANNOT_ENCODING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'変数名、目的関数名、または拘束関数名にエンコードできない文字が含まれています。環境依存の文字は使用しないでください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_CANNOT_ENCODING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_CANNOT_SELECT_SAME_PARAMETER">
+<span class="sig-name descname"><span class="pre">ERR_CANNOT_SELECT_SAME_PARAMETER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'同じ変数を設定できません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_CANNOT_SELECT_SAME_PARAMETER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_CHECK_DIRECTION">
+<span class="sig-name descname"><span class="pre">ERR_CHECK_DIRECTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数の方向は、&quot;minimize&quot;、&quot;maximize&quot;、または数値である必要があります。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_CHECK_DIRECTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_CHECK_MINMAX">
+<span class="sig-name descname"><span class="pre">ERR_CHECK_MINMAX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'大小関係が間違っています。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_CHECK_MINMAX" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_CLOSE_FEMTET_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_CLOSE_FEMTET_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">を終了できませんでした。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_CLOSE_FEMTET_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT">
+<span class="sig-name descname"><span class="pre">ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'拘束関数は</span> <span class="pre">FEM</span> <span class="pre">解析が実行される前に評価されるため、Femtet.Gogh</span> <span class="pre">にアクセスしないでください。FEM</span> <span class="pre">解析の実行後に拘束関数を評価する場合は、`strict`</span> <span class="pre">引数を</span> <span class="pre">False</span> <span class="pre">に設定します。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FAILED_TO_OPEN_PREFIX">
+<span class="sig-name descname"><span class="pre">ERR_FAILED_TO_OPEN_PREFIX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'以下のファイルが開けません:</span> <span class="pre">'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FAILED_TO_OPEN_PREFIX" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FAILED_TO_SAVE_JPG">
+<span class="sig-name descname"><span class="pre">ERR_FAILED_TO_SAVE_JPG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'スクリーンショットの保存に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FAILED_TO_SAVE_JPG" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FAILED_TO_SAVE_PDT">
+<span class="sig-name descname"><span class="pre">ERR_FAILED_TO_SAVE_PDT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'結果（.pdt）ファイルの保存に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FAILED_TO_SAVE_PDT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FAILED_TO_UPDATE_VARIABLE">
+<span class="sig-name descname"><span class="pre">ERR_FAILED_TO_UPDATE_VARIABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'変数の更新に失敗しました:'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FAILED_TO_UPDATE_VARIABLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FEMPRJ_IN_CSV_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_FEMPRJ_IN_CSV_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">に記載の</span> <span class="pre">femprj</span> <span class="pre">ファイルが見つからないか不正です。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FEMPRJ_IN_CSV_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FEMPRJ_RESULT_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_FEMPRJ_RESULT_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'サンプル結果フォルダが見つかりませんでした。以下のコマンドで</span> <span class="pre">pyfemtet</span> <span class="pre">の再インストールを検討して下さい。</span> <span class="pre">`py</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyfemtet</span> <span class="pre">-U</span> <span class="pre">--force-reinstall`'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FEMPRJ_RESULT_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FEMTET_CONNECTION_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_FEMTET_CONNECTION_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">への接続に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FEMTET_CONNECTION_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FEMTET_CRASHED_AND_RESTART_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_FEMTET_CRASHED_AND_RESTART_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">が予期せず停止し、再起動に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FEMTET_CRASHED_AND_RESTART_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_FEM_FAILED_AND_CANNOT_CONTINUE">
+<span class="sig-name descname"><span class="pre">ERR_FEM_FAILED_AND_CANNOT_CONTINUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'現在の変数の組合せで</span> <span class="pre">FEM</span> <span class="pre">解析を行うことができません。現在の最適化手法では変数の組合せをスキップすることができません。最適化プログラムは停止されます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_FEM_FAILED_AND_CANNOT_CONTINUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_INCONSISTENT_PARAMETER">
+<span class="sig-name descname"><span class="pre">ERR_INCONSISTENT_PARAMETER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'変数の組合せが</span> <span class="pre">add_init_parameter</span> <span class="pre">で与えられた変数の組合せと一致しません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_INCONSISTENT_PARAMETER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_JPG_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_JPG_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'スクリーンショットファイルが見つかりませんでした。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_JPG_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_MODEL_IN_CSV_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_MODEL_IN_CSV_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">に記載の解析モデル名が見つかりませんでした。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_MODEL_IN_CSV_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_MODEL_MESH_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_MODEL_MESH_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'メッシュ生成に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_MODEL_MESH_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_MODEL_RECONSTRUCTION_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_MODEL_RECONSTRUCTION_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'モデル再構築に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_MODEL_RECONSTRUCTION_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_MODEL_REDRAW_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_MODEL_REDRAW_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'モデルの再描画に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_MODEL_REDRAW_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_MODEL_UPDATE_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_MODEL_UPDATE_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'モデル更新に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_MODEL_UPDATE_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NEW_FEMTET_BUT_NO_FEMPRJ">
+<span class="sig-name descname"><span class="pre">ERR_NEW_FEMTET_BUT_NO_FEMPRJ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&quot;'connect_method'</span> <span class="pre">引数に</span> <span class="pre">'new'</span> <span class="pre">をしている場合、'femprj_path'</span> <span class="pre">引数に有効な</span> <span class="pre">.femprj</span> <span class="pre">ファイルパスを指定してください。&quot;</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NEW_FEMTET_BUT_NO_FEMPRJ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NOT_IMPLEMENTED">
+<span class="sig-name descname"><span class="pre">ERR_NOT_IMPLEMENTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'以下の機能は現在の最適化手法では利用できません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NOT_IMPLEMENTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_CONNECTION_ESTABLISHED">
+<span class="sig-name descname"><span class="pre">ERR_NO_CONNECTION_ESTABLISHED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">との接続ができていません。Femtet</span> <span class="pre">を起動し、プロジェクトを開いてください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_CONNECTION_ESTABLISHED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_FEM_RESULT">
+<span class="sig-name descname"><span class="pre">ERR_NO_FEM_RESULT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'FEM</span> <span class="pre">解析結果が（まだ）存在しません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_FEM_RESULT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_HISTORY_SELECTED">
+<span class="sig-name descname"><span class="pre">ERR_NO_HISTORY_SELECTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">が選択されていません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_HISTORY_SELECTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_INITIAL_VALUE">
+<span class="sig-name descname"><span class="pre">ERR_NO_INITIAL_VALUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'initial_value</span> <span class="pre">を指定してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_INITIAL_VALUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_MAKEPY">
+<span class="sig-name descname"><span class="pre">ERR_NO_MAKEPY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">マクロの定数の設定が未完了であることが検出され、設定コマンド（python</span> <span class="pre">-m</span> <span class="pre">win23com.client.makepy</span> <span class="pre">FemtetMacro）が自動実行されました。プログラムを再実行してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_MAKEPY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_PREDICTION_MODEL">
+<span class="sig-name descname"><span class="pre">ERR_NO_PREDICTION_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'予測モデルがまだ計算されていません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_PREDICTION_MODEL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_SOLUTION_SELECTED">
+<span class="sig-name descname"><span class="pre">ERR_NO_SOLUTION_SELECTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'グラフ上で結果プロットが選択されていません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_SOLUTION_SELECTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_SUCH_MODEL_IN_FEMPRJ">
+<span class="sig-name descname"><span class="pre">ERR_NO_SUCH_MODEL_IN_FEMPRJ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'指定された解析モデルは現在のプロジェクトに含まれていません。現在開かれているプロジェクトが正しいか確認してください。例えば、「解析結果単体」の画面になっていないことを確認してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_SUCH_MODEL_IN_FEMPRJ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_SUCH_PARAMETER_IN_FEMTET">
+<span class="sig-name descname"><span class="pre">ERR_NO_SUCH_PARAMETER_IN_FEMTET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'指定された変数は</span> <span class="pre">Femtet</span> <span class="pre">解析モデルの中に設定されていません。変数の大文字・小文字の相違に注意してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_SUCH_PARAMETER_IN_FEMTET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_OPEN_RESULT_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_OPEN_RESULT_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'結果ファイルが開けませんでした。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_OPEN_RESULT_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_PARAMETRIC_SOLVE_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_PARAMETRIC_SOLVE_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'パラメトリック解析に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_PARAMETRIC_SOLVE_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_PDT_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_PDT_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'結果（.pdt）ファイルが見つかりませんでした。.Result</span> <span class="pre">フォルダ内を確認してください。.pdt</span> <span class="pre">ファイルが作成されるかどうかは最適化スクリプトの</span> <span class="pre">FemtetInterface</span> <span class="pre">の引数</span> <span class="pre">`save_pdt`</span> <span class="pre">の挙動に左右されることに注意してください（デフォルトは</span> <span class="pre">`all`,</span> <span class="pre">すべての</span> <span class="pre">trial</span> <span class="pre">の結果が保存されます）。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_PDT_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_PROBLEM_MISMATCH">
+<span class="sig-name descname"><span class="pre">ERR_PROBLEM_MISMATCH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'実行中の構成が</span> <span class="pre">csv</span> <span class="pre">ファイル内の構成と一致しません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_PROBLEM_MISMATCH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_RE_EXECUTE_MODEL_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_RE_EXECUTE_MODEL_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'モデル履歴の再実行に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_RE_EXECUTE_MODEL_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_RUN_JOURNAL_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_RUN_JOURNAL_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'&quot;%UGII_BASE_DIR%\\NXBIN\\run_journal.exe&quot;</span> <span class="pre">ファイルが見つかりません。NX</span> <span class="pre">のインストールと</span> <span class="pre">UGII_BASE_DIR</span> <span class="pre">環境変数が設定されていることを確認してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_RUN_JOURNAL_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_SAMPLE_CSV_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_SAMPLE_CSV_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'サンプル履歴</span> <span class="pre">csv</span> <span class="pre">が見つかりませんでした。以下のコマンドで</span> <span class="pre">pyfemtet</span> <span class="pre">の再インストールを検討して下さい。</span> <span class="pre">`py</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyfemtet</span> <span class="pre">-U</span> <span class="pre">--force-reinstall`'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_SAMPLE_CSV_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_SAMPLE_FEMPRJ_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">ERR_SAMPLE_FEMPRJ_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'サンプルプロジェクトファイルが見つかりませんでした。以下のコマンドで</span> <span class="pre">pyfemtet</span> <span class="pre">の再インストールを検討して下さい。</span> <span class="pre">`py</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyfemtet</span> <span class="pre">-U</span> <span class="pre">--force-reinstall`'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_SAMPLE_FEMPRJ_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_SOLVE_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_SOLVE_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'解析に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_SOLVE_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED">
+<span class="sig-name descname"><span class="pre">ERR_UPDATE_SOLIDWORKS_MODEL_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Solidworks</span> <span class="pre">でのモデル更新に失敗しました。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.FEMTET_ANALYSIS_MODEL_WITH_NO_PARAMETER">
+<span class="sig-name descname"><span class="pre">FEMTET_ANALYSIS_MODEL_WITH_NO_PARAMETER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'解析モデルに変数が設定されていません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.FEMTET_ANALYSIS_MODEL_WITH_NO_PARAMETER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.GRAPH_AXIS_LABEL_TRIAL">
+<span class="sig-name descname"><span class="pre">GRAPH_AXIS_LABEL_TRIAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'trial</span> <span class="pre">番号'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.GRAPH_AXIS_LABEL_TRIAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.GRAPH_TITLE_HYPERVOLUME">
+<span class="sig-name descname"><span class="pre">GRAPH_TITLE_HYPERVOLUME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Hypervolume</span> <span class="pre">プロット'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.GRAPH_TITLE_HYPERVOLUME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.GRAPH_TITLE_MULTI_OBJECTIVE">
+<span class="sig-name descname"><span class="pre">GRAPH_TITLE_MULTI_OBJECTIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数ペアプロット'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.GRAPH_TITLE_MULTI_OBJECTIVE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.GRAPH_TITLE_PREDICTION_MODEL">
+<span class="sig-name descname"><span class="pre">GRAPH_TITLE_PREDICTION_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数に対する予測モデル'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.GRAPH_TITLE_PREDICTION_MODEL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.GRAPH_TITLE_SINGLE_OBJECTIVE">
+<span class="sig-name descname"><span class="pre">GRAPH_TITLE_SINGLE_OBJECTIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数プロット'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.GRAPH_TITLE_SINGLE_OBJECTIVE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.HELLO">
+<span class="sig-name descname"><span class="pre">HELLO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'こんにちは！'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.HELLO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.INFO_EXCEPTION_DURING_FEM_ANALYSIS">
+<span class="sig-name descname"><span class="pre">INFO_EXCEPTION_DURING_FEM_ANALYSIS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'FEM</span> <span class="pre">解析中に例外が発生しました。現在の変数の組合せは以下の通りです。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.INFO_EXCEPTION_DURING_FEM_ANALYSIS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.INFO_FEMTET_CRASHED_AND_RESTARTED">
+<span class="sig-name descname"><span class="pre">INFO_FEMTET_CRASHED_AND_RESTARTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">は再実行されました。状態回復のため、FEM</span> <span class="pre">の再実行を行います。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.INFO_FEMTET_CRASHED_AND_RESTARTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.INFO_INFEASIBLE">
+<span class="sig-name descname"><span class="pre">INFO_INFEASIBLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'以下の変数の組合せで拘束が満たされませんでした。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.INFO_INFEASIBLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_AUTO_UPDATE">
+<span class="sig-name descname"><span class="pre">LABEL_AUTO_UPDATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'グラフの自動更新'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_AUTO_UPDATE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_CONNECT_FEMTET_BUTTON">
+<span class="sig-name descname"><span class="pre">LABEL_CONNECT_FEMTET_BUTTON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">に接続する'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_CONNECT_FEMTET_BUTTON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_FILE_PICKER">
+<span class="sig-name descname"><span class="pre">LABEL_FILE_PICKER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">をドラッグ＆ドロップ'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_FILE_PICKER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_INTERRUPT">
+<span class="sig-name descname"><span class="pre">LABEL_INTERRUPT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適化を中断する'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_INTERRUPT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_LOAD_SAMPLE_CSV">
+<span class="sig-name descname"><span class="pre">LABEL_LOAD_SAMPLE_CSV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'サンプル履歴</span> <span class="pre">CSV</span> <span class="pre">読み込み'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_LOAD_SAMPLE_CSV" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_OF_AXIS1_SELECTION">
+<span class="sig-name descname"><span class="pre">LABEL_OF_AXIS1_SELECTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'変数'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_OF_AXIS1_SELECTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_OF_AXIS2_SELECTION">
+<span class="sig-name descname"><span class="pre">LABEL_OF_AXIS2_SELECTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'変数2'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_OF_AXIS2_SELECTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_OF_AXIS3_SELECTION">
+<span class="sig-name descname"><span class="pre">LABEL_OF_AXIS3_SELECTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_OF_AXIS3_SELECTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON">
+<span class="sig-name descname"><span class="pre">LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'</span> <span class="pre">予測モデルの再計算'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_OF_REDRAW_PREDICTION_MODEL_GRAPH_BUTTON">
+<span class="sig-name descname"><span class="pre">LABEL_OF_REDRAW_PREDICTION_MODEL_GRAPH_BUTTON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'</span> <span class="pre">描画の更新'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_OF_REDRAW_PREDICTION_MODEL_GRAPH_BUTTON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_OPEN_PDT_BUTTON">
+<span class="sig-name descname"><span class="pre">LABEL_OPEN_PDT_BUTTON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">で結果を開く'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_OPEN_PDT_BUTTON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_RECONSTRUCT_MODEL_BUTTON">
+<span class="sig-name descname"><span class="pre">LABEL_RECONSTRUCT_MODEL_BUTTON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'モデルの再構築'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_RECONSTRUCT_MODEL_BUTTON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_TUTORIAL_MODE_SWITCH">
+<span class="sig-name descname"><span class="pre">LABEL_TUTORIAL_MODE_SWITCH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'チュートリアルモード'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_TUTORIAL_MODE_SWITCH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_CONSTRAINT">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_CONSTRAINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'拘束条件'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_CONSTRAINT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_DOMI">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_DOMI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'不適'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_DOMI" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_FEASIBLE">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_FEASIBLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'満たす'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_FEASIBLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_INFEASIBLE">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_INFEASIBLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'満たさない'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_INFEASIBLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_NON_DOMI">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_NON_DOMI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'適'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_NON_DOMI" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_OPTIMAL">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_OPTIMAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適性'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_OPTIMAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_PREDICTION_MODEL">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_PREDICTION_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'モデルによる予測値'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_PREDICTION_MODEL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LEGEND_LABEL_PREDICTION_MODEL_STDDEV">
+<span class="sig-name descname"><span class="pre">LEGEND_LABEL_PREDICTION_MODEL_STDDEV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'予測値の標準偏差'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LEGEND_LABEL_PREDICTION_MODEL_STDDEV" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LOAD_CSV_POPOVER_BODY">
+<span class="sig-name descname"><span class="pre">LOAD_CSV_POPOVER_BODY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適化を実行した結果生成される</span> <span class="pre">csv</span> <span class="pre">ファイル（履歴</span> <span class="pre">csv）を開きます。その後、Femtet</span> <span class="pre">の起動・接続が自動的に行われます。チュートリアルモードではこのボタンを押すと自動的に用意されたサンプルファイルが開きます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LOAD_CSV_POPOVER_BODY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LOAD_CSV_POPOVER_HEADER">
+<span class="sig-name descname"><span class="pre">LOAD_CSV_POPOVER_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">CSV</span> <span class="pre">読み込み'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LOAD_CSV_POPOVER_HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.MAIN_GRAPH_POPOVER_BODY">
+<span class="sig-name descname"><span class="pre">MAIN_GRAPH_POPOVER_BODY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ここに最適化の履歴が表示されます。プロットの</span> <span class="pre">1</span> <span class="pre">個の点が</span> <span class="pre">1</span> <span class="pre">個の変数の組合せに対する</span> <span class="pre">FEM</span> <span class="pre">解析結果を示します。グラフ中の結果ファイルを選択し、Femtet</span> <span class="pre">で対応する結果ファイルを開くことができます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.MAIN_GRAPH_POPOVER_BODY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.MAIN_GRAPH_POPOVER_HEADER">
+<span class="sig-name descname"><span class="pre">MAIN_GRAPH_POPOVER_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'メイングラフ'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.MAIN_GRAPH_POPOVER_HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.NO_ANALYSIS_MODEL_IS_OPEN">
+<span class="sig-name descname"><span class="pre">NO_ANALYSIS_MODEL_IS_OPEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'解析モデルが開かれていません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.NO_ANALYSIS_MODEL_IS_OPEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.OPEN_PDT_POPOVER_BODY">
+<span class="sig-name descname"><span class="pre">OPEN_PDT_POPOVER_BODY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'メイングラフで点を選択した後でこのボタンを押すと、対応する</span> <span class="pre">FEM</span> <span class="pre">解析結果が</span> <span class="pre">Femtet</span> <span class="pre">で開かれます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.OPEN_PDT_POPOVER_BODY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.OPEN_PDT_POPOVER_HEADER">
+<span class="sig-name descname"><span class="pre">OPEN_PDT_POPOVER_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'結果を開く'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.OPEN_PDT_POPOVER_HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.OPTIMIZATION_FINISHED">
+<span class="sig-name descname"><span class="pre">OPTIMIZATION_FINISHED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適化が完了しました。結果は次の場所に保存されました:'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.OPTIMIZATION_FINISHED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.PAGE_TITLE_PREDICTION_MODEL">
+<span class="sig-name descname"><span class="pre">PAGE_TITLE_PREDICTION_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'予測'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.PAGE_TITLE_PREDICTION_MODEL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.PAGE_TITLE_PROGRESS">
+<span class="sig-name descname"><span class="pre">PAGE_TITLE_PROGRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'進捗'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.PAGE_TITLE_PROGRESS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.PAGE_TITLE_RESULT">
+<span class="sig-name descname"><span class="pre">PAGE_TITLE_RESULT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'結果'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.PAGE_TITLE_RESULT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.PAGE_TITLE_WORKERS">
+<span class="sig-name descname"><span class="pre">PAGE_TITLE_WORKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'並列プロセス'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.PAGE_TITLE_WORKERS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVES">
+<span class="sig-name descname"><span class="pre">TAB_LABEL_OBJECTIVES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.TAB_LABEL_PREDICTION_MODEL">
+<span class="sig-name descname"><span class="pre">TAB_LABEL_PREDICTION_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'予測モデル'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.TAB_LABEL_PREDICTION_MODEL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_CSV_MODEL_NAME_IS_INVALID">
+<span class="sig-name descname"><span class="pre">WARN_CSV_MODEL_NAME_IS_INVALID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">ファイルに記載されている解析モデル名はプロジェクトに含まれていません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_CSV_MODEL_NAME_IS_INVALID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_FEMPRJ_IN_CSV_NOT_FOUND">
+<span class="sig-name descname"><span class="pre">WARN_FEMPRJ_IN_CSV_NOT_FOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">ファイルに記載されているプロジェクトファイルが見つかりませんでした。目的のプロジェクトを手動で開いてください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_FEMPRJ_IN_CSV_NOT_FOUND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_FEMTET_CRASHED_AND_TRY_RESTART">
+<span class="sig-name descname"><span class="pre">WARN_FEMTET_CRASHED_AND_TRY_RESTART</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">が予期せず停止したことが検出されました。状態の回復を試みます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_FEMTET_CRASHED_AND_TRY_RESTART" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_HISTORY_CSV_NOT_ACCESSIBLE">
+<span class="sig-name descname"><span class="pre">WARN_HISTORY_CSV_NOT_ACCESSIBLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">ファイルは使用中なので、書き込むことができません。最適化が終了する前にこのファイルを解放してください。そうしないと、履歴データが失われます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_HISTORY_CSV_NOT_ACCESSIBLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_HISTORY_CSV_NOT_READ">
+<span class="sig-name descname"><span class="pre">WARN_HISTORY_CSV_NOT_READ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">が読み込まれていません。目的のプロジェクトを手動で開いてください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_HISTORY_CSV_NOT_READ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_IGNORE_PARAMETER_NOT_CONTAINED">
+<span class="sig-name descname"><span class="pre">WARN_IGNORE_PARAMETER_NOT_CONTAINED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'指定された変数は解析モデルに含まれていないので、無視されます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_IGNORE_PARAMETER_NOT_CONTAINED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_INCONSISTENT_FEMPRJ_PATH">
+<span class="sig-name descname"><span class="pre">WARN_INCONSISTENT_FEMPRJ_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">に記載のプロジェクトファイルのパスが不正です。現在開かれているプロジェクトファイルと履歴</span> <span class="pre">csv</span> <span class="pre">に記載のプロジェクトファイルのパスが一致することを確認してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_INCONSISTENT_FEMPRJ_PATH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_INCONSISTENT_MODEL_NAME">
+<span class="sig-name descname"><span class="pre">WARN_INCONSISTENT_MODEL_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">に記載の解析モデル名と</span> <span class="pre">Femtet</span> <span class="pre">で開かれている解析モデル名が一致しません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_INCONSISTENT_MODEL_NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_INTERRUPTED_IN_SCIPY">
+<span class="sig-name descname"><span class="pre">WARN_INTERRUPTED_IN_SCIPY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適化が中断されました。`trust-constr`,</span> <span class="pre">`TNC`,</span> <span class="pre">`SLSQP`</span> <span class="pre">又は</span> <span class="pre">`COBYLA`</span> <span class="pre">メソッドを使っている場合は、OptimizationResult</span> <span class="pre">オブジェクトが取得できないことに注意してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_INTERRUPTED_IN_SCIPY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_INVALID_METADATA">
+<span class="sig-name descname"><span class="pre">WARN_INVALID_METADATA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">ファイルからプロジェクトに関するデータを読み込めませんでした。目的のプロジェクトを手動で開いてください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_INVALID_METADATA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_INVALID_MODEL_NAME">
+<span class="sig-name descname"><span class="pre">WARN_INVALID_MODEL_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'履歴</span> <span class="pre">csv</span> <span class="pre">に記載の解析モデル名が不正です。現在開かれている解析モデル名と履歴</span> <span class="pre">csv</span> <span class="pre">に記載の解析モデル名が一致することを確認してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_INVALID_MODEL_NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ">
+<span class="sig-name descname"><span class="pre">WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'解析モデル名が指定されていません。目的の解析モデルをプロジェクト内で手動で開いてください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.some_string">
+<span class="sig-name descname"><span class="pre">some_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/message/messages.html#Message.some_string"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.message.messages.Message.some_string" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pyfemtet.message">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.message" title="Link to this heading"></a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.Msg">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.message.</span></span><span class="sig-name descname"><span class="pre">Msg</span></span><a class="headerlink" href="#pyfemtet.message.Msg" title="Link to this definition"></a></dt>
+<dd><p>:py:class:<a href="#id1"><span class="problematic" id="id2">`</span></a>~pyfemtet.message.messages.Message`の別名です。</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyfemtet.html" class="btn btn-neutral float-left" title="pyfemtet package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyfemtet.opt.html" class="btn btn-neutral float-right" title="pyfemtet.opt package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

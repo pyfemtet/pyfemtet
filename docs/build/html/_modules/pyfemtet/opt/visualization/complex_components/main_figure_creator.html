@@ -81,6 +81,7 @@
 <span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
 
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">History</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <span class="k">class</span> <span class="nc">_ColorSet</span><span class="p">:</span>
@@ -96,11 +97,17 @@
     <span class="n">feasible</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;feasible&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
     <span class="n">non_domi</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;non_domi&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ja&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">language</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ja&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">feasible</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;拘束条件&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="s1">&#39;満足&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s1">&#39;違反&#39;</span><span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">non_domi</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;最適性&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="s1">&#39;非劣解&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s1">&#39;劣解&#39;</span><span class="p">}</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feasible</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">Msg</span><span class="o">.</span><span class="n">LEGEND_LABEL_CONSTRAINT</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">:</span> <span class="n">Msg</span><span class="o">.</span><span class="n">LEGEND_LABEL_FEASIBLE</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">:</span> <span class="n">Msg</span><span class="o">.</span><span class="n">LEGEND_LABEL_INFEASIBLE</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_domi</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">Msg</span><span class="o">.</span><span class="n">LEGEND_LABEL_OPTIMAL</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">:</span> <span class="n">Msg</span><span class="o">.</span><span class="n">LEGEND_LABEL_NON_DOMI</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">:</span> <span class="n">Msg</span><span class="o">.</span><span class="n">LEGEND_LABEL_DOMI</span><span class="p">,</span>
+        <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">localize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
         <span class="c1"># 元のオブジェクトを変更しないようにコピー</span>
@@ -113,7 +120,7 @@
         <span class="k">return</span> <span class="n">cdf</span>
 
 
-<span class="n">_ls</span> <span class="o">=</span> <span class="n">_LanguageSet</span><span class="p">(</span><span class="s1">&#39;ja&#39;</span><span class="p">)</span>
+<span class="n">_ls</span> <span class="o">=</span> <span class="n">_LanguageSet</span><span class="p">()</span>
 <span class="n">_cs</span> <span class="o">=</span> <span class="n">_ColorSet</span><span class="p">()</span>
 <span class="n">_ss</span> <span class="o">=</span> <span class="n">_SymbolSet</span><span class="p">()</span>
 
@@ -134,7 +141,10 @@
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
         <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;ハイパーボリュームプロット&quot;</span><span class="p">,</span>
+            <span class="n">title_text</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">GRAPH_TITLE_HYPERVOLUME</span><span class="p">,</span>
+            <span class="c1"># transition_duration=1000,  # Causes graph freeze on tab change</span>
+            <span class="n">xaxis_title</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">GRAPH_AXIS_LABEL_TRIAL</span><span class="p">,</span>
+            <span class="n">yaxis_title</span><span class="o">=</span><span class="s1">&#39;hypervolume&#39;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
@@ -160,7 +170,10 @@
         <span class="n">fig</span> <span class="o">=</span> <span class="n">_get_multi_objective_pairplot</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">hovertemplate</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">clickmode</span><span class="o">=</span><span class="s1">&#39;event+select&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">clickmode</span><span class="o">=</span><span class="s1">&#39;event+select&#39;</span><span class="p">,</span>
+        <span class="n">transition_duration</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span></div>
 
@@ -205,8 +218,8 @@
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
         <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;目的プロット&quot;</span><span class="p">,</span>
-            <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;解析実行回数(回)&quot;</span><span class="p">,</span>
+            <span class="n">title_text</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">GRAPH_TITLE_SINGLE_OBJECTIVE</span><span class="p">,</span>
+            <span class="n">xaxis_title</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">GRAPH_AXIS_LABEL_TRIAL</span><span class="p">,</span>
             <span class="n">yaxis_title</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">)</span>
@@ -267,7 +280,7 @@
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
         <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;多目的ペアプロット&quot;</span><span class="p">,</span>
+            <span class="n">title_text</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">GRAPH_TITLE_MULTI_OBJECTIVE</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
