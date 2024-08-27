@@ -54,6 +54,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
         self.method_checker = OptunaMethodChecker(self)
+        self.parameter_constraints = []
 
     def _objective(self, trial):
 
@@ -273,9 +274,40 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler=sampler,
         )
 
+        # monkey patch
+        if len(self.parameter_constraints) > 0:
+            assert isinstance(sampler, optuna.integration.BoTorchSampler), Msg.ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH
+
+            from pyfemtet.opt.opt._optuna_botorch_helper import OptunaBotorchWithParameterConstraintMonkeyPatch
+            mp = OptunaBotorchWithParameterConstraintMonkeyPatch(
+                study,
+                self,
+            )
+            for p_cns in self.parameter_constraints:
+                fun = p_cns['fun']
+                prm_args = p_cns['prm_args']
+                kwargs = p_cns['kwargs']
+                mp.add_nonlinear_constraint(fun, prm_args, kwargs)
+            mp.do_monkey_patch()
+
         # run
         study.optimize(
             self._objective,
             timeout=self.timeout,
             callbacks=self.optimize_callbacks,
+        )
+
+    def add_parameter_constraints(
+            self,
+            fun,
+            prm_args=None,
+            kwargs=None
+    ):
+        kwargs = kwargs if kwargs is not None else {}
+        self.parameter_constraints.append(
+            dict(
+                fun=fun,
+                prm_args=prm_args,
+                kwargs=kwargs,
+            )
         )

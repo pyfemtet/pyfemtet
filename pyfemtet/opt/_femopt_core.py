@@ -337,6 +337,25 @@ class Constraint(Function):
         super().__init__(fun, name, args, kwargs)
 
 
+# from pyfemtet.opt.opt import AbstractOptimizer
+class ParameterConstraint(Constraint):
+    """Variable のみを引数とする constraint 関数"""
+
+    def __init__(self, fun, name, lb, ub, opt: 'AbstractOptimizer'):
+        super().__init__(fun, name, lb, ub, strict=True, args=None, kwargs=None)
+        self.opt = opt
+        self.prm_args = [arg.name for arg in inspect.signature(self.fun).parameters.values()]
+
+    def calc(self, _):
+        # variables 全体から fun に対する引数を作成する
+        kwargs: dict = self.opt.get_parameter('dict')
+        keys = list(kwargs.keys())
+        for k in keys:
+            if k not in self.prm_args:
+                kwargs.pop(k)
+        return float(self.fun(**kwargs))
+
+
 class _HistoryDfCore:
     """Class for managing a DataFrame object in a distributed manner."""
 
