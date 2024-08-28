@@ -389,7 +389,6 @@ class History:
         prm_names (str): User defined names of parameters.
         obj_names (str): User defined names of objectives.
         cns_names (str): User defined names of constraints.
-        local_data (pd.DataFrame): Local copy (on memory) of optimization history. 
         is_restart (bool): If the optimization process is a continuation of another process or not.
         is_processing (bool): The optimization is running or not.
 
@@ -463,7 +462,7 @@ class History:
             if not os.path.isfile(self.path):
                 raise FileNotFoundError(self.path)
 
-            # csv の local_data へと、names への読み込み
+            # csv の読み込み
             self.load()
 
     def load(self):
@@ -746,7 +745,7 @@ class History:
         study = optuna.create_study(**kwargs)
 
         # add trial to study
-        df: pd.DataFrame = self.local_data
+        df: pd.DataFrame = self.get_df()
         for i, row in df.iterrows():
             FD = optuna.distributions.FloatDistribution
             kwargs = dict(
