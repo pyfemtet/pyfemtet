@@ -627,6 +627,7 @@ class FEMOpt:
             # 全ての Exception を再表示
             for i, opt_exception in enumerate(opt_exceptions):
                 if opt_exception is not None:
+                    print()
                     print(f'===== unexpected exception raised on worker {i} =====')
                     print_exception(opt_exception)
                     print()
