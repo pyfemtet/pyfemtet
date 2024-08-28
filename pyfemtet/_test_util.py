@@ -103,8 +103,6 @@ def record_result(src: FEMOpt or str, py_path, suffix=''):
 
 
 def _get_obj_from_csv(csv_path, encoding='cp932'):
-    print('=====')
-    print(csv_path)
     df = pd.read_csv(csv_path, encoding=encoding, header=2)
     columns = df.columns
     with open(csv_path, mode='r', encoding=encoding, newline='\n') as f:

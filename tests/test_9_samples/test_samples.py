@@ -39,6 +39,8 @@ def run(py_script_path, log_path):
         process.stdin.flush()
         process.communicate()
 
+        return process.returncode
+
 
 def postprocess(py_script_path, log_path):
     created_csv_path = _test_util.find_latest_csv(dir_path=os.path.dirname(py_script_path))
@@ -57,26 +59,8 @@ def check_traceback(log_path):
     with open(log_path, 'r', encoding=encoding, newline='\n') as f:
         lines = f.readlines()
 
-    # remove after 'Finished. Press Enter to quit...'
-    out1 = []
     for line in lines:
-        if 'Finished. Press Enter to quit...' in line:
-            break
-        out1.append(line)
-
-    # remove ignored traceback
-    out2 = []
-    skip_next = False
-    for line in out1:
-        if skip_next:
-            skip_next = False
-            continue
-        skip_next = 'Exception ignored in: ' in line
-        out2.append(line)
-
-    # check traceback
-    log = '\n'.join(out2)
-    assert 'Traceback' not in log, '実行したスクリプトの出力に無視されていない例外があります。'
+        assert "unexpected exception raised on worker" not in line, '実行したスクリプトの出力に無視されていない例外があります。'
 
 
 def main(femprj_path=None):
@@ -89,21 +73,30 @@ def main(femprj_path=None):
     else:
         py_script_path = femprj_path.replace('.femprj', '.py')
 
-    # get log file
+    # create log file (default name with "failed")
     basename = os.path.basename(py_script_path)
-    log_path = os.path.join(here, datetime.datetime.now().strftime(f'%y%m%d_%H：%M_{basename}.log'))
+    log_path = os.path.join(here, datetime.datetime.now().strftime(f'%y%m%d_%H：%M_failed_{basename}.log'))
 
     # run
-    run(py_script_path, log_path)
+    return_code = run(py_script_path, log_path)
 
     # terminate Femtet
     _test_util.taskkill_femtet()
 
-    # check error
+    # check error 1 (before optimize())
+    if return_code != 0:
+        raise Exception('スクリプトの実行中、optimize() の実施前にエラーが発生しました。')
+
+    # check error 2 (inside optimize())
     check_traceback(log_path)
 
     # check result
     postprocess(py_script_path, log_path)
+
+    # If here, test ran successfully (without any unexpected error or curious optimization result.)
+    # rename log file: "failed" to "succeed"
+    new_log_path = log_path.replace('_failed_', '_succeed_')
+    os.rename(log_path, new_log_path)
 
 
 def test_sample_gau_ex08_parametric():
@@ -156,11 +149,27 @@ if __name__ == '__main__':
 
     # main()
 
-    test_sample_gau_ex08_parametric()
-    test_sample_her_ex40_parametric()
-    test_sample_wat_ex14_parametric()
-    test_sample_paswat_ex1_parametric()
-    test_sample_gal_ex58_parametric()
-    test_cad_sample_nx_ex01()
-    test_cad_sample_sldworks_ex01()
-    test_sample_parametric()
+    # test_test()
+
+    def try_test(f):
+        try:
+            f()
+        except Exception as e:
+            from traceback import print_exception
+            from time import sleep
+            print()
+            print(f.__name__, "test failed")
+            print("==========")
+            sleep(1)
+            print_exception(e)  # 次の print() が先に来る
+            print()
+
+    # try_test(test_test)
+    # try_test(test_sample_gau_ex08_parametric)
+    # try_test(test_sample_her_ex40_parametric)
+    # try_test(test_sample_wat_ex14_parametric)
+    # try_test(test_sample_paswat_ex1_parametric)
+    # try_test(test_sample_gal_ex58_parametric)
+    try_test(test_cad_sample_nx_ex01)
+    # try_test(test_cad_sample_sldworks_ex01)
+    # try_test(test_sample_parametric)
