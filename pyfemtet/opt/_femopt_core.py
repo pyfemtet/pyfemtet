@@ -337,6 +337,25 @@ class Constraint(Function):
         super().__init__(fun, name, args, kwargs)
 
 
+# from pyfemtet.opt.opt import AbstractOptimizer
+class ParameterConstraint(Constraint):
+    """Variable のみを引数とする constraint 関数"""
+
+    def __init__(self, fun, name, lb, ub, opt: 'AbstractOptimizer'):
+        super().__init__(fun, name, lb, ub, strict=True, args=None, kwargs=None)
+        self.opt = opt
+        self.prm_args = [arg.name for arg in inspect.signature(self.fun).parameters.values()]
+
+    def calc(self, _):
+        # variables 全体から fun に対する引数を作成する
+        kwargs: dict = self.opt.get_parameter('dict')
+        keys = list(kwargs.keys())
+        for k in keys:
+            if k not in self.prm_args:
+                kwargs.pop(k)
+        return float(self.fun(**kwargs))
+
+
 class _HistoryDfCore:
     """Class for managing a DataFrame object in a distributed manner."""
 
@@ -370,7 +389,6 @@ class History:
         prm_names (str): User defined names of parameters.
         obj_names (str): User defined names of objectives.
         cns_names (str): User defined names of constraints.
-        local_data (pd.DataFrame): Local copy (on memory) of optimization history. 
         is_restart (bool): If the optimization process is a continuation of another process or not.
         is_processing (bool): The optimization is running or not.
 
@@ -444,7 +462,7 @@ class History:
             if not os.path.isfile(self.path):
                 raise FileNotFoundError(self.path)
 
-            # csv の local_data へと、names への読み込み
+            # csv の読み込み
             self.load()
 
     def load(self):
@@ -727,7 +745,7 @@ class History:
         study = optuna.create_study(**kwargs)
 
         # add trial to study
-        df: pd.DataFrame = self.local_data
+        df: pd.DataFrame = self.get_df()
         for i, row in df.iterrows():
             FD = optuna.distributions.FloatDistribution
             kwargs = dict(

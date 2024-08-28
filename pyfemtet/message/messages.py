@@ -89,6 +89,7 @@ class Message:
     INFO_INFEASIBLE = _('The constraints were not satisfied for the following sets of variables:')
     ERR_FEM_FAILED_AND_CANNOT_CONTINUE = _('Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated.')
     WARN_INTERRUPTED_IN_SCIPY = _('Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.')
+    ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH = _('You can use parameter constraint only with BoTorchSampler.')
 
     # ===== pyfemtet.opt.visualization =====
     # control_femtet.py

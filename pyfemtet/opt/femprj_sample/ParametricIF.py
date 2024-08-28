@@ -27,5 +27,3 @@ if __name__ == '__main__':
         n_trials=10,
         n_parallel=1,
     )
-    input()  # required to tests script
-    femopt.terminate_all()

@@ -184,16 +184,18 @@ class MainGraph(AbstractPage):
             # create component
             title_component = html.H3(f"trial{trial}", style={"color": "darkblue"})
             img_component = self.create_image_content_if_femtet(trial)
-            tbl_component = self.create_formatted_parameter(row)
+            tbl_component_prm = self.create_formatted_parameter(row)
+            tbl_component_obj = self.create_formatted_objective(row)
 
             # create layout
             description = html.Div([
                 title_component,
-                tbl_component,
+                tbl_component_prm,
             ])
             tooltip_layout = html.Div([
                 html.Div(img_component, style={'display': 'inline-block', 'margin-right': '10px', 'vertical-align': 'top'}),
-                html.Div(description, style={'display': 'inline-block', 'margin-right': '10px'})
+                html.Div(description, style={'display': 'inline-block', 'margin-right': '10px'}),
+                html.Div(tbl_component_obj, style={'display': 'inline-block', 'margin-right': '10px'}),
             ])
 
             return True, bbox, tooltip_layout
@@ -205,7 +207,22 @@ class MainGraph(AbstractPage):
         names = parameters.columns
         values = [f'{value:.3e}' for value in parameters.values.ravel()]
         data = pd.DataFrame(dict(
-            name=names, value=values
+            parameter=names, value=values
+        ))
+        table = dash_table.DataTable(
+            columns=[{'name': col, 'id': col} for col in data.columns],
+            data=data.to_dict('records')
+        )
+        return table
+
+    def create_formatted_objective(self, row) -> Component:
+        metadata = self.application.history.metadata
+        pd.options.display.float_format = '{:.4e}'.format
+        objectives = row.iloc[:, np.where(np.array(metadata) == 'obj')[0]]
+        names = objectives.columns
+        values = [f'{value:.3e}' for value in objectives.values.ravel()]
+        data = pd.DataFrame(dict(
+            objective=names, value=values
         ))
         table = dash_table.DataTable(
             columns=[{'name': col, 'id': col} for col in data.columns],
