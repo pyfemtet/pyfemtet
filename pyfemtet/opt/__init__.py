@@ -4,7 +4,7 @@ from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt.interface import FemtetWithNXInterface
 from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 
-from pyfemtet.opt.opt import OptunaOptimizer, ScipyOptimizer
+from pyfemtet.opt.opt import OptunaOptimizer, ScipyOptimizer, ScipyScalarOptimizer
 from pyfemtet.opt.opt import AbstractOptimizer
 
 from pyfemtet.opt._femopt import FEMOpt
@@ -19,4 +19,6 @@ __all__ = [
     'FemtetWithSolidworksInterface',
     'AbstractOptimizer',
     'OptunaOptimizer',
+    'ScipyScalarOptimizer',
+    'ScipyOptimizer',
 ]
