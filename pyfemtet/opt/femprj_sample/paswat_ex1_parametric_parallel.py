@@ -59,11 +59,3 @@ if __name__ == '__main__':
     femopt.set_random_seed(42)
     # femopt.optimize(n_trials=15)
     femopt.optimize(n_trials=30, n_parallel=3)  # This line is the only difference with no parallel pattern.
-
-    # Stop script to keep process alive
-    # while you check the result in process monitor.
-    print('================================')
-    print('Finished. Press Enter to quit...')
-    print('================================')
-    input()
-    femopt.terminate_all()
