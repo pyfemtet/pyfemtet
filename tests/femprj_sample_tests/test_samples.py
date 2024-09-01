@@ -2,13 +2,12 @@ import os
 import sys
 import subprocess
 import datetime
-from glob import glob
 
 import pyfemtet
 
-from pyfemtet import _test_util
-from pyfemtet.message import encoding
-# encoding = 'utf-8'
+from test_utils import record_history, control_femtet
+from pyfemtet.message import encoding as csv_encoding
+log_encoding = 'utf-8'
 
 
 here = os.path.dirname(__file__)
@@ -23,7 +22,7 @@ os.chdir(here)
 
 
 def run(py_script_path, log_path):
-    with open(log_path, 'w', encoding=encoding) as f:
+    with open(log_path, 'w', encoding=log_encoding) as f:
         # run sample script
         process = subprocess.Popen(
             [sys.executable, py_script_path],
@@ -31,7 +30,7 @@ def run(py_script_path, log_path):
             stdout=f,
             stderr=f,
             cwd=os.path.dirname(py_script_path),
-            encoding=encoding,
+            encoding=log_encoding,
         )
 
         # press enter to skip input() in sample script
@@ -43,20 +42,20 @@ def run(py_script_path, log_path):
 
 
 def postprocess(py_script_path, log_path):
-    created_csv_path = _test_util.find_latest_csv(dir_path=os.path.dirname(py_script_path))
-    reccsv_path = _test_util.py_to_reccsv(py_script_path, suffix='_test_result')
+    created_csv_path = record_history.find_latest_csv(dir_path=os.path.dirname(py_script_path))
+    reccsv_path = record_history.py_to_reccsv(py_script_path, suffix='_test_result')
 
     if RECORD_MODE:
         if os.path.exists(reccsv_path): os.remove(reccsv_path)
         os.rename(created_csv_path, reccsv_path)
     else:
         if py_script_path != test_script:
-            _test_util.is_equal_result(reccsv_path, created_csv_path, log_path)
+            record_history.is_equal_result(reccsv_path, created_csv_path, log_path)
 
 
 def check_traceback(log_path):
     # get log
-    with open(log_path, 'r', encoding=encoding, newline='\n') as f:
+    with open(log_path, 'r', encoding=log_encoding, newline='\n') as f:
         lines = f.readlines()
 
     for line in lines:
@@ -65,7 +64,7 @@ def check_traceback(log_path):
 
 def main(femprj_path=None):
     # launch and open Femtet
-    _test_util.launch_femtet(femprj_path)
+    control_femtet.launch_femtet(femprj_path)
 
     # get py_script
     if femprj_path is None:
@@ -78,10 +77,13 @@ def main(femprj_path=None):
     log_path = os.path.join(here, datetime.datetime.now().strftime(f'%y%m%d_%H：%M_failed_{basename}.log'))
 
     # run
+    print("============================================")
+    print('Launch subprocess / Running sample script...')
+    print("============================================")
     return_code = run(py_script_path, log_path)
 
     # terminate Femtet
-    _test_util.taskkill_femtet()
+    control_femtet.taskkill_femtet()
 
     # check error 1 (before optimize())
     if return_code != 0:
@@ -155,21 +157,22 @@ if __name__ == '__main__':
         try:
             f()
         except Exception as e:
-            from traceback import print_exception
+            # from traceback import print_exception
             from time import sleep
             print()
             print(f.__name__, "test failed")
             print("==========")
             sleep(1)
-            print_exception(e)  # 次の print() が先に来る
+            # print_exception(e)  # 次の print() が先に来る  # どこで失敗したか見る必要があるのはテストをデバッグするときだけ
+            print(e)
             print()
 
     # try_test(test_test)
-    # try_test(test_sample_gau_ex08_parametric)
+    try_test(test_sample_gau_ex08_parametric)
     # try_test(test_sample_her_ex40_parametric)
     # try_test(test_sample_wat_ex14_parametric)
     # try_test(test_sample_paswat_ex1_parametric)
     # try_test(test_sample_gal_ex58_parametric)
-    try_test(test_cad_sample_nx_ex01)
+    # try_test(test_cad_sample_nx_ex01)
     # try_test(test_cad_sample_sldworks_ex01)
     # try_test(test_sample_parametric)
