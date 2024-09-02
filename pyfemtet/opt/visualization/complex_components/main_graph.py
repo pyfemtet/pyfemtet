@@ -2,7 +2,7 @@
 from dash.development.base_component import Component
 
 # callback
-from dash import Output, Input, State, no_update, callback_context
+from dash import Output, Input, State, no_update, callback_context, ALL
 from dash.exceptions import PreventUpdate
 
 # components
@@ -21,7 +21,7 @@ import json
 import numpy as np
 
 from pyfemtet.opt.visualization.complex_components import main_figure_creator
-from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
+from pyfemtet.opt.visualization.base import AbstractPage, logger
 from pyfemtet.message import Msg
 
 
@@ -45,11 +45,15 @@ class MainGraph(AbstractPage):
     | | |  graph <-------- ToolTip
     | | +---------+ | |
     | +-------------+ |
+    +-----------------+
+    |                 | <- CardFooter (depends on tab)
     +=================+
 
         Data(data-selection)
 
     """
+
+    TAB_ID_OBJECTIVE_PLOT = 'tab-objectives-plot'
 
     def __init__(self):
         self.setup_figure_creator()
@@ -60,9 +64,14 @@ class MainGraph(AbstractPage):
         # list[0] is the default tab
         self.figure_creators = [
             dict(
-                tab_id='tab-objective-plot',
-                label=Msg.TAB_LABEL_OBJECTIVES,
+                tab_id='tab-objectives-scatterplot',
+                label=Msg.TAB_LABEL_OBJECTIVE_SCATTERPLOT,
                 creator=main_figure_creator.get_default_figure,
+            ),
+            dict(
+                tab_id=self.TAB_ID_OBJECTIVE_PLOT,
+                label=Msg.TAB_LABEL_OBJECTIVE_PLOT,
+                creator=main_figure_creator.get_objective_plot,
             ),
             dict(
                 tab_id='tab-hypervolume-plot',
@@ -82,6 +91,41 @@ class MainGraph(AbstractPage):
 
         # setup body
         self.tooltip = dcc.Tooltip(id='main-graph-tooltip')
+
+        # setup footer components for objective plot
+        self.axis1_dropdown = dbc.DropdownMenu()
+        self.axis2_dropdown = dbc.DropdownMenu()
+        self.axis3_dropdown = dbc.DropdownMenu()
+        self.switch_3d = dbc.Checklist(
+            options=[
+                dict(
+                    label="3D",
+                    disabled=False,
+                    value=False,
+                )
+            ],
+            switch=True,
+            value=[],
+        )
+        self.objective_plot_controller: html.Div = html.Div(
+            [
+                self.switch_3d,
+                dbc.Stack(
+                    children=['X axis', self.axis1_dropdown],
+                    direction='horizontal', gap=2),
+                dbc.Stack(
+                    children=['Y axis', self.axis2_dropdown],
+                    direction='horizontal', gap=2),
+                dbc.Stack(
+                    children=['Z axis', self.axis3_dropdown],
+                    direction='horizontal', gap=2),
+            ]
+        )
+
+        # setup footer
+        self.card_footer: dbc.CardFooter = dbc.CardFooter(
+            self.objective_plot_controller
+        )
 
         # set kwargs of Graph to reconstruct Graph in ProcessMonitor.
         self.graph_kwargs = dict(
@@ -127,6 +171,7 @@ class MainGraph(AbstractPage):
                 self.data_length,
                 self.card_header,
                 self.card_body,
+                self.card_footer,
                 self.selection_data,
             ],
             # style=FLEXBOX_STYLE_ALLOW_VERTICAL_FILL,
@@ -140,15 +185,183 @@ class MainGraph(AbstractPage):
 
         app = self.application.app
 
-        # ===== Update Graph =====
+        # ===== Change visibility of dropdown menus =====
+        @app.callback(
+            Output(self.objective_plot_controller, 'hidden'),
+            Input(self.tabs, 'active_tab'),
+            prevent_initial_call=True,
+        )
+        def invisible_controller(active_tab):
+            return active_tab != self.TAB_ID_OBJECTIVE_PLOT
+
+        # ===== Change accessibility of axis3 dropdown =====
+        @app.callback(
+            Output(self.axis3_dropdown, 'disabled'),
+            Input(self.switch_3d, 'value'),
+            Input(self.location, 'pathname'),
+            prevent_initial_call=True,
+        )
+        def disable_axis_3_dropdown_menu(is_3d, _):
+            return not is_3d
+
+        # ===== Initialize Dropdown menus =====
+        @app.callback(
+            output=dict(
+                items_list=[
+                    Output(self.axis1_dropdown, 'children'),
+                    Output(self.axis2_dropdown, 'children'),
+                    Output(self.axis3_dropdown, 'children'),
+                ],
+                labels=[
+                    Output(self.axis1_dropdown, 'label'),
+                    Output(self.axis2_dropdown, 'label'),
+                    Output(self.axis3_dropdown, 'label'),
+                ]
+            ),
+            inputs=[Input(self.location, 'pathname')],
+            prevent_initial_call=True,
+        )
+        def init_dropdown_menus(*_, **__):
+            # just in case
+            if callback_context.triggered_id is None:
+                raise PreventUpdate
+
+            # load history
+            if self.application.history is None:
+                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
+                raise PreventUpdate
+
+            # assert 3 or more objectives
+            obj_names = self.application.history.obj_names
+            assert len(obj_names) >= 3
+
+            # add dropdown item to dropdown
+            axis1_dropdown_items = []
+            axis2_dropdown_items = []
+            axis3_dropdown_items = []
+
+            for i, obj_name in enumerate(obj_names):
+                axis1_dropdown_items.append(
+                    dbc.DropdownMenuItem(
+                        children=obj_name,
+                        id={'type': 'objective-axis1-dropdown-menu-item', 'index': obj_name},
+                    )
+                )
+
+                axis2_dropdown_items.append(
+                    dbc.DropdownMenuItem(
+                        children=obj_name,
+                        id={'type': 'objective-axis2-dropdown-menu-item', 'index': obj_name},
+                    )
+                )
+
+                axis3_dropdown_items.append(
+                    dbc.DropdownMenuItem(
+                        children=obj_name,
+                        id={'type': 'objective-axis3-dropdown-menu-item', 'index': obj_name},
+                    )
+                )
+
+            items_list = [axis1_dropdown_items, axis2_dropdown_items, axis3_dropdown_items]
+
+            ret = dict(
+                items_list=items_list,
+                labels=obj_names[:3],
+            )
+
+            return ret
+
+        # ===== Update Dropdown menus =====
+        @app.callback(
+            output=dict(
+                label_1=Output(self.axis1_dropdown, 'label', allow_duplicate=True),  # label of dropdown
+                label_2=Output(self.axis2_dropdown, 'label', allow_duplicate=True),
+                label_3=Output(self.axis3_dropdown, 'label', allow_duplicate=True),
+            ),
+            inputs=dict(
+                _=(  # when the dropdown item is clicked
+                    Input({'type': 'objective-axis1-dropdown-menu-item', 'index': ALL}, 'n_clicks'),
+                    Input({'type': 'objective-axis2-dropdown-menu-item', 'index': ALL}, 'n_clicks'),
+                    Input({'type': 'objective-axis3-dropdown-menu-item', 'index': ALL}, 'n_clicks'),
+                ),
+                current_labels=dict(  # for exclusive selection
+                    label_1=State(self.axis1_dropdown, 'label'),
+                    label_2=State(self.axis2_dropdown, 'label'),
+                    label_3=State(self.axis3_dropdown, 'label'),
+                ),
+            ),
+            prevent_initial_call=True,
+        )
+        def update_dropdowns(_, current_labels):
+            # just in case
+            if callback_context.triggered_id is None:
+                raise PreventUpdate
+
+            # load history
+            if self.application.history is None:
+                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
+                raise PreventUpdate
+            obj_names = self.application.history.obj_names
+
+            assert len(obj_names) >= 3
+
+            # default return values
+            ret = dict(
+                label_1=no_update,
+                label_2=no_update,
+                label_3=no_update,
+            )
+
+            # ===== update dropdown label =====
+            new_label = callback_context.triggered_id['index']
+
+            # example of triggerd_id: {'index': 'max_displacement', 'type': 'objective-axis1-dropdown-menu-item'}
+            if callback_context.triggered_id['type'] == 'objective-axis1-dropdown-menu-item':
+                ret["label_1"] = new_label
+                if current_labels["label_2"] == new_label:
+                    ret["label_2"] = current_labels["label_1"]
+                if current_labels["label_3"] == new_label:
+                    ret["label_3"] = current_labels["label_1"]
+            if callback_context.triggered_id['type'] == 'objective-axis2-dropdown-menu-item':
+                ret["label_2"] = new_label
+                if current_labels["label_3"] == new_label:
+                    ret["label_3"] = current_labels["label_2"]
+                if current_labels["label_1"] == new_label:
+                    ret["label_1"] = current_labels["label_2"]
+            if callback_context.triggered_id['type'] == 'objective-axis3-dropdown-menu-item':
+                ret["label_3"] = new_label
+                if current_labels["label_1"] == new_label:
+                    ret["label_1"] = current_labels["label_3"]
+                if current_labels["label_2"] == new_label:
+                    ret["label_2"] = current_labels["label_3"]
+
+            return ret
+
+        # ===== Update Graph (by tab selection or dropdown changed) =====
         @app.callback(
             Output(self.graph.id, 'figure'),
             Output(self.data_length.id, self.data_length_prop),  # To determine whether Process Monitor should update the graph, the main graph remembers the current amount of data.
-            Input(self.tabs.id, 'active_tab'),
-            Input(self.dummy, 'children'),
-            prevent_initial_call=False,)
-        def redraw_main_graph(active_tab_id, _):
-            figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True)
+            inputs=dict(
+                active_tab_id=Input(self.tabs.id, 'active_tab'),
+                _=Input(self.dummy, 'children'),
+                is_3d=Input(self.switch_3d, 'value'),
+                obj_names=(
+                    Input(self.axis1_dropdown, 'label'),
+                    Input(self.axis2_dropdown, 'label'),
+                    Input(self.axis3_dropdown, 'label'),
+                ),
+            ),
+            prevent_initial_call=False,
+        )
+        def redraw_main_graph(active_tab_id, _, is_3d, obj_names):
+            kwargs = {}
+            if active_tab_id == self.TAB_ID_OBJECTIVE_PLOT:
+                if not is_3d:
+                    obj_names = obj_names[:-1]
+                kwargs = dict(
+                    obj_names=obj_names
+                )
+            figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
             return figure, length
 
         # ===== Save Selection =====
@@ -248,7 +461,7 @@ class MainGraph(AbstractPage):
                 img_url = 'data:image/jpeg;base64, ' + encoded_image
         return html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
 
-    def get_fig_by_tab_id(self, tab_id, with_length=False):
+    def get_fig_by_tab_id(self, tab_id, with_length=False, kwargs: dict = None):
         # If the history is not loaded, do nothing
         if self.application.history is None:
             raise PreventUpdate
@@ -264,7 +477,8 @@ class MainGraph(AbstractPage):
 
         # create figure
         df = self.data_accessor()
-        fig = creator(self.application.history, df)
+        kwargs = kwargs or {}
+        fig = creator(self.application.history, df, **kwargs)
         if with_length:
             return fig, len(df)
         else:

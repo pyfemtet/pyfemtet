@@ -111,7 +111,8 @@ class Message:
     GRAPH_TITLE_MULTI_OBJECTIVE = _('Multi Objective Pair Plot')
     GRAPH_AXIS_LABEL_TRIAL = _('trial number')
     # main_graph.py
-    TAB_LABEL_OBJECTIVES = _('Objectives')
+    TAB_LABEL_OBJECTIVE_PLOT = _('Objectives')
+    TAB_LABEL_OBJECTIVE_SCATTERPLOT = _('Objectives (all)')
     # pm_graph.py
     TAB_LABEL_PREDICTION_MODEL = _('Prediction Model')
     LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON = _(' Recalculate Model')
