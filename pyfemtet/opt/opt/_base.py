@@ -135,7 +135,6 @@ class AbstractOptimizer(ABC):
         self.fem = None
         self.fem_class = None
         self.fem_kwargs = dict()
-        self.parameters: pd.DataFrame = pd.DataFrame()
         self.variables: ExpressionEvaluator = ExpressionEvaluator()
         self.objectives: dict = dict()
         self.constraints: dict = dict()
@@ -154,6 +153,9 @@ class AbstractOptimizer(ABC):
     def f(self, x):
         """Get x, update fem analysis, return objectives (and constraints)."""
         # interruption の実装は具象クラスに任せる
+
+        if isinstance(x, np.float64):
+            x = np.array([x])
 
         # x の更新
         prm_names = self.variables.get_parameter_names()

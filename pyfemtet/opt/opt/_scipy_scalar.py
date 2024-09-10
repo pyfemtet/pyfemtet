@@ -15,10 +15,14 @@ from scipy.optimize import minimize_scalar, OptimizeResult
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
 from pyfemtet.opt.opt import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
+from pyfemtet.message import Msg
 
 
 class ScipyScalarMethodChecker(OptimizationMethodChecker):
     def check_incomplete_bounds(self, raise_error=True): return True
+    def check_seed(self, raise_error=True):
+        logger.warning(Msg.WARN_SCIPY_DOESNT_NEED_SEED)
+        return True
 
 
 class ScipyScalarOptimizer(AbstractOptimizer):
@@ -41,8 +45,10 @@ class ScipyScalarOptimizer(AbstractOptimizer):
 
     def _objective(self, x: float):  # x: candidate parameter
         # update parameter
-        self.parameters['value'] = x
-        self.fem.update_parameter(self.parameters)
+
+        df = self.get_parameter('df')
+        df['value'] = x
+        self.fem.update_parameter(df)
 
         # strict constraints
         ...
@@ -72,19 +78,25 @@ class ScipyScalarOptimizer(AbstractOptimizer):
     def run(self):
 
         # create init
-        assert len(self.parameters) == 1
+        params = self.get_parameter()
+        assert len(params) == 1, print(f'{params} parameter(s) are passed.')
 
         # create bounds
         if 'bounds' not in self.minimize_kwargs.keys():
             bounds = []
-            for i, row in self.parameters.iterrows():
-                lb, ub = row['lower_bound'], row['upper_bound']
-                if lb is None: lb = -np.inf
-                if ub is None: ub = np.inf
-                bounds.append([lb, ub])
-            self.minimize_kwargs.update(
-                {'bounds': bounds}
-            )
+
+            row = self.get_parameter('df')
+            lb, ub = row['lower_bound'].iloc[0], row['upper_bound'].iloc[0]
+
+            if lb is None and ub is None:
+                pass
+            elif lb is None or ub is None:
+                raise ValueError('Both lower and upper bounds must be set.')
+            else:
+                bounds = [lb, ub]
+                self.minimize_kwargs.update(
+                    {'bounds': bounds}
+                )
 
         # run optimize
         try:
