@@ -237,7 +237,7 @@ class AbstractOptimizer(ABC):
             ValueError: If an invalid format is provided.
 
         """
-        return self.variables.get_variables(format=format)
+        return self.variables.get_variables(format=format, filter_parameter=True)
 
     def _check_interruption(self):
         """"""

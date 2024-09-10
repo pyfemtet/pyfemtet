@@ -51,6 +51,9 @@ class StopIterationCallback:
 
 class ScipyMethodChecker(OptimizationMethodChecker):
     def check_incomplete_bounds(self, raise_error=True): return True
+    def check_seed(self, raise_error=True):
+        logger.warning(Msg.WARN_SCIPY_DOESNT_NEED_SEED)
+        return True
 
 
 class ScipyOptimizer(AbstractOptimizer):
@@ -76,8 +79,9 @@ class ScipyOptimizer(AbstractOptimizer):
 
     def _objective(self, x: np.ndarray):  # x: candidate parameter
         # update parameter
-        self.parameters['value'] = x
-        self.fem.update_parameter(self.parameters)
+        df = self.get_parameter('df')
+        df['value'] = x
+        self.fem.update_parameter(df)
 
         # strict constraints
         ...
@@ -108,13 +112,13 @@ class ScipyOptimizer(AbstractOptimizer):
     def run(self):
 
         # create init
-        x0 = self.parameters['value'].values
+        x0 = self.get_parameter('values')
 
         # create bounds
         if 'bounds' not in self.minimize_kwargs.keys():
             bounds = []
-            for i, row in self.parameters.iterrows():
-                lb, ub = row['lower_buond'], row['upper_bound']
+            for i, row in self.get_parameter('df').iterrows():
+                lb, ub = row['lower_bound'], row['upper_bound']
                 if lb is None: lb = -np.inf
                 if ub is None: ub = np.inf
                 bounds.append([lb, ub])

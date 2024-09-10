@@ -90,6 +90,7 @@ class Message:
     ERR_FEM_FAILED_AND_CANNOT_CONTINUE = _('Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated.')
     WARN_INTERRUPTED_IN_SCIPY = _('Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.')
     ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH = _('You can use parameter constraint only with BoTorchSampler.')
+    WARN_SCIPY_DOESNT_NEED_SEED = _('Scipy is deterministic, so whether you set a seed or not will not change the results.')
 
     # ===== pyfemtet.opt.visualization =====
     # control_femtet.py
