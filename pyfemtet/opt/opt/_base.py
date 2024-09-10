@@ -241,6 +241,17 @@ class AbstractOptimizer(ABC):
         """
         return self.variables.get_variables(format=format, filter_parameter=True)
 
+    def set_parameter(self, params: dict) -> None:
+        """Update parameter.
+
+        Args:
+            params (dict): Key is the name of parameter and the value is the value of it. The partial set is available.
+
+        """
+        for name, value in params.items():
+            self.variables.variables[name].value = value
+        self.variables.evaluate()
+
     def _check_interruption(self):
         """"""
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
