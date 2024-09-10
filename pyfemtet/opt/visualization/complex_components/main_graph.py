@@ -85,7 +85,17 @@ class MainGraph(AbstractPage):
         self.location = dcc.Location(id='main-graph-location', refresh=True)
 
         # setup header
-        self.tab_list = [dbc.Tab(label=d['label'], tab_id=d['tab_id']) for d in self.figure_creators]
+        tab_list = []
+        for d in self.figure_creators:
+            disabled = d['tab_id'] == self.TAB_ID_OBJECTIVE_PLOT  # Objective plot tab is only shown in obj_names > 3. Set this via callback.
+            tab_list.append(
+                dbc.Tab(
+                    label=d['label'],
+                    tab_id=d['tab_id'],
+                    disabled=disabled,
+                )
+            )
+        self.tab_list = tab_list
         self.tabs = dbc.Tabs(self.tab_list, id='main-graph-tabs')
         self.card_header = dbc.CardHeader(self.tabs)
 
@@ -185,6 +195,27 @@ class MainGraph(AbstractPage):
 
         app = self.application.app
 
+        # ===== Change availability of objective plot tab =====
+        objective_plot_tab = [t for t in self.tab_list if t.tab_id == self.TAB_ID_OBJECTIVE_PLOT][0]
+        @app.callback(
+            Output(objective_plot_tab, 'disabled'),
+            Input(self.tabs, 'active_tab'),
+            Input(self.location, 'pathname'),
+            prevent_initial_call=True,
+        )
+        def set_disabled(*_):
+            disabled = no_update
+
+            # load history
+            if self.application.history is None:
+                raise PreventUpdate
+
+            # assert 3 or more objectives
+            obj_names = self.application.history.obj_names
+            disabled = len(obj_names) < 3
+
+            return disabled
+
         # ===== Change visibility of dropdown menus =====
         @app.callback(
             Output(self.objective_plot_controller, 'hidden'),
@@ -233,7 +264,8 @@ class MainGraph(AbstractPage):
 
             # assert 3 or more objectives
             obj_names = self.application.history.obj_names
-            assert len(obj_names) >= 3
+            if len(obj_names) < 3:
+                raise PreventUpdate
 
             # add dropdown item to dropdown
             axis1_dropdown_items = []
@@ -303,7 +335,8 @@ class MainGraph(AbstractPage):
                 raise PreventUpdate
             obj_names = self.application.history.obj_names
 
-            assert len(obj_names) >= 3
+            if len(obj_names) < 3:
+                raise PreventUpdate
 
             # default return values
             ret = dict(
