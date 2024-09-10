@@ -203,7 +203,7 @@ class OptunaOptimizer(AbstractOptimizer):
                 if 'LHS' in self.additional_initial_methods:
                     names = []
                     bounds = []
-                    for i, row in self.parameters.iterrows():
+                    for i, row in self.get_parameter('df').iterrows():
                         names.append(row['name'])
                         lb = row['lower_bound']
                         ub = row['upper_bound']
