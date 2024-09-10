@@ -98,9 +98,9 @@ class FEMOpt:
             self.fem = fem
 
         if opt is None:
-            self.opt = OptunaOptimizer()
+            self.opt: AbstractOptimizer = OptunaOptimizer()
         else:
-            self.opt = opt
+            self.opt: AbstractOptimizer = opt
 
         # メンバーの宣言
         self.client = None
