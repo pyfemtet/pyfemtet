@@ -121,7 +121,7 @@ class OptunaOptimizer(AbstractOptimizer):
                     _c.append(lb - c_value)
                 if ub is not None:  # ub >= fun  <=>  fun - ub <= 0
                     _c.append(c_value - ub)
-            trial.set_user_attr('constraint', _c)
+            trial.set_user_attr('constraints', _c)
 
         # 中断の確認 (解析中に interrupt されている場合対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
@@ -134,8 +134,8 @@ class OptunaOptimizer(AbstractOptimizer):
 
     def _constraint(self, trial):
         # if break trial without weak constraint calculation, return 1 (as infeasible).
-        if 'constraint' in trial.user_attrs.keys():
-            return trial.user_attrs['constraint']
+        if 'constraints' in trial.user_attrs.keys():
+            return trial.user_attrs['constraints']
         else:
             _c = []
             for name, cns in self.constraints.items():

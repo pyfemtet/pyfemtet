@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
@@ -198,5 +199,73 @@ def _get_multi_objective_pairplot(history, df):
             title_text=Msg.GRAPH_TITLE_MULTI_OBJECTIVE,
         )
     )
+
+    return fig
+
+
+def get_objective_plot(history: History, df: pd.DataFrame, obj_names: list[str]) -> go.Figure:
+    df = _ls.localize(df)
+    df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
+    obj_names = [o.replace(' / ', '<BR>/ ') for o in obj_names]
+
+    common_kwargs = dict(
+        color=_ls.non_domi['label'],
+        color_discrete_map={
+            _ls.non_domi[True]: _cs.non_domi[True],
+            _ls.non_domi[False]: _cs.non_domi[False],
+        },
+        symbol=_ls.feasible['label'],
+        symbol_map={
+            _ls.feasible[True]: _ss.feasible[True],
+            _ls.feasible[False]: _ss.feasible[False],
+        },
+        custom_data=['trial'],
+        category_orders={
+            _ls.feasible['label']: (_ls.feasible[False], _ls.feasible[True]),
+            _ls.non_domi['label']: (_ls.non_domi[False], _ls.non_domi[True]),
+        },
+    )
+
+    if len(obj_names) == 2:
+        fig = px.scatter(
+            data_frame=df,
+            x=obj_names[0],
+            y=obj_names[1],
+            **common_kwargs,
+        )
+        fig.update_layout(
+            dict(
+                xaxis_title=obj_names[0],
+                yaxis_title=obj_names[1],
+            )
+        )
+
+    elif len(obj_names) == 3:
+        fig = px.scatter_3d(
+            df,
+            x=obj_names[0],
+            y=obj_names[1],
+            z=obj_names[2],
+            **common_kwargs,
+        )
+        fig.update_layout(
+            margin=dict(l=0, r=0, b=0, t=30),
+        )
+        fig.update_traces(
+            marker=dict(
+                size=3,
+            ),
+        )
+
+    else:
+        raise Exception
+
+    fig.update_layout(
+        dict(
+            title_text="Objective plot",
+        )
+    )
+
+    fig.update_traces(hoverinfo="none", hovertemplate=None)
 
     return fig
