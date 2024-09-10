@@ -157,10 +157,8 @@ class AbstractOptimizer(ABC):
         if isinstance(x, np.float64):
             x = np.array([x])
 
-        # x の更新
-        prm_names = self.variables.get_parameter_names()
-        for name, value in zip(prm_names, x):
-            self.variables.variables[name].value = value
+        # Optimizer の x の更新
+        self.set_parameter_values(x)
 
         logger.info('---------------------')
         logger.info(f'input: {x}')
@@ -251,6 +249,16 @@ class AbstractOptimizer(ABC):
         for name, value in params.items():
             self.variables.variables[name].value = value
         self.variables.evaluate()
+
+    def set_parameter_values(self, values: np.ndarray) -> None:
+        """Update parameter with values.
+
+        Args:
+            values (np.ndarray): Values of all parameters.
+        """
+        prm_names = self.variables.get_parameter_names()
+        assert len(values) == len(prm_names)
+        self.set_parameter({k: v for k, v in zip(prm_names, values)})
 
     def _check_interruption(self):
         """"""
