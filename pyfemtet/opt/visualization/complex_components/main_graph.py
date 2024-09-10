@@ -54,6 +54,7 @@ class MainGraph(AbstractPage):
     """
 
     TAB_ID_OBJECTIVE_PLOT = 'tab-objectives-plot'
+    TAB_ID_HYPERVOLUME_PLOT = 'tab-hypervolume-plot'
 
     def __init__(self):
         self.setup_figure_creator()
@@ -74,7 +75,7 @@ class MainGraph(AbstractPage):
                 creator=main_figure_creator.get_objective_plot,
             ),
             dict(
-                tab_id='tab-hypervolume-plot',
+                tab_id=self.TAB_ID_HYPERVOLUME_PLOT,
                 label='Hypervolume',
                 creator=main_figure_creator.get_hypervolume_plot,
             ),
@@ -87,12 +88,19 @@ class MainGraph(AbstractPage):
         # setup header
         tab_list = []
         for d in self.figure_creators:
-            disabled = d['tab_id'] == self.TAB_ID_OBJECTIVE_PLOT  # Objective plot tab is only shown in obj_names > 3. Set this via callback.
+            is_objective_plot = d['tab_id'] == self.TAB_ID_OBJECTIVE_PLOT  # Objective plot tab is only shown in obj_names > 3. Set this via callback.
+            is_hypervolume_plot = d['tab_id'] == self.TAB_ID_HYPERVOLUME_PLOT  # same above
+
+            if is_objective_plot or is_hypervolume_plot:
+                style = {'display': 'none'}
+            else:
+                style = None
+
             tab_list.append(
                 dbc.Tab(
                     label=d['label'],
                     tab_id=d['tab_id'],
-                    disabled=disabled,
+                    tab_style=style,
                 )
             )
         self.tab_list = tab_list
@@ -195,26 +203,56 @@ class MainGraph(AbstractPage):
 
         app = self.application.app
 
-        # ===== Change availability of objective plot tab =====
+        # ===== Change visibility of plot tab =====
         objective_plot_tab = [t for t in self.tab_list if t.tab_id == self.TAB_ID_OBJECTIVE_PLOT][0]
+        hypervolume_plot_tab = [t for t in self.tab_list if t.tab_id == self.TAB_ID_HYPERVOLUME_PLOT][0]
         @app.callback(
-            Output(objective_plot_tab, 'disabled'),
-            Input(self.tabs, 'active_tab'),
-            Input(self.location, 'pathname'),
+            output=(
+                Output(objective_plot_tab, 'tab_style'),
+                Output(hypervolume_plot_tab, 'tab_style'),
+            ),
+            inputs=dict(
+                _=(
+                    Input(self.tabs, 'active_tab'),
+                    Input(self.location, 'pathname'),
+                ),
+                current_styles=dict(
+                    obj=State(objective_plot_tab, 'tab_style'),
+                    hv=State(hypervolume_plot_tab, 'tab_style'),
+                ),
+            ),
             prevent_initial_call=True,
         )
-        def set_disabled(*_):
-            disabled = no_update
+        def set_disabled(_, current_styles):
+            obj_style: dict = no_update
+            hv_style: dict = no_update
 
             # load history
             if self.application.history is None:
                 raise PreventUpdate
-
-            # assert 3 or more objectives
             obj_names = self.application.history.obj_names
-            disabled = len(obj_names) < 3
 
-            return disabled
+            # show objective plot with 3 or more objectives
+            if len(obj_names) < 3:
+                if 'display' not in current_styles['obj'].keys():
+                    obj_style = current_styles['obj']
+                    obj_style.update({'display': 'none'})
+            else:
+                if 'display' in current_styles['obj'].keys():
+                    obj_style = current_styles['obj']
+                    obj_style.pop('display')
+
+            # show hypervolume plot with 2 or more objectives
+            if len(obj_names) < 2:
+                if 'display' not in current_styles['hv'].keys():
+                    hv_style = current_styles['hv']
+                    hv_style.update({'display': 'none'})
+            else:
+                if 'display' in current_styles['hv'].keys():
+                    hv_style = current_styles['hv']
+                    hv_style.pop('display')
+
+            return obj_style, hv_style
 
         # ===== Change visibility of dropdown menus =====
         @app.callback(

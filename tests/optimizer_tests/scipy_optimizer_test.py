@@ -12,12 +12,6 @@ def x(opt: ScipyOptimizer):
     return r * cos(theta)
 
 
-def y(opt: ScipyOptimizer):
-    """r, theta から y 座標を返します。"""
-    r, theta = opt.get_parameter("values")
-    return r * sin(theta)
-
-
 def main():
 
     fem = NoFEM()  # Femtet を使わない設定です。
