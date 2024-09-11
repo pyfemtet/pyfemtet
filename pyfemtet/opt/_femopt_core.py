@@ -173,11 +173,11 @@ def is_feasible(value, lb, ub):
         bool: True if the value satisfies the bounds; False otherwise.
     """
     if lb is None and ub is not None:
-        return value < ub
+        return value <= ub
     elif lb is not None and ub is None:
-        return lb < value
+        return lb <= value
     elif lb is not None and ub is not None:
-        return lb < value < ub
+        return lb <= value <= ub
     else:
         return True
 
@@ -313,7 +313,7 @@ class Constraint(Function):
 
     default_name = 'cns'
 
-    def __init__(self, fun, name, lb, ub, strict, args, kwargs):
+    def __init__(self, fun, name, lb, ub, strict, args, kwargs, using_fem):
         """Initializes a Constraint instance.
 
         Args:
@@ -324,6 +324,7 @@ class Constraint(Function):
             strict (bool): Whether to enforce strict inequality for the bounds.
             args: Additional arguments for the constraint function.
             kwargs: Additional keyword arguments for the constraint function.
+            using_fem: Update fem or not before run calc().
 
         Raises:
             ValueError: If the lower bound is greater than or equal to the upper bound.
@@ -334,26 +335,8 @@ class Constraint(Function):
         self.lb = lb
         self.ub = ub
         self.strict = strict
+        self.using_fem = using_fem
         super().__init__(fun, name, args, kwargs)
-
-
-# from pyfemtet.opt.opt import AbstractOptimizer
-class ParameterConstraint(Constraint):
-    """Variable のみを引数とする constraint 関数"""
-
-    def __init__(self, fun, name, lb, ub, opt: 'AbstractOptimizer'):
-        super().__init__(fun, name, lb, ub, strict=True, args=None, kwargs=None)
-        self.opt = opt
-        self.prm_args = [arg.name for arg in inspect.signature(self.fun).parameters.values()]
-
-    def calc(self, _):
-        # variables 全体から fun に対する引数を作成する
-        kwargs: dict = self.opt.get_parameter('dict')
-        keys = list(kwargs.keys())
-        for k in keys:
-            if k not in self.prm_args:
-                kwargs.pop(k)
-        return float(self.fun(**kwargs))
 
 
 class _HistoryDfCore:

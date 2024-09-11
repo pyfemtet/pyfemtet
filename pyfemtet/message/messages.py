@@ -91,6 +91,8 @@ class Message:
     WARN_INTERRUPTED_IN_SCIPY = _('Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.')
     ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH = _('You can use parameter constraint only with BoTorchSampler.')
     WARN_SCIPY_DOESNT_NEED_SEED = _('Scipy is deterministic, so whether you set a seed or not will not change the results.')
+    START_CANDIDATE_WITH_PARAMETER_CONSTRAINT = _('Start to candidate new parameter set with constraints. This process may take a long time.')
+    WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME = _('Updating FEM parameter during evaluating constraints take a long time. Please consider not to use FEM variables in constraint functions and set `update_fem` to False.')
 
     # ===== pyfemtet.opt.visualization =====
     # control_femtet.py

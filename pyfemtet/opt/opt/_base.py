@@ -12,7 +12,7 @@ import pandas as pd
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FemtetInterface
-from pyfemtet.opt._femopt_core import OptimizationStatus
+from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
 from pyfemtet.message import Msg
 from pyfemtet.opt.parameter import ExpressionEvaluator
 
@@ -136,8 +136,8 @@ class AbstractOptimizer(ABC):
         self.fem_class = None
         self.fem_kwargs = dict()
         self.variables: ExpressionEvaluator = ExpressionEvaluator()
-        self.objectives: dict = dict()
-        self.constraints: dict = dict()
+        self.objectives: dict[str, Constraint] = dict()
+        self.constraints: dict[str, Constraint] = dict()
         self.entire_status = None  # actor
         self.history = None  # actor
         self.worker_status = None  # actor
