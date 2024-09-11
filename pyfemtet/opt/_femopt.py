@@ -21,6 +21,7 @@ from pyfemtet.opt.visualization.process_monitor.application import main as proce
 from pyfemtet.opt._femopt_core import (
     _check_bound,
     _is_access_gogh,
+    _is_access_femtet,
     Objective,
     Constraint,
     History,
@@ -260,7 +261,7 @@ class FEMOpt:
             strict: bool = True,
             args: tuple or None = None,
             kwargs: dict or None = None,
-            using_fem: bool = True,
+            using_fem: bool = None,
     ):
         """Adds a constraint to the optimization problem.
 
@@ -272,7 +273,7 @@ class FEMOpt:
             strict (bool, optional): Flag indicating if it is a strict constraint. Defaults to True.
             args (tuple or None, optional): Additional arguments for the constraint function. Defaults to None.
             kwargs (dict): Additional arguments for the constraint function. Defaults to None.
-            using_fem (bool): Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to True.
+            using_fem (bool, optional): Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically.
 
         Note:
             If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.
@@ -300,6 +301,8 @@ class FEMOpt:
                 else:
                     i += 1
             name = candidate
+        if using_fem is None:
+            using_fem = _is_access_femtet(fun)
 
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
         if strict:
@@ -308,12 +311,17 @@ class FEMOpt:
                 raise Exception(message)
 
         # strict constraint かつ BoTorchSampler の場合、
-        # 最適化実行時に monkey patch を実行するフラグを立てる
+        # 最適化実行時に monkey patch を実行するフラグを立てる。
+        # ただし using_fem が True ならば非常に低速なので警告を出す。
         if strict and isinstance(self.opt, OptunaOptimizer):
             self.opt: OptunaOptimizer
             from optuna_integration import BoTorchSampler
             if issubclass(self.opt.sampler_class, BoTorchSampler):
+                # パッチ実行フラグ
                 self.opt._do_monkey_patch = True
+                # 警告
+                if using_fem:
+                    logger.warning(Msg.WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME)
 
         self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs, using_fem)
 

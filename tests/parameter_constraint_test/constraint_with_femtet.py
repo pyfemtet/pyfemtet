@@ -10,10 +10,16 @@ def mises_stress(Femtet):
 
 def sumation(Femtet, opt):
     """三辺の和を返します。"""
-    d = Femtet.GetVariableValue('d')
-    w = Femtet.GetVariableValue('w')
-    h = Femtet.GetVariableValue('h')
-    # d, h, w = opt.get_parameter('values')
+    # Femtet にアクセスしても変数は取得できますが、
+    # 変数探索アルゴリズムの内部繰り返し計算のたびに
+    # Femtet にアクセスする必要があるので非常に低速です。
+    # d = Femtet.GetVariableValue('d')
+    # w = Femtet.GetVariableValue('w')
+    # h = Femtet.GetVariableValue('h')
+
+    # 代わりに下記のように opt 経由で変数を取得する手段を検討してください。
+    d, h, w = opt.get_parameter('values')
+
     return d + w + h
 
 
@@ -37,8 +43,7 @@ if __name__ == '__main__':
     femopt.add_parameter('h', 20, 10, 80)
     femopt.add_parameter('w', 20, 20, 110)
 
-    # femopt.add_constraint(sumation, '3辺の和', lower_bound=30, upper_bound=120, args=(opt,), using_fem=False)
-    femopt.add_constraint(sumation, '3辺の和', lower_bound=30, upper_bound=120, args=(opt,), using_fem=True)
+    femopt.add_constraint(sumation, '3辺の和', lower_bound=30, upper_bound=120, args=(opt,))
 
     femopt.add_objective(mises_stress, '最大ミーゼス応力')
 

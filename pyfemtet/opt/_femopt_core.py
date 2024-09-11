@@ -132,13 +132,38 @@ def _check_bound(lb, ub, name=None):
             raise ValueError(message)
 
 
-def _is_access_gogh(fun):
+def _get_scope_indent(source: str) -> int:
+    SPACES = [' ', '\t']
+    indent = 0
+    while True:
+        if source[indent] not in SPACES:
+            break
+        else:
+            indent += 1
+    return indent
+
+
+def _remove_indent(source: str, indent: int) -> str:  # returns source
+    lines = source.splitlines()
+    edited_lines = [l[indent:] for l in lines]
+    edited_source = '\n'.join(edited_lines)
+    return edited_source
+
+
+def _check_accsess_femtet_objects(fun, target: str = None):
+    if target is None:
+        target = ''
 
     # 関数fのソースコードを取得
     source = inspect.getsource(fun)
 
     # ソースコードを抽象構文木（AST）に変換
-    tree = ast.parse(source)
+    try:
+        # instanceメソッドなどの場合を想定してインデントを削除
+        source = _remove_indent(source, _get_scope_indent(source))
+        tree = ast.parse(source)
+    except:
+        return False  # パースに失敗するからと言ってエラーにするまででもない
 
     # 関数定義を見つける
     for node in ast.walk(tree):
@@ -146,18 +171,33 @@ def _is_access_gogh(fun):
             # 関数の第一引数の名前を取得
             first_arg_name = node.args.args[0].arg
 
+            # ただしクラスメソッドまたはインスタンスメソッドならば第二引数を取得
+            if first_arg_name == 'cls' or first_arg_name == 'self':
+                first_arg_name = node.args.args[1].arg
+            
+            # first_arg_name は Femtet オブジェクトを表す変数のはず
+
             # 関数内の全ての属性アクセスをチェック
             for sub_node in ast.walk(node):
                 if isinstance(sub_node, ast.Attribute):
-                    # 第一引数に対して 'Gogh' へのアクセスがあるかチェック
-                    if (
-                            isinstance(sub_node.value, ast.Name)
-                            and sub_node.value.id == first_arg_name
-                            and sub_node.attr == 'Gogh'
-                    ):
+                    # Femtet に対してアクセスがあるかチェック
+                    conditions = [isinstance(sub_node.value, ast.Name)]
+                    conditions.append(sub_node.value.id == first_arg_name)  # Femtet にアクセスしている
+                    if target == 'Gogh':
+                        conditions.append(sub_node.attr == 'Gogh')  # Femtet.Gogh にアクセスしている
+                    if all(conditions):
                         return True
+
             # ここまできてもなければアクセスしてない
             return False
+
+
+def _is_access_gogh(fun):
+    return _check_accsess_femtet_objects(fun, target='Gogh')
+
+
+def _is_access_femtet(fun):
+    return _check_accsess_femtet_objects(fun)
 
 
 def is_feasible(value, lb, ub):
