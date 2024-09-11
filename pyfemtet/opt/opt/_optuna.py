@@ -11,7 +11,7 @@ from optuna.trial import TrialState
 from optuna.study import MaxTrialsCallback
 
 # pyfemtet relative
-from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
+from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs, Constraint
 from pyfemtet.opt.opt import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
 from pyfemtet.message import Msg
@@ -54,7 +54,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
         self.method_checker = OptunaMethodChecker(self)
-        self.parameter_constraints = []
+        self._do_monkey_patch = False
 
     def _objective(self, trial):
 
@@ -114,7 +114,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # 拘束 attr の更新
         if len(self.constraints) > 0:
-            _c = []  # 非正なら OK
+            _c = []  # <= 0 is feasible
             for (name, cns), c_value in zip(self.constraints.items(), c):
                 lb, ub = cns.lb, cns.ub
                 if lb is not None:  # fun >= lb  <=>  lb - fun <= 0
@@ -275,39 +275,20 @@ class OptunaOptimizer(AbstractOptimizer):
         )
 
         # monkey patch
-        if len(self.parameter_constraints) > 0:
+        if self._do_monkey_patch:
             assert isinstance(sampler, optuna.integration.BoTorchSampler), Msg.ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH
 
-            from pyfemtet.opt.opt._optuna_botorch_helper import OptunaBotorchWithParameterConstraintMonkeyPatch
-            mp = OptunaBotorchWithParameterConstraintMonkeyPatch(
-                study,
-                self,
+            from pyfemtet.opt.opt._optuna_botorchsampler_parameter_constraint_helper import do_patch
+
+            do_patch(
+                self.study,
+                self.constraints,
+                self
             )
-            for p_cns in self.parameter_constraints:
-                fun = p_cns['fun']
-                prm_args = p_cns['prm_args']
-                kwargs = p_cns['kwargs']
-                mp.add_nonlinear_constraint(fun, prm_args, kwargs)
-            mp.do_monkey_patch()
 
         # run
         study.optimize(
             self._objective,
             timeout=self.timeout,
             callbacks=self.optimize_callbacks,
-        )
-
-    def add_parameter_constraints(
-            self,
-            fun,
-            prm_args=None,
-            kwargs=None
-    ):
-        kwargs = kwargs if kwargs is not None else {}
-        self.parameter_constraints.append(
-            dict(
-                fun=fun,
-                prm_args=prm_args,
-                kwargs=kwargs,
-            )
         )

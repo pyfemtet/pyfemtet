@@ -12,7 +12,7 @@ import pandas as pd
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FemtetInterface
-from pyfemtet.opt._femopt_core import OptimizationStatus
+from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
 from pyfemtet.message import Msg
 from pyfemtet.opt.parameter import ExpressionEvaluator
 
@@ -136,8 +136,8 @@ class AbstractOptimizer(ABC):
         self.fem_class = None
         self.fem_kwargs = dict()
         self.variables: ExpressionEvaluator = ExpressionEvaluator()
-        self.objectives: dict = dict()
-        self.constraints: dict = dict()
+        self.objectives: dict[str, Constraint] = dict()
+        self.constraints: dict[str, Constraint] = dict()
         self.entire_status = None  # actor
         self.history = None  # actor
         self.worker_status = None  # actor
@@ -157,10 +157,8 @@ class AbstractOptimizer(ABC):
         if isinstance(x, np.float64):
             x = np.array([x])
 
-        # x の更新
-        prm_names = self.variables.get_parameter_names()
-        for name, value in zip(prm_names, x):
-            self.variables.variables[name].value = value
+        # Optimizer の x の更新
+        self.set_parameter_values(x)
 
         logger.info('---------------------')
         logger.info(f'input: {x}')
@@ -240,6 +238,27 @@ class AbstractOptimizer(ABC):
 
         """
         return self.variables.get_variables(format=format, filter_parameter=True)
+
+    def set_parameter(self, params: dict) -> None:
+        """Update parameter.
+
+        Args:
+            params (dict): Key is the name of parameter and the value is the value of it. The partial set is available.
+
+        """
+        for name, value in params.items():
+            self.variables.variables[name].value = value
+        self.variables.evaluate()
+
+    def set_parameter_values(self, values: np.ndarray) -> None:
+        """Update parameter with values.
+
+        Args:
+            values (np.ndarray): Values of all parameters.
+        """
+        prm_names = self.variables.get_parameter_names()
+        assert len(values) == len(prm_names)
+        self.set_parameter({k: v for k, v in zip(prm_names, values)})
 
     def _check_interruption(self):
         """"""
