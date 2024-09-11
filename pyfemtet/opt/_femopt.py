@@ -302,10 +302,14 @@ class FEMOpt:
                     i += 1
             name = candidate
         if using_fem is None:
-            using_fem = _is_access_femtet(fun)
+            # 自動推定機能は Femtet 特有の処理とする
+            if isinstance(self.fem, FemtetInterface):
+                using_fem = _is_access_femtet(fun)
+            else:
+                using_fem = False
 
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
-        if strict:
+        if strict and isinstance(self.fem, FemtetInterface):
             if _is_access_gogh(fun):
                 message = Msg.ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT
                 raise Exception(message)

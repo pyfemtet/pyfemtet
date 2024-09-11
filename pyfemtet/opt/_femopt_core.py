@@ -168,14 +168,8 @@ def _check_accsess_femtet_objects(fun, target: str = None):
     # 関数定義を見つける
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
-            # 関数の第一引数の名前を取得
-            first_arg_name = node.args.args[0].arg
-
-            # ただしクラスメソッドまたはインスタンスメソッドならば第二引数を取得
-            if first_arg_name == 'cls' or first_arg_name == 'self':
-                first_arg_name = node.args.args[1].arg
-            
-            # first_arg_name は Femtet オブジェクトを表す変数のはず
+            # Femtet という名前の引数を取得
+            first_arg_name = 'Femtet'
 
             # 関数内の全ての属性アクセスをチェック
             for sub_node in ast.walk(node):
