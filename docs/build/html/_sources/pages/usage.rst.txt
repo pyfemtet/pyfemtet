@@ -11,7 +11,6 @@ This section outlines the standard procedure for applying ``pyfemtet.opt`` in yo
 .. toctree::
     :titlesonly:
 
-    usage_pages/how_to_use_script_builder
     usage_pages/how_to_use_result_viewer
     usage_pages/how_to_optimize_your_project
     usage_pages/how_to_deploy_cluster

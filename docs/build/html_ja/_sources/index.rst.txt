@@ -107,6 +107,7 @@ Table of Contents
     Home <self>
     pages/installation
     pages/examples
+    pages/script_builder
     pages/usage
     pages/api
     pages/LICENSE

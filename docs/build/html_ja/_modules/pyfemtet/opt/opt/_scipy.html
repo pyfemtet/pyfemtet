@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
@@ -130,10 +131,13 @@
 
 <span class="k">class</span> <span class="nc">ScipyMethodChecker</span><span class="p">(</span><span class="n">OptimizationMethodChecker</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">check_incomplete_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">WARN_SCIPY_DOESNT_NEED_SEED</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="ScipyOptimizer">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.opt.ScipyOptimizer">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.ScipyOptimizer">[ドキュメント]</a>
 <span class="k">class</span> <span class="nc">ScipyOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -157,8 +161,9 @@
 
     <span class="k">def</span> <span class="nf">_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>  <span class="c1"># x: candidate parameter</span>
         <span class="c1"># update parameter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;df&#39;</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
         <span class="c1"># strict constraints</span>
         <span class="o">...</span>
@@ -187,17 +192,17 @@
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="ScipyOptimizer.run">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.opt.ScipyOptimizer.run">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.ScipyOptimizer.run">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># create init</span>
-        <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
 
         <span class="c1"># create bounds</span>
         <span class="k">if</span> <span class="s1">&#39;bounds&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimize_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lower_buond&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;upper_bound&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;df&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lower_bound&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;upper_bound&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">lb</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
                 <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
                 <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">])</span>

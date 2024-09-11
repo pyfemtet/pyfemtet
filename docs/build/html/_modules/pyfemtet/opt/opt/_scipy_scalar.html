@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
@@ -94,14 +95,18 @@
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span><span class="p">,</span> <span class="n">generate_lhs</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.opt</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">OptimizationMethodChecker</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">MeshError</span><span class="p">,</span> <span class="n">ModelError</span><span class="p">,</span> <span class="n">SolveError</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <span class="k">class</span> <span class="nc">ScipyScalarMethodChecker</span><span class="p">(</span><span class="n">OptimizationMethodChecker</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">check_incomplete_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">def</span> <span class="nf">check_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">WARN_SCIPY_DOESNT_NEED_SEED</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="ScipyScalarOptimizer">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.opt.ScipyScalarOptimizer">[docs]</a>
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.ScipyScalarOptimizer">[docs]</a>
 <span class="k">class</span> <span class="nc">ScipyScalarOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -122,8 +127,10 @@
 
     <span class="k">def</span> <span class="nf">_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>  <span class="c1"># x: candidate parameter</span>
         <span class="c1"># update parameter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;df&#39;</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
         <span class="c1"># strict constraints</span>
         <span class="o">...</span>
@@ -151,23 +158,29 @@
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="ScipyScalarOptimizer.run">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.opt.ScipyScalarOptimizer.run">[docs]</a>
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.ScipyScalarOptimizer.run">[docs]</a>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># create init</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s1"> parameter(s) are passed.&#39;</span><span class="p">)</span>
 
         <span class="c1"># create bounds</span>
         <span class="k">if</span> <span class="s1">&#39;bounds&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimize_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lower_bound&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;upper_bound&#39;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">lb</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-                <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-                <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">minimize_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                <span class="p">{</span><span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">}</span>
-            <span class="p">)</span>
+
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;df&#39;</span><span class="p">)</span>
+            <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;lower_bound&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;upper_bound&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ub</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">lb</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ub</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Both lower and upper bounds must be set.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">minimize_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="c1"># run optimize</span>
         <span class="k">try</span><span class="p">:</span>

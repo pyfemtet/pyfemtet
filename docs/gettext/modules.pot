@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-22 11:35+0900\n"
+"POT-Creation-Date: 2024-09-11 17:54+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -143,6 +143,8 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:0
 #: ../../pyfemtet/opt/opt/_base.py:docstring of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:0
+#: ../../pyfemtet/opt/opt/_base.py:docstring of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter:0
+#: ../../pyfemtet/opt/opt/_base.py:docstring of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter_values:0
 #: ../../pyfemtet/opt/opt/_optuna.py:docstring of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:0
 #: ../../pyfemtet/opt/prediction/base.py:docstring of pyfemtet.opt.prediction.base.PredictionModelBase.fit:0
 #: ../../pyfemtet/opt/prediction/base.py:docstring of pyfemtet.opt.prediction.base.PredictionModelBase.predict:0
@@ -442,6 +444,22 @@ msgstr ""
 msgid "Start calculation using optimization library."
 msgstr ""
 
+#: ../../pyfemtet/opt/opt/_base.py:docstring of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter:1
+msgid "Update parameter."
+msgstr ""
+
+#: ../../pyfemtet/opt/opt/_base.py:docstring of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter:3
+msgid "Key is the name of parameter and the value is the value of it. The partial set is available."
+msgstr ""
+
+#: ../../pyfemtet/opt/opt/_base.py:docstring of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter_values:1
+msgid "Update parameter with values."
+msgstr ""
+
+#: ../../pyfemtet/opt/opt/_base.py:docstring of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter_values:3
+msgid "Values of all parameters."
+msgstr ""
+
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface:1
 msgid "Abstract base class for the interface with FEM software."
 msgstr ""
@@ -580,12 +598,16 @@ msgstr ""
 msgid "Additional arguments for the constraint function. Defaults to None."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:18
+#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:17
+msgid "Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically."
+msgstr ""
+
+#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:20
 #: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:14
 msgid "If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:20
+#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:22
 msgid "If name is None, name is a string with the prefix `\"cns_\"` followed by a sequential number."
 msgstr ""
 
@@ -697,19 +719,23 @@ msgstr ""
 msgid "Wait for all workers launching FEM system. Defaults to True."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:12
-msgid "If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080."
+#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:11
+msgid "Insert stop before exit to continue to show process monitor."
 msgstr ""
 
 #: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:14
-msgid "If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user."
+msgid "If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080."
 msgstr ""
 
 #: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:16
+msgid "If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user."
+msgstr ""
+
+#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:18
 msgid "If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:20
+#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:22
 msgid "If ``n_parallel`` >= 2 and ``fem`` is a subclass of ``FemtetInterface``, the ``strictly_pid_specify`` of subprocess is set to ``False``. So **it is recommended to close all other Femtet processes before running.**"
 msgstr ""
 
@@ -743,14 +769,6 @@ msgstr ""
 
 #: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_random_seed:3
 msgid "The random seed value to be set."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.terminate_all:1
-msgid "Try to terminate all launched processes."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.terminate_all:3
-msgid "If distributed computing, Scheduler and Workers will NOT be terminated."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM:1
@@ -1008,6 +1026,7 @@ msgstr ""
 #: ../../pyfemtet/opt/visualization/complex_components/main_graph.py:docstring of pyfemtet.opt.visualization.complex_components.main_graph.MainGraph:1
 #: ../../pyfemtet/opt/visualization/complex_components/pm_graph.py:docstring of pyfemtet.opt.visualization.complex_components.pm_graph.PredictionModelGraph:1
 #: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.HomePage:1
+#: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.OptunaVisualizerPage:1
 #: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.PredictionModelPage:1
 #: ../../pyfemtet/opt/visualization/process_monitor/pages.py:docstring of pyfemtet.opt.visualization.process_monitor.pages.WorkerPage:1
 #: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage:1

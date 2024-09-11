@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-10 17:35+0900\n"
+"POT-Creation-Date: 2024-09-11 17:54+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -131,9 +131,8 @@ msgstr "外部 CAD (Solidworks) 連携"
 msgid "Explore the same problem as left with Solidworks integration."
 msgstr "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
 
-#: ../source/pages/installation.rst:2
+#: ../source/pages/installation.rst:2 ../source/pages/script_builder.rst:10
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:10
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:10
 msgid "Installation"
 msgstr "インストール"
 
@@ -334,11 +333,73 @@ msgstr "Femtet をインストールした後、Windows のスタート メニ�
 msgid "This step will open the Femtet help window. **You don't need to run the help window, so close it.**"
 msgstr "この手順により、Femtet ヘルプ ウィンドウが開きますが、 **ヘルプの内容を実行する必要はないので、閉じてください。**"
 
-#: ../source/pages/usage.rst:2
+#: ../source/pages/script_builder.rst:2
+msgid "GUI"
+msgstr ""
+
+#: ../source/pages/script_builder.rst:4
+msgid "``pyfemtet.opt`` has a GUI tool for script builder to run optimization: ``pyfemtet-opt-gui``."
+msgstr "``pyfemtet.opt`` での最適化問題をセットアップするため ``pyfemtet-opt-gui`` というツールをご利用できます。"
+
+#: ../source/pages/script_builder.rst:14
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:14
+msgid "If you successfully ran `onestop-installer`, you already have the GUI tool."
+msgstr "`onestop-installer` の実行が成功していれば、すでに GUI ツールを使う準備ができています。"
+
+#: ../source/pages/script_builder.rst:16
+msgid "More information, see :doc:`installation_pages/install_pyfemtet` or :ref:`manualinstallation` ."
+msgstr "詳細は :doc:`installation_pages/install_pyfemtet` 又は :ref:`manualinstallation` をご覧ください。"
+
+#: ../source/pages/script_builder.rst:20
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:20
+msgid "Launch GUI"
+msgstr "起動方法"
+
+#: ../source/pages/script_builder.rst:22
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:22
+msgid "Double click desktop icon."
+msgstr "デスクトップアイコンをダブルクリックします。"
+
+#: ../source/pages/script_builder.rst:26
+msgid "It may takes a long time for first time launching."
+msgstr "初回起動には少し時間がかかる場合があります。"
+
+#: ../source/pages/script_builder.rst:30 ../source/pages/usage.rst:2
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:28
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:30
 msgid "Usage"
 msgstr "使い方"
+
+#: ../source/pages/script_builder.rst:32
+msgid "Before launch tool, you prepare a .femprj file that define the FEM problem with parametric modeling and parametric analysis output settings."
+msgstr "ツールを起動する前に、パラメトリックモデリングを行い、パラメトリック解析結果出力機能を設定した .femprj ファイルを準備してください。"
+
+#: ../source/pages/script_builder.rst:35
+msgid "Then Launch the tool and setup optimization problem following the tool's explanation."
+msgstr "次にツールを起動し、画面の説明に従って最適化問題をセットアップします。"
+
+#: ../source/pages/script_builder.rst:37
+msgid "Finally, you will get a ``.py`` script to run optimization with your ``.femprj`` file."
+msgstr "最終的に ``.femprj`` ファイルで最適化を実行するための ``.py`` ファイルが生成されます。"
+
+#: ../source/pages/script_builder.rst:42
+msgid "Manual Installation"
+msgstr "手動インストール"
+
+#: ../source/pages/script_builder.rst:44
+msgid "If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::"
+msgstr "`onestop-installer` の実行に失敗して ``pyfemtet-opt-gui`` がインストールできなかった場合、下記のコマンドをコマンドプロンプトで実行してください。::"
+
+#: ../source/pages/script_builder.rst:48
+msgid "If you have no icon on your desktop, search `pyfemtet-opt.exe` in `Scripts` folder of your python environment."
+msgstr "デスクトップにアイコンがない場合、ご利用の python 環境の `Scripts` フォルダに存在する `pyfemtet-opt.exe` ファイルを探してください。"
+
+#: ../source/pages/script_builder.rst:50
+msgid "To check where your python environment is, run following command in `cmd`::"
+msgstr "python 環境のパスを確認するには、下記のコマンドをコマンドプロンプトで実行してください。"
+
+#: ../source/pages/script_builder.rst:54
+msgid "The command above returns full path of your `python.exe` file. Typically the `Scripts` folder exists in where the `python.exe` exists."
+msgstr "このコマンドにより、ご利用の環境での `python.exe` 実行ファイルのフルパスが表示されます。通常は、その実行ファイルが存在するフォルダに `Scripts` フォルダが存在します。"
 
 #: ../source/pages/usage.rst:4
 msgid "This section outlines the standard procedure for applying ``pyfemtet.opt`` in your own project."
@@ -624,24 +685,9 @@ msgstr "結果ビューア"
 msgid "``pyfemtet.opt`` has a GUI tool to visualize the optimization result."
 msgstr "``pyfemtet.opt`` は最適化結果を可視化するための GUI ツールを備えています。"
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:14
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:14
-msgid "If you successfully ran `onestop-installer`, you already have the GUI tool."
-msgstr "`onestop-installer` の実行が成功していれば、すでに GUI ツールを使う準備ができています。"
-
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:16
 msgid "See :doc:`../installation_pages/install_pyfemtet` or :doc:`../installation_pages/install_pyfemtet_manually` ."
 msgstr "詳しくは :doc:`../installation_pages/install_pyfemtet` 又は :doc:`../installation_pages/install_pyfemtet_manually` をご覧ください。"
-
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:20
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:20
-msgid "Launch GUI"
-msgstr "起動方法"
-
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:22
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:22
-msgid "Double click desktop icon."
-msgstr "デスクトップアイコンをダブルクリックします。"
 
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:30
 msgid "Before launch tool, you run an optimization and get ``.csv`` file that contains the optimization history."
@@ -658,54 +704,6 @@ msgstr "最終的に、ツール上で各解析結果のプロットを選択し
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:40
 msgid "To learn usage with ready-made sample project, you can use `tutorial mode` in tool. It starts few minutes journy to explain how to use the tool."
 msgstr "ツールの `チュートリアルモード` によってサンプルプロジェクトを用いてツールの使い方を学習することができます。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:2
-msgid "Script Builder"
-msgstr "最適化問題セットアップツール"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:4
-msgid "``pyfemtet.opt`` has a GUI tool for script builder to run optimization: ``pyfemtet-opt-gui``."
-msgstr "``pyfemtet.opt`` での最適化問題をセットアップするため ``pyfemtet-opt-gui`` というツールをご利用できます。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:16
-msgid "More information, see :doc:`../installation_pages/install_pyfemtet` or :ref:`manualinstallation` ."
-msgstr "詳細は :doc:`../installation_pages/install_pyfemtet` 又は :ref:`manualinstallation` をご覧ください。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:26
-msgid "It may takes a long time for first time launching."
-msgstr "初回起動には少し時間がかかる場合があります。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:32
-msgid "Before launch tool, you prepare a .femprj file that define the FEM problem with parametric modeling and parametric analysis output settings."
-msgstr "ツールを起動する前に、パラメトリックモデリングを行い、パラメトリック解析結果出力機能を設定した .femprj ファイルを準備してください。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:35
-msgid "Then Launch the tool and setup optimization problem following the tool's explanation."
-msgstr "次にツールを起動し、画面の説明に従って最適化問題をセットアップします。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:37
-msgid "Finally, you will get a ``.py`` script to run optimization with your ``.femprj`` file."
-msgstr "最終的に ``.femprj`` ファイルで最適化を実行するための ``.py`` ファイルが生成されます。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:42
-msgid "Manual Installation"
-msgstr "手動インストール"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:44
-msgid "If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::"
-msgstr "`onestop-installer` の実行に失敗して ``pyfemtet-opt-gui`` がインストールできなかった場合、下記のコマンドをコマンドプロンプトで実行してください。::"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:48
-msgid "If you have no icon on your desktop, search `pyfemtet-opt.exe` in `Scripts` folder of your python environment."
-msgstr "デスクトップにアイコンがない場合、ご利用の python 環境の `Scripts` フォルダに存在する `pyfemtet-opt.exe` ファイルを探してください。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:50
-msgid "To check where your python environment is, run following command in `cmd`::"
-msgstr "python 環境のパスを確認するには、下記のコマンドをコマンドプロンプトで実行してください。"
-
-#: ../source/pages/usage_pages/how_to_use_script_builder.rst:54
-msgid "The command above returns full path of your `python.exe` file. Typically the `Scripts` folder exists in where the `python.exe` exists."
-msgstr "このコマンドにより、ご利用の環境での `python.exe` 実行ファイルのフルパスが表示されます。通常は、その実行ファイルが存在するフォルダに `Scripts` フォルダが存在します。"
 
 #~ msgid "実施例"
 #~ msgstr ""
@@ -772,4 +770,7 @@ msgstr "このコマンドにより、ご利用の環境での `python.exe` 実�
 
 #~ msgid "You will need administrator privileges to run this step."
 #~ msgstr "この手順を実行するには管理者権限が必要です。"
+
+#~ msgid "Script Builder"
+#~ msgstr "最適化問題セットアップツール"
 

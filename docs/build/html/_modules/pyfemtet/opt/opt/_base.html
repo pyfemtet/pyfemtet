@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
@@ -91,7 +92,7 @@
 
 <span class="c1"># pyfemtet relative</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetInterface</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span><span class="p">,</span> <span class="n">Objective</span><span class="p">,</span> <span class="n">Constraint</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.parameter</span> <span class="kn">import</span> <span class="n">ExpressionEvaluator</span>
 
@@ -216,10 +217,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fem_class</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fem_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="n">ExpressionEvaluator</span> <span class="o">=</span> <span class="n">ExpressionEvaluator</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Constraint</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Constraint</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># actor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># actor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># actor</span>
@@ -229,7 +229,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_cluster</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">subprocess_idx</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_error_exit</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">method_checker</span><span class="p">:</span> <span class="n">OptimizationMethodChecker</span> <span class="o">=</span> <span class="n">OptimizationMethodChecker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AbstractOptimizer.f">
@@ -238,10 +238,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, update fem analysis, return objectives (and constraints).&quot;&quot;&quot;</span>
         <span class="c1"># interruption の実装は具象クラスに任せる</span>
 
-        <span class="c1"># x の更新</span>
-        <span class="n">prm_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prm_names</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">])</span>
+
+        <span class="c1"># Optimizer の x の更新</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter_values</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---------------------&#39;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;input: </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -323,7 +324,34 @@
 <span class="sd">            ValueError: If an invalid format is provided.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">filter_parameter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.set_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.AbstractOptimizer.set_parameter">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update parameter.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): Key is the name of parameter and the value is the value of it. The partial set is available.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.set_parameter_values">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.AbstractOptimizer.set_parameter_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_parameter_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update parameter with values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            values (np.ndarray): Values of all parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prm_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prm_names</span><span class="p">,</span> <span class="n">values</span><span class="p">)})</span></div>
 
 
     <span class="k">def</span> <span class="nf">_check_interruption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -347,7 +375,7 @@
             <span class="n">worker_status_list</span><span class="p">,</span>
             <span class="n">wait_setup</span><span class="p">,</span>
             <span class="n">skip_set_fem</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]:</span>
 
         <span class="c1"># 自分の worker_status の取得</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">subprocess_idx</span> <span class="o">=</span> <span class="n">subprocess_idx</span>
@@ -390,12 +418,12 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;=================================&quot;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_is_error_exit</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span> <span class="o">=</span> <span class="n">e</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">CRASHED</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_finalize</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_error_exit</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span>
 
 <div class="viewcode-block" id="AbstractOptimizer.run">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.opt.html#pyfemtet.opt.AbstractOptimizer.run">[docs]</a>

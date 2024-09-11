@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
@@ -77,11 +78,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pyfemtet.opt.interface._femtet</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Final</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="nn">winreg</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">psutil</span>
@@ -182,6 +184,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_api_retry</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strictly_pid_specify</span> <span class="o">=</span> <span class="n">strictly_pid_specify</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="o">=</span> <span class="n">parametric_output_indexes_use_as_objective</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span> <span class="o">=</span> <span class="n">get_autosave_enabled</span><span class="p">()</span>
+        <span class="n">set_autosave_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># dask サブプロセスのときは femprj を更新し connect_method を new にする</span>
         <span class="k">try</span><span class="p">:</span>
@@ -223,6 +227,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
         <span class="c1"># CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748</span>
@@ -984,6 +989,40 @@
         <span class="n">pdt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">here</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;trial</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s1">.pdt&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pdt_path</span>
 
+
+<span class="c1"># レジストリのパスと値の名前</span>
+<span class="n">REGISTRY_PATH</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Murata Software\Femtet2014\Femtet&quot;</span>
+<span class="n">VALUE_NAME</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoSave&quot;</span>
+
+<span class="k">def</span> <span class="nf">get_autosave_enabled</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_CURRENT_USER</span><span class="p">,</span> <span class="n">REGISTRY_PATH</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
+        <span class="n">value</span><span class="p">,</span> <span class="n">regtype</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">VALUE_NAME</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">regtype</span> <span class="o">==</span> <span class="n">winreg</span><span class="o">.</span><span class="n">REG_DWORD</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unexpected registry value type.&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">set_autosave_enabled</span><span class="p">(</span><span class="n">enable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_CURRENT_USER</span><span class="p">,</span> <span class="n">REGISTRY_PATH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">KEY_SET_VALUE</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
+        <span class="n">winreg</span><span class="o">.</span><span class="n">SetValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">VALUE_NAME</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">REG_DWORD</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">enable</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_test_autosave_setting</span><span class="p">():</span>
+
+    <span class="c1"># 使用例</span>
+    <span class="n">current_setting</span> <span class="o">=</span> <span class="n">get_autosave_enabled</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current AutoSave setting is </span><span class="si">{</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">current_setting</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 設定を変更する例</span>
+    <span class="n">new_setting</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">current_setting</span>
+    <span class="n">set_autosave_enabled</span><span class="p">(</span><span class="n">new_setting</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AutoSave setting has been </span><span class="si">{</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">new_setting</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 再度設定を確認する</span>
+    <span class="n">after_setting</span> <span class="o">=</span> <span class="n">get_autosave_enabled</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current AutoSave setting is </span><span class="si">{</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">after_setting</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">new_setting</span> <span class="o">==</span> <span class="n">after_setting</span><span class="p">,</span> <span class="s2">&quot;レジストリ編集に失敗しました。&quot;</span> 
 </pre></div>
 
            </div>

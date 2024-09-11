@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
@@ -79,6 +80,8 @@
   <h1>pyfemtet.opt.visualization.result_viewer.application のソースコード</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.result_viewer.pages</span> <span class="kn">import</span> <span class="n">HomePage</span><span class="p">,</span> <span class="n">PredictionModelPage</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.pages</span> <span class="kn">import</span> <span class="n">OptunaVisualizerPage</span>
+
 <span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
@@ -111,9 +114,11 @@
 
     <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_RESULT</span><span class="p">)</span>
     <span class="n">g_rsm_page</span> <span class="o">=</span> <span class="n">PredictionModelPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PREDICTION_MODEL</span><span class="p">,</span> <span class="s1">&#39;/prediction-model&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
+    <span class="n">g_optuna</span> <span class="o">=</span> <span class="n">OptunaVisualizerPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_OPTUNA_VISUALIZATION</span><span class="p">,</span> <span class="s1">&#39;/optuna&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_rsm_page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_optuna</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
@@ -127,9 +132,11 @@
 
     <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_RESULT</span><span class="p">)</span>
     <span class="n">g_rsm_page</span> <span class="o">=</span> <span class="n">PredictionModelPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PREDICTION_MODEL</span><span class="p">,</span> <span class="s1">&#39;/prediction-model&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
+    <span class="n">g_optuna</span> <span class="o">=</span> <span class="n">OptunaVisualizerPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_OPTUNA_VISUALIZATION</span><span class="p">,</span> <span class="s1">&#39;/optuna&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_rsm_page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_optuna</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
