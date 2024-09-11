@@ -149,7 +149,7 @@ def simple():
 
 
 
-from pyfemtet._test_util import SuperSphere
+from test_utils import SuperSphere
 
 s = SuperSphere(2)
 

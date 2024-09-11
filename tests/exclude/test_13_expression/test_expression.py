@@ -2,7 +2,7 @@ import os
 
 from numpy import pi
 
-from pyfemtet._test_util import SuperSphere
+from test_utils import SuperSphere
 from pyfemtet.opt import FEMOpt, NoFEM, FemtetInterface, AbstractOptimizer
 
 here = os.path.dirname(__file__)

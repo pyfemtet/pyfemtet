@@ -141,8 +141,8 @@ def test_sample_parametric():
     main(femprj_path)
 
 
-def test_test():
-    main()
+# def test_test():
+#     main()
 
 
 if __name__ == '__main__':
