@@ -14,7 +14,7 @@ here = os.path.dirname(__file__)
 test_script = os.path.join(here, 'test_of_test.py')
 
 LIBRARY_ROOT = os.path.dirname(pyfemtet.__file__)
-SAMPLE_DIR = os.path.join(LIBRARY_ROOT, 'opt', 'femprj_sample')
+SAMPLE_DIR = os.path.join(LIBRARY_ROOT, 'opt', 'samples', 'femprj_sample')
 
 RECORD_MODE = False
 

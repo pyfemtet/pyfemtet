@@ -82,7 +82,7 @@ class Message:
     ERR_JPG_NOT_FOUND = _('Screenshot (.jpg) is not found.')
     ERR_UPDATE_SOLIDWORKS_MODEL_FAILED = _('Failed to update model in solidworks.')
 
-    # ===== pyfemtet.opt.opt =====
+    # ===== pyfemtet.opt.optimizer =====
     ERR_NOT_IMPLEMENTED = _('The following features are not supported by the specified optimization method. ')
     ERR_INCONSISTENT_PARAMETER = _('The parameter set does not match the one added with add_init_parameter.')
     INFO_EXCEPTION_DURING_FEM_ANALYSIS = _('An exception has occurred during FEM update. Current parameters are: ')

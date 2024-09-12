@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
@@ -84,7 +85,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span><span class="p">,</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.pages</span> <span class="kn">import</span> <span class="n">HomePage</span><span class="p">,</span> <span class="n">WorkerPage</span><span class="p">,</span> <span class="n">PredictionModelPage</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.pages</span> <span class="kn">import</span> <span class="n">HomePage</span><span class="p">,</span> <span class="n">WorkerPage</span><span class="p">,</span> <span class="n">PredictionModelPage</span><span class="p">,</span> <span class="n">OptunaVisualizerPage</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
@@ -148,14 +149,14 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_get_actor_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">local_data</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
 
     <span class="nd">@local_data</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">local_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_get_actor_data</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;If should_get_actor_data, ProcessMonitorApplication.local_df is read_only.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">local_data</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProcessMonitorApplication.setup_callback">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.process_monitor.html#pyfemtet.opt.visualization.process_monitor.application.ProcessMonitorApplication.setup_callback">[ドキュメント]</a>
@@ -198,7 +199,7 @@
                     <span class="n">worker_status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">INTERRUPTING</span><span class="p">)</span>
 
             <span class="c1"># status と df を actor から application に反映する</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">actor_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">local_entire_status_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">local_worker_status_int_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span><span class="p">]</span>
 
@@ -269,11 +270,13 @@
 
     <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PROGRESS</span><span class="p">)</span>
     <span class="n">g_rsm_page</span> <span class="o">=</span> <span class="n">PredictionModelPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PREDICTION_MODEL</span><span class="p">,</span> <span class="s1">&#39;/prediction-model&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
+    <span class="n">g_optuna</span> <span class="o">=</span> <span class="n">OptunaVisualizerPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_OPTUNA_VISUALIZATION</span><span class="p">,</span> <span class="s1">&#39;/optuna&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
     <span class="n">g_worker_page</span> <span class="o">=</span> <span class="n">WorkerPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_WORKERS</span><span class="p">,</span> <span class="s1">&#39;/workers&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_rsm_page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_worker_page</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_optuna</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_worker_page</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
@@ -287,11 +290,13 @@
 
     <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PROGRESS</span><span class="p">)</span>
     <span class="n">g_rsm_page</span> <span class="o">=</span> <span class="n">PredictionModelPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_PREDICTION_MODEL</span><span class="p">,</span> <span class="s1">&#39;/prediction-model&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
+    <span class="n">g_optuna</span> <span class="o">=</span> <span class="n">OptunaVisualizerPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_OPTUNA_VISUALIZATION</span><span class="p">,</span> <span class="s1">&#39;/optuna&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
     <span class="n">g_worker_page</span> <span class="o">=</span> <span class="n">WorkerPage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_WORKERS</span><span class="p">,</span> <span class="s1">&#39;/workers&#39;</span><span class="p">,</span> <span class="n">g_application</span><span class="p">)</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_home_page</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_rsm_page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_worker_page</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_optuna</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_worker_page</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span>
 
     <span class="n">g_application</span><span class="o">.</span><span class="n">start_server</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span></div>

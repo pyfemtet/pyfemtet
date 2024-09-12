@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/LICENSE.html">License</a></li>
@@ -134,6 +135,8 @@
                                         <span class="s1">&#39;Please free this file before exiting the program, &#39;</span>
                                         <span class="s1">&#39;otherwise history data will be lost.&#39;</span><span class="p">)</span>
     <span class="n">OPTIMIZATION_FINISHED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Optimization finished. Results were saved in following:&#39;</span><span class="p">)</span>
+    <span class="n">ERR_NO_BOUNDS</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;No bounds specified.&#39;</span><span class="p">)</span>
+    <span class="n">CONFIRM_BEFORE_EXIT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The optimization is now complete. You can view the results on the monitor until you press Enter to exit the program.&#39;</span><span class="p">)</span>
 
     <span class="c1"># ===== pyfemtet.opt.interface =====</span>
     <span class="n">ERR_RUN_JOURNAL_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&quot;%UGII_BASE_DIR%\NXBIN\run_journal.exe&quot; is not found. Make sure you have NX installed and the environment variable UGII_BASE_DIR is set.&#39;</span><span class="p">)</span>
@@ -164,13 +167,17 @@
     <span class="n">ERR_JPG_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Screenshot (.jpg) is not found.&#39;</span><span class="p">)</span>
     <span class="n">ERR_UPDATE_SOLIDWORKS_MODEL_FAILED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to update model in solidworks.&#39;</span><span class="p">)</span>
 
-    <span class="c1"># ===== pyfemtet.opt.opt =====</span>
+    <span class="c1"># ===== pyfemtet.opt.optimizer =====</span>
     <span class="n">ERR_NOT_IMPLEMENTED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The following features are not supported by the specified optimization method. &#39;</span><span class="p">)</span>
     <span class="n">ERR_INCONSISTENT_PARAMETER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The parameter set does not match the one added with add_init_parameter.&#39;</span><span class="p">)</span>
     <span class="n">INFO_EXCEPTION_DURING_FEM_ANALYSIS</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;An exception has occurred during FEM update. Current parameters are: &#39;</span><span class="p">)</span>
     <span class="n">INFO_INFEASIBLE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The constraints were not satisfied for the following sets of variables:&#39;</span><span class="p">)</span>
     <span class="n">ERR_FEM_FAILED_AND_CANNOT_CONTINUE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated.&#39;</span><span class="p">)</span>
     <span class="n">WARN_INTERRUPTED_IN_SCIPY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.&#39;</span><span class="p">)</span>
+    <span class="n">ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;You can use parameter constraint only with BoTorchSampler.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_SCIPY_DOESNT_NEED_SEED</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Scipy is deterministic, so whether you set a seed or not will not change the results.&#39;</span><span class="p">)</span>
+    <span class="n">START_CANDIDATE_WITH_PARAMETER_CONSTRAINT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Start to candidate new parameter set with constraints. This process may take a long time.&#39;</span><span class="p">)</span>
+    <span class="n">WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Updating FEM parameter during evaluating constraints take a long time. Please consider not to use FEM variables in constraint functions and set `update_fem` to False.&#39;</span><span class="p">)</span>
 
     <span class="c1"># ===== pyfemtet.opt.visualization =====</span>
     <span class="c1"># control_femtet.py</span>
@@ -192,7 +199,8 @@
     <span class="n">GRAPH_TITLE_MULTI_OBJECTIVE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Multi Objective Pair Plot&#39;</span><span class="p">)</span>
     <span class="n">GRAPH_AXIS_LABEL_TRIAL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;trial number&#39;</span><span class="p">)</span>
     <span class="c1"># main_graph.py</span>
-    <span class="n">TAB_LABEL_OBJECTIVES</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Objectives&#39;</span><span class="p">)</span>
+    <span class="n">TAB_LABEL_OBJECTIVE_PLOT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Objectives&#39;</span><span class="p">)</span>
+    <span class="n">TAB_LABEL_OBJECTIVE_SCATTERPLOT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Objectives (all)&#39;</span><span class="p">)</span>
     <span class="c1"># pm_graph.py</span>
     <span class="n">TAB_LABEL_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction Model&#39;</span><span class="p">)</span>
     <span class="n">LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39; Recalculate Model&#39;</span><span class="p">)</span>
@@ -204,6 +212,7 @@
     <span class="n">ERR_NO_FEM_RESULT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;No FEM result (yet).&#39;</span><span class="p">)</span>
     <span class="n">ERR_NO_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction model is not calculated yet.&#39;</span><span class="p">)</span>
     <span class="n">ERR_CANNOT_SELECT_SAME_PARAMETER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Cannot select same parameter&#39;</span><span class="p">)</span>
+    <span class="n">LABEL_SWITCH_PREDICTION_MODEL_3D</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;3D graph (two or more parameters required)&#39;</span><span class="p">)</span>
     <span class="c1"># pm_graph_creator</span>
     <span class="n">GRAPH_TITLE_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction Model of Objective&#39;</span><span class="p">)</span>
     <span class="n">LEGEND_LABEL_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;prediction model&#39;</span><span class="p">)</span>
@@ -212,6 +221,7 @@
     <span class="n">PAGE_TITLE_PROGRESS</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Progress&#39;</span><span class="p">)</span>
     <span class="n">PAGE_TITLE_PREDICTION_MODEL</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction&#39;</span><span class="p">)</span>
     <span class="n">PAGE_TITLE_WORKERS</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Workers&#39;</span><span class="p">)</span>
+    <span class="n">PAGE_TITLE_OPTUNA_VISUALIZATION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Details&#39;</span><span class="p">)</span>
     <span class="c1"># process monitor pages</span>
     <span class="n">DEFAULT_STATUS_ALERT</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Optimization status will be shown here.&#39;</span><span class="p">)</span>
     <span class="n">LABEL_AUTO_UPDATE</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Auto-update graph&#39;</span><span class="p">)</span>
@@ -253,8 +263,17 @@
     <span class="n">CONNECT_FEMTET_POPOVER_BODY</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Re-connect to Femtet.&#39;</span><span class="p">)</span>
     <span class="n">ERR_SAMPLE_CSV_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span><span class="p">)</span>
     <span class="n">ERR_SAMPLE_FEMPRJ_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span><span class="p">)</span>
-    <span class="n">ERR_FEMPRJ_RESULT_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span><span class="p">)</span></div>
-
+    <span class="n">ERR_FEMPRJ_RESULT_NOT_FOUND</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`&#39;</span><span class="p">)</span>
+    <span class="c1"># DETAIL VISUALIZATION PAGES</span>
+    <span class="n">DETAIL_PAGE_TEXT_BEFORE_LOADING</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Loading data...&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_HISTORY_HEADER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Plots of objectives versus trials&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_HISTORY_DESCRIPTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The vertical axis is the objective, and the horizontal axis is the number of trials.&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_PARALLEL_COOR_HEADER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Parallel coordinate plots&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_PARALLEL_COOR_DESCRIPTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The vertical axis is an objective or parameters, and one polyline indicates one result.&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_CONTOUR_HEADER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The heatmap of objectives&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_CONTOUR_DESCRIPTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The axes are parameters, and the color shows objective value.&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_SLICE_HEADER</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The response of an objective versus one parameter&#39;</span><span class="p">)</span>
+    <span class="n">DETAIL_PAGE_SLICE_DESCRIPTION</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;The vertical axis is objective, and the horizontal axis is parameter.&#39;</span><span class="p">)</span></div>
 
 
 </pre></div>

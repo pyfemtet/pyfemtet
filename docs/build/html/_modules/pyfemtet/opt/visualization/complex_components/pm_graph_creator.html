@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
@@ -267,6 +268,13 @@
                     <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;toself&#39;</span><span class="p">,</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">LEGEND_LABEL_PREDICTION_MODEL_STDDEV</span><span class="p">,</span>
                 <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># layout</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">GRAPH_TITLE_PREDICTION_MODEL</span><span class="p">,</span>
+                <span class="n">xaxis_title</span><span class="o">=</span><span class="n">prm_name_1</span><span class="p">,</span>
+                <span class="n">yaxis_title</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">fig</span></div>
