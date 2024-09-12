@@ -6,10 +6,6 @@ authors = ["kazuma.naito <kazuma.naito@murata.com>"]
 readme = "README.md"
 license = "BSD-3-Clause"
 repository = "https://github.com/pyfemtet/pyfemtet"
-packages = [
-    {include="pyfemtet"},
-    {include="test_utils"},
-]
 
 [tool.poetry.dependencies]
 # core
