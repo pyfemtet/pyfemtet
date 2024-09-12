@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">使い方</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">pyfemtet</a><ul class="current">
@@ -106,10 +107,15 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.message.messages.</span></span><span class="sig-name descname"><span class="pre">Message</span></span><a class="reference internal" href="../_modules/pyfemtet/message/messages.html#Message"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.message.messages.Message" title="Link to this definition"></a></dt>
-<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message.CERTIFY_MACRO_VERSION">
 <span class="sig-name descname"><span class="pre">CERTIFY_MACRO_VERSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'マクロのバージョンがインストールされている</span> <span class="pre">Femtet</span> <span class="pre">のバージョンと異なる可能性があります。利用中の</span> <span class="pre">Femtet</span> <span class="pre">のバージョンのフォルダに含まれる「マクロ機能を有効化する」コマンドを管理者権限で実行してください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.CERTIFY_MACRO_VERSION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.CONFIRM_BEFORE_EXIT">
+<span class="sig-name descname"><span class="pre">CONFIRM_BEFORE_EXIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適化が完了しました。Enter</span> <span class="pre">を押してプログラムを終了するまで、プロセスモニターで結果を確認することができます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.CONFIRM_BEFORE_EXIT" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -120,6 +126,51 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DEFAULT_STATUS_ALERT">
 <span class="sig-name descname"><span class="pre">DEFAULT_STATUS_ALERT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'最適化の状態がここに表示されます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DEFAULT_STATUS_ALERT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_CONTOUR_DESCRIPTION">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_CONTOUR_DESCRIPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'軸は設計変数、色は目的関数の値を示します。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_CONTOUR_DESCRIPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_CONTOUR_HEADER">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_CONTOUR_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数のヒートマップ'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_CONTOUR_HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_HISTORY_DESCRIPTION">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_HISTORY_DESCRIPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'縦軸は目的関数、横軸は試行回数です。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_HISTORY_DESCRIPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_HISTORY_HEADER">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_HISTORY_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'試行回数に対する各目的関数のプロット'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_HISTORY_HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_PARALLEL_COOR_DESCRIPTION">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_PARALLEL_COOR_DESCRIPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'縦軸は目的関数及び各設計変数、折れ線ひとつはひとつの試行に対応します。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_PARALLEL_COOR_DESCRIPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_PARALLEL_COOR_HEADER">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_PARALLEL_COOR_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'並行座標プロット'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_PARALLEL_COOR_HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_SLICE_DESCRIPTION">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_SLICE_DESCRIPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'縦軸は目的関数、横軸は設計変数です。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_SLICE_DESCRIPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_SLICE_HEADER">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_SLICE_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ひとつの設計変数に対する目的関数の変化'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_SLICE_HEADER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.DETAIL_PAGE_TEXT_BEFORE_LOADING">
+<span class="sig-name descname"><span class="pre">DETAIL_PAGE_TEXT_BEFORE_LOADING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Loading</span> <span class="pre">data...'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.DETAIL_PAGE_TEXT_BEFORE_LOADING" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -253,6 +304,11 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_BOUNDS">
+<span class="sig-name descname"><span class="pre">ERR_NO_BOUNDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'上下限が指定されていません。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_BOUNDS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_NO_CONNECTION_ESTABLISHED">
 <span class="sig-name descname"><span class="pre">ERR_NO_CONNECTION_ESTABLISHED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Femtet</span> <span class="pre">との接続ができていません。Femtet</span> <span class="pre">を起動し、プロジェクトを開いてください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_NO_CONNECTION_ESTABLISHED" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -300,6 +356,11 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_OPEN_RESULT_FAILED">
 <span class="sig-name descname"><span class="pre">ERR_OPEN_RESULT_FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'結果ファイルが開けませんでした。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_OPEN_RESULT_FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH">
+<span class="sig-name descname"><span class="pre">ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BoTorchSampler</span> <span class="pre">でのみパラメーター制約を使用できます。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -458,6 +519,11 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_SWITCH_PREDICTION_MODEL_3D">
+<span class="sig-name descname"><span class="pre">LABEL_SWITCH_PREDICTION_MODEL_3D</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'3D</span> <span class="pre">(2</span> <span class="pre">つ以上の設計変数が必要です)'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_SWITCH_PREDICTION_MODEL_3D" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message.LABEL_TUTORIAL_MODE_SWITCH">
 <span class="sig-name descname"><span class="pre">LABEL_TUTORIAL_MODE_SWITCH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'チュートリアルモード'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.LABEL_TUTORIAL_MODE_SWITCH" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -543,6 +609,11 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.PAGE_TITLE_OPTUNA_VISUALIZATION">
+<span class="sig-name descname"><span class="pre">PAGE_TITLE_OPTUNA_VISUALIZATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'詳細分析'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.PAGE_TITLE_OPTUNA_VISUALIZATION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message.PAGE_TITLE_PREDICTION_MODEL">
 <span class="sig-name descname"><span class="pre">PAGE_TITLE_PREDICTION_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'予測'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.PAGE_TITLE_PREDICTION_MODEL" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -563,8 +634,18 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVES">
-<span class="sig-name descname"><span class="pre">TAB_LABEL_OBJECTIVES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVES" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.START_CANDIDATE_WITH_PARAMETER_CONSTRAINT">
+<span class="sig-name descname"><span class="pre">START_CANDIDATE_WITH_PARAMETER_CONSTRAINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Start</span> <span class="pre">to</span> <span class="pre">candidate</span> <span class="pre">new</span> <span class="pre">parameter</span> <span class="pre">set</span> <span class="pre">with</span> <span class="pre">constraints.</span> <span class="pre">This</span> <span class="pre">process</span> <span class="pre">may</span> <span class="pre">take</span> <span class="pre">a</span> <span class="pre">long</span> <span class="pre">time.'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.START_CANDIDATE_WITH_PARAMETER_CONSTRAINT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVE_PLOT">
+<span class="sig-name descname"><span class="pre">TAB_LABEL_OBJECTIVE_PLOT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'目的関数'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVE_PLOT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVE_SCATTERPLOT">
+<span class="sig-name descname"><span class="pre">TAB_LABEL_OBJECTIVE_SCATTERPLOT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'全ての目的関数'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.TAB_LABEL_OBJECTIVE_SCATTERPLOT" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -630,6 +711,16 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ">
 <span class="sig-name descname"><span class="pre">WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'解析モデル名が指定されていません。目的の解析モデルをプロジェクト内で手動で開いてください。'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_MODEL_IN_CSV_NOT_FOUND_IN_FEMPRJ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_SCIPY_DOESNT_NEED_SEED">
+<span class="sig-name descname"><span class="pre">WARN_SCIPY_DOESNT_NEED_SEED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Scipy</span> <span class="pre">is</span> <span class="pre">deterministic,</span> <span class="pre">so</span> <span class="pre">whether</span> <span class="pre">you</span> <span class="pre">set</span> <span class="pre">a</span> <span class="pre">seed</span> <span class="pre">or</span> <span class="pre">not</span> <span class="pre">will</span> <span class="pre">not</span> <span class="pre">change</span> <span class="pre">the</span> <span class="pre">results.'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_SCIPY_DOESNT_NEED_SEED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.message.messages.Message.WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME">
+<span class="sig-name descname"><span class="pre">WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Updating</span> <span class="pre">FEM</span> <span class="pre">parameter</span> <span class="pre">during</span> <span class="pre">evaluating</span> <span class="pre">constraints</span> <span class="pre">take</span> <span class="pre">a</span> <span class="pre">long</span> <span class="pre">time.</span> <span class="pre">Please</span> <span class="pre">consider</span> <span class="pre">not</span> <span class="pre">to</span> <span class="pre">use</span> <span class="pre">FEM</span> <span class="pre">variables</span> <span class="pre">in</span> <span class="pre">constraint</span> <span class="pre">functions</span> <span class="pre">and</span> <span class="pre">set</span> <span class="pre">`update_fem`</span> <span class="pre">to</span> <span class="pre">False.'</span></em><a class="headerlink" href="#pyfemtet.message.messages.Message.WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

@@ -1,8 +1,9 @@
-from typing import Optional, List
+from typing import Optional, List, Final
 
 import os
 import sys
 from time import sleep, time
+import winreg
 
 import pandas as pd
 import psutil
@@ -101,6 +102,8 @@ class FemtetInterface(FEMInterface):
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
         self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
+        self._original_autosave_enabled = get_autosave_enabled()
+        set_autosave_enabled(False)
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -142,6 +145,7 @@ class FemtetInterface(FEMInterface):
         )
 
     def __del__(self):
+        set_autosave_enabled(self._original_autosave_enabled)
         if self.quit_when_destruct:
             self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
@@ -854,3 +858,37 @@ class _UnPicklableNoFEM(FemtetInterface):
         pdt_path = os.path.join(here, f'trial{trial}.pdt')
         return pdt_path
 
+
+# レジストリのパスと値の名前
+REGISTRY_PATH: Final[str] = r"SOFTWARE\Murata Software\Femtet2014\Femtet"
+VALUE_NAME: Final[str] = "AutoSave"
+
+def get_autosave_enabled() -> bool:
+    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REGISTRY_PATH) as key:
+        value, regtype = winreg.QueryValueEx(key, VALUE_NAME)
+        if regtype == winreg.REG_DWORD:
+            return bool(value)
+        else:
+            raise ValueError("Unexpected registry value type.")
+
+def set_autosave_enabled(enable: bool) -> None:
+    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REGISTRY_PATH, 0, winreg.KEY_SET_VALUE) as key:
+        winreg.SetValueEx(key, VALUE_NAME, 0, winreg.REG_DWORD, int(enable))
+
+
+def _test_autosave_setting():
+
+    # 使用例
+    current_setting = get_autosave_enabled()
+    print(f"Current AutoSave setting is {'enabled' if current_setting else 'disabled'}.")
+
+    # 設定を変更する例
+    new_setting = not current_setting
+    set_autosave_enabled(new_setting)
+    print(f"AutoSave setting has been {'enabled' if new_setting else 'disabled'}.")
+
+    # 再度設定を確認する
+    after_setting = get_autosave_enabled()
+    print(f"Current AutoSave setting is {'enabled' if after_setting else 'disabled'}.")
+
+    assert new_setting == after_setting, "レジストリ編集に失敗しました。" 

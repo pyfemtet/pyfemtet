@@ -132,32 +132,66 @@ def _check_bound(lb, ub, name=None):
             raise ValueError(message)
 
 
-def _is_access_gogh(fun):
+def _get_scope_indent(source: str) -> int:
+    SPACES = [' ', '\t']
+    indent = 0
+    while True:
+        if source[indent] not in SPACES:
+            break
+        else:
+            indent += 1
+    return indent
+
+
+def _remove_indent(source: str, indent: int) -> str:  # returns source
+    lines = source.splitlines()
+    edited_lines = [l[indent:] for l in lines]
+    edited_source = '\n'.join(edited_lines)
+    return edited_source
+
+
+def _check_accsess_femtet_objects(fun, target: str = None):
+    if target is None:
+        target = ''
 
     # 関数fのソースコードを取得
     source = inspect.getsource(fun)
 
     # ソースコードを抽象構文木（AST）に変換
-    tree = ast.parse(source)
+    try:
+        # instanceメソッドなどの場合を想定してインデントを削除
+        source = _remove_indent(source, _get_scope_indent(source))
+        tree = ast.parse(source)
+    except:
+        return False  # パースに失敗するからと言ってエラーにするまででもない
 
     # 関数定義を見つける
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
-            # 関数の第一引数の名前を取得
-            first_arg_name = node.args.args[0].arg
+            # Femtet という名前の引数を取得
+            first_arg_name = 'Femtet'
 
             # 関数内の全ての属性アクセスをチェック
             for sub_node in ast.walk(node):
                 if isinstance(sub_node, ast.Attribute):
-                    # 第一引数に対して 'Gogh' へのアクセスがあるかチェック
-                    if (
-                            isinstance(sub_node.value, ast.Name)
-                            and sub_node.value.id == first_arg_name
-                            and sub_node.attr == 'Gogh'
-                    ):
+                    # Femtet に対してアクセスがあるかチェック
+                    conditions = [isinstance(sub_node.value, ast.Name)]
+                    conditions.append(sub_node.value.id == first_arg_name)  # Femtet にアクセスしている
+                    if target == 'Gogh':
+                        conditions.append(sub_node.attr == 'Gogh')  # Femtet.Gogh にアクセスしている
+                    if all(conditions):
                         return True
+
             # ここまできてもなければアクセスしてない
             return False
+
+
+def _is_access_gogh(fun):
+    return _check_accsess_femtet_objects(fun, target='Gogh')
+
+
+def _is_access_femtet(fun):
+    return _check_accsess_femtet_objects(fun)
 
 
 def is_feasible(value, lb, ub):
@@ -173,11 +207,11 @@ def is_feasible(value, lb, ub):
         bool: True if the value satisfies the bounds; False otherwise.
     """
     if lb is None and ub is not None:
-        return value < ub
+        return value <= ub
     elif lb is not None and ub is None:
-        return lb < value
+        return lb <= value
     elif lb is not None and ub is not None:
-        return lb < value < ub
+        return lb <= value <= ub
     else:
         return True
 
@@ -313,7 +347,7 @@ class Constraint(Function):
 
     default_name = 'cns'
 
-    def __init__(self, fun, name, lb, ub, strict, args, kwargs):
+    def __init__(self, fun, name, lb, ub, strict, args, kwargs, using_fem):
         """Initializes a Constraint instance.
 
         Args:
@@ -324,6 +358,7 @@ class Constraint(Function):
             strict (bool): Whether to enforce strict inequality for the bounds.
             args: Additional arguments for the constraint function.
             kwargs: Additional keyword arguments for the constraint function.
+            using_fem: Update fem or not before run calc().
 
         Raises:
             ValueError: If the lower bound is greater than or equal to the upper bound.
@@ -334,26 +369,8 @@ class Constraint(Function):
         self.lb = lb
         self.ub = ub
         self.strict = strict
+        self.using_fem = using_fem
         super().__init__(fun, name, args, kwargs)
-
-
-# from pyfemtet.opt.opt import AbstractOptimizer
-class ParameterConstraint(Constraint):
-    """Variable のみを引数とする constraint 関数"""
-
-    def __init__(self, fun, name, lb, ub, opt: 'AbstractOptimizer'):
-        super().__init__(fun, name, lb, ub, strict=True, args=None, kwargs=None)
-        self.opt = opt
-        self.prm_args = [arg.name for arg in inspect.signature(self.fun).parameters.values()]
-
-    def calc(self, _):
-        # variables 全体から fun に対する引数を作成する
-        kwargs: dict = self.opt.get_parameter('dict')
-        keys = list(kwargs.keys())
-        for k in keys:
-            if k not in self.prm_args:
-                kwargs.pop(k)
-        return float(self.fun(**kwargs))
 
 
 class _HistoryDfCore:

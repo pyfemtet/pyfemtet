@@ -82,7 +82,7 @@ class Message:
     ERR_JPG_NOT_FOUND = _('Screenshot (.jpg) is not found.')
     ERR_UPDATE_SOLIDWORKS_MODEL_FAILED = _('Failed to update model in solidworks.')
 
-    # ===== pyfemtet.opt.opt =====
+    # ===== pyfemtet.opt.optimizer =====
     ERR_NOT_IMPLEMENTED = _('The following features are not supported by the specified optimization method. ')
     ERR_INCONSISTENT_PARAMETER = _('The parameter set does not match the one added with add_init_parameter.')
     INFO_EXCEPTION_DURING_FEM_ANALYSIS = _('An exception has occurred during FEM update. Current parameters are: ')
@@ -90,6 +90,9 @@ class Message:
     ERR_FEM_FAILED_AND_CANNOT_CONTINUE = _('Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated.')
     WARN_INTERRUPTED_IN_SCIPY = _('Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`.')
     ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH = _('You can use parameter constraint only with BoTorchSampler.')
+    WARN_SCIPY_DOESNT_NEED_SEED = _('Scipy is deterministic, so whether you set a seed or not will not change the results.')
+    START_CANDIDATE_WITH_PARAMETER_CONSTRAINT = _('Start to candidate new parameter set with constraints. This process may take a long time.')
+    WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME = _('Updating FEM parameter during evaluating constraints take a long time. Please consider not to use FEM variables in constraint functions and set `update_fem` to False.')
 
     # ===== pyfemtet.opt.visualization =====
     # control_femtet.py
@@ -111,7 +114,8 @@ class Message:
     GRAPH_TITLE_MULTI_OBJECTIVE = _('Multi Objective Pair Plot')
     GRAPH_AXIS_LABEL_TRIAL = _('trial number')
     # main_graph.py
-    TAB_LABEL_OBJECTIVES = _('Objectives')
+    TAB_LABEL_OBJECTIVE_PLOT = _('Objectives')
+    TAB_LABEL_OBJECTIVE_SCATTERPLOT = _('Objectives (all)')
     # pm_graph.py
     TAB_LABEL_PREDICTION_MODEL = _('Prediction Model')
     LABEL_OF_CREATE_PREDICTION_MODEL_BUTTON = _(' Recalculate Model')

@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
@@ -213,7 +214,20 @@
         <span class="c1"># sliders</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider_stack_data_prop</span> <span class="o">=</span> <span class="s1">&#39;data-prm-slider-values&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider_stack_data</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">slider_stack_data_prop</span><span class="p">:</span> <span class="p">{}})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider_container</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider_container</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">()</span>
+
+        <span class="c1"># 2d or 3d</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Checklist</span><span class="p">(</span>
+            <span class="n">options</span><span class="o">=</span><span class="p">[</span>
+                <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">label</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">LABEL_SWITCH_PREDICTION_MODEL_3D</span><span class="p">,</span>
+                    <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">switch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="p">[],</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PredictionModelGraph.setup_layout">
@@ -240,6 +254,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">command_manager</span>
                     <span class="p">],</span>
                     <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">dropdown_rows</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">slider_container</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">slider_stack_data</span><span class="p">,</span>
@@ -285,13 +300,15 @@
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_graph_button_spinner</span><span class="p">,</span> <span class="s1">&#39;spinner_style&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_graph_button</span><span class="p">,</span> <span class="s1">&#39;disabled&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command_manager</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_manager_prop</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_rsm_button</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_graph_button</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_rsm_button_spinner</span><span class="p">,</span> <span class="s1">&#39;spinner_style&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_graph_button_spinner</span><span class="p">,</span> <span class="s1">&#39;spinner_style&#39;</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">),</span>
             <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">def</span> <span class="nf">disable_fit_button</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">_2</span><span class="p">,</span> <span class="n">state1</span><span class="p">,</span> <span class="n">state2</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">disable_fit_button</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">_2</span><span class="p">,</span> <span class="n">state1</span><span class="p">,</span> <span class="n">state2</span><span class="p">,</span> <span class="n">switch_options</span><span class="p">):</span>
             <span class="c1"># spinner visibility</span>
             <span class="k">if</span> <span class="s1">&#39;display&#39;</span> <span class="ow">in</span> <span class="n">state1</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="n">state1</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;display&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="s1">&#39;display&#39;</span> <span class="ow">in</span> <span class="n">state2</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="n">state2</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;display&#39;</span><span class="p">)</span>
@@ -302,7 +319,12 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommandState</span><span class="o">.</span><span class="n">redraw</span><span class="o">.</span><span class="n">value</span>
 
-            <span class="k">return</span> <span class="n">state1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">state2</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">command</span>
+            <span class="c1"># disable switch</span>
+            <span class="n">option</span> <span class="o">=</span> <span class="n">switch_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">option</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;disabled&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+            <span class="n">switch_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span>
+
+            <span class="k">return</span> <span class="n">state1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">state2</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">switch_options</span>
 
         <span class="c1"># ===== recreate RSM =====</span>
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
@@ -348,9 +370,10 @@
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis3_obj_dropdown</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider_container</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>  <span class="c1"># for callback chain</span>
             <span class="n">State</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;prm-slider&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">ALL</span><span class="p">},</span> <span class="s1">&#39;value&#39;</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">),</span>
             <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">def</span> <span class="nf">redraw_graph</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">active_tab_id</span><span class="p">,</span> <span class="n">axis1_label</span><span class="p">,</span> <span class="n">axis2_label</span><span class="p">,</span> <span class="n">axis3_label</span><span class="p">,</span> <span class="n">_2</span><span class="p">,</span> <span class="n">prm_values</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">redraw_graph</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">active_tab_id</span><span class="p">,</span> <span class="n">axis1_label</span><span class="p">,</span> <span class="n">axis2_label</span><span class="p">,</span> <span class="n">axis3_label</span><span class="p">,</span> <span class="n">_2</span><span class="p">,</span> <span class="n">prm_values</span><span class="p">,</span> <span class="n">is_3d</span><span class="p">):</span>
             <span class="c1"># just in case</span>
             <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">PreventUpdate</span>
@@ -374,6 +397,9 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rsm_creator</span><span class="p">,</span> <span class="s1">&#39;history&#39;</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_NO_PREDICTION_MODEL</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">no_update</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommandState</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">value</span>  <span class="c1"># to re-enable buttons, fire callback chain</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_3d</span><span class="p">:</span>
+                <span class="n">axis2_label</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># get indices to remove</span>
             <span class="n">idx1</span> <span class="o">=</span> <span class="n">prm_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis1_label</span><span class="p">)</span> <span class="k">if</span> <span class="n">axis1_label</span> <span class="ow">in</span> <span class="n">prm_names</span> <span class="k">else</span> <span class="kc">None</span>
@@ -399,23 +425,31 @@
 
             <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommandState</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">value</span>
 
-        <span class="c1"># ===== When the graph is updated, enable buttons =====</span>
+        <span class="c1"># ===== re-enable buttons when the graph is updated,  =====</span>
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_rsm_button</span><span class="p">,</span> <span class="s1">&#39;disabled&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_rsm_button_spinner</span><span class="p">,</span> <span class="s1">&#39;spinner_style&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_graph_button</span><span class="p">,</span> <span class="s1">&#39;disabled&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_graph_button_spinner</span><span class="p">,</span> <span class="s1">&#39;spinner_style&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command_manager</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_manager_prop</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_rsm_button_spinner</span><span class="p">,</span> <span class="s1">&#39;spinner_style&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_graph_button_spinner</span><span class="p">,</span> <span class="s1">&#39;spinner_style&#39;</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">),</span>
             <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">def</span> <span class="nf">enable_buttons</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">state1</span><span class="p">,</span> <span class="n">state2</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">enable_buttons</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">state1</span><span class="p">,</span> <span class="n">state2</span><span class="p">,</span> <span class="n">switch_options</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">command</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommandState</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">PreventUpdate</span>
             <span class="n">state1</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">})</span>
             <span class="n">state2</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">})</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">state1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">state2</span>
+
+            <span class="c1"># enable switch</span>
+            <span class="n">option</span> <span class="o">=</span> <span class="n">switch_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">option</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;disabled&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+            <span class="n">switch_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span>
+
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">state1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">state2</span><span class="p">,</span> <span class="n">switch_options</span>
 
         <span class="c1"># ===== setup dropdown and sliders from history =====</span>
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
@@ -506,6 +540,7 @@
             <span class="n">Input</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;axis2-dropdown-menu-item&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">ALL</span><span class="p">},</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;axis3-dropdown-menu-item&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">ALL</span><span class="p">},</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis1_prm_dropdown</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>  <span class="c1"># for callback chain timing</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_3d</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis1_prm_dropdown</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis2_prm_dropdown</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis3_obj_dropdown</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">),</span>
@@ -514,10 +549,10 @@
         <span class="p">)</span>
         <span class="k">def</span> <span class="nf">update_controller</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
             <span class="c1"># argument processing</span>
-            <span class="n">current_ax1_label</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">current_ax2_label</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
-            <span class="c1"># current_ax3_label = args[6]</span>
-            <span class="n">current_styles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+            <span class="n">current_ax1_label</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">current_ax2_label</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">current_styles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+            <span class="n">is_3d</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 
             <span class="c1"># just in case</span>
             <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -543,6 +578,10 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm_names</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">ret</span><span class="p">[</span><span class="n">ax2_hidden</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
+            <span class="c1"># ===== hide dropdown of axis 2 if not is_3d =====</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_3d</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">ax2_hidden</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
             <span class="c1"># ===== update dropdown label =====</span>
 
             <span class="c1"># by callback chain on loaded after setup_dropdown_and_sliders()</span>
@@ -558,29 +597,43 @@
 
                 <span class="c1"># ax1</span>
                 <span class="k">if</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;axis1-dropdown-menu-item&#39;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">new_label</span> <span class="o">!=</span> <span class="n">current_ax2_label</span><span class="p">:</span>
-                        <span class="n">ret</span><span class="p">[</span><span class="n">ax1_label_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_label</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CANNOT_SELECT_SAME_PARAMETER</span><span class="p">)</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="n">ax1_label_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_label</span>
+                    <span class="k">if</span> <span class="n">new_label</span> <span class="o">==</span> <span class="n">current_ax2_label</span><span class="p">:</span>
+                        <span class="n">ret</span><span class="p">[</span><span class="n">ax2_label_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_ax1_label</span>
+
 
                 <span class="c1"># ax2</span>
                 <span class="k">elif</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;axis2-dropdown-menu-item&#39;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">new_label</span> <span class="o">!=</span> <span class="n">current_ax1_label</span><span class="p">:</span>
-                        <span class="n">ret</span><span class="p">[</span><span class="n">ax2_label_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_label</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CANNOT_SELECT_SAME_PARAMETER</span><span class="p">)</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="n">ax2_label_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_label</span>
+                    <span class="k">if</span> <span class="n">new_label</span> <span class="o">==</span> <span class="n">current_ax1_label</span><span class="p">:</span>
+                        <span class="n">ret</span><span class="p">[</span><span class="n">ax1_label_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_ax2_label</span>
+
 
                 <span class="c1"># ax3</span>
                 <span class="k">elif</span> <span class="n">callback_context</span><span class="o">.</span><span class="n">triggered_id</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;axis3-dropdown-menu-item&#39;</span><span class="p">:</span>
                     <span class="n">ret</span><span class="p">[</span><span class="n">ax3_label_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_label</span>
 
             <span class="c1"># ===== update visibility of sliders =====</span>
-            <span class="k">for</span> <span class="n">label_key</span><span class="p">,</span> <span class="n">current_label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="n">ax1_label_key</span><span class="p">,</span> <span class="n">ax2_label_key</span><span class="p">),</span> <span class="p">(</span><span class="n">current_ax1_label</span><span class="p">,</span> <span class="n">current_ax2_label</span><span class="p">)):</span>
-                <span class="c1"># get label of output</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">no_update</span> <span class="k">else</span> <span class="n">current_label</span>
-                <span class="c1"># update display style of slider</span>
-                <span class="n">idx</span> <span class="o">=</span> <span class="n">prm_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">prm_names</span> <span class="k">else</span> <span class="kc">None</span>
-                <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># invisible the slider correspond to the dropdown-1</span>
+            <span class="n">label_key</span><span class="p">,</span> <span class="n">current_label</span> <span class="o">=</span> <span class="n">ax1_label_key</span><span class="p">,</span> <span class="n">current_ax1_label</span>
+            <span class="c1"># get label of output</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">no_update</span> <span class="k">else</span> <span class="n">current_label</span>
+            <span class="c1"># update display style of slider</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">prm_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">prm_names</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">current_styles</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">})</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">slider_style_list_key</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_styles</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+            <span class="c1"># invisible the slider correspond to the dropdown-2</span>
+            <span class="n">label_key</span><span class="p">,</span> <span class="n">current_label</span> <span class="o">=</span> <span class="n">ax2_label_key</span><span class="p">,</span> <span class="n">current_ax2_label</span>
+            <span class="c1"># get label of output</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">no_update</span> <span class="k">else</span> <span class="n">current_label</span>
+            <span class="c1"># update display style of slider</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">prm_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">prm_names</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># if 2d, should not disable the slider correspond to dropdown-2.</span>
+                <span class="k">if</span> <span class="n">is_3d</span><span class="p">:</span>
                     <span class="n">current_styles</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">})</span>
                     <span class="n">ret</span><span class="p">[</span><span class="n">slider_style_list_key</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_styles</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 
@@ -655,7 +708,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="n">ProcessMonitorApplication</span><span class="p">):</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">local_data</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">local_data</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">df</span></div>
 </div>
 

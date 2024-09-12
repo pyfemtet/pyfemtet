@@ -16,11 +16,12 @@ from dask.distributed import LocalCluster, Client
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
-from pyfemtet.opt.opt import AbstractOptimizer, OptunaOptimizer
+from pyfemtet.opt.optimizer import AbstractOptimizer, OptunaOptimizer
 from pyfemtet.opt.visualization.process_monitor.application import main as process_monitor_main
 from pyfemtet.opt._femopt_core import (
     _check_bound,
     _is_access_gogh,
+    _is_access_femtet,
     Objective,
     Constraint,
     History,
@@ -98,9 +99,9 @@ class FEMOpt:
             self.fem = fem
 
         if opt is None:
-            self.opt = OptunaOptimizer()
+            self.opt: AbstractOptimizer = OptunaOptimizer()
         else:
-            self.opt = opt
+            self.opt: AbstractOptimizer = opt
 
         # メンバーの宣言
         self.client = None
@@ -260,6 +261,7 @@ class FEMOpt:
             strict: bool = True,
             args: tuple or None = None,
             kwargs: dict or None = None,
+            using_fem: bool = None,
     ):
         """Adds a constraint to the optimization problem.
 
@@ -271,6 +273,7 @@ class FEMOpt:
             strict (bool, optional): Flag indicating if it is a strict constraint. Defaults to True.
             args (tuple or None, optional): Additional arguments for the constraint function. Defaults to None.
             kwargs (dict): Additional arguments for the constraint function. Defaults to None.
+            using_fem (bool, optional): Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically.
 
         Note:
             If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.
@@ -298,55 +301,33 @@ class FEMOpt:
                 else:
                     i += 1
             name = candidate
+        if using_fem is None:
+            # 自動推定機能は Femtet 特有の処理とする
+            if isinstance(self.fem, FemtetInterface):
+                using_fem = _is_access_femtet(fun)
+            else:
+                using_fem = False
 
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
-        if strict:
+        if strict and isinstance(self.fem, FemtetInterface):
             if _is_access_gogh(fun):
                 message = Msg.ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT
                 raise Exception(message)
 
-        self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs)
+        # strict constraint かつ BoTorchSampler の場合、
+        # 最適化実行時に monkey patch を実行するフラグを立てる。
+        # ただし using_fem が True ならば非常に低速なので警告を出す。
+        if strict and isinstance(self.opt, OptunaOptimizer):
+            self.opt: OptunaOptimizer
+            from optuna_integration import BoTorchSampler
+            if issubclass(self.opt.sampler_class, BoTorchSampler):
+                # パッチ実行フラグ
+                self.opt._do_monkey_patch = True
+                # 警告
+                if using_fem:
+                    logger.warning(Msg.WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME)
 
-    def add_parameter_constraint(
-            self,
-            fun: Callable[[List[float], Any], float],
-            name: Optional[str] = None,
-            lower_bound: Optional[float] = None,
-            upper_bound: Optional[float] = None,
-    ):
-        """Add constraint in case of parameter-only.
-
-        Args:
-            fun (Callable[[List[float], Any], float]): Function to constraint. The name of arguments must be one of ones of parameter or variables.
-            name (Optional[str], optional): Name of constraint. Defaults to None and then name is set to 'cns_{i}'.
-            lower_bound (Optional[float], optional): Lower bound of return value. Defaults to None.
-            upper_bound (Optional[float], optional): Upper bound of return value. Defaults to None.
-        """
-
-        # candidate default name
-        if name is None:
-            prefix = Constraint.default_name
-            i = 0
-            while True:
-                candidate = f'{prefix}_{str(int(i))}'
-                is_existing = candidate in list(self.opt.constraints.keys())
-                if not is_existing:
-                    break
-                else:
-                    i += 1
-            name = candidate
-
-        # assert at least 1 bound exist
-        assert lower_bound is not None or upper_bound is not None, Msg.ERR_NO_BOUNDS
-
-        from pyfemtet.opt._femopt_core import ParameterConstraint
-        self.opt.constraints[name] = ParameterConstraint(fun, name, lower_bound, upper_bound, self.opt)
-        if hasattr(self.opt, 'add_parameter_constraints'):
-            prm_args = [p.name for p in inspect.signature(fun).parameters.values()]
-            if lower_bound is not None:
-                self.opt.add_parameter_constraints(lambda *args, **kwargs: fun(*args, **kwargs) - lower_bound, prm_args=prm_args)
-            if upper_bound is not None:
-                self.opt.add_parameter_constraints(lambda *args, **kwargs: upper_bound - fun(*args, **kwargs), prm_args=prm_args)
+        self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs, using_fem)
 
     def get_parameter(self, format='dict'):
         raise DeprecationWarning('FEMOpt.get_parameter() was deprecated. Use Femopt.opt.get_parameter() instead.')

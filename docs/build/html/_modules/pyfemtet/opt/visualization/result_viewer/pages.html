@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
@@ -370,7 +371,7 @@
                 <span class="n">trial</span> <span class="o">=</span> <span class="n">pt</span><span class="p">[</span><span class="s1">&#39;customdata&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
                 <span class="c1"># get parameter and update model</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">local_data</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
                 <span class="n">row</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">trial</span><span class="p">]</span>
                 <span class="n">metadata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metadata</span> <span class="o">==</span> <span class="s1">&#39;prm&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -623,6 +624,7 @@
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tutorial_mode_switch</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_button</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>  <span class="c1"># load button clicked</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_graph</span><span class="o">.</span><span class="n">selection_data_property</span><span class="p">),</span>  <span class="c1"># selection changed</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">femtet_state</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">femtet_state_prop</span><span class="p">),</span>  <span class="c1"># connection established</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_input_dummy</span><span class="p">,</span> <span class="s1">&#39;children&#39;</span><span class="p">),</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_badge</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
             <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_sample_csv_div</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">),</span>  <span class="c1"># switch visibility</span>
@@ -634,9 +636,10 @@
         <span class="p">)</span>
         <span class="k">def</span> <span class="nf">control_visibility</span><span class="p">(</span>
                 <span class="n">is_tutorial</span><span class="p">,</span>
-                <span class="n">_1</span><span class="p">,</span>
-                <span class="n">selection_data</span><span class="p">,</span>
-                <span class="n">_2</span><span class="p">,</span>
+                <span class="n">_1</span><span class="p">,</span>  <span class="c1"># load_sample clicked</span>
+                <span class="n">selection_data</span><span class="p">,</span>  <span class="c1"># data selected</span>
+                <span class="n">_2</span><span class="p">,</span>  <span class="c1"># result of connect_femtet clicked</span>
+                <span class="n">_3</span><span class="p">,</span>  <span class="c1"># dummy component loaded</span>
                 <span class="n">load_sample_csv_badge_current_style</span><span class="p">,</span>
                 <span class="n">load_sample_csv_div_current_style</span><span class="p">,</span>
                 <span class="n">file_picker_current_style</span><span class="p">,</span>
@@ -697,13 +700,12 @@
 
             <span class="c1"># if history is not None,</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=====&#39;</span><span class="p">)</span>
-                <span class="c1"># if a point is already selected, show badge to open-pdt or connect-femtet</span>
+                <span class="c1"># if a point is already selected,</span>
+                <span class="c1"># show badge to open-pdt or connect-femtet</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_point_selected</span><span class="p">(</span><span class="n">selection_data</span><span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
                     <span class="c1"># if femtet is connected, show badge to open-pdt</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_control</span><span class="o">.</span><span class="n">check_femtet_state</span><span class="p">()</span> <span class="ow">is</span> <span class="n">FemtetState</span><span class="o">.</span><span class="n">connected</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
                         <span class="n">ret</span><span class="p">[</span><span class="n">open_pdt_badge_style</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_by_style</span><span class="p">(</span>
                             <span class="kc">True</span><span class="p">,</span>
                             <span class="n">open_pdt_badge_current_style</span><span class="p">,</span>
@@ -711,7 +713,6 @@
 
                     <span class="c1"># else, show femtet-connect badge</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;3&#39;</span><span class="p">)</span>
                         <span class="n">ret</span><span class="p">[</span><span class="n">connect_femtet_badge_style</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_visibility_by_style</span><span class="p">(</span>
                             <span class="kc">True</span><span class="p">,</span>
                             <span class="n">connect_femtet_badge_current_style</span><span class="p">,</span>
@@ -747,7 +748,7 @@
             <span class="c1"># get sample file</span>
             <span class="kn">import</span> <span class="nn">pyfemtet</span>
             <span class="n">package_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pyfemtet</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
-            <span class="n">sample_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_root</span><span class="p">,</span> <span class="s1">&#39;opt&#39;</span><span class="p">,</span> <span class="s1">&#39;femprj_sample&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: locale によってパスを変える</span>
+            <span class="n">sample_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_root</span><span class="p">,</span> <span class="s1">&#39;opt&#39;</span><span class="p">,</span> <span class="s1">&#39;samples&#39;</span><span class="p">,</span> <span class="s1">&#39;femprj_sample&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: locale によってパスを変える</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_dir</span><span class="p">,</span> <span class="s1">&#39;wat_ex14_parametric_test_result.reccsv&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
