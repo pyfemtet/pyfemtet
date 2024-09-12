@@ -5,10 +5,10 @@ import datetime
 
 import pyfemtet
 
-from test_utils import record_history, control_femtet
-from pyfemtet.message import encoding as csv_encoding
-log_encoding = 'utf-8'
+# noinspection PyProtectedMember
+from pyfemtet.opt._test_utils import record_history, control_femtet
 
+log_encoding = 'utf-8'
 
 here = os.path.dirname(__file__)
 test_script = os.path.join(here, 'test_of_test.py')
@@ -141,17 +141,11 @@ def test_sample_parametric():
     main(femprj_path)
 
 
-# def test_test():
-#     main()
-
-
 if __name__ == '__main__':
 
-    RECORD_MODE = False
+    def test_test():
+        main()
 
-    # main()
-
-    # test_test()
 
     def try_test(f):
         try:
@@ -167,12 +161,15 @@ if __name__ == '__main__':
             print(e)
             print()
 
+
+    RECORD_MODE = False
+
     # try_test(test_test)
-    try_test(test_sample_gau_ex08_parametric)
+    # try_test(test_sample_gau_ex08_parametric)
     # try_test(test_sample_her_ex40_parametric)
     # try_test(test_sample_wat_ex14_parametric)
     # try_test(test_sample_paswat_ex1_parametric)
-    # try_test(test_sample_gal_ex58_parametric)
+    try_test(test_sample_gal_ex58_parametric)
     # try_test(test_cad_sample_nx_ex01)
     # try_test(test_cad_sample_sldworks_ex01)
     # try_test(test_sample_parametric)

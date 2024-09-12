@@ -2,7 +2,7 @@ from pyfemtet.opt import FEMOpt, NoFEM, AbstractOptimizer
 
 n_input = 3
 n_trials = 10
-error_timing = 5
+error_timing = -1
 
 counter = 0
 

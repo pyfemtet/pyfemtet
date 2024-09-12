@@ -12,7 +12,7 @@ from pyfemtet.message import encoding as ENCODING
 
 def find_latest_csv(dir_path=None):
     if dir_path is None:
-        dir_path = "."
+        dir_path = ""
     target = os.path.join(dir_path, "*.csv")
     files = [(f, os.path.getmtime(f)) for f in glob(target)]
     out = sorted(files, key=lambda files: files[1])[-1]
