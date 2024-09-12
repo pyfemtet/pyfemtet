@@ -13,7 +13,7 @@ from scipy.optimize import minimize_scalar, OptimizeResult
 
 # pyfemtet relative
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
-from pyfemtet.opt.opt import AbstractOptimizer, logger, OptimizationMethodChecker
+from pyfemtet.opt.optimizer import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
 from pyfemtet.message import Msg
 

@@ -14,7 +14,7 @@ from botorch.acquisition import AcquisitionFunction
 from botorch.optim.initializers import gen_batch_initial_conditions
 
 from pyfemtet.opt._femopt_core import Constraint
-from pyfemtet.opt.opt import OptunaOptimizer, logger
+from pyfemtet.opt.optimizer import OptunaOptimizer, logger
 from pyfemtet.message import Msg
 
 from time import time
