@@ -8,7 +8,7 @@ Subpackages
    :maxdepth: 4
 
    pyfemtet.opt.interface
-   pyfemtet.opt.opt
+   pyfemtet.opt.optimizer
    pyfemtet.opt.prediction
    pyfemtet.opt.visualization
 

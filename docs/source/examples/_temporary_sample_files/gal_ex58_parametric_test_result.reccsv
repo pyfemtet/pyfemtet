@@ -1,4 +1,4 @@
-"{""femprj_path"": ""E:\\pyfemtet\\pyfemtet\\pyfemtet\\opt\\femprj_sample\\gal_ex58_parametric.femprj"", ""model_name"": ""ex58_UnLoad""}",prm,prm_lb,prm_ub,obj,obj_direction,,,,,
+"",prm,prm_lb,prm_ub,obj,obj_direction,,,,,
 ,,,,,,,,,,
 trial,rot,rot_lower_bound,rot_upper_bound,final angle (degree),final angle (degree)_direction,non_domi,feasible,hypervolume,message,time
 1,90.0,80.0,100.0,81.62540666214329,90,False,True,-1.0,initial,2024-07-24 10:57:24.248429

@@ -522,6 +522,7 @@ class Tutorial(AbstractPage):
             Input(self.tutorial_mode_switch, 'value'),
             Input(self.load_sample_csv_button, 'n_clicks'),  # load button clicked
             Input(self.main_graph.selection_data, self.main_graph.selection_data_property),  # selection changed
+            Input(self.femtet_control.femtet_state.id, self.femtet_control.femtet_state_prop),  # connection established
             Input(self.control_visibility_input_dummy, 'children'),
             State(self.load_sample_csv_badge, 'style'),  # switch visibility
             State(self.load_sample_csv_div, 'style'),  # switch visibility
@@ -533,9 +534,10 @@ class Tutorial(AbstractPage):
         )
         def control_visibility(
                 is_tutorial,
-                _1,
-                selection_data,
-                _2,
+                _1,  # load_sample clicked
+                selection_data,  # data selected
+                _2,  # result of connect_femtet clicked
+                _3,  # dummy component loaded
                 load_sample_csv_badge_current_style,
                 load_sample_csv_div_current_style,
                 file_picker_current_style,
@@ -596,13 +598,12 @@ class Tutorial(AbstractPage):
 
             # if history is not None,
             else:
-                print('=====')
-                # if a point is already selected, show badge to open-pdt or connect-femtet
+                # if a point is already selected,
+                # show badge to open-pdt or connect-femtet
                 if self.check_point_selected(selection_data):
-                    print(1)
+
                     # if femtet is connected, show badge to open-pdt
                     if self.femtet_control.check_femtet_state() is FemtetState.connected:
-                        print(2)
                         ret[open_pdt_badge_style] = self.control_visibility_by_style(
                             True,
                             open_pdt_badge_current_style,
@@ -610,7 +611,6 @@ class Tutorial(AbstractPage):
 
                     # else, show femtet-connect badge
                     else:
-                        print('3')
                         ret[connect_femtet_badge_style] = self.control_visibility_by_style(
                             True,
                             connect_femtet_badge_current_style,
@@ -646,7 +646,7 @@ class Tutorial(AbstractPage):
             # get sample file
             import pyfemtet
             package_root = os.path.dirname(pyfemtet.__file__)
-            sample_dir = os.path.join(package_root, 'opt', 'femprj_sample')  # FIXME: locale によってパスを変える
+            sample_dir = os.path.join(package_root, 'opt', 'samples', 'femprj_sample')  # FIXME: locale によってパスを変える
             path = os.path.join(sample_dir, 'wat_ex14_parametric_test_result.reccsv')
 
             if not os.path.exists(path):
