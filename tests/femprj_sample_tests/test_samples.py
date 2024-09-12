@@ -7,7 +7,7 @@ import pyfemtet
 
 # noinspection PyProtectedMember
 from pyfemtet.opt._test_utils import record_history, control_femtet
-
+from pyfemtet.message import encoding
 log_encoding = 'utf-8'
 
 here = os.path.dirname(__file__)
@@ -55,8 +55,12 @@ def postprocess(py_script_path, log_path):
 
 def check_traceback(log_path):
     # get log
-    with open(log_path, 'r', encoding=log_encoding, newline='\n') as f:
-        lines = f.readlines()
+    try:
+        with open(log_path, 'r', encoding=log_encoding, newline='\n') as f:
+            lines = f.readlines()
+    except UnicodeDecodeError:
+        with open(log_path, 'r', encoding=encoding, newline='\n') as f:
+            lines = f.readlines()
 
     for line in lines:
         assert "unexpected exception raised on worker" not in line, '実行したスクリプトの出力に無視されていない例外があります。'
