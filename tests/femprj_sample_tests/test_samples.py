@@ -145,6 +145,11 @@ def test_sample_parametric():
     main(femprj_path)
 
 
+def test_sample_constraint():
+    femprj_path = os.path.join(SAMPLE_DIR, 'constrained_pipe.femprj')
+    main(femprj_path)
+
+
 if __name__ == '__main__':
 
     def test_test():
@@ -166,7 +171,11 @@ if __name__ == '__main__':
             print()
 
 
-    RECORD_MODE = False
+    # RECORD_MODE = True
+    # try_test(test_sample_constraint)
+
+    # RECORD_MODE = False
+    # try_test(test_sample_constraint)
 
     # try_test(test_test)
     # try_test(test_sample_gau_ex08_parametric)
@@ -177,3 +186,4 @@ if __name__ == '__main__':
     # try_test(test_cad_sample_nx_ex01)
     # try_test(test_cad_sample_sldworks_ex01)
     # try_test(test_sample_parametric)
+    # ry_test(test_sample_constraint)

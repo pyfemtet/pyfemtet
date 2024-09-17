@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-11 17:54+0900\n"
+"POT-Creation-Date: 2024-09-17 15:36+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -140,10 +140,10 @@ msgstr ""
 #: pyfemtet.opt.interface._femtet.FemtetInterface
 #: pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet
 #: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface
-#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
-#: pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter
-#: pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter_values
-#: pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values
+#: pyfemtet.opt.optimizer._optuna.OptunaOptimizer.add_init_parameter
 #: pyfemtet.opt.prediction.base.PredictionModelBase.fit
 #: pyfemtet.opt.prediction.base.PredictionModelBase.predict
 #: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit
@@ -166,7 +166,7 @@ msgstr ""
 #: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
 #: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
 #: pyfemtet.opt._femopt.FEMOpt.add_parameter
-#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter
 msgid "Raises"
 msgstr ""
 
@@ -178,7 +178,7 @@ msgstr ""
 #: pyfemtet.dispatch_extensions.dispatch_specific_femtet
 #: pyfemtet.dispatch_extensions.dispatch_specific_femtet_core
 #: pyfemtet.dispatch_extensions.launch_and_dispatch_femtet
-#: pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter
 #: pyfemtet.opt.prediction.base.PredictionModelBase.predict
 #: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict
 msgid "Return type"
@@ -255,7 +255,7 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.message.rst:16
 #: ../source/modules/pyfemtet.opt.interface.rst:5
-#: ../source/modules/pyfemtet.opt.opt.rst:5
+#: ../source/modules/pyfemtet.opt.optimizer.rst:5
 #: ../source/modules/pyfemtet.opt.prediction.rst:24
 #: ../source/modules/pyfemtet.opt.rst:27
 #: ../source/modules/pyfemtet.opt.visualization.complex_components.rst:56
@@ -292,166 +292,168 @@ msgid "format: dict, values, df, raw(list of Variable object)"
 msgstr ""
 
 #: of pyfemtet.opt.interface._base.FEMInterface:1
-#: pyfemtet.opt.opt._base.AbstractOptimizer:1
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:1
 #: pyfemtet.opt.prediction.base.PredictionModelBase:1
 #: pyfemtet.opt.visualization.base.AbstractPage:1
 msgid "Bases: :py:class:`~abc.ABC`"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:1
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:1
 msgid "Abstract base class for an interface of optimization library."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:5
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:5
 msgid "The finite element method object."
 msgstr ""
 
-#: of pyfemtet.opt._femopt.FEMOpt pyfemtet.opt.opt._base.AbstractOptimizer
-#: pyfemtet.opt.opt._base.AbstractOptimizer:13
+#: of pyfemtet.opt._femopt.FEMOpt
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:13
 msgid "type"
 msgstr ""
 
-#: of pyfemtet.opt._femopt.FEMOpt:16 pyfemtet.opt.opt._base.AbstractOptimizer:7
+#: of pyfemtet.opt._femopt.FEMOpt:16
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:7
 msgid "FEMInterface"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:11
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:11
 msgid "The class of the finite element method object."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:17
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:17
 msgid "The keyword arguments used to instantiate the finite element method object."
 msgstr ""
 
 #: of pyfemtet.opt._femopt.FEMOpt:70
-#: pyfemtet.opt.opt._base.AbstractOptimizer:19
-#: pyfemtet.opt.opt._base.AbstractOptimizer:31
-#: pyfemtet.opt.opt._base.AbstractOptimizer:37
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:19
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:31
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:37
 msgid "dict"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:23
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:23
 msgid "The parameters used in the optimization."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:25
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:25
 msgid "pd.DataFrame"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:29
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:29
 msgid "A dictionary containing the objective functions used in the optimization."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:35
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:35
 msgid "A dictionary containing the constraint functions used in the optimization."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:41
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:41
 msgid "The status of the entire optimization process."
 msgstr ""
 
 #: of pyfemtet.opt._femopt.FEMOpt:40
-#: pyfemtet.opt.opt._base.AbstractOptimizer:43
-#: pyfemtet.opt.opt._base.AbstractOptimizer:55
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:43
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:55
 msgid "OptimizationStatus"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:47
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:47
 msgid "An actor object that records the history of each iteration in the optimization process."
 msgstr ""
 
 #: of pyfemtet.opt._femopt.FEMOpt:46
-#: pyfemtet.opt.opt._base.AbstractOptimizer:49
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:49
 msgid "History"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:53
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:53
 msgid "The status of each worker in a distributed computing environment."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:59
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:59
 msgid "A message associated with the current state of the optimization process."
 msgstr ""
 
 #: of pyfemtet.opt._femopt.FEMOpt:52
-#: pyfemtet.opt.opt._base.AbstractOptimizer:61
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:61
 msgid "str"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:65
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:65
 msgid "The random seed used for random number generation during the optimization process."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:67
-#: pyfemtet.opt.opt._base.AbstractOptimizer:79
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:67
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer:79
 msgid "int or None"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:71
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:71
 msgid "The maximum time allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:73
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:73
 msgid "float or int or None"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:77
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:77
 msgid "The maximum number of trials allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:83
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:83
 msgid "Flag indicating if running on a distributed computing cluster."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer:85
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer:85
 msgid "bool"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.f:1
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:1
 msgid "Get x, update fem analysis, return objectives (and constraints)."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:1
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:1
 msgid "Returns the parameters in the specified format."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:3
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:3
 msgid "The desired format of the parameters. Can be 'df' (DataFrame), 'value' (alias of values), 'values' (np.ndarray), or 'dict'. Defaults to 'dict'."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter
 #: pyfemtet.opt.prediction.base.PredictionModelBase.predict
 #: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict
 msgid "Returns"
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:6
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:6
 msgid "The parameters in the specified format."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.get_parameter:9
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:9
 msgid "If an invalid format is provided."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.run:1
-#: pyfemtet.opt.opt._scipy.ScipyOptimizer.run:1
-#: pyfemtet.opt.opt._scipy_scalar.ScipyScalarOptimizer.run:1
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.run:1
+#: pyfemtet.opt.optimizer._scipy.ScipyOptimizer.run:1
+#: pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer.run:1
 msgid "Start calculation using optimization library."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter:1
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:1
 msgid "Update parameter."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter:3
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:3
 msgid "Key is the name of parameter and the value is the value of it. The partial set is available."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter_values:1
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:1
 msgid "Update parameter with values."
 msgstr ""
 
-#: of pyfemtet.opt.opt._base.AbstractOptimizer.set_parameter_values:3
+#: of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:3
 msgid "Values of all parameters."
 msgstr ""
 
@@ -933,29 +935,29 @@ msgstr ""
 msgid "Interface with no FEM for debug."
 msgstr ""
 
-#: of pyfemtet.opt.opt._optuna.OptunaOptimizer:1
-#: pyfemtet.opt.opt._scipy.ScipyOptimizer:1
-#: pyfemtet.opt.opt._scipy_scalar.ScipyScalarOptimizer:1
-msgid "Bases: :py:class:`~pyfemtet.opt.opt._base.AbstractOptimizer`"
+#: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer:1
+#: pyfemtet.opt.optimizer._scipy.ScipyOptimizer:1
+#: pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:1
+msgid "Bases: :py:class:`~pyfemtet.opt.optimizer._base.AbstractOptimizer`"
 msgstr ""
 
-#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:1
+#: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer.add_init_parameter:1
 msgid "Add additional initial parameter for evaluate."
 msgstr ""
 
-#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:3
+#: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer.add_init_parameter:3
 msgid "The parameter set is ignored if the main() is continued."
 msgstr ""
 
-#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:5
+#: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer.add_init_parameter:5
 msgid "Parameter to evaluate before run optimization algorithm."
 msgstr ""
 
-#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.add_init_parameter:7
+#: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer.add_init_parameter:7
 msgid "Optional. If specified, the name is saved in the history row. Default to None."
 msgstr ""
 
-#: of pyfemtet.opt.opt._optuna.OptunaOptimizer.run:1
+#: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer.run:1
 msgid "Set random seed, sampler, study and run study.optimize()."
 msgstr ""
 
@@ -963,8 +965,8 @@ msgstr ""
 msgid "pyfemtet.opt.interface package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.opt.rst:2
-msgid "pyfemtet.opt.opt package"
+#: ../source/modules/pyfemtet.opt.optimizer.rst:2
+msgid "pyfemtet.opt.optimizer package"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.prediction.rst:2
@@ -2343,5 +2345,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "If distributed computing, Scheduler and Workers will NOT be terminated."
+#~ msgstr ""
+
+#~ msgid "Bases: :py:class:`~pyfemtet.opt.opt._base.AbstractOptimizer`"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.opt package"
 #~ msgstr ""
 

@@ -80,7 +80,7 @@ class SParameterCalculator:
         return self.resonance_frequency  # 単位: Hz
         
 
-def antenna_is_smaller_than_substrate(Femtet):
+def antenna_is_smaller_than_substrate(Femtet, opt):
     """アンテナの大きさと基板の大きさの関係を計算します。
 
     この関数は、変数の更新によってモデル形状が破綻しないように
@@ -92,15 +92,17 @@ def antenna_is_smaller_than_substrate(Femtet):
     Returns:
         float: 基板エッジとアンテナエッジの間隙。1 mm 以上が必要です。
     """
-    r = Femtet.GetVariableValue('antenna_radius')
-    w = Femtet.GetVariableValue('substrate_w')
+    params = opt.get_parameter()
+    r = params['antenna_radius']
+    w = params['substrate_w']
     return w / 2 - r  # 単位: mm
 
 
-def port_is_inside_antenna(Femtet):
+def port_is_inside_antenna(Femtet, opt):
     """給電ポートの位置とアンテナの大きさの関係を計算します。"""
-    r = Femtet.GetVariableValue('antenna_radius')
-    x = Femtet.GetVariableValue('port_x')
+    params = opt.get_parameter()
+    r = params['antenna_radius']
+    x = params['port_x']
     return r - x  # 単位: mm。1 mm 以上が必要です。
 
 
@@ -125,8 +127,8 @@ if __name__ == '__main__':
     femopt.add_parameter('port_x', 5, 1, 20)
 
     # 拘束関数を最適化問題に追加
-    femopt.add_constraint(antenna_is_smaller_than_substrate, 'アンテナと基板エッジの間隙', lower_bound=1)
-    femopt.add_constraint(port_is_inside_antenna, 'アンテナエッジと給電ポートの間隙', lower_bound=1)
+    femopt.add_constraint(antenna_is_smaller_than_substrate, 'アンテナと基板エッジの間隙', lower_bound=1, args=(opt,))
+    femopt.add_constraint(port_is_inside_antenna, 'アンテナエッジと給電ポートの間隙', lower_bound=1, args=(opt,))
 
     # 目的関数を最適化問題に追加
     # 共振周波数の目標は 3.0 GHz です。

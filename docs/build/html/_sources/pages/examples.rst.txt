@@ -120,3 +120,25 @@ CAD Integration
     ../examples/NX_ex01/NX_ex01
     ../examples/Sldworks_ex01/Sldworks_ex01
 
+
+Constrained Model
+-----------------
+
+.. grid:: 2
+
+    .. grid-item-card:: Strict constraint
+        :link: ../examples/constrained_pipe/constrained_pipe
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ../examples/constrained_pipe/thumbnail.png
+            :scale: 50
+        +++
+        Constrains combinations of variables.
+
+
+.. toctree::
+    :titlesonly:
+    :hidden:
+
+    ../examples/constrained_pipe/constrained_pipe

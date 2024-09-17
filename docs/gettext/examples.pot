@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-11 17:54+0900\n"
+"POT-Creation-Date: 2024-09-17 15:36+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,6 +26,7 @@ msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:8
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:15
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:9
 #: ../source/examples/gau_ex08/gau_ex08.rst:8
 #: ../source/examples/her_ex40/her_ex40.rst:8
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:16
@@ -71,6 +72,7 @@ msgid "Appearance of the Model Section (and Design Variables)"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:37
@@ -80,6 +82,7 @@ msgid "Variable Name"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:37
@@ -113,6 +116,7 @@ msgid "Flange Bending"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:52
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:33
 #: ../source/examples/gau_ex08/gau_ex08.rst:37
 #: ../source/examples/her_ex40/her_ex40.rst:37
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:46
@@ -131,6 +135,7 @@ msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:59
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:25
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:39
 #: ../source/examples/gau_ex08/gau_ex08.rst:43
 #: ../source/examples/her_ex40/her_ex40.rst:43
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:54
@@ -145,6 +150,7 @@ msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:68
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:34
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:48
 #: ../source/examples/gau_ex08/gau_ex08.rst:52
 #: ../source/examples/her_ex40/her_ex40.rst:52
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:63
@@ -163,6 +169,7 @@ msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:80
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:46
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:59
 #: ../source/examples/gau_ex08/gau_ex08.rst:63
 #: ../source/examples/her_ex40/her_ex40.rst:63
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:103
@@ -201,6 +208,54 @@ msgstr ""
 
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:41
 msgid "After 20 trials, a Pareto set of von Mises stress and mass is obtained."
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:2
+msgid "Restrict parameter combinations"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:4
+msgid "This example explains how to use the constraint function when you want to restrict parameter combinations."
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:12
+msgid "Keep the :download:`sample project<../_temporary_sample_files/constrained_pipe.femprj>` open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/constrained_pipe.py>` to execute it."
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:18
+msgid "Design Variables and analysis conditions"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:22
+msgid "Model appearance, analysis conditions and design variables"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:27
+msgid "external_r"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:27
+msgid "Outer radius of the pipe."
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:28
+msgid "internal_r"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:28
+msgid "Inner radius of the pipe."
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:35
+msgid "Max Mises stress of the pipe."
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:41
+msgid "constrained_pipe.py"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:53
+msgid "Execution result of constrained_pipe.py. There is no trial with pipe thickness < 1."
 msgstr ""
 
 #: ../source/examples/gau_ex08/gau_ex08.rst:2

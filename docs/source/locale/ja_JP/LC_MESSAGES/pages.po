@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-11 17:54+0900\n"
+"POT-Creation-Date: 2024-09-17 15:12+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -130,6 +130,18 @@ msgstr "外部 CAD (Solidworks) 連携"
 #: ../source/pages/examples.rst:113
 msgid "Explore the same problem as left with Solidworks integration."
 msgstr "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
+
+#: ../source/pages/examples.rst:125
+msgid "Constrained Model"
+msgstr "モデルの拘束"
+
+#: ../source/pages/examples.rst:129
+msgid "Strict constraint"
+msgstr "Strict な拘束"
+
+#: ../source/pages/examples.rst:137
+msgid "Constrains combinations of variables."
+msgstr "設計変数の組合せを拘束します。"
 
 #: ../source/pages/installation.rst:2 ../source/pages/script_builder.rst:10
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:10

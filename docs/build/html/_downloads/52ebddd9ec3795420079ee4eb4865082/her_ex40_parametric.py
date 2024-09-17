@@ -80,7 +80,7 @@ class SParameterCalculator:
         return self.resonance_frequency  # unit: Hz
         
 
-def antenna_is_smaller_than_substrate(Femtet):
+def antenna_is_smaller_than_substrate(Femtet, opt):
     """Calculate the relationship between antenna size and board size.
 
     This function is used to constrain the model
@@ -89,15 +89,17 @@ def antenna_is_smaller_than_substrate(Femtet):
     Returns:
         float: Difference between the substrate size and antenna size. Must be equal to or grater than 1 mm.
     """
-    r = Femtet.GetVariableValue('antenna_radius')
-    w = Femtet.GetVariableValue('substrate_w')
+    params = opt.get_parameter()
+    r = params['antenna_radius']
+    w = params['substrate_w']
     return w / 2 - r  # unit: mm
 
 
-def port_is_inside_antenna(Femtet):
+def port_is_inside_antenna(Femtet, opt):
     """Calculate the relationship between the feed port location and antenna size."""
-    r = Femtet.GetVariableValue('antenna_radius')
-    x = Femtet.GetVariableValue('port_x')
+    params = opt.get_parameter()
+    r = params['antenna_radius']
+    x = params['port_x']
     return r - x  # unit: mm. Must be equal to or grater than 1 mm.
 
 
@@ -125,8 +127,8 @@ if __name__ == '__main__':
     femopt.add_parameter('port_x', 5, 1, 20)
 
     # Add the constraint function to the optimization problem.
-    femopt.add_constraint(antenna_is_smaller_than_substrate, 'antenna and substrate clearance', lower_bound=1)
-    femopt.add_constraint(port_is_inside_antenna, 'antenna and port clearance', lower_bound=1)
+    femopt.add_constraint(antenna_is_smaller_than_substrate, 'antenna and substrate clearance', lower_bound=1, args=(opt,))
+    femopt.add_constraint(port_is_inside_antenna, 'antenna and port clearance', lower_bound=1, args=(opt,))
 
     # Add the objective function to the optimization problem.
     # The target frequency is 3.0 GHz.

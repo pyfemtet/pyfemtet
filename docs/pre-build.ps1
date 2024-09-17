@@ -29,7 +29,8 @@ Copy-Item -Path "$SAMPLES_SOURCE\*" -Destination $SAMPLES_ON_DOC_SOURCE -Recurse
 Copy-Item -Path $INSTALLER -Destination $INSTALLER_ON_DOC_SOURCE -Force
 
 # update api references
-poetry run sphinx-apidoc -f -o docs/source/modules pyfemtet
+if (Test-Path "docs/source/modules") {Remove-Item "docs/source/modules" -Force -Recurse}
+poetry run sphinx-apidoc -f -o "docs/source/modules" pyfemtet
 
 # build English document
 poetry run python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR

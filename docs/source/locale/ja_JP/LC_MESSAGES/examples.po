@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-28 14:06+0900\n"
+"POT-Creation-Date: 2024-09-17 15:36+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -28,6 +28,7 @@ msgstr "PyFemtet では外部 CAD (NX) で作成したモデルを Femtet にイ
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:8
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:15
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:9
 #: ../source/examples/gau_ex08/gau_ex08.rst:8
 #: ../source/examples/her_ex40/her_ex40.rst:8
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:16
@@ -73,6 +74,7 @@ msgid "Appearance of the Model Section (and Design Variables)"
 msgstr "モデルの外観 (設計変数)"
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:37
@@ -82,6 +84,7 @@ msgid "Variable Name"
 msgstr "変数名"
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:37
@@ -115,6 +118,7 @@ msgid "Flange Bending"
 msgstr "フランジ曲げ"
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:52
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:33
 #: ../source/examples/gau_ex08/gau_ex08.rst:37
 #: ../source/examples/her_ex40/her_ex40.rst:37
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:46
@@ -133,6 +137,7 @@ msgstr "体積（最小にする）"
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:59
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:25
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:39
 #: ../source/examples/gau_ex08/gau_ex08.rst:43
 #: ../source/examples/her_ex40/her_ex40.rst:43
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:54
@@ -147,6 +152,7 @@ msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:68
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:34
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:48
 #: ../source/examples/gau_ex08/gau_ex08.rst:52
 #: ../source/examples/her_ex40/her_ex40.rst:52
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:63
@@ -165,6 +171,7 @@ msgstr "20 回の反復計算の結果、 ミーゼス応力と質量のパレ�
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:80
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:46
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:59
 #: ../source/examples/gau_ex08/gau_ex08.rst:63
 #: ../source/examples/her_ex40/her_ex40.rst:63
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:103
@@ -204,6 +211,54 @@ msgstr "Sldworks_ex01.py の実行結果。 横軸が ミーゼス応力 、 縦
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:41
 msgid "After 20 trials, a Pareto set of von Mises stress and mass is obtained."
 msgstr "20 回の反復計算の結果、 ミーゼス応力と質量のパレート集合が得られます。"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:2
+msgid "Restrict parameter combinations"
+msgstr "設計変数の組合せを拘束します。"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:4
+msgid "This example explains how to use the constraint function when you want to restrict parameter combinations."
+msgstr "この例では、パラメータの組み合わせを制限する場合に拘束関数を使用する方法について説明します。"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:12
+msgid "Keep the :download:`sample project<../_temporary_sample_files/constrained_pipe.femprj>` open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/constrained_pipe.py>` to execute it."
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/constrained_pipe.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/constrained_pipe.py>` をダブルクリックして実行してください。"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:18
+msgid "Design Variables and analysis conditions"
+msgstr "設計変数と解析条件"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:22
+msgid "Model appearance, analysis conditions and design variables"
+msgstr "解析モデルの概要と設計変数"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:27
+msgid "external_r"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:27
+msgid "Outer radius of the pipe."
+msgstr "管の外径"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:28
+msgid "internal_r"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:28
+msgid "Inner radius of the pipe."
+msgstr "管の内径"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:35
+msgid "Max Mises stress of the pipe."
+msgstr "ミーゼス応力の最大値"
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:41
+msgid "constrained_pipe.py"
+msgstr ""
+
+#: ../source/examples/constrained_pipe/constrained_pipe.rst:53
+msgid "Execution result of constrained_pipe.py. There is no trial with pipe thickness < 1."
+msgstr "constrained_pipe.py の実行結果です。wall thickness が 1 未満である試行は存在しません。"
 
 #: ../source/examples/gau_ex08/gau_ex08.rst:2
 msgid "Self-inductance of a solenoid coil"
@@ -511,7 +566,6 @@ msgid "Parallelize wat_ex14_parametric with 3 Femtet instances. Other items, exc
 msgstr "wat_ex14_parametric を 3 つの Femtet インスタンスで並列化します。 サンプルコード及び実行結果以外の項目は :doc:`../wat_ex14/wat_ex14` と同じです。"
 
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:12
-#, fuzzy
 msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parametric_parallel.py>` to execute it."
 msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parametric_parallel.py>` をダブルクリックして実行してください。"
 
