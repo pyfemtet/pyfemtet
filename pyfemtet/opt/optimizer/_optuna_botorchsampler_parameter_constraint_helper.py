@@ -39,12 +39,22 @@ def do_patch(
         opt (OptunaOptimizer): OptunaOptimizer.
     """
     import optuna_integration
-    target_fun = optuna_integration.botorch.optimize_acqf
+
+    from optuna_integration import version
+    if int(version.__version__.split('.')[0]) >= 4:
+        target_fun = optuna_integration.botorch.botorch.optimize_acqf
+    else:
+        target_fun = optuna_integration.botorch.optimize_acqf
+
     new_fun: callable = OptimizeReplacedACQF(target_fun)
     new_fun.set_constraints(list(constraints.values()))
     new_fun.set_study(study)
     new_fun.set_opt(opt)
-    optuna_integration.botorch.optimize_acqf = new_fun
+
+    if int(version.__version__.split('.')[0]) >= 4:
+        optuna_integration.botorch.botorch.optimize_acqf = new_fun
+    else:
+        optuna_integration.botorch.optimize_acqf = new_fun
 
 
 class GeneralFunctionWithForwardDifference(torch.autograd.Function):
