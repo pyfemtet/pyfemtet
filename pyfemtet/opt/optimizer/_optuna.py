@@ -281,7 +281,7 @@ class OptunaOptimizer(AbstractOptimizer):
             from pyfemtet.opt.optimizer._optuna_botorchsampler_parameter_constraint_helper import do_patch
 
             do_patch(
-                self.study,
+                study,
                 self.constraints,
                 self
             )

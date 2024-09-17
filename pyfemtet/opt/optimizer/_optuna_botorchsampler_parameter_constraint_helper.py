@@ -135,14 +135,8 @@ def evaluate_pyfemtet_cns(study: Study, cns: Constraint, norm_x: np.ndarray, opt
         bool: feasible or not.
     """
     # ===== unnormalize x =====
-    trial: Trial
-    for trial in study.trials[-1::-1]:
-        if len(trial.distributions) > 0:
-            break
-    else:
-        raise RuntimeError('Cannot detect bounds because of no COMPLETE trials. Certify 1 or more sampling excluding initial conditions.')
-    search_space = study.sampler.infer_relative_search_space(study, trial)
-    trans = _SearchSpaceTransform(trial.distributions, transform_0_1=True, transform_log=False, transform_step=False)
+    search_space = study.sampler.infer_relative_search_space(study, None)
+    trans = _SearchSpaceTransform(search_space, transform_0_1=True, transform_log=False, transform_step=False)
     params = trans.untransform(norm_x)
 
     # ===== update OptunaOptimizer and FEMInterface who is referenced by cns =====
