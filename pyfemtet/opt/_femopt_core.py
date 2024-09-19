@@ -150,9 +150,7 @@ def _remove_indent(source: str, indent: int) -> str:  # returns source
     return edited_source
 
 
-def _check_accsess_femtet_objects(fun, target: str = None):
-    if target is None:
-        target = ''
+def _check_access_femtet_objects(fun, target: str = 'Femtet'):
 
     # 関数fのソースコードを取得
     source = inspect.getsource(fun)
@@ -162,36 +160,88 @@ def _check_accsess_femtet_objects(fun, target: str = None):
         # instanceメソッドなどの場合を想定してインデントを削除
         source = _remove_indent(source, _get_scope_indent(source))
         tree = ast.parse(source)
-    except:
+
+    except Exception:
         return False  # パースに失敗するからと言ってエラーにするまででもない
 
-    # 関数定義を見つける
+    # if function or staticmethod, 1st argument is Femtet. Find the name.
+    varname_contains_femtet = ''  # invalid variable name
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
-            # Femtet という名前の引数を取得
-            first_arg_name = 'Femtet'
+            all_arguments: ast.arguments = node.args
 
-            # 関数内の全ての属性アクセスをチェック
-            for sub_node in ast.walk(node):
-                if isinstance(sub_node, ast.Attribute):
-                    # Femtet に対してアクセスがあるかチェック
-                    conditions = [isinstance(sub_node.value, ast.Name)]
-                    conditions.append(sub_node.value.id == first_arg_name)  # Femtet にアクセスしている
-                    if target == 'Gogh':
-                        conditions.append(sub_node.attr == 'Gogh')  # Femtet.Gogh にアクセスしている
-                    if all(conditions):
-                        return True
+            args: list[ast.arg] = all_arguments.args
+            # args.extend(all_arguments.posonlyargs)  # 先にこっちを入れるべきかも
 
-            # ここまできてもなければアクセスしてない
-            return False
+            target_arg = args[0]
+
+            # if class method or instance method, 2nd argument is it.
+            # In this implementation, we cannot detect the FunctionDef is
+            # method or not because the part of source code is unindented and parsed.
+            if target_arg.arg == 'self' or target_arg.arg == 'cls':
+                if len(args) > 1:
+                    target_arg = args[1]
+                else:
+                    target_arg = None
+
+            if target_arg is not None:
+                varname_contains_femtet = target_arg.arg
+
+    # check Femtet access
+    if target == 'Femtet':
+        for node in ast.walk(tree):
+
+            # by accessing argument directory
+            if isinstance(node, ast.Name):
+                # found local variables
+                node: ast.Name
+                if node.id == varname_contains_femtet:
+                    # found Femtet
+                    return True
+
+            # by accessing inside method
+            elif isinstance(node, ast.Attribute):
+                # found attribute of something
+                node: ast.Attribute
+                if node.attr == 'Femtet':
+                    # found **.Femtet.**
+                    return True
+
+    # check Gogh access
+    elif target == 'Gogh':
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Attribute):
+                if node.attr == 'Gogh':
+                    # found **.Gogh.**
+                    node: ast.Attribute
+                    parent = node.value
+
+                    # by accessing argument directory
+                    if isinstance(parent, ast.Name):
+                        # found *.Gogh.**
+                        parent: ast.Name
+                        if parent.id == varname_contains_femtet:
+                            # found Femtet.Gogh.**
+                            return True
+
+                    # by accessing inside method
+                    if isinstance(parent, ast.Attribute):
+                        # found **.*.Gogh.**
+                        parent: ast.Attribute
+                        if parent.attr == 'Femtet':
+                            # found **.Femtet.Gogh.**
+                            return True
+
+    # ここまで来たならば target へのアクセスはおそらくない
+    return False
 
 
 def _is_access_gogh(fun):
-    return _check_accsess_femtet_objects(fun, target='Gogh')
+    return _check_access_femtet_objects(fun, target='Gogh')
 
 
 def _is_access_femtet(fun):
-    return _check_accsess_femtet_objects(fun)
+    return _check_access_femtet_objects(fun, target='Femtet')
 
 
 def is_feasible(value, lb, ub):
