@@ -12,7 +12,7 @@ from traceback import print_exception
 # 3rd-party
 import numpy as np
 import pandas as pd
-from dask.distributed import LocalCluster, Client
+from dask.distributed import LocalCluster, Client, Worker
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
@@ -452,10 +452,16 @@ class FEMOpt:
         else:
             # ローカルクラスターを構築
             logger.info('Launching single machine cluster. This may take tens of seconds.')
-            cluster = LocalCluster(processes=True, n_workers=n_parallel,
-                                   threads_per_worker=1)  # n_parallel = n_parallel - 1 + 1; main 分減らし、monitor 分増やす
+            cluster = LocalCluster(
+                processes=True,
+                n_workers=n_parallel,  # n_parallel = n_parallel - 1 + 1; main 分減らし、monitor 分増やす
+                threads_per_worker=1,
+                worker_class=Worker,
+            )
+            logger.info('LocalCluster launched successfully.')
             self.client = Client(cluster, direct_to_workers=False)
             self.scheduler_address = self.client.scheduler.address
+            logger.info('Client launched successfully.')
 
             # 最適化タスクを振り分ける worker を指定
             subprocess_indices = list(range(n_parallel))[1:]
@@ -487,6 +493,7 @@ class FEMOpt:
                         indexes,
                         directions,
                     )
+                logger.info('Femtet loaded successfully.')
 
             # actor の設定
             self.status = OptimizationStatus(_client)
@@ -500,6 +507,7 @@ class FEMOpt:
                 _client,
                 metadata,
             )
+            logger.info('Status Actor initialized successfully.')
 
             # launch monitor
             self.monitor_process_future = _client.submit(
@@ -516,6 +524,7 @@ class FEMOpt:
                 workers=self.monitor_process_worker_name,
                 allow_other_workers=False
             )
+            logger.info('Process monitor initialized successfully.')
 
             # fem
             self.fem._setup_before_parallel(_client)
