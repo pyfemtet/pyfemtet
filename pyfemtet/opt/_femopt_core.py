@@ -8,13 +8,20 @@ import inspect
 import ast
 import csv
 import ctypes
+from packaging import version
 
 # 3rd-party
 import numpy as np
 import pandas as pd
 from scipy.stats.qmc import LatinHypercube
 import optuna
-from optuna._hypervolume import WFG
+if version.parse(optuna.version.__version__) < version.parse('4.0.0'):
+    from optuna._hypervolume import WFG
+    wfg = WFG()
+    compute_hypervolume = wfg.compute
+else:
+    from optuna._hypervolume import wfg
+    compute_hypervolume = wfg.compute_hypervolume
 from dask.distributed import Lock, get_client
 
 # win32com
@@ -753,10 +760,9 @@ class History:
         reference_point = r * (maximum - minimum) + minimum
 
         #### hv 履歴の計算
-        wfg = WFG()
         hvs = []
         for i in range(n):
-            hv = wfg.compute(pareto_set[:i], reference_point)
+            hv = compute_hypervolume(pareto_set[:i], reference_point)
             if np.isnan(hv):
                 hv = 0
             hvs.append(hv)

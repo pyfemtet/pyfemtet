@@ -183,7 +183,6 @@ class NonlinearInequalityConstraints:
                 item = (lambda x: GeneralFunctionWithForwardDifference.apply(cns_botorch, x), True)
                 self._nonlinear_inequality_constraints.append(item)
 
-
     def _filter_feasible_conditions(self, ic_batch):
         # List to store feasible initial conditions
         feasible_ic_list = []
