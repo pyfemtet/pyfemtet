@@ -715,20 +715,27 @@ class History:
 
     def _calc_non_domi(self, objectives, df):
 
+        # feasible のもののみ取り出してくる
+        idx = df['feasible'].values
+        pdf = df[idx]
+
         # 目的関数の履歴を取り出してくる
-        solution_set = df[self.obj_names]
+        solution_set = pdf[self.obj_names]
 
         # 最小化問題の座標空間に変換する
         for obj_column, (_, objective) in zip(self.obj_names, objectives.items()):
             solution_set.loc[:, obj_column] = solution_set[obj_column].map(objective.convert)
 
         # 非劣解の計算
-        non_domi = []
+        non_domi: list[bool] = []
         for i, row in solution_set.iterrows():
             non_domi.append((row > solution_set).product(axis=1).sum(axis=0) == 0)
 
-        # 非劣解の登録
-        df['non_domi'] = non_domi
+        # feasible も infeasible も一旦劣解にする
+        df['non_domi'] = False
+
+        # feasible のものに non_domi の評価結果を代入する
+        df.loc[idx, 'non_domi'] = non_domi
 
     def _calc_hypervolume(self, objectives, df):
 
