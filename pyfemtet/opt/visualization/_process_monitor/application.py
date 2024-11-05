@@ -5,7 +5,7 @@ from threading import Thread
 import pandas as pd
 
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, logger
-from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
+from pyfemtet.opt.visualization._process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
 from pyfemtet._message import Msg
 
 
@@ -206,4 +206,4 @@ def main(history, status, worker_addresses, worker_status_list, host=None, port=
 
 
 if __name__ == '__main__':
-    g_debug()
+    _g_debug()

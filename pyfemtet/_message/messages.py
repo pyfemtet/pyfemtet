@@ -132,7 +132,7 @@ class Message:
     GRAPH_TITLE_PREDICTION_MODEL = _('Prediction Model of Objective')
     LEGEND_LABEL_PREDICTION_MODEL = _('prediction model')
     LEGEND_LABEL_PREDICTION_MODEL_STDDEV = _('std. dev. of model')
-    # process_monitor application
+    # _process_monitor application
     PAGE_TITLE_PROGRESS = _('Progress')
     PAGE_TITLE_PREDICTION_MODEL = _('Prediction')
     PAGE_TITLE_WORKERS = _('Workers')

@@ -21,7 +21,7 @@ def _get_worker_name_as_prefix():
     return name
 
 
-class DaskLogRecord(logging.LogRecord):
+class _DaskLogRecord(logging.LogRecord):
     """Generate a log message with dask worker name."""
 
     # def __init__(self, *args, **kwargs):
@@ -43,7 +43,7 @@ class DaskLogRecord(logging.LogRecord):
         return msg
 
 
-logging.setLogRecordFactory(DaskLogRecord)  # すべての logging %(message)s の前に prefix を入れる
+logging.setLogRecordFactory(_DaskLogRecord)  # すべての logging %(message)s の前に prefix を入れる
 
 
 def _color_supported() -> bool:

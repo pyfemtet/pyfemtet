@@ -21,7 +21,7 @@ import base64
 import json
 import numpy as np
 
-from pyfemtet.opt.visualization.complex_components.pm_graph_creator import PredictionModelCreator
+from pyfemtet.opt.visualization._complex_components.pm_graph_creator import PredictionModelCreator
 from pyfemtet.opt.visualization.base import AbstractPage, logger
 from pyfemtet._message import Msg
 
@@ -602,7 +602,7 @@ class PredictionModelGraph(AbstractPage):
     #         return fig
 
     def data_accessor(self) -> pd.DataFrame:
-        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:

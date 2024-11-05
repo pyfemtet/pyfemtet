@@ -8,8 +8,8 @@ from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.visualization.wrapped_components import dcc, dbc, html
 from pyfemtet.opt.visualization.base import AbstractPage, logger
-from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
-from pyfemtet.opt.visualization.complex_components.pm_graph import PredictionModelGraph
+from pyfemtet.opt.visualization._complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
+from pyfemtet.opt.visualization._complex_components.pm_graph import PredictionModelGraph
 from pyfemtet._message import Msg
 
 
@@ -112,7 +112,7 @@ class HomePage(AbstractPage):
         # setup callback of subpages
         super().setup_callback()
 
-        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
         from pyfemtet.opt._femopt_core import OptimizationStatus
         self.application: ProcessMonitorApplication = self.application
 
@@ -229,7 +229,7 @@ class HomePage(AbstractPage):
 class WorkerPage(AbstractPage):
 
     def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
@@ -281,7 +281,7 @@ class PredictionModelPage(AbstractPage):
     """"""
 
     def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
@@ -296,7 +296,7 @@ class PredictionModelPage(AbstractPage):
 class OptunaVisualizerPage(AbstractPage):
 
     def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
@@ -385,7 +385,7 @@ class OptunaVisualizerPage(AbstractPage):
         pass
 
     def data_accessor(self) -> pd.DataFrame:
-        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:

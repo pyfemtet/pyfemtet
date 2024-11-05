@@ -12,10 +12,10 @@ from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.visualization.wrapped_components import dcc, dbc, html
 from pyfemtet.opt.visualization.base import AbstractPage  # , logger
-from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
-from pyfemtet.opt.visualization.complex_components.control_femtet import FemtetControl, FemtetState
-from pyfemtet.opt.visualization.complex_components.alert_region import AlertRegion
-from pyfemtet.opt.visualization.complex_components.pm_graph import PredictionModelGraph
+from pyfemtet.opt.visualization._complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
+from pyfemtet.opt.visualization._complex_components.control_femtet import FemtetControl, FemtetState
+from pyfemtet.opt.visualization._complex_components.alert_region import AlertRegion
+from pyfemtet.opt.visualization._complex_components.pm_graph import PredictionModelGraph
 
 from pyfemtet.opt._femopt_core import History
 
@@ -721,7 +721,7 @@ class PredictionModelPage(AbstractPage):
     """"""
 
     def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization.process_monitor.application import ProcessMonitorApplication
+        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
