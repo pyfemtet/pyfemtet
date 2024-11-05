@@ -206,4 +206,4 @@ def main(history, status, worker_addresses, worker_status_list, host=None, port=
 
 
 if __name__ == '__main__':
-    _g_debug()
+    g_debug()
