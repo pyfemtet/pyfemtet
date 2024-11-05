@@ -11,7 +11,7 @@ from pyfemtet.opt._femopt_core import History
 
 from pyfemtet.opt.prediction.base import PyFemtetPredictionModel
 from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 class PredictionModelCreator:

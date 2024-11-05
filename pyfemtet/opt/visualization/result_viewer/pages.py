@@ -19,7 +19,7 @@ from pyfemtet.opt.visualization.complex_components.pm_graph import PredictionMod
 
 from pyfemtet.opt._femopt_core import History
 
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 class HomePage(AbstractPage):

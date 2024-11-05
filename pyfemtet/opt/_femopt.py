@@ -28,7 +28,7 @@ from pyfemtet.opt._femopt_core import (
     OptimizationStatus,
     logger,
 )
-from pyfemtet.message import Msg, encoding
+from pyfemtet._message import Msg, encoding
 from pyfemtet.opt.parameter import Parameter, Expression
 
 

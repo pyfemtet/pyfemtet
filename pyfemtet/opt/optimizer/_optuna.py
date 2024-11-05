@@ -14,7 +14,7 @@ from optuna.study import MaxTrialsCallback
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs, Constraint
 from pyfemtet.opt.optimizer import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 # filter warnings
 import warnings

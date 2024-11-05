@@ -13,7 +13,7 @@ import pandas as pd
 # pyfemtet relative
 from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 from pyfemtet.opt.parameter import ExpressionEvaluator
 
 # logger

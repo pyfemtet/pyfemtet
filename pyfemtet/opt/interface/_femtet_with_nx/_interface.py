@@ -7,7 +7,7 @@ from dask.distributed import get_worker
 
 from pyfemtet.core import ModelError
 from pyfemtet.opt.interface import FemtetInterface, logger
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 here, me = os.path.split(__file__)

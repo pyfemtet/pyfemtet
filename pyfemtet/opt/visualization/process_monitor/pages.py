@@ -10,7 +10,7 @@ from pyfemtet.opt.visualization.wrapped_components import dcc, dbc, html
 from pyfemtet.opt.visualization.base import AbstractPage, logger
 from pyfemtet.opt.visualization.complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization.complex_components.pm_graph import PredictionModelGraph
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 DBC_COLUMN_STYLE_CENTER = {

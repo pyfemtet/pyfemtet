@@ -6,7 +6,7 @@ import pandas as pd
 
 from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, logger
 from pyfemtet.opt.visualization.process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):

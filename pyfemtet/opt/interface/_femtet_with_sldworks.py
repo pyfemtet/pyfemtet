@@ -10,7 +10,7 @@ from pythoncom import CoInitialize, CoUninitialize
 
 from pyfemtet.core import ModelError
 from pyfemtet.opt.interface import FemtetInterface, logger
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 class FemtetWithSolidworksInterface(FemtetInterface):

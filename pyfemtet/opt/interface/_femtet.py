@@ -34,7 +34,7 @@ from pyfemtet.dispatch_extensions import (
     DispatchExtensionException,
 )
 from pyfemtet.opt.interface import FEMInterface, logger
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 def post_activate_message(hwnd):

@@ -22,7 +22,7 @@ import numpy as np
 
 from pyfemtet.opt.visualization.complex_components import main_figure_creator
 from pyfemtet.opt.visualization.base import AbstractPage, logger
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {

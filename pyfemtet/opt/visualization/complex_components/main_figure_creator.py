@@ -3,7 +3,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 
 from pyfemtet.opt._femopt_core import History
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 class _ColorSet:
