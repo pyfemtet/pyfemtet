@@ -9,7 +9,7 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from pyfemtet.opt.prediction.base import PredictionModelBase
 
 
-class MyStandardScaler:
+class _StandardScaler:
 
     # noinspection PyAttributeOutsideInit
     def fit_transform(self, x: torch.Tensor) -> torch.Tensor:
@@ -27,7 +27,7 @@ class MyStandardScaler:
         return torch.tensor(x.numpy() * self.s**2).double()
 
 
-class MyMinMaxScaler:
+class _MinMaxScaler:
 
     # noinspection PyAttributeOutsideInit
     def fit_transform(self, x: torch.Tensor) -> torch.Tensor:
@@ -56,11 +56,11 @@ class SingleTaskGPModel(PredictionModelBase):
         self._is_single_objective = len(y[0]) == 1
 
         # Normalize the input data to the unit cube
-        self.scaler_x = MyMinMaxScaler()
+        self.scaler_x = _MinMaxScaler()
         train_x = self.scaler_x.fit_transform(train_x)
 
         # Standardize the output data
-        self.scaler_y = MyStandardScaler()
+        self.scaler_y = _StandardScaler()
         train_y = self.scaler_y.fit_transform(train_y)
 
         # Fit a Gaussian Process model using the extracted data
