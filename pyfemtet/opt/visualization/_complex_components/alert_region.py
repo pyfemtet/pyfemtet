@@ -7,7 +7,7 @@ from dash import Output, Input, State, no_update, callback_context
 from dash.exceptions import PreventUpdate
 
 # components
-from pyfemtet.opt.visualization.wrapped_components import html, dcc, dbc
+from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
 
 from pyfemtet.opt.visualization.base import AbstractPage, logger
 

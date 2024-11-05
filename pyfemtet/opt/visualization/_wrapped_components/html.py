@@ -1,5 +1,5 @@
 # auto created module
-from pyfemtet.opt.visualization.wrapped_components.str_enum import StrEnum
+from pyfemtet.opt.visualization._wrapped_components.str_enum import StrEnum
 # from enum import StrEnum
 import dash
 import dash_bootstrap_components

@@ -14,7 +14,7 @@ from dash import Output, Input  # , State, no_update, callback_context
 import dash_bootstrap_components
 
 from pyfemtet.opt._femopt_core import History
-from pyfemtet.opt.visualization.wrapped_components import html, dcc, dbc
+from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
 
 # the others
 from abc import ABC, abstractmethod

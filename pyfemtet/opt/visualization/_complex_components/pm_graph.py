@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 
 # components
 from dash import dash_table
-from pyfemtet.opt.visualization.wrapped_components import html, dcc, dbc
+from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
 
 # graph
 import pandas as pd
