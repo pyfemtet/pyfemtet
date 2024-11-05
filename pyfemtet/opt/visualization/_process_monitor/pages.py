@@ -7,7 +7,7 @@ from dash import Output, Input, State, callback_context, no_update, ALL
 from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.visualization._wrapped_components import dcc, dbc, html
-from pyfemtet.opt.visualization.base import AbstractPage, logger
+from pyfemtet.opt.visualization._base import AbstractPage, logger
 from pyfemtet.opt.visualization._complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization._complex_components.pm_graph import PredictionModelGraph
 from pyfemtet._message import Msg

@@ -9,7 +9,7 @@ from dash.exceptions import PreventUpdate
 # components
 from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
 
-from pyfemtet.opt.visualization.base import AbstractPage, logger
+from pyfemtet.opt.visualization._base import AbstractPage, logger
 
 
 class AlertRegion(AbstractPage):

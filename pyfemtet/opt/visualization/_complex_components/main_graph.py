@@ -21,7 +21,7 @@ import json
 import numpy as np
 
 from pyfemtet.opt.visualization._complex_components import main_figure_creator
-from pyfemtet.opt.visualization.base import AbstractPage, logger
+from pyfemtet.opt.visualization._base import AbstractPage, logger
 from pyfemtet._message import Msg
 
 

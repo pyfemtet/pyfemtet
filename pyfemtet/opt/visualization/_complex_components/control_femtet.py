@@ -16,7 +16,7 @@ import json
 # noinspection PyUnresolvedReferences
 from pythoncom import com_error
 
-from pyfemtet.opt.visualization.base import PyFemtetApplicationBase, AbstractPage, logger
+from pyfemtet.opt.visualization._base import PyFemtetApplicationBase, AbstractPage, logger
 from pyfemtet.opt.interface._femtet import FemtetInterface
 from pyfemtet._message import Msg
 

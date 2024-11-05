@@ -11,7 +11,7 @@ from dash import Output, Input, State, callback_context, no_update
 from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.visualization._wrapped_components import dcc, dbc, html
-from pyfemtet.opt.visualization.base import AbstractPage  # , logger
+from pyfemtet.opt.visualization._base import AbstractPage  # , logger
 from pyfemtet.opt.visualization._complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from pyfemtet.opt.visualization._complex_components.control_femtet import FemtetControl, FemtetState
 from pyfemtet.opt.visualization._complex_components.alert_region import AlertRegion
