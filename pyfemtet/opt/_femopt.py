@@ -510,6 +510,7 @@ class FEMOpt:
             logger.info('Status Actor initialized successfully.')
 
             # launch monitor
+            # noinspection PyTypeChecker
             self.monitor_process_future = _client.submit(
                 # func
                 _start_monitor_server,

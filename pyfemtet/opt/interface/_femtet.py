@@ -48,27 +48,36 @@ class FemtetInterface(FEMInterface):
         femprj_path (str, optional):
             The path to the project file.
             If not specified, get it from connected Femtet.
+
         model_name (str, optional):
             The name of the model.
             If not specified, get it from connected Femtet or the
             first model when Femtet open the project file.
+
         connect_method (str, optional):
             The connection method.
             Default is 'auto'. Other valid values are 'new' or 'existing'.
+
         save_pdt (str, optional):
             The type to save result file.
             Can specify 'all' or None. Default is 'all'.
+
         strictly_pid_specify (bool, optional):
             Whether to strictly specify the PID in Femtet connection.
             Default is True.
+
         allow_without_project (bool, optional):
             Whether to allow without a project. Default is False.
+
         open_result_with_gui (bool, optional):
             Whether to open the result with GUI. Default is True.
-        parametric_output_indexes_use_as_objective (list[int], optional):
-            A list of parametric output indexes to use as the
-            objective function. If not specified, it will be None
-            and no parametric outputs are used as objectives.
+
+        parametric_output_indexes_use_as_objective (dict[int, str or float], optional):
+            A list of parametric output indexes and its direction
+            to use as the objective function. If not specified,
+            it will be None and no parametric outputs are used
+            as objectives.
+
         **kwargs: Additional arguments from inherited classes.
 
     Warning:
@@ -93,7 +102,7 @@ class FemtetInterface(FEMInterface):
             strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
             allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui: bool = True,
-            parametric_output_indexes_use_as_objective: list[int] = None,
+            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
             **kwargs  # 継承されたクラスからの引数
     ):
 
