@@ -55,7 +55,6 @@ def add_worker(client, worker_name):
     client.wait_for_workers(n_workers=current_n_workers + 1)
 
 
-
 class FEMOpt:
     """Class to control FEM interface and optimizer.
 
@@ -81,22 +80,22 @@ class FEMOpt:
             See Also:
                 https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html
 
+    .. Example の中について、reST ではリストだと改行できないので、リストにしない
+
     Examples:
 
-        - When specifying and opening a femprj and model, we write:
+        When specifying and opening a femprj and model, we write
 
             >>> from pyfemtet.opt import FEMOpt, FemtetInterface  # doctest: +SKIP
             >>> fem = FemtetInterface(femprj_path='path/to/project.femprj', model_name='NewModel')  # doctest: +SKIP
             >>> femopt = FEMOpt(fem=fem)  # doctest: +SKIP
 
-        - When specifying optimization algorithm, we write:
+        When specifying optimization algorithm, we write
 
             >>> from optuna.samplers import TPESampler  # doctest: +SKIP
             >>> from pyfemtet.opt import FEMOpt, OptunaOptimizer  # doctest: +SKIP
             >>> opt = OptunaOptimizer(sampler_class=TPESampler, sampler_kwargs=dict(n_startup_trials=10))  # doctest: +SKIP
             >>> femopt = FEMOpt(opt=opt)  # doctest: +SKIP
-
-
 
     """
 
@@ -155,40 +154,42 @@ class FEMOpt:
     def add_parameter(
             self,
             name: str,
-            initial_value: float or None = None,
-            lower_bound: float or None = None,
-            upper_bound: float or None = None,
-            step: float or None = None,
-            properties: Optional[dict] = None,
-            pass_to_fem: Optional[bool] = True,
+            initial_value: float = None,
+            lower_bound: float = None,
+            upper_bound: float = None,
+            step: float = None,
+            properties: dict[str, str or float] = None,
+            pass_to_fem: bool = True,
     ):
+        # noinspection PyUnresolvedReferences
         """Adds a parameter to the optimization problem.
 
-        Args:
-            name (str): The name of the parameter.
-            initial_value (float or None, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.
-            lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
-            upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.
-            step (float or None, optional): The step of parameter. Defaults to None.
-            properties (dict, optional): Additional information about the parameter. Defaults to None.
-            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
+                Args:
+                    name (str): The name of the parameter.
+                    initial_value (float, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.
+                    lower_bound (float, optional): The lower bound of the parameter. Defaults to None. Some optimization algorithms require this.
+                    upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. Some optimization algorithms require this.
+                    step (float, optional): The step of parameter. If specified, parameter is used as discrete. Defaults to None.
+                    properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.
+                    pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
 
-        Raises:
-            ValueError: If initial_value is not specified and the value for the given name is also not specified.
+                Raises:
+                    ValueError: If initial_value is not specified and the value for the given name is also not specified.
 
-        Examples:
+                Examples:
 
-            - When adding parameter a (-1 <= a <= 1; initial value is 0), we write:
+                    When adding parameter a (-1 <= a <= 1; initial value is 0), we write
 
-                >>> femopt.add_parameter('parameter_a', 0, -1, 1)  # doctest: +SKIP
+                        >>> femopt.add_parameter('parameter_a', 0, -1, 1)  # doctest: +SKIP
 
-                Note that the ```note``` argument can be set any name in this case.
+                        Note that the ```note``` argument can be set any name in this case.
 
-            - When adding discrete parameter a (-1 <= a <= 1; initial value is 0, step 0.5), we write:
+                    When adding discrete parameter a (-1 <= a <= 1; initial value is 0,
+                    step 0.5), we write
 
-                >>> femopt.add_parameter('parameter a', 0, -1, 1, 0.5)  # doctest: +SKIP
+                        >>> femopt.add_parameter('parameter a', 0, -1, 1, 0.5)  # doctest: +SKIP
 
-        """
+                """
 
         _check_bound(lower_bound, upper_bound, name)
 
@@ -223,6 +224,7 @@ class FEMOpt:
             kwargs: Optional[dict] = None,
             pass_to_fem=True,
     ):
+        # noinspection PyUnresolvedReferences
         """Add expression to the optimization problem.
 
         Warnings:
@@ -237,14 +239,17 @@ class FEMOpt:
             pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True.
 
         Examples:
-            - When adding variable a and b; a is not directly included as model variables
-            but an optimization parameter, b is not a parameter but a model variable and
-            the relationship of these 2 variables is ```b = a ** 2```, we write:
+
+            When adding variable a and b; a is not directly included as model
+            variables but an optimization parameter, b is not a parameter but
+            a model variable and the relationship of these 2 variables is
+            ```b = a ** 2```, we write:
 
                 >>> def calc_b(parameter_a):  # doctest: +SKIP
                 ...     return parameter_a ** 2  # doctest: +SKIP
-                ... femopt.add_parameter('parameter_a', 0, -1, 1, pass_to_fem=False)  # doctest: +SKIP
-                ... femopt.add_expression('variable_b', calc_b)  # doctest: +SKIP
+                ...
+                >>> femopt.add_parameter('parameter_a', 0, -1, 1, pass_to_fem=False)  # doctest: +SKIP
+                >>> femopt.add_expression('variable_b', calc_b)  # doctest: +SKIP
 
                 Notes:
                     The argument names of function to calculate variable
@@ -254,8 +259,9 @@ class FEMOpt:
                     In this case, only strings that can be used as Python variables are valid
                     for ```name``` argument of :func:`FEMOpt.add_parameter`.
 
-            - When adding variable r, theta and x, y; r, theta is an optimization parameter and
-            x, y is an intermediate variable to calculate constraint function, we write:
+            When adding variable r, theta and x, y; r, theta is an optimization
+            parameter and x, y is an intermediate variable to calculate constraint
+            function, we write
 
                 >>> def calc_x(r, theta):  # doctest: +SKIP
                 ...     return r * cos(theta)  # doctest: +SKIP
@@ -263,19 +269,19 @@ class FEMOpt:
                 >>> def calc_y(r, theta):  # doctest: +SKIP
                 ...     return r * cos(theta)  # doctest: +SKIP
                 ...
+                >>> def constraint(Femtet, opt: AbstractOptimizer):  # doctest: +SKIP
+                ...     d = opt.variables.get_variables()  # doctest: +SKIP
+                ...     x, y = d['x'], d['y']  # doctest: +SKIP
+                ...     return min(x, y)  # doctest: +SKIP
+                ...
                 >>> femopt.add_parameter('r', 0, 0, 1)  # doctest: +SKIP
                 >>> femopt.add_parameter('theta', 0, 0, 2*pi)  # doctest: +SKIP
                 >>> femopt.add_expression('x', calc_x, pass_to_fem=False)  # doctest: +SKIP
                 >>> femopt.add_expression('y', calc_y, pass_to_fem=False)  # doctest: +SKIP
-                >>>
-                >>> def constraint(Femtet, opt: AbstractOptimizer):
-                ...     d = opt.variables.get_variables()
-                ...     x, y = d['x'], d['y']
-                ...     return min(x, y)
-                ...
-                >>> femopt.add_constraint(constraint, lower_bound=0.5, args=(femopt.opt,))
+                >>> femopt.add_constraint(constraint, lower_bound=0.5, args=(femopt.opt,))  # doctest: +SKIP
 
         """
+
         exp = Expression(
             name=name,
             value=None,
@@ -294,12 +300,13 @@ class FEMOpt:
             args: tuple or None = None,
             kwargs: dict or None = None
     ):
+        # noinspection PyUnresolvedReferences
         """Adds an objective to the optimization problem.
 
         Args:
             fun (callable): The objective function.
             name (str or None, optional): The name of the objective. Defaults to None.
-            direction (str or float, optional): The optimization direction. Defaults to 'minimize'.
+            direction (str or float, optional): The optimization direction. Varid values are 'maximize', 'minimize' or a float value. Defaults to 'minimize'.
             args (tuple or None, optional): Additional arguments for the objective function. Defaults to None.
             kwargs (dict or None, optional): Additional keyword arguments for the objective function. Defaults to None.
 
@@ -308,22 +315,23 @@ class FEMOpt:
 
         Examples:
 
-            - When add a complex objective (for example, want to dynamically set body to calculate temperature
-            and use product of the temperature and one of the parameters as objective) , we write:
+            When add a complex objective (for example, want to dynamically set body
+            to calculate temperature and use product of the temperature and one of
+            the parameters as objective) , we write
 
-                >>> class MyClass:
-                ...     def get_body_name(self):
-                ...         ...  # process something and detect body name
-                ...         return body_name
+                >>> class MyClass:  # doctest: +SKIP
+                ...     def get_body_name(self):  # doctest: +SKIP
+                ...         ...  # process something and detect body name  # doctest: +SKIP
+                ...         return body_name  # doctest: +SKIP
                 ...
-                >>> def complex_objective(Femtet, opt, some_object):
-                ...     body_name = some_object.get_body_name()  # dynamically get body name to calculate temperature
-                ...     temp, _, _ = Femtet.Gogh.Watt.GetTemp(body_name)  # calculate temperature
-                ...     some_param = opt.get_parameter()['some_param']  # get ome parameter
-                ...     return temp * some_param  # calculate something and return it
+                >>> def complex_objective(Femtet, opt, some_object):  # doctest: +SKIP
+                ...     body_name = some_object.get_body_name()  # dynamically get body name to calculate temperature  # doctest: +SKIP
+                ...     temp, _, _ = Femtet.Gogh.Watt.GetTemp(body_name)  # calculate temperature  # doctest: +SKIP
+                ...     some_param = opt.get_parameter()['some_param']  # get ome parameter  # doctest: +SKIP
+                ...     return temp * some_param  # calculate something and return it  # doctest: +SKIP
                 ...
-                >>> my_obj = MyClass()
-                >>> femopt.add_objective(complex_objective, args=(femopt.opt, my_obj,))
+                >>> my_obj = MyClass()  # doctest: +SKIP
+                >>> femopt.add_objective(complex_objective, args=(femopt.opt, my_obj,))  # doctest: +SKIP
 
         Tip:
             If name is None, name is a string with the prefix `"obj_"` followed by a sequential number.
@@ -362,6 +370,7 @@ class FEMOpt:
             kwargs: dict or None = None,
             using_fem: bool = None,
     ):
+        # noinspection PyUnresolvedReferences
         """Adds a constraint to the optimization problem.
 
         Args:
@@ -373,12 +382,33 @@ class FEMOpt:
             args (tuple or None, optional): Additional arguments for the constraint function. Defaults to None.
             kwargs (dict): Additional arguments for the constraint function. Defaults to None.
             using_fem (bool, optional): Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically.
-            options: (dict[str, Any]): Optional keyword arguments to pass to optimizer. See :func:`AbstractOptimizer.add_constraint`.
-
-        Examples:
 
         Warnings:
+            strict == True かつ OptunaOptimzier と BoTorchSampler を使う場合、
+            pyfemtet は新しい変数を提案するために最適化 subproblem を解きます。
+            この際、subproblem の各 iteration で拘束関数 fun が実行されるため、
+            FEMInterface を介した 3D モデル情報の取得のような時間的に高コストな
+            処理を含むと現実的な時間で全体の最適化が終了しない可能性があります。
 
+            Examples:
+                例えば、モデルの底面積を拘束する例において、
+                下記の書き方はとても長い時間を必要とします。
+
+                    >>> def bottom_area(Femtet, opt):  # doctest: +SKIP
+                    ...     w = Femtet.GetVariableValue('width')  # doctest: +SKIP
+                    ...     d = Femtet.GetVariableValue('depth')  # doctest: +SKIP
+                    ...     return w * d  # doctest: +SKIP
+                    ...
+                    >>> femopt.add_constraint(constraint, lower_bound=5)  # doctest: +SKIP
+
+                代わりに、以下のようにしてください。
+
+                    >>> def bottom_area(_, opt):  # 第一引数 Femtet にはアクセスしないようにします。  # doctest: +SKIP
+                    ...     params = opt.get_parameter()  # doctest: +SKIP
+                    ...     w, d = params['width'], params['depth']  # doctest: +SKIP
+                    ...     return w * d  # doctest: +SKIP
+                    ...
+                    >>> femopt.add_constraint(constraint, lower_bound=5, args=(femopt.opt,))  # doctest: +SKIP
 
         Note:
             If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.
@@ -435,22 +465,32 @@ class FEMOpt:
         self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs, using_fem)
 
     def get_parameter(self, format='dict'):
+        """Deprecated method.
+
+        Planed to remove in future version. Use Femopt.opt.get_parameter() instead.
+        """
         raise DeprecationWarning('FEMOpt.get_parameter() was deprecated. Use Femopt.opt.get_parameter() instead.')
 
     def set_monitor_host(self, host=None, port=None):
-        """Sets up the monitor server with the specified host and port.
+        """Sets the host IP address and the port of the process monitor.
 
         Args:
-            host (str): The hostname or IP address of the monitor server.
-            port (int or None, optional): The port number of the monitor server. If None, ``8080`` will be used. Defaults to None.
+            host (str):
+                The hostname or IP address of the monitor server.
+            port (int, optional):
+                The port number of the monitor server.
+                If None, ``8080`` will be used.
+                Defaults to None.
 
         Tip:
-            Specifying host ``0.0.0.0`` allows viewing monitor from all computers on the local network.
+            Specifying host ``0.0.0.0`` allows viewing monitor
+            from all computers on the local network.
 
-            However, please note that in this case,
-            it will be visible to all users on the local network.
+            If no hostname is specified, the monitor server
+            will be hosted on ``localhost``.
 
-            If no hostname is specified, the monitor server will be hosted on ``localhost``.
+            We can access process monitor by accessing
+            ```localhost:8080``` on our browser by default.
 
         """
         self.monitor_server_kwargs = dict(
@@ -460,33 +500,57 @@ class FEMOpt:
 
     def optimize(
             self,
-            n_trials=None,
-            n_parallel=1,
-            timeout=None,
-            wait_setup=True,
-            confirm_before_exit=True,
+            n_trials: int = None,
+            n_parallel: int = 1,
+            timeout: float = None,
+            wait_setup: bool = True,
+            confirm_before_exit: bool = True,
     ):
         """Runs the main optimization process.
 
         Args:
-            n_trials (int or None, optional): The number of trials. Defaults to None.
-            n_parallel (int, optional): The number of parallel processes. Defaults to 1.
-            timeout (float or None, optional): The maximum amount of time in seconds that each trial can run. Defaults to None.
-            wait_setup (bool, optional): Wait for all workers launching FEM system. Defaults to True.
-            confirm_before_exit (bool, optional): Insert stop before exit to continue to show process monitor.
+            n_trials (int, optional):
+                The number of trials.
+                Defaults to None.
+            n_parallel (int, optional):
+                The number of parallel processes.
+                Defaults to 1.
+                Note that even if this argument is 1,
+                :class:`FEMOpt` makes some child processes
+                to run process monitor, status monitor, etc.
+            timeout (float, optional):
+                The maximum amount of time in seconds
+                that each trial can run.
+                Defaults to None.
+            wait_setup (bool, optional):
+                Wait for all workers launching FEM system.
+                Defaults to True.
+            confirm_before_exit (bool, optional):
+                Insert stop before exit to continue to
+                show process monitor.
 
         Tip:
-            If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080.
+            If set_monitor_host() is not executed,
+            a local server for monitoring will be
+            started at localhost:8080.
+
+            See Also:
+                :func:`FEMOpt.set_monitor_host`
 
         Note:
-            If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user.
+            If ``n_trials`` and ``timeout`` are both None,
+            it runs forever until interrupting by the user.
 
         Note:
-            If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.
+            If ``n_parallel`` >= 2, depending on the end timing,
+            ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.
 
         Warning:
-            If ``n_parallel`` >= 2 and ``fem`` is a subclass of ``FemtetInterface``, the ``strictly_pid_specify`` of subprocess is set to ``False``.
-            So **it is recommended to close all other Femtet processes before running.**
+            If ``n_parallel`` >= 2 and ``fem`` is a subclass of
+            ``FemtetInterface``, the ``strictly_pid_specify`` of
+            subprocess is set to ``False``.
+            So **it is recommended to close all other Femtet processes
+            before running.**
 
         """
 
@@ -740,6 +804,11 @@ class FEMOpt:
 
     @staticmethod
     def terminate_all():
+        """Deprecated method. We plan to remove this in future version.
+
+        In current version, the termination processes are
+        automatically execute in the last of :func:`FEMOpt.optimize`.
+        """
         warnings.warn(
             "terminate_all() is deprecated and will be removed in a future version. "
             "In current and later versions, the equivalent of terminate_all() will be executed when optimize() finishes. "
