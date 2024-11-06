@@ -19,7 +19,7 @@ from multiprocessing.process import _children, _cleanup
 from multiprocessing.managers import SyncManager
 
 import logging
-from .logger import get_logger
+from pyfemtet.logger import get_logger
 
 from pyfemtet._message import Msg
 
@@ -189,6 +189,19 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple
     """Connect to existing Femtet process.
 
     Args:
+        timeout:
+        subprocess_log_prefix:
+
+    Raises:
+        FemtetConnectionTimeoutError: Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched).
+
+    Returns:
+
+    """
+
+    """
+
+    Args:
         timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
         subprocess_log_prefix (str, optional): The prefix of log message.
 
@@ -333,16 +346,16 @@ def dispatch_specific_femtet(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, in
     """
     try:
         with Lock('dispatch-specific-femtet'):
-            return dispatch_specific_femtet_core(pid, timeout)
+            return _dispatch_specific_femtet_core(pid, timeout)
     except RuntimeError as e:
         if 'object not properly initialized' in str(e):
             pass
         else:
             raise e
-    return dispatch_specific_femtet_core(pid, timeout)  # for logger, out of except.
+    return _dispatch_specific_femtet_core(pid, timeout)  # for logger, out of except.
 
 
-def dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
+def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
     """Connect Femtet whose process id is specified.
 
     Warnings:

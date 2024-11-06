@@ -5,9 +5,6 @@ from colorlog import ColoredFormatter
 from dask.distributed import get_worker
 
 
-__all__ = ['get_logger']
-
-
 def _get_worker_name_as_prefix():
     name = '(Main) '
     try:
