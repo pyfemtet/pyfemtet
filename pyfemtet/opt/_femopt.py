@@ -29,7 +29,8 @@ from pyfemtet.opt._femopt_core import (
     logger,
 )
 from pyfemtet._message import Msg, encoding
-from pyfemtet.opt.parameter import Parameter, Expression
+from pyfemtet.opt.optimizer.parameter import Parameter, Expression
+from pyfemtet._warning import experimental_feature
 
 
 def add_worker(client, worker_name):
@@ -59,22 +60,43 @@ class FEMOpt:
     """Class to control FEM interface and optimizer.
 
     Args:
-        fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automatically set to FemtetInterface.
-        opt (AbstractOptimizer):
-        history_path (str, optional): The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
-        scheduler_address (str or None): If cluster processing, set this parameter like "tcp://xxx.xxx.xxx.xxx:xxxx".
+        fem (FEMInterface, optional):
+            The FEM software interface.
+            Defaults to None (automatically set to :class:`FemtetInterface`).
 
-    Attributes:
-        fem (FEMInterface): The interface of FEM system.
-        opt (AbstractOptimizer): The optimizer.
-        scheduler_address (str or None): Dask scheduler address. If None, LocalCluster will be used.
-        client (Client): Dask client. For detail, see dask documentation.
-        status (OptimizationStatus): Entire process status. This contains dask actor.
-        history(History): History of optimization process. This contains dask actor.
-        history_path (str): The path to the history (.csv) file.
-        worker_status_list([OptimizationStatus]): Process status of each dask worker.
-        monitor_process_future(Future): Future of monitor server process. This is dask future.
-        monitor_server_kwargs(dict): Monitor server parameter. Currently, the valid arguments are hostname and port.
+        opt (AbstractOptimizer, optional):
+            The numerical optimizer object.
+            Defaults to None (automatically set to :class:`OptunaOptimizer`
+            with :class:`optuna.samplers.TPESampler`).
+
+        history_path (str, optional):
+            The path to the history file.
+            Defaults to None.
+            If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory.
+
+        scheduler_address (str, optional):
+            When performing cluster computing, please specify the address
+            of the scheduler computer here.
+
+            See Also:
+                https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html
+
+    Examples:
+
+        - When specifying and opening a femprj and model, we write:
+
+            >>> from pyfemtet.opt import FEMOpt, FemtetInterface  # doctest: +SKIP
+            >>> fem = FemtetInterface(femprj_path='path/to/project.femprj', model_name='NewModel')  # doctest: +SKIP
+            >>> femopt = FEMOpt(fem=fem)  # doctest: +SKIP
+
+        - When specifying optimization algorithm, we write:
+
+            >>> from optuna.samplers import TPESampler  # doctest: +SKIP
+            >>> from pyfemtet.opt import FEMOpt, OptunaOptimizer  # doctest: +SKIP
+            >>> opt = OptunaOptimizer(sampler_class=TPESampler, sampler_kwargs=dict(n_startup_trials=10))  # doctest: +SKIP
+            >>> femopt = FEMOpt(opt=opt)  # doctest: +SKIP
+
+
 
     """
 
@@ -150,8 +172,21 @@ class FEMOpt:
             step (float or None, optional): The step of parameter. Defaults to None.
             properties (dict, optional): Additional information about the parameter. Defaults to None.
             pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
+
         Raises:
             ValueError: If initial_value is not specified and the value for the given name is also not specified.
+
+        Examples:
+
+            - When adding parameter a (-1 <= a <= 1; initial value is 0), we write:
+
+                >>> femopt.add_parameter('parameter_a', 0, -1, 1)  # doctest: +SKIP
+
+                Note that the ```note``` argument can be set any name in this case.
+
+            - When adding discrete parameter a (-1 <= a <= 1; initial value is 0, step 0.5), we write:
+
+                >>> femopt.add_parameter('parameter a', 0, -1, 1, 0.5)  # doctest: +SKIP
 
         """
 
@@ -179,22 +214,67 @@ class FEMOpt:
         )
         self.opt.variables.add_parameter(prm)
 
+    @experimental_feature
     def add_expression(
             self,
             name: str,
             fun: Callable[[Any], float],
-            properties=property,
+            properties=str,
             kwargs: Optional[dict] = None,
             pass_to_fem=True,
     ):
         """Add expression to the optimization problem.
 
+        Warnings:
+            This feature is highly experimental and
+            may change in the future.
+
         Args:
             name (str): The name of the variable.
             fun (Callable[[Any], float]): An expression function. The arguments that you want to use as input variables must be the same with ``name`` of Variable objects added by ``add_parameter()`` or ``add_expression()``. If you use other objects as argument of the function, you must specify ``kwargs``.
-            properties ([type], optional): Property names and their values of the variable. Defaults to property.
+            properties (str, optional): Property names and their values of the variable. Defaults to property.
             kwargs (Optional[dict], optional): Remaining arguments of ``fun``. Defaults to None.
             pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True.
+
+        Examples:
+            - When adding variable a and b; a is not directly included as model variables
+            but an optimization parameter, b is not a parameter but a model variable and
+            the relationship of these 2 variables is ```b = a ** 2```, we write:
+
+                >>> def calc_b(parameter_a):  # doctest: +SKIP
+                ...     return parameter_a ** 2  # doctest: +SKIP
+                ... femopt.add_parameter('parameter_a', 0, -1, 1, pass_to_fem=False)  # doctest: +SKIP
+                ... femopt.add_expression('variable_b', calc_b)  # doctest: +SKIP
+
+                Notes:
+                    The argument names of function to calculate variable
+                    must match the ```name``` of the parameter.
+
+                Notes:
+                    In this case, only strings that can be used as Python variables are valid
+                    for ```name``` argument of :func:`FEMOpt.add_parameter`.
+
+            - When adding variable r, theta and x, y; r, theta is an optimization parameter and
+            x, y is an intermediate variable to calculate constraint function, we write:
+
+                >>> def calc_x(r, theta):  # doctest: +SKIP
+                ...     return r * cos(theta)  # doctest: +SKIP
+                ...
+                >>> def calc_y(r, theta):  # doctest: +SKIP
+                ...     return r * cos(theta)  # doctest: +SKIP
+                ...
+                >>> femopt.add_parameter('r', 0, 0, 1)  # doctest: +SKIP
+                >>> femopt.add_parameter('theta', 0, 0, 2*pi)  # doctest: +SKIP
+                >>> femopt.add_expression('x', calc_x, pass_to_fem=False)  # doctest: +SKIP
+                >>> femopt.add_expression('y', calc_y, pass_to_fem=False)  # doctest: +SKIP
+                >>>
+                >>> def constraint(Femtet, opt: AbstractOptimizer):
+                ...     d = opt.variables.get_variables()
+                ...     x, y = d['x'], d['y']
+                ...     return min(x, y)
+                ...
+                >>> femopt.add_constraint(constraint, lower_bound=0.5, args=(femopt.opt,))
+
         """
         exp = Expression(
             name=name,
@@ -225,6 +305,25 @@ class FEMOpt:
 
         Note:
             If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.
+
+        Examples:
+
+            - When add a complex objective (for example, want to dynamically set body to calculate temperature
+            and use product of the temperature and one of the parameters as objective) , we write:
+
+                >>> class MyClass:
+                ...     def get_body_name(self):
+                ...         ...  # process something and detect body name
+                ...         return body_name
+                ...
+                >>> def complex_objective(Femtet, opt, some_object):
+                ...     body_name = some_object.get_body_name()  # dynamically get body name to calculate temperature
+                ...     temp, _, _ = Femtet.Gogh.Watt.GetTemp(body_name)  # calculate temperature
+                ...     some_param = opt.get_parameter()['some_param']  # get ome parameter
+                ...     return temp * some_param  # calculate something and return it
+                ...
+                >>> my_obj = MyClass()
+                >>> femopt.add_objective(complex_objective, args=(femopt.opt, my_obj,))
 
         Tip:
             If name is None, name is a string with the prefix `"obj_"` followed by a sequential number.
@@ -274,6 +373,12 @@ class FEMOpt:
             args (tuple or None, optional): Additional arguments for the constraint function. Defaults to None.
             kwargs (dict): Additional arguments for the constraint function. Defaults to None.
             using_fem (bool, optional): Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically.
+            options: (dict[str, Any]): Optional keyword arguments to pass to optimizer. See :func:`AbstractOptimizer.add_constraint`.
+
+        Examples:
+
+        Warnings:
+
 
         Note:
             If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.

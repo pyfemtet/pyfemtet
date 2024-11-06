@@ -8,13 +8,12 @@ from time import sleep
 
 # 3rd-party
 import numpy as np
-import pandas as pd
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface
 from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
 from pyfemtet._message import Msg
-from pyfemtet.opt.parameter import ExpressionEvaluator
+from pyfemtet.opt.optimizer.parameter import ExpressionEvaluator, Parameter
 
 # logger
 import logging
@@ -144,6 +143,19 @@ class AbstractOptimizer(ABC):
         self._exception = None
         self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
 
+    # ===== algorithm specific methods =====
+    @abstractmethod
+    def run(self) -> None:
+        """Start optimization."""
+        pass
+
+    # ----- FEMOpt interfaces -----
+    @abstractmethod
+    def _setup_before_parallel(self, *args, **kwargs):
+        """Setup before parallel processes are launched."""
+        pass
+
+    # ===== calc =====
     def f(self, x: np.ndarray) -> list[np.ndarray]:
         """Calculate objectives and constraints.
 
@@ -217,18 +229,7 @@ class AbstractOptimizer(ABC):
 
         return np.array(y), np.array(_y), np.array(c)
 
-    def _reconstruct_fem(self, skip_reconstruct=False):
-        """Reconstruct FEMInterface in a subprocess."""
-        # reconstruct fem
-        if not skip_reconstruct:
-            self.fem = self.fem_class(**self.fem_kwargs)
-
-        # COM 定数の restore
-        for obj in self.objectives.values():
-            obj._restore_constants()
-        for cns in self.constraints.values():
-            cns._restore_constants()
-
+    # ===== parameter processing =====
     def get_parameter(self, format='dict'):
         """Returns the parameters in the specified format.
 
@@ -275,6 +276,19 @@ class AbstractOptimizer(ABC):
         assert len(values) == len(prm_names)
         self.set_parameter({k: v for k, v in zip(prm_names, values)})
 
+    # ===== FEMOpt interfaces =====
+    def _reconstruct_fem(self, skip_reconstruct=False):
+        """Reconstruct FEMInterface in a subprocess."""
+        # reconstruct fem
+        if not skip_reconstruct:
+            self.fem = self.fem_class(**self.fem_kwargs)
+
+        # COM 定数の restore
+        for obj in self.objectives.values():
+            obj._restore_constants()
+        for cns in self.constraints.values():
+            cns._restore_constants()
+
     def _check_interruption(self):
         """"""
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
@@ -290,6 +304,7 @@ class AbstractOptimizer(ABC):
         if not self.worker_status.get() == OptimizationStatus.CRASHED:
             self.worker_status.set(OptimizationStatus.TERMINATED)
 
+    # run via FEMOpt (considering parallel processing)
     def _run(
             self,
             subprocess_idx,
@@ -346,12 +361,16 @@ class AbstractOptimizer(ABC):
 
         return self._exception
 
-    @abstractmethod
-    def run(self) -> None:
-        """Start optimization."""
-        pass
 
-    @abstractmethod
-    def _setup_before_parallel(self, *args, **kwargs):
-        """Setup before parallel processes are launched."""
-        pass
+if __name__ == '__main__':
+    class Optimizer(AbstractOptimizer):
+        def run(self): pass
+        def _setup_before_parallel(self, *args, **kwargs): pass
+
+    opt = Optimizer()
+    opt.set_parameter(
+        dict(
+            prm1=0.,
+            prm2=1.,
+        )
+    )
