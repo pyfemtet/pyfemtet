@@ -151,16 +151,19 @@ def _get_subprocess_log_prefix():
 def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strictly_pid_specify=True) -> Tuple[IFemtet, int]:
     """Launch Femtet by new process and connect to it.
 
+    The wrapper for Dispatch() but returns PID with IFemtet.
+
     Args:
-        timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
-        strictly_pid_specify (bool): If True, try to connect the launched femtet process strictly. If False, launch new process but try to connect any connectable femtet.
+        timeout (int, optional): Raises an error if the connection is not established within the specified timeout.
+        strictly_pid_specify (bool, optional): Attempts to establish a connection to the launched Femtet strictly.
+            This may result in slower processing due to process exclusivity handling.
 
     Raises:
-        FemtetNotFoundException: Launched Femtet is not found for some reason (i.e. failed to launch Femtet).
-        FemtetConnectionTimeoutError: Connection trial takes over `timeout` seconds by some reason.
+        FemtetConnectionTimeoutError: Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched).
 
     Returns:
-        Tuple[IFemtet, int]:
+        tuple[IFemtet, int]: An object for controlling Femtet and the PID of the Femtet being controlled.
+
     """
     # launch femtet
     util.execute_femtet()
@@ -188,14 +191,17 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strictly_pid_specify=Tr
 def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple[IFemtet, int]:
     """Connect to existing Femtet process.
 
+    The wrapper for Dispatch() but returns PID with IFemtet.
+
     Args:
-        timeout:
-        subprocess_log_prefix:
+        timeout (int, optional): Raises an error if the connection is not established within the specified timeout.
+        subprocess_log_prefix (str, optional): A prefix to output in logs. Typically used only for internal processing.
 
     Raises:
         FemtetConnectionTimeoutError: Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched).
 
     Returns:
+        tuple[IFemtet, int]: An object for controlling Femtet and the PID of the Femtet being controlled.
 
     """
 
@@ -245,7 +251,6 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple
         logger.info(f'Successfully connected. The pid of Femtet is {pid}.')
 
     return Femtet, pid
-
 
 
 def _block_other_femtets(
@@ -327,36 +332,7 @@ def _block_other_femtets(
 
 
 def dispatch_specific_femtet(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
-    """Connect Femtet whose process id is specified.
-
-    This is a wrapper function of `dispatch_specific_femtet_core`.
-    When this function is called by dask worker,
-    the connection is processed exclusively.
-
-    Args:
-        pid (int): Process id of Femtet that you want to connect.
-        timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
-
-    Raises:
-        FemtetNotFoundException: Femtet whose process id is `pid` doesn't exist. 
-        FemtetConnectionTimeoutError: Connection trial takes over `timeout` seconds by some reason.
-
-    Returns:
-        Tuple[IFemtet, int]:
-    """
-    try:
-        with Lock('dispatch-specific-femtet'):
-            return _dispatch_specific_femtet_core(pid, timeout)
-    except RuntimeError as e:
-        if 'object not properly initialized' in str(e):
-            pass
-        else:
-            raise e
-    return _dispatch_specific_femtet_core(pid, timeout)  # for logger, out of except.
-
-
-def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
-    """Connect Femtet whose process id is specified.
+    """Connect Existing Femtet whose process id is specified.
 
     Warnings:
         Once Femtet is connected a python process,
@@ -381,16 +357,29 @@ def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemt
         please consider parallel processing.
 
     Args:
-        pid (int): Process id of Femtet that you want to connect.
-        timeout (int or float, optional): Seconds to wait for connection. Defaults to 10.
+        timeout (int, optional): Raises an error if the connection is not established within the specified timeout.
 
     Raises:
-        FemtetNotFoundException: Femtet whose process id is `pid` doesn't exist. 
-        FemtetConnectionTimeoutError: Connection trial takes over `timeout` seconds by some reason.
+        FemtetConnectionTimeoutError: Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched).
 
     Returns:
-        Tuple[IFemtet, int]:
+        tuple[IFemtet, int]: An object for controlling Femtet and the PID of the Femtet being controlled.
+
+
     """
+    try:
+        with Lock('dispatch-specific-femtet'):
+            return _dispatch_specific_femtet_core(pid, timeout)
+    except RuntimeError as e:
+        if 'object not properly initialized' in str(e):
+            pass
+        else:
+            raise e
+    return _dispatch_specific_femtet_core(pid, timeout)  # for logger, out of except.
+
+
+def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
+
     # TODO: 安定性を見て lock_main を復活させるか決める
 
     if timeout < 5:

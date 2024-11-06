@@ -7,11 +7,12 @@ from pyfemtet.opt._femopt_core import History
 
 
 class PredictionModelBase(ABC):
+    """Simple Abstract surrogate model class."""
 
     @abstractmethod
     def fit(self, x: np.ndarray, y: np.ndarray):
         """
-        Parameters:
+        Args:
             x (np.ndarray): Input. (Point number) rows and (variable number) columns.
             y (np.ndarray): Output. (Point number) rows and (objective number) columns.
         """
@@ -19,7 +20,7 @@ class PredictionModelBase(ABC):
     @abstractmethod
     def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
-        Parameters:
+        Args:
             x (np.ndarray): Input. (Point number) rows and (variable number) columns.
         Returns:
             np.ndarray: (Point number) rows and (objective number) columns. Index 0 is mean and index 1 is std.

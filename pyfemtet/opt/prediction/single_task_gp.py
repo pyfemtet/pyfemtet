@@ -6,7 +6,7 @@ from botorch.models import SingleTaskGP
 from botorch.fit import fit_gpytorch_mll
 from gpytorch.mlls import ExactMarginalLogLikelihood
 
-from pyfemtet.opt.prediction.base import PredictionModelBase
+from pyfemtet.opt.prediction._base import PredictionModelBase
 
 
 class _StandardScaler:
@@ -46,6 +46,11 @@ class _MinMaxScaler:
 
 
 class SingleTaskGPModel(PredictionModelBase):
+    """Simple interface surrogate model using ```SingleTaskGP```.
+
+    See Also:
+        https://botorch.org/api/models.html#botorch.models.gp_regression.SingleTaskGP
+    """
 
     # noinspection PyAttributeOutsideInit
     def fit(self, x: np.ndarray, y: np.ndarray):

@@ -14,6 +14,26 @@ from pyfemtet._message import Msg
 
 
 class FemtetWithSolidworksInterface(FemtetInterface):
+    """Control Femtet and Solidworks.
+
+    Using this class, you can import CAD files created
+    in Solidworks through the Parasolid format into a
+    Femtet project. It allows you to pass design
+    variables to Solidworks, update the model, and
+    perform analysis using the updated model in Femtet.
+
+
+    Args:
+        sldprt_path (str):
+            The path to .sldprt file containing the
+            CAD data from which the import is made.
+        **kwargs:
+            For other arguments, please refer to the
+            :class:`FemtetInterface` class.
+
+    """
+
+
     # 定数の宣言
     swThisConfiguration = 1  # https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swInConfigurationOpts_e.html
     swAllConfiguration = 2
@@ -76,7 +96,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         CoInitialize()
         self.initialize_sldworks_connection()
 
-    def update_model(self, parameters: pd.DataFrame):
+    def update_model(self, parameters: pd.DataFrame, with_warning=False):
         """Update .x_t"""
 
         self.parameters = parameters.copy()

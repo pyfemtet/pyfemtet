@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 # pyfemtet relative
-from pyfemtet.opt.interface import FemtetInterface
+from pyfemtet.opt.interface import FEMInterface
 from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
 from pyfemtet._message import Msg
 from pyfemtet.opt.parameter import ExpressionEvaluator
@@ -117,17 +117,11 @@ class AbstractOptimizer(ABC):
         fem (FEMInterface): The finite element method object.
         fem_class (type): The class of the finite element method object.
         fem_kwargs (dict): The keyword arguments used to instantiate the finite element method object.
-        parameters (pd.DataFrame): The parameters used in the optimization.
-        objectives (dict): A dictionary containing the objective functions used in the optimization.
-        constraints (dict): A dictionary containing the constraint functions used in the optimization.
-        entire_status (OptimizationStatus): The status of the entire optimization process.
+        variables (ExpressionEvaluator): The variables using optimization process including parameters.
+        objectives (dict[str, Objective]): A dictionary containing the objective functions used in the optimization.
+        constraints (dict[str, Constraint]): A dictionary containing the constraint functions used in the optimization.
         history (History): An actor object that records the history of each iteration in the optimization process.
-        worker_status (OptimizationStatus): The status of each worker in a distributed computing environment.
-        message (str): A message associated with the current state of the optimization process.
         seed (int or None): The random seed used for random number generation during the optimization process.
-        timeout (float or int or None): The maximum time allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.
-        n_trials (int or None): The maximum number of trials allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.
-        is_cluster (bool): Flag indicating if running on a distributed computing cluster.
 
     """
 
@@ -150,9 +144,20 @@ class AbstractOptimizer(ABC):
         self._exception = None
         self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
 
-    def f(self, x):
-        """Get x, update fem analysis, return objectives (and constraints)."""
-        # interruption の実装は具象クラスに任せる
+    def f(self, x: np.ndarray) -> list[np.ndarray]:
+        """Calculate objectives and constraints.
+
+        Args:
+            x (np.ndarray): Optimization parameters.
+
+        Returns:
+            list[np.ndarray]:
+                The list of internal objective values,
+                un-normalized objective values and
+                constraint values.
+
+        """
+
 
         if isinstance(x, np.float64):
             x = np.array([x])
@@ -202,8 +207,8 @@ class AbstractOptimizer(ABC):
             y,
             c,
             self.message,
-            postprocess_func=self.fem.postprocess_func,
-            postprocess_args=self.fem.create_postprocess_args(),
+            postprocess_func=self.fem._postprocess_func,
+            postprocess_args=self.fem._create_postprocess_args(),
         )
 
         logger.debug('history.record end')
@@ -228,10 +233,16 @@ class AbstractOptimizer(ABC):
         """Returns the parameters in the specified format.
 
         Args:
-            format (str, optional): The desired format of the parameters. Can be 'df' (DataFrame), 'value' (alias of values), 'values' (np.ndarray), or 'dict'. Defaults to 'dict'.
+            format (str, optional):
+                The desired format of the parameters.
+                Can be 'df' (DataFrame),
+                'values' (np.ndarray),
+                'dict' or
+                'raw' (list of Variable object).
+                Defaults to 'dict'.
 
         Returns:
-            object: The parameters in the specified format.
+            The parameters in the specified format.
 
         Raises:
             ValueError: If an invalid format is provided.
@@ -239,11 +250,14 @@ class AbstractOptimizer(ABC):
         """
         return self.variables.get_variables(format=format, filter_parameter=True)
 
-    def set_parameter(self, params: dict) -> None:
+    def set_parameter(self, params: dict[str, float]) -> None:
         """Update parameter.
 
         Args:
-            params (dict): Key is the name of parameter and the value is the value of it. The partial set is available.
+            params (dict):
+                Key is the name of parameter and
+                the value is the value of it.
+                The partial set is available.
 
         """
         for name, value in params.items():
@@ -255,6 +269,7 @@ class AbstractOptimizer(ABC):
 
         Args:
             values (np.ndarray): Values of all parameters.
+
         """
         prm_names = self.variables.get_parameter_names()
         assert len(values) == len(prm_names)
@@ -333,7 +348,7 @@ class AbstractOptimizer(ABC):
 
     @abstractmethod
     def run(self) -> None:
-        """Start calculation using optimization library."""
+        """Start optimization."""
         pass
 
     @abstractmethod

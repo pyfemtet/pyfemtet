@@ -203,7 +203,7 @@ class HomePage(AbstractPage):
             trial = pt['customdata'][0]
 
             # get pdt path
-            pdt_path = self.femtet_control.fem.create_pdt_path(femprj_path, model_name, trial)
+            pdt_path = self.femtet_control.fem._create_pdt_path(femprj_path, model_name, trial)
 
             # check pdt exists
             if not os.path.exists(pdt_path):

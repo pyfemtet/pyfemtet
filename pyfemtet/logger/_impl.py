@@ -85,7 +85,16 @@ def _create_formatter() -> logging.Formatter:
 
 
 def get_logger(logger_name):
-    """Return a logger with a default ColoredFormatter."""
+    """Returns a logger.
+
+    Examples:
+        >>> # Retrieves a specific logger used in pyfemtet.opt.
+        >>> import logging  # doctest: +SKIP
+        >>> from pyfemtet.logger import get_logger  # doctest: +SKIP
+        >>> logger = get_logger('opt')  # logger of optimizer  # doctest: +SKIP
+        >>> logger.setLevel(logging.ERROR)  # disable all log from optimizer  # doctest: +SKIP
+
+    """
 
     formatter = _create_formatter()
 

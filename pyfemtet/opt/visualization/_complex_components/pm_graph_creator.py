@@ -9,7 +9,7 @@ import plotly.express as px
 
 from pyfemtet.opt._femopt_core import History
 
-from pyfemtet.opt.prediction.base import PyFemtetPredictionModel
+from pyfemtet.opt.prediction._base import PyFemtetPredictionModel
 from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
 from pyfemtet._message import Msg
 

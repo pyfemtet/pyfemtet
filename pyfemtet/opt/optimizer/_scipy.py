@@ -57,15 +57,30 @@ class ScipyMethodChecker(OptimizationMethodChecker):
 
 
 class ScipyOptimizer(AbstractOptimizer):
+    """Optimizer using ```scipy```.
+
+    This class provides an interface for the optimization
+    engine using Scipy. For more details, please refer to
+    the Scipy documentation.
+
+    See Also:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+
+    Args:
+        **minimize_kwargs:
+            The keyword arguments of
+            ```scipy.optimize.minimize```.
+
+    Attributes:
+        res (OptimizeResult):
+            The return value of ```scipy.optimize.minimize```.
+
+    """
 
     def __init__(
             self,
             **minimize_kwargs,
     ):
-        """
-        Args:
-            **minimize_kwargs: Kwargs of `scipy.optimize.minimize`.
-        """
         super().__init__()
 
         # define members

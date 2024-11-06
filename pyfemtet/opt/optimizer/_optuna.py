@@ -37,6 +37,38 @@ class OptunaMethodChecker(OptimizationMethodChecker):
 
 
 class OptunaOptimizer(AbstractOptimizer):
+    """Optimizer using ```optuna```.
+
+    This class provides an interface for the optimization
+    engine using Optuna. For more details, please refer to
+    the Optuna documentation.
+
+    See Also:
+        https://optuna.readthedocs.io/en/stable/reference/index.html
+
+    Args:
+        sampler_class (optuna.samplers.BaseSampler, optional):
+            A sampler class from Optuna. If not specified,
+            ```optuna.samplers.TPESampler``` is specified.
+            This defines the sampling strategy used during
+            optimization. Defaults to None.
+        sampler_kwargs (dict, optional):
+            A dictionary of keyword arguments to be passed to
+            the sampler class. This allows for customization
+            of the sampling process. Defaults to None.
+        add_init_method (str or Iterable[str], optional):
+            A method or a collection of methods to be added
+            during initialization. This can be used to specify
+            additional setup procedures.
+            Currently, the only valid value is 'LHS'
+            (using Latin Hypercube Sampling).
+            Defaults to None.
+
+    Warnings:
+        Do not include ```constraints_func``` in ```sampler_kwargs```.
+        It is generated and provided by :func:`FEMOpt.add_constraint`.
+
+    """
 
     def __init__(
             self,

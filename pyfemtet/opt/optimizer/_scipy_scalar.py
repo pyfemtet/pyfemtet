@@ -26,15 +26,30 @@ class ScipyScalarMethodChecker(OptimizationMethodChecker):
 
 
 class ScipyScalarOptimizer(AbstractOptimizer):
+    """Optimizer using ```scipy```.
+
+    This class provides an interface for the optimization
+    engine using Scipy. For more details, please refer to
+    the Scipy documentation.
+
+    See Also:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html
+
+    Args:
+        **minimize_kwargs:
+            The keyword arguments of
+            ```scipy.optimize.minimize_scalar```.
+
+    Attributes:
+        res (OptimizeResult):
+            The return value of ```scipy.optimize.minimize_scalar```.
+
+    """
 
     def __init__(
             self,
             **minimize_kwargs,
     ):
-        """
-        Args:
-            **minimize_kwargs: Kwargs of `scipy.optimize.minimize_scalar` __except ``fun``.__.
-        """
         super().__init__()
 
         # define members
