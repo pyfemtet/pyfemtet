@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -95,7 +95,7 @@
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span><span class="p">,</span> <span class="n">generate_lhs</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">OptimizationMethodChecker</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">MeshError</span><span class="p">,</span> <span class="n">ModelError</span><span class="p">,</span> <span class="n">SolveError</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <span class="k">class</span> <span class="nc">ScipyScalarMethodChecker</span><span class="p">(</span><span class="n">OptimizationMethodChecker</span><span class="p">):</span>
@@ -108,15 +108,30 @@
 <div class="viewcode-block" id="ScipyScalarOptimizer">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.ScipyScalarOptimizer">[docs]</a>
 <span class="k">class</span> <span class="nc">ScipyScalarOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimizer using ```scipy```.</span>
+
+<span class="sd">    This class provides an interface for the optimization</span>
+<span class="sd">    engine using Scipy. For more details, please refer to</span>
+<span class="sd">    the Scipy documentation.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        **minimize_kwargs:</span>
+<span class="sd">            The keyword arguments of</span>
+<span class="sd">            ```scipy.optimize.minimize_scalar```.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        res (OptimizeResult):</span>
+<span class="sd">            The return value of ```scipy.optimize.minimize_scalar```.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="o">**</span><span class="n">minimize_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            **minimize_kwargs: Kwargs of `scipy.optimize.minimize_scalar` __except ``fun``.__.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="c1"># define members</span>

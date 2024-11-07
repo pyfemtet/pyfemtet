@@ -164,32 +164,32 @@ class FEMOpt:
         # noinspection PyUnresolvedReferences
         """Adds a parameter to the optimization problem.
 
-                Args:
-                    name (str): The name of the parameter.
-                    initial_value (float, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.
-                    lower_bound (float, optional): The lower bound of the parameter. Defaults to None. Some optimization algorithms require this.
-                    upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. Some optimization algorithms require this.
-                    step (float, optional): The step of parameter. If specified, parameter is used as discrete. Defaults to None.
-                    properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.
-                    pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
+        Args:
+            name (str): The name of the parameter.
+            initial_value (float, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.
+            lower_bound (float, optional): The lower bound of the parameter. Defaults to None. Some optimization algorithms require this.
+            upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. Some optimization algorithms require this.
+            step (float, optional): The step of parameter. If specified, parameter is used as discrete. Defaults to None.
+            properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.
+            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
 
-                Raises:
-                    ValueError: If initial_value is not specified and the value for the given name is also not specified in FEM.
+        Raises:
+            ValueError: If initial_value is not specified and the value for the given name is also not specified in FEM.
 
-                Examples:
+        Examples:
 
-                    When adding parameter a (-1 <= a <= 1; initial value is 0), we write
+            When adding parameter a (-1 <= a <= 1; initial value is 0), we write
 
-                        >>> femopt.add_parameter('parameter_a', 0, -1, 1)  # doctest: +SKIP
+                >>> femopt.add_parameter('parameter_a', 0, -1, 1)  # doctest: +SKIP
 
-                        Note that the ```note``` argument can be set any name in this case.
+                Note that the ```note``` argument can be set any name in this case.
 
-                    When adding discrete parameter a (-1 <= a <= 1; initial value is 0,
-                    step 0.5), we write
+            When adding discrete parameter a (-1 <= a <= 1; initial value is 0,
+            step 0.5), we write
 
-                        >>> femopt.add_parameter('parameter a', 0, -1, 1, 0.5)  # doctest: +SKIP
+                >>> femopt.add_parameter('parameter a', 0, -1, 1, 0.5)  # doctest: +SKIP
 
-                """
+        """
 
         _check_bound(lower_bound, upper_bound, name)
 

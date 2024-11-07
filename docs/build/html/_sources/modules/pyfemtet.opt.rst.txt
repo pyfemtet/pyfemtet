@@ -5,23 +5,12 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    pyfemtet.opt.interface
    pyfemtet.opt.optimizer
    pyfemtet.opt.prediction
    pyfemtet.opt.visualization
-
-Submodules
-----------
-
-pyfemtet.opt.parameter module
------------------------------
-
-.. automodule:: pyfemtet.opt.parameter
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------

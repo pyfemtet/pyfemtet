@@ -23,8 +23,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyfemtet.opt.visualization package" href="pyfemtet.opt.visualization.html" />
-    <link rel="prev" title="pyfemtet.opt.optimizer package" href="pyfemtet.opt.optimizer.html" /> 
+    <link rel="next" title="&lt;no title&gt;" href="pyfemtet.opt.prediction.single_task_gp.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="pyfemtet.opt.optimizer.parameter.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,14 +52,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">Usage</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="modules.html">pyfemtet</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../pages/api.html#most-major-classes">Most Major Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pages/api.html#other-major-classes">Other Major Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../pages/api.html#entire-reference">Entire Reference</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.core">pyfemtet.core module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.dispatch_extensions">pyfemtet.dispatch_extensions module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet.logger">pyfemtet.logger module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
 </ul>
 </li>
@@ -84,8 +83,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../pages/api.html">API reference</a></li>
-          <li class="breadcrumb-item"><a href="modules.html">pyfemtet</a></li>
+          <li class="breadcrumb-item"><a href="../pages/api.html">API Reference</a></li>
           <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet package</a></li>
           <li class="breadcrumb-item"><a href="pyfemtet.opt.html">pyfemtet.opt package</a></li>
       <li class="breadcrumb-item active">pyfemtet.opt.prediction package</li>
@@ -102,160 +100,11 @@
 <h1>pyfemtet.opt.prediction package<a class="headerlink" href="#pyfemtet-opt-prediction-package" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
-</section>
-<section id="module-pyfemtet.opt.prediction.base">
-<span id="pyfemtet-opt-prediction-base-module"></span><h2>pyfemtet.opt.prediction.base module<a class="headerlink" href="#module-pyfemtet.opt.prediction.base" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PredictionModelBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.base.</span></span><span class="sig-name descname"><span class="pre">PredictionModelBase</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PredictionModelBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PredictionModelBase" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PredictionModelBase.fit">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PredictionModelBase.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PredictionModelBase.fit" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>np.ndarray</em>) – Input. (Point number) rows and (variable number) columns.</p></li>
-<li><p><strong>y</strong> (<em>np.ndarray</em>) – Output. (Point number) rows and (objective number) columns.</p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyfemtet.opt.prediction.single_task_gp.html"><code class="docutils literal notranslate"><span class="pre">SingleTaskGPModel</span></code></a></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PredictionModelBase.predict">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PredictionModelBase.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PredictionModelBase.predict" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Input. (Point number) rows and (variable number) columns.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(Point number) rows and (objective number) columns. Index 0 is mean and index 1 is std.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PyFemtetPredictionModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.base.</span></span><span class="sig-name descname"><span class="pre">PyFemtetPredictionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">History</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MetaModel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.12)"><span class="pre">type</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PyFemtetPredictionModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PyFemtetPredictionModel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PyFemtetPredictionModel.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PyFemtetPredictionModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PyFemtetPredictionModel.fit" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PyFemtetPredictionModel.get_obj_index">
-<span class="sig-name descname"><span class="pre">get_obj_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PyFemtetPredictionModel.get_obj_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PyFemtetPredictionModel.get_obj_index" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PyFemtetPredictionModel.get_prm_index">
-<span class="sig-name descname"><span class="pre">get_prm_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prm_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PyFemtetPredictionModel.get_prm_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PyFemtetPredictionModel.get_prm_index" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.base.PyFemtetPredictionModel.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/base.html#PyFemtetPredictionModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.base.PyFemtetPredictionModel.predict" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="module-pyfemtet.opt.prediction.single_task_gp">
-<span id="pyfemtet-opt-prediction-single-task-gp-module"></span><h2>pyfemtet.opt.prediction.single_task_gp module<a class="headerlink" href="#module-pyfemtet.opt.prediction.single_task_gp" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.single_task_gp.</span></span><span class="sig-name descname"><span class="pre">MyMinMaxScaler</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyMinMaxScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.fit_transform">
-<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyMinMaxScaler.fit_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.fit_transform" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.inverse_transform_mean">
-<span class="sig-name descname"><span class="pre">inverse_transform_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyMinMaxScaler.inverse_transform_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.inverse_transform_mean" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.inverse_transform_var">
-<span class="sig-name descname"><span class="pre">inverse_transform_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyMinMaxScaler.inverse_transform_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.inverse_transform_var" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyMinMaxScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.transform" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyStandardScaler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.single_task_gp.</span></span><span class="sig-name descname"><span class="pre">MyStandardScaler</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyStandardScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.fit_transform">
-<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyStandardScaler.fit_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.fit_transform" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.inverse_transform_mean">
-<span class="sig-name descname"><span class="pre">inverse_transform_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyStandardScaler.inverse_transform_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.inverse_transform_mean" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.inverse_transform_var">
-<span class="sig-name descname"><span class="pre">inverse_transform_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyStandardScaler.inverse_transform_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.inverse_transform_var" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#MyStandardScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.transform" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.single_task_gp.</span></span><span class="sig-name descname"><span class="pre">SingleTaskGPModel</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#SingleTaskGPModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyfemtet.opt.prediction.base.PredictionModelBase" title="pyfemtet.opt.prediction.base.PredictionModelBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModelBase</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#SingleTaskGPModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>np.ndarray</em>) – Input. (Point number) rows and (variable number) columns.</p></li>
-<li><p><strong>y</strong> (<em>np.ndarray</em>) – Output. (Point number) rows and (objective number) columns.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#SingleTaskGPModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Input. (Point number) rows and (variable number) columns.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(Point number) rows and (objective number) columns. Index 0 is mean and index 1 is std.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+</div>
 </section>
 <section id="module-pyfemtet.opt.prediction">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.opt.prediction" title="Link to this heading"></a></h2>
@@ -266,8 +115,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pyfemtet.opt.optimizer.html" class="btn btn-neutral float-left" title="pyfemtet.opt.optimizer package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pyfemtet.opt.visualization.html" class="btn btn-neutral float-right" title="pyfemtet.opt.visualization package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pyfemtet.opt.optimizer.parameter.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyfemtet.opt.prediction.single_task_gp.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

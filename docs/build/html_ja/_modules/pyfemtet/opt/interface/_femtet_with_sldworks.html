@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -90,12 +90,32 @@
 
 <span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetInterface</span><span class="p">,</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface">[ドキュメント]</a>
 <span class="k">class</span> <span class="nc">FemtetWithSolidworksInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Control Femtet and Solidworks.</span>
+
+<span class="sd">    Using this class, you can import CAD files created</span>
+<span class="sd">    in Solidworks through the Parasolid format into a</span>
+<span class="sd">    Femtet project. It allows you to pass design</span>
+<span class="sd">    variables to Solidworks, update the model, and</span>
+<span class="sd">    perform analysis using the updated model in Femtet.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        sldprt_path (str):</span>
+<span class="sd">            The path to .sldprt file containing the</span>
+<span class="sd">            CAD data from which the import is made.</span>
+<span class="sd">        **kwargs:</span>
+<span class="sd">            For other arguments, please refer to the</span>
+<span class="sd">            :class:`FemtetInterface` class.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
     <span class="c1"># 定数の宣言</span>
     <span class="n">swThisConfiguration</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swInConfigurationOpts_e.html</span>
     <span class="n">swAllConfiguration</span> <span class="o">=</span> <span class="mi">2</span>
@@ -166,7 +186,7 @@
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.update_model">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_model">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update .x_t&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>

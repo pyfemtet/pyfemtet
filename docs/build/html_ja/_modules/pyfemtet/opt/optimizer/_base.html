@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -88,13 +88,12 @@
 
 <span class="c1"># 3rd-party</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="c1"># pyfemtet relative</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetInterface</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FEMInterface</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span><span class="p">,</span> <span class="n">Objective</span><span class="p">,</span> <span class="n">Constraint</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.parameter</span> <span class="kn">import</span> <span class="n">ExpressionEvaluator</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer.parameter</span> <span class="kn">import</span> <span class="n">ExpressionEvaluator</span><span class="p">,</span> <span class="n">Parameter</span>
 
 <span class="c1"># logger</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -199,17 +198,11 @@
 <span class="sd">        fem (FEMInterface): The finite element method object.</span>
 <span class="sd">        fem_class (type): The class of the finite element method object.</span>
 <span class="sd">        fem_kwargs (dict): The keyword arguments used to instantiate the finite element method object.</span>
-<span class="sd">        parameters (pd.DataFrame): The parameters used in the optimization.</span>
-<span class="sd">        objectives (dict): A dictionary containing the objective functions used in the optimization.</span>
-<span class="sd">        constraints (dict): A dictionary containing the constraint functions used in the optimization.</span>
-<span class="sd">        entire_status (OptimizationStatus): The status of the entire optimization process.</span>
+<span class="sd">        variables (ExpressionEvaluator): The variables using optimization process including parameters.</span>
+<span class="sd">        objectives (dict[str, Objective]): A dictionary containing the objective functions used in the optimization.</span>
+<span class="sd">        constraints (dict[str, Constraint]): A dictionary containing the constraint functions used in the optimization.</span>
 <span class="sd">        history (History): An actor object that records the history of each iteration in the optimization process.</span>
-<span class="sd">        worker_status (OptimizationStatus): The status of each worker in a distributed computing environment.</span>
-<span class="sd">        message (str): A message associated with the current state of the optimization process.</span>
 <span class="sd">        seed (int or None): The random seed used for random number generation during the optimization process.</span>
-<span class="sd">        timeout (float or int or None): The maximum time allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.</span>
-<span class="sd">        n_trials (int or None): The maximum number of trials allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.</span>
-<span class="sd">        is_cluster (bool): Flag indicating if running on a distributed computing cluster.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -232,11 +225,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">method_checker</span><span class="p">:</span> <span class="n">OptimizationMethodChecker</span> <span class="o">=</span> <span class="n">OptimizationMethodChecker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
+    <span class="c1"># ===== algorithm specific methods =====</span>
+<div class="viewcode-block" id="AbstractOptimizer.run">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.AbstractOptimizer.run">[ドキュメント]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start optimization.&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="c1"># ----- FEMOpt interfaces -----</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup before parallel processes are launched.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># ===== calc =====</span>
 <div class="viewcode-block" id="AbstractOptimizer.f">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.AbstractOptimizer.f">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, update fem analysis, return objectives (and constraints).&quot;&quot;&quot;</span>
-        <span class="c1"># interruption の実装は具象クラスに任せる</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate objectives and constraints.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Optimization parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[np.ndarray]:</span>
+<span class="sd">                The list of internal objective values,</span>
+<span class="sd">                un-normalized objective values and</span>
+<span class="sd">                constraint values.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">])</span>
@@ -286,8 +306,8 @@
             <span class="n">y</span><span class="p">,</span>
             <span class="n">c</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-            <span class="n">postprocess_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">postprocess_func</span><span class="p">,</span>
-            <span class="n">postprocess_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">create_postprocess_args</span><span class="p">(),</span>
+            <span class="n">postprocess_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_postprocess_func</span><span class="p">,</span>
+            <span class="n">postprocess_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_create_postprocess_args</span><span class="p">(),</span>
         <span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;history.record end&#39;</span><span class="p">)</span>
@@ -297,28 +317,23 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">_y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">c</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_reconstruct_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_reconstruct</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct FEMInterface in a subprocess.&quot;&quot;&quot;</span>
-        <span class="c1"># reconstruct fem</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_reconstruct</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_class</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_kwargs</span><span class="p">)</span>
-
-        <span class="c1"># COM 定数の restore</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">_restore_constants</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">cns</span><span class="o">.</span><span class="n">_restore_constants</span><span class="p">()</span>
-
+    <span class="c1"># ===== parameter processing =====</span>
 <div class="viewcode-block" id="AbstractOptimizer.get_parameter">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.AbstractOptimizer.get_parameter">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the parameters in the specified format.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            format (str, optional): The desired format of the parameters. Can be &#39;df&#39; (DataFrame), &#39;value&#39; (alias of values), &#39;values&#39; (np.ndarray), or &#39;dict&#39;. Defaults to &#39;dict&#39;.</span>
+<span class="sd">            format (str, optional):</span>
+<span class="sd">                The desired format of the parameters.</span>
+<span class="sd">                Can be &#39;df&#39; (DataFrame),</span>
+<span class="sd">                &#39;values&#39; (np.ndarray),</span>
+<span class="sd">                &#39;dict&#39; or</span>
+<span class="sd">                &#39;raw&#39; (list of Variable object).</span>
+<span class="sd">                Defaults to &#39;dict&#39;.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            object: The parameters in the specified format.</span>
+<span class="sd">            The parameters in the specified format.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If an invalid format is provided.</span>
@@ -329,11 +344,14 @@
 
 <div class="viewcode-block" id="AbstractOptimizer.set_parameter">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.AbstractOptimizer.set_parameter">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update parameter.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            params (dict): Key is the name of parameter and the value is the value of it. The partial set is available.</span>
+<span class="sd">            params (dict):</span>
+<span class="sd">                Key is the name of parameter and</span>
+<span class="sd">                the value is the value of it.</span>
+<span class="sd">                The partial set is available.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -348,11 +366,25 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            values (np.ndarray): Values of all parameters.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">prm_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prm_names</span><span class="p">,</span> <span class="n">values</span><span class="p">)})</span></div>
 
+
+    <span class="c1"># ===== FEMOpt interfaces =====</span>
+    <span class="k">def</span> <span class="nf">_reconstruct_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_reconstruct</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct FEMInterface in a subprocess.&quot;&quot;&quot;</span>
+        <span class="c1"># reconstruct fem</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_reconstruct</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_class</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># COM 定数の restore</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_restore_constants</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">cns</span><span class="o">.</span><span class="n">_restore_constants</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_check_interruption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
@@ -369,6 +401,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">CRASHED</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">OptimizationStatus</span><span class="o">.</span><span class="n">TERMINATED</span><span class="p">)</span>
 
+    <span class="c1"># run via FEMOpt (considering parallel processing)</span>
     <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">subprocess_idx</span><span class="p">,</span>
@@ -423,21 +456,22 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_finalize</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span>
-
-<div class="viewcode-block" id="AbstractOptimizer.run">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.AbstractOptimizer.run">[ドキュメント]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start calculation using optimization library.&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span></div>
 
 
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup before parallel processes are launched.&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
 
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">Optimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+        <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="k">pass</span>
+
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">Optimizer</span><span class="p">()</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">prm1</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+            <span class="n">prm2</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
 </pre></div>
 
            </div>

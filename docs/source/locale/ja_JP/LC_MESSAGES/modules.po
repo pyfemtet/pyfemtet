@@ -21,33 +21,39 @@ msgstr ""
 
 #: ../source/modules/modules.rst:2
 msgid "pyfemtet"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.rst:2
 msgid "pyfemtet package"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.rst:5
 #: ../source/modules/pyfemtet.rst:5
 msgid "Subpackages"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:5
 #: ../source/modules/pyfemtet.opt.prediction.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:5
 #: ../source/modules/pyfemtet.rst:15
 msgid "Submodules"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.rst:18
 msgid "pyfemtet.core module"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.core.FemtetAutomationError:1 pyfemtet.core.MeshError:1
 #: pyfemtet.core.ModelError:1 pyfemtet.core.SolveError:1
 msgid "Bases: :py:class:`Exception`"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.core.FemtetAutomationError:1
 msgid "Exception raised for errors in automating Femtet."
@@ -57,7 +63,8 @@ msgstr "Femtetの自動化におけるエラーに対して発生する例外で
 #: pyfemtet.core.MeshError.add_note:1 pyfemtet.core.ModelError.add_note:1
 #: pyfemtet.core.SolveError.add_note:1
 msgid "Exception.add_note(note) -- add a note to the exception"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.core.MeshError:1
 msgid "Exception raised for errors in the meshing."
@@ -86,15 +93,18 @@ msgstr "ソルバーにおけるエラーに対して発生する例外です。
 #: ../source/modules/pyfemtet.opt.visualization.rst:13
 #: ../source/modules/pyfemtet.rst:26
 msgid "Module contents"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:2
 msgid "pyfemtet.dispatch\\_extensions package"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.logger.rst:2
 msgid "pyfemtet.logger package"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.logger._impl.get_logger:1
 msgid "Returns a logger."
@@ -105,16 +115,19 @@ msgstr "ロガーを返します。"
 #: pyfemtet.opt._femopt.FEMOpt.add_objective:17
 #: pyfemtet.opt._femopt.FEMOpt.add_parameter:21
 msgid "Examples"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.rst:2
 msgid "pyfemtet.opt package"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.interface._base.FEMInterface:1
 #: pyfemtet.opt.optimizer._base.AbstractOptimizer:1
 msgid "Bases: :py:class:`~abc.ABC`"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:1
 msgid "Abstract base class for an interface of optimization library."
@@ -129,11 +142,13 @@ msgstr "有限要素法オブジェクトです。"
 #: pyfemtet.opt.optimizer._scipy.ScipyOptimizer
 #: pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer
 msgid "type"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:7
 msgid "FEMInterface"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:11
 msgid "The class of the finite element method object."
@@ -145,7 +160,8 @@ msgstr "有限要素法オブジェクトをインスタンス化するために
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:19
 msgid "dict"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:23
 msgid "The variables using optimization process including parameters."
@@ -153,7 +169,8 @@ msgstr "パラメータを含む最適化プロセスで使用される変数で
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:25
 msgid "ExpressionEvaluator"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:29
 msgid "A dictionary containing the objective functions used in the optimization."
@@ -161,15 +178,17 @@ msgstr "最適化で使用される目的関数を含む dict です。"
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:31
 msgid "dict[str, Objective]"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:35
 msgid "A dictionary containing the constraint functions used in the optimization."
-msgstr "最適化で使用される制約関数を含む dict です。"
+msgstr "最適化で使用される拘束関数を含む dict です。"
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:37
 msgid "dict[str, Constraint]"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:41
 msgid "An actor object that records the history of each iteration in the optimization process."
@@ -177,7 +196,8 @@ msgstr "最適化プロセスの各イテレーションの履歴を記録する
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:43
 msgid "History"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:47
 msgid "The random seed used for random number generation during the optimization process."
@@ -185,11 +205,12 @@ msgstr "最適化プロセス中の乱数生成に使用されるランダムシ
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer:49
 msgid "int or None"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:1
 msgid "Calculate objectives and constraints."
-msgstr "目的関数と制約を計算します。"
+msgstr "目的関数と拘束を計算します。"
 
 #: of pyfemtet.opt._femopt.FEMOpt pyfemtet.opt._femopt.FEMOpt.add_constraint
 #: pyfemtet.opt._femopt.FEMOpt.add_expression
@@ -232,7 +253,8 @@ msgstr "目的関数と制約を計算します。"
 #: pyfemtet.opt.visualization._base.SidebarApplicationBase.add_page
 #: pyfemtet.opt.visualization.result_viewer.pages.Tutorial.control_visibility_by_style
 msgid "Parameters"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:3
 msgid "Optimization parameters."
@@ -242,11 +264,12 @@ msgstr "最適化パラメータ。"
 #: pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter
 #: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict
 msgid "Returns"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:6
 msgid "The list of internal objective values, un-normalized objective values and constraint values."
-msgstr "内部的に使用されるために変換された目的関数の値、生の目的関数の値、および制約関数値のリストです。"
+msgstr "内部的に使用されるために変換された目的関数の値、生の目的関数の値、および拘束関数値のリストです。"
 
 #: of pyfemtet.opt.interface._base.FEMInterface.check_param_value
 #: pyfemtet.opt.interface._base.FEMInterface.update
@@ -264,7 +287,8 @@ msgstr "内部的に使用されるために変換された目的関数の値、
 #: pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values
 #: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict
 msgid "Return type"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:1
 msgid "Returns the parameters in the specified format."
@@ -272,7 +296,7 @@ msgstr "指定された形式でパラメータを返します。"
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:3
 msgid "The desired format of the parameters. Can be 'df' (DataFrame), 'values' (np.ndarray), 'dict' or 'raw' (list of Variable object). Defaults to 'dict'."
-msgstr "パラメータの希望する形式です。'df'（DataFrame）、'values'（np.ndarray）、'dict'、または'raw'（Variableオブジェクトのリスト）を指定できます。デフォルトは'dict'です。"
+msgstr "パラメータの希望する形式です。 'df' （DataFrame）、 'values' （np.ndarray）、 'dict' 、または 'raw' （Variableオブジェクトのリスト）を指定できます。デフォルトは 'dict' です。"
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:11
 msgid "The parameters in the specified format."
@@ -281,7 +305,8 @@ msgstr "指定された形式のパラメータです。"
 #: of pyfemtet.opt._femopt.FEMOpt.add_parameter
 #: pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter
 msgid "Raises"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:13
 msgid "If an invalid format is provided."
@@ -346,7 +371,8 @@ msgstr "このメソッドが実装されている場合、FEMInterfaceを介し
 #: pyfemtet.opt.optimizer.parameter.ExpressionEvaluator:1
 #: pyfemtet.opt.optimizer.parameter.Variable:1
 msgid "Bases: :py:class:`object`"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt._femopt.FEMOpt:1
 msgid "Class to control FEM interface and optimizer."
@@ -363,11 +389,12 @@ msgstr "数値最適化器オブジェクトです。デフォルトはNone（�
 #: of pyfemtet.opt._femopt.FEMOpt:10
 #, python-format
 msgid "The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory."
-msgstr "履歴ファイルへのパスです。デフォルトはNoneです。Noneの場合、現在のディレクトリに'%Y_%m_%d_%H_%M_%S.csv'が作成されます。"
+msgstr "履歴ファイルへのパスです。デフォルトはNoneです。Noneの場合、現在のディレクトリに '%Y_%m_%d_%H_%M_%S.csv' が作成されます。"
 
 #: of pyfemtet.opt._femopt.FEMOpt:14
 msgid "When performing cluster computing, please specify the address of the scheduler computer here.  .. seealso:: https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html"
-msgstr "クラスタコンピューティングを行う際は、ここにスケジューラーコンピュータのアドレスを指定してください。 .. seealso:: https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt._femopt.FEMOpt:14
 msgid "When performing cluster computing, please specify the address of the scheduler computer here."
@@ -375,7 +402,8 @@ msgstr "クラスタコンピューティングを行う際は、ここにスケ
 
 #: of pyfemtet.opt._femopt.FEMOpt:17
 msgid "https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt._femopt.FEMOpt:24
 msgid "When specifying and opening a femprj and model, we write"
@@ -387,48 +415,49 @@ msgstr "最適化アルゴリズムを指定する際は、次のように記述
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:1
 msgid "Adds a constraint to the optimization problem."
-msgstr "最適化問題に制約を追加します。"
+msgstr "最適化問題に拘束を追加します。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:3
 msgid "The constraint function."
-msgstr "制約関数です。"
+msgstr "拘束関数です。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:5
 msgid "The name of the constraint. Defaults to None."
-msgstr "制約の名前です。デフォルトはNoneです。"
+msgstr "拘束の名前です。デフォルトはNoneです。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:7
 msgid "The lower bound of the constraint. Defaults to None."
-msgstr "制約の下限です。デフォルトはNoneです。"
+msgstr "拘束の下限です。デフォルトはNoneです。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:9
 msgid "The upper bound of the constraint. Defaults to None."
-msgstr "制約の上限です。デフォルトはNoneです。"
+msgstr "拘束の上限です。デフォルトはNoneです。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:11
 msgid "Flag indicating if it is a strict constraint. Defaults to True."
-msgstr "厳密な制約であるかを示すフラグです。デフォルトはTrueです。"
+msgstr "厳密な拘束であるかを示すフラグです。デフォルトはTrueです。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:13
 #: pyfemtet.opt._femopt.FEMOpt.add_constraint:15
 msgid "Additional arguments for the constraint function. Defaults to None."
-msgstr "制約関数のための追加引数です。デフォルトはNoneです。"
+msgstr "拘束関数のための追加引数です。デフォルトはNoneです。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:17
 msgid "Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically."
-msgstr "制約関数でFEMを使用するかどうかを示します。これは、BoTorchSamplerにおける厳密な制約での処理時間に影響を与える場合があります。デフォルトはNoneです。Noneの場合、PyFemtetはFemtetへのアクセスを確認し、自動的にFemtetを使用するかどうかを推定します。"
+msgstr "拘束関数でFEMを使用するかどうかを示します。これは、BoTorchSamplerにおける厳密な拘束での処理時間に影響を与える場合があります。デフォルトはNoneです。Noneの場合、PyFemtetはFemtetへのアクセスを確認し、自動的にFemtetを使用するかどうかを推定します。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:22
 msgid "When ```strict``` == True and using OptunaOptimizer along with BoTorchSampler, Pyfemtet will solve an optimization subproblem to propose new variables. During this process, the constraint function fun will be executed at each iteration of the subproblem, which may include time-consuming operations such as retrieving 3D model information via FEMInterface. As a result, it may not be feasible to complete the overall optimization within a realistic timeframe."
-msgstr "```strict``` がTrueで、OptunaOptimizerをBoTorchSamplerと併用する場合、Pyfemtetは新しい変数を提案するために最適化サブプロブレムを解決します。この過程で、制約関数funはサブプロブレムの各イテレーションで実行され、FEMInterfaceを介して3Dモデル情報を取得するなどの時間のかかる操作が含まれる可能性があります。その結果、現実的な時間枠内で全体の最適化を完了することが難しい場合があります。"
+msgstr "```strict``` がTrueで、OptunaOptimizerをBoTorchSamplerと併用する場合、Pyfemtetは新しい変数を提案するために最適化サブプロブレムを解決します。この過程で、拘束関数funはサブプロブレムの各イテレーションで実行され、FEMInterfaceを介して3Dモデル情報を取得するなどの時間のかかる操作が含まれる可能性があります。その結果、現実的な時間枠内で全体の最適化を完了することが難しい場合があります。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:47
 msgid "Examples:"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:31
 msgid "For example, in a case where the bottom area of the model is constrained, the following approach may require a very long time."
-msgstr "例えば、モデルの底面積が制約されている場合、次のアプローチは非常に長い時間を要する可能性があります。"
+msgstr "例えば、モデルの底面積が拘束されている場合、次のアプローチは非常に長い時間を要する可能性があります。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:41
 msgid "Instead, please do the following."
@@ -437,7 +466,7 @@ msgstr "代わりに、次のことを行ってください。"
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:50
 #: pyfemtet.opt._femopt.FEMOpt.add_objective:14
 msgid "If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object."
-msgstr "FEMInterfaceがFemtetInterfaceの場合、funの最初の引数はFemtet (IPyDispatch)オブジェクトであるべきです。"
+msgstr "FEMInterfaceがFemtetInterfaceの場合、funの最初の引数はFemtet (IPyDispatch)オブジェクトでなくてはなりません。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_constraint:52
 msgid "If name is None, name is a string with the prefix `\"cns_\"` followed by a sequential number."
@@ -479,7 +508,8 @@ msgstr "変数aとbを追加する場合; aはモデル変数として直接含�
 #: of pyfemtet.opt._femopt.FEMOpt.add_expression:34
 #: pyfemtet.opt._femopt.FEMOpt.add_expression:38
 msgid "Notes:"
-msgstr "\"  # IGNORE_TRANSLAT"
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_expression:33
 msgid "The argument names of function to calculate variable must match the ```name``` of the parameter."
@@ -491,7 +521,7 @@ msgstr "この場合、 :func:`FEMOpt.add_parameter` の ```name``` 引数には
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_expression:40
 msgid "When adding variable r, theta and x, y; r, theta is an optimization parameter and x, y is an intermediate variable to calculate constraint function, we write"
-msgstr "変数r、theta、x、yを追加する場合; r、thetaは最適化パラメータであり、x、yは制約関数を計算するための中間変数であるため、次のように記述します。"
+msgstr "変数r、theta、x、yを追加する場合; r、thetaは最適化パラメータであり、x、yは拘束関数を計算するための中間変数であるため、次のように記述します。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_objective:1
 msgid "Adds an objective to the optimization problem."
@@ -507,7 +537,7 @@ msgstr "目的の名前です。デフォルトはNoneです。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_objective:7
 msgid "The optimization direction. Varid values are 'maximize', 'minimize' or a float value. Defaults to 'minimize'."
-msgstr "最適化の方向です。変数の値は'maximize'、'minimize'、または浮動小数点値です。デフォルトは'minimize'です。"
+msgstr "最適化の方向です。変数の値は 'maximize' 、 'minimize' 、または浮動小数点値です。デフォルトは 'minimize' です。"
 
 #: of pyfemtet.opt._femopt.FEMOpt.add_objective:9
 msgid "Additional arguments for the objective function. Defaults to None."
@@ -607,11 +637,13 @@ msgstr "set_monitor_host() が実行されていない場合、localhost:8080 �
 
 #: of pyfemtet.opt._femopt.FEMOpt.optimize:29
 msgid "See Also:"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt._femopt.FEMOpt.optimize:30
 msgid ":func:`FEMOpt.set_monitor_host`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt._femopt.FEMOpt.optimize:34
 msgid "If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user."
@@ -668,7 +700,8 @@ msgstr "現在のバージョンでは、終了処理は :func:`FEMOpt.optimize`
 #: of pyfemtet.opt.interface._base.NoFEM:1
 #: pyfemtet.opt.interface._femtet.FemtetInterface:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface:1
 msgid "Control Femtet from optimizer."
@@ -688,7 +721,7 @@ msgstr "接続方法です。デフォルトは 'auto' です。他の有効な�
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface:13
 msgid "The type to save result file. Can specify 'all' or None. Default is 'all'."
-msgstr "結果ファイルを保存するタイプです。'all' または None を指定できます。デフォルトは 'all' です。"
+msgstr "結果ファイルを保存するタイプです。 'all' または None を指定できます。デフォルトは 'all' です。"
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface:16
 msgid "Whether to strictly specify the PID in Femtet connection. Default is True."
@@ -732,7 +765,7 @@ msgstr "Femtet プロセスに接続します。"
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:3
 msgid "The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'."
-msgstr "接続方法です。'new'、'existing'、または 'auto' を指定できます。デフォルトは 'auto' です。"
+msgstr "接続方法です。'new' 、 'existing' 、または 'auto' を指定できます。デフォルトは 'auto' です。"
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:5
 msgid "The process ID of an existing Femtet process and wanted to connect."
@@ -797,7 +830,8 @@ msgstr "femprj のパラメータを更新します。"
 #: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:1
 #: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet.FemtetInterface`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:1
 msgid "Control Femtet and NX."
@@ -828,7 +862,8 @@ msgstr "その他の引数については、:class:`FemtetInterface` クラス�
 #: of
 #: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:24
 msgid "Notes"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of
 #: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:25
@@ -890,7 +925,8 @@ msgstr "FEM なしのダミーインターフェースです。デバッグ目�
 #: pyfemtet.opt.optimizer._scipy.ScipyOptimizer:1
 #: pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:1
 msgid "Bases: :py:class:`~pyfemtet.opt.optimizer._base.AbstractOptimizer`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer:1
 msgid "Optimizer using ```optuna```."
@@ -902,7 +938,8 @@ msgstr "このクラスは Optuna を使用した最適化エンジンのイン�
 
 #: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer:7
 msgid "https://optuna.readthedocs.io/en/stable/reference/index.html"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._optuna.OptunaOptimizer:9
 msgid "A sampler class from Optuna. If not specified, ```optuna.samplers.TPESampler``` is specified. This defines the sampling strategy used during optimization. Defaults to None."
@@ -952,7 +989,8 @@ msgstr "このクラスは Scipy を使用した最適化エンジンのイン�
 
 #: of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:7
 msgid "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:9
 msgid "The keyword arguments of ```scipy.optimize.minimize```."
@@ -965,11 +1003,13 @@ msgstr "```scipy.optimize.minimize``` の戻り値です。"
 #: of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:16
 #: pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:16
 msgid "OptimizeResult"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:7
 msgid "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:9
 msgid "The keyword arguments of ```scipy.optimize.minimize_scalar```."
@@ -981,20 +1021,24 @@ msgstr "```scipy.optimize.minimize_scalar``` の戻り値です。"
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:2
 msgid "pyfemtet.opt.optimizer package"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:8
 msgid "pyfemtet.opt.optimizer.parameter module"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer.parameter.Expression:1
 #: pyfemtet.opt.optimizer.parameter.Parameter:1
 msgid "Bases: :py:class:`~pyfemtet.opt.optimizer.parameter.Variable`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.optimizer.parameter.ExpressionEvaluator.get_variables:1
 msgid "format: dict, values, df, raw(list of Variable object)"
@@ -1002,15 +1046,18 @@ msgstr "format: dict、values、df、raw（Variable オブジェクトのリス�
 
 #: ../source/modules/pyfemtet.opt.prediction.rst:2
 msgid "pyfemtet.opt.prediction package"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.prediction.rst:8
 msgid "pyfemtet.opt.prediction.single\\_task\\_gp module"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel:1
 msgid "Bases: :py:class:`~pyfemtet.opt.prediction._base.PredictionModelBase`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel:1
 msgid "Simple interface surrogate model using ```SingleTaskGP```."
@@ -1018,7 +1065,8 @@ msgstr "```SingleTaskGP``` を使用したシンプルなインターフェー�
 
 #: of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel:3
 msgid "https://botorch.org/api/models.html#botorch.models.gp_regression.SingleTaskGP"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit:1
 #: pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:1
@@ -1035,28 +1083,34 @@ msgstr "(ポイント数) 行と (目的数) 列の二次元配列です。 イ�
 
 #: ../source/modules/pyfemtet.opt.visualization.rst:2
 msgid "pyfemtet.opt.visualization package"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:2
 msgid "pyfemtet.opt.visualization.result\\_viewer package"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:8
 msgid "pyfemtet.opt.visualization.result\\_viewer.application module"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of
 #: pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication:1
 msgid "Bases: :py:class:`~pyfemtet.opt.visualization._base.PyFemtetApplicationBase`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:16
 msgid "pyfemtet.opt.visualization.result\\_viewer.pages module"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 
 #: of pyfemtet.opt.visualization.result_viewer.pages.HomePage:1
 #: pyfemtet.opt.visualization.result_viewer.pages.PredictionModelPage:1
 #: pyfemtet.opt.visualization.result_viewer.pages.Tutorial:1
 msgid "Bases: :py:class:`~pyfemtet.opt.visualization._base.AbstractPage`"
-msgstr ""  # IGNORE_TRANSLATE
+msgstr ""
+#. IGNORE_TRANSLATE
 

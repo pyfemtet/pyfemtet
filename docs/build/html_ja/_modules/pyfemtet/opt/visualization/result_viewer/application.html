@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -78,15 +78,15 @@
            <div itemprop="articleBody">
              
   <h1>pyfemtet.opt.visualization.result_viewer.application のソースコード</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span>
+<span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization._base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.result_viewer.pages</span> <span class="kn">import</span> <span class="n">HomePage</span><span class="p">,</span> <span class="n">PredictionModelPage</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.pages</span> <span class="kn">import</span> <span class="n">OptunaVisualizerPage</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization._process_monitor.pages</span> <span class="kn">import</span> <span class="n">OptunaVisualizerPage</span>
 
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <div class="viewcode-block" id="ResultViewerApplication">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.application.html#pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication">[ドキュメント]</a>
 <span class="k">class</span> <span class="nc">ResultViewerApplication</span><span class="p">(</span><span class="n">PyFemtetApplicationBase</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -97,16 +97,14 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="ResultViewerApplication.setup_callback">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication.setup_callback">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.application.html#pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication.setup_callback">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">setup_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span></div>
 </div>
 
 
 
-<div class="viewcode-block" id="debug">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.application.debug">[ドキュメント]</a>
-<span class="k">def</span> <span class="nf">debug</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">_debug</span><span class="p">():</span>
     <span class="kn">import</span> <span class="nn">os</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 
@@ -121,12 +119,11 @@
     <span class="n">g_application</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">g_optuna</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">g_application</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span>
 
-    <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
-
+    <span class="n">g_application</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.html#pyfemtet.opt.visualization.result_viewer.application.main">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.application.html#pyfemtet.opt.visualization.result_viewer.application.main">[ドキュメント]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">g_application</span> <span class="o">=</span> <span class="n">ResultViewerApplication</span><span class="p">()</span>
 
