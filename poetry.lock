@@ -63,6 +63,23 @@ files = [
 dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
 
 [[package]]
+name = "bayesian-optimization"
+version = "2.0.0"
+description = "Bayesian Optimization package"
+optional = false
+python-versions = "<4.0,>=3.9"
+files = [
+    {file = "bayesian_optimization-2.0.0-py3-none-any.whl", hash = "sha256:7dc2b1b78dadab9d38c07f3b7c5d7fe91a138bce0ec71e895085642ddf4c85b3"},
+    {file = "bayesian_optimization-2.0.0.tar.gz", hash = "sha256:434abeb87e4a59f285641fbbfd74606fa27603dd831fff7c8984e5d10391e0d0"},
+]
+
+[package.dependencies]
+colorama = ">=0.4.6,<0.5.0"
+numpy = ">=1.25"
+scikit-learn = ">=1.0.0,<2.0.0"
+scipy = ">=1.0.0,<2.0.0"
+
+[[package]]
 name = "blinker"
 version = "1.8.2"
 description = "Fast, simple object-to-object and broadcast signaling"
@@ -3113,4 +3130,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = " >= 3.9.3, < 3.13"
-content-hash = "110409ca6a46d5a97759c90eb2ebb6b9af548bdcbbe4cf7195404b697ed0780f"
+content-hash = "98440617b2dd86a8ed7a9808349b582cb07cffc0e0bb8e06f334b8fba7d01adf"
