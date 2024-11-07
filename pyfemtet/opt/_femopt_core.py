@@ -29,7 +29,7 @@ from win32com.client import constants, Constants
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
-from pyfemtet.message import encoding, Msg
+from pyfemtet._message import encoding, Msg
 
 # logger
 import logging

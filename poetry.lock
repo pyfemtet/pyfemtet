@@ -1888,6 +1888,16 @@ files = [
 windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
+name = "pyperclip"
+version = "1.9.0"
+description = "A cross-platform clipboard module for Python. (Only handles plain text for now.)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyperclip-1.9.0.tar.gz", hash = "sha256:b7de0142ddc81bfc5c7507eea19da920b92252b548b96186caf94a5e2527d310"},
+]
+
+[[package]]
 name = "pyro-api"
 version = "0.1.2"
 description = "Generic API for dispatch to Pyro backends."
@@ -3113,4 +3123,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = " >= 3.9.3, < 3.13"
-content-hash = "110409ca6a46d5a97759c90eb2ebb6b9af548bdcbbe4cf7195404b697ed0780f"
+content-hash = "380ca4ce1c0a0ccec0caa79bcfee217750f12267bf47223ef6377f607d74a1ed"

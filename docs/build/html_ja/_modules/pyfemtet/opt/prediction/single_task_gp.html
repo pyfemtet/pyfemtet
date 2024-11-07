@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -86,82 +86,57 @@
 <span class="kn">from</span> <span class="nn">botorch.fit</span> <span class="kn">import</span> <span class="n">fit_gpytorch_mll</span>
 <span class="kn">from</span> <span class="nn">gpytorch.mlls</span> <span class="kn">import</span> <span class="n">ExactMarginalLogLikelihood</span>
 
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.prediction.base</span> <span class="kn">import</span> <span class="n">PredictionModelBase</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.prediction._base</span> <span class="kn">import</span> <span class="n">PredictionModelBase</span>
 
 
-<div class="viewcode-block" id="MyStandardScaler">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler">[ドキュメント]</a>
-<span class="k">class</span> <span class="nc">MyStandardScaler</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">_StandardScaler</span><span class="p">:</span>
 
     <span class="c1"># noinspection PyAttributeOutsideInit</span>
-<div class="viewcode-block" id="MyStandardScaler.fit_transform">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.fit_transform">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="MyStandardScaler.transform">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.transform">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="MyStandardScaler.inverse_transform_mean">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.inverse_transform_mean">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">inverse_transform_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="MyStandardScaler.inverse_transform_var">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyStandardScaler.inverse_transform_var">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">inverse_transform_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span></div>
-</div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
 
 
-
-<div class="viewcode-block" id="MyMinMaxScaler">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler">[ドキュメント]</a>
-<span class="k">class</span> <span class="nc">MyMinMaxScaler</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">_MinMaxScaler</span><span class="p">:</span>
 
     <span class="c1"># noinspection PyAttributeOutsideInit</span>
-<div class="viewcode-block" id="MyMinMaxScaler.fit_transform">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.fit_transform">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="MyMinMaxScaler.transform">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.transform">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">))</span><span class="o">.</span><span class="n">double</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">))</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="MyMinMaxScaler.inverse_transform_mean">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.inverse_transform_mean">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">inverse_transform_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="MyMinMaxScaler.inverse_transform_var">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.MyMinMaxScaler.inverse_transform_var">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">inverse_transform_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span></div>
-</div>
-
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="SingleTaskGPModel">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel">[ドキュメント]</a>
 <span class="k">class</span> <span class="nc">SingleTaskGPModel</span><span class="p">(</span><span class="n">PredictionModelBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple interface surrogate model using ```SingleTaskGP```.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://botorch.org/api/models.html#botorch.models.gp_regression.SingleTaskGP</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># noinspection PyAttributeOutsideInit</span>
 <div class="viewcode-block" id="SingleTaskGPModel.fit">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">train_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
         <span class="n">train_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
@@ -170,11 +145,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_single_objective</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span>
 
         <span class="c1"># Normalize the input data to the unit cube</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scaler_x</span> <span class="o">=</span> <span class="n">MyMinMaxScaler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler_x</span> <span class="o">=</span> <span class="n">_MinMaxScaler</span><span class="p">()</span>
         <span class="n">train_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler_x</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">train_x</span><span class="p">)</span>
 
         <span class="c1"># Standardize the output data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scaler_y</span> <span class="o">=</span> <span class="n">MyStandardScaler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler_y</span> <span class="o">=</span> <span class="n">_StandardScaler</span><span class="p">()</span>
         <span class="n">train_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler_y</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">train_y</span><span class="p">)</span>
 
         <span class="c1"># Fit a Gaussian Process model using the extracted data</span>
@@ -184,7 +159,7 @@
 
 
 <div class="viewcode-block" id="SingleTaskGPModel.predict">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict">[ドキュメント]</a>
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
