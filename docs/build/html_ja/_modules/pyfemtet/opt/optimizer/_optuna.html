@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -94,7 +94,7 @@
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">OptimizationStatus</span><span class="p">,</span> <span class="n">generate_lhs</span><span class="p">,</span> <span class="n">Constraint</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">OptimizationMethodChecker</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">MeshError</span><span class="p">,</span> <span class="n">ModelError</span><span class="p">,</span> <span class="n">SolveError</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 <span class="c1"># filter warnings</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -119,6 +119,38 @@
 <div class="viewcode-block" id="OptunaOptimizer">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.OptunaOptimizer">[ドキュメント]</a>
 <span class="k">class</span> <span class="nc">OptunaOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimizer using ```optuna```.</span>
+
+<span class="sd">    This class provides an interface for the optimization</span>
+<span class="sd">    engine using Optuna. For more details, please refer to</span>
+<span class="sd">    the Optuna documentation.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://optuna.readthedocs.io/en/stable/reference/index.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampler_class (optuna.samplers.BaseSampler, optional):</span>
+<span class="sd">            A sampler class from Optuna. If not specified,</span>
+<span class="sd">            ```optuna.samplers.TPESampler``` is specified.</span>
+<span class="sd">            This defines the sampling strategy used during</span>
+<span class="sd">            optimization. Defaults to None.</span>
+<span class="sd">        sampler_kwargs (dict, optional):</span>
+<span class="sd">            A dictionary of keyword arguments to be passed to</span>
+<span class="sd">            the sampler class. This allows for customization</span>
+<span class="sd">            of the sampling process. Defaults to None.</span>
+<span class="sd">        add_init_method (str or Iterable[str], optional):</span>
+<span class="sd">            A method or a collection of methods to be added</span>
+<span class="sd">            during initialization. This can be used to specify</span>
+<span class="sd">            additional setup procedures.</span>
+<span class="sd">            Currently, the only valid value is &#39;LHS&#39;</span>
+<span class="sd">            (using Latin Hypercube Sampling).</span>
+<span class="sd">            Defaults to None.</span>
+
+<span class="sd">    Warnings:</span>
+<span class="sd">        Do not include ```constraints_func``` in ```sampler_kwargs```.</span>
+<span class="sd">        It is generated and provided by :func:`FEMOpt.add_constraint`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>

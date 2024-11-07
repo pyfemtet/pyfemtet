@@ -12,13 +12,13 @@ import dash_bootstrap_components as dbc
 
 
 here, me = os.path.split(__file__)
-COMPONENT_FILE_DIR = os.path.join(here, 'wrapped_components')
+COMPONENT_FILE_DIR = os.path.join(here, '_wrapped_components')
 indent = '    '
 
 
 def create(module_name: str) -> str:
     header = '''# auto created module
-from pyfemtet.opt.visualization.wrapped_components.str_enum import StrEnum
+from pyfemtet.opt.visualization._wrapped_components.str_enum import StrEnum
 # from enum import StrEnum
 import dash
 import dash_bootstrap_components

@@ -7,7 +7,7 @@ import pyfemtet
 
 # noinspection PyProtectedMember
 from pyfemtet.opt._test_utils import record_history, control_femtet
-from pyfemtet.message import encoding
+from pyfemtet._message import encoding
 log_encoding = 'utf-8'
 
 here = os.path.dirname(__file__)

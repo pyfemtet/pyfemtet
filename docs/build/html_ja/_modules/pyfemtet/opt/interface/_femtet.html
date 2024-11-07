@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -114,49 +114,77 @@
     <span class="n">DispatchExtensionException</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
-<span class="k">def</span> <span class="nf">post_activate_message</span><span class="p">(</span><span class="n">hwnd</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_post_activate_message</span><span class="p">(</span><span class="n">hwnd</span><span class="p">):</span>
     <span class="n">win32gui</span><span class="o">.</span><span class="n">PostMessage</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">win32con</span><span class="o">.</span><span class="n">WM_ACTIVATE</span><span class="p">,</span> <span class="n">win32con</span><span class="o">.</span><span class="n">WA_ACTIVE</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FemtetInterface">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface">[ドキュメント]</a>
 <span class="k">class</span> <span class="nc">FemtetInterface</span><span class="p">(</span><span class="n">FEMInterface</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concrete class for the interface with Femtet.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Control Femtet from optimizer.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.</span>
-<span class="sd">            model_name (str or None, optional): The name of the analysis model. Defaults to None.</span>
-<span class="sd">            connect_method (str, optional): The connection method to use. Can be &#39;new&#39;, &#39;existing&#39;, or &#39;auto&#39;. Defaults to &#39;auto&#39;.</span>
-<span class="sd">            strictly_pid_specify (bool, optional): If True and connect_method==&#39;new&#39;, search launched Femtet process strictly based on its process id.</span>
-<span class="sd">            allow_without_project (bool, optional): Allow to launch Femtet with no project file. Default to False.</span>
-<span class="sd">            open_result_with_gui (bool, optional): Open analysis result with Femtet GUI. Default to True.</span>
-<span class="sd">            parametric_output_indexes_use_as_objective (dict, optional): Parametric output indexes and their directions which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output &#39;No.&#39; in dialog is starts with 1, but this &#39;index&#39; is starts with 0. The key is the &#39;index&#39;, the value is direction (&#39;maximize&#39;, &#39;minimize&#39; or float). Default to None.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        femprj_path (str, optional):</span>
+<span class="sd">            The path to the project file.</span>
+<span class="sd">            If not specified, get it from connected Femtet.</span>
 
-<span class="sd">        Warning:</span>
-<span class="sd">            Even if you specify ``strictly_pid_specify=True`` on the constructor,</span>
-<span class="sd">            **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**</span>
-<span class="sd">            because of its large overhead.</span>
-<span class="sd">            So you should close all Femtet processes before running FEMOpt.optimize()</span>
-<span class="sd">            if ``n_parallel`` &gt;= 2.</span>
+<span class="sd">        model_name (str, optional):</span>
+<span class="sd">            The name of the model.</span>
+<span class="sd">            If not specified, get it from connected Femtet or the</span>
+<span class="sd">            first model when Femtet open the project file.</span>
 
-<span class="sd">        Tip:</span>
-<span class="sd">            If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.</span>
+<span class="sd">        connect_method (str, optional):</span>
+<span class="sd">            The connection method.</span>
+<span class="sd">            Default is &#39;auto&#39;. Other valid values are &#39;new&#39; or &#39;existing&#39;.</span>
+
+<span class="sd">        save_pdt (str, optional):</span>
+<span class="sd">            The type to save result file.</span>
+<span class="sd">            Can specify &#39;all&#39; or None. Default is &#39;all&#39;.</span>
+
+<span class="sd">        strictly_pid_specify (bool, optional):</span>
+<span class="sd">            Whether to strictly specify the PID in Femtet connection.</span>
+<span class="sd">            Default is True.</span>
+
+<span class="sd">        allow_without_project (bool, optional):</span>
+<span class="sd">            Whether to allow without a project. Default is False.</span>
+
+<span class="sd">        open_result_with_gui (bool, optional):</span>
+<span class="sd">            Whether to open the result with GUI. Default is True.</span>
+
+<span class="sd">        parametric_output_indexes_use_as_objective (dict[int, str or float], optional):</span>
+<span class="sd">            A list of parametric output indexes and its direction</span>
+<span class="sd">            to use as the objective function. If not specified,</span>
+<span class="sd">            it will be None and no parametric outputs are used</span>
+<span class="sd">            as objectives.</span>
+
+<span class="sd">        **kwargs: Additional arguments from inherited classes.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        Even if you specify ``strictly_pid_specify=True`` on the constructor,</span>
+<span class="sd">        **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**</span>
+<span class="sd">        because of its large overhead.</span>
+<span class="sd">        So you should close all Femtet processes before running FEMOpt.optimize()</span>
+<span class="sd">        if ``n_parallel`` &gt;= 2.</span>
+
+<span class="sd">    Tip:</span>
+<span class="sd">        If you search for information about the method to</span>
+<span class="sd">        connect python and Femtet, see :func:`connect_femtet`.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">femprj_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">model_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">connect_method</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>  <span class="c1"># dask worker では __init__ の中で &#39;new&#39; にするので super() の引数にしない。（しても意味がない）</span>
-            <span class="n">save_pdt</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="c1"># &#39;all&#39; or None</span>
-            <span class="n">strictly_pid_specify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># dask worker では True にしたいので super() の引数にしない。</span>
-            <span class="n">allow_without_project</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># main でのみ True を許容したいので super() の引数にしない。</span>
-            <span class="n">open_result_with_gui</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">parametric_output_indexes_use_as_objective</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">femprj_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">connect_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>  <span class="c1"># dask worker では __init__ の中で &#39;new&#39; にするので super() の引数にしない。（しても意味がない）</span>
+            <span class="n">save_pdt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="c1"># &#39;all&#39; or None</span>
+            <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># dask worker では True にしたいので super() の引数にしない。</span>
+            <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># main でのみ True を許容したいので super() の引数にしない。</span>
+            <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span>  <span class="c1"># 継承されたクラスからの引数</span>
     <span class="p">):</span>
 
@@ -184,8 +212,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_api_retry</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strictly_pid_specify</span> <span class="o">=</span> <span class="n">strictly_pid_specify</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="o">=</span> <span class="n">parametric_output_indexes_use_as_objective</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span> <span class="o">=</span> <span class="n">get_autosave_enabled</span><span class="p">()</span>
-        <span class="n">set_autosave_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span> <span class="o">=</span> <span class="n">_get_autosave_enabled</span><span class="p">()</span>
+        <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># dask サブプロセスのときは femprj を更新し connect_method を new にする</span>
         <span class="k">try</span><span class="p">:</span>
@@ -227,7 +255,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span><span class="p">)</span>
+        <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
         <span class="c1"># CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748</span>
@@ -254,12 +282,12 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Connects to a Femtet process.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            connect_method (str, optional): The connection method. Can be &#39;new&#39;, &#39;existing&#39;, or &#39;auto&#39;. Defaults to &#39;new&#39;.</span>
+<span class="sd">            connect_method (str, optional): The connection method. Can be &#39;new&#39;, &#39;existing&#39;, or &#39;auto&#39;. Defaults to &#39;auto&#39;.</span>
 <span class="sd">            pid (int or None, optional): The process ID of an existing Femtet process and wanted to connect.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            When connect_method is &#39;new&#39;, starts a new Femtet process and connects to it.</span>
-<span class="sd">            **`pid` will be ignored.**</span>
+<span class="sd">            `pid` will be ignored.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            When &#39;existing&#39;, connect to an existing Femtet process.</span>
@@ -423,11 +451,11 @@
             <span class="c1"># さらに、プロジェクトツリーが開いていないとアクティブ化イベントも意味がないらしい。</span>
             <span class="k">if</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;ReExecute&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span>
-                    <span class="n">post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
+                    <span class="n">_post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
                 <span class="c1"># API を実行</span>
                 <span class="n">returns</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># can raise pywintypes.error</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span>
-                    <span class="n">post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
+                    <span class="n">_post_activate_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">returns</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -778,12 +806,28 @@
 <div class="viewcode-block" id="FemtetInterface.preprocess">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.preprocess">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method called just before :func:`solve`.</span>
+
+<span class="sd">        This method is called just before solve.</span>
+<span class="sd">        By inheriting from the Interface class</span>
+<span class="sd">        and overriding this method, it is possible</span>
+<span class="sd">        to perform any desired preprocessing after</span>
+<span class="sd">        the model update and before solving.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="FemtetInterface.postprocess">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.postprocess">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method called just after :func:`solve`.</span>
+
+<span class="sd">        This method is called just after solve.</span>
+<span class="sd">        By inheriting from the Interface class</span>
+<span class="sd">        and overriding this method, it is possible</span>
+<span class="sd">        to perform any desired postprocessing after</span>
+<span class="sd">        the solve and before evaluating objectives.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
@@ -838,11 +882,9 @@
     <span class="k">def</span> <span class="nf">_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_version</span><span class="p">(</span><span class="n">Femtet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">)</span>
 
-<div class="viewcode-block" id="FemtetInterface.create_postprocess_args">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.create_postprocess_args">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">create_postprocess_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">file_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_result_file_content</span><span class="p">()</span>
-        <span class="n">jpg_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_jpg_content</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_create_postprocess_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">file_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_result_file_content</span><span class="p">()</span>
+        <span class="n">jpg_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_jpg_content</span><span class="p">()</span>
 
         <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">original_femprj_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">original_femprj_path</span><span class="p">,</span>
@@ -850,23 +892,17 @@
             <span class="n">pdt_file_content</span><span class="o">=</span><span class="n">file_content</span><span class="p">,</span>
             <span class="n">jpg_file_content</span><span class="o">=</span><span class="n">jpg_content</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span></div>
+        <span class="k">return</span> <span class="n">out</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.create_pdt_path">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.create_pdt_path">[ドキュメント]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">create_pdt_path</span><span class="p">(</span><span class="n">femprj_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_pdt_path</span><span class="p">(</span><span class="n">femprj_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
         <span class="n">result_dir</span> <span class="o">=</span> <span class="n">femprj_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.femprj&#39;</span><span class="p">,</span> <span class="s1">&#39;.Results&#39;</span><span class="p">)</span>
         <span class="n">pdt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_dir</span><span class="p">,</span> <span class="n">model_name</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_trial</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s1">.pdt&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">pdt_path</span></div>
-
+        <span class="k">return</span> <span class="n">pdt_path</span>
 
     <span class="c1"># noinspection PyMethodOverriding</span>
-<div class="viewcode-block" id="FemtetInterface.postprocess_func">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.postprocess_func">[ドキュメント]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">postprocess_func</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">_postprocess_func</span><span class="p">(</span>
             <span class="n">trial</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
             <span class="n">original_femprj_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -876,19 +912,16 @@
     <span class="p">):</span>
         <span class="n">result_dir</span> <span class="o">=</span> <span class="n">original_femprj_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.femprj&#39;</span><span class="p">,</span> <span class="s1">&#39;.Results&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">pdt_file_content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">pdt_path</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">create_pdt_path</span><span class="p">(</span><span class="n">original_femprj_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">trial</span><span class="p">)</span>
+            <span class="n">pdt_path</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_create_pdt_path</span><span class="p">(</span><span class="n">original_femprj_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">trial</span><span class="p">)</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pdt_file_content</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">jpg_file_content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">jpg_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_dir</span><span class="p">,</span> <span class="n">model_name</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_trial</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s1">.jpg&#39;</span><span class="p">)</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jpg_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jpg_file_content</span><span class="p">)</span></div>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jpg_file_content</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.create_result_file_content">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.create_result_file_content">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">create_result_file_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_result_file_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after solve&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_pdt</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
             <span class="c1"># save to worker space</span>
@@ -910,12 +943,9 @@
             <span class="k">return</span> <span class="n">content</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
+            <span class="k">return</span> <span class="kc">None</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.create_jpg_content">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.create_jpg_content">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">create_jpg_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_jpg_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">result_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.femprj&#39;</span><span class="p">,</span> <span class="s1">&#39;.Results&#39;</span><span class="p">)</span>
         <span class="n">jpg_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.jpg&#39;</span><span class="p">)</span>
 
@@ -939,7 +969,6 @@
             <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">content</span></div>
-</div>
 
 
 
@@ -991,35 +1020,37 @@
 
 
 <span class="c1"># レジストリのパスと値の名前</span>
-<span class="n">REGISTRY_PATH</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Murata Software\Femtet2014\Femtet&quot;</span>
-<span class="n">VALUE_NAME</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoSave&quot;</span>
+<span class="n">_REGISTRY_PATH</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Murata Software\Femtet2014\Femtet&quot;</span>
+<span class="n">_VALUE_NAME</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoSave&quot;</span>
 
-<span class="k">def</span> <span class="nf">get_autosave_enabled</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_CURRENT_USER</span><span class="p">,</span> <span class="n">REGISTRY_PATH</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
-        <span class="n">value</span><span class="p">,</span> <span class="n">regtype</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">VALUE_NAME</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_get_autosave_enabled</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_CURRENT_USER</span><span class="p">,</span> <span class="n">_REGISTRY_PATH</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
+        <span class="n">value</span><span class="p">,</span> <span class="n">regtype</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">_VALUE_NAME</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">regtype</span> <span class="o">==</span> <span class="n">winreg</span><span class="o">.</span><span class="n">REG_DWORD</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unexpected registry value type.&quot;</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">set_autosave_enabled</span><span class="p">(</span><span class="n">enable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_CURRENT_USER</span><span class="p">,</span> <span class="n">REGISTRY_PATH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">KEY_SET_VALUE</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
-        <span class="n">winreg</span><span class="o">.</span><span class="n">SetValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">VALUE_NAME</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">REG_DWORD</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">enable</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_set_autosave_enabled</span><span class="p">(</span><span class="n">enable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_CURRENT_USER</span><span class="p">,</span> <span class="n">_REGISTRY_PATH</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">KEY_SET_VALUE</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
+        <span class="n">winreg</span><span class="o">.</span><span class="n">SetValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">_VALUE_NAME</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">REG_DWORD</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">enable</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">_test_autosave_setting</span><span class="p">():</span>
 
     <span class="c1"># 使用例</span>
-    <span class="n">current_setting</span> <span class="o">=</span> <span class="n">get_autosave_enabled</span><span class="p">()</span>
+    <span class="n">current_setting</span> <span class="o">=</span> <span class="n">_get_autosave_enabled</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current AutoSave setting is </span><span class="si">{</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">current_setting</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="c1"># 設定を変更する例</span>
     <span class="n">new_setting</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">current_setting</span>
-    <span class="n">set_autosave_enabled</span><span class="p">(</span><span class="n">new_setting</span><span class="p">)</span>
+    <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="n">new_setting</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AutoSave setting has been </span><span class="si">{</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">new_setting</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="c1"># 再度設定を確認する</span>
-    <span class="n">after_setting</span> <span class="o">=</span> <span class="n">get_autosave_enabled</span><span class="p">()</span>
+    <span class="n">after_setting</span> <span class="o">=</span> <span class="n">_get_autosave_enabled</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current AutoSave setting is </span><span class="si">{</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">after_setting</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="k">assert</span> <span class="n">new_setting</span> <span class="o">==</span> <span class="n">after_setting</span><span class="p">,</span> <span class="s2">&quot;レジストリ編集に失敗しました。&quot;</span> 

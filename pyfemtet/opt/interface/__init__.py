@@ -11,5 +11,4 @@ __all__ = [
     'FemtetInterface',
     'FemtetWithNXInterface',
     'FemtetWithSolidworksInterface',
-    'logger',
 ]

@@ -68,15 +68,15 @@ class FEMInterface(ABC):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
-    def postprocess_func(self, trial: int, *args, dask_scheduler=None, **kwargs):
+    def _postprocess_func(self, trial: int, *args, dask_scheduler=None, **kwargs):
         pass
 
-    def create_postprocess_args(self):
+    def _create_postprocess_args(self):
         pass
 
 
 class NoFEM(FEMInterface):
-    """Interface with no FEM for debug."""
+    """Dummy interface without FEM. Intended for debugging purposes."""
 
     def update(self, parameters: pd.DataFrame) -> None:
         pass

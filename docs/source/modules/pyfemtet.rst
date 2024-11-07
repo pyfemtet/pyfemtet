@@ -5,37 +5,19 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
-   pyfemtet.message
+   pyfemtet.dispatch_extensions
+   pyfemtet.logger
    pyfemtet.opt
 
 Submodules
 ----------
 
-pyfemtet.core module
---------------------
+.. toctree::
+   :maxdepth: 1
 
-.. automodule:: pyfemtet.core
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyfemtet.dispatch\_extensions module
-------------------------------------
-
-.. automodule:: pyfemtet.dispatch_extensions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyfemtet.logger module
-----------------------
-
-.. automodule:: pyfemtet.logger
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   pyfemtet.core
 
 Module contents
 ---------------

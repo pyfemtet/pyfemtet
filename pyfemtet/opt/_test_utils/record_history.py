@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from pyfemtet.opt import FEMOpt
-from pyfemtet.message import encoding as ENCODING
+from pyfemtet._message import encoding as ENCODING
 
 
 def find_latest_csv(dir_path=None):

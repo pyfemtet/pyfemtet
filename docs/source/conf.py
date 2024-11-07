@@ -51,6 +51,17 @@ intersphinx_disabled_domains = ["std"]
 
 templates_path = ["_templates"]
 
+
+# -- extention settings --------------
+autosummary_generate = True
+autodoc_typehints = "description"
+autodoc_default_options = {
+    "members": True,
+    "inherited-members": True,
+    "exclude-members": "with_traceback",
+}
+
+
 # -- Options for EPUB output
 epub_show_urls = "footnote"
 
