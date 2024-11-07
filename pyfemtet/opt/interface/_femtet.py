@@ -198,7 +198,7 @@ class FemtetInterface(FEMInterface):
         """Connects to a Femtet process.
 
         Args:
-            connect_method (str, optional): The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'new'.
+            connect_method (str, optional): The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
             pid (int or None, optional): The process ID of an existing Femtet process and wanted to connect.
 
         Note:

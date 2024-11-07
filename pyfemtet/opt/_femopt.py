@@ -174,7 +174,7 @@ class FEMOpt:
                     pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
 
                 Raises:
-                    ValueError: If initial_value is not specified and the value for the given name is also not specified.
+                    ValueError: If initial_value is not specified and the value for the given name is also not specified in FEM.
 
                 Examples:
 
@@ -220,7 +220,7 @@ class FEMOpt:
             self,
             name: str,
             fun: Callable[[Any], float],
-            properties=str,
+            properties: dict[str, str or float] = None,
             kwargs: Optional[dict] = None,
             pass_to_fem=True,
     ):
@@ -234,7 +234,7 @@ class FEMOpt:
         Args:
             name (str): The name of the variable.
             fun (Callable[[Any], float]): An expression function. The arguments that you want to use as input variables must be the same with ``name`` of Variable objects added by ``add_parameter()`` or ``add_expression()``. If you use other objects as argument of the function, you must specify ``kwargs``.
-            properties (str, optional): Property names and their values of the variable. Defaults to property.
+            properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.
             kwargs (Optional[dict], optional): Remaining arguments of ``fun``. Defaults to None.
             pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True.
 
@@ -384,15 +384,18 @@ class FEMOpt:
             using_fem (bool, optional): Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically.
 
         Warnings:
-            strict == True かつ OptunaOptimzier と BoTorchSampler を使う場合、
-            pyfemtet は新しい変数を提案するために最適化 subproblem を解きます。
-            この際、subproblem の各 iteration で拘束関数 fun が実行されるため、
-            FEMInterface を介した 3D モデル情報の取得のような時間的に高コストな
-            処理を含むと現実的な時間で全体の最適化が終了しない可能性があります。
+
+            When ```strict``` == True and using OptunaOptimizer along with BoTorchSampler,
+            Pyfemtet will solve an optimization subproblem to propose new variables.
+            During this process, the constraint function fun will be executed at each
+            iteration of the subproblem, which may include time-consuming operations such
+            as retrieving 3D model information via FEMInterface.
+            As a result, it may not be feasible to complete the overall optimization within
+            a realistic timeframe.
 
             Examples:
-                例えば、モデルの底面積を拘束する例において、
-                下記の書き方はとても長い時間を必要とします。
+                For example, in a case where the bottom area of the model is constrained,
+                the following approach may require a very long time.
 
                     >>> def bottom_area(Femtet, opt):  # doctest: +SKIP
                     ...     w = Femtet.GetVariableValue('width')  # doctest: +SKIP
@@ -401,7 +404,7 @@ class FEMOpt:
                     ...
                     >>> femopt.add_constraint(constraint, lower_bound=5)  # doctest: +SKIP
 
-                代わりに、以下のようにしてください。
+                Instead, please do the following.
 
                     >>> def bottom_area(_, opt):  # 第一引数 Femtet にはアクセスしないようにします。  # doctest: +SKIP
                     ...     params = opt.get_parameter()  # doctest: +SKIP
@@ -467,9 +470,9 @@ class FEMOpt:
     def get_parameter(self, format='dict'):
         """Deprecated method.
 
-        Planed to remove in future version. Use Femopt.opt.get_parameter() instead.
+        Planed to remove in future version. Use FEMOpt.opt.get_parameter() instead.
         """
-        raise DeprecationWarning('FEMOpt.get_parameter() was deprecated. Use Femopt.opt.get_parameter() instead.')
+        raise DeprecationWarning('FEMOpt.get_parameter() was deprecated. Use FEMOpt.opt.get_parameter() instead.')
 
     def set_monitor_host(self, host=None, port=None):
         """Sets the host IP address and the port of the process monitor.
