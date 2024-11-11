@@ -55,8 +55,9 @@ class GPClassificationModel(ApproximateGP, GPyTorchModel):
         super(GPClassificationModel, self).__init__(variational_strategy)
 
         self.mean_module = gpytorch.means.ConstantMean().double()
-        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel().double()).double()
+        self.covar_module = gpytorch.kernels.MaternKernel(nu=1/2).double()
         self.likelihood = gpytorch.likelihoods.BernoulliLikelihood().double()
+        # self.likelihood = gpytorch.likelihoods.BetaLikelihood().double()
 
     def forward(self, x):
         mean_x = self.mean_module(x)
@@ -68,34 +69,17 @@ from gpytorch.distributions import MultivariateNormal
 
 con_model = GPClassificationModel(train_x, train_y)
 con_mll = gpytorch.mlls.VariationalELBO(con_model.likelihood, con_model, len(train_x))
+# con_mll = gpytorch.mlls.ExactMarginalLogLikelihood(con_model.likelihood, con_model)
 fit_gpytorch_mll(con_mll)
 
+
+
+# ===== Bernoulli likelihood =====
 # test
 test_x = tensor([[-1, -1]])
 ret: MultivariateNormal = con_model(test_x)
 print(f'Model returns {ret.mean.detach().numpy()[0]:.3f}±{ret.stddev.detach().numpy()[0]:.3f} from {test_x.detach().numpy()[0]}')
 
-test_x = tensor([[1, 1]])
-ret: MultivariateNormal = con_model(test_x)
-print(f'Model returns {ret.mean.detach().numpy()[0]:.3f}±{ret.stddev.detach().numpy()[0]:.3f} from {test_x.detach().numpy()[0]}')
-
 # likelihood
-from torch.distributions import Bernoulli
-_p = Bernoulli(0.3)
-_p.probs
-_p.mean
-_p.stddev
-_p.enumerate_support(True)
-
-test_x = tensor([[-1, -1]])
-ret: MultivariateNormal = con_model(test_x)
 p = con_model.likelihood(ret)
 print(f'Feasible probability is {p.probs.detach().numpy()[0]:.4f}')
-
-
-# posterior
-test_x = tensor([[-1, -1]])
-post = con_model.posterior(test_x)
-print(f'Posterior of model is {post.mean.detach().numpy()[0][0]:.3f}±{post.stddev.detach().numpy()[0]:.3f} from {test_x.detach().numpy()[0]}')
-# ret と一致
-

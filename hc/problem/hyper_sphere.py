@@ -8,6 +8,7 @@ from hc.problem._base import AbstractProblem, Floats
 class HyperSphere(AbstractProblem):
 
     def __init__(self, dim: int):
+        self.r_upper = 0.5
         super().__init__(dim, dim)
 
     @property
@@ -48,7 +49,7 @@ class HyperSphere(AbstractProblem):
 
     def _hidden_constraint(self, x: Floats) -> bool:
         r, *angles = x
-        return r < 0.5
+        return r < self.r_upper
 
     def create_base_figure(self) -> go.Figure:
 
@@ -71,7 +72,7 @@ class HyperSphere(AbstractProblem):
 
 
         # feasible 領域
-        r = 0.5 * np.ones(60)
+        r = min(1., self.r_upper) * np.ones(60)
         theta = np.linspace(0, 2*pi, 60)
 
         x = r * cos(theta)

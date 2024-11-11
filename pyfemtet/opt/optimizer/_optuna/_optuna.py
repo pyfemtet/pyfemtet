@@ -5,13 +5,12 @@ from typing import Iterable
 import os
 
 # 3rd-party
-import numpy as np
 import optuna
 from optuna.trial import TrialState
 from optuna.study import MaxTrialsCallback
 
 # pyfemtet relative
-from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs, Constraint
+from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
 from pyfemtet.opt.optimizer import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
 from pyfemtet._message import Msg
@@ -310,7 +309,7 @@ class OptunaOptimizer(AbstractOptimizer):
         if self._do_monkey_patch:
             assert isinstance(sampler, optuna.integration.BoTorchSampler), Msg.ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH
 
-            from pyfemtet.opt.optimizer._optuna_botorchsampler_parameter_constraint_helper import do_patch
+            from opt.optimizer._optuna._optuna_botorchsampler_parameter_constraint_helper import do_patch
 
             do_patch(
                 study,

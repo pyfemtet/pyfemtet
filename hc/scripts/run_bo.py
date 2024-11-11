@@ -8,7 +8,8 @@ from hc.sampler.random import RandomSampler
 
 
 if __name__ == '__main__':
-    problem = SpotsInSquare()
+    problem = HyperSphere(6)
+    problem.r_upper = 1e10
     random_manager = RandomSampler(problem)
     bayesian_manager = BayesSampler(problem)
 
@@ -26,5 +27,4 @@ if __name__ == '__main__':
 
     for i in tqdm(range(5), 'bayesian sampler'):
         bayesian_manager.sampling()
-
-    bayesian_manager.show_figure()
+        bayesian_manager.show_figure()
