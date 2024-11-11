@@ -1,7 +1,13 @@
-from typing import Any, Callable, Sequence
+from functools import partial
+import torch
+from torch import Tensor
+from torch.distributions import Normal
+from botorch.models import SingleTaskGP
+from botorch.optim import optimize_acqf
 
-import optuna
+from pyfemtet.opt.optimizer._optuna._botorch_patch import detect_target
 
+# ignore warnings
 import warnings
 from botorch.exceptions.warnings import InputDataWarning
 warnings.filterwarnings('ignore', category=InputDataWarning)
@@ -9,7 +15,10 @@ from optuna.exceptions import ExperimentalWarning
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 
-# ヘルパー関数
+__all__ = ['PoFBoTorchSampler']
+
+
+# helper function
 def symlog(x):
     """
     Symmetric logarithm function.
@@ -27,29 +36,29 @@ def symlog(x):
         -torch.log(1 - x)
     )
 
-# ===== botorch の獲得関数に pof を乗ずるための準備 =====
-import torch
-from torch import Tensor
-from torch.distributions import Normal
-from botorch.models import SingleTaskGP
 
-
-# botorch の獲得関数クラスに pof 係数を追加したクラスを作る関数
+# ===== optuna_integration.botorch の獲得関数に pof 係数を導入する =====
+# ベースとなる獲得関数クラスに pof 係数を追加したクラスを作成する関数
 def acqf_patch_factory(acqf_class):
+    """ベース acqf クラスに pof 係数の計算を追加したクラスを作成します。
+
+    出力されたクラスは、 set_model_c() メソッドで学習済みの
+    feasibility を評価するための SingleTaskGP オブジェクトを
+    指定する必要があります。
+    """
 
     # optuna_integration.botorch.botorch.qExpectedImprovement
     class ACQFWithPOF(acqf_class):
         model_c: SingleTaskGP
 
-        gamma: float = 1.0  # 大きいほど feasibility を重視する。
-        # gamma: float = 10.0  # 大きいほど feasibility を重視する。
-        threshold: float = 0.5  # 0 ~ 1。大きいほど feasibility を重視する。
-        # threshold: float = 0.8  # 0 ~ 1。大きいほど feasibility を重視する。
+        gamma: float = 1.0  # 大きいほど feasibility を重視します。
+        threshold: float = 0.5  # 0 ~ 1。大きいほど feasibility を重視します。
 
-        enable_log: bool = True  # 獲得関数に symlog を適用する。
-        enable_positive_only_pof: bool = True  # 獲得関数が正のときのみ pof を乗ずる。
+        enable_log: bool = False  # 獲得関数に symlog を適用します。
+        enable_positive_only_pof: bool = False  # 獲得関数が正のときのみ pof を乗じます。
 
-        # 関数が微分不可能になるので下記の実用化はとりやめ
+        # 関数が微分不可能になるので下記の実用化はペンディングする。
+        # enable_dynamic_gamma は必ず False であること。
         enable_dynamic_gamma: bool = False  # gamma を動的に変更します。 True のとき、gamma は無視されます。
         # eps: float = 10.  # dynamic_gamma の場合の s_bar の閾値です。目的関数の予想される最大値の 10% 程度がよいとされます。
         # alpha_0: float = 0.3  # dynamic_gamma の場合の gamma の初期値です。
@@ -115,76 +124,70 @@ def acqf_patch_factory(acqf_class):
                     torch.ones_like(pof)
                 )
 
-            if self.enable_dynamic_gamma:
-                self.gamma = self.alpha(X)
+            # if self.enable_dynamic_gamma:
+            #     _X = X.squeeze(1)
+            #     posterior = self.model.posterior(_X)
+            #     sigma = posterior.stddev
+            #     # sigma が小さいほど、feasibility を重視させたい = gamma を大きくしたい
+            #     sigma_base = 0.3  # 適当。サンプリングしている最大の...とかでもいいと思う。
+            #     self.gamma = sigma_base / sigma.max(dim=1).values
 
             return base_acqf * pof ** self.gamma
-
 
     return ACQFWithPOF
 
 
-# ===== 獲得関数クラスを挿げ替える関数 =====
-# Notes: 代替 optimize_acqf() は引数に model_c を持つので sample_relative の中で毎回挿げ替える
-from functools import partial
-from packaging.version import Version
-import optuna_integration
-from optuna_integration import version as optuna_integration_version
-if Version(optuna_integration_version.__version__) < Version('4.0.0'):
-    target_package = optuna_integration.botorch
-else:
-    target_package = optuna_integration.botorch.botorch
+# optuna_integration.botorch の獲得関数クラスを置換する関数
+def override_optuna_integration_acqf():
+    target_module = detect_target.get_botorch_sampler_module()
 
-
-def replace_acqf():
     from botorch.acquisition.analytic import LogConstrainedExpectedImprovement
-    target_package.LogConstrainedExpectedImprovement = acqf_patch_factory(
+    target_module.LogConstrainedExpectedImprovement = acqf_patch_factory(
         LogConstrainedExpectedImprovement
     )
 
     from botorch.acquisition.analytic import LogExpectedImprovement
-    target_package.LogExpectedImprovement = acqf_patch_factory(
+    target_module.LogExpectedImprovement = acqf_patch_factory(
         LogExpectedImprovement
     )
 
     from botorch.acquisition.monte_carlo import qExpectedImprovement
-    target_package.qExpectedImprovement = acqf_patch_factory(
+    target_module.qExpectedImprovement = acqf_patch_factory(
         qExpectedImprovement
     )
 
     from botorch.acquisition.monte_carlo import qNoisyExpectedImprovement
-    target_package.qNoisyExpectedImprovement = acqf_patch_factory(
+    target_module.qNoisyExpectedImprovement = acqf_patch_factory(
         qNoisyExpectedImprovement
     )
 
     from botorch.acquisition.multi_objective import monte_carlo
-    target_package.monte_carlo.qExpectedHypervolumeImprovement = acqf_patch_factory(
+    target_module.monte_carlo.qExpectedHypervolumeImprovement = acqf_patch_factory(
         monte_carlo.qExpectedHypervolumeImprovement
     )
-    target_package.monte_carlo.qNoisyExpectedHypervolumeImprovement = acqf_patch_factory(
+    target_module.monte_carlo.qNoisyExpectedHypervolumeImprovement = acqf_patch_factory(
         monte_carlo.qNoisyExpectedHypervolumeImprovement
     )
 
     from botorch.acquisition.multi_objective.analytic import ExpectedHypervolumeImprovement
-    target_package.ExpectedHypervolumeImprovement = acqf_patch_factory(
+    target_module.ExpectedHypervolumeImprovement = acqf_patch_factory(
         ExpectedHypervolumeImprovement
     )
 
     from botorch.acquisition.knowledge_gradient import qKnowledgeGradient
-    target_package.qKnowledgeGradient = acqf_patch_factory(
+    target_module.qKnowledgeGradient = acqf_patch_factory(
         qKnowledgeGradient
     )
 
     from botorch.acquisition.multi_objective.hypervolume_knowledge_gradient import qHypervolumeKnowledgeGradient
-    target_package.qHypervolumeKnowledgeGradient = acqf_patch_factory(
+    target_module.qHypervolumeKnowledgeGradient = acqf_patch_factory(
         qHypervolumeKnowledgeGradient
     )
 
 
-# ===== optimize_acqf の前に model_c を acqf に set する処理を挿入した関数 =====
-from botorch.optim import optimize_acqf
-
-
+# optuna_integration の candidate function の中で
+# 獲得関数クラスに model_c を set するために
+# 共通処理である optimize_acqf の前に当該処理を挿入した関数。
 def optimize_acqf_with_model_c_set(
         *args,  # optimize_acqf の位置引数
         model_c: SingleTaskGP = None,  # set する model_c. キーワード引数で与えること。
@@ -205,10 +208,53 @@ def optimize_acqf_with_model_c_set(
         args = tuple(args)
 
     # optimize_acqf を実行する
-    return optimize_acqf(*args, **kwargs)
+    target_module = detect_target.get_botorch_sampler_module()
+    target_fun = target_module.optimize_acqf
+    return target_fun(*args, **kwargs)
 
 
-# ===== PoF を考慮した BoTorchSampler の実装 =====
+# optimize_acqf を上記関数に置換する関数
+# ※ model_c は毎 sample 学習しなおす必要があるので
+#   毎 sampler_relative で呼ぶのであって、PoF...Sampler を使えば
+#   自動で呼び出される。
+def override_optimize_acqf(model_c):
+    target_module = detect_target.get_botorch_sampler_module()
+    new_func = OptimizeACQFWithModelC(target_module.optimize_acqf)
+    new_func.set_model_c(model_c)
+
+    target_module.optimize_acqf = new_func
+
+
+# 渡された関数の実行前に引数から acqf を取得し model_c を set する。
+# optimize_acqf に対して使う。
+class OptimizeACQFWithModelC(partial):
+    model_c: SingleTaskGP
+
+    def set_model_c(self, model_c: SingleTaskGP):
+        self.model_c = model_c
+
+    def __call__(self, *args, **kwargs):
+
+        # acqf を検出
+        if 'acq_function' in kwargs.keys():
+            # acqf に学習済み model_c を渡す
+            acqf = kwargs['acq_function']
+            acqf.set_model_c(self.model_c)
+            kwargs['acq_function'] = acqf
+
+        else:
+            # acqf に学習済み model_c を渡す
+            acqf = args[0]
+            acqf.set_model_c(self.model_c)
+            list(args)[0] = acqf
+            args = tuple(args)
+
+        # optimize_acqf を実行する
+        return super().__call__(*args, **kwargs)
+
+
+# ===== PoF を考慮した Sampler =====
+from typing import Any, Callable, Sequence
 import numpy
 from optuna._transform import _SearchSpaceTransform
 from optuna import Study
@@ -225,11 +271,18 @@ from botorch.utils.sampling import manual_seed
 class PoFBoTorchSampler(BoTorchSampler):
     ACQF_REPLACED = False
 
+    @classmethod
+    def set_replaced_flag(cls):
+        # クラスメソッド経由で set すれば
+        # すべてのインスタンスのメンバーも変更になる
+        cls.ACQF_REPLACED = True
+
     def sample_relative(
             self,
             study: Study,
             trial: FrozenTrial,
-            search_space: dict[str, BaseDistribution]) -> dict[str, Any]:
+            search_space: dict[str, BaseDistribution]
+    ) -> dict[str, Any]:
 
         # n_startup_trials までは {} を返す
         if len(search_space) == 0:
@@ -240,10 +293,13 @@ class PoFBoTorchSampler(BoTorchSampler):
         if n_trials < self._n_startup_trials:
             return {}
 
+        # デバッグ用
+        print('PoFBoTorchSampler start')
+
         # ===== 必要ならば獲得関数を置換 =====
         if not self.ACQF_REPLACED:
-            replace_acqf()
-            self.ACQF_REPLACED = True
+            override_optuna_integration_acqf()
+            self.set_replaced_flag()
 
         # ===== model_c を作成する =====
         # ----- bounds, train_x, train_y を準備する -----
@@ -275,54 +331,26 @@ class PoFBoTorchSampler(BoTorchSampler):
         values = torch.from_numpy(values).to(self._device)  # 0 or 1, n_points x 1 Tensor
         bounds.transpose_(0, 1)  # 未正規化, 2 x n_parameters Tensor
 
-        # model_c を作る
-        with manual_seed(self._seed):
-            train_x_c = normalize(params, bounds=bounds)
-            train_y_c = values
-            model_c = SingleTaskGP(
-                train_x_c,  # n_data x n_prm
-                train_y_c,  # n_data x n_obj
-                train_Yvar=1e-4 + torch.zeros_like(train_y_c),
-                outcome_transform=Standardize(
-                    m=train_y_c.shape[-1],  # The output dimension.
-                )
+        # ----- model_c を作る -----
+        # with manual_seed(self._seed):
+        train_x_c = normalize(params, bounds=bounds)
+        train_y_c = values
+        model_c = SingleTaskGP(
+            train_x_c,  # n_data x n_prm
+            train_y_c,  # n_data x n_obj
+            train_Yvar=1e-4 + torch.zeros_like(train_y_c),
+            outcome_transform=Standardize(
+                m=train_y_c.shape[-1],  # The output dimension.
             )
-            mll_c = ExactMarginalLogLikelihood(
-                model_c.likelihood,
-                model_c
-            )
-            fit_gpytorch_mll(mll_c)
+        )
+        mll_c = ExactMarginalLogLikelihood(
+            model_c.likelihood,
+            model_c
+        )
+        fit_gpytorch_mll(mll_c)
 
         # ===== optimize_acqf を置換する =====
-        new_optimize_acqf = partial(
-            optimize_acqf_with_model_c_set,
-            model_c=model_c,
-        )
-        target_package.optimize_acqf = new_optimize_acqf
+        override_optimize_acqf(model_c)
 
         # ===== sampling を実行する =====
         return super().sample_relative(study, trial, search_space)
-
-
-if __name__ == '__main__':
-    _count = 0
-
-    def _g_obj(t: optuna.Trial):
-        global _count
-        print(f'feasible counter: {_count}')
-        a = t.suggest_float("a", -10, 10)
-        if a < 5:
-            print(f'{a=}')
-            raise optuna.TrialPruned
-        else:
-            _count += 1
-            return a ** 2
-
-    _g_s = optuna.create_study(
-        direction='minimize',
-        sampler=PoFBoTorchSampler(
-            n_startup_trials=5,
-            seed=7,
-        )
-    )
-    _g_s.optimize(_g_obj, n_trials=50)

@@ -15,21 +15,24 @@ if __name__ == '__main__':
     bo_pof.gamma = 1.
 
     # 問題の設定
-    # problem = Spiral()
+    problem = Spiral()
+
     # problem = HyperSphere(2)
+
     # problem = SpotsInSquare()
-    dim = 9
-    radii = {
-        2: 0.05,
-        6: 0.4,
-        9: 0.95,
-    }[dim]
-    spots = [dict(center=[0.]*dim, radii=radii)]
-    for i in range(dim):
-        center = [0. for _ in range(dim)]
-        center[i] = 1. - radii
-        spots.append(dict(center=center, radii=radii))
-    problem = HyperSpotsInSquare(spots, dim)
+
+    # dim = 9
+    # radii = {
+    #     2: 0.05,
+    #     6: 0.4,
+    #     9: 0.95,
+    # }[dim]
+    # spots = [dict(center=[0.]*dim, radii=radii)]
+    # for i in range(dim):
+    #     center = [0. for _ in range(dim)]
+    #     center[i] = 1. - radii
+    #     spots.append(dict(center=center, radii=radii))
+    # problem = HyperSpotsInSquare(spots, dim)
 
     # 最適化手法の設定
     random_manager = RandomSampler(problem)

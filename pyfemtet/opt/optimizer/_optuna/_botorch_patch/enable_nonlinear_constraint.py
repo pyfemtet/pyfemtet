@@ -17,46 +17,16 @@ from pyfemtet.opt._femopt_core import Constraint
 from pyfemtet.opt.optimizer import OptunaOptimizer, logger
 from pyfemtet._message import Msg
 
-from time import time
-
-
-__all__ = ['do_patch']
+from pyfemtet.opt.optimizer._optuna._botorch_patch import detect_target
 
 
 BotorchConstraint = Callable[[Tensor], Tensor]
 
 
-def do_patch(
-    study: Study,
-    constraints: dict[str, Constraint],
-    opt: OptunaOptimizer,
-):
-    """BoTorchSampler の optimize_acqf をパッチし、パラメータ拘束が実施できるようにします。
-
-    Args:
-        study (Study): Optuna study. Use to calculate bounds.
-        constraints (dict[str, Constraint]): Constraints.
-        opt (OptunaOptimizer): OptunaOptimizer.
-    """
-    import optuna_integration
-
-    from optuna_integration import version
-    if int(version.__version__.split('.')[0]) >= 4:
-        target_fun = optuna_integration.botorch.botorch.optimize_acqf
-    else:
-        target_fun = optuna_integration.botorch.optimize_acqf
-
-    new_fun: callable = OptimizeReplacedACQF(target_fun)
-    new_fun.set_constraints(list(constraints.values()))
-    new_fun.set_study(study)
-    new_fun.set_opt(opt)
-
-    if int(version.__version__.split('.')[0]) >= 4:
-        optuna_integration.botorch.botorch.optimize_acqf = new_fun
-    else:
-        optuna_integration.botorch.optimize_acqf = new_fun
+__all__ = ['add_optimize_acqf_patch']
 
 
+# 拘束関数に pytorch の自動微分機能を適用するためのクラス
 class GeneralFunctionWithForwardDifference(torch.autograd.Function):
     """自作関数を pytorch で自動微分するためのクラスです。
 
@@ -85,6 +55,8 @@ class GeneralFunctionWithForwardDifference(torch.autograd.Function):
         return None, diff
 
 
+# ユーザー定義関数 (pyfemtet.opt.Constraint) を受け取り、
+# botorch で処理できる callable オブジェクトを作成するクラス
 class ConvertedConstraint:
     """ユーザーが定義した Constraint を botorch で処理できる形式に変換します。
 
@@ -116,6 +88,7 @@ class ConvertedConstraint:
             return Tensor([self._constraint.ub - c])
 
 
+# list[pyfemtet.opt.Constraint] について、正規化された入力に対し、 feasible or not を返す関数
 def is_feasible(study: Study, constraints: list[Constraint], norm_x: np.ndarray, opt: OptunaOptimizer) -> bool:
     feasible = True
     cns: Constraint
@@ -132,6 +105,7 @@ def is_feasible(study: Study, constraints: list[Constraint], norm_x: np.ndarray,
     return feasible
 
 
+# 正規化された入力を受けて pyfemtet.opt.Constraint を評価する関数
 def evaluate_pyfemtet_cns(study: Study, cns: Constraint, norm_x: np.ndarray, opt: OptunaOptimizer) -> float:
     """Evaluate given constraint function by given NORMALIZED x.
 
@@ -163,6 +137,9 @@ def evaluate_pyfemtet_cns(study: Study, cns: Constraint, norm_x: np.ndarray, opt
     return cns.calc(opt.fem)
 
 
+# botorch の optimize_acqf で非線形拘束を使えるようにするクラス。以下を備える。
+#   - 渡すパラメータ nonlinear_constraints を作成する
+#   - gen_initial_conditions で feasible なものを返すラッパー関数
 class NonlinearInequalityConstraints:
     """botorch の optimize_acqf に parameter constraints を設定するための引数を作成します。"""
 
@@ -191,7 +168,7 @@ class NonlinearInequalityConstraints:
             feasible_q_list = []
             for each_q in each_num_restarts:
                 norm_x: np.ndarray = each_q.numpy()  # normalized parameters
-                
+
                 if is_feasible(self._study, self._constraints, norm_x, self._opt):
                     feasible_q_list.append(each_q)  # Keep only feasible rows
 
@@ -244,50 +221,26 @@ class NonlinearInequalityConstraints:
         )
 
 
-class AcquisitionFunctionWithPenalty(AcquisitionFunction):
-    """獲得関数に infeasible 項を追加します。"""
+# optimize_acqf のキーワード引数に nonlinear_constraints を追加します。
+def add_optimize_acqf_patch(
+        constraints: dict[str, Constraint],
+        study: Study,
+        opt: OptunaOptimizer,
+):
+    # botorch の元関数ではなく optimize_acqf をターゲットにします
+    target_module = detect_target.get_botorch_sampler_module()
+    target_fun = target_module.optimize_acqf
 
-    # noinspection PyAttributeOutsideInit
-    def set_acqf(self, acqf):
-        self._acqf = acqf
+    new_fun: callable = OptimizeReplacedACQF(target_fun)
+    new_fun.set_constraints(list(constraints.values()))
+    new_fun.set_study(study)
+    new_fun.set_opt(opt)
 
-    # noinspection PyAttributeOutsideInit
-    def set_constraints(self, constraints: list[Constraint]):
-        self._constraints: list[Constraint] = constraints
-
-    # noinspection PyAttributeOutsideInit
-    def set_study(self, study: Study):
-        self._study: Study = study
-
-    # noinspection PyAttributeOutsideInit
-    def set_opt(self, opt: OptunaOptimizer):
-        self._opt = opt
-
-    def forward(self, X: "Tensor") -> "Tensor":
-        """
-
-        Args:
-            X (Tensor): batch_size x 1 x n_params tensor.
-
-        Returns:
-            Tensor: batch_size tensor.
-
-        """
-        base = self._acqf.forward(X)
-
-        norm_x: np.ndarray
-        for i, _norm_x in enumerate(X.detach().numpy()):
-            
-            cns: Constraint
-            for cns in self._constraints:
-                feasible = is_feasible(self._study, [cns], _norm_x[0], self._opt)
-                if not feasible:
-                    base[i] = base[i] * 0.  # ペナルティ
-                    break
-
-        return base
+    target_module.optimize_acqf = new_fun
 
 
+# optimize_acqf の前に NonlinearInequalityConstraints オブジェクト作成などの
+# 前処理を挟むための partial 継承クラスです。
 class OptimizeReplacedACQF(partial):
     """optimize_acqf をこの partial 関数に置き換えます。"""
 
@@ -314,15 +267,6 @@ class OptimizeReplacedACQF(partial):
         # FEM の更新が必要な場合、時間がかかることが多いので警告を出す
         if any([cns.using_fem for cns in self._constraints]):
             logger.warning(Msg.WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME)
-
-        # # 獲得関数に infeasible な場合のペナルティ項を追加します。
-        # acqf = kwargs['acq_function']
-        # new_acqf = AcquisitionFunctionWithPenalty(...)
-        # new_acqf.set_acqf(acqf)
-        # new_acqf.set_constraints(self._constraints)
-        # new_acqf.set_study(self._study)
-        # new_acqf.set_opt(self._opt)
-        # kwargs['acq_function'] = new_acqf
 
         # optimize_acqf の探索に parameter constraints を追加します。
         nlic = NonlinearInequalityConstraints(self._study, self._constraints, self._opt)
