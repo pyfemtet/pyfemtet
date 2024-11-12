@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+# ignore warnings
+import warnings
+from botorch.exceptions.warnings import InputDataWarning
+from optuna.exceptions import ExperimentalWarning
+
+warnings.filterwarnings('ignore', category=InputDataWarning)
+warnings.filterwarnings('ignore', category=ExperimentalWarning)
+
 from collections.abc import Callable
 from collections.abc import Sequence
 from typing import Any
-import warnings
 
 import numpy
 from optuna import logging
@@ -22,15 +29,6 @@ from optuna.study import StudyDirection
 from optuna.trial import FrozenTrial
 from optuna.trial import TrialState
 from packaging import version
-
-# ignore warnings
-import warnings
-from botorch.exceptions.warnings import InputDataWarning
-from torch import Tensor
-
-warnings.filterwarnings('ignore', category=InputDataWarning)
-from optuna.exceptions import ExperimentalWarning
-warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
 with try_import() as _imports:
     from botorch.acquisition.knowledge_gradient import qKnowledgeGradient
@@ -55,11 +53,13 @@ with try_import() as _imports:
     if version.parse(botorch.version.version) < version.parse("0.8.0"):
         from botorch.fit import fit_gpytorch_model as fit_gpytorch_mll
 
+
         def _get_sobol_qmc_normal_sampler(num_samples: int) -> SobolQMCNormalSampler:
             return SobolQMCNormalSampler(num_samples)
 
     else:
         from botorch.fit import fit_gpytorch_mll
+
 
         def _get_sobol_qmc_normal_sampler(num_samples: int) -> SobolQMCNormalSampler:
             return SobolQMCNormalSampler(torch.Size((num_samples,)))
@@ -74,7 +74,6 @@ with try_import() as _imports:
     from botorch.utils.sampling import sample_simplex
     from botorch.utils.transforms import normalize
     from botorch.utils.transforms import unnormalize
-
 
 _logger = logging.get_logger(__name__)
 
@@ -103,8 +102,7 @@ def _get_constraint_funcs(n_constraints: int) -> list[Callable[["torch.Tensor"],
 
 # helper function
 def symlog(x):
-    """
-    Symmetric logarithm function.
+    """Symmetric logarithm function.
 
     Args:
         x (torch.Tensor): Input tensor.
@@ -132,25 +130,30 @@ def acqf_patch_factory(acqf_class):
 
     # optuna_integration.botorch.botorch.qExpectedImprovement
     class ACQFWithPOF(acqf_class):
+        """Introduces PoF coefficients for a given class of acquisition functions."""
         model_c: SingleTaskGP
 
-        gamma: float = 1.0  # 大きいほど feasibility を重視します。
-        threshold: float = 0.5  # 0 ~ 1。大きいほど feasibility を重視します。
+        gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。
+        threshold: float or torch.Tensor = 0.5  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
 
-        enable_log: bool = False  # 獲得関数に symlog を適用します。
-        enable_positive_only_pof: bool = False  # 獲得関数が正のときのみ pof を乗じます。
+        enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
+        enable_positive_only_pof: bool = False  # ベース獲得関数が正のときのみ PoF を乗じます。
 
-        # 関数が微分不可能になるので下記の実用化はペンディングする。
-        # enable_dynamic_gamma は必ず False であること。
-        enable_dynamic_gamma: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
-        # eps: float = 10.  # dynamic_gamma の場合の s_bar の閾値です。目的関数の予想される最大値の 10% 程度がよいとされます。
-        # alpha_0: float = 0.3  # dynamic_gamma の場合の gamma の初期値です。
-        repeat_penalty: float = 1.
+        enable_dynamic_pof: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
+        enable_dynamic_threshold: bool = False  # threshold を動的に変更します。 True のとき、threshold は無視されます。
+
+        enable_repeat_penalty: bool = True  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
+        _repeat_penalty: float or torch.Tensor = 1.  # enable_repeat_penalty が True のときに使用される内部変数です。
+
+        enable_dynamic_repeat_penalty: bool = True  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
+        repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
+        repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
+        _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
 
         def set_model_c(self, model_c: SingleTaskGP):
             self.model_c = model_c
 
-        def pof(self, X: Tensor):
+        def pof(self, X: torch.Tensor):
             # 予測点の平均と標準偏差をもとにした正規分布の関数を作る
             _X = X.squeeze(1)
             posterior = self.model_c.posterior(_X)
@@ -169,80 +172,69 @@ def acqf_patch_factory(acqf_class):
 
             return cdf.squeeze(1)
 
-        def forward(self, X: Tensor) -> Tensor:
+        def forward(self, X: torch.Tensor) -> torch.Tensor:
+            # ===== ベース目的関数 =====
             base_acqf = super().forward(X)
 
-            if self.enable_dynamic_gamma:
-
-                # 戦略 1. stddev が小さくなっていれば acqf を小さくする
-                # バッチを外す
+            # ===== 各種 dynamic 手法を使う際の共通処理 =====
+            if (
+                    self.enable_dynamic_pof
+                    or self.enable_dynamic_threshold
+                    or self.enable_dynamic_threshold
+                    or self.enable_repeat_penalty
+                    or self.enable_dynamic_repeat_penalty
+            ):
+                # ===== 正規化不確実性の計算 =====
                 _X = X.squeeze()  # batch x 1 x dim -> batch x dim
                 # X の予測標準偏差を取得する
                 post = self.model_c.posterior(_X)
                 current_stddev = post.variance.sqrt()  # batch x dim
-                # 既知のポイントの標準偏差で規格化し、一次元にする
+                # 既知のポイントの標準偏差を取得する
                 post = self.model_c.posterior(self.model_c.train_inputs[0])
                 known_stddev = post.variance.sqrt().mean(dim=0)
-                # 規格化し、一次元にする
-                # known_stddev: 小さい。
-                # current_stddev: かなり大きい。10~100 倍とか。
-                norm_stddev = current_stddev / known_stddev
-                norm_stddev = norm_stddev.mean(dim=1)  # (batch, ), 1 ~ 100 くらいの値
+                # known_stddev: サンプル済みポイントの標準偏差なので小さいはず。
+                # current_stddev: 未知の点の標準偏差なので大きいはず。逆に、小さければ既知の点に近い。
+                # 既知のポイントの標準偏差で規格化し、平均を取って一次元にする
+                buff = current_stddev / known_stddev
+                norm_stddev = buff.mean(dim=1)  # (batch, ), 1 ~ 100 くらいの値
 
-                strategy = 7
-                # 1. stddev が小さければ、acqf を小さくする
-                if strategy == 0:
-                    self.repeat_penalty = norm_stddev
-
-                # 2. stddev が小さければ、gamma を大きくする（=acqf を小さくする
-                elif strategy == 1:
+                # ===== 動的 gamma =====
+                if self.enable_dynamic_pof:
                     buff = 1000. / norm_stddev  # 1 ~ 100 くらいの値
                     buff = symlog(buff)  # 1 ~ 4 くらいの値?
                     self.gamma = buff
 
-                # 3. 両方
-                elif strategy == 2:
-                    self.repeat_penalty = norm_stddev
-                    buff = 1000. / norm_stddev  # 1 ~ 100 くらいの値
-                    buff = symlog(buff)  # 1 ~ 4 くらいの値?
-                    self.gamma = buff
-
-                # 4. stddev が小さければ、threshold を 1 に近づける
-                elif strategy == 3:
-                    # norm_stddev が最小で 1 の時、threshold が 1
-                    # norm_stddev が 1 以上の時、threshold は 0.5 に近づく
+                # ===== 動的 threshold =====
+                if self.enable_dynamic_threshold:
+                    # 効きすぎる傾向？
                     self.threshold = (1 - torch.sigmoid(norm_stddev - 1 - 4) / 2).unsqueeze(1)
 
-                # 5. stddev が閾値を下回れば gamma を 10 にし、そうでなければ 0 にする
-                elif strategy == 4:
-                    self.gamma = torch.where(
-                        norm_stddev < 20,
-                        torch.ones_like(base_acqf)*10,
-                        torch.zeros_like(base_acqf),
-                    )
+                # ===== 繰り返しペナルティ =====
+                if self.enable_repeat_penalty:
+                    # ベースペナルティは不確実性
+                    # stddev が小さい
+                    # = サンプル済み付近
+                    # = 獲得関数を小さくしたい
+                    # = stddev をそのまま係数にする
+                    self._repeat_penalty = norm_stddev
 
-                # 6. 5 以外全部
-                elif strategy == 6:
-                    self.repeat_penalty = norm_stddev
-                    buff = 1000. / norm_stddev  # 1 ~ 100 くらいの値
-                    buff = symlog(buff)  # 1 ~ 4 くらいの値?
-                    self.gamma = buff
-                    self.threshold = (1 - torch.sigmoid(norm_stddev - 1 - 4) / 2).unsqueeze(1)
-
-                # 同じ提案が続くならば repeat_penalty を大きくする
-                elif strategy == 7:
-                    self.repeat_penalty = norm_stddev
-                    # 直近 3 回の結果を見る
-                    if len(self.model_c.train_inputs[0]) > 3:
-                        monitor_window = self.model_c.train_inputs[0][-3:]
-                        # monitor_window.std(dim=0).mean()
+                # ===== 動的繰り返しペナルティ =====
+                if self.enable_dynamic_repeat_penalty:
+                    # 計算コストが多くないので念のためベースペナルティを(再)定義
+                    self._repeat_penalty = norm_stddev
+                    # サンプル数が watch_window 以下なら何もできない
+                    if len(self.model_c.train_inputs[0]) > self.repeat_watch_window:
+                        # 直近 N サンプルの x のばらつきが小さいほど
+                        # その optimize_scipy 全体でペナルティを強化する
+                        monitor_window = self.model_c.train_inputs[0][-self.repeat_watch_window:]
                         g = monitor_window.mean(dim=0)
                         distance = torch.norm(monitor_window - g, dim=1).mean()
-                        # distance が小さければ小さいほど repeat_penalty を小さくする
-                        self.repeat_penalty = self.repeat_penalty ** (0.1/distance)
+                        self._repeat_penalty_gamma = self.repeat_watch_norm_distance / distance
 
+            # ===== PoF 計算 =====
             pof = self.pof(X)
 
+            # ===== その他 =====
             if self.enable_log:
                 base_acqf = symlog(base_acqf)
 
@@ -253,21 +245,19 @@ def acqf_patch_factory(acqf_class):
                     torch.ones_like(pof)
                 )
 
-            ret = base_acqf * pof ** self.gamma * self.repeat_penalty
-
+            ret = base_acqf * pof ** self.gamma * self._repeat_penalty ** self._repeat_penalty_gamma
             return ret
-
 
     return ACQFWithPOF
 
 
 @experimental_func("3.3.0")
 def logei_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
 ) -> "torch.Tensor":
     """Log Expected Improvement (LogEI).
 
@@ -373,11 +363,11 @@ def logei_candidates_func(
 
 @experimental_func("2.4.0")
 def qei_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Improvement (qEI).
 
@@ -478,11 +468,11 @@ def qei_candidates_func(
 
 @experimental_func("3.3.0")
 def qnei_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Improvement (qNEI).
 
@@ -545,12 +535,12 @@ def qnei_candidates_func(
 
 @experimental_func("2.4.0")
 def qehvi_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
-    model_c: "SingleTaskGP"
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP"
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Hypervolume Improvement (qEHVI).
 
@@ -636,12 +626,12 @@ def qehvi_candidates_func(
 
 @experimental_func("3.5.0")
 def ehvi_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
-    model_c,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
+        model_c,
 ) -> "torch.Tensor":
     """Expected Hypervolume Improvement (EHVI).
 
@@ -710,11 +700,11 @@ def ehvi_candidates_func(
 
 @experimental_func("3.1.0")
 def qnehvi_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Hypervolume Improvement (qNEHVI).
 
@@ -794,11 +784,11 @@ def qnehvi_candidates_func(
 
 @experimental_func("2.4.0")
 def qparego_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
 ) -> "torch.Tensor":
     """Quasi MC-based extended ParEGO (qParEGO) for constrained multi-objective optimization.
 
@@ -866,11 +856,11 @@ def qparego_candidates_func(
 
 @experimental_func("4.0.0")
 def qkg_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Knowledge Gradient (qKG).
 
@@ -932,11 +922,11 @@ def qkg_candidates_func(
 
 @experimental_func("4.0.0")
 def qhvkg_candidates_func(
-    train_x: "torch.Tensor",
-    train_obj: "torch.Tensor",
-    train_con: "torch.Tensor" | None,
-    bounds: "torch.Tensor",
-    pending_x: "torch.Tensor" | None,
+        train_x: "torch.Tensor",
+        train_obj: "torch.Tensor",
+        train_con: "torch.Tensor" | None,
+        bounds: "torch.Tensor",
+        pending_x: "torch.Tensor" | None,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Hypervolume Knowledge Gradient (qHVKG).
 
@@ -1015,9 +1005,9 @@ def qhvkg_candidates_func(
 
 
 def _get_default_candidates_func(
-    n_objectives: int,
-    has_constraint: bool,
-    consider_running_trials: bool,
+        n_objectives: int,
+        has_constraint: bool,
+        consider_running_trials: bool,
 ) -> Callable[
     [
         "torch.Tensor",
@@ -1118,27 +1108,27 @@ class PoFBoTorchSampler(BaseSampler):
     """
 
     def __init__(
-        self,
-        *,
-        candidates_func: (
-            Callable[
-                [
-                    "torch.Tensor",
-                    "torch.Tensor",
-                    "torch.Tensor" | None,
-                    "torch.Tensor",
-                    "torch.Tensor" | None,
-                ],
-                "torch.Tensor",
-            ]
-            | None
-        ) = None,
-        constraints_func: Callable[[FrozenTrial], Sequence[float]] | None = None,
-        n_startup_trials: int = 10,
-        consider_running_trials: bool = False,
-        independent_sampler: BaseSampler | None = None,
-        seed: int | None = None,
-        device: "torch.device" | None = None,
+            self,
+            *,
+            candidates_func: (
+                    Callable[
+                        [
+                            "torch.Tensor",
+                            "torch.Tensor",
+                            "torch.Tensor" | None,
+                            "torch.Tensor",
+                            "torch.Tensor" | None,
+                        ],
+                        "torch.Tensor",
+                    ]
+                    | None
+            ) = None,
+            constraints_func: Callable[[FrozenTrial], Sequence[float]] | None = None,
+            n_startup_trials: int = 10,
+            consider_running_trials: bool = False,
+            independent_sampler: BaseSampler | None = None,
+            seed: int | None = None,
+            device: "torch.device" | None = None,
     ):
         _imports.check()
 
@@ -1154,9 +1144,9 @@ class PoFBoTorchSampler(BaseSampler):
         self._device = device or torch.device("cpu")
 
     def infer_relative_search_space(
-        self,
-        study: Study,
-        trial: FrozenTrial,
+            self,
+            study: Study,
+            trial: FrozenTrial,
     ) -> dict[str, BaseDistribution]:
         if self._study_id is None:
             self._study_id = study._study_id
@@ -1177,10 +1167,10 @@ class PoFBoTorchSampler(BaseSampler):
         return search_space
 
     def sample_relative(
-        self,
-        study: Study,
-        trial: FrozenTrial,
-        search_space: dict[str, BaseDistribution],
+            self,
+            study: Study,
+            trial: FrozenTrial,
+            search_space: dict[str, BaseDistribution],
     ) -> dict[str, Any]:
         assert isinstance(search_space, dict)
 
@@ -1214,7 +1204,7 @@ class PoFBoTorchSampler(BaseSampler):
                 for obj_idx, (direction, value) in enumerate(zip(study.directions, trial.values)):
                     assert value is not None
                     if (
-                        direction == StudyDirection.MINIMIZE
+                            direction == StudyDirection.MINIMIZE
                     ):  # BoTorch always assumes maximization.
                         value *= -1
                     values[trial_idx, obj_idx] = value
@@ -1332,7 +1322,6 @@ class PoFBoTorchSampler(BaseSampler):
             )
             fit_gpytorch_mll(mll_c)
 
-
             # `manual_seed` makes the default candidates functions reproducible.
             # `SobolQMCNormalSampler`'s constructor has a `seed` argument, but its behavior is
             # deterministic when the BoTorch's seed is fixed.
@@ -1365,11 +1354,11 @@ class PoFBoTorchSampler(BaseSampler):
         return trans.untransform(candidates.cpu().numpy())
 
     def sample_independent(
-        self,
-        study: Study,
-        trial: FrozenTrial,
-        param_name: str,
-        param_distribution: BaseDistribution,
+            self,
+            study: Study,
+            trial: FrozenTrial,
+            param_name: str,
+            param_distribution: BaseDistribution,
     ) -> Any:
         return self._independent_sampler.sample_independent(
             study, trial, param_name, param_distribution
@@ -1384,11 +1373,11 @@ class PoFBoTorchSampler(BaseSampler):
         self._independent_sampler.before_trial(study, trial)
 
     def after_trial(
-        self,
-        study: Study,
-        trial: FrozenTrial,
-        state: TrialState,
-        values: Sequence[float] | None,
+            self,
+            study: Study,
+            trial: FrozenTrial,
+            state: TrialState,
+            values: Sequence[float] | None,
     ) -> None:
         if self._constraints_func is not None:
             _process_constraints_after_trial(self._constraints_func, study, trial, state)
