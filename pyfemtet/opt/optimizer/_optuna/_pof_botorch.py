@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+# ===== constant =====
+_USE_FIXED_NOISE = True
+def _get_use_fixed_noise() -> bool:
+    return _USE_FIXED_NOISE
+def _set_use_fixed_noise(value: bool):
+    global _USE_FIXED_NOISE
+    _USE_FIXED_NOISE = value
+
 # ignore warnings
 import warnings
 from botorch.exceptions.warnings import InputDataWarning
@@ -258,6 +266,7 @@ def logei_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Log Expected Improvement (LogEI).
 
@@ -290,6 +299,8 @@ def logei_candidates_func(
             ``(n_pending, n_params)``. ``n_pending`` is the number of the trials which are already
             suggested all their parameters but have not completed their evaluation, and
             ``n_params`` is identical to that of ``train_x``.
+        model_c:
+            Feasibility model.
 
     Returns:
         Next set of candidates. Usually the return value of BoTorch's ``optimize_acqf``.
@@ -327,21 +338,29 @@ def logei_candidates_func(
 
     train_x = normalize(train_x, bounds=bounds)
 
-    model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.size(-1)))
+    model = SingleTaskGP(
+        train_x,
+        train_y,
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
+        outcome_transform=Standardize(m=train_y.size(-1))
+    )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
     if n_constraints > 0:
-        acqf = LogConstrainedExpectedImprovement(
+        ACQF = acqf_patch_factory(LogConstrainedExpectedImprovement)
+        acqf = ACQF(
             model=model,
             best_f=best_f,
             objective_index=0,
             constraints={i: (None, 0.0) for i in range(1, n_constraints + 1)},
         )
     else:
-        acqf = LogExpectedImprovement(
+        ACQF = acqf_patch_factory(LogExpectedImprovement)
+        acqf = ACQF(
             model=model,
             best_f=best_f,
         )
+    acqf.set_model_c(model_c)
 
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
@@ -368,6 +387,7 @@ def qei_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Improvement (qEI).
 
@@ -397,6 +417,8 @@ def qei_candidates_func(
             ``(n_pending, n_params)``. ``n_pending`` is the number of the trials which are already
             suggested all their parameters but have not completed their evaluation, and
             ``n_params`` is identical to that of ``train_x``.
+        model_c:
+            Feasibility model.
     Returns:
         Next set of candidates. Usually the return value of BoTorch's ``optimize_acqf``.
 
@@ -436,17 +458,24 @@ def qei_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
-    model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.size(-1)))
+    model = SingleTaskGP(
+        train_x,
+        train_y,
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
+        outcome_transform=Standardize(m=train_y.size(-1))
+    )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    acqf = qExpectedImprovement(
+    ACQF = acqf_patch_factory(qExpectedImprovement)
+    acqf = ACQF(
         model=model,
         best_f=best_f,
         sampler=_get_sobol_qmc_normal_sampler(256),
         X_pending=pending_x,
         **additonal_qei_kwargs,
     )
+    acqf.set_model_c(model_c)
 
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
@@ -473,6 +502,7 @@ def qnei_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Improvement (qNEI).
 
@@ -503,17 +533,24 @@ def qnei_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
-    model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.size(-1)))
+    model = SingleTaskGP(
+        train_x,
+        train_y,
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
+        outcome_transform=Standardize(m=train_y.size(-1))
+    )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    acqf = qNoisyExpectedImprovement(
+    ACQF = acqf_patch_factory(qNoisyExpectedImprovement)
+    acqf = ACQF(
         model=model,
         X_baseline=train_x,
         sampler=_get_sobol_qmc_normal_sampler(256),
         X_pending=pending_x,
         **additional_qnei_kwargs,
     )
+    acqf.set_model_c(model_c)
 
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
@@ -576,7 +613,12 @@ def qehvi_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
-    model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.shape[-1]))
+    model = SingleTaskGP(
+        train_x,
+        train_y,
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
+        outcome_transform=Standardize(m=train_y.size(-1))
+    )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
@@ -594,7 +636,6 @@ def qehvi_candidates_func(
     ref_point_list = ref_point.tolist()
 
     ACQF = acqf_patch_factory(monte_carlo.qExpectedHypervolumeImprovement)
-
     acqf = ACQF(
         model=model,
         ref_point=ref_point_list,
@@ -603,7 +644,6 @@ def qehvi_candidates_func(
         X_pending=pending_x,
         **additional_qehvi_kwargs,
     )
-
     acqf.set_model_c(model_c)
 
     standard_bounds = torch.zeros_like(bounds)
@@ -631,7 +671,7 @@ def ehvi_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
-        model_c,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Expected Hypervolume Improvement (EHVI).
 
@@ -653,7 +693,7 @@ def ehvi_candidates_func(
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4 * torch.ones_like(train_y),
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
         outcome_transform=Standardize(m=train_y.size(-1))
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
@@ -673,7 +713,6 @@ def ehvi_candidates_func(
     ref_point_list = ref_point.tolist()
 
     ACQF = acqf_patch_factory(ExpectedHypervolumeImprovement)
-
     acqf = ACQF(
         model=model,
         ref_point=ref_point_list,
@@ -705,6 +744,7 @@ def qnehvi_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Hypervolume Improvement (qNEHVI).
 
@@ -736,7 +776,12 @@ def qnehvi_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
-    model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.shape[-1]))
+    model = SingleTaskGP(
+        train_x,
+        train_y,
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
+        outcome_transform=Standardize(m=train_y.size(-1))
+    )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
@@ -753,7 +798,8 @@ def qnehvi_candidates_func(
 
     # prune_baseline=True is generally recommended by the documentation of BoTorch.
     # cf. https://botorch.org/api/acquisition.html (accessed on 2022/11/18)
-    acqf = monte_carlo.qNoisyExpectedHypervolumeImprovement(
+    ACQF = acqf_patch_factory(monte_carlo.qNoisyExpectedHypervolumeImprovement)
+    acqf = ACQF(
         model=model,
         ref_point=ref_point_list,
         X_baseline=train_x,
@@ -763,6 +809,7 @@ def qnehvi_candidates_func(
         X_pending=pending_x,
         **additional_qnehvi_kwargs,
     )
+    acqf.set_model_c(model_c)
 
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
@@ -789,6 +836,7 @@ def qparego_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Quasi MC-based extended ParEGO (qParEGO) for constrained multi-objective optimization.
 
@@ -823,11 +871,17 @@ def qparego_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
-    model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.size(-1)))
+    model = SingleTaskGP(
+        train_x,
+        train_y,
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
+        outcome_transform=Standardize(m=train_y.size(-1))
+    )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    acqf = qExpectedImprovement(
+    ACQF = acqf_patch_factory(qExpectedImprovement)
+    acqf = ACQF(
         model=model,
         best_f=objective(train_y).max(),
         sampler=_get_sobol_qmc_normal_sampler(256),
@@ -835,6 +889,7 @@ def qparego_candidates_func(
         X_pending=pending_x,
         **additional_qei_kwargs,
     )
+    acqf.set_model_c(model_c)
 
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
@@ -861,6 +916,7 @@ def qkg_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Quasi MC-based batch Knowledge Gradient (qKG).
 
@@ -891,16 +947,23 @@ def qkg_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
-    model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.size(-1)))
+    model = SingleTaskGP(
+        train_x,
+        train_y,
+        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
+        outcome_transform=Standardize(m=train_y.size(-1))
+    )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    acqf = qKnowledgeGradient(
+    ACQF = acqf_patch_factory(qKnowledgeGradient)
+    acqf = ACQF(
         model=model,
         num_fantasies=256,
         objective=objective,
         X_pending=pending_x,
     )
+    acqf.set_model_c(model_c)
 
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
@@ -927,6 +990,7 @@ def qhvkg_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
+        model_c: "SingleTaskGP",
 ) -> "torch.Tensor":
     """Quasi MC-based batch Hypervolume Knowledge Gradient (qHVKG).
 
@@ -956,7 +1020,12 @@ def qhvkg_candidates_func(
         pending_x = normalize(pending_x, bounds=bounds)
 
     models = [
-        SingleTaskGP(train_x, train_y[..., [i]], outcome_transform=Standardize(m=1))
+        SingleTaskGP(
+            train_x,
+            train_y[..., [i]],
+            train_Yvar=1e-4*torch.ones_like(train_y[..., [i]]) if _get_use_fixed_noise() else None,
+            outcome_transform=Standardize(m=1)
+        )
         for i in range(train_y.shape[-1])
     ]
     model = ModelListGP(*models)
@@ -972,7 +1041,8 @@ def qhvkg_candidates_func(
 
     ref_point = train_obj.min(dim=0).values - 1e-8
 
-    acqf = qHypervolumeKnowledgeGradient(
+    ACQF = acqf_patch_factory(qHypervolumeKnowledgeGradient)
+    acqf = ACQF(
         model=model,
         ref_point=ref_point,
         num_fantasies=16,
@@ -986,6 +1056,8 @@ def qhvkg_candidates_func(
         ),
         inner_sampler=SobolQMCNormalSampler(sample_shape=torch.Size([32])),
     )
+    acqf.set_model_c(model_c)
+
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
@@ -1015,23 +1087,20 @@ def _get_default_candidates_func(
         "torch.Tensor" | None,
         "torch.Tensor",
         "torch.Tensor" | None,
+        "SingleTaskGP",
     ],
     "torch.Tensor",
 ]:
     if n_objectives > 3 and not has_constraint and not consider_running_trials:
-        # return ehvi_candidates_func
-        raise NotImplementedError
+        return ehvi_candidates_func
     elif n_objectives > 3:
-        # return qparego_candidates_func
-        raise NotImplementedError
+        return qparego_candidates_func
     elif n_objectives > 1:
         return qehvi_candidates_func
     elif consider_running_trials:
-        # return qei_candidates_func
-        raise NotImplementedError
+        return qei_candidates_func
     else:
-        # return logei_candidates_func
-        raise NotImplementedError
+        return logei_candidates_func
 
 
 @experimental_class("2.4.0")
@@ -1118,6 +1187,7 @@ class PoFBoTorchSampler(BaseSampler):
                             "torch.Tensor" | None,
                             "torch.Tensor",
                             "torch.Tensor" | None,
+                            "SingleTaskGP"
                         ],
                         "torch.Tensor",
                     ]
@@ -1129,6 +1199,7 @@ class PoFBoTorchSampler(BaseSampler):
             independent_sampler: BaseSampler | None = None,
             seed: int | None = None,
             device: "torch.device" | None = None,
+            use_fixed_noise=False,
     ):
         _imports.check()
 
@@ -1142,6 +1213,16 @@ class PoFBoTorchSampler(BaseSampler):
         self._study_id: int | None = None
         self._search_space = IntersectionSearchSpace()
         self._device = device or torch.device("cpu")
+
+        _set_use_fixed_noise(use_fixed_noise)
+
+    @property
+    def use_fixed_noise(self) -> bool:
+        return _get_use_fixed_noise()
+
+    @use_fixed_noise.setter
+    def use_fixed_noise(self, value: bool):
+        _set_use_fixed_noise(value)
 
     def infer_relative_search_space(
             self,
