@@ -17,7 +17,6 @@ from pyfemtet.opt._femopt_core import Constraint
 from pyfemtet.opt.optimizer import OptunaOptimizer, logger
 from pyfemtet._message import Msg
 
-from pyfemtet.opt.optimizer._optuna._botorch_patch import detect_target
 
 
 BotorchConstraint = Callable[[Tensor], Tensor]
@@ -216,42 +215,3 @@ class NonlinearInequalityConstraints:
             nonlinear_inequality_constraints=self._nonlinear_inequality_constraints,
             ic_generator=self._generate_feasible_initial_conditions,
         )
-
-
-# optimize_acqf の前に NonlinearInequalityConstraints オブジェクト作成などの
-# 前処理を挟むための partial 継承クラスです。
-class PatchedOptimizeACQF(partial):
-    """optimize_acqf をこの partial 関数に置き換えます。"""
-
-    # noinspection PyAttributeOutsideInit
-    def set_constraints(self, constraints: list[Constraint]):
-        self._constraints: list[Constraint] = constraints
-
-    # noinspection PyAttributeOutsideInit
-    def set_study(self, study: Study):
-        self._study: Study = study
-
-    # noinspection PyAttributeOutsideInit
-    def set_opt(self, opt: OptunaOptimizer):
-        self._opt = opt
-
-    def __call__(self, *args, **kwargs):
-        """置き換え先の関数の処理内容です。
-
-        kwargs を横入りして追記することで拘束を実現します。
-        """
-
-        logger.info(Msg.START_CANDIDATE_WITH_PARAMETER_CONSTRAINT)
-
-        # FEM の更新が必要な場合、時間がかかることが多いので警告を出す
-        if any([cns.using_fem for cns in self._constraints]):
-            logger.warning(Msg.WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME)
-
-        # optimize_acqf の探索に parameter constraints を追加します。
-        nc = NonlinearInequalityConstraints(self._study, self._constraints, self._opt)
-        kwargs.update(nc.create_kwargs())
-
-        # replace other arguments
-        ...
-
-        return super().__call__(*args, **kwargs)
