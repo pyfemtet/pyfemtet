@@ -305,24 +305,6 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler=sampler,
         )
 
-        # monkey patch
-        if self._do_monkey_patch:
-            assert isinstance(sampler, optuna.integration.BoTorchSampler), Msg.ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH
-
-            # from opt.optimizer._optuna._optuna_botorchsampler_parameter_constraint_helper import do_patch
-            # do_patch(
-            #     study,
-            #     self.constraints,
-            #     self
-            # )
-
-            from pyfemtet.opt.optimizer._optuna._botorch_patch import fix_noise, add_optimize_acqf_patch
-            add_optimize_acqf_patch(
-                self.constraints,
-                self.study,
-                self
-            )
-
         # run
         study.optimize(
             self._objective,

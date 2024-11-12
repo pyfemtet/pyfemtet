@@ -59,41 +59,13 @@ def acqf_patch_factory(acqf_class):
 
         # 関数が微分不可能になるので下記の実用化はペンディングする。
         # enable_dynamic_gamma は必ず False であること。
-        enable_dynamic_gamma: bool = False  # gamma を動的に変更します。 True のとき、gamma は無視されます。
+        enable_dynamic_gamma: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
         # eps: float = 10.  # dynamic_gamma の場合の s_bar の閾値です。目的関数の予想される最大値の 10% 程度がよいとされます。
         # alpha_0: float = 0.3  # dynamic_gamma の場合の gamma の初期値です。
+        repeat_penalty: float = 1.
 
         def set_model_c(self, model_c: SingleTaskGP):
             self.model_c = model_c
-
-        def s_hat(self, x):
-            if hasattr(self, '_mean_and_sigma'):
-                mean, sigma = self._mean_and_sigma(x)
-            else:
-                sigma = self.model.posterior(x).stddev
-            return sigma
-
-        def s_bar(self, x):
-            # "Bayesian optimization with hidden constraints for aircraft design"
-            # if x in A:  # すでに評価されている場合
-            if False:
-                return 0.
-            else:
-                return self.s_hat(x)
-
-        def alpha(self, X):
-            s_bar = self.s_bar(X)
-            x = X.flatten()
-            ret = torch.where(
-                s_bar < self.eps,
-                torch.ones_like(x),
-                torch.where(
-                    self.pof(X) < 0.01,
-                    self.alpha_0 * torch.ones_like(x),
-                    torch.zeros_like(x),
-                )
-            )
-            return ret
 
         def pof(self, X: Tensor):
             # 予測点の平均と標準偏差をもとにした正規分布の関数を作る
@@ -106,12 +78,86 @@ def acqf_patch_factory(acqf_class):
             normal = Normal(mean, sigma)
             # ここの閾値を true に近づけるほど厳しくなる
             # true の値を超えて大きくしすぎると、多分 true も false も
-            cdf = 1. - normal.cdf(torch.tensor(self.threshold, device='cpu').double())
             # 差が出なくなる
+            if isinstance(self.threshold, float):
+                cdf = 1. - normal.cdf(torch.tensor(self.threshold, device='cpu').double())
+            else:
+                cdf = 1. - normal.cdf(self.threshold)
+
             return cdf.squeeze(1)
 
         def forward(self, X: Tensor) -> Tensor:
             base_acqf = super().forward(X)
+
+            if self.enable_dynamic_gamma:
+
+                # 戦略 1. stddev が小さくなっていれば acqf を小さくする
+                # バッチを外す
+                _X = X.squeeze()  # batch x 1 x dim -> batch x dim
+                # X の予測標準偏差を取得する
+                post = self.model_c.posterior(_X)
+                current_stddev = post.variance.sqrt()  # batch x dim
+                # 既知のポイントの標準偏差で規格化し、一次元にする
+                post = self.model_c.posterior(self.model_c.train_inputs[0])
+                known_stddev = post.variance.sqrt().mean(dim=0)
+                # 規格化し、一次元にする
+                # known_stddev: 小さい。
+                # current_stddev: かなり大きい。10~100 倍とか。
+                norm_stddev = current_stddev / known_stddev
+                norm_stddev = norm_stddev.mean(dim=1)  # (batch, ), 1 ~ 100 くらいの値
+
+                strategy = 7
+                # 1. stddev が小さければ、acqf を小さくする
+                if strategy == 0:
+                    self.repeat_penalty = norm_stddev
+
+                # 2. stddev が小さければ、gamma を大きくする（=acqf を小さくする
+                elif strategy == 1:
+                    buff = 1000. / norm_stddev  # 1 ~ 100 くらいの値
+                    buff = symlog(buff)  # 1 ~ 4 くらいの値?
+                    self.gamma = buff
+
+                # 3. 両方
+                elif strategy == 2:
+                    self.repeat_penalty = norm_stddev
+                    buff = 1000. / norm_stddev  # 1 ~ 100 くらいの値
+                    buff = symlog(buff)  # 1 ~ 4 くらいの値?
+                    self.gamma = buff
+
+                # 4. stddev が小さければ、threshold を 1 に近づける
+                elif strategy == 3:
+                    # norm_stddev が最小で 1 の時、threshold が 1
+                    # norm_stddev が 1 以上の時、threshold は 0.5 に近づく
+                    self.threshold = (1 - torch.sigmoid(norm_stddev - 1 - 4) / 2).unsqueeze(1)
+
+                # 5. stddev が閾値を下回れば gamma を 10 にし、そうでなければ 0 にする
+                elif strategy == 4:
+                    self.gamma = torch.where(
+                        norm_stddev < 20,
+                        torch.ones_like(base_acqf)*10,
+                        torch.zeros_like(base_acqf),
+                    )
+
+                # 6. 5 以外全部
+                elif strategy == 6:
+                    self.repeat_penalty = norm_stddev
+                    buff = 1000. / norm_stddev  # 1 ~ 100 くらいの値
+                    buff = symlog(buff)  # 1 ~ 4 くらいの値?
+                    self.gamma = buff
+                    self.threshold = (1 - torch.sigmoid(norm_stddev - 1 - 4) / 2).unsqueeze(1)
+
+                # 同じ提案が続くならば repeat_penalty を大きくする
+                elif strategy == 7:
+                    self.repeat_penalty = norm_stddev
+                    # 直近 3 回の結果を見る
+                    if len(self.model_c.train_inputs[0]) > 3:
+                        monitor_window = self.model_c.train_inputs[0][-3:]
+                        # monitor_window.std(dim=0).mean()
+                        g = monitor_window.mean(dim=0)
+                        distance = torch.norm(monitor_window - g, dim=1).mean()
+                        # distance が小さければ小さいほど repeat_penalty を小さくする
+                        self.repeat_penalty = self.repeat_penalty ** (0.1/distance)
+
             pof = self.pof(X)
 
             if self.enable_log:
@@ -124,15 +170,9 @@ def acqf_patch_factory(acqf_class):
                     torch.ones_like(pof)
                 )
 
-            # if self.enable_dynamic_gamma:
-            #     _X = X.squeeze(1)
-            #     posterior = self.model.posterior(_X)
-            #     sigma = posterior.stddev
-            #     # sigma が小さいほど、feasibility を重視させたい = gamma を大きくしたい
-            #     sigma_base = 0.3  # 適当。サンプリングしている最大の...とかでもいいと思う。
-            #     self.gamma = sigma_base / sigma.max(dim=1).values
+            ret = base_acqf * pof ** self.gamma * self.repeat_penalty
 
-            return base_acqf * pof ** self.gamma
+            return ret
 
     return ACQFWithPOF
 
