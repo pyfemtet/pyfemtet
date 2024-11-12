@@ -22,6 +22,8 @@ from collections.abc import Callable
 from collections.abc import Sequence
 from typing import Any
 
+from dataclasses import dataclass
+
 import numpy
 from optuna import logging
 from optuna._experimental import experimental_class
@@ -128,8 +130,30 @@ def symlog(x):
     )
 
 
+# ===== constants =====
+@dataclass
+class PoFConfig:
+    enable_pof: bool = True  # PoF を考慮するかどうかを規定します。
+    gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
+    threshold: float or torch.Tensor = 0.5  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
+
+    enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
+    enable_positive_only_pof: bool = False  # ベース獲得関数が正のときのみ PoF を乗じます。
+
+    enable_dynamic_pof: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
+    enable_dynamic_threshold: bool = False  # threshold を動的に変更します。 True のとき、threshold は無視されます。
+
+    enable_repeat_penalty: bool = True  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
+    _repeat_penalty: float or torch.Tensor = 1.  # enable_repeat_penalty が True のときに使用される内部変数です。
+
+    enable_dynamic_repeat_penalty: bool = True  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
+    repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
+    repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
+    _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
+
+
 # ベースとなる獲得関数クラスに pof 係数を追加したクラスを作成する関数
-def acqf_patch_factory(acqf_class):
+def acqf_patch_factory(acqf_class, pof_config=None):
     """ベース acqf クラスに pof 係数の計算を追加したクラスを作成します。
 
     出力されたクラスは、 set_model_c() メソッドで学習済みの
@@ -138,37 +162,31 @@ def acqf_patch_factory(acqf_class):
     """
     from torch.distributions import Normal
 
+    if pof_config is None:
+        pof_config = PoFConfig()
+
     # optuna_integration.botorch.botorch.qExpectedImprovement
     class ACQFWithPOF(acqf_class):
         """Introduces PoF coefficients for a given class of acquisition functions."""
         model_c: SingleTaskGP
 
-        enable_pof: bool = True  # PoF を考慮するかどうかを規定します。
-        gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
-        threshold: float or torch.Tensor = 0.5  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
+        enable_pof: bool = pof_config.enable_pof  # PoF を考慮するかどうかを規定します。
+        gamma: float or torch.Tensor = pof_config.gamma  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
+        threshold: float or torch.Tensor = pof_config.threshold  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
 
-        enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
-        enable_positive_only_pof: bool = False  # ベース獲得関数が正のときのみ PoF を乗じます。
+        enable_log: bool = pof_config.enable_log  # ベース獲得関数値に symlog を適用します。
+        enable_positive_only_pof: bool = pof_config.enable_positive_only_pof  # ベース獲得関数が正のときのみ PoF を乗じます。
 
-        enable_dynamic_pof: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
-        enable_dynamic_threshold: bool = False  # threshold を動的に変更します。 True のとき、threshold は無視されます。
+        enable_dynamic_pof: bool = pof_config.enable_dynamic_pof  # gamma を動的に変更します。 True のとき、gamma は無視されます。
+        enable_dynamic_threshold: bool = pof_config.enable_dynamic_threshold  # threshold を動的に変更します。 True のとき、threshold は無視されます。
 
-        enable_repeat_penalty: bool = True  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
-        _repeat_penalty: float or torch.Tensor = 1.  # enable_repeat_penalty が True のときに使用される内部変数です。
+        enable_repeat_penalty: bool = pof_config.enable_repeat_penalty  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
+        _repeat_penalty: float or torch.Tensor = pof_config._repeat_penalty  # enable_repeat_penalty が True のときに使用される内部変数です。
 
-        enable_dynamic_repeat_penalty: bool = True  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
-        repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
-        repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
-        _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
-
-
-        enable_pof = False
-        enable_log = False
-        enable_positive_only_pof = False
-        enable_dynamic_pof = False
-        enable_dynamic_threshold = False
-        enable_repeat_penalty = False
-        enable_dynamic_repeat_penalty = False
+        enable_dynamic_repeat_penalty: bool = pof_config.enable_dynamic_repeat_penalty  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
+        repeat_watch_window: int = pof_config.repeat_watch_window  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
+        repeat_watch_norm_distance: float = pof_config.repeat_watch_norm_distance  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
+        _repeat_penalty_gamma: float or torch.Tensor = pof_config._repeat_penalty_gamma  # _repeat_penalty の指数で、内部変数です。
 
 
         def set_model_c(self, model_c: SingleTaskGP):
@@ -286,6 +304,7 @@ def logei_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Log Expected Improvement (LogEI).
 
@@ -366,7 +385,7 @@ def logei_candidates_func(
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
     if n_constraints > 0:
-        ACQF = acqf_patch_factory(LogConstrainedExpectedImprovement)
+        ACQF = acqf_patch_factory(LogConstrainedExpectedImprovement, pof_config)
         acqf = ACQF(
             model=model,
             best_f=best_f,
@@ -374,7 +393,7 @@ def logei_candidates_func(
             constraints={i: (None, 0.0) for i in range(1, n_constraints + 1)},
         )
     else:
-        ACQF = acqf_patch_factory(LogExpectedImprovement)
+        ACQF = acqf_patch_factory(LogExpectedImprovement, pof_config)
         acqf = ACQF(
             model=model,
             best_f=best_f,
@@ -431,6 +450,7 @@ def qei_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Improvement (qEI).
 
@@ -510,7 +530,7 @@ def qei_candidates_func(
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qExpectedImprovement)
+    ACQF = acqf_patch_factory(qExpectedImprovement, pof_config)
     acqf = ACQF(
         model=model,
         best_f=best_f,
@@ -570,6 +590,7 @@ def qnei_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Improvement (qNEI).
 
@@ -609,7 +630,7 @@ def qnei_candidates_func(
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qNoisyExpectedImprovement)
+    ACQF = acqf_patch_factory(qNoisyExpectedImprovement, pof_config)
     acqf = ACQF(
         model=model,
         X_baseline=train_x,
@@ -669,6 +690,7 @@ def qehvi_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Hypervolume Improvement (qEHVI).
 
@@ -726,7 +748,7 @@ def qehvi_candidates_func(
 
     ref_point_list = ref_point.tolist()
 
-    ACQF = acqf_patch_factory(monte_carlo.qExpectedHypervolumeImprovement)
+    ACQF = acqf_patch_factory(monte_carlo.qExpectedHypervolumeImprovement, pof_config)
     acqf = ACQF(
         model=model,
         ref_point=ref_point_list,
@@ -787,6 +809,7 @@ def ehvi_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Expected Hypervolume Improvement (EHVI).
 
@@ -884,6 +907,7 @@ def qnehvi_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Hypervolume Improvement (qNEHVI).
 
@@ -937,7 +961,7 @@ def qnehvi_candidates_func(
 
     # prune_baseline=True is generally recommended by the documentation of BoTorch.
     # cf. https://botorch.org/api/acquisition.html (accessed on 2022/11/18)
-    ACQF = acqf_patch_factory(monte_carlo.qNoisyExpectedHypervolumeImprovement)
+    ACQF = acqf_patch_factory(monte_carlo.qNoisyExpectedHypervolumeImprovement, pof_config)
     acqf = ACQF(
         model=model,
         ref_point=ref_point_list,
@@ -1000,6 +1024,7 @@ def qparego_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Quasi MC-based extended ParEGO (qParEGO) for constrained multi-objective optimization.
 
@@ -1043,7 +1068,7 @@ def qparego_candidates_func(
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qExpectedImprovement)
+    ACQF = acqf_patch_factory(qExpectedImprovement, pof_config)
     acqf = ACQF(
         model=model,
         best_f=objective(train_y).max(),
@@ -1104,6 +1129,7 @@ def qkg_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Knowledge Gradient (qKG).
 
@@ -1143,7 +1169,7 @@ def qkg_candidates_func(
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qKnowledgeGradient)
+    ACQF = acqf_patch_factory(qKnowledgeGradient, pof_config)
     acqf = ACQF(
         model=model,
         num_fantasies=256,
@@ -1202,6 +1228,7 @@ def qhvkg_candidates_func(
         _constraints,
         _study,
         _opt,
+        pof_config,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Hypervolume Knowledge Gradient (qHVKG).
 
@@ -1252,7 +1279,7 @@ def qhvkg_candidates_func(
 
     ref_point = train_obj.min(dim=0).values - 1e-8
 
-    ACQF = acqf_patch_factory(qHypervolumeKnowledgeGradient)
+    ACQF = acqf_patch_factory(qHypervolumeKnowledgeGradient, pof_config)
     acqf = ACQF(
         model=model,
         ref_point=ref_point,
@@ -1323,6 +1350,7 @@ def _get_default_candidates_func(
         "list[Constraint]",
         "Study",
         "OptunaOptimizer",
+        "PoFConfig",
     ],
     "torch.Tensor",
 ]:
@@ -1434,7 +1462,8 @@ class PoFBoTorchSampler(BaseSampler):
             independent_sampler: BaseSampler | None = None,
             seed: int | None = None,
             device: "torch.device" | None = None,
-            use_fixed_noise=False,
+            use_fixed_noise: bool = False,
+            pof_config: PoFConfig or None = None,
     ):
         _imports.check()
 
@@ -1450,6 +1479,8 @@ class PoFBoTorchSampler(BaseSampler):
         self._device = device or torch.device("cpu")
 
         _set_use_fixed_noise(use_fixed_noise)
+
+        self.pof_config = pof_config
 
     @property
     def use_fixed_noise(self) -> bool:
@@ -1655,6 +1686,7 @@ class PoFBoTorchSampler(BaseSampler):
                 _constraints=_constraints,
                 _study=study,
                 _opt=_opt,
+                pof_config=self.pof_config,
             )
             if self._seed is not None:
                 self._seed += 1
@@ -1709,8 +1741,3 @@ class PoFBoTorchSampler(BaseSampler):
         if self._constraints_func is not None:
             _process_constraints_after_trial(self._constraints_func, study, trial, state)
         self._independent_sampler.after_trial(study, trial, state, values)
-
-#
-# from pyfemtet.opt._femopt_core import Constraint
-# from pyfemtet.opt.optimizer import OptunaOptimizer
-#
