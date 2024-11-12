@@ -298,6 +298,11 @@ class OptunaOptimizer(AbstractOptimizer):
             **self.sampler_kwargs
         )
 
+        from pyfemtet.opt.optimizer._optuna._pof_botorch import PoFBoTorchSampler
+        if isinstance(sampler, PoFBoTorchSampler):
+            sampler._pyfemtet_constraints = self.constraints.values()
+            sampler._pyfemtet_optimizer = self
+
         # load study
         study = optuna.load_study(
             study_name=self.study_name,

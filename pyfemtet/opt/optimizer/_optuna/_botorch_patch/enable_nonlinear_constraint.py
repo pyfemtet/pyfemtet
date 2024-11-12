@@ -23,9 +23,6 @@ from pyfemtet.opt.optimizer._optuna._botorch_patch import detect_target
 BotorchConstraint = Callable[[Tensor], Tensor]
 
 
-__all__ = ['add_optimize_acqf_patch']
-
-
 # 拘束関数に pytorch の自動微分機能を適用するためのクラス
 class GeneralFunctionWithForwardDifference(torch.autograd.Function):
     """自作関数を pytorch で自動微分するためのクラスです。
@@ -221,27 +218,9 @@ class NonlinearInequalityConstraints:
         )
 
 
-# optimize_acqf のキーワード引数に nonlinear_constraints を追加します。
-def add_optimize_acqf_patch(
-        constraints: dict[str, Constraint],
-        study: Study,
-        opt: OptunaOptimizer,
-):
-    # botorch の元関数ではなく optimize_acqf をターゲットにします
-    target_module = detect_target.get_botorch_sampler_module()
-    target_fun = target_module.optimize_acqf
-
-    new_fun: callable = OptimizeReplacedACQF(target_fun)
-    new_fun.set_constraints(list(constraints.values()))
-    new_fun.set_study(study)
-    new_fun.set_opt(opt)
-
-    target_module.optimize_acqf = new_fun
-
-
 # optimize_acqf の前に NonlinearInequalityConstraints オブジェクト作成などの
 # 前処理を挟むための partial 継承クラスです。
-class OptimizeReplacedACQF(partial):
+class PatchedOptimizeACQF(partial):
     """optimize_acqf をこの partial 関数に置き換えます。"""
 
     # noinspection PyAttributeOutsideInit
@@ -269,8 +248,8 @@ class OptimizeReplacedACQF(partial):
             logger.warning(Msg.WARN_UPDATE_FEM_PARAMETER_TOOK_A_LONG_TIME)
 
         # optimize_acqf の探索に parameter constraints を追加します。
-        nlic = NonlinearInequalityConstraints(self._study, self._constraints, self._opt)
-        kwargs.update(nlic.create_kwargs())
+        nc = NonlinearInequalityConstraints(self._study, self._constraints, self._opt)
+        kwargs.update(nc.create_kwargs())
 
         # replace other arguments
         ...

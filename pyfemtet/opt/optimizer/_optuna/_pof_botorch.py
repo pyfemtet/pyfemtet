@@ -16,6 +16,8 @@ from optuna.exceptions import ExperimentalWarning
 warnings.filterwarnings('ignore', category=InputDataWarning)
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
 
+from pyfemtet.opt.optimizer._optuna._botorch_patch.enable_nonlinear_constraint import NonlinearInequalityConstraints
+
 from collections.abc import Callable
 from collections.abc import Sequence
 from typing import Any
@@ -141,7 +143,8 @@ def acqf_patch_factory(acqf_class):
         """Introduces PoF coefficients for a given class of acquisition functions."""
         model_c: SingleTaskGP
 
-        gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。
+        enable_pof: bool = True  # PoF を考慮するかどうかを規定します。
+        gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
         threshold: float or torch.Tensor = 0.5  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
 
         enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
@@ -157,6 +160,16 @@ def acqf_patch_factory(acqf_class):
         repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
         repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
         _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
+
+
+        enable_pof = False
+        enable_log = False
+        enable_positive_only_pof = False
+        enable_dynamic_pof = False
+        enable_dynamic_threshold = False
+        enable_repeat_penalty = False
+        enable_dynamic_repeat_penalty = False
+
 
         def set_model_c(self, model_c: SingleTaskGP):
             self.model_c = model_c
@@ -193,7 +206,7 @@ def acqf_patch_factory(acqf_class):
                     or self.enable_dynamic_repeat_penalty
             ):
                 # ===== 正規化不確実性の計算 =====
-                _X = X.squeeze()  # batch x 1 x dim -> batch x dim
+                _X = X.squeeze(1)  # batch x 1 x dim -> batch x dim
                 # X の予測標準偏差を取得する
                 post = self.model_c.posterior(_X)
                 current_stddev = post.variance.sqrt()  # batch x dim
@@ -240,7 +253,10 @@ def acqf_patch_factory(acqf_class):
                         self._repeat_penalty_gamma = self.repeat_watch_norm_distance / distance
 
             # ===== PoF 計算 =====
-            pof = self.pof(X)
+            if self.enable_pof:
+                pof = self.pof(X)
+            else:
+                pof = 1.
 
             # ===== その他 =====
             if self.enable_log:
@@ -267,6 +283,9 @@ def logei_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Log Expected Improvement (LogEI).
 
@@ -365,15 +384,36 @@ def logei_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=10,
-        raw_samples=512,
-        options={"batch_limit": 5, "maxiter": 200},
-        sequential=True,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": batch_limit, "maxiter": 200},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": 5, "maxiter": 200},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -388,6 +428,9 @@ def qei_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Improvement (qEI).
 
@@ -480,15 +523,36 @@ def qei_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=10,
-        raw_samples=512,
-        options={"batch_limit": 5, "maxiter": 200},
-        sequential=True,
-    )
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": batch_limit, "maxiter": 200},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": 5, "maxiter": 200},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -503,6 +567,9 @@ def qnei_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Improvement (qNEI).
 
@@ -555,15 +622,36 @@ def qnei_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=10,
-        raw_samples=512,
-        options={"batch_limit": 5, "maxiter": 200},
-        sequential=True,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": batch_limit, "maxiter": 200},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": 5, "maxiter": 200},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -577,7 +665,10 @@ def qehvi_candidates_func(
         train_con: "torch.Tensor" | None,
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
-        model_c: "SingleTaskGP"
+        model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Hypervolume Improvement (qEHVI).
 
@@ -649,15 +740,36 @@ def qehvi_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=20,
-        raw_samples=1024,
-        options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
-        sequential=True,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=20,
+            raw_samples=1024,
+            options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=20,
+            raw_samples=1024,
+            options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -672,6 +784,9 @@ def ehvi_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Expected Hypervolume Improvement (EHVI).
 
@@ -722,15 +837,36 @@ def ehvi_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=20,
-        raw_samples=1024,
-        options={"batch_limit": 5, "maxiter": 200},
-        sequential=True,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": batch_limit, "maxiter": 200},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=20,
+            raw_samples=1024,
+            options={"batch_limit": 5, "maxiter": 200},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -745,6 +881,9 @@ def qnehvi_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Hypervolume Improvement (qNEHVI).
 
@@ -814,15 +953,36 @@ def qnehvi_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=20,
-        raw_samples=1024,
-        options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
-        sequential=True,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=20,
+            raw_samples=1024,
+            options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=20,
+            raw_samples=1024,
+            options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -837,6 +997,9 @@ def qparego_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Quasi MC-based extended ParEGO (qParEGO) for constrained multi-objective optimization.
 
@@ -894,15 +1057,36 @@ def qparego_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=20,
-        raw_samples=1024,
-        options={"batch_limit": 5, "maxiter": 200},
-        sequential=True,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=20,
+            raw_samples=1024,
+            options={"batch_limit": batch_limit, "maxiter": 200},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=20,
+            raw_samples=1024,
+            options={"batch_limit": 5, "maxiter": 200},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -917,6 +1101,9 @@ def qkg_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Knowledge Gradient (qKG).
 
@@ -968,15 +1155,36 @@ def qkg_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=10,
-        raw_samples=512,
-        options={"batch_limit": 8, "maxiter": 200},
-        sequential=True,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": batch_limit, "maxiter": 200},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=10,
+            raw_samples=512,
+            options={"batch_limit": 8, "maxiter": 200},
+            sequential=True,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -991,6 +1199,9 @@ def qhvkg_candidates_func(
         bounds: "torch.Tensor",
         pending_x: "torch.Tensor" | None,
         model_c: "SingleTaskGP",
+        _constraints,
+        _study,
+        _opt,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Hypervolume Knowledge Gradient (qHVKG).
 
@@ -1061,15 +1272,36 @@ def qhvkg_candidates_func(
     standard_bounds = torch.zeros_like(bounds)
     standard_bounds[1] = 1
 
-    candidates, _ = optimize_acqf(
-        acq_function=acqf,
-        bounds=standard_bounds,
-        q=1,
-        num_restarts=1,
-        raw_samples=1024,
-        options={"batch_limit": 4, "maxiter": 200, "nonnegative": True},
-        sequential=False,
-    )
+    # optimize_acqf の探索に parameter constraints を追加します。
+    if len(_constraints) > 0:
+        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+        # 1, batch_limit, nonlinear_..., ic_generator
+        kwargs = nc.create_kwargs()
+        q = kwargs.pop('q')
+        batch_limit = kwargs.pop('options')["batch_limit"]
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=q,
+            num_restarts=1,
+            raw_samples=1024,
+            options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
+            sequential=True,
+            **kwargs
+        )
+
+    else:
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=standard_bounds,
+            q=1,
+            num_restarts=1,
+            raw_samples=1024,
+            options={"batch_limit": 4, "maxiter": 200, "nonnegative": True},
+            sequential=False,
+        )
 
     candidates = unnormalize(candidates.detach(), bounds=bounds)
 
@@ -1088,6 +1320,9 @@ def _get_default_candidates_func(
         "torch.Tensor",
         "torch.Tensor" | None,
         "SingleTaskGP",
+        "list[Constraint]",
+        "Study",
+        "OptunaOptimizer",
     ],
     "torch.Tensor",
 ]:
@@ -1403,12 +1638,23 @@ class PoFBoTorchSampler(BaseSampler):
             )
             fit_gpytorch_mll(mll_c)
 
+            # ===== NonlinearConstraints の実装に必要なクラスを渡す =====
+            # PyFemtet 専用関数が前提になっているからこの実装をせざるを得ない。
+            # 将来的に optuna の拘束関数の取り扱いの実装が変わったら
+            # そちらに実装を変更する（Constraints の変換をして optuna 単体でも使えるようにする）
+            # これらは Optimizer の中でセットする
+            _constraints = self._pyfemtet_constraints
+            _opt = self._pyfemtet_optimizer
+
             # `manual_seed` makes the default candidates functions reproducible.
             # `SobolQMCNormalSampler`'s constructor has a `seed` argument, but its behavior is
             # deterministic when the BoTorch's seed is fixed.
             candidates = self._candidates_func(
                 completed_params, completed_values, con, bounds, running_params,
-                model_c=model_c
+                model_c=model_c,
+                _constraints=_constraints,
+                _study=study,
+                _opt=_opt,
             )
             if self._seed is not None:
                 self._seed += 1
@@ -1463,3 +1709,8 @@ class PoFBoTorchSampler(BaseSampler):
         if self._constraints_func is not None:
             _process_constraints_after_trial(self._constraints_func, study, trial, state)
         self._independent_sampler.after_trial(study, trial, state, values)
+
+#
+# from pyfemtet.opt._femopt_core import Constraint
+# from pyfemtet.opt.optimizer import OptunaOptimizer
+#
