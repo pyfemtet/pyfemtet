@@ -86,7 +86,6 @@ class OptunaOptimizer(AbstractOptimizer):
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
         self.method_checker = OptunaMethodChecker(self)
-        self._do_monkey_patch = False
 
     def _objective(self, trial):
 
