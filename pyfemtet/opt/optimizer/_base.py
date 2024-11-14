@@ -142,6 +142,7 @@ class AbstractOptimizer(ABC):
         self.subprocess_idx = None
         self._exception = None
         self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
+        self._retry_counter = 0
 
     # ===== algorithm specific methods =====
     @abstractmethod
@@ -176,13 +177,11 @@ class AbstractOptimizer(ABC):
 
         # Optimizer の x の更新
         self.set_parameter_values(x)
-
-        logger.info('---------------------')
         logger.info(f'input: {x}')
 
         # FEM の更新
-        logger.debug('fem.update() start')
         try:
+            logger.info(f'Solving FEM...')
             df_to_fem = self.variables.get_variables(
                 format='df',
                 filter_pass_to_fem=True
@@ -193,25 +192,20 @@ class AbstractOptimizer(ABC):
             logger.info(f'{type(e).__name__} : {e}')
             logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
             logger.info(x)
-            raise e  # may be just a ModelError, etc.
+            raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
 
         # y, _y, c の更新
-        logger.debug('calculate y start')
         y = [obj.calc(self.fem) for obj in self.objectives.values()]
 
-        logger.debug('calculate _y start')
         _y = [obj.convert(value) for obj, value in zip(self.objectives.values(), y)]
 
-        logger.debug('calculate c start')
         c = [cns.calc(self.fem) for cns in self.constraints.values()]
 
-        logger.debug('history.record start')
-
+        # register to history
         df_to_opt = self.variables.get_variables(
             format='df',
             filter_parameter=True,
         )
-
         self.history.record(
             df_to_opt,
             self.objectives,
@@ -222,8 +216,6 @@ class AbstractOptimizer(ABC):
             postprocess_func=self.fem._postprocess_func,
             postprocess_args=self.fem._create_postprocess_args(),
         )
-
-        logger.debug('history.record end')
 
         logger.info(f'output: {y}')
 

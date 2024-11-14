@@ -90,13 +90,21 @@ class OptunaOptimizer(AbstractOptimizer):
 
     def _objective(self, trial):
 
+        logger.info('')
+        if self._retry_counter == 0:
+            logger.info(f'===== trial {len(self.history.get_df())} start =====')
+        else:
+            logger.info(f'===== trial {len(self.history.get_df())} (retry {self._retry_counter}) start =====')
+
         # 中断の確認 (FAIL loop に陥る対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             self.worker_status.set(OptimizationStatus.INTERRUPTING)
             trial.study.stop()  # 現在実行中の trial を最後にする
+            self._retry_counter = 0
             return None  # set TrialState FAIL
 
         # candidate x and update parameters
+        logger.info('Searching new parameter set...')
         for prm in self.variables.get_variables(format='raw', filter_parameter=True):
             value = trial.suggest_float(
                 name=prm.name,
@@ -126,9 +134,11 @@ class OptunaOptimizer(AbstractOptimizer):
             if cns.ub is not None:
                 feasible = feasible and (cns.ub >= cns_value)
             if not feasible:
+                logger.info('----- Out of constraint! -----')
                 logger.info(Msg.INFO_INFEASIBLE)
                 logger.info(f'Constraint: {cns.name}')
                 logger.info(self.variables.get_variables('dict', filter_parameter=True))
+                self._retry_counter += 1
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
@@ -142,6 +152,15 @@ class OptunaOptimizer(AbstractOptimizer):
                 trial.study.stop()  # 現在実行中の trial を最後にする
                 return None  # set TrialState FAIL
 
+            logger.warning('----- Infeasible! -----')
+            logger.warning(Msg.INFO_INFEASIBLE)
+            logger.warning(f'Hidden Constraint ({type(e).__name__})')
+            logger.warning(self.variables.get_variables('dict', filter_parameter=True))
+            logger.warning('Please consider to determine the cause'
+                           'of the above error and modify the model'
+                           'or analysis.')
+
+            self._retry_counter += 1
             raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 拘束 attr の更新
@@ -159,9 +178,11 @@ class OptunaOptimizer(AbstractOptimizer):
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             self.worker_status.set(OptimizationStatus.INTERRUPTING)
             trial.study.stop()  # 現在実行中の trial を最後にする
+            self._retry_counter = 0
             return None  # set TrialState FAIL
 
         # 結果
+        self._retry_counter = 0
         return tuple(_y)
 
     def _constraint(self, trial):
