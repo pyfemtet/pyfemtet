@@ -132,6 +132,7 @@ class FEMOpt:
         self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
         self.monitor_process_worker_name = None
+        self._hv_reference = None
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -385,9 +386,9 @@ class FEMOpt:
 
         Warnings:
 
-            When ```strict``` == True and using OptunaOptimizer along with BoTorchSampler,
-            Pyfemtet will solve an optimization subproblem to propose new variables.
-            During this process, the constraint function fun will be executed at each
+            When ```strict``` == True and using OptunaOptimizer along with :class:`PoFBoTorchSampler`,
+            PyFemtet will solve an optimization subproblem to propose new variables.
+            During this process, the constraint function ```fun``` will be executed at each
             iteration of the subproblem, which may include time-consuming operations such
             as retrieving 3D model information via FEMInterface.
             As a result, it may not be feasible to complete the overall optimization within
@@ -406,7 +407,7 @@ class FEMOpt:
 
                 Instead, please do the following.
 
-                    >>> def bottom_area(_, opt):  # 第一引数 Femtet にはアクセスしないようにします。  # doctest: +SKIP
+                    >>> def bottom_area(_, opt):  # Not to access the 1st argument.  # doctest: +SKIP
                     ...     params = opt.get_parameter()  # doctest: +SKIP
                     ...     w, d = params['width'], params['depth']  # doctest: +SKIP
                     ...     return w * d  # doctest: +SKIP
@@ -678,6 +679,7 @@ class FEMOpt:
                 list(self.opt.constraints.keys()),
                 _client,
                 metadata,
+                self._hv_reference
             )
             logger.info('Status Actor initialized successfully.')
 

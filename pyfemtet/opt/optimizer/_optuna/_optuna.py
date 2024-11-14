@@ -3,15 +3,15 @@ from typing import Iterable
 
 # built-in
 import os
+import inspect
 
 # 3rd-party
-import numpy as np
 import optuna
 from optuna.trial import TrialState
 from optuna.study import MaxTrialsCallback
 
 # pyfemtet relative
-from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs, Constraint
+from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
 from pyfemtet.opt.optimizer import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
 from pyfemtet._message import Msg
@@ -86,17 +86,24 @@ class OptunaOptimizer(AbstractOptimizer):
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
         self.method_checker = OptunaMethodChecker(self)
-        self._do_monkey_patch = False
 
     def _objective(self, trial):
+
+        logger.info('')
+        if self._retry_counter == 0:
+            logger.info(f'===== trial {1 + len(self.history.get_df())} start =====')
+        else:
+            logger.info(f'===== trial {1 + len(self.history.get_df())} (retry {self._retry_counter}) start =====')
 
         # 中断の確認 (FAIL loop に陥る対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             self.worker_status.set(OptimizationStatus.INTERRUPTING)
             trial.study.stop()  # 現在実行中の trial を最後にする
+            self._retry_counter = 0
             return None  # set TrialState FAIL
 
         # candidate x and update parameters
+        logger.info('Searching new parameter set...')
         for prm in self.variables.get_variables(format='raw', filter_parameter=True):
             value = trial.suggest_float(
                 name=prm.name,
@@ -126,9 +133,11 @@ class OptunaOptimizer(AbstractOptimizer):
             if cns.ub is not None:
                 feasible = feasible and (cns.ub >= cns_value)
             if not feasible:
+                logger.info('----- Out of constraint! -----')
                 logger.info(Msg.INFO_INFEASIBLE)
                 logger.info(f'Constraint: {cns.name}')
                 logger.info(self.variables.get_variables('dict', filter_parameter=True))
+                self._retry_counter += 1
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
@@ -142,6 +151,15 @@ class OptunaOptimizer(AbstractOptimizer):
                 trial.study.stop()  # 現在実行中の trial を最後にする
                 return None  # set TrialState FAIL
 
+            logger.warning('----- Infeasible! -----')
+            logger.warning(Msg.INFO_INFEASIBLE)
+            logger.warning(f'Hidden Constraint ({type(e).__name__})')
+            logger.warning(self.variables.get_variables('dict', filter_parameter=True))
+            logger.warning('Please consider to determine the cause'
+                           'of the above error and modify the model'
+                           'or analysis.')
+
+            self._retry_counter += 1
             raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 拘束 attr の更新
@@ -159,9 +177,11 @@ class OptunaOptimizer(AbstractOptimizer):
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
             self.worker_status.set(OptimizationStatus.INTERRUPTING)
             trial.study.stop()  # 現在実行中の trial を最後にする
+            self._retry_counter = 0
             return None  # set TrialState FAIL
 
         # 結果
+        self._retry_counter = 0
         return tuple(_y)
 
     def _constraint(self, trial):
@@ -295,9 +315,19 @@ class OptunaOptimizer(AbstractOptimizer):
             self.sampler_kwargs.update(
                 seed=seed
             )
+        parameters = inspect.signature(self.sampler_class.__init__).parameters
+        sampler_kwargs = dict()
+        for k, v in self.sampler_kwargs.items():
+            if k in parameters.keys():
+                sampler_kwargs.update({k: v})
         sampler = self.sampler_class(
-            **self.sampler_kwargs
+            **sampler_kwargs
         )
+
+        from pyfemtet.opt.optimizer._optuna._pof_botorch import PoFBoTorchSampler
+        if isinstance(sampler, PoFBoTorchSampler):
+            sampler._pyfemtet_constraints = [cns for cns in self.constraints.values() if cns.strict]
+            sampler._pyfemtet_optimizer = self
 
         # load study
         study = optuna.load_study(
@@ -306,21 +336,56 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler=sampler,
         )
 
-        # monkey patch
-        if self._do_monkey_patch:
-            assert isinstance(sampler, optuna.integration.BoTorchSampler), Msg.ERR_PARAMETER_CONSTRAINT_ONLY_BOTORCH
+        # 一時的な実装。
+        #   TPESampler の場合、リスタート時などの場合で、
+        #   Pruned が多いとエラーを起こす挙動があるので、
+        #   Pruned な Trial は remove したい。
+        #   study.remove_trial がないので、一度ダミー
+        #   study を作成して最適化終了後に結果をコピーする。
+        if isinstance(sampler, optuna.samplers.TPESampler):
+            tmp_db = f"tmp{self.subprocess_idx}.db"
+            if os.path.exists(tmp_db):
+                os.remove(tmp_db)
 
-            from pyfemtet.opt.optimizer._optuna_botorchsampler_parameter_constraint_helper import do_patch
-
-            do_patch(
-                study,
-                self.constraints,
-                self
+            _study = optuna.create_study(
+                study_name="tmp",
+                storage=f"sqlite:///{tmp_db}",
+                sampler=sampler,
+                directions=['minimize']*len(self.objectives),
+                load_if_exists=False,
             )
 
-        # run
-        study.optimize(
-            self._objective,
-            timeout=self.timeout,
-            callbacks=self.optimize_callbacks,
-        )
+            _study.add_trials(
+                study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
+            )
+
+            # run
+            _study.optimize(
+                self._objective,
+                timeout=self.timeout,
+                callbacks=self.optimize_callbacks,
+            )
+
+            # write back
+            study.add_trials(
+                _study.get_trials()
+            )
+
+            # clean up
+            from optuna.storages import get_storage
+            storage = get_storage(f"sqlite:///{tmp_db}")
+            storage.remove_session()
+            del _study
+            del storage
+            import gc
+            gc.collect()
+            if os.path.exists(tmp_db):
+                os.remove(tmp_db)
+
+        else:
+            # run
+            study.optimize(
+                self._objective,
+                timeout=self.timeout,
+                callbacks=self.optimize_callbacks,
+            )

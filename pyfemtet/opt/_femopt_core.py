@@ -453,18 +453,12 @@ class History:
         cns_names (List[str], optional): The names of constraints. Defaults to None.
         client (dask.distributed.Client): Dask client.
         additional_metadata (str, optional): metadata of optimization process.
-
-    Raises:
-        FileNotFoundError: If the csv file is not found.
-
-    Attributes:
-        HEADER_ROW (int): Header row number of csv file. Must be grater than 0. Default to 2.
-        ENCODING (str): Encoding of csv file. Default to 'cp932'.
-        prm_names (str): User defined names of parameters.
-        obj_names (str): User defined names of objectives.
-        cns_names (str): User defined names of constraints.
-        is_restart (bool): If the optimization process is a continuation of another process or not.
-        is_processing (bool): The optimization is running or not.
+        hv_reference (str or list[float or np.ndarray, optional):
+            The method to calculate hypervolume or
+            the reference point itself.
+            Valid values are 'dynamic-pareto' or
+            'dynamic-nadir' or 'nadir' or 'pareto'
+            or fixed point (in objective function space).
 
     """
 
@@ -487,7 +481,10 @@ class History:
             cns_names=None,
             client=None,
             additional_metadata=None,
+            hv_reference=None,
     ):
+        # hypervolume 計算メソッド
+        self._hv_reference = hv_reference or 'dynamic-pareto'
 
         # 引数の処理
         self.path = history_path  # .csv
@@ -739,59 +736,98 @@ class History:
 
     def _calc_hypervolume(self, objectives, df):
 
-        # filter non-dominated and feasible solutions
-        idx = df['non_domi'].values
-        idx = idx * df['feasible'].values  # *= を使うと non_domi 列の値が変わる
-        pdf = df[idx]
-        pareto_set = pdf[self.obj_names].values
-        n = len(pareto_set)  # 集合の要素数
-        m = len(pareto_set.T)  # 目的変数数
-        # 多目的でないと計算できない
-        if m <= 1:
-            return None
-        # 長さが 2 以上でないと計算できない
-        if n <= 1:
-            return None
-        # 最小化問題に convert
-        for i, (_, objective) in enumerate(objectives.items()):
-            for j in range(n):
-                pareto_set[j, i] = objective.convert(pareto_set[j, i])
-                #### reference point の計算[1]
-        # 逆正規化のための範囲計算
-        maximum = pareto_set.max(axis=0)
-        minimum = pareto_set.min(axis=0)
+        if len(objectives) < 2:
+            df.loc[len(df) - 1, 'hypervolume'] = 0.
+            return
 
-        r = 1.01
+        # 最小化問題に変換された objective values を取得
+        raw_objective_values = df[self.obj_names].values
+        objective_values = np.empty_like(raw_objective_values)
+        for n_trial in range(len(raw_objective_values)):
+            for obj_idx, (_, objective) in enumerate(objectives.items()):
+                objective_values[n_trial, obj_idx] = objective.convert(raw_objective_values[n_trial, obj_idx])
 
-        # r を逆正規化
-        reference_point = r * (maximum - minimum) + minimum
+        # pareto front を取得
+        def get_pareto(objective_values_, with_partial=False):
+            ret = None
+            if with_partial:
+                ret = []
 
-        #### hv 履歴の計算
-        hvs = []
-        for i in range(n):
-            hv = compute_hypervolume(pareto_set[:i], reference_point)
-            if np.isnan(hv):
-                hv = 0
-            hvs.append(hv)
+            pareto_set_ = np.empty((0, len(self.obj_names)))
+            for i in range(len(objective_values_)):
+                target = objective_values_[i]
+                dominated = False
+                # TODO: Array の計算に直して高速化する
+                for j in range(len(objective_values_)):
+                    compare = objective_values_[j]
+                    if all(target > compare):
+                        dominated = True
+                        break
+                if not dominated:
+                    pareto_set_ = np.concatenate([pareto_set_, [target]], axis=0)
 
-        # 計算結果を履歴の一部に割り当て
-        # idx: [False, True, False, True, True, False, ...]
-        # hvs: [          1,           2,    3,        ...]
-        # want:[   0,     1,     1,    2,    3,     3, ...]
-        hvs_index = -1
-        for i in range(len(df)):
+                if ret is not None:
+                    ret.append(np.array(pareto_set_))
 
-            # process hvs index
-            if idx[i]:
-                hvs_index += 1
-
-            # get hv
-            if hvs_index < 0:
-                hypervolume = 0.
+            if ret is not None:
+                return pareto_set_, ret
             else:
-                hypervolume = hvs[hvs_index]
+                return pareto_set_
 
-            df.loc[i, 'hypervolume'] = hypervolume
+        if self._hv_reference == 'dynamic-pareto':
+            pareto_set, pareto_set_list = get_pareto(objective_values, with_partial=True)
+            for i, partial_pareto_set in enumerate(pareto_set_list):
+                ref_point = pareto_set.max(axis=0) + 1e-8
+                hv = compute_hypervolume(partial_pareto_set, ref_point)
+                df.loc[i, 'hypervolume'] = hv
+            return
+
+        elif self._hv_reference == 'dynamic-nadir':
+            _, pareto_set_list = get_pareto(objective_values, with_partial=True)
+            for i, partial_pareto_set in enumerate(pareto_set_list):
+                ref_point = objective_values.max(axis=0) + 1e-8
+                hv = compute_hypervolume(partial_pareto_set, ref_point)
+                df.loc[i, 'hypervolume'] = hv
+            return
+
+        elif self._hv_reference == 'nadir':
+            pareto_set = get_pareto(objective_values)
+            ref_point = objective_values.max(axis=0) + 1e-8
+            hv = compute_hypervolume(pareto_set, ref_point)
+            df.loc[len(df) - 1, 'hypervolume'] = hv
+            return
+
+        elif self._hv_reference == 'pareto':
+            pareto_set = get_pareto(objective_values)
+            ref_point = pareto_set.max(axis=0) + 1e-8
+            hv = compute_hypervolume(pareto_set, ref_point)
+            df.loc[len(df) - 1, 'hypervolume'] = hv
+            return
+
+        elif (
+                isinstance(self._hv_reference, np.ndarray)
+                or isinstance(self._hv_reference, list)
+        ):
+            _buff = np.array(self._hv_reference)
+            assert _buff.shape == (len(self.obj_names),)
+
+            ref_point = np.array(
+                [obj.convert(raw_value) for obj, raw_value in zip(objectives.values(), _buff)]
+            )
+
+            _buff = get_pareto(objective_values)
+
+            pareto_set = np.empty((0, len(objectives)))
+            for pareto_sol in _buff:
+                if all(pareto_sol < ref_point):
+                    pareto_set = np.concatenate([pareto_set, [pareto_sol]], axis=0)
+
+            hv = compute_hypervolume(pareto_set, ref_point)
+            df.loc[len(df) - 1, 'hypervolume'] = hv
+            return
+
+        else:
+            raise NotImplementedError(f'Invalid Hypervolume reference point calculation method: {self._hv_reference}')
 
     def save(self, _f=None):
         """Save csv file."""
