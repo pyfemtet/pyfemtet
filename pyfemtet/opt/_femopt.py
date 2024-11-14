@@ -132,6 +132,7 @@ class FEMOpt:
         self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
         self.monitor_process_worker_name = None
+        self._hv_reference = None
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -678,6 +679,7 @@ class FEMOpt:
                 list(self.opt.constraints.keys()),
                 _client,
                 metadata,
+                self._hv_reference
             )
             logger.info('Status Actor initialized successfully.')
 
