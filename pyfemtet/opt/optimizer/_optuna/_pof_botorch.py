@@ -1344,6 +1344,7 @@ def _get_default_candidates_func(
         return logei_candidates_func
 
 
+# ===== main re-implementation of BoTorchSampler =====
 @dataclass
 class PoFConfig:
     """Configuration of PoFBoTorchSampler
@@ -1396,6 +1397,14 @@ class PoFConfig:
            for a stronger penalty effect. Extreme values may cause numerical instability.
            Defaults to 0.1.
 
+        enable_no_noise (bool):
+            Whether to treat observation errors as non-existent
+            when training the regression model with the objective
+            function value. The default is True because there is
+            essentially no observational error in a FEM analysis.
+            This is different from the original BoTorchSampler
+            implementation.
+
     """
     enable_pof: bool = True  # PoF を考慮するかどうかを規定します。
     gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
@@ -1415,6 +1424,8 @@ class PoFConfig:
     repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
     _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
 
+    enable_no_noise: bool = True
+
     def _disable_all_features(self):
         # 拘束以外のすべてを disable にすることで、
         # BoTorchSampler の実装と同じにします。
@@ -1425,6 +1436,7 @@ class PoFConfig:
         self.enable_dynamic_threshold = False
         self.enable_repeat_penalty = False
         self.enable_dynamic_repeat_penalty = False
+        self.enable_no_noise = False
 
 
 @experimental_class("2.4.0")
@@ -1487,13 +1499,6 @@ class PoFBoTorchSampler(BaseSampler):
         device:
             A ``torch.device`` to store input and output data of BoTorch. Please set a CUDA device
             if you fasten sampling.
-        use_fixed_noise:
-            Whether to treat observation errors as non-existent
-            when training the regression model with the objective
-            function value. The default is True because there is
-            essentially no observational error in a FEM analysis.
-            This is different from the original BoTorchSampler
-            implementation.
         pof_config (PoFConfig or None):
             Sampler settings.
     """
@@ -1541,7 +1546,7 @@ class PoFBoTorchSampler(BaseSampler):
         self._device = device or torch.device("cpu")
 
         self.pof_config = pof_config or PoFConfig()
-        _set_use_fixed_noise(self.pof_config)
+        _set_use_fixed_noise(self.pof_config.enable_no_noise)
 
 
     @property
