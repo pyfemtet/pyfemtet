@@ -51,7 +51,6 @@ bokeh = "^3.3.3"
 # test
 pytest = "^7.4.3"
 pytest-dashboard = "^0.1.2"
-bayesian-optimization = "^2.0.0"
 
 [tool.poetry.scripts]
 pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.result_viewer.application:main'
