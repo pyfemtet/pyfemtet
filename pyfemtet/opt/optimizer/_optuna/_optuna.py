@@ -306,7 +306,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
         from pyfemtet.opt.optimizer._optuna._pof_botorch import PoFBoTorchSampler
         if isinstance(sampler, PoFBoTorchSampler):
-            sampler._pyfemtet_constraints = self.constraints.values()
+            sampler._pyfemtet_constraints = [cns for cns in self.constraints.values() if cns.strict]
             sampler._pyfemtet_optimizer = self
 
         # load study
