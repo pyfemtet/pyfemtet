@@ -225,7 +225,7 @@ class AbstractOptimizer(ABC):
 
         logger.debug('history.record end')
 
-        logger.info(f'output: {_y}')
+        logger.info(f'output: {y}')
 
         return np.array(y), np.array(_y), np.array(c)
 
