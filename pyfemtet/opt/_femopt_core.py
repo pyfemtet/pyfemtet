@@ -453,19 +453,12 @@ class History:
         cns_names (List[str], optional): The names of constraints. Defaults to None.
         client (dask.distributed.Client): Dask client.
         additional_metadata (str, optional): metadata of optimization process.
-        hv_reference (str or list[float or np.ndarray, optional): The method to calculate hypervolume or the reference point itself.
-
-    Raises:
-        FileNotFoundError: If the csv file is not found.
-
-    Attributes:
-        HEADER_ROW (int): Header row number of csv file. Must be grater than 0. Default to 2.
-        ENCODING (str): Encoding of csv file. Default to 'cp932'.
-        prm_names (str): User defined names of parameters.
-        obj_names (str): User defined names of objectives.
-        cns_names (str): User defined names of constraints.
-        is_restart (bool): If the optimization process is a continuation of another process or not.
-        is_processing (bool): The optimization is running or not.
+        hv_reference (str or list[float or np.ndarray, optional):
+            The method to calculate hypervolume or
+            the reference point itself.
+            Valid values are 'dynamic-pareto' or
+            'dynamic-nadir' or 'nadir' or 'pareto'
+            or fixed point (in objective function space).
 
     """
 

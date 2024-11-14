@@ -9,6 +9,8 @@ from pyfemtet.opt.optimizer import AbstractOptimizer
 
 from pyfemtet.opt._femopt import FEMOpt
 
+from pyfemtet.opt._femopt_core import History
+
 
 __all__ = [
     'FEMOpt',
@@ -21,4 +23,5 @@ __all__ = [
     'OptunaOptimizer',
     'ScipyScalarOptimizer',
     'ScipyOptimizer',
+    'History',
 ]
