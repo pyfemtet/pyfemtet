@@ -43,8 +43,7 @@ def constraint_2(opt):
     return theta - COEF * r  # > 0
 
 
-if __name__ == '__main__':
-
+def pof_basic_test():
     # ===== problem =====
     seed = 42
     n_trials = 10
@@ -113,3 +112,6 @@ if __name__ == '__main__':
     assert (np.abs(dif - ref) / ref).max() < 0.1, "前回結果から 10% 以上の乖離あり"
     print('Pof test Passed!')
 
+
+if __name__ == '__main__':
+    pof_basic_test()
