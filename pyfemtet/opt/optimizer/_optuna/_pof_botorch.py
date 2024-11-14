@@ -130,28 +130,6 @@ def symlog(x):
     )
 
 
-# ===== constants =====
-@dataclass
-class PoFConfig:
-    enable_pof: bool = True  # PoF を考慮するかどうかを規定します。
-    gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
-    threshold: float or torch.Tensor = 0.5  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
-
-    enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
-    enable_positive_only_pof: bool = False  # ベース獲得関数が正のときのみ PoF を乗じます。
-
-    enable_dynamic_pof: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
-    enable_dynamic_threshold: bool = False  # threshold を動的に変更します。 True のとき、threshold は無視されます。
-
-    enable_repeat_penalty: bool = True  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
-    _repeat_penalty: float or torch.Tensor = 1.  # enable_repeat_penalty が True のときに使用される内部変数です。
-
-    enable_dynamic_repeat_penalty: bool = True  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
-    repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
-    repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
-    _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
-
-
 # ベースとなる獲得関数クラスに pof 係数を追加したクラスを作成する関数
 def acqf_patch_factory(acqf_class, pof_config=None):
     """ベース acqf クラスに pof 係数の計算を追加したクラスを作成します。
@@ -1366,26 +1344,98 @@ def _get_default_candidates_func(
         return logei_candidates_func
 
 
+@dataclass
+class PoFConfig:
+    """Configuration of PoFBoTorchSampler
+
+    Args:
+        enable_pof (bool):
+            Whether to consider Probability of Feasibility.
+            Defaults to True.
+
+        gamma (float or torch.Tensor):
+            Exponent for Probability of Feasibility. A larger value places more emphasis on feasibility.
+            If 0, Probability of Feasibility is not considered.
+            Defaults to 1.
+
+        threshold (float or torch.Tensor):
+            Boundary value for calculating Probability of Feasibility with CDF.
+            Generally between 0 and 1, with 0.5 being recommended. A larger value places more emphasis on feasibility.
+            Defaults to 0.5.
+
+        enable_log (bool):
+            Whether to apply symlog to the base acquisition function values.
+            Defaults to True.
+
+        enable_positive_only_pof (bool):
+            Whether to apply Probability of Feasibility only when the base acquisition function is positive.
+            Defaults to False.
+
+        enable_dynamic_pof (bool):
+            Whether to change gamma dynamically. When True, ```gamma``` argument is ignored.
+            Defaults to True.
+
+        enable_dynamic_threshold (bool):
+            Whether to change threshold dynamically. When True, ```threshold``` argument is ignored.
+            Defaults to False.
+
+        enable_repeat_penalty (bool):
+            Whether to apply a penalty coefficient on the base acquisition function values near sampled points.
+            Defaults to True.
+
+        enable_dynamic_repeat_penalty (bool):
+            Enhances the penalty coefficient if the same value is repeated. When True, it behaves as if enable_repeat_penalty is set to True.
+            Defaults to True.
+
+        repeat_watch_window (int):
+           Specifies how many recent proposal values are referenced when determining the magnitude of penalties when enable_dynamic_repeat_penalty is True.
+           Defaults to 3.
+
+        repeat_watch_norm_distance (float):
+           Defines how small the norm distance between proposed parameters needs to be in normalized parameter space [0, 1]
+           for a stronger penalty effect. Extreme values may cause numerical instability.
+           Defaults to 0.1.
+
+    """
+    enable_pof: bool = True  # PoF を考慮するかどうかを規定します。
+    gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
+    threshold: float or torch.Tensor = 0.5  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
+
+    enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
+    enable_positive_only_pof: bool = False  # ベース獲得関数が正のときのみ PoF を乗じます。
+
+    enable_dynamic_pof: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
+    enable_dynamic_threshold: bool = False  # threshold を動的に変更します。 True のとき、threshold は無視されます。
+
+    enable_repeat_penalty: bool = True  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
+    _repeat_penalty: float or torch.Tensor = 1.  # enable_repeat_penalty が True のときに使用される内部変数です。
+
+    enable_dynamic_repeat_penalty: bool = True  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
+    repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
+    repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
+    _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
+
+    def _disable_all_features(self):
+        # 拘束以外のすべてを disable にすることで、
+        # BoTorchSampler の実装と同じにします。
+        self.enable_pof = False
+        self.enable_log = False
+        self.enable_positive_only_pof = False
+        self.enable_dynamic_pof = False
+        self.enable_dynamic_threshold = False
+        self.enable_repeat_penalty = False
+        self.enable_dynamic_repeat_penalty = False
+
+
 @experimental_class("2.4.0")
 class PoFBoTorchSampler(BaseSampler):
-    """A sampler that uses BoTorch, a Bayesian optimization library built on top of PyTorch.
+    """A sampler that forked from BoTorchSampler.
 
-    This sampler allows using BoTorch's optimization algorithms from Optuna to suggest parameter
-    configurations. Parameters are transformed to continuous space and passed to BoTorch, and then
-    transformed back to Optuna's representations. Categorical parameters are one-hot encoded.
+    This sampler improves the BoTorchSampler to account
+    for known/hidden constraints and repeated penalties.
 
-    .. seealso::
-        See an `example <https://github.com/optuna/optuna-examples/blob/main/multi_objective/
-        botorch_simple.py>`_ how to use the sampler.
-
-    .. seealso::
-        See the `BoTorch <https://botorch.org/>`_ homepage for details and for how to implement
-        your own ``candidates_func``.
-
-    .. note::
-        An instance of this sampler *should not be used with different studies* when used with
-        constraints. Instead, a new instance should be created for each new study. The reason for
-        this is that the sampler is stateful keeping all the computed constraints.
+    See Also:
+        https://optuna.readthedocs.io/en/v3.0.0-b1/reference/generated/optuna.integration.BoTorchSampler.html
 
     Args:
         candidates_func:
@@ -1437,6 +1487,15 @@ class PoFBoTorchSampler(BaseSampler):
         device:
             A ``torch.device`` to store input and output data of BoTorch. Please set a CUDA device
             if you fasten sampling.
+        use_fixed_noise:
+            Whether to treat observation errors as non-existent
+            when training the regression model with the objective
+            function value. The default is True because there is
+            essentially no observational error in a FEM analysis.
+            This is different from the original BoTorchSampler
+            implementation.
+        pof_config (PoFConfig or None):
+            Sampler settings.
     """
 
     def __init__(
@@ -1450,7 +1509,11 @@ class PoFBoTorchSampler(BaseSampler):
                             "torch.Tensor" | None,
                             "torch.Tensor",
                             "torch.Tensor" | None,
-                            "SingleTaskGP"
+                            "SingleTaskGP",
+                            "list[Constraint]",
+                            "Study",
+                            "OptunaOptimizer",
+                            "PoFConfig",
                         ],
                         "torch.Tensor",
                     ]
@@ -1462,7 +1525,6 @@ class PoFBoTorchSampler(BaseSampler):
             independent_sampler: BaseSampler | None = None,
             seed: int | None = None,
             device: "torch.device" | None = None,
-            use_fixed_noise: bool = False,
             pof_config: PoFConfig or None = None,
     ):
         _imports.check()
@@ -1478,9 +1540,9 @@ class PoFBoTorchSampler(BaseSampler):
         self._search_space = IntersectionSearchSpace()
         self._device = device or torch.device("cpu")
 
-        _set_use_fixed_noise(use_fixed_noise)
+        self.pof_config = pof_config or PoFConfig()
+        _set_use_fixed_noise(self.pof_config)
 
-        self.pof_config = pof_config
 
     @property
     def use_fixed_noise(self) -> bool:
@@ -1681,12 +1743,16 @@ class PoFBoTorchSampler(BaseSampler):
             # `SobolQMCNormalSampler`'s constructor has a `seed` argument, but its behavior is
             # deterministic when the BoTorch's seed is fixed.
             candidates = self._candidates_func(
-                completed_params, completed_values, con, bounds, running_params,
-                model_c=model_c,
-                _constraints=_constraints,
-                _study=study,
-                _opt=_opt,
-                pof_config=self.pof_config,
+                completed_params,
+                completed_values,
+                con,
+                bounds,
+                running_params,
+                model_c,
+                _constraints,
+                study,
+                _opt,
+                self.pof_config,
             )
             if self._seed is not None:
                 self._seed += 1
