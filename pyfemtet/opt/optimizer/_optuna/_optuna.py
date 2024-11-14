@@ -92,9 +92,9 @@ class OptunaOptimizer(AbstractOptimizer):
 
         logger.info('')
         if self._retry_counter == 0:
-            logger.info(f'===== trial {len(self.history.get_df())} start =====')
+            logger.info(f'===== trial {1 + len(self.history.get_df())} start =====')
         else:
-            logger.info(f'===== trial {len(self.history.get_df())} (retry {self._retry_counter}) start =====')
+            logger.info(f'===== trial {1 + len(self.history.get_df())} (retry {self._retry_counter}) start =====')
 
         # 中断の確認 (FAIL loop に陥る対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
