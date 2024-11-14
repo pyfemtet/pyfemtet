@@ -3,6 +3,7 @@ from typing import Iterable
 
 # built-in
 import os
+import inspect
 
 # 3rd-party
 import optuna
@@ -294,8 +295,13 @@ class OptunaOptimizer(AbstractOptimizer):
             self.sampler_kwargs.update(
                 seed=seed
             )
+        parameters = inspect.signature(self.sampler_class.__init__).parameters
+        sampler_kwargs = dict()
+        for k, v in self.sampler_kwargs.items():
+            if k in parameters.keys():
+                sampler_kwargs.update({k: v})
         sampler = self.sampler_class(
-            **self.sampler_kwargs
+            **sampler_kwargs
         )
 
         from pyfemtet.opt.optimizer._optuna._pof_botorch import PoFBoTorchSampler
