@@ -5,6 +5,8 @@ import datetime
 
 import pyfemtet
 
+import pytest
+
 # noinspection PyProtectedMember
 from pyfemtet.opt._test_utils import record_history, control_femtet
 from pyfemtet._message import encoding
@@ -105,46 +107,55 @@ def main(femprj_path=None):
     os.rename(log_path, new_log_path)
 
 
+@pytest.mark.sample
 def test_sample_gau_ex08_parametric():
     femprj_path = os.path.join(SAMPLE_DIR, 'gau_ex08_parametric.femprj')
     main(femprj_path)
 
 
+@pytest.mark.sample
 def test_sample_her_ex40_parametric():
     femprj_path = os.path.join(SAMPLE_DIR, 'her_ex40_parametric.femprj')
     main(femprj_path)
 
 
+@pytest.mark.sample
 def test_sample_wat_ex14_parametric():
     femprj_path = os.path.join(SAMPLE_DIR, 'wat_ex14_parametric.femprj')
     main(femprj_path)
 
 
+@pytest.mark.sample
 def test_sample_paswat_ex1_parametric():
     femprj_path = os.path.join(SAMPLE_DIR, 'paswat_ex1_parametric.femprj')
     main(femprj_path)
 
 
+@pytest.mark.sample
 def test_sample_gal_ex58_parametric():
     femprj_path = os.path.join(SAMPLE_DIR, 'gal_ex58_parametric.femprj')
     main(femprj_path)
 
 
+@pytest.mark.cad
 def test_cad_sample_nx_ex01():
     femprj_path = os.path.join(SAMPLE_DIR, 'cad_ex01_NX.femprj')
     main(femprj_path)
 
 
+@pytest.mark.cad
 def test_cad_sample_sldworks_ex01():
     femprj_path = os.path.join(SAMPLE_DIR, 'cad_ex01_SW.femprj')
     main(femprj_path)
 
 
+@pytest.mark.sample
 def test_sample_parametric():
     femprj_path = os.path.join(SAMPLE_DIR, 'ParametricIF.femprj')
     main(femprj_path)
 
 
+@pytest.mark.sample
 def test_sample_constraint():
     femprj_path = os.path.join(SAMPLE_DIR, 'constrained_pipe.femprj')
     main(femprj_path)

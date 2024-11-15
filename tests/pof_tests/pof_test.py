@@ -7,6 +7,8 @@ from pyfemtet.opt import FEMOpt, NoFEM, OptunaOptimizer
 from pyfemtet.core import SolveError
 from pyfemtet.opt.optimizer import PoFBoTorchSampler, PoFConfig
 
+import pytest
+
 
 COEF = 5. / 12. * pi
 
@@ -43,7 +45,8 @@ def constraint_2(opt):
     return theta - COEF * r  # > 0
 
 
-def pof_basic_test():
+@pytest.mark.nofem
+def test_pof_basic():
     # ===== problem =====
     seed = 42
     n_trials = 10
@@ -114,4 +117,4 @@ def pof_basic_test():
 
 
 if __name__ == '__main__':
-    pof_basic_test()
+    test_pof_basic()

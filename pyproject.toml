@@ -59,6 +59,12 @@ pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.result_viewer.applicati
 filterwarnings = [
     'ignore::DeprecationWarning',
 ]
+markers = [
+    # "example: marks tests as slow (deselect with '-m \"not example\"')",
+    "sample",
+    "cad",
+    "nofem",
+]
 
 [tool.poetry-dynamic-versioning]
 enable = true
