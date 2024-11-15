@@ -12,7 +12,7 @@ from traceback import print_exception
 # 3rd-party
 import numpy as np
 import pandas as pd
-from dask.distributed import LocalCluster, Client, Worker
+from dask.distributed import LocalCluster, Client
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
@@ -33,9 +33,9 @@ from pyfemtet.opt.optimizer.parameter import Parameter, Expression
 from pyfemtet._warning import experimental_feature
 
 
-def add_worker(client, worker_name):
+def add_worker(client, worker_name, n_workers=1):
     import sys
-    from subprocess import Popen, DEVNULL
+    from subprocess import Popen, DEVNULL, PIPE
 
     current_n_workers = len(client.nthreads().keys())
 
@@ -43,16 +43,16 @@ def add_worker(client, worker_name):
         f'{sys.executable} -m dask worker '
         f'{client.scheduler.address} '
         f'--nthreads 1 '
-        f'--nworkers 1 '
-        f'--name {worker_name} '
-        f'--no-nanny',
+        f'--nworkers {n_workers} '
+        f'--name {worker_name} ',  # A unique name for this worker like ‘worker-1’. If used with -nworkers then the process number will be appended like name-0, name-1, name-2, …
+        # --no-nanny option は --nworkers と併用できない
         shell=True,
         stderr=DEVNULL,
         stdout=DEVNULL,
     )
 
     # worker が増えるまで待つ
-    client.wait_for_workers(n_workers=current_n_workers + 1)
+    client.wait_for_workers(n_workers=current_n_workers + n_workers)
 
 
 class FEMOpt:
@@ -624,14 +624,21 @@ class FEMOpt:
 
         else:
             # ローカルクラスターを構築
-            logger.info('Launching single machine cluster. This may take tens of seconds.')
+            logger.info('Launching single machine cluster... This may take tens of seconds.')
+
+            # Fixed:
+            #   Nanny の管理機能は必要ないが、Python API では worker_class を Worker にすると
+            #   processes 引数が無視されて Thread worker が立てられる。
+            #   これは CLI の --no-nanny オプションも同様らしい。
+
+            # クラスターの構築
             cluster = LocalCluster(
                 processes=True,
-                n_workers=n_parallel,  # n_parallel = n_parallel - 1 + 1; main 分減らし、monitor 分増やす
+                n_workers=n_parallel,
                 threads_per_worker=1,
-                worker_class=Worker,
             )
             logger.info('LocalCluster launched successfully.')
+
             self.client = Client(cluster, direct_to_workers=False)
             self.scheduler_address = self.client.scheduler.address
             logger.info('Client launched successfully.')
