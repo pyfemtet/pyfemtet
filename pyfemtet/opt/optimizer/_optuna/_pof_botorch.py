@@ -265,12 +265,13 @@ def acqf_patch_factory(acqf_class, pof_config=None):
                     torch.ones_like(pof)
                 )
 
-            ret = base_acqf * pof ** self.gamma * self._repeat_penalty ** self._repeat_penalty_gamma
+            ret = -torch.log(1 - torch.sigmoid(base_acqf)) * pof ** self.gamma * self._repeat_penalty ** self._repeat_penalty_gamma
             return ret
 
     return ACQFWithPOF
 
 
+# noinspection PyIncorrectDocstring
 @experimental_func("3.3.0")
 def logei_candidates_func(
         train_x: "torch.Tensor",
@@ -417,6 +418,7 @@ def logei_candidates_func(
     return candidates
 
 
+# noinspection PyIncorrectDocstring
 @experimental_func("2.4.0")
 def qei_candidates_func(
         train_x: "torch.Tensor",
@@ -557,6 +559,7 @@ def qei_candidates_func(
     return candidates
 
 
+# noinspection PyIncorrectDocstring
 @experimental_func("3.3.0")
 def qnei_candidates_func(
         train_x: "torch.Tensor",
@@ -657,6 +660,7 @@ def qnei_candidates_func(
     return candidates
 
 
+# noinspection PyIncorrectDocstring
 @experimental_func("2.4.0")
 def qehvi_candidates_func(
         train_x: "torch.Tensor",
@@ -776,6 +780,7 @@ def qehvi_candidates_func(
     return candidates
 
 
+# noinspection PyIncorrectDocstring
 @experimental_func("3.5.0")
 def ehvi_candidates_func(
         train_x: "torch.Tensor",
@@ -874,6 +879,7 @@ def ehvi_candidates_func(
     return candidates
 
 
+# noinspection PyIncorrectDocstring
 @experimental_func("3.1.0")
 def qnehvi_candidates_func(
         train_x: "torch.Tensor",
@@ -991,6 +997,7 @@ def qnehvi_candidates_func(
     return candidates
 
 
+# noinspection PyIncorrectDocstring
 @experimental_func("2.4.0")
 def qparego_candidates_func(
         train_x: "torch.Tensor",
@@ -1195,6 +1202,7 @@ def qkg_candidates_func(
     return candidates
 
 
+# noinspection PyIncorrectDocstring,SpellCheckingInspection
 @experimental_func("4.0.0")
 def qhvkg_candidates_func(
         train_x: "torch.Tensor",
@@ -1413,13 +1421,13 @@ class PoFConfig:
     enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
     enable_positive_only_pof: bool = False  # ベース獲得関数が正のときのみ PoF を乗じます。
 
-    enable_dynamic_pof: bool = True  # gamma を動的に変更します。 True のとき、gamma は無視されます。
+    enable_dynamic_pof: bool = False  # gamma を動的に変更します。 True のとき、gamma は無視されます。
     enable_dynamic_threshold: bool = False  # threshold を動的に変更します。 True のとき、threshold は無視されます。
 
-    enable_repeat_penalty: bool = True  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
+    enable_repeat_penalty: bool = False  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
     _repeat_penalty: float or torch.Tensor = 1.  # enable_repeat_penalty が True のときに使用される内部変数です。
 
-    enable_dynamic_repeat_penalty: bool = True  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
+    enable_dynamic_repeat_penalty: bool = False  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
     repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
     repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
     _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
@@ -1741,7 +1749,10 @@ class PoFBoTorchSampler(BaseSampler):
             # 将来的に optuna の拘束関数の取り扱いの実装が変わったら
             # そちらに実装を変更する（Constraints の変換をして optuna 単体でも使えるようにする）
             # これらは Optimizer の中でセットする
+
+            # noinspection PyUnresolvedReferences
             _constraints = self._pyfemtet_constraints
+            # noinspection PyUnresolvedReferences
             _opt = self._pyfemtet_optimizer
 
             # `manual_seed` makes the default candidates functions reproducible.
