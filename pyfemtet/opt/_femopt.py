@@ -32,6 +32,9 @@ from pyfemtet._message import Msg, encoding
 from pyfemtet.opt.optimizer.parameter import Parameter, Expression
 from pyfemtet._warning import experimental_feature
 
+from dask import config as cfg
+cfg.set({'distributed.scheduler.worker-ttl': None})
+
 
 def add_worker(client, worker_name, n_workers=1):
     import sys
