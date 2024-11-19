@@ -80,7 +80,7 @@ msgstr "モデル更新に失敗しました。"
 
 #: pyfemtet/message/messages.py:60
 msgid "It was detected that the configuration of Femtet python macro constants has not been completed. The configuration was done automatically (python -m win32com.client.makepy FemtetMacro). Please restart the program."
-msgstr "Femtet マクロの定数の設定が未完了であることが検出され、設定コマンド（python -m win23com.client.makepy FemtetMacro）が自動実行されました。プログラムを再実行してください。"
+msgstr "Femtet マクロの定数の設定が未完了であることが検出され、設定コマンド（python -m win32com.client.makepy FemtetMacro）が自動実行されました。プログラムを再実行してください。"
 
 #: pyfemtet/message/messages.py:61
 msgid "Failed to connect to Femtet."
