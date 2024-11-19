@@ -5,8 +5,8 @@ the steps to run optimization on models that require them.
 
 """
 
-from optuna_integration import BoTorchSampler
 from pyfemtet.opt import FEMOpt, OptunaOptimizer
+from pyfemtet.opt.optimizer import PoFBoTorchSampler
 
 
 def mises_stress(Femtet):
@@ -69,7 +69,7 @@ def radius_diff(Femtet, opt):
 if __name__ == '__main__':
     # Setup optimization method
     opt = OptunaOptimizer(
-        sampler_class=BoTorchSampler,
+        sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
             n_startup_trials=3,  # The first three samples are randomly sampled.
         )
