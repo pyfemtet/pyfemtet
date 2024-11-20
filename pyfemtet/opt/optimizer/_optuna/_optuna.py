@@ -355,9 +355,9 @@ class OptunaOptimizer(AbstractOptimizer):
                 load_if_exists=False,
             )
 
-            _study.add_trials(
-                study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
-            )
+            # 既存の trials のうち COMPLETE のものを取得
+            existing_trials = study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
+            _study.add_trials(existing_trials)
 
             # run
             _study.optimize(
@@ -366,10 +366,16 @@ class OptunaOptimizer(AbstractOptimizer):
                 callbacks=self.optimize_callbacks,
             )
 
-            # write back
-            study.add_trials(
-                _study.get_trials()
-            )
+            # trial.number と trial_id は _study への add_trials 時に
+            # 振りなおされるため重複したものをフィルタアウトするために
+            # datetime_start を利用。
+            added_trials = []
+            for _trial in _study.get_trials():
+                if _trial.datetime_start not in [t.datetime_start for t in existing_trials]:
+                    added_trials.append(_trial)
+
+            # Write back added trials to the existing study.
+            study.add_trials(added_trials)
 
             # clean up
             from optuna.storages import get_storage
