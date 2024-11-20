@@ -38,7 +38,7 @@ import pytest
 
 here = os.path.dirname(__file__)
 
-pyfemtet_root = rf'{here}\..\..\..\pyfemtet'
+pyfemtet_root = rf'{here}\..\..\pyfemtet'
 sample_root = rf'{pyfemtet_root}\opt\samples\femprj_sample'
 
 results = here + '/results'
