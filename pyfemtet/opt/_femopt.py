@@ -666,6 +666,7 @@ class FEMOpt:
                         model_name=self.fem.model_name
                     )
                 )
+
                 # Femtet の parametric 設定を目的関数に用いるかどうか
                 if self.fem.parametric_output_indexes_use_as_objective is not None:
                     from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
@@ -676,7 +677,13 @@ class FEMOpt:
                         indexes,
                         directions,
                     )
+
+                # Femtet の confirm_before_exit のセット
+                self.fem.confirm_before_exit = confirm_before_exit
+                self.fem.kwargs['confirm_before_exit'] = confirm_before_exit
+
                 logger.info('Femtet loaded successfully.')
+
 
             # actor の設定
             self.status = OptimizationStatus(_client)

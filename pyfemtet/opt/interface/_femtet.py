@@ -78,6 +78,10 @@ class FemtetInterface(FEMInterface):
             it will be None and no parametric outputs are used
             as objectives.
 
+        confirm_before_exit (bool):
+            Whether to confirm before (abnormal) termination.
+            Default is True.
+
         **kwargs: Additional arguments from inherited classes.
 
     Warning:
@@ -103,6 +107,7 @@ class FemtetInterface(FEMInterface):
             allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui: bool = True,
             parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
+            confirm_before_exit: bool = True,
             **kwargs  # 継承されたクラスからの引数
     ):
 
@@ -132,6 +137,7 @@ class FemtetInterface(FEMInterface):
         self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
         self._original_autosave_enabled = _get_autosave_enabled()
         _set_autosave_enabled(False)
+        self.confirm_before_exit = confirm_before_exit
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -169,6 +175,7 @@ class FemtetInterface(FEMInterface):
             open_result_with_gui=self.open_result_with_gui,
             parametric_output_indexes_use_as_objective=self.parametric_output_indexes_use_as_objective,
             save_pdt=self.save_pdt,
+            confirm_before_exit=self.confirm_before_exit,
             **kwargs
         )
 
@@ -241,7 +248,8 @@ class FemtetInterface(FEMInterface):
             print('================')
             print(message)
             print('================')
-            input('Press enter to finish...')
+            if self.confirm_before_exit:
+                input('Press enter to finish...')
             raise RuntimeError(message)
 
         if self.Femtet is None:
@@ -532,7 +540,8 @@ class FemtetInterface(FEMInterface):
                 logger.error(Msg.ERR_CANNOT_ACCESS_API + 'GetVariableNames_py')
                 logger.error(Msg.CERTIFY_MACRO_VERSION)
                 print('================')
-                input(Msg.ENTER_TO_QUIT)
+                if self.confirm_before_exit:
+                    input(Msg.ENTER_TO_QUIT)
                 raise e
                 
             if variable_names is not None:
@@ -543,7 +552,8 @@ class FemtetInterface(FEMInterface):
             logger.error(message)
             logger.error(f'`{param_name}` not in {variable_names}')
             print('================')
-            input(Msg.ENTER_TO_QUIT)
+            if self.confirm_before_exit:
+                input(Msg.ENTER_TO_QUIT)
             raise RuntimeError(message)
         else:
             return None
@@ -736,7 +746,8 @@ class FemtetInterface(FEMInterface):
                 logger.error(Msg.ERR_CANNOT_ACCESS_API + 'Femtet.Exit()')
                 logger.error(Msg.CERTIFY_MACRO_VERSION)
                 print('================')
-                input(Msg.ENTER_TO_QUIT)
+                if self.confirm_before_exit:
+                    input(Msg.ENTER_TO_QUIT)
                 raise e
 
         else:
