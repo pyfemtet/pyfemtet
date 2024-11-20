@@ -25,11 +25,14 @@ if __name__ == '__main__':
 
 import os
 import datetime
+import importlib
 import pyfemtet
 import numpy as np
 import pandas as pd
 from femtetutils import util
 from win32com.client import Dispatch
+
+import pytest
 
 
 pyfemtet_root = os.path.dirname(pyfemtet.__file__)
@@ -63,7 +66,7 @@ class SampleTest:
         """
         Notes:
             here
-             +- result
+             +- results
                  +- <basename1>_ref.csv
                  +- <datetime>_<basename1>_dif.csv (current)
                  +- <datetime>_<basename2>_dif.csv
@@ -141,14 +144,21 @@ class SampleTest:
             # {GEN_PY_NAME}.py を保存
             self.save_script(mod_script)
         
-            # history csv を削除
+            # history を削除
             if self.record_mode and os.path.exists(self.ref_path):
                 os.remove(self.ref_path)
+                db_path = self.ref_path.replace('.csv', '.db')
+                if os.path.exists(db_path):
+                    os.remove(db_path)
             elif (not self.record_mode) and os.path.exists(self.dif_path):
                 os.remove(self.dif_path)
-        
+                db_path = self.dif_path.replace('.csv', '.db')
+                if os.path.exists(db_path):
+                    os.remove(db_path)
+
             # {GEN_PY_NAME}.py を実行
             import generated_sample_script
+            importlib.reload(generated_sample_script)
             generated_sample_script.main()
         
         finally:
@@ -162,10 +172,10 @@ class SampleTest:
         # そうでなければ、ref と比較する
         if not self.record_mode:
             # csv 取得
-            dif_values = get_simplified_df_values(self.dif_path)
+            dif_values = _get_simplified_df_values(self.dif_path)
 
             # ref csv 取得
-            ref_values = get_simplified_df_values(self.ref_path)
+            ref_values = _get_simplified_df_values(self.ref_path)
 
             # 比較
             if (np.abs(dif_values - ref_values) / ref_values).mean() > self.threshold:
@@ -174,7 +184,7 @@ class SampleTest:
                 print(f'{os.path.basename(self.py_path)}, PASSED!')
 
 
-def get_simplified_df_values(csv_path):
+def _get_simplified_df_values(csv_path):
     with open(csv_path, 'r', encoding='cp932') as f:
         meta_header = f.readline()
     meta_header = 'removed' + meta_header.split('}"')[-1]
@@ -203,10 +213,94 @@ def get_simplified_df_values(csv_path):
     return pdf.values.astype(float)
 
 
-if __name__ == '__main__':
-
+@pytest.mark.sample
+def test_constrained_pipe(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\constrained_pipe.py',
-        record_mode=False,
+        record_mode=record_mode,
     )
     sample_test.run()
+
+
+@pytest.mark.sample
+def test_sample_gau_ex08_parametric(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\gau_ex08_parametric.py',
+        record_mode=record_mode,
+    )
+    sample_test.run()
+
+
+@pytest.mark.sample
+def test_sample_her_ex40_parametric(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\her_ex40_parametric.py',
+        record_mode=record_mode,
+    )
+    sample_test.run()
+
+
+@pytest.mark.sample
+def test_sample_wat_ex14_parametric(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\wat_ex14_parametric.py',
+        record_mode=record_mode,
+    )
+    sample_test.run()
+
+
+@pytest.mark.sample
+def test_sample_paswat_ex1_parametric(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\paswat_ex1_parametric.py',
+        record_mode=record_mode,
+    )
+    sample_test.run()
+
+
+@pytest.mark.sample
+def test_sample_gal_ex58_parametric(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\gal_ex58_parametric.py',
+        record_mode=record_mode,
+    )
+    sample_test.run()
+
+
+@pytest.mark.sample
+def test_sample_parametric_if(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\ParametricIF.py',
+        record_mode=record_mode,
+    )
+    sample_test.run()
+
+
+# NOT IMPLEMENTED! (must copy CAD file before running)
+# @pytest.mark.cad
+# def test_cad_sample_sldworks_ex01(record_mode=False):
+#     sample_test = SampleTest(
+#         rf'{sample_root}\cad_ex01_SW.py',
+#         record_mode=record_mode,
+#     )
+#     sample_test.run()
+
+
+# NOT IMPLEMENTED! (must copy CAD file before running)
+# @pytest.mark.cad
+# def test_cad_sample_nx_ex01(record_mode=False):
+#     sample_test = SampleTest(
+#         rf'{sample_root}\cad_ex01_NX.py',
+#         record_mode=record_mode,
+#     )
+#     sample_test.run()
+
+
+if __name__ == '__main__':
+    # test_constrained_pipe(record_mode=True)
+    # test_sample_gau_ex08_parametric(record_mode=True)
+    test_sample_her_ex40_parametric(record_mode=True)
+    test_sample_wat_ex14_parametric(record_mode=True)
+    test_sample_paswat_ex1_parametric(record_mode=True)
+    test_sample_gal_ex58_parametric(record_mode=True)
+    test_sample_parametric_if(record_mode=True)
