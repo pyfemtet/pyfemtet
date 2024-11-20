@@ -21,6 +21,7 @@ from pyfemtet.opt.optimizer._optuna._botorch_patch.enable_nonlinear_constraint i
 from collections.abc import Callable
 from collections.abc import Sequence
 from typing import Any
+import random
 
 from dataclasses import dataclass
 
@@ -1692,6 +1693,13 @@ class PoFBoTorchSampler(BaseSampler):
             running_params = running_params[~torch.isnan(running_params).any(dim=1)]
         else:
             running_params = None
+
+        if self._seed is not None:
+            random.seed(self._seed)
+            numpy.random.seed(self._seed)
+            torch.manual_seed(self._seed)
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
 
         with manual_seed(self._seed):
 
