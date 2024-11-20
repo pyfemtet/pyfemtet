@@ -35,11 +35,12 @@ from win32com.client import Dispatch
 import pytest
 
 
-pyfemtet_root = os.path.dirname(pyfemtet.__file__)
+
+here = os.path.dirname(__file__)
+
+pyfemtet_root = rf'{here}\..\..\..\pyfemtet'
 sample_root = rf'{pyfemtet_root}\opt\samples\femprj_sample'
 
-# here = os.path.dirname(__file__)
-here = f'{pyfemtet_root}\\..\\tests\\femprj_sample_tests'
 results = here + '/results'
 
 
