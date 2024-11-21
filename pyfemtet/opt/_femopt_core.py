@@ -430,6 +430,79 @@ class Constraint(Function):
         super().__init__(fun, name, args, kwargs)
 
 
+class ObjectivesFunc:
+    """複数の値を返す関数を objective として扱うためのクラス
+
+    複数の値を返す関数を受け取る。
+
+    最初に評価されたときに計算を実行し
+    そうでない場合は保持した値を返す
+    callable のリストを提供する。
+
+    """
+
+    def __init__(self, fun, n_return):
+        self._evaluated = [False for _ in range(n_return)]
+        self._values = [None for _ in range(n_return)]
+        self._i = 0
+        self.fun = fun
+        self.n_return = n_return
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+
+        # iter の長さ
+        if self._i == self.n_return:
+            self._i = 0
+            raise StopIteration
+
+        # iter として提供する callable オブジェクト
+        # self の情報にもアクセスする必要があり
+        # それぞれが iter された時点での i 番目という
+        # 情報も必要なのでこのスコープで定義する必要がある
+        class NthFunc:
+            def __init__(self_, i):
+                # 何番目の要素であるかを保持
+                # self._i を直接参照すると
+                # 実行時点での ObjectiveFunc の
+                # 値を参照してしまう
+                self_.i = i
+
+            def __call__(self_, *args, **kwargs):
+                # 何番目の要素であるか
+                i = self_.i
+
+                # 一度も評価されていなければ評価する
+                if not any(self._evaluated):
+                    self._values = tuple(self.fun(*args, **kwargs))
+                    assert len(self._values) == self.n_return, '予期しない戻り値の数'
+
+                # 評価したらフラグを立てる
+                self._evaluated[i] = True
+
+                # すべてのフラグが立ったらクリアする
+                if all(self._evaluated):
+                    self._evaluated = [False for _ in range(self.n_return)]
+
+                # 値を返す
+                return self._values[i]
+
+            @property
+            def __globals__(self_):
+                # ScapeGoat 実装への対処
+                return self.fun.__globals__
+
+        # callable を作成
+        f = NthFunc(self._i)
+
+        # index を更新
+        self._i += 1
+
+        return f
+
+
 class _HistoryDfCore:
     """Class for managing a DataFrame object in a distributed manner."""
 
