@@ -1,7 +1,7 @@
 # built-in
 import inspect
 import warnings
-from typing import Optional, Any, Callable, List
+from typing import Optional, Any, Callable, List, Sequence, SupportsFloat
 import os
 import datetime
 from time import time, sleep
@@ -365,10 +365,10 @@ class FEMOpt:
 
     def add_objectives(
             self,
-            fun: Callable[[Any], "Sequence"["SupportsFloat"]],
+            fun: Callable[[Any], Sequence[SupportsFloat]],
             n_return: int,
-            names: str or "Sequence"[str] or None = None,
-            directions: str or "Sequence"[str] or None = None,
+            names: str or Sequence[str] or None = None,
+            directions: str or Sequence[str] or None = None,
             args: tuple or None = None,
             kwargs: dict or None = None,
     ):

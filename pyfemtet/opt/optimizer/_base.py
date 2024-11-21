@@ -129,7 +129,7 @@ class AbstractOptimizer(ABC):
         self.fem_class = None
         self.fem_kwargs = dict()
         self.variables: ExpressionEvaluator = ExpressionEvaluator()
-        self.objectives: dict[str, Constraint] = dict()
+        self.objectives: dict[str, Objective] = dict()
         self.constraints: dict[str, Constraint] = dict()
         self.entire_status = None  # actor
         self.history = None  # actor
