@@ -363,6 +363,46 @@ class FEMOpt:
 
         self.opt.objectives[name] = Objective(fun, name, direction, args, kwargs)
 
+    def add_objectives(
+            self,
+            fun: Callable[[Any], "Sequence"["SupportsFloat"]],
+            n_return: int,
+            names: str or "Sequence"[str] or None = None,
+            directions: str or "Sequence"[str] or None = None,
+            args: tuple or None = None,
+            kwargs: dict or None = None,
+    ):
+        from pyfemtet.opt._femopt_core import ObjectivesFunc
+        components = ObjectivesFunc(fun, n_return)
+
+        if names is not None:
+            if isinstance(names, str):
+                names = [f'name_{i}' for i in range(n_return)]
+            else:
+                # names = names
+                pass
+        else:
+            names = [None for _ in range(n_return)]
+
+        if directions is not None:
+            if isinstance(directions, str):
+                directions = [directions for _ in range(n_return)]
+            else:
+                # directions = directions
+                pass
+        else:
+            directions = ['minimize' for _ in range(n_return)]
+
+        for name, component, direction in zip(names, components, directions):
+            self.add_objective(
+                fun=component,
+                name=name,
+                direction=direction,
+                args=args,
+                kwargs=kwargs,
+            )
+
+
     def add_constraint(
             self,
             fun,
