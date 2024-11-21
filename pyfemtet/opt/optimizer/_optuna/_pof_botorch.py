@@ -1,4 +1,7 @@
-"""
+"""This algorithm is based on BoTorchSampler of optuna_integration[1] and the paper[2].
+
+
+** LICENSE NOTICE OF [1] **
 
 MIT License
 
@@ -22,6 +25,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+** reference of [2] **
+LEE, H., et al. Optimization subject to hidden constraints via statistical
+emulation. Pacific Journal of Optimization, 2011, 7.3: 467-478
+
+
 
 """
 
@@ -1722,12 +1732,13 @@ class PoFBoTorchSampler(BaseSampler):
         else:
             running_params = None
 
-        if self._seed is not None:
-            random.seed(self._seed)
-            numpy.random.seed(self._seed)
-            torch.manual_seed(self._seed)
-            torch.backends.cudnn.benchmark = False
-            torch.backends.cudnn.deterministic = True
+        # 一時的に取り消し：TPESampler と整合性が取れない
+        # if self._seed is not None:
+        #     random.seed(self._seed)
+        #     numpy.random.seed(self._seed)
+        #     torch.manual_seed(self._seed)
+        #     torch.backends.cudnn.benchmark = False
+        #     torch.backends.cudnn.deterministic = True
 
         with manual_seed(self._seed):
 
