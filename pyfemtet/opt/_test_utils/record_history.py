@@ -10,6 +10,21 @@ from pyfemtet.opt import FEMOpt
 from pyfemtet._message import encoding as ENCODING
 
 
+def remove_femprj_metadata_from_csv(csv_path, encoding=ENCODING):
+
+    with open(csv_path, mode="r", encoding=encoding, newline="\n") as f:
+        reader = csv.reader(f, delimiter=",")
+        data = [line for line in reader]
+
+    new_meta_data = data[0]
+    new_meta_data[0] = ""
+    data[0] = new_meta_data
+
+    with open(csv_path, mode="w", encoding=encoding, newline="\n") as f:
+        writer = csv.writer(f, delimiter=',')
+        writer.writerows(data)
+
+
 def find_latest_csv(dir_path=None):
     if dir_path is None:
         dir_path = ""

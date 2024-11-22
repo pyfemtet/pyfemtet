@@ -31,6 +31,7 @@ import numpy as np
 import pandas as pd
 from femtetutils import util
 from win32com.client import Dispatch
+from pyfemtet.opt._test_utils.record_history import remove_femprj_metadata_from_csv
 
 import pytest
 
@@ -137,7 +138,7 @@ class SampleTest:
             # カレントディレクトリの変更（一応）
             _buff = os.getcwd()
             os.chdir(here)
-        
+
             # スクリプトの編集実行
             script = self.load_script()
             mod_script = self.modify_script(script)
@@ -169,9 +170,12 @@ class SampleTest:
             # 起動した Femtet を終了
             Femtet.Exit(force := True)
 
-        # record_mode なら、何もしない
+        # record_mode なら、metadata を削除する
+        if self.record_mode:
+            remove_femprj_metadata_from_csv(self.ref_path)
+
         # そうでなければ、ref と比較する
-        if not self.record_mode:
+        else:
             # csv 取得
             dif_values = _get_simplified_df_values(self.dif_path)
 
@@ -298,10 +302,10 @@ def test_sample_parametric_if(record_mode=False):
 
 
 if __name__ == '__main__':
-    # test_constrained_pipe(record_mode=True)
+    test_constrained_pipe(record_mode=True)
     # test_sample_gau_ex08_parametric(record_mode=True)
     # test_sample_her_ex40_parametric(record_mode=True)
     # test_sample_wat_ex14_parametric(record_mode=True)
-    test_sample_paswat_ex1_parametric(record_mode=True)
+    # test_sample_paswat_ex1_parametric(record_mode=True)
     # test_sample_gal_ex58_parametric(record_mode=True)
     # test_sample_parametric_if(record_mode=True)
