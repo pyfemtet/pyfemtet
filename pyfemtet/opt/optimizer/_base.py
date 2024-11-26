@@ -316,7 +316,7 @@ class AbstractOptimizer(ABC):
         # set_fem をはじめ、終了したらそれを示す
         if not skip_set_fem:  # なくても動く？？
             self._reconstruct_fem()
-        self.fem._setup_after_parallel()
+        self.fem._setup_after_parallel(opt=self)
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
 
         # wait_setup or not

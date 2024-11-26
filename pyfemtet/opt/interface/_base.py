@@ -64,7 +64,7 @@ class FEMInterface(ABC):
         """
         pass
 
-    def _setup_after_parallel(self):
+    def _setup_after_parallel(self, *args, **kwargs):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
