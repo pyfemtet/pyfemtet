@@ -292,7 +292,7 @@ class AbstractOptimizer(ABC):
 
     def _finalize(self):
         """Destruct fem and set worker status."""
-        del self.fem
+        self.fem.quit()
         if not self.worker_status.get() == OptimizationStatus.CRASHED:
             self.worker_status.set(OptimizationStatus.TERMINATED)
 
@@ -325,6 +325,9 @@ class AbstractOptimizer(ABC):
                     return None
                 # 他のすべての worker_status が wait 以上になったら break
                 if all([ws.get() >= OptimizationStatus.WAIT_OTHER_WORKERS for ws in worker_status_list]):
+                    # リソースの競合等を避けるため
+                    # break する前に index 秒待つ
+                    sleep(int(subprocess_idx))
                     break
                 sleep(1)
         else:

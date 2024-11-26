@@ -18,6 +18,9 @@ from pyfemtet.opt import FEMInterface
 from pyfemtet.core import SolveError
 from pyfemtet.opt.optimizer.parameter import Parameter
 
+from pyfemtet.dispatch_extensions import _get_pid, dispatch_specific_femtet
+from pyfemtet.dispatch_extensions._impl import _NestableSpawnProcess
+
 
 class ExcelInterface(FEMInterface):
 
@@ -40,7 +43,9 @@ class ExcelInterface(FEMInterface):
     visible: bool = True  # excel を可視化するかどうか
     display_alerts: bool = True  # ダイアログを表示するかどうか
 
-    _load_problem_from_me: bool = True  # add_parameter() 等を省略するかどうか
+    _load_problem_from_me: bool = True  # TODO: add_parameter() 等を省略するかどうか。定義するだけでフラグとして機能する。
+    _excel_pid: int
+    _excel_hwnd: int
 
     def __init__(
             self,
@@ -82,6 +87,11 @@ class ExcelInterface(FEMInterface):
         # 先に femtet を起動
         util.execute_femtet()
 
+        # Femtet が Dispatch 可能になるまで捨てプロセスで待つ
+        p = _NestableSpawnProcess(target=wait_femtet)
+        p.start()
+        p.join()
+
         # サブプロセスでの restore のための情報保管
         kwargs = dict(
             input_xlsm_path=self.input_xlsm_path,
@@ -113,6 +123,11 @@ class ExcelInterface(FEMInterface):
         else:
             self.excel = DispatchEx('Excel.Application')
 
+        # 起動した excel の pid を記憶する
+        self._excel_hwnd = self.excel.hWnd
+        self._excel_pid = _get_pid(self.excel.hWnd)
+
+        # 可視性の設定
         self.excel.Visible = self.visible
         self.excel.DisplayAlerts = self.display_alerts
 
@@ -221,10 +236,29 @@ class ExcelInterface(FEMInterface):
         self.excel.CalculateFull()  # 他に適したメソッドもあるかも。
 
     def quit(self):
-        self.excel.Close(
-            SaveChanges := False,
-        )
+        self.wb_input.Close(SaveChanges := False)
+        if self.input_xlsm_path.name != self.output_xlsm_path.name:
+            self.wb_output.Close(SaveChanges := False)
         self.excel.Quit()
+        del self.excel
+
+        # import gc
+        # gc.collect()
+
+        # quit した後ならば femtet を終了できる
+        # excel の process の完全消滅を待つ
+        from time import sleep
+        while self._excel_pid == _get_pid(self._excel_hwnd):
+            print('エクセルの終了待ち...')
+            sleep(1)
+
+        # 正確だが時間がかかる
+        femtet_pid = util.get_last_executed_femtet_process_id()
+        Femtet, caught_pid = dispatch_specific_femtet(femtet_pid)
+        assert femtet_pid == caught_pid
+        Femtet.Exit(True)
+
+
 
     # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
     @property
@@ -331,6 +365,14 @@ class ExcelInterface(FEMInterface):
         c = value_column_index + 1
         v = self.sh_output.Cells(r, c).value
         return float(v)
+
+
+from time import sleep
+def wait_femtet():
+    Femtet = Dispatch('FemtetMacro.Femtet')
+    while Femtet.hWnd <= 0:
+        sleep(1)
+        Femtet = Dispatch('FemtetMacro.Femtet')
 
 
 # main thread で作成した excel への参照を含む関数を

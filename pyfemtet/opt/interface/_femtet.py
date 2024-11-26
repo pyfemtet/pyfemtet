@@ -731,6 +731,9 @@ class FemtetInterface(FEMInterface):
 
     def quit(self, timeout=1, force=True):
         """Force to terminate connected Femtet."""
+
+        _set_autosave_enabled(self._original_autosave_enabled)
+
         major, minor, bugfix = 2024, 0, 1
 
         # すでに終了しているならば何もしない

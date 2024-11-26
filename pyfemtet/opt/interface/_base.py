@@ -80,6 +80,9 @@ class FEMInterface(ABC):
     def _create_postprocess_args(self):
         pass
 
+    def quit(self):
+        pass
+
 
 class NoFEM(FEMInterface):
     """Dummy interface without FEM. Intended for debugging purposes."""
