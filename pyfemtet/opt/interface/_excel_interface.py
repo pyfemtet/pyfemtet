@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from time import sleep
 
 import pandas as pd
 import numpy as np
@@ -20,6 +21,9 @@ from pyfemtet.opt.optimizer.parameter import Parameter
 
 from pyfemtet.dispatch_extensions import _get_pid, dispatch_specific_femtet
 from pyfemtet.dispatch_extensions._impl import _NestableSpawnProcess
+
+import logging
+logger = logging.getLogger('fem')
 
 
 class ExcelInterface(FEMInterface):
@@ -84,9 +88,14 @@ class ExcelInterface(FEMInterface):
             else:
                 self.output_xlsm_path = Path(os.path.abspath(output_xlsm_path)).resolve()
 
+        # FIXME: そもそも ExcelInterface なので Femtet 関連のことをやらなくていいと思う。
+        # FemtetRef が文句なく動けばいいのだが、手元環境ではなぜか動いたり動かなかったりするため
+        # 仕方なく Femtet を Python 側から動かしている仮実装。
+
         # 先に femtet を起動
         util.execute_femtet()
 
+        # 直後の Excel 起動に間に合わない場合があったため
         # Femtet が Dispatch 可能になるまで捨てプロセスで待つ
         p = _NestableSpawnProcess(target=wait_femtet)
         p.start()
@@ -204,6 +213,9 @@ class ExcelInterface(FEMInterface):
             if isinstance(obj.fun, ScapeGoatObjective):
                 opt.objectives[obj_name].fun = self.objective_from_excel
 
+         # FIXME: __init__ が作った Femtet 以外を排他処理して
+         #  Excel がそれを使うことを保証するようにする（遅すぎるか？）
+
     def update(self, parameters: pd.DataFrame) -> None:
 
         # params を作成
@@ -216,7 +228,7 @@ class ExcelInterface(FEMInterface):
             self.sh_input.Range(key).value = value
 
         # 再計算
-        self.excel.CalculateFull()  # 他に適したメソッドもあるかも。
+        self.excel.CalculateFull()
 
         # マクロ実行
         try:
@@ -226,38 +238,37 @@ class ExcelInterface(FEMInterface):
             )
 
         # FIXME: エラーハンドリング
-        #   com_error をキャッチするか、
-        #   sh_out に解析結果を書くようにして、
+        #   com_error をキャッチする(solveerror)か、
+        #   sh_out に解析結果を書く(拘束違反)ようにして、
         #   それが FALSE なら SolveError を raise する。
         except ...:
             raise SolveError('Excelアップデートに失敗しました')
 
         # 再計算
-        self.excel.CalculateFull()  # 他に適したメソッドもあるかも。
+        self.excel.CalculateFull()
 
     def quit(self):
+        logger.info('Excel-Femtet の終了処理を開始します。')  # FIXME: message にする
         self.wb_input.Close(SaveChanges := False)
         if self.input_xlsm_path.name != self.output_xlsm_path.name:
             self.wb_output.Close(SaveChanges := False)
         self.excel.Quit()
         del self.excel
 
-        # import gc
-        # gc.collect()
-
         # quit した後ならば femtet を終了できる
         # excel の process の完全消滅を待つ
-        from time import sleep
+        logger.info('Excel の終了を待っています。')
         while self._excel_pid == _get_pid(self._excel_hwnd):
-            print('エクセルの終了待ち...')
             sleep(1)
 
-        # 正確だが時間がかかる
+        # 正確だが時間がかかるかも
+        logger.info('終了する Femtet を特定しています。')
         femtet_pid = util.get_last_executed_femtet_process_id()
         Femtet, caught_pid = dispatch_specific_femtet(femtet_pid)
-        assert femtet_pid == caught_pid
+        # FIXME: バージョンによって処理を分ける（どこかにヘルパー関数を作る）
         Femtet.Exit(True)
 
+        logger.info('Excel-Femtet を終了しました。')
 
 
     # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
@@ -288,6 +299,7 @@ class ExcelInterface(FEMInterface):
             index_col=None,
         )
 
+        # TODO: 使い勝手を考える
         for i, row in df.iterrows():
             try:
                 name = row['name']
@@ -328,6 +340,7 @@ class ExcelInterface(FEMInterface):
             index_col=None,
         )
 
+        # TODO: 使い勝手を考える
         for i, row in df.iterrows():
             try:
                 name = row['name']
@@ -356,7 +369,7 @@ class ExcelInterface(FEMInterface):
                 fun=ScapeGoatObjective(),
                 name=name,
                 direction=direction,
-                args=(i, value_column_index, ),  # 参照なのでこれで良い? parallel で問題になるかも
+                args=(i, value_column_index, ),
                 kwargs=dict(),
             )
 
@@ -367,7 +380,6 @@ class ExcelInterface(FEMInterface):
         return float(v)
 
 
-from time import sleep
 def wait_femtet():
     Femtet = Dispatch('FemtetMacro.Femtet')
     while Femtet.hWnd <= 0:
