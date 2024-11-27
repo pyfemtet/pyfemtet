@@ -64,6 +64,7 @@ markers = [
     "sample",
     "cad",
     "nofem",
+    "excel",
 ]
 
 [tool.poetry-dynamic-versioning]
