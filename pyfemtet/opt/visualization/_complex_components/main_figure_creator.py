@@ -142,8 +142,8 @@ def _get_single_objective_plot(history, df):
             # y=df[obj_name][anti_indices],
             # customdata=df['trial'][anti_indices].values.reshape((-1, 1)),
             mode="markers",
-            marker=dict(color='#6c757d', size=6),  # FIXME
-            name='全ての解',  # FIXME
+            marker=dict(color='#6c757d', size=6),
+            name=Msg.LEGEND_LABEL_ALL_SOLUTIONS,
         )
     )
 
@@ -153,8 +153,8 @@ def _get_single_objective_plot(history, df):
             x=df['trial'][indices],
             y=df[obj_name][indices],
             mode="markers+lines",
-            marker=dict(color='#007bff', size=9),  # FIXME
-            name='最適解の推移',  # FIXME
+            marker=dict(color='#007bff', size=9),
+            name=Msg.LEGEND_LABEL_OPTIMAL_SOLUTIONS,
             line=dict(width=1, color='#6c757d',),
             customdata=df['trial'][indices].values.reshape((-1, 1)),
             legendgroup='optimal',
@@ -187,7 +187,7 @@ def _get_single_objective_plot(history, df):
                     y=y,
                     mode="lines",
                     line=dict(width=0.5, color='#FF2400', dash='dash'),
-                    name='ターゲット値',
+                    name=Msg.LEGEND_LABEL_OBJECTIVE_TARGET,
                 )
             )
 
