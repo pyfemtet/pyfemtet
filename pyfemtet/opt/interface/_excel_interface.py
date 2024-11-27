@@ -22,8 +22,13 @@ from pyfemtet.opt.optimizer.parameter import Parameter
 from pyfemtet.dispatch_extensions import _get_pid, dispatch_specific_femtet
 from pyfemtet.dispatch_extensions._impl import _NestableSpawnProcess
 
+from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
+from pyfemtet._femtet_config_util.autosave import _set_autosave_enabled, _get_autosave_enabled
+
 import logging
-logger = logging.getLogger('fem')
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class ExcelInterface(FEMInterface):
@@ -33,7 +38,7 @@ class ExcelInterface(FEMInterface):
     output_xlsm_path: Path  # 操作対象の xlsm パス (指定しない場合、input と同一)
     output_sheet_name: str  # 計算結果セルを定義しているシート名 (指定しない場合、input と同一)
 
-    # FIXME: related_file_paths: dict[Path]  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
+    # TODO: related_file_paths: dict[Path]  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
 
     procedure_name: str  # マクロ関数名（or モジュール名.関数名）
     procedure_args: list  # マクロ関数の引数
@@ -50,6 +55,7 @@ class ExcelInterface(FEMInterface):
     _load_problem_from_me: bool = True  # TODO: add_parameter() 等を省略するかどうか。定義するだけでフラグとして機能する。
     _excel_pid: int
     _excel_hwnd: int
+    _femtet_autosave_buffer: bool  # 元々 Femtet の
 
     def __init__(
             self,
@@ -60,7 +66,6 @@ class ExcelInterface(FEMInterface):
             procedure_name: str = None,
             procedure_args: list or tuple = None,
             connect_method: str = 'auto',  # or 'new'
-
     ):
 
         # 初期化
@@ -72,6 +77,7 @@ class ExcelInterface(FEMInterface):
         self.procedure_args = procedure_args or []
         assert connect_method in ['new', 'auto']
         self.connect_method = connect_method
+        self._femtet_autosave_buffer = _get_autosave_enabled()
 
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
@@ -88,10 +94,10 @@ class ExcelInterface(FEMInterface):
             else:
                 self.output_xlsm_path = Path(os.path.abspath(output_xlsm_path)).resolve()
 
-        # FIXME: そもそも ExcelInterface なので Femtet 関連のことをやらなくていいと思う。
-        # FemtetRef が文句なく動けばいいのだが、手元環境ではなぜか動いたり動かなかったりするため
-        # 仕方なく Femtet を Python 側から動かしている仮実装。
-
+        # FIXME:
+        #   そもそも ExcelInterface なので Femtet 関連のことをやらなくていいと思う。
+        #   FemtetRef が文句なく動けばいいのだが、手元環境ではなぜか動いたり動かなかったりするため
+        #   仕方なく Femtet を Python 側から動かしている仮実装。
         # 先に femtet を起動
         util.execute_femtet()
 
@@ -112,6 +118,12 @@ class ExcelInterface(FEMInterface):
             connect_method='new',  # subprocess で connect する際は new を強制する
         )
         super().__init__(**kwargs)
+
+    def __del__(self):
+        try:
+            _set_autosave_enabled(self._femtet_autosave_buffer)
+        finally:
+            pass
 
     def _setup_before_parallel(self, client) -> None:
         # メインプロセスで、並列プロセスを開始する前に行う前処理
@@ -134,7 +146,10 @@ class ExcelInterface(FEMInterface):
 
         # 起動した excel の pid を記憶する
         self._excel_hwnd = self.excel.hWnd
-        self._excel_pid = _get_pid(self.excel.hWnd)
+        self._excel_pid = 0
+        while self._excel_pid == 0:
+            sleep(0.5)
+            self._excel_pid = _get_pid(self.excel.hWnd)
 
         # 可視性の設定
         self.excel.Visible = self.visible
@@ -198,7 +213,11 @@ class ExcelInterface(FEMInterface):
     def _setup_after_parallel(self, *args, **kwargs):
         # サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理
 
+        # スレッドが変わっているかもしれないので win32com の初期化
         CoInitialize()
+
+        # 最適化中は femtet の autosave を無効にする
+        _set_autosave_enabled(False)
 
         # excel に繋ぎなおす
         self.connect_excel(self.connect_method)
@@ -213,8 +232,10 @@ class ExcelInterface(FEMInterface):
             if isinstance(obj.fun, ScapeGoatObjective):
                 opt.objectives[obj_name].fun = self.objective_from_excel
 
-         # FIXME: __init__ が作った Femtet 以外を排他処理して
-         #  Excel がそれを使うことを保証するようにする（遅すぎるか？）
+        # TODO:
+        #   __init__ が作った Femtet 以外を排他処理して
+        #   Excel がそれを使うことを保証するようにする（遅すぎるか？）
+        #   そもそも、excel から Femtet を起動できればそれで済む（？）。
 
     def update(self, parameters: pd.DataFrame) -> None:
 
@@ -249,11 +270,21 @@ class ExcelInterface(FEMInterface):
 
     def quit(self):
         logger.info('Excel-Femtet の終了処理を開始します。')  # FIXME: message にする
+
+        del self.sh_input
+        del self.sh_output
+
         self.wb_input.Close(SaveChanges := False)
         if self.input_xlsm_path.name != self.output_xlsm_path.name:
             self.wb_output.Close(SaveChanges := False)
+        del self.wb_input
+        del self.wb_output
+
         self.excel.Quit()
         del self.excel
+
+        import gc
+        gc.collect()
 
         # quit した後ならば femtet を終了できる
         # excel の process の完全消滅を待つ
@@ -265,11 +296,12 @@ class ExcelInterface(FEMInterface):
         logger.info('終了する Femtet を特定しています。')
         femtet_pid = util.get_last_executed_femtet_process_id()
         Femtet, caught_pid = dispatch_specific_femtet(femtet_pid)
-        # FIXME: バージョンによって処理を分ける（どこかにヘルパー関数を作る）
-        Femtet.Exit(True)
+        _exit_or_force_terminate(timeout=3, Femtet=Femtet, force=True)
+
+        logger.info('自動保存機能の設定を元に戻しています。')
+        _set_autosave_enabled(self._femtet_autosave_buffer)
 
         logger.info('Excel-Femtet を終了しました。')
-
 
     # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
     @property
@@ -396,50 +428,3 @@ class ScapeGoatObjective:
     @property
     def __globals__(self):
         return tuple()
-
-
-if __name__ == '__main__':
-    import os
-    os.chdir(os.path.dirname(__file__))
-
-    dg_fem = ExcelInterface(
-        input_xlsm_path=r"io_and_solve.xlsm",
-        input_sheet_name='input',
-        output_sheet_name='output',
-        procedure_name='FemtetMacro.FemtetMain',
-        connect_method='auto',
-    )
-
-    dg_df = pd.DataFrame(
-        dict(
-            name=['w', 'h', 'd'],
-            value=[10, 10, 10],
-        )
-    )
-
-    # fem.update(df)
-
-    from threading import Thread
-
-    # fem.excel = None
-    # fem.sh_input = None
-    # fem.sh_output = None
-    # fem.wb_input = None
-    # fem.wb_output = None
-
-    # import gc
-    # gc.collect()
-
-    def update_with_restore_com(fem_, df_):
-        fem_.__init__(**fem_.kwargs)
-        fem_.update(df_)
-        print(fem_.output_sheet.Cells)
-
-    t = Thread(
-        target=update_with_restore_com,
-        args=(dg_fem, dg_df,)
-    )
-
-    t.start()
-    t.join()
-

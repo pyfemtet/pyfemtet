@@ -86,9 +86,9 @@ def test_excel_interface():
             print('ExcelInterface, PASSED!')
 
 
-RECORD_MODE = True
+RECORD_MODE = False
 
 
 if __name__ == '__main__':
-    RECORD_MODE = False
+    # RECORD_MODE = True
     test_excel_interface()

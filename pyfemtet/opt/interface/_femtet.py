@@ -35,6 +35,8 @@ from pyfemtet.dispatch_extensions import (
 )
 from pyfemtet.opt.interface import FEMInterface, logger
 from pyfemtet._message import Msg
+from pyfemtet._femtet_config_util.autosave import _get_autosave_enabled, _set_autosave_enabled
+from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
 
 
 def _post_activate_message(hwnd):
@@ -316,9 +318,6 @@ class FemtetInterface(FEMInterface):
         -------
 
         """
-
-        # FIXME: Gaudi へのアクセスなど、self.Femtet.Gaudi.SomeFunc() のような場合、この関数を呼び出す前に Gaudi へのアクセスの時点で com_error が起こる
-        # FIXME: => 文字列で渡して eval() すればよい。
 
         if args is None:
             args = tuple()
@@ -734,43 +733,7 @@ class FemtetInterface(FEMInterface):
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
-        major, minor, bugfix = 2024, 0, 1
-
-        # すでに終了しているならば何もしない
-        if not self.femtet_is_alive():
-            return
-
-        if self._version() >= _version(major, minor, bugfix):
-            # gracefully termination method without save project available from 2024.0.1
-            try:
-                self.Femtet.Exit(True)
-            except AttributeError as e:
-                print('================')
-                logger.error(Msg.ERR_CANNOT_ACCESS_API + 'Femtet.Exit()')
-                logger.error(Msg.CERTIFY_MACRO_VERSION)
-                print('================')
-                if self.confirm_before_exit:
-                    input(Msg.ENTER_TO_QUIT)
-                raise e
-
-        else:
-            hwnd = self.Femtet.hWnd
-
-            # terminate
-            util.close_femtet(hwnd, timeout, force)
-
-            try:
-                pid = _get_pid(hwnd)
-                start = time()
-                while psutil.pid_exists(pid):
-                    if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
-                        logger.error(Msg.ERR_CLOSE_FEMTET_FAILED)
-                        break
-                    sleep(1)
-                sleep(1)
-
-            except (AttributeError, OSError):  # already dead
-                pass
+        _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
 
     def _setup_before_parallel(self, client):
         client.upload_file(
@@ -915,40 +878,3 @@ class _UnPicklableNoFEM(FemtetInterface):
         here = os.path.dirname(__file__)
         pdt_path = os.path.join(here, f'trial{trial}.pdt')
         return pdt_path
-
-
-# レジストリのパスと値の名前
-_REGISTRY_PATH: Final[str] = r"SOFTWARE\Murata Software\Femtet2014\Femtet"
-_VALUE_NAME: Final[str] = "AutoSave"
-
-
-def _get_autosave_enabled() -> bool:
-    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _REGISTRY_PATH) as key:
-        value, regtype = winreg.QueryValueEx(key, _VALUE_NAME)
-        if regtype == winreg.REG_DWORD:
-            return bool(value)
-        else:
-            raise ValueError("Unexpected registry value type.")
-
-
-def _set_autosave_enabled(enable: bool) -> None:
-    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _REGISTRY_PATH, 0, winreg.KEY_SET_VALUE) as key:
-        winreg.SetValueEx(key, _VALUE_NAME, 0, winreg.REG_DWORD, int(enable))
-
-
-def _test_autosave_setting():
-
-    # 使用例
-    current_setting = _get_autosave_enabled()
-    print(f"Current AutoSave setting is {'enabled' if current_setting else 'disabled'}.")
-
-    # 設定を変更する例
-    new_setting = not current_setting
-    _set_autosave_enabled(new_setting)
-    print(f"AutoSave setting has been {'enabled' if new_setting else 'disabled'}.")
-
-    # 再度設定を確認する
-    after_setting = _get_autosave_enabled()
-    print(f"Current AutoSave setting is {'enabled' if after_setting else 'disabled'}.")
-
-    assert new_setting == after_setting, "レジストリ編集に失敗しました。" 
