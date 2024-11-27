@@ -25,12 +25,15 @@ from pyfemtet.dispatch_extensions._impl import _NestableSpawnProcess
 from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
 from pyfemtet._femtet_config_util.autosave import _set_autosave_enabled, _get_autosave_enabled
 
+from pyfemtet._warning import experimental_class
+
 import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+@experimental_class
 class ExcelInterface(FEMInterface):
 
     input_xlsm_path: Path  # 操作対象の xlsm パス
@@ -38,7 +41,7 @@ class ExcelInterface(FEMInterface):
     output_xlsm_path: Path  # 操作対象の xlsm パス (指定しない場合、input と同一)
     output_sheet_name: str  # 計算結果セルを定義しているシート名 (指定しない場合、input と同一)
 
-    # TODO: related_file_paths: dict[Path]  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
+    # TODO: related_file_paths: dict[Path] を必要なら実装  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
 
     procedure_name: str  # マクロ関数名（or モジュール名.関数名）
     procedure_args: list  # マクロ関数の引数
@@ -55,7 +58,7 @@ class ExcelInterface(FEMInterface):
     _load_problem_from_me: bool = True  # TODO: add_parameter() 等を省略するかどうか。定義するだけでフラグとして機能する。
     _excel_pid: int
     _excel_hwnd: int
-    _femtet_autosave_buffer: bool  # 元々 Femtet の
+    _femtet_autosave_buffer: bool  # Femtet の自動保存機能の一時退避場所。最適化中はオフにする。
 
     def __init__(
             self,
@@ -428,3 +431,7 @@ class ScapeGoatObjective:
     @property
     def __globals__(self):
         return tuple()
+
+
+if __name__ == '__main__':
+    ExcelInterface(..., ...)

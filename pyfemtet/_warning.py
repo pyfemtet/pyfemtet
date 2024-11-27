@@ -16,6 +16,22 @@ def experimental_feature(func):
     return wrapper
 
 
+def experimental_class(cls):
+
+    class Wrapper(cls):
+        def __new__(cls, *args, **kwargs):
+            warnings.warn(
+                f"The class '{cls.__name__}' is experimental and may change in the future.",
+                category=UserWarning,
+                stacklevel=2
+            )
+            return super().__new__(cls)
+
+    Wrapper.__name__ = cls.__name__
+    Wrapper.__doc__ = cls.__doc__
+    return Wrapper
+
+
 def changed_feature(version, additional_message=None):
 
     def changed_feature_wrapper(func):
