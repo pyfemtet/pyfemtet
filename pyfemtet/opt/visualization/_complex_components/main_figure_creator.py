@@ -107,25 +107,43 @@ def _get_single_objective_plot(history, df):
     fig = go.Figure()
 
     # ===== i 番目が、その時点までで最適かどうか =====
-    # その時点までの最小の点 index
+    # その時点までの最適な点 index
     indices = []
     anti_indices = []
     objectives = df[obj_name].values
-    for i, obj in enumerate(objectives):
-        if obj == min(objectives[:i+1]):
-            indices.append(i)
+    objective_directions = df[f'{obj_name}_direction'].values
+    for i, (obj, direction) in enumerate(zip(objectives, objective_directions)):
+        # DESCRIPTION: 最適化中に direction は変化しない前提
+        if direction == 'maximize':
+            if obj == max(objectives[:i+1]):
+                indices.append(i)
+            else:
+                anti_indices.append(i)
+        elif direction == 'minimize':
+            if obj == min(objectives[:i+1]):
+                indices.append(i)
+            else:
+                anti_indices.append(i)
         else:
-            anti_indices.append(i)
+            residuals = (objectives - objective_directions) ** 2
+            residual = residuals[i]
+            if residual == min(residuals[:i+1]):
+                indices.append(i)
+            else:
+                anti_indices.append(i)
 
     # ===== 最適でない点を灰色で打つ =====
     fig.add_trace(
         go.Scatter(
-            x=df['trial'][anti_indices],
-            y=df[obj_name][anti_indices],
+            x=df['trial'],
+            y=df[obj_name],
+            customdata=df['trial'].values.reshape((-1, 1)),
+            # x=df['trial'][anti_indices],
+            # y=df[obj_name][anti_indices],
+            # customdata=df['trial'][anti_indices].values.reshape((-1, 1)),
             mode="markers",
             marker=dict(color='#6c757d', size=6),  # FIXME
             name='全ての解',  # FIXME
-            customdata=df['trial'][anti_indices].values.reshape((-1, 1)),
         )
     )
 
@@ -139,13 +157,14 @@ def _get_single_objective_plot(history, df):
             name='最適解の推移',  # FIXME
             line=dict(width=1, color='#6c757d',),
             customdata=df['trial'][indices].values.reshape((-1, 1)),
+            legendgroup='optimal',
         )
     )
 
     # ===== その時点までの最小の点から現在までの平行点線を引く =====
     if len(indices) > 1:
         x = [df['trial'][indices].iloc[-1], df['trial'].iloc[-1]]
-        y = [df[obj_name][indices].iloc[-1], df[obj_name][indices].iloc[-1]]
+        y = [df[obj_name][indices].iloc[-1]] * 2
         fig.add_trace(
             go.Scatter(
                 x=x,
@@ -153,8 +172,25 @@ def _get_single_objective_plot(history, df):
                 mode="lines",
                 line=dict(width=0.5, color='#6c757d', dash='dash'),
                 showlegend=False,
+                legendgroup='optimal',
             )
         )
+
+    # ===== direction が float の場合、目標値を描く =====
+    if len(df) > 1:
+        if isinstance(objective_directions[0], float):
+            x = [df['trial'].iloc[0], df['trial'].iloc[-1]]
+            y = [objective_directions[0]] * 2
+            fig.add_trace(
+                go.Scatter(
+                    x=x,
+                    y=y,
+                    mode="lines",
+                    line=dict(width=0.5, color='#FF2400', dash='dash'),
+                    name='ターゲット値',
+                )
+            )
+
 
     # ===== layout =====
     fig.update_layout(
