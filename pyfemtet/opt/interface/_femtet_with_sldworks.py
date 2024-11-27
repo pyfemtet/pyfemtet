@@ -92,7 +92,7 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         )
         super()._setup_before_parallel(client)
 
-    def _setup_after_parallel(self):
+    def _setup_after_parallel(self, *args, **kwargs):
         CoInitialize()
         self.initialize_sldworks_connection()
 
