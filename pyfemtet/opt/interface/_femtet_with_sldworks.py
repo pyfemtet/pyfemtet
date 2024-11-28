@@ -192,53 +192,70 @@ class FemtetWithSolidworksInterface(FemtetInterface):
         for i, row in parameters.iterrows():
             user_param_dict[row['name']] = row['value']
 
-        # ===== model を取得 =====
-        swModel = get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
-
-        # ===== equation manager を取得 =====
-        swEqnMgr = swModel.GetEquationMgr
-        nEquation = swEqnMgr.GetCount
-
-        # プロパティを退避
-        buffer_aso = swEqnMgr.AutomaticSolveOrder
-        buffer_ar = swEqnMgr.AutomaticRebuild
-        swEqnMgr.AutomaticSolveOrder = False
-        swEqnMgr.AutomaticRebuild = False
-
-        for i in range(nEquation):
-            # name, equation の取得
-            current_equation = swEqnMgr.Equation(i)
-            current_name = self._get_name_from_equation(current_equation)
-            # 対象なら処理
-            if current_name in list(user_param_dict.keys()):
-                new_equation = f'"{current_name}" = {user_param_dict[current_name]}'
-                swEqnMgr.Equation(i, new_equation)
-
-        # 式の計算
-        # noinspection PyStatementEffect
-        swEqnMgr.EvaluateAll  # always returns -1
-
-        # プロパティをもとに戻す
-        swEqnMgr.AutomaticSolveOrder = buffer_aso
-        swEqnMgr.AutomaticRebuild = buffer_ar
-
-        # 更新する（ここで失敗はしうる）
-        result = swModel.EditRebuild3  # モデル再構築
-        if not result:
-            raise ModelError(Msg.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED)
-
-        # export as x_t
-        swModel.SaveAs(x_t_path)
-
-        # 30 秒待っても x_t ができてなければエラー(COM なのでありうる)
-        timeout = 30
-        start = time()
         while True:
-            if os.path.isfile(x_t_path):
-                break
-            if time() - start > timeout:
-                raise ModelError(Msg.ERR_MODEL_UPDATE_FAILED)
-            sleep(1)
+
+            try:
+
+                # ===== model を取得 =====
+                swModel = get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
+
+                # ===== equation manager を取得 =====
+                swEqnMgr = swModel.GetEquationMgr
+                nEquation = swEqnMgr.GetCount
+
+                # プロパティを退避
+                buffer_aso = swEqnMgr.AutomaticSolveOrder
+                buffer_ar = swEqnMgr.AutomaticRebuild
+                swEqnMgr.AutomaticSolveOrder = False
+                swEqnMgr.AutomaticRebuild = False
+
+                for i in range(nEquation):
+                    # name, equation の取得
+                    current_equation = swEqnMgr.Equation(i)
+                    current_name = self._get_name_from_equation(current_equation)
+                    # 対象なら処理
+                    if current_name in list(user_param_dict.keys()):
+                        new_equation = f'"{current_name}" = {user_param_dict[current_name]}'
+                        swEqnMgr.Equation(i, new_equation)
+
+                # 式の計算
+                # noinspection PyStatementEffect
+                swEqnMgr.EvaluateAll  # always returns -1
+
+                # プロパティをもとに戻す
+                swEqnMgr.AutomaticSolveOrder = buffer_aso
+                swEqnMgr.AutomaticRebuild = buffer_ar
+
+                # 更新する（ここで失敗はしうる）
+                result = swModel.EditRebuild3  # モデル再構築
+                if not result:
+                    raise ModelError(Msg.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED)
+
+                # export as x_t
+                swModel.SaveAs(x_t_path)
+
+                # 30 秒待っても x_t ができてなければエラー(COM なのでありうる)
+                timeout = 30
+                start = time()
+                while True:
+                    if os.path.isfile(x_t_path):
+                        break
+                    if time() - start > timeout:
+                        raise ModelError(Msg.ERR_MODEL_UPDATE_FAILED)
+                    sleep(1)
+
+            except AttributeError as e:
+                if 'SLDWORKS.Application.' in str(e):
+                    # re-launch solidworks
+                    self.swApp = DispatchEx('SLDWORKS.Application')
+                    self.swApp.Visible = True
+                    self.swApp.OpenDoc(self.sldprt_path, self.swDocPART)
+                    continue
+
+                else:
+                    raise e
+
+            break
 
     def _get_name_from_equation(self, equation: str):
         pattern = r'^\s*"(.+?)"\s*$'
