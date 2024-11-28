@@ -336,62 +336,9 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler=sampler,
         )
 
-        # 一時的な実装。
-        #   TPESampler の場合、リスタート時などの場合で、
-        #   Pruned が多いとエラーを起こす挙動があるので、
-        #   Pruned な Trial は remove したい。
-        #   study.remove_trial がないので、一度ダミー
-        #   study を作成して最適化終了後に結果をコピーする。
-        if isinstance(sampler, optuna.samplers.TPESampler):
-            tmp_db = f"tmp{self.subprocess_idx}.db"
-            if os.path.exists(tmp_db):
-                os.remove(tmp_db)
-
-            _study = optuna.create_study(
-                study_name="tmp",
-                storage=f"sqlite:///{tmp_db}",
-                sampler=sampler,
-                directions=['minimize']*len(self.objectives),
-                load_if_exists=False,
-            )
-
-            # 既存の trials のうち COMPLETE のものを取得
-            existing_trials = study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
-            _study.add_trials(existing_trials)
-
-            # run
-            _study.optimize(
-                self._objective,
-                timeout=self.timeout,
-                callbacks=self.optimize_callbacks,
-            )
-
-            # trial.number と trial_id は _study への add_trials 時に
-            # 振りなおされるため重複したものをフィルタアウトするために
-            # datetime_start を利用。
-            added_trials = []
-            for _trial in _study.get_trials():
-                if _trial.datetime_start not in [t.datetime_start for t in existing_trials]:
-                    added_trials.append(_trial)
-
-            # Write back added trials to the existing study.
-            study.add_trials(added_trials)
-
-            # clean up
-            from optuna.storages import get_storage
-            storage = get_storage(f"sqlite:///{tmp_db}")
-            storage.remove_session()
-            del _study
-            del storage
-            import gc
-            gc.collect()
-            if os.path.exists(tmp_db):
-                os.remove(tmp_db)
-
-        else:
-            # run
-            study.optimize(
-                self._objective,
-                timeout=self.timeout,
-                callbacks=self.optimize_callbacks,
-            )
+        # run
+        study.optimize(
+            self._objective,
+            timeout=self.timeout,
+            callbacks=self.optimize_callbacks,
+        )
