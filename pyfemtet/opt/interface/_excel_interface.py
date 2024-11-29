@@ -25,6 +25,8 @@ from pyfemtet.dispatch_extensions._impl import _NestableSpawnProcess
 from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
 from pyfemtet._femtet_config_util.autosave import _set_autosave_enabled, _get_autosave_enabled
 
+from pyfemtet._util.excel_macro_util import watch_excel_macro_error
+
 from pyfemtet._warning import experimental_class
 
 import logging
@@ -52,8 +54,8 @@ class ExcelInterface(FEMInterface):
     wb_output: CDispatch  # システムを構成する Workbook
     sh_output: CDispatch  # 計算結果の定義された WorkSheet (sh_input と同じでもよい)
 
-    visible: bool = True  # excel を可視化するかどうか
-    display_alerts: bool = True  # ダイアログを表示するかどうか
+    visible: bool = False  # excel を可視化するかどうか
+    display_alerts: bool = False  # ダイアログを表示するかどうか
 
     _load_problem_from_me: bool = True  # TODO: add_parameter() 等を省略するかどうか。定義するだけでフラグとして機能する。
     _excel_pid: int
@@ -256,20 +258,18 @@ class ExcelInterface(FEMInterface):
 
         # マクロ実行
         try:
-            self.excel.Run(
-                f'{self.wb_input.Name}!{self.procedure_name}',
-                *self.procedure_args
-            )
+            with watch_excel_macro_error:
+                self.excel.Run(
+                    f'{self.wb_input.Name}!{self.procedure_name}',
+                    *self.procedure_args
+                )
 
-        # FIXME: エラーハンドリング
-        #   com_error をキャッチする(solveerror)か、
-        #   sh_out に解析結果を書く(拘束違反)ようにして、
-        #   それが FALSE なら SolveError を raise する。
-        except ...:
-            raise SolveError('Excelアップデートに失敗しました')
+            # 再計算
+            self.excel.CalculateFull()
 
-        # 再計算
-        self.excel.CalculateFull()
+        except com_error:
+            raise SolveError(f'Failed to run macro {self.wb_input.Name}!{self.procedure_name}')
+
 
     def quit(self):
         logger.info('Excel-Femtet の終了処理を開始します。')  # FIXME: message にする
