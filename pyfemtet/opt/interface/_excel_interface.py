@@ -71,6 +71,7 @@ class ExcelInterface(FEMInterface):
             procedure_name: str = None,
             procedure_args: list or tuple = None,
             connect_method: str = 'auto',  # or 'new'
+            procedure_timeout: float or None = None,
     ):
 
         # 初期化
@@ -83,6 +84,7 @@ class ExcelInterface(FEMInterface):
         assert connect_method in ['new', 'auto']
         self.connect_method = connect_method
         self._femtet_autosave_buffer = _get_autosave_enabled()
+        self.procedure_timeout = procedure_timeout
 
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
@@ -121,6 +123,7 @@ class ExcelInterface(FEMInterface):
             procedure_name=self.procedure_name,
             procedure_args=self.procedure_args,
             connect_method='new',  # subprocess で connect する際は new を強制する
+            procedure_timeout=self.procedure_timeout,
         )
         super().__init__(**kwargs)
 
@@ -258,7 +261,7 @@ class ExcelInterface(FEMInterface):
 
         # マクロ実行
         try:
-            with watch_excel_macro_error:
+            with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
                 self.excel.Run(
                     f'{self.wb_input.Name}!{self.procedure_name}',
                     *self.procedure_args

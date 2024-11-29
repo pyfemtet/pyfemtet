@@ -27,7 +27,7 @@ class _ExcelDialogProcessor:
         self.should_stop = False
         self.timeout = timeout
         self.__timed_out = False
-        self.__workbook_paths = [wb.FullName for wb in excel.Workbooks]
+        self.__workbook_paths = [wb.FullName for wb in excel_.Workbooks]
         self.__error_raised = False
         self.__excel_state_stash = dict()
         self.__watch_thread = None
