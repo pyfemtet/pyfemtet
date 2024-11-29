@@ -31,7 +31,10 @@ def test_excel_interface():
         output_sheet_name='output',
         procedure_name='FemtetMacro.FemtetMain',
         procedure_args=None,
+        procedure_timeout=60,
     )
+
+    fem.visible = True
 
     opt = OptunaOptimizer(
         sampler_class=QMCSampler,

@@ -27,7 +27,7 @@ from pyfemtet._femtet_config_util.autosave import _set_autosave_enabled, _get_au
 
 from pyfemtet._util.excel_macro_util import watch_excel_macro_error
 
-from pyfemtet._warning import experimental_class
+from pyfemtet._warning import show_experimental_warning
 
 import logging
 
@@ -35,7 +35,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-@experimental_class
 class ExcelInterface(FEMInterface):
 
     input_xlsm_path: Path  # 操作対象の xlsm パス
@@ -73,6 +72,7 @@ class ExcelInterface(FEMInterface):
             connect_method: str = 'auto',  # or 'new'
             procedure_timeout: float or None = None,
     ):
+        show_experimental_warning("ExcelInterface")
 
         # 初期化
         self.input_xlsm_path = None  # あとで取得する
@@ -125,7 +125,7 @@ class ExcelInterface(FEMInterface):
             connect_method='new',  # subprocess で connect する際は new を強制する
             procedure_timeout=self.procedure_timeout,
         )
-        super().__init__(**kwargs)
+        FEMInterface.__init__(self, **kwargs)
 
     def __del__(self):
         try:

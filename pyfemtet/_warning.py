@@ -2,15 +2,19 @@ import warnings
 from functools import wraps
 
 
+def show_experimental_warning(feature_name):
+    warnings.warn(
+        f"The function '{feature_name}' is experimental and may change in the future.",
+        category=UserWarning,
+        stacklevel=2
+    )
+
+
 def experimental_feature(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        warnings.warn(
-            f"The function '{func.__name__}' is experimental and may change in the future.",
-            category=UserWarning,
-            stacklevel=2
-        )
+        show_experimental_warning(func.__name__)
         return func(*args, **kwargs)
 
     return wrapper
@@ -62,6 +66,10 @@ if __name__ == '__main__':
         print("This is an experimental function.")
 
     class Sample:
+
+        def __init__(self):
+            show_experimental_warning("Sample")
+
         @experimental_feature
         def add(self, a, b):
             return a + b

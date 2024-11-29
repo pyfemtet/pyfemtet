@@ -201,8 +201,9 @@ class SampleTest:
             ref_values = _get_simplified_df_values(self.ref_path)
 
             # 比較
-            if (np.abs(dif_values - ref_values) / ref_values).mean() > self.threshold:
-                assert False, f'ref との平均差異が {int(self.threshold*100)}% 超です。'
+            rate = (np.abs(dif_values - ref_values) / ref_values).mean()
+            if rate > self.threshold:
+                assert False, f'ref との平均差異が {int(rate*100)} であり、 {int(self.threshold*100)}% 超です。'
             else:
                 print(f'{os.path.basename(self.py_path)}, PASSED!')
 
@@ -327,4 +328,4 @@ if __name__ == '__main__':
     # test_sample_paswat_ex1_parametric(record_mode=True)
     # test_sample_gal_ex58_parametric(record_mode=True)
     # test_sample_parametric_if(record_mode=True)
-    test_cad_sample_sldworks_ex01(record_mode=False)
+    test_cad_sample_sldworks_ex01(record_mode=True)
