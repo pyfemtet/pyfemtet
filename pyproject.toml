@@ -33,7 +33,7 @@ optuna =  ">=3.4.0, <5.0.0"
 optuna-integration = ">=3.6.0, <5.0.0"
 botorch = "==0.9.5"
 torch = "~2.3.0"
-brepmatching = {version = ">=0.1.0", optional = true}
+brepmatching = {version = "^0.1.6", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 # license
@@ -68,6 +68,7 @@ markers = [
     "sample",
     "cad",
     "nofem",
+    "brep",
 ]
 
 [tool.poetry-dynamic-versioning]
