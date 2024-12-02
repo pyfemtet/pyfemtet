@@ -7,8 +7,8 @@ import inspect
 
 # 3rd-party
 import optuna
-from optuna.trial import TrialState
-from optuna.study import MaxTrialsCallback
+from optuna.trial import TrialState, FrozenTrial
+from optuna.study import MaxTrialsCallback, Study
 
 # pyfemtet relative
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
@@ -86,6 +86,8 @@ class OptunaOptimizer(AbstractOptimizer):
         self.additional_initial_parameter = []
         self.additional_initial_methods = add_init_method if hasattr(add_init_method, '__iter__') else [add_init_method]
         self.method_checker = OptunaMethodChecker(self)
+        self._temporary_storage = None
+        self._temporary_storage_path = '_pyfemtet_temporary_file.db'
 
     def _objective(self, trial):
 
@@ -277,6 +279,35 @@ class OptunaOptimizer(AbstractOptimizer):
                 f'sqlite:///{storage_path}',
             )
 
+            # if TPESampler, create temporary study
+            # due to instability in case of many pruned trials.
+            from optuna.samplers import TPESampler
+            if issubclass(self.sampler_class, TPESampler):
+
+                if os.path.exists(self._temporary_storage_path):
+                    os.remove(self._temporary_storage_path)
+
+                self._temporary_storage = optuna.integration.dask.DaskStorage(
+                    f'sqlite:///{self._temporary_storage_path}',
+                )
+
+                study = optuna.load_study(
+                    study_name=None,
+                    storage=self.storage,
+                    sampler=None,
+                )
+
+                _study = optuna.create_study(
+                    study_name='tmp',
+                    storage=self._temporary_storage,
+                    load_if_exists=True,
+                    directions=['minimize'] * len(self.objectives),
+                )
+
+                # Copy COMPLETE trials to temporary study.
+                existing_trials = study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
+                _study.add_trials(existing_trials)
+
     def add_init_parameter(
             self,
             parameter: dict or Iterable,
@@ -336,28 +367,29 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler=sampler,
         )
 
-        # 一時的な実装。
-        #   TPESampler の場合、リスタート時などの場合で、
-        #   Pruned が多いとエラーを起こす挙動があるので、
-        #   Pruned な Trial は remove したい。
-        #   study.remove_trial がないので、一度ダミー
-        #   study を作成して最適化終了後に結果をコピーする。
-        if isinstance(sampler, optuna.samplers.TPESampler):
-            tmp_db = f"tmp{self.subprocess_idx}.db"
-            if os.path.exists(tmp_db):
-                os.remove(tmp_db)
-
-            _study = optuna.create_study(
-                study_name="tmp",
-                storage=f"sqlite:///{tmp_db}",
-                sampler=sampler,
-                directions=['minimize']*len(self.objectives),
-                load_if_exists=False,
+        # use temporary storage or not
+        if self._temporary_storage is None:
+            # run
+            study.optimize(
+                self._objective,
+                timeout=self.timeout,
+                callbacks=self.optimize_callbacks,
             )
 
-            # 既存の trials のうち COMPLETE のものを取得
-            existing_trials = study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
-            _study.add_trials(existing_trials)
+        else:
+            # load study
+            _study = optuna.load_study(
+                study_name="tmp",
+                storage=self._temporary_storage,
+                sampler=sampler,
+            )
+
+            # Add callback to coppy back each trial.
+            class CopyBack:
+                def __call__(self, _: Study, trial: FrozenTrial) -> None:
+                    # Write back added trials to the existing study.
+                    study.add_trial(trial)
+            self.optimize_callbacks.append(CopyBack())
 
             # run
             _study.optimize(
@@ -366,32 +398,14 @@ class OptunaOptimizer(AbstractOptimizer):
                 callbacks=self.optimize_callbacks,
             )
 
-            # trial.number と trial_id は _study への add_trials 時に
-            # 振りなおされるため重複したものをフィルタアウトするために
-            # datetime_start を利用。
-            added_trials = []
-            for _trial in _study.get_trials():
-                if _trial.datetime_start not in [t.datetime_start for t in existing_trials]:
-                    added_trials.append(_trial)
-
-            # Write back added trials to the existing study.
-            study.add_trials(added_trials)
-
             # clean up
-            from optuna.storages import get_storage
-            storage = get_storage(f"sqlite:///{tmp_db}")
-            storage.remove_session()
-            del _study
-            del storage
-            import gc
-            gc.collect()
-            if os.path.exists(tmp_db):
-                os.remove(tmp_db)
-
-        else:
-            # run
-            study.optimize(
-                self._objective,
-                timeout=self.timeout,
-                callbacks=self.optimize_callbacks,
-            )
+            try:
+                self._temporary_storage.remove_session()
+                del self._temporary_storage
+                del _study
+                import gc
+                gc.collect()
+                if os.path.exists(self._temporary_storage_path):
+                    os.remove(self._temporary_storage_path)
+            except:
+                pass

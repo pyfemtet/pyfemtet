@@ -601,6 +601,25 @@ class FEMOpt:
 
         """
 
+        # ===== opt の設定 =====
+
+        # Interface から設定を読む場合の処理
+        # 設定ファイルから設定を読む場合は最適化問題が
+        # この時点で不定なので actor 等の設定をする前に
+        # ここで確定する必要がある。
+        if hasattr(self.fem, '_load_problem_from_me'):
+            if self.fem._load_problem_from_me:
+                self.fem.load_parameter(self.opt)
+                self.fem.load_objective(self.opt)
+
+        # resolve expression dependencies
+        self.opt.variables.resolve()
+        self.opt.variables.evaluate()
+
+        # opt の共通引数
+        self.opt.n_trials = n_trials
+        self.opt.timeout = timeout
+
         # method checker
         if n_parallel > 1:
             self.opt.method_checker.check_parallel()
@@ -630,13 +649,37 @@ class FEMOpt:
         if is_incomplete_bounds:
             self.opt.method_checker.check_incomplete_bounds()
 
-        # 共通引数
-        self.opt.n_trials = n_trials
-        self.opt.timeout = timeout
 
-        # resolve expression dependencies
-        self.opt.variables.resolve()
-        self.opt.variables.evaluate()
+        # ===== fem の設定 ==--=
+
+        # Femtet 特有の処理
+        metadata = None
+        if isinstance(self.fem, FemtetInterface):
+
+            # 結果 csv に記載する femprj に関する情報の作成
+            metadata = json.dumps(
+                dict(
+                    femprj_path=self.fem.original_femprj_path,
+                    model_name=self.fem.model_name
+                )
+            )
+
+            # Femtet の parametric 設定を目的関数に用いるかどうか
+            if self.fem.parametric_output_indexes_use_as_objective is not None:
+                from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
+                indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
+                directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
+                add_parametric_results_as_objectives(
+                    self,
+                    indexes,
+                    directions,
+                )
+
+            # Femtet の confirm_before_exit のセット
+            self.fem.confirm_before_exit = confirm_before_exit
+            self.fem.kwargs['confirm_before_exit'] = confirm_before_exit
+
+            logger.info('Femtet loaded successfully.')
 
         # クラスターの設定
         self.opt.is_cluster = self.scheduler_address is not None
@@ -696,35 +739,6 @@ class FEMOpt:
 
         with self.client.cluster as _cluster, self.client as _client:
 
-            # Femtet 特有の処理
-            metadata = None
-            if isinstance(self.fem, FemtetInterface):
-                # 結果 csv に記載する femprj に関する情報
-                metadata = json.dumps(
-                    dict(
-                        femprj_path=self.fem.original_femprj_path,
-                        model_name=self.fem.model_name
-                    )
-                )
-
-                # Femtet の parametric 設定を目的関数に用いるかどうか
-                if self.fem.parametric_output_indexes_use_as_objective is not None:
-                    from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
-                    indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
-                    directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
-                    add_parametric_results_as_objectives(
-                        self,
-                        indexes,
-                        directions,
-                    )
-
-                # Femtet の confirm_before_exit のセット
-                self.fem.confirm_before_exit = confirm_before_exit
-                self.fem.kwargs['confirm_before_exit'] = confirm_before_exit
-
-                logger.info('Femtet loaded successfully.')
-
-
             # actor の設定
             self.status = OptimizationStatus(_client)
             self.worker_status_list = [OptimizationStatus(_client, name) for name in worker_addresses]  # tqdm 検討
@@ -759,6 +773,7 @@ class FEMOpt:
             logger.info('Process monitor initialized successfully.')
 
             # fem
+            # TODO: n_parallel=1 のときもアップロードしている。これを使うべきか、アップロードしないべき。
             self.fem._setup_before_parallel(_client)
 
             # opt
@@ -767,6 +782,9 @@ class FEMOpt:
             self.opt.entire_status = self.status
             self.opt.history = self.history
             self.opt._setup_before_parallel()
+
+            buff = self.opt.fem
+            del self.opt.fem
 
             # クラスターでの計算開始
             self.status.set(OptimizationStatus.LAUNCHING_FEM)
@@ -780,15 +798,17 @@ class FEMOpt:
                 allow_other_workers=False,
             )
 
+            self.opt.fem = buff
+
             t_main = None
             if not self.opt.is_cluster:
-                # ローカルプロセスでの計算(opt._main 相当の処理)
+                # ローカルプロセスでの計算(opt._run 相当の処理)
                 subprocess_idx = 0
 
                 # set_fem
                 self.opt.fem = self.fem
-                self.opt._reconstruct_fem(skip_reconstruct=True)
 
+                # fem の _setup_after_parallel はこの場合も呼ばれる
                 t_main = Thread(
                     target=self.opt._run,
                     args=(
@@ -797,7 +817,7 @@ class FEMOpt:
                         wait_setup,
                     ),
                     kwargs=dict(
-                        skip_set_fem=True,
+                        skip_reconstruct=True,
                     )
                 )
                 t_main.start()

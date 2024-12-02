@@ -51,6 +51,12 @@ class FEMInterface(ABC):
         """
         pass
 
+    def load_parameter(self, opt) -> None:  # opt: AbstractOptimizer
+        raise NotImplementedError()
+
+    def load_objective(self, opt) -> None:  # opt: AbstractOptimizer
+        raise NotImplementedError()
+
     def _setup_before_parallel(self, client) -> None:
         """Preprocessing before launching a dask worker (if implemented in concrete class).
 
@@ -64,7 +70,7 @@ class FEMInterface(ABC):
         """
         pass
 
-    def _setup_after_parallel(self):
+    def _setup_after_parallel(self, *args, **kwargs):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
@@ -72,6 +78,9 @@ class FEMInterface(ABC):
         pass
 
     def _create_postprocess_args(self):
+        pass
+
+    def quit(self):
         pass
 
 

@@ -113,6 +113,9 @@ class Message:
     GRAPH_TITLE_SINGLE_OBJECTIVE = _('Objective Plot')
     GRAPH_TITLE_MULTI_OBJECTIVE = _('Multi Objective Pair Plot')
     GRAPH_AXIS_LABEL_TRIAL = _('trial number')
+    LEGEND_LABEL_ALL_SOLUTIONS = _('All solutions')
+    LEGEND_LABEL_OPTIMAL_SOLUTIONS = _('Transition of optimal solutions')
+    LEGEND_LABEL_OBJECTIVE_TARGET = _('Target value')
     # main_graph.py
     TAB_LABEL_OBJECTIVE_PLOT = _('Objectives')
     TAB_LABEL_OBJECTIVE_SCATTERPLOT = _('Objectives (all)')

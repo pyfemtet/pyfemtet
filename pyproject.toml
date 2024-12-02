@@ -69,6 +69,7 @@ markers = [
     "cad",
     "nofem",
     "brep",
+    "excel",
 ]
 
 [tool.poetry-dynamic-versioning]

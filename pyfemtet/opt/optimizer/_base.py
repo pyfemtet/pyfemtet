@@ -292,17 +292,17 @@ class AbstractOptimizer(ABC):
 
     def _finalize(self):
         """Destruct fem and set worker status."""
-        del self.fem
+        self.fem.quit()
         if not self.worker_status.get() == OptimizationStatus.CRASHED:
             self.worker_status.set(OptimizationStatus.TERMINATED)
 
     # run via FEMOpt (considering parallel processing)
     def _run(
             self,
-            subprocess_idx,
-            worker_status_list,
-            wait_setup,
-            skip_set_fem=False,
+            subprocess_idx,  # 自身が何番目の並列プロセスであるかを示す連番
+            worker_status_list,  # 他の worker の status オブジェクト
+            wait_setup,  # 他の worker の status が ready になるまで待つか
+            skip_reconstruct=False,  # reconstruct fem を行うかどうか
     ) -> Optional[Exception]:
 
         # 自分の worker_status の取得
@@ -314,9 +314,8 @@ class AbstractOptimizer(ABC):
             return None
 
         # set_fem をはじめ、終了したらそれを示す
-        if not skip_set_fem:  # なくても動く？？
-            self._reconstruct_fem()
-        self.fem._setup_after_parallel()
+        self._reconstruct_fem(skip_reconstruct)
+        self.fem._setup_after_parallel(opt=self)
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
 
         # wait_setup or not
@@ -326,6 +325,9 @@ class AbstractOptimizer(ABC):
                     return None
                 # 他のすべての worker_status が wait 以上になったら break
                 if all([ws.get() >= OptimizationStatus.WAIT_OTHER_WORKERS for ws in worker_status_list]):
+                    # リソースの競合等を避けるため
+                    # break する前に index 秒待つ
+                    sleep(int(subprocess_idx))
                     break
                 sleep(1)
         else:

@@ -27,10 +27,12 @@ import os
 import datetime
 import importlib
 import pyfemtet
+import shutil
 import numpy as np
 import pandas as pd
 from femtetutils import util
 from win32com.client import Dispatch
+from pyfemtet.opt._test_utils.record_history import remove_femprj_metadata_from_csv
 
 import pytest
 
@@ -52,12 +54,18 @@ class SampleTest:
             sample_femprj_path: str or None = None,
             record_mode: bool = False,
             threshold: float = 0.05,
+            related_file_paths: list[str] = None,
     ):
         self.py_path: str = os.path.abspath(sample_py_path)
         self.femprj_path: str = os.path.abspath(sample_femprj_path) if sample_femprj_path is not None else self.py_path.replace('.py', '.femprj')
         self.record_mode: bool = record_mode
         self.threshold = threshold
         self._now = datetime.datetime.now().strftime(f'%y%m%d_%H：%M')
+
+        if related_file_paths is None:
+            self.related_file_paths = []
+        else:
+            self.related_file_paths = related_file_paths
 
         assert os.path.exists(self.py_path)
         assert os.path.exists(self.femprj_path)
@@ -116,9 +124,20 @@ class SampleTest:
         return _buff
 
     def save_script(self, script: str):
+
+        # create main script
         path = here + '/generated_sample_script.py'
         with open(path, 'w', encoding='utf-8') as f:
             f.write(script)
+
+        # copy related paths
+        for path in self.related_file_paths:
+            filename = os.path.basename(path)
+            dst_path = os.path.join(here, filename)
+            if os.path.exists(dst_path):
+                os.remove(dst_path)
+            shutil.copy(path, dst_path)
+
         return path
 
     def run(self):
@@ -137,7 +156,7 @@ class SampleTest:
             # カレントディレクトリの変更（一応）
             _buff = os.getcwd()
             os.chdir(here)
-        
+
             # スクリプトの編集実行
             script = self.load_script()
             mod_script = self.modify_script(script)
@@ -169,9 +188,12 @@ class SampleTest:
             # 起動した Femtet を終了
             Femtet.Exit(force := True)
 
-        # record_mode なら、何もしない
+        # record_mode なら、metadata を削除する
+        if self.record_mode:
+            remove_femprj_metadata_from_csv(self.ref_path)
+
         # そうでなければ、ref と比較する
-        if not self.record_mode:
+        else:
             # csv 取得
             dif_values = _get_simplified_df_values(self.dif_path)
 
@@ -179,8 +201,9 @@ class SampleTest:
             ref_values = _get_simplified_df_values(self.ref_path)
 
             # 比較
-            if (np.abs(dif_values - ref_values) / ref_values).mean() > self.threshold:
-                assert False, f'ref との平均差異が {int(self.threshold*100)}% 超です。'
+            rate = (np.abs(dif_values - ref_values) / ref_values).mean()
+            if rate > self.threshold:
+                assert False, f'ref との平均差異が {int(rate*100)} であり、 {int(self.threshold*100)}% 超です。'
             else:
                 print(f'{os.path.basename(self.py_path)}, PASSED!')
 
@@ -277,14 +300,14 @@ def test_sample_parametric_if(record_mode=False):
     sample_test.run()
 
 
-# NOT IMPLEMENTED! (must copy CAD file before running)
-# @pytest.mark.cad
-# def test_cad_sample_sldworks_ex01(record_mode=False):
-#     sample_test = SampleTest(
-#         rf'{sample_root}\cad_ex01_SW.py',
-#         record_mode=record_mode,
-#     )
-#     sample_test.run()
+@pytest.mark.cad
+def test_cad_sample_sldworks_ex01(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\cad_ex01_SW.py',
+        record_mode=record_mode,
+        related_file_paths=[rf'{sample_root}\cad_ex01_SW.SLDPRT'],
+    )
+    sample_test.run()
 
 
 # NOT IMPLEMENTED! (must copy CAD file before running)
@@ -302,6 +325,7 @@ if __name__ == '__main__':
     # test_sample_gau_ex08_parametric(record_mode=True)
     # test_sample_her_ex40_parametric(record_mode=True)
     # test_sample_wat_ex14_parametric(record_mode=True)
-    test_sample_paswat_ex1_parametric(record_mode=True)
+    # test_sample_paswat_ex1_parametric(record_mode=True)
     # test_sample_gal_ex58_parametric(record_mode=True)
     # test_sample_parametric_if(record_mode=True)
+    test_cad_sample_sldworks_ex01(record_mode=True)
