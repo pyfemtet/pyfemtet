@@ -263,15 +263,15 @@ class ExcelInterface(FEMInterface):
         try:
             with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
                 self.excel.Run(
-                    f'{self.wb_input.Name}!{self.procedure_name}',
+                    f'{self.procedure_name}',
                     *self.procedure_args
                 )
 
             # 再計算
             self.excel.CalculateFull()
 
-        except com_error:
-            raise SolveError(f'Failed to run macro {self.wb_input.Name}!{self.procedure_name}')
+        except com_error as e:
+            raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
 
 
     def quit(self):
@@ -293,7 +293,7 @@ class ExcelInterface(FEMInterface):
         gc.collect()
 
         # quit した後ならば femtet を終了できる
-        # excel の process の完全消滅を待つ
+        # excel の process の消滅を待つ
         logger.info('Excel の終了を待っています。')
         while self._excel_pid == _get_pid(self._excel_hwnd):
             sleep(1)
@@ -301,12 +301,14 @@ class ExcelInterface(FEMInterface):
         # 正確だが時間がかかるかも
         logger.info('終了する Femtet を特定しています。')
         femtet_pid = util.get_last_executed_femtet_process_id()
-        Femtet, caught_pid = dispatch_specific_femtet(femtet_pid)
-        _exit_or_force_terminate(timeout=3, Femtet=Femtet, force=True)
+        from multiprocessing import Process
+        p = Process(target=_terminate_femtet, args=(femtet_pid,))
+        p.start()
 
         logger.info('自動保存機能の設定を元に戻しています。')
         _set_autosave_enabled(self._femtet_autosave_buffer)
 
+        p.join()
         logger.info('Excel-Femtet を終了しました。')
 
     # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
@@ -424,6 +426,11 @@ def wait_femtet():
         sleep(1)
         Femtet = Dispatch('FemtetMacro.Femtet')
 
+
+def _terminate_femtet(femtet_pid_):
+    CoInitialize()
+    Femtet, caught_pid = dispatch_specific_femtet(femtet_pid_)
+    _exit_or_force_terminate(timeout=3, Femtet=Femtet, force=True)
 
 # main thread で作成した excel への参照を含む関数を
 # 直接 thread や process に渡すと機能しない
