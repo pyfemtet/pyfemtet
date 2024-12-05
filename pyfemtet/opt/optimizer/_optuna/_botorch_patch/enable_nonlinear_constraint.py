@@ -14,9 +14,12 @@ from botorch.acquisition import AcquisitionFunction
 from botorch.optim.initializers import gen_batch_initial_conditions
 
 from pyfemtet.opt._femopt_core import Constraint
-from pyfemtet.opt.optimizer import OptunaOptimizer, logger
+from pyfemtet.opt.optimizer import OptunaOptimizer
 from pyfemtet._message import Msg
 
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger(__file__, __name__)
 
 
 BotorchConstraint = Callable[[Tensor], Tensor]

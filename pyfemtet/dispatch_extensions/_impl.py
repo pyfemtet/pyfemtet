@@ -18,14 +18,11 @@ from multiprocessing.context import BaseContext, SpawnProcess, _concrete_context
 from multiprocessing.process import _children, _cleanup
 from multiprocessing.managers import SyncManager
 
-import logging
-from pyfemtet.logger import get_logger
-
 from pyfemtet._message import Msg
 
+from pyfemtet.logger import get_module_logger
 
-logger = get_logger('dispatch')
-logger.setLevel(logging.INFO)
+logger = get_module_logger('dispatch', __name__)
 
 
 DISPATCH_TIMEOUT = 120

@@ -5,11 +5,9 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-import logging
-from pyfemtet.logger import get_logger
-logger = get_logger('FEM')
-logger.setLevel(logging.INFO)
+from pyfemtet.logger import get_module_logger
 
+logger = get_module_logger('opt.interface', __name__)
 
 here, me = os.path.split(__file__)
 

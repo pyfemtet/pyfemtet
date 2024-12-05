@@ -16,10 +16,9 @@ from pyfemtet._message import Msg
 from pyfemtet.opt.optimizer.parameter import ExpressionEvaluator, Parameter
 
 # logger
-import logging
-from pyfemtet.logger import get_logger
-logger = get_logger('opt')
-logger.setLevel(logging.INFO)
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger('opt.optimizer', __name__)
 
 
 class OptimizationMethodChecker:

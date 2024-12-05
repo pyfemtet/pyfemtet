@@ -5,12 +5,6 @@ from tqdm import tqdm
 from win32com.client import Dispatch
 from femtetutils import util
 
-import logging
-
-
-logger = logging.getLogger("test")
-logger.setLevel(logging.DEBUG)
-
 
 def _open_femprj(femprj_path):
     Femtet = Dispatch("FemtetMacro.Femtet")

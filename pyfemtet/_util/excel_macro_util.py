@@ -1,20 +1,14 @@
 """Excel のエラーダイアログを補足します。"""
-import sys
 from time import sleep
 from threading import Thread
-import logging
 import asyncio  # for timeout
 import win32gui
 import win32con
 import win32api
 
-logger = logging.getLogger(__name__)
-if __name__ == '__main__':
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger('util.excel', __name__)
 
 
 class _ExcelDialogProcessor:

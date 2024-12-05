@@ -1,107 +1,231 @@
+import logging
 import os
 import sys
-import logging
+import datetime
+import locale
+from threading import Lock
+from pathlib import Path
+import platform
+
 from colorlog import ColoredFormatter
 from dask.distributed import get_worker
 
+LOCALE, LOCALE_ENCODING = locale.getlocale()
+if platform.system() == 'Windows':
+    DATEFMT = '%#m/%#d %#H:%M'
+else:
+    DATEFMT = '%-m/%-d %-H:%M'
 
-def _get_worker_name_as_prefix():
-    name = '(Main) '
+__lock = Lock()  # thread 並列されたタスクがアクセスする場合に備えて
+
+__initialized_root_packages: list[str] = list()
+
+
+# ===== set dask worker prefix to ``ROOT`` logger =====
+
+def _get_dask_worker_name():
+    name = '(Main)'
     try:
         worker = get_worker()
         if isinstance(worker.name, str):  # local なら index, cluster なら tcp address
-            name = f'({worker.name}) '
+            name = f'({worker.name})'
         else:
-            name = f'(Sub{worker.name}) '
+            name = f'(Sub{worker.name})'
     except ValueError:
         pass
     return name
 
 
 class _DaskLogRecord(logging.LogRecord):
-    """Generate a log message with dask worker name."""
-
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.worker = _get_worker_name_as_prefix()
-
     def getMessage(self):
-        """Add worker name to loggin message.
-
-        This function is originated from logging.LogRecord.
-
-            # Copyright (C) 2001-2022 Vinay Sajip. All Rights Reserved.
-
-        """
         msg = str(self.msg)
         if self.args:
             msg = msg % self.args
-        msg = _get_worker_name_as_prefix() + msg
+        msg = _get_dask_worker_name() + ' ' + msg
         return msg
 
 
-logging.setLogRecordFactory(_DaskLogRecord)  # すべての logging %(message)s の前に prefix を入れる
+logging.setLogRecordFactory(_DaskLogRecord)
 
 
-def _color_supported() -> bool:
-    """Detection of color support.
+# ===== format config =====
 
-    This function is originated from optuna.logging.
+def __create_formatter(colored=True):
 
-        # Copyright (c) 2018 Preferred Networks, Inc.
+    if colored:
+        # colorized
+        header = "%(log_color)s" + "[%(name)s %(levelname).4s]" + " %(asctime)s" + "%(reset)s"
 
-    """
+        formatter = ColoredFormatter(
+            f"{header} %(message)s",
+            datefmt=DATEFMT,
+            reset=True,
+            log_colors={
+                "DEBUG": "purple",
+                "INFO": "cyan",
+                "WARNING": "yellow",
+                "ERROR": "light_red",
+                "CRITICAL": "red",
+            },
+        )
 
-    # NO_COLOR environment variable:
-    if os.environ.get("NO_COLOR", None):
-        return False
-
-    if not hasattr(sys.stderr, "isatty") or not sys.stderr.isatty():
-        return False
     else:
-        return True
-
-
-def _create_formatter() -> logging.Formatter:
-    """Create a formatter."""
-    # header = f"[pyfemtet %(name)s] %(levelname).4s %(worker)s]"
-    header = f"[pyfemtet %(name)s %(levelname).4s]"
-    message = "%(message)s"
-
-    formatter = ColoredFormatter(
-        f"%(log_color)s{header}%(reset)s {message}",
-        datefmt=None,
-        reset=True,
-        log_colors={
-            "DEBUG": "purple",
-            "INFO": "cyan",
-            "WARNING": "yellow",
-            "ERROR": "light_red",
-            "CRITICAL": "red",
-        },
-    )
+        header = "[%(name)s %(levelname).4s]"
+        formatter = logging.Formatter(
+            f"{header} %(message)s",
+            datefmt=DATEFMT,
+        )
 
     return formatter
 
 
-def get_logger(logger_name):
-    """Returns a logger.
+# ===== handler config =====
 
-    Examples:
-        >>> # Retrieves a specific logger used in pyfemtet.opt.
-        >>> import logging  # doctest: +SKIP
-        >>> from pyfemtet.logger import get_logger  # doctest: +SKIP
-        >>> logger = get_logger('opt')  # logger of optimizer  # doctest: +SKIP
-        >>> logger.setLevel(logging.ERROR)  # disable all log from optimizer  # doctest: +SKIP
+STDOUT_HANDLER_NAME = 'stdout-handler'
+
+
+def __get_stdout_handler():
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.set_name(STDOUT_HANDLER_NAME)
+    stdout_handler.setFormatter(__create_formatter(colored=True))
+    return stdout_handler
+
+
+def __has_stdout_handler(logger):
+    return any([handler.get_name() != STDOUT_HANDLER_NAME for handler in logger.handlers])
+
+
+def set_stdout_output(logger, level=logging.INFO):
+
+    if not __has_stdout_handler(logger):
+        logger.addHandler(__get_stdout_handler())
+
+    logger.setLevel(level)
+
+
+def remove_stdout_output(logger):
+    if __has_stdout_handler(logger):
+        logger.removeHandler(__get_stdout_handler())
+
+
+def add_file_output(logger, filepath=None, level=logging.INFO) -> str:
+    """Add FileHandler to the logger.
+
+    Returns:
+        str: THe name of the added handler.
+        Its format is 'filehandler-{os.path.basename(filepath)}'
 
     """
 
-    formatter = _create_formatter()
+    # certify filepath
+    if filepath is None:
+        filepath = datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + f'_{logger.name}.log'
 
-    logger = logging.getLogger(logger_name)
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+    # add file handler
+    file_handler = logging.FileHandler(filename=filepath, encoding=LOCALE_ENCODING)
+    file_handler.set_name(f'filehandler-{os.path.basename(filepath)}')
+    file_handler.setFormatter(__create_formatter(colored=False))
+    logger.addHandler(file_handler)
+
+    # set (default) log level
+    logger.setLevel(level)
+
+    return file_handler.get_name()
+
+
+def remove_file_output(logger, filepath=None):
+    """Removes FileHandler from the logger.
+
+    If filepath is None, remove all FileHandler.
+    """
+
+    if filepath is None:
+        for handler in logger.handlers:
+            if 'filehandler-' in handler.name:
+                logger.removeHandler(handler)
+
+    else:
+        handler_name = f'filehandler-{os.path.basename(filepath)}'
+        for handler in logger.handlers:
+            if handler_name == handler.name:
+                logger.removeHandler(handler)
+
+
+def remove_all_output(logger):
+    for handler in logger.handlers:
+        logger.removeHandler(handler)
+
+    logger.addHandler(logging.NullHandler())
+
+
+# ===== root-package logger =====
+
+def setup_package_root_logger(package_name):
+    global __initialized_root_packages
+    if package_name not in __initialized_root_packages:
+        with __lock:
+            logger = logging.getLogger(package_name)
+            logger.propagate = True
+            set_stdout_output(logger)
+            logger.setLevel(logging.INFO)
+            __initialized_root_packages.append(package_name)
+    else:
+        logger = logging.getLogger(package_name)
+    return logger
+
+
+# ===== module logger =====
+
+def get_module_logger(name: str, __module_name__: str, ) -> logging.Logger:
+    """Return the module-level logger.
+
+    The format is defined in the package_root_logger.
+
+    Args:
+        name (str): The logger name to want.
+        __module_name__ (str): __name__ of the module.
+
+    Returns:
+        logging.Logger:
+            The logger its name is ``root_package.subpackage.module``.
+            child level logger's signal propagates to the parent logger
+            and is shown in the parent(s)'s handler(s).
+
+    """
+
+    # check root logger initialized
+    name_arr = name.split('.')
+    if name_arr[0] not in __initialized_root_packages:
+        setup_package_root_logger(name_arr[0])
+
+    # get logger
+    logger = logging.getLogger(name)
+
+    # If not root logger, ensure propagate is True.
+    if len(name_arr) > 1:
+        logger.propagate = True
+
+    # If debug mode, set specific level.
+    if __module_name__ == '__main__':
+        logger.setLevel(logging.DEBUG)
 
     return logger
+
+
+if __name__ == '__main__':
+
+    root_logger = setup_package_root_logger('logger')
+    optimizer_logger = get_module_logger('logger.optimizer', __name__); optimizer_logger.setLevel(logging.INFO)
+    interface_logger = get_module_logger('logger.interface', __name__)
+
+    root_logger.info("This is root logger's info.")
+    optimizer_logger.info("This is optimizer logger's info.")
+
+    add_file_output(interface_logger, 'test-module-log.log', level=logging.DEBUG)
+    interface_logger.debug('debugging...')
+    remove_file_output(interface_logger, 'test-module-log.log')
+
+    interface_logger.debug('debug is finished.')
+    root_logger.debug("This message will not be shown "
+                      "even if the module_logger's level "
+                      "is logging.DEBUG.")

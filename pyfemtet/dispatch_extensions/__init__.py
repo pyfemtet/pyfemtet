@@ -9,4 +9,3 @@ from pyfemtet.dispatch_extensions._impl import (
     _get_pid,
     _get_pids,
 )
-

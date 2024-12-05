@@ -1,5 +1,4 @@
 from time import time, sleep
-import logging
 
 from win32com.client import CDispatch
 from femtetutils import util
@@ -9,7 +8,9 @@ from pyfemtet.dispatch_extensions._impl import _get_pid
 from pyfemtet.core import _version
 from pyfemtet._message import Msg
 
-logger = logging.getLogger('fem')
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger('util.femtet.exit', __name__)
 
 
 def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):

@@ -32,10 +32,9 @@ from pyfemtet.opt.interface import FEMInterface, FemtetInterface
 from pyfemtet._message import encoding, Msg
 
 # logger
-import logging
-from pyfemtet.logger import get_logger
-logger = get_logger('femopt')
-logger.setLevel(logging.INFO)
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger('opt.core', __name__)
 
 
 __all__ = [
