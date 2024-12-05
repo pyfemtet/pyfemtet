@@ -22,7 +22,7 @@ if version.parse(optuna.version.__version__) < version.parse('4.0.0'):
 else:
     from optuna._hypervolume import wfg
     compute_hypervolume = wfg.compute_hypervolume
-from dask.distributed import Lock, get_client
+from dask.distributed import Lock, get_client, Client
 
 # win32com
 from win32com.client import constants, Constants
@@ -502,19 +502,6 @@ class ObjectivesFunc:
         return f
 
 
-class _HistoryDfCore:
-    """Class for managing a DataFrame object in a distributed manner."""
-
-    def __init__(self):
-        self.df = pd.DataFrame()
-
-    def set_df(self, df):
-        self.df = df
-
-    def get_df(self):
-        return self.df
-
-
 class History:
     """Class for managing the history of optimization results.
 
@@ -542,8 +529,6 @@ class History:
     is_restart = False
     is_processing = False
     _df = None  # in case without client
-    _future = None  # in case with client
-    _actor_data = None  # in case with client
 
     def __init__(
             self,
@@ -564,16 +549,13 @@ class History:
         self.obj_names = obj_names
         self.cns_names = cns_names
         self.additional_metadata = additional_metadata or ''
+        self.__scheduler_address = client.scheduler.address if client is not None else None
 
         # 最適化実行中かどうか
         self.is_processing = client is not None
 
         # 最適化実行中の process monitor である場合
         if self.is_processing:
-
-            # actor の生成
-            self._future = client.submit(_HistoryDfCore, actor=True)
-            self._actor_data = self._future.result()
 
             # csv が存在すれば続きからモード
             self.is_restart = os.path.isfile(self.path)
@@ -640,16 +622,28 @@ class History:
         self.set_df(df)
 
     def get_df(self) -> pd.DataFrame:
-        if self._actor_data is None:
+        if self.__scheduler_address is None:
             return self._df
         else:
-            return self._actor_data.get_df().result()
+            with Lock('access-df'):
+                client_: 'Client' = get_client(self.__scheduler_address)
+                if 'df' in client_.list_datasets():
+                    return client_.get_dataset('df')
+                else:
+                    logger.debug('Access df of History before it is initialized.')
+                    return pd.DataFrame()
 
     def set_df(self, df: pd.DataFrame):
-        if self._actor_data is None:
+        if self.__scheduler_address is None:
             self._df = df
         else:
-            self._actor_data.set_df(df).result()
+            with Lock('access-df'):
+                client_: 'Client' = get_client(self.__scheduler_address)
+                if 'df' in client_.list_datasets():
+                    client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
+                client_.publish_dataset(**dict(
+                    df=df
+                ))
 
     def create_df_columns(self):
         """Create columns of history."""
