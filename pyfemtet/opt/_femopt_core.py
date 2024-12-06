@@ -625,25 +625,33 @@ class History:
         if self.__scheduler_address is None:
             return self._df
         else:
-            with Lock('access-df'):
-                client_: 'Client' = get_client(self.__scheduler_address)
-                if 'df' in client_.list_datasets():
-                    return client_.get_dataset('df')
-                else:
-                    logger.debug('Access df of History before it is initialized.')
-                    return pd.DataFrame()
+            # scheduler がまだ存命か確認する
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+                    if 'df' in client_.list_datasets():
+                        return client_.get_dataset('df')
+                    else:
+                        logger.debug('Access df of History before it is initialized.')
+                        return pd.DataFrame()
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
+                return pd.DataFrame()
 
     def set_df(self, df: pd.DataFrame):
         if self.__scheduler_address is None:
             self._df = df
         else:
-            with Lock('access-df'):
-                client_: 'Client' = get_client(self.__scheduler_address)
-                if 'df' in client_.list_datasets():
-                    client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
-                client_.publish_dataset(**dict(
-                    df=df
-                ))
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+                    if 'df' in client_.list_datasets():
+                        client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
+                    client_.publish_dataset(**dict(
+                        df=df
+                    ))
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
 
     def create_df_columns(self):
         """Create columns of history."""
