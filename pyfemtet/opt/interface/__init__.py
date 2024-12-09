@@ -1,4 +1,4 @@
-from pyfemtet.opt.interface._base import FEMInterface, logger
+from pyfemtet.opt.interface._base import FEMInterface
 from pyfemtet.opt.interface._base import NoFEM
 from pyfemtet.opt.interface._femtet import FemtetInterface
 from pyfemtet.opt.interface._femtet_with_sldworks import FemtetWithSolidworksInterface

@@ -29,10 +29,7 @@ from pyfemtet._util.excel_macro_util import watch_excel_macro_error
 
 from pyfemtet._warning import show_experimental_warning
 
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+from pyfemtet.opt.interface._base import logger
 
 
 class ExcelInterface(FEMInterface):

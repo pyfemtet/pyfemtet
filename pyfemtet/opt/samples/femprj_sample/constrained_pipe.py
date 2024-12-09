@@ -65,7 +65,6 @@ def radius_diff(Femtet, opt):
     external_r = params['external_r']
     return external_r - internal_r
 
-
 if __name__ == '__main__':
     # Setup optimization method
     opt = OptunaOptimizer(

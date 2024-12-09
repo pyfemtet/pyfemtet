@@ -33,10 +33,16 @@ from pyfemtet.dispatch_extensions import (
     _get_pids,
     DispatchExtensionException,
 )
-from pyfemtet.opt.interface import FEMInterface, logger
+from pyfemtet.opt.interface import FEMInterface
 from pyfemtet._message import Msg
 from pyfemtet._femtet_config_util.autosave import _get_autosave_enabled, _set_autosave_enabled
 from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
+
+if __name__ == '__main__':
+    from pyfemtet.logger import get_module_logger
+    logger = get_module_logger('opt.interface.FemtetInterface', __name__)
+else:
+    from pyfemtet.opt.interface._base import logger
 
 
 def _post_activate_message(hwnd):

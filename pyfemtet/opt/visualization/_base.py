@@ -20,14 +20,14 @@ from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
 from abc import ABC, abstractmethod
 import logging
 import psutil
-from pyfemtet.logger import get_logger
+from pyfemtet.logger import get_module_logger, get_dash_logger
 
+logger = get_module_logger('opt.monitor', __name__)
+logger.setLevel(logging.ERROR)
 
-dash_logger = logging.getLogger('werkzeug')
+dash_logger = get_dash_logger()
 dash_logger.setLevel(logging.ERROR)
 
-logger = get_logger('viewer')
-logger.setLevel(logging.ERROR)
 
 
 class AbstractPage(ABC):
