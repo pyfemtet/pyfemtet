@@ -32,6 +32,7 @@ def test_excel_interface():
         procedure_name='FemtetMacro.FemtetMain',
         procedure_args=None,
         procedure_timeout=60,
+        with_call_femtet=False,
     )
 
     fem.visible = True
@@ -51,7 +52,7 @@ def test_excel_interface():
     df = femopt.optimize(
         n_trials=30,
         confirm_before_exit=False,
-        n_parallel=3,
+        n_parallel=1,
     )
 
     csv_path = femopt.history_path

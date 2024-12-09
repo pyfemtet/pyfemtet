@@ -33,6 +33,99 @@ from pyfemtet.opt.interface._base import logger
 
 
 class ExcelInterface(FEMInterface):
+    """Excel を計算コアとして利用するためのクラス。
+
+    通常の有限要素法を Excel に
+    置き換えて使用することが可能です。
+
+    すでに Excel マクロと Femtet を
+    連携させた自動解析システムを
+    構築している場合、このクラスは
+    それをラップします。これにより、
+    PyFemtet を用いた最適化を
+    行う際に便利な機能を提供します。
+
+    Args:
+        input_xlsm_path (str or Path):
+            設計変数の定義を含む Excel ファイルのパスを指定
+            します。
+            
+        input_sheet_name (str):
+            設計変数の定義を含むシートの名前を指定します。
+            
+        output_xlsm_path (str or Path, optional):
+            目的関数の定義を含む Excel ファイルのパスを指定
+            します。指定しない場合は ``input_xlsm_path`` と
+            同じと見做します。
+            
+        output_sheet_name (str, optional):
+            目的関数の定義を含む含むシートの名前を指定します。
+            指定しない場合は ``input_sheet_name`` と同じと見
+            做します。
+            
+        procedure_name (str, optional):
+            Excel マクロ関数名を指定します。指定しない場合は
+            ``FemtetMacro.FemtetMain`` と見做します。
+            
+        procedure_args (list or tuple, optional):
+            Excel マクロ関数に渡す引数をリストまたはタプルで
+            指定します。
+            
+        connect_method (str, optional):
+            Excel との接続方法を指定します。 'auto' または
+            'new' が利用可能です。デフォルトは 'auto' です。
+            
+        procedure_timeout (float or None, optional):
+            Excel マクロ関数のタイムアウト時間を秒単位で指定
+            します。 None の場合はタイムアウトなしとなります。
+            
+        with_call_femtet (bool, optional):
+            Femtet を呼び出すかどうかを指定します。
+            デフォルトは False です。
+
+    
+    Attributes:
+        input_xlsm_path (str or Path):
+            設計変数の定義を含む Excel ファイルのパス。
+            
+        input_sheet_name (str):
+            設計変数の定義を含むシートの名前。
+
+        output_xlsm_path (str or Path, optional):
+            目的関数の定義を含む Excel ファイルのパス。
+
+        output_sheet_name (str, optional):
+            目的関数の定義を含む含むシートの名前。
+
+        procedure_name (str, optional):
+            実行する Excel マクロ関数名。
+
+        procedure_args (list or tuple, optional):
+            Excel マクロ関数に渡す引数のリストまたはタプル。
+
+        connect_method (str, optional):
+            接続方法。
+
+        procedure_timeout (float or None, optional):
+            Excel マクロ関数の実行タイムアウト。
+            Noneの場合は無制限。
+        
+        excel (CDispatch):
+            Excel の COM オブジェクト。
+
+        input_sheet (CDispatch):
+            設計変数を含むシートの COM オブジェクト。
+
+        output_sheet (CDispatch):
+            目的関数を含むシートの COM オブジェクト。
+
+        input_workbook (CDispatch):
+            設計変数を含む xlsm ファイルの COM オブジェクト。
+
+        output_workbook (CDispatch):
+            設計変数を含む xlsm ファイルの COM オブジェクト。
+
+    """
 
     input_xlsm_path: Path  # 操作対象の xlsm パス
     input_sheet_name: str  # 変数セルを定義しているシート名
@@ -53,10 +146,12 @@ class ExcelInterface(FEMInterface):
     visible: bool = False  # excel を可視化するかどうか
     display_alerts: bool = False  # ダイアログを表示するかどうか
 
-    _load_problem_from_me: bool = True  # TODO: add_parameter() 等を省略するかどうか。定義するだけでフラグとして機能する。
+    _load_problem_from_me: bool = True
     _excel_pid: int
     _excel_hwnd: int
     _femtet_autosave_buffer: bool  # Femtet の自動保存機能の一時退避場所。最適化中はオフにする。
+    _with_call_femtet: bool  # Femtet を Python から起動するかどうか。Excel から起動できる場合は False でよい。
+
 
     def __init__(
             self,
@@ -68,7 +163,9 @@ class ExcelInterface(FEMInterface):
             procedure_args: list or tuple = None,
             connect_method: str = 'auto',  # or 'new'
             procedure_timeout: float or None = None,
+            with_call_femtet: bool = False
     ):
+
         show_experimental_warning("ExcelInterface")
 
         # 初期化
@@ -82,6 +179,7 @@ class ExcelInterface(FEMInterface):
         self.connect_method = connect_method
         self._femtet_autosave_buffer = _get_autosave_enabled()
         self.procedure_timeout = procedure_timeout
+        self._with_call_femtet = with_call_femtet
 
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
@@ -98,19 +196,6 @@ class ExcelInterface(FEMInterface):
             else:
                 self.output_xlsm_path = Path(os.path.abspath(output_xlsm_path)).resolve()
 
-        # FIXME:
-        #   そもそも ExcelInterface なので Femtet 関連のことをやらなくていいと思う。
-        #   FemtetRef が文句なく動けばいいのだが、手元環境ではなぜか動いたり動かなかったりするため
-        #   仕方なく Femtet を Python 側から動かしている仮実装。
-        # 先に femtet を起動
-        util.execute_femtet()
-
-        # 直後の Excel 起動に間に合わない場合があったため
-        # Femtet が Dispatch 可能になるまで捨てプロセスで待つ
-        p = _NestableSpawnProcess(target=wait_femtet)
-        p.start()
-        p.join()
-
         # サブプロセスでの restore のための情報保管
         kwargs = dict(
             input_xlsm_path=self.input_xlsm_path,
@@ -121,6 +206,7 @@ class ExcelInterface(FEMInterface):
             procedure_args=self.procedure_args,
             connect_method='new',  # subprocess で connect する際は new を強制する
             procedure_timeout=self.procedure_timeout,
+            with_call_femtet=self._with_call_femtet,
         )
         FEMInterface.__init__(self, **kwargs)
 
@@ -205,15 +291,51 @@ class ExcelInterface(FEMInterface):
     def add_femtet_ref_xla(self, wb):
 
         # search
+        ref_file_1 = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+        if not os.path.exists(ref_file_1):
+            # 32bit
+            ref_file_1 = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+        if not os.path.exists(ref_file_1):
+            raise FileNotFoundError(f'{ref_file_1} not found. Please check the "Enable Macros" command was fired.')
+        contain_1 = False
+        for ref in wb.VBProject.References:
+            if ref.FullPath is not None:
+                if ref.FullPath == ref_file_1:  # or ``FemtetMacroを使用するための参照設定を自動で行ないます。``
+                    contain_1 = True
+        # add
+        if not contain_1:
+            wb.VBProject.References.AddFromFile(ref_file_1)
+
+        # search
         ref_file_2 = os.path.abspath(util._get_femtetmacro_dllpath())
-        contain = False
+        contain_2 = False
         for ref in wb.VBProject.References:
             if ref.Description is not None:
                 if ref.Description == 'FemtetMacro':  # FemtetMacro
-                    contain = True
+                    contain_2 = True
         # add
-        if not contain:
+        if not contain_2:
             wb.VBProject.References.AddFromFile(ref_file_2)
+
+    def remove_femtet_ref_xla(self, wb):
+
+        # search
+        ref_file_1 = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+        if not os.path.exists(ref_file_1):
+            # 32bit
+            ref_file_1 = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+        if not os.path.exists(ref_file_1):
+            raise FileNotFoundError(f'{ref_file_1} not found. Please check the "Enable Macros" command was fired.')
+        for ref in wb.VBProject.References:
+            if ref.FullPath is not None:
+                if ref.FullPath == ref_file_1:  # or ``FemtetMacroを使用するための参照設定を自動で行ないます。``
+                    wb.VBProject.References.Remove(ref)
+
+        # search
+        for ref in wb.VBProject.References:
+            if ref.Description is not None:
+                if ref.Description == 'FemtetMacro':  # FemtetMacro
+                    wb.VBProject.References.Remove(ref)
 
     def _setup_after_parallel(self, *args, **kwargs):
         # サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理
@@ -224,7 +346,17 @@ class ExcelInterface(FEMInterface):
         # 最適化中は femtet の autosave を無効にする
         _set_autosave_enabled(False)
 
-        # excel に繋ぎなおす
+        # 必要なら Femtet を起動する
+        if self._with_call_femtet:
+            util.execute_femtet()
+
+            # 直後の Excel 起動に間に合わない場合があるため
+            # Femtet が Dispatch 可能になるまで捨てプロセスで待つ
+            p = _NestableSpawnProcess(target=wait_femtet)
+            p.start()
+            p.join()
+
+        # excel に繋ぐ
         self.connect_excel(self.connect_method)
 
         # load_objective は 1 回目に呼ばれたのが main thread なので
@@ -236,11 +368,6 @@ class ExcelInterface(FEMInterface):
         for obj_name, obj in opt.objectives.items():
             if isinstance(obj.fun, ScapeGoatObjective):
                 opt.objectives[obj_name].fun = self.objective_from_excel
-
-        # TODO:
-        #   __init__ が作った Femtet 以外を排他処理して
-        #   Excel がそれを使うことを保証するようにする（遅すぎるか？）
-        #   そもそも、excel から Femtet を起動できればそれで済む（？）。
 
     def update(self, parameters: pd.DataFrame) -> None:
 
@@ -270,16 +397,30 @@ class ExcelInterface(FEMInterface):
         except com_error as e:
             raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
 
-
     def quit(self):
-        logger.info('Excel-Femtet の終了処理を開始します。')  # FIXME: message にする
+        logger.info('Excel の終了処理を開始します。')
+
+        self.remove_femtet_ref_xla(self.wb_input)
+        self.remove_femtet_ref_xla(self.wb_output)
 
         del self.sh_input
         del self.sh_output
 
-        self.wb_input.Close(SaveChanges := False)
+        # TODO: 閉じる際にエラーダイアログが発生する場合がある。
+        try:
+            with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
+                self.wb_input.Close(SaveChanges := False)
+        except com_error as e:
+            pass
+
         if self.input_xlsm_path.name != self.output_xlsm_path.name:
-            self.wb_output.Close(SaveChanges := False)
+
+            try:
+                with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
+                    self.wb_output.Close(SaveChanges := False)
+            except com_error as e:
+                pass
+
         del self.wb_input
         del self.wb_output
 
@@ -295,18 +436,18 @@ class ExcelInterface(FEMInterface):
         while self._excel_pid == _get_pid(self._excel_hwnd):
             sleep(1)
 
-        # 正確だが時間がかかるかも
-        logger.info('終了する Femtet を特定しています。')
-        femtet_pid = util.get_last_executed_femtet_process_id()
-        from multiprocessing import Process
-        p = Process(target=_terminate_femtet, args=(femtet_pid,))
-        p.start()
+        if self._with_call_femtet:
+            # TODO: 正確だが時間がかかる。選択できるようにしたほうがいいかもしれない。
+            logger.info('終了する Femtet を特定しています。')
+            femtet_pid = util.get_last_executed_femtet_process_id()
+            from multiprocessing import Process
+            p = Process(target=_terminate_femtet, args=(femtet_pid,))
+            p.start()
+            p.join()
+            logger.info('Excel-Femtet を終了しました。')
 
         logger.info('自動保存機能の設定を元に戻しています。')
         _set_autosave_enabled(self._femtet_autosave_buffer)
-
-        p.join()
-        logger.info('Excel-Femtet を終了しました。')
 
     # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
     @property
@@ -428,6 +569,7 @@ def _terminate_femtet(femtet_pid_):
     CoInitialize()
     Femtet, caught_pid = dispatch_specific_femtet(femtet_pid_)
     _exit_or_force_terminate(timeout=3, Femtet=Femtet, force=True)
+
 
 # main thread で作成した excel への参照を含む関数を
 # 直接 thread や process に渡すと機能しない
