@@ -310,22 +310,23 @@ def test_cad_sample_sldworks_ex01(record_mode=False):
     sample_test.run()
 
 
-# NOT IMPLEMENTED! (must copy CAD file before running)
-# @pytest.mark.cad
-# def test_cad_sample_nx_ex01(record_mode=False):
-#     sample_test = SampleTest(
-#         rf'{sample_root}\cad_ex01_NX.py',
-#         record_mode=record_mode,
-#     )
-#     sample_test.run()
+@pytest.mark.cad
+def test_cad_sample_nx_ex01(record_mode=False):
+    sample_test = SampleTest(
+        rf'{sample_root}\cad_ex01_NX.py',
+        record_mode=record_mode,
+        related_file_paths=[rf'{sample_root}\cad_ex01_NX.prt'],
+    )
+    sample_test.run()
 
 
 if __name__ == '__main__':
-    # test_constrained_pipe(record_mode=True)
-    # test_sample_gau_ex08_parametric(record_mode=True)
-    # test_sample_her_ex40_parametric(record_mode=True)
-    # test_sample_wat_ex14_parametric(record_mode=True)
-    # test_sample_paswat_ex1_parametric(record_mode=True)
-    # test_sample_gal_ex58_parametric(record_mode=True)
-    # test_sample_parametric_if(record_mode=True)
+    test_constrained_pipe(record_mode=True)
+    test_sample_gau_ex08_parametric(record_mode=True)
+    test_sample_her_ex40_parametric(record_mode=True)
+    test_sample_wat_ex14_parametric(record_mode=True)
+    test_sample_paswat_ex1_parametric(record_mode=True)
+    test_sample_gal_ex58_parametric(record_mode=True)
+    test_sample_parametric_if(record_mode=True)
     test_cad_sample_sldworks_ex01(record_mode=True)
+    test_cad_sample_nx_ex01(record_mode=True)
