@@ -13,7 +13,7 @@ logger = get_module_logger('util.excel', __name__)
 
 class _ExcelDialogProcessor:
 
-    def __init__(self, excel_, timeout):
+    def __init__(self, excel_, timeout, restore_book=True):
         self.excel = excel_
         self.__excel_window_title = f' - Excel'  # {basename} - Excel
         self.__error_dialog_title = 'Microsoft Visual Basic'
@@ -25,6 +25,7 @@ class _ExcelDialogProcessor:
         self.__error_raised = False
         self.__excel_state_stash = dict()
         self.__watch_thread = None
+        self.restore_book = restore_book
 
     async def watch(self):
 
@@ -127,15 +128,17 @@ class _ExcelDialogProcessor:
         # if exc_type is not None:
         #     if issubclass(exc_type, com_error) and self.__error_raised:
         if self.__error_raised:
+            if self.restore_book:
                 logger.debug('エラーハンドリングの副作用でブックを閉じているので'
                              'Excel のブックを開きなおします。')
                 for wb_path in self.__workbook_paths:
                     self.excel.Workbooks.Open(wb_path)
 
 
-def watch_excel_macro_error(excel_, timeout):
+def watch_excel_macro_error(excel_, timeout, restore_book=True):
     """Excel のエラーダイアログの出現を監視し、検出されればブックを閉じます。"""
-    return _ExcelDialogProcessor(excel_, timeout)
+    return _ExcelDialogProcessor(excel_, timeout, restore_book)
+
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from time import sleep
+import gc
 
 import pandas as pd
 import numpy as np
@@ -85,31 +86,36 @@ class ExcelInterface(FEMInterface):
 
     
     Attributes:
-        input_xlsm_path (str or Path):
+        input_xlsm_path (Path):
             設計変数の定義を含む Excel ファイルのパス。
             
         input_sheet_name (str):
             設計変数の定義を含むシートの名前。
 
-        output_xlsm_path (str or Path, optional):
+        output_xlsm_path (Path):
             目的関数の定義を含む Excel ファイルのパス。
 
-        output_sheet_name (str, optional):
+        output_sheet_name (str):
             目的関数の定義を含む含むシートの名前。
 
-        procedure_name (str, optional):
+        procedure_name (str):
             実行する Excel マクロ関数名。
 
-        procedure_args (list or tuple, optional):
+        procedure_args (list or tuple):
             Excel マクロ関数に渡す引数のリストまたはタプル。
 
-        connect_method (str, optional):
-            接続方法。
+        connect_method (str):
+            接続方法。'new' または 'auto'。
 
-        procedure_timeout (float or None, optional):
+        procedure_timeout (float or None):
             Excel マクロ関数の実行タイムアウト。
             Noneの場合は無制限。
-        
+
+        terminate_excel_when_quit (bool):
+            プログラム終了時に Excel を終了するかどうか。
+            connect_method が 'new' の場合 True,
+            'auto' の場合 False。
+
         excel (CDispatch):
             Excel の COM オブジェクト。
 
@@ -145,6 +151,7 @@ class ExcelInterface(FEMInterface):
 
     visible: bool = False  # excel を可視化するかどうか
     display_alerts: bool = False  # ダイアログを表示するかどうか
+    terminate_excel_when_quit: bool  # 終了時に Excel を終了するかどうか
 
     _load_problem_from_me: bool = True
     _excel_pid: int
@@ -180,6 +187,7 @@ class ExcelInterface(FEMInterface):
         self._femtet_autosave_buffer = _get_autosave_enabled()
         self.procedure_timeout = procedure_timeout
         self._with_call_femtet = with_call_femtet
+        self.terminate_excel_when_quit = self.connect_method == 'new'
 
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
@@ -300,7 +308,7 @@ class ExcelInterface(FEMInterface):
         contain_1 = False
         for ref in wb.VBProject.References:
             if ref.FullPath is not None:
-                if ref.FullPath == ref_file_1:  # or ``FemtetMacroを使用するための参照設定を自動で行ないます。``
+                if ref.FullPath.lower() == ref_file_1.lower():
                     contain_1 = True
         # add
         if not contain_1:
@@ -398,53 +406,46 @@ class ExcelInterface(FEMInterface):
             raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
 
     def quit(self):
-        logger.info('Excel の終了処理を開始します。')
+        if self.terminate_excel_when_quit:
+            logger.info('Excel の終了処理を開始します。')
 
-        self.remove_femtet_ref_xla(self.wb_input)
-        self.remove_femtet_ref_xla(self.wb_output)
+            self.remove_femtet_ref_xla(self.wb_input)
+            self.remove_femtet_ref_xla(self.wb_output)
 
-        del self.sh_input
-        del self.sh_output
+            del self.sh_input
+            del self.sh_output
 
-        # TODO: 閉じる際にエラーダイアログが発生する場合がある。
-        try:
-            with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
+            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_input.Close(SaveChanges := False)
-        except com_error as e:
-            pass
-
-        if self.input_xlsm_path.name != self.output_xlsm_path.name:
-
-            try:
-                with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
+            if self.input_xlsm_path.name != self.output_xlsm_path.name:
+                with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                     self.wb_output.Close(SaveChanges := False)
-            except com_error as e:
-                pass
 
-        del self.wb_input
-        del self.wb_output
+            del self.wb_input
+            del self.wb_output
 
-        self.excel.Quit()
-        del self.excel
+            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
+                self.excel.Quit()
+            del self.excel
 
-        import gc
-        gc.collect()
+            gc.collect()  # ここで Excel のプロセスが残らず落ちる
 
-        # quit した後ならば femtet を終了できる
-        # excel の process の消滅を待つ
-        logger.info('Excel の終了を待っています。')
-        while self._excel_pid == _get_pid(self._excel_hwnd):
-            sleep(1)
+            if self._with_call_femtet:
 
-        if self._with_call_femtet:
-            # TODO: 正確だが時間がかかる。選択できるようにしたほうがいいかもしれない。
-            logger.info('終了する Femtet を特定しています。')
-            femtet_pid = util.get_last_executed_femtet_process_id()
-            from multiprocessing import Process
-            p = Process(target=_terminate_femtet, args=(femtet_pid,))
-            p.start()
-            p.join()
-            logger.info('Excel-Femtet を終了しました。')
+                # quit した後ならば femtet を終了できる
+                # excel の process の消滅を待つ
+                logger.info('Excel の終了を待っています。')
+                while self._excel_pid == _get_pid(self._excel_hwnd):
+                    sleep(1)
+
+                # TODO: 正確だが時間がかかる。選択できるようにしたほうがいいかもしれない。
+                logger.info('終了する Femtet を特定しています。')
+                femtet_pid = util.get_last_executed_femtet_process_id()
+                from multiprocessing import Process
+                p = Process(target=_terminate_femtet, args=(femtet_pid,))
+                p.start()
+                p.join()
+                logger.info('Excel-Femtet を終了しました。')
 
         logger.info('自動保存機能の設定を元に戻しています。')
         _set_autosave_enabled(self._femtet_autosave_buffer)

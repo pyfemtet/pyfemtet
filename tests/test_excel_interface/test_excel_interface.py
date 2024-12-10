@@ -33,6 +33,7 @@ def test_excel_interface():
         procedure_args=None,
         procedure_timeout=60,
         with_call_femtet=False,
+        connect_method='new',
     )
 
     fem.visible = True
