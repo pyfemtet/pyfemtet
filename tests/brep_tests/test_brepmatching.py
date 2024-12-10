@@ -1,13 +1,13 @@
 import os
 from femtetutils import util
 from win32com.client import Dispatch
-from pyfemtet.brep import ModelUpdater
-
+import pytest
 import logging
 logger = logging.getLogger('brepmatching')
 logger.setLevel(logging.DEBUG)
 
 
+@pytest.mark.brep
 def test_brepmatching():
     util.auto_execute_femtet()
     Femtet = Dispatch('FemtetMacro.Femtet')
@@ -18,7 +18,8 @@ def test_brepmatching():
         ),
         True
     )
-
+    
+    from pyfemtet.brep import ModelUpdater
     mu = ModelUpdater(Femtet)
 
     def update_model():
