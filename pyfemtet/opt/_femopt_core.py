@@ -22,20 +22,19 @@ if version.parse(optuna.version.__version__) < version.parse('4.0.0'):
 else:
     from optuna._hypervolume import wfg
     compute_hypervolume = wfg.compute_hypervolume
-from dask.distributed import Lock, get_client
+from dask.distributed import Lock, get_client, Client
 
 # win32com
 from win32com.client import constants, Constants
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
-from pyfemtet.message import encoding, Msg
+from pyfemtet._message import encoding, Msg
 
 # logger
-import logging
-from pyfemtet.logger import get_logger
-logger = get_logger('femopt')
-logger.setLevel(logging.INFO)
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger('opt.core', __name__)
 
 
 __all__ = [
@@ -430,17 +429,77 @@ class Constraint(Function):
         super().__init__(fun, name, args, kwargs)
 
 
-class _HistoryDfCore:
-    """Class for managing a DataFrame object in a distributed manner."""
+class ObjectivesFunc:
+    """複数の値を返す関数を objective として扱うためのクラス
 
-    def __init__(self):
-        self.df = pd.DataFrame()
+    複数の値を返す関数を受け取る。
 
-    def set_df(self, df):
-        self.df = df
+    最初に評価されたときに計算を実行し
+    そうでない場合は保持した値を返す
+    callable のリストを提供する。
 
-    def get_df(self):
-        return self.df
+    """
+
+    def __init__(self, fun, n_return):
+        self._evaluated = [False for _ in range(n_return)]
+        self._values = [None for _ in range(n_return)]
+        self._i = 0
+        self.fun = fun
+        self.n_return = n_return
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+
+        # iter の長さ
+        if self._i == self.n_return:
+            self._i = 0
+            raise StopIteration
+
+        # iter として提供する callable オブジェクト
+        # self の情報にもアクセスする必要があり
+        # それぞれが iter された時点での i 番目という
+        # 情報も必要なのでこのスコープで定義する必要がある
+        class NthFunc:
+            def __init__(self_, i):
+                # 何番目の要素であるかを保持
+                # self._i を直接参照すると
+                # 実行時点での ObjectiveFunc の
+                # 値を参照してしまう
+                self_.i = i
+
+            def __call__(self_, *args, **kwargs):
+                # 何番目の要素であるか
+                i = self_.i
+
+                # 一度も評価されていなければ評価する
+                if not any(self._evaluated):
+                    self._values = tuple(self.fun(*args, **kwargs))
+                    assert len(self._values) == self.n_return, '予期しない戻り値の数'
+
+                # 評価したらフラグを立てる
+                self._evaluated[i] = True
+
+                # すべてのフラグが立ったらクリアする
+                if all(self._evaluated):
+                    self._evaluated = [False for _ in range(self.n_return)]
+
+                # 値を返す
+                return self._values[i]
+
+            @property
+            def __globals__(self_):
+                # ScapeGoat 実装への対処
+                return self.fun.__globals__
+
+        # callable を作成
+        f = NthFunc(self._i)
+
+        # index を更新
+        self._i += 1
+
+        return f
 
 
 class History:
@@ -453,18 +512,12 @@ class History:
         cns_names (List[str], optional): The names of constraints. Defaults to None.
         client (dask.distributed.Client): Dask client.
         additional_metadata (str, optional): metadata of optimization process.
-
-    Raises:
-        FileNotFoundError: If the csv file is not found.
-
-    Attributes:
-        HEADER_ROW (int): Header row number of csv file. Must be grater than 0. Default to 2.
-        ENCODING (str): Encoding of csv file. Default to 'cp932'.
-        prm_names (str): User defined names of parameters.
-        obj_names (str): User defined names of objectives.
-        cns_names (str): User defined names of constraints.
-        is_restart (bool): If the optimization process is a continuation of another process or not.
-        is_processing (bool): The optimization is running or not.
+        hv_reference (str or list[float or np.ndarray, optional):
+            The method to calculate hypervolume or
+            the reference point itself.
+            Valid values are 'dynamic-pareto' or
+            'dynamic-nadir' or 'nadir' or 'pareto'
+            or fixed point (in objective function space).
 
     """
 
@@ -476,8 +529,6 @@ class History:
     is_restart = False
     is_processing = False
     _df = None  # in case without client
-    _future = None  # in case with client
-    _actor_data = None  # in case with client
 
     def __init__(
             self,
@@ -487,7 +538,10 @@ class History:
             cns_names=None,
             client=None,
             additional_metadata=None,
+            hv_reference=None,
     ):
+        # hypervolume 計算メソッド
+        self._hv_reference = hv_reference or 'dynamic-pareto'
 
         # 引数の処理
         self.path = history_path  # .csv
@@ -495,16 +549,13 @@ class History:
         self.obj_names = obj_names
         self.cns_names = cns_names
         self.additional_metadata = additional_metadata or ''
+        self.__scheduler_address = client.scheduler.address if client is not None else None
 
         # 最適化実行中かどうか
         self.is_processing = client is not None
 
         # 最適化実行中の process monitor である場合
         if self.is_processing:
-
-            # actor の生成
-            self._future = client.submit(_HistoryDfCore, actor=True)
-            self._actor_data = self._future.result()
 
             # csv が存在すれば続きからモード
             self.is_restart = os.path.isfile(self.path)
@@ -571,16 +622,36 @@ class History:
         self.set_df(df)
 
     def get_df(self) -> pd.DataFrame:
-        if self._actor_data is None:
+        if self.__scheduler_address is None:
             return self._df
         else:
-            return self._actor_data.get_df().result()
+            # scheduler がまだ存命か確認する
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+                    if 'df' in client_.list_datasets():
+                        return client_.get_dataset('df')
+                    else:
+                        logger.debug('Access df of History before it is initialized.')
+                        return pd.DataFrame()
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
+                return pd.DataFrame()
 
     def set_df(self, df: pd.DataFrame):
-        if self._actor_data is None:
+        if self.__scheduler_address is None:
             self._df = df
         else:
-            self._actor_data.set_df(df).result()
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+                    if 'df' in client_.list_datasets():
+                        client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
+                    client_.publish_dataset(**dict(
+                        df=df
+                    ))
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
 
     def create_df_columns(self):
         """Create columns of history."""
@@ -715,76 +786,122 @@ class History:
 
     def _calc_non_domi(self, objectives, df):
 
+        # feasible のもののみ取り出してくる
+        idx = df['feasible'].values
+        pdf = df[idx]
+
         # 目的関数の履歴を取り出してくる
-        solution_set = df[self.obj_names]
+        solution_set = pdf[self.obj_names]
 
         # 最小化問題の座標空間に変換する
         for obj_column, (_, objective) in zip(self.obj_names, objectives.items()):
             solution_set.loc[:, obj_column] = solution_set[obj_column].map(objective.convert)
 
         # 非劣解の計算
-        non_domi = []
+        non_domi: list[bool] = []
         for i, row in solution_set.iterrows():
             non_domi.append((row > solution_set).product(axis=1).sum(axis=0) == 0)
 
-        # 非劣解の登録
-        df['non_domi'] = non_domi
+        # feasible も infeasible も一旦劣解にする
+        df['non_domi'] = False
+
+        # feasible のものに non_domi の評価結果を代入する
+        df.loc[idx, 'non_domi'] = non_domi
 
     def _calc_hypervolume(self, objectives, df):
 
-        # filter non-dominated and feasible solutions
-        idx = df['non_domi'].values
-        idx = idx * df['feasible'].values  # *= を使うと non_domi 列の値が変わる
-        pdf = df[idx]
-        pareto_set = pdf[self.obj_names].values
-        n = len(pareto_set)  # 集合の要素数
-        m = len(pareto_set.T)  # 目的変数数
-        # 多目的でないと計算できない
-        if m <= 1:
-            return None
-        # 長さが 2 以上でないと計算できない
-        if n <= 1:
-            return None
-        # 最小化問題に convert
-        for i, (_, objective) in enumerate(objectives.items()):
-            for j in range(n):
-                pareto_set[j, i] = objective.convert(pareto_set[j, i])
-                #### reference point の計算[1]
-        # 逆正規化のための範囲計算
-        maximum = pareto_set.max(axis=0)
-        minimum = pareto_set.min(axis=0)
+        if len(objectives) < 2:
+            df.loc[len(df) - 1, 'hypervolume'] = 0.
+            return
 
-        r = 1.01
+        # 最小化問題に変換された objective values を取得
+        raw_objective_values = df[self.obj_names].values
+        objective_values = np.empty_like(raw_objective_values)
+        for n_trial in range(len(raw_objective_values)):
+            for obj_idx, (_, objective) in enumerate(objectives.items()):
+                objective_values[n_trial, obj_idx] = objective.convert(raw_objective_values[n_trial, obj_idx])
 
-        # r を逆正規化
-        reference_point = r * (maximum - minimum) + minimum
+        # pareto front を取得
+        def get_pareto(objective_values_, with_partial=False):
+            ret = None
+            if with_partial:
+                ret = []
 
-        #### hv 履歴の計算
-        hvs = []
-        for i in range(n):
-            hv = compute_hypervolume(pareto_set[:i], reference_point)
-            if np.isnan(hv):
-                hv = 0
-            hvs.append(hv)
+            pareto_set_ = np.empty((0, len(self.obj_names)))
+            for i in range(len(objective_values_)):
+                target = objective_values_[i]
+                dominated = False
+                # TODO: Array の計算に直して高速化する
+                for j in range(len(objective_values_)):
+                    compare = objective_values_[j]
+                    if all(target > compare):
+                        dominated = True
+                        break
+                if not dominated:
+                    pareto_set_ = np.concatenate([pareto_set_, [target]], axis=0)
 
-        # 計算結果を履歴の一部に割り当て
-        # idx: [False, True, False, True, True, False, ...]
-        # hvs: [          1,           2,    3,        ...]
-        # want:[   0,     1,     1,    2,    3,     3, ...]
-        hvs_index = -1
-        for i in range(len(df)):
+                if ret is not None:
+                    ret.append(np.array(pareto_set_))
 
-            # process hvs index
-            if idx[i]:
-                hvs_index += 1
-
-            # get hv
-            if hvs_index < 0:
-                hypervolume = 0.
+            if ret is not None:
+                return pareto_set_, ret
             else:
-                hypervolume = hvs[hvs_index]
+                return pareto_set_
 
-            df.loc[i, 'hypervolume'] = hypervolume
+        if self._hv_reference == 'dynamic-pareto':
+            pareto_set, pareto_set_list = get_pareto(objective_values, with_partial=True)
+            for i, partial_pareto_set in enumerate(pareto_set_list):
+                ref_point = pareto_set.max(axis=0) + 1e-8
+                hv = compute_hypervolume(partial_pareto_set, ref_point)
+                df.loc[i, 'hypervolume'] = hv
+            return
+
+        elif self._hv_reference == 'dynamic-nadir':
+            _, pareto_set_list = get_pareto(objective_values, with_partial=True)
+            for i, partial_pareto_set in enumerate(pareto_set_list):
+                ref_point = objective_values.max(axis=0) + 1e-8
+                hv = compute_hypervolume(partial_pareto_set, ref_point)
+                df.loc[i, 'hypervolume'] = hv
+            return
+
+        elif self._hv_reference == 'nadir':
+            pareto_set = get_pareto(objective_values)
+            ref_point = objective_values.max(axis=0) + 1e-8
+            hv = compute_hypervolume(pareto_set, ref_point)
+            df.loc[len(df) - 1, 'hypervolume'] = hv
+            return
+
+        elif self._hv_reference == 'pareto':
+            pareto_set = get_pareto(objective_values)
+            ref_point = pareto_set.max(axis=0) + 1e-8
+            hv = compute_hypervolume(pareto_set, ref_point)
+            df.loc[len(df) - 1, 'hypervolume'] = hv
+            return
+
+        elif (
+                isinstance(self._hv_reference, np.ndarray)
+                or isinstance(self._hv_reference, list)
+        ):
+            _buff = np.array(self._hv_reference)
+            assert _buff.shape == (len(self.obj_names),)
+
+            ref_point = np.array(
+                [obj.convert(raw_value) for obj, raw_value in zip(objectives.values(), _buff)]
+            )
+
+            _buff = get_pareto(objective_values)
+
+            pareto_set = np.empty((0, len(objectives)))
+            for pareto_sol in _buff:
+                if all(pareto_sol < ref_point):
+                    pareto_set = np.concatenate([pareto_set, [pareto_sol]], axis=0)
+
+            hv = compute_hypervolume(pareto_set, ref_point)
+            df.loc[len(df) - 1, 'hypervolume'] = hv
+            return
+
+        else:
+            raise NotImplementedError(f'Invalid Hypervolume reference point calculation method: {self._hv_reference}')
 
     def save(self, _f=None):
         """Save csv file."""

@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -92,12 +92,12 @@
 <span class="c1"># 3rd-party</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">LocalCluster</span><span class="p">,</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">LocalCluster</span><span class="p">,</span> <span class="n">Client</span><span class="p">,</span> <span class="n">Worker</span>
 
 <span class="c1"># pyfemtet relative</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">FemtetInterface</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.process_monitor.application</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">process_monitor_main</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization._process_monitor.application</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">process_monitor_main</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_check_bound</span><span class="p">,</span>
     <span class="n">_is_access_gogh</span><span class="p">,</span>
@@ -108,8 +108,9 @@
     <span class="n">OptimizationStatus</span><span class="p">,</span>
     <span class="n">logger</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span><span class="p">,</span> <span class="n">encoding</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span><span class="p">,</span> <span class="n">encoding</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._warning</span> <span class="kn">import</span> <span class="n">experimental_feature</span>
 
 
 <span class="k">def</span> <span class="nf">add_worker</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">):</span>
@@ -134,29 +135,49 @@
     <span class="n">client</span><span class="o">.</span><span class="n">wait_for_workers</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="n">current_n_workers</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
 
-
 <div class="viewcode-block" id="FEMOpt">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt">[ドキュメント]</a>
 <span class="k">class</span> <span class="nc">FEMOpt</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to control FEM interface and optimizer.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fem (FEMInterface, optional): The finite element method interface. Defaults to None. If None, automatically set to FemtetInterface.</span>
-<span class="sd">        opt (AbstractOptimizer):</span>
-<span class="sd">        history_path (str, optional): The path to the history file. Defaults to None. If None, &#39;%Y_%m_%d_%H_%M_%S.csv&#39; is created in current directory.</span>
-<span class="sd">        scheduler_address (str or None): If cluster processing, set this parameter like &quot;tcp://xxx.xxx.xxx.xxx:xxxx&quot;.</span>
+<span class="sd">        fem (FEMInterface, optional):</span>
+<span class="sd">            The FEM software interface.</span>
+<span class="sd">            Defaults to None (automatically set to :class:`FemtetInterface`).</span>
 
-<span class="sd">    Attributes:</span>
-<span class="sd">        fem (FEMInterface): The interface of FEM system.</span>
-<span class="sd">        opt (AbstractOptimizer): The optimizer.</span>
-<span class="sd">        scheduler_address (str or None): Dask scheduler address. If None, LocalCluster will be used.</span>
-<span class="sd">        client (Client): Dask client. For detail, see dask documentation.</span>
-<span class="sd">        status (OptimizationStatus): Entire process status. This contains dask actor.</span>
-<span class="sd">        history(History): History of optimization process. This contains dask actor.</span>
-<span class="sd">        history_path (str): The path to the history (.csv) file.</span>
-<span class="sd">        worker_status_list([OptimizationStatus]): Process status of each dask worker.</span>
-<span class="sd">        monitor_process_future(Future): Future of monitor server process. This is dask future.</span>
-<span class="sd">        monitor_server_kwargs(dict): Monitor server parameter. Currently, the valid arguments are hostname and port.</span>
+<span class="sd">        opt (AbstractOptimizer, optional):</span>
+<span class="sd">            The numerical optimizer object.</span>
+<span class="sd">            Defaults to None (automatically set to :class:`OptunaOptimizer`</span>
+<span class="sd">            with :class:`optuna.samplers.TPESampler`).</span>
+
+<span class="sd">        history_path (str, optional):</span>
+<span class="sd">            The path to the history file.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">            If None, &#39;%Y_%m_%d_%H_%M_%S.csv&#39; is created in current directory.</span>
+
+<span class="sd">        scheduler_address (str, optional):</span>
+<span class="sd">            When performing cluster computing, please specify the address</span>
+<span class="sd">            of the scheduler computer here.</span>
+
+<span class="sd">            See Also:</span>
+<span class="sd">                https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html</span>
+
+<span class="sd">    .. Example の中について、reST ではリストだと改行できないので、リストにしない</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        When specifying and opening a femprj and model, we write</span>
+
+<span class="sd">            &gt;&gt;&gt; from pyfemtet.opt import FEMOpt, FemtetInterface  # doctest: +SKIP</span>
+<span class="sd">            &gt;&gt;&gt; fem = FemtetInterface(femprj_path=&#39;path/to/project.femprj&#39;, model_name=&#39;NewModel&#39;)  # doctest: +SKIP</span>
+<span class="sd">            &gt;&gt;&gt; femopt = FEMOpt(fem=fem)  # doctest: +SKIP</span>
+
+<span class="sd">        When specifying optimization algorithm, we write</span>
+
+<span class="sd">            &gt;&gt;&gt; from optuna.samplers import TPESampler  # doctest: +SKIP</span>
+<span class="sd">            &gt;&gt;&gt; from pyfemtet.opt import FEMOpt, OptunaOptimizer  # doctest: +SKIP</span>
+<span class="sd">            &gt;&gt;&gt; opt = OptunaOptimizer(sampler_class=TPESampler, sampler_kwargs=dict(n_startup_trials=10))  # doctest: +SKIP</span>
+<span class="sd">            &gt;&gt;&gt; femopt = FEMOpt(opt=opt)  # doctest: +SKIP</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -220,25 +241,40 @@
     <span class="k">def</span> <span class="nf">add_parameter</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">initial_value</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">properties</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a parameter to the optimization problem.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the parameter.</span>
-<span class="sd">            initial_value (float or None, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.</span>
-<span class="sd">            lower_bound (float or None, optional): The lower bound of the parameter. Defaults to None. However, this argument is required for some algorithms.</span>
-<span class="sd">            upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. However, this argument is required for some algorithms.</span>
-<span class="sd">            step (float or None, optional): The step of parameter. Defaults to None.</span>
-<span class="sd">            properties (dict, optional): Additional information about the parameter. Defaults to None.</span>
+<span class="sd">            initial_value (float, optional): The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface.</span>
+<span class="sd">            lower_bound (float, optional): The lower bound of the parameter. Defaults to None. Some optimization algorithms require this.</span>
+<span class="sd">            upper_bound (float or None, optional): The upper bound of the parameter. Defaults to None. Some optimization algorithms require this.</span>
+<span class="sd">            step (float, optional): The step of parameter. If specified, parameter is used as discrete. Defaults to None.</span>
+<span class="sd">            properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.</span>
 <span class="sd">            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.</span>
+
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If initial_value is not specified and the value for the given name is also not specified.</span>
+<span class="sd">            ValueError: If initial_value is not specified and the value for the given name is also not specified in FEM.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            When adding parameter a (-1 &lt;= a &lt;= 1; initial value is 0), we write</span>
+
+<span class="sd">                &gt;&gt;&gt; femopt.add_parameter(&#39;parameter_a&#39;, 0, -1, 1)  # doctest: +SKIP</span>
+
+<span class="sd">                Note that the ```note``` argument can be set any name in this case.</span>
+
+<span class="sd">            When adding discrete parameter a (-1 &lt;= a &lt;= 1; initial value is 0,</span>
+<span class="sd">            step 0.5), we write</span>
+
+<span class="sd">                &gt;&gt;&gt; femopt.add_parameter(&#39;parameter a&#39;, 0, -1, 1, 0.5)  # doctest: +SKIP</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -269,23 +305,73 @@
 
 <div class="viewcode-block" id="FEMOpt.add_expression">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt.add_expression">[ドキュメント]</a>
+    <span class="nd">@experimental_feature</span>
     <span class="k">def</span> <span class="nf">add_expression</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
-            <span class="n">properties</span><span class="o">=</span><span class="nb">property</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add expression to the optimization problem.</span>
+
+<span class="sd">        Warnings:</span>
+<span class="sd">            This feature is highly experimental and</span>
+<span class="sd">            may change in the future.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the variable.</span>
 <span class="sd">            fun (Callable[[Any], float]): An expression function. The arguments that you want to use as input variables must be the same with ``name`` of Variable objects added by ``add_parameter()`` or ``add_expression()``. If you use other objects as argument of the function, you must specify ``kwargs``.</span>
-<span class="sd">            properties ([type], optional): Property names and their values of the variable. Defaults to property.</span>
+<span class="sd">            properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.</span>
 <span class="sd">            kwargs (Optional[dict], optional): Remaining arguments of ``fun``. Defaults to None.</span>
 <span class="sd">            pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            When adding variable a and b; a is not directly included as model</span>
+<span class="sd">            variables but an optimization parameter, b is not a parameter but</span>
+<span class="sd">            a model variable and the relationship of these 2 variables is</span>
+<span class="sd">            ```b = a ** 2```, we write:</span>
+
+<span class="sd">                &gt;&gt;&gt; def calc_b(parameter_a):  # doctest: +SKIP</span>
+<span class="sd">                ...     return parameter_a ** 2  # doctest: +SKIP</span>
+<span class="sd">                ...</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_parameter(&#39;parameter_a&#39;, 0, -1, 1, pass_to_fem=False)  # doctest: +SKIP</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_expression(&#39;variable_b&#39;, calc_b)  # doctest: +SKIP</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    The argument names of function to calculate variable</span>
+<span class="sd">                    must match the ```name``` of the parameter.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    In this case, only strings that can be used as Python variables are valid</span>
+<span class="sd">                    for ```name``` argument of :func:`FEMOpt.add_parameter`.</span>
+
+<span class="sd">            When adding variable r, theta and x, y; r, theta is an optimization</span>
+<span class="sd">            parameter and x, y is an intermediate variable to calculate constraint</span>
+<span class="sd">            function, we write</span>
+
+<span class="sd">                &gt;&gt;&gt; def calc_x(r, theta):  # doctest: +SKIP</span>
+<span class="sd">                ...     return r * cos(theta)  # doctest: +SKIP</span>
+<span class="sd">                ...</span>
+<span class="sd">                &gt;&gt;&gt; def calc_y(r, theta):  # doctest: +SKIP</span>
+<span class="sd">                ...     return r * cos(theta)  # doctest: +SKIP</span>
+<span class="sd">                ...</span>
+<span class="sd">                &gt;&gt;&gt; def constraint(Femtet, opt: AbstractOptimizer):  # doctest: +SKIP</span>
+<span class="sd">                ...     d = opt.variables.get_variables()  # doctest: +SKIP</span>
+<span class="sd">                ...     x, y = d[&#39;x&#39;], d[&#39;y&#39;]  # doctest: +SKIP</span>
+<span class="sd">                ...     return min(x, y)  # doctest: +SKIP</span>
+<span class="sd">                ...</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_parameter(&#39;r&#39;, 0, 0, 1)  # doctest: +SKIP</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_parameter(&#39;theta&#39;, 0, 0, 2*pi)  # doctest: +SKIP</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_expression(&#39;x&#39;, calc_x, pass_to_fem=False)  # doctest: +SKIP</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_expression(&#39;y&#39;, calc_y, pass_to_fem=False)  # doctest: +SKIP</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_constraint(constraint, lower_bound=0.5, args=(femopt.opt,))  # doctest: +SKIP</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">exp</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -307,17 +393,38 @@
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
+        <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds an objective to the optimization problem.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            fun (callable): The objective function.</span>
 <span class="sd">            name (str or None, optional): The name of the objective. Defaults to None.</span>
-<span class="sd">            direction (str or float, optional): The optimization direction. Defaults to &#39;minimize&#39;.</span>
+<span class="sd">            direction (str or float, optional): The optimization direction. Varid values are &#39;maximize&#39;, &#39;minimize&#39; or a float value. Defaults to &#39;minimize&#39;.</span>
 <span class="sd">            args (tuple or None, optional): Additional arguments for the objective function. Defaults to None.</span>
 <span class="sd">            kwargs (dict or None, optional): Additional keyword arguments for the objective function. Defaults to None.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            When add a complex objective (for example, want to dynamically set body</span>
+<span class="sd">            to calculate temperature and use product of the temperature and one of</span>
+<span class="sd">            the parameters as objective) , we write</span>
+
+<span class="sd">                &gt;&gt;&gt; class MyClass:  # doctest: +SKIP</span>
+<span class="sd">                ...     def get_body_name(self):  # doctest: +SKIP</span>
+<span class="sd">                ...         ...  # process something and detect body name  # doctest: +SKIP</span>
+<span class="sd">                ...         return body_name  # doctest: +SKIP</span>
+<span class="sd">                ...</span>
+<span class="sd">                &gt;&gt;&gt; def complex_objective(Femtet, opt, some_object):  # doctest: +SKIP</span>
+<span class="sd">                ...     body_name = some_object.get_body_name()  # dynamically get body name to calculate temperature  # doctest: +SKIP</span>
+<span class="sd">                ...     temp, _, _ = Femtet.Gogh.Watt.GetTemp(body_name)  # calculate temperature  # doctest: +SKIP</span>
+<span class="sd">                ...     some_param = opt.get_parameter()[&#39;some_param&#39;]  # get ome parameter  # doctest: +SKIP</span>
+<span class="sd">                ...     return temp * some_param  # calculate something and return it  # doctest: +SKIP</span>
+<span class="sd">                ...</span>
+<span class="sd">                &gt;&gt;&gt; my_obj = MyClass()  # doctest: +SKIP</span>
+<span class="sd">                &gt;&gt;&gt; femopt.add_objective(complex_objective, args=(femopt.opt, my_obj,))  # doctest: +SKIP</span>
 
 <span class="sd">        Tip:</span>
 <span class="sd">            If name is None, name is a string with the prefix `&quot;obj_&quot;` followed by a sequential number.</span>
@@ -359,6 +466,7 @@
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">using_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a constraint to the optimization problem.</span>
 
 <span class="sd">        Args:</span>
@@ -370,6 +478,36 @@
 <span class="sd">            args (tuple or None, optional): Additional arguments for the constraint function. Defaults to None.</span>
 <span class="sd">            kwargs (dict): Additional arguments for the constraint function. Defaults to None.</span>
 <span class="sd">            using_fem (bool, optional): Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically.</span>
+
+<span class="sd">        Warnings:</span>
+
+<span class="sd">            When ```strict``` == True and using OptunaOptimizer along with BoTorchSampler,</span>
+<span class="sd">            Pyfemtet will solve an optimization subproblem to propose new variables.</span>
+<span class="sd">            During this process, the constraint function fun will be executed at each</span>
+<span class="sd">            iteration of the subproblem, which may include time-consuming operations such</span>
+<span class="sd">            as retrieving 3D model information via FEMInterface.</span>
+<span class="sd">            As a result, it may not be feasible to complete the overall optimization within</span>
+<span class="sd">            a realistic timeframe.</span>
+
+<span class="sd">            Examples:</span>
+<span class="sd">                For example, in a case where the bottom area of the model is constrained,</span>
+<span class="sd">                the following approach may require a very long time.</span>
+
+<span class="sd">                    &gt;&gt;&gt; def bottom_area(Femtet, opt):  # doctest: +SKIP</span>
+<span class="sd">                    ...     w = Femtet.GetVariableValue(&#39;width&#39;)  # doctest: +SKIP</span>
+<span class="sd">                    ...     d = Femtet.GetVariableValue(&#39;depth&#39;)  # doctest: +SKIP</span>
+<span class="sd">                    ...     return w * d  # doctest: +SKIP</span>
+<span class="sd">                    ...</span>
+<span class="sd">                    &gt;&gt;&gt; femopt.add_constraint(constraint, lower_bound=5)  # doctest: +SKIP</span>
+
+<span class="sd">                Instead, please do the following.</span>
+
+<span class="sd">                    &gt;&gt;&gt; def bottom_area(_, opt):  # 第一引数 Femtet にはアクセスしないようにします。  # doctest: +SKIP</span>
+<span class="sd">                    ...     params = opt.get_parameter()  # doctest: +SKIP</span>
+<span class="sd">                    ...     w, d = params[&#39;width&#39;], params[&#39;depth&#39;]  # doctest: +SKIP</span>
+<span class="sd">                    ...     return w * d  # doctest: +SKIP</span>
+<span class="sd">                    ...</span>
+<span class="sd">                    &gt;&gt;&gt; femopt.add_constraint(constraint, lower_bound=5, args=(femopt.opt,))  # doctest: +SKIP</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object.</span>
@@ -429,25 +567,35 @@
 <div class="viewcode-block" id="FEMOpt.get_parameter">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt.get_parameter">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s1">&#39;FEMOpt.get_parameter() was deprecated. Use Femopt.opt.get_parameter() instead.&#39;</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deprecated method.</span>
+
+<span class="sd">        Planed to remove in future version. Use FEMOpt.opt.get_parameter() instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s1">&#39;FEMOpt.get_parameter() was deprecated. Use FEMOpt.opt.get_parameter() instead.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FEMOpt.set_monitor_host">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt.set_monitor_host">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">set_monitor_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets up the monitor server with the specified host and port.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the host IP address and the port of the process monitor.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            host (str): The hostname or IP address of the monitor server.</span>
-<span class="sd">            port (int or None, optional): The port number of the monitor server. If None, ``8080`` will be used. Defaults to None.</span>
+<span class="sd">            host (str):</span>
+<span class="sd">                The hostname or IP address of the monitor server.</span>
+<span class="sd">            port (int, optional):</span>
+<span class="sd">                The port number of the monitor server.</span>
+<span class="sd">                If None, ``8080`` will be used.</span>
+<span class="sd">                Defaults to None.</span>
 
 <span class="sd">        Tip:</span>
-<span class="sd">            Specifying host ``0.0.0.0`` allows viewing monitor from all computers on the local network.</span>
+<span class="sd">            Specifying host ``0.0.0.0`` allows viewing monitor</span>
+<span class="sd">            from all computers on the local network.</span>
 
-<span class="sd">            However, please note that in this case,</span>
-<span class="sd">            it will be visible to all users on the local network.</span>
+<span class="sd">            If no hostname is specified, the monitor server</span>
+<span class="sd">            will be hosted on ``localhost``.</span>
 
-<span class="sd">            If no hostname is specified, the monitor server will be hosted on ``localhost``.</span>
+<span class="sd">            We can access process monitor by accessing</span>
+<span class="sd">            ```localhost:8080``` on our browser by default.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor_server_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -460,33 +608,57 @@
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt.optimize">[ドキュメント]</a>
     <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">n_trials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">n_parallel</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">wait_setup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">confirm_before_exit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">n_parallel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">wait_setup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">confirm_before_exit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the main optimization process.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            n_trials (int or None, optional): The number of trials. Defaults to None.</span>
-<span class="sd">            n_parallel (int, optional): The number of parallel processes. Defaults to 1.</span>
-<span class="sd">            timeout (float or None, optional): The maximum amount of time in seconds that each trial can run. Defaults to None.</span>
-<span class="sd">            wait_setup (bool, optional): Wait for all workers launching FEM system. Defaults to True.</span>
-<span class="sd">            confirm_before_exit (bool, optional): Insert stop before exit to continue to show process monitor.</span>
+<span class="sd">            n_trials (int, optional):</span>
+<span class="sd">                The number of trials.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            n_parallel (int, optional):</span>
+<span class="sd">                The number of parallel processes.</span>
+<span class="sd">                Defaults to 1.</span>
+<span class="sd">                Note that even if this argument is 1,</span>
+<span class="sd">                :class:`FEMOpt` makes some child processes</span>
+<span class="sd">                to run process monitor, status monitor, etc.</span>
+<span class="sd">            timeout (float, optional):</span>
+<span class="sd">                The maximum amount of time in seconds</span>
+<span class="sd">                that each trial can run.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            wait_setup (bool, optional):</span>
+<span class="sd">                Wait for all workers launching FEM system.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            confirm_before_exit (bool, optional):</span>
+<span class="sd">                Insert stop before exit to continue to</span>
+<span class="sd">                show process monitor.</span>
 
 <span class="sd">        Tip:</span>
-<span class="sd">            If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080.</span>
+<span class="sd">            If set_monitor_host() is not executed,</span>
+<span class="sd">            a local server for monitoring will be</span>
+<span class="sd">            started at localhost:8080.</span>
+
+<span class="sd">            See Also:</span>
+<span class="sd">                :func:`FEMOpt.set_monitor_host`</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user.</span>
+<span class="sd">            If ``n_trials`` and ``timeout`` are both None,</span>
+<span class="sd">            it runs forever until interrupting by the user.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            If ``n_parallel`` &gt;= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.</span>
+<span class="sd">            If ``n_parallel`` &gt;= 2, depending on the end timing,</span>
+<span class="sd">            ``n_trials`` may be exceeded by up to ``n_parallel-1`` times.</span>
 
 <span class="sd">        Warning:</span>
-<span class="sd">            If ``n_parallel`` &gt;= 2 and ``fem`` is a subclass of ``FemtetInterface``, the ``strictly_pid_specify`` of subprocess is set to ``False``.</span>
-<span class="sd">            So **it is recommended to close all other Femtet processes before running.**</span>
+<span class="sd">            If ``n_parallel`` &gt;= 2 and ``fem`` is a subclass of</span>
+<span class="sd">            ``FemtetInterface``, the ``strictly_pid_specify`` of</span>
+<span class="sd">            subprocess is set to ``False``.</span>
+<span class="sd">            So **it is recommended to close all other Femtet processes</span>
+<span class="sd">            before running.**</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -557,10 +729,16 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># ローカルクラスターを構築</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Launching single machine cluster. This may take tens of seconds.&#39;</span><span class="p">)</span>
-            <span class="n">cluster</span> <span class="o">=</span> <span class="n">LocalCluster</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_workers</span><span class="o">=</span><span class="n">n_parallel</span><span class="p">,</span>
-                                   <span class="n">threads_per_worker</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># n_parallel = n_parallel - 1 + 1; main 分減らし、monitor 分増やす</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">LocalCluster</span><span class="p">(</span>
+                <span class="n">processes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">n_workers</span><span class="o">=</span><span class="n">n_parallel</span><span class="p">,</span>  <span class="c1"># n_parallel = n_parallel - 1 + 1; main 分減らし、monitor 分増やす</span>
+                <span class="n">threads_per_worker</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">worker_class</span><span class="o">=</span><span class="n">Worker</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LocalCluster launched successfully.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">direct_to_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">address</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Client launched successfully.&#39;</span><span class="p">)</span>
 
             <span class="c1"># 最適化タスクを振り分ける worker を指定</span>
             <span class="n">subprocess_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_parallel</span><span class="p">))[</span><span class="mi">1</span><span class="p">:]</span>
@@ -592,6 +770,7 @@
                         <span class="n">indexes</span><span class="p">,</span>
                         <span class="n">directions</span><span class="p">,</span>
                     <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Femtet loaded successfully.&#39;</span><span class="p">)</span>
 
             <span class="c1"># actor の設定</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">OptimizationStatus</span><span class="p">(</span><span class="n">_client</span><span class="p">)</span>
@@ -605,8 +784,10 @@
                 <span class="n">_client</span><span class="p">,</span>
                 <span class="n">metadata</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Status Actor initialized successfully.&#39;</span><span class="p">)</span>
 
             <span class="c1"># launch monitor</span>
+            <span class="c1"># noinspection PyTypeChecker</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">monitor_process_future</span> <span class="o">=</span> <span class="n">_client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
                 <span class="c1"># func</span>
                 <span class="n">_start_monitor_server</span><span class="p">,</span>
@@ -621,6 +802,7 @@
                 <span class="n">workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor_process_worker_name</span><span class="p">,</span>
                 <span class="n">allow_other_workers</span><span class="o">=</span><span class="kc">False</span>
             <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Process monitor initialized successfully.&#39;</span><span class="p">)</span>
 
             <span class="c1"># fem</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="n">_client</span><span class="p">)</span>
@@ -733,6 +915,11 @@
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt.terminate_all">[ドキュメント]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">terminate_all</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deprecated method. We plan to remove this in future version.</span>
+
+<span class="sd">        In current version, the termination processes are</span>
+<span class="sd">        automatically execute in the last of :func:`FEMOpt.optimize`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;terminate_all() is deprecated and will be removed in a future version. &quot;</span>
             <span class="s2">&quot;In current and later versions, the equivalent of terminate_all() will be executed when optimize() finishes. &quot;</span>

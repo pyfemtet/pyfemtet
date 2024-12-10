@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -159,24 +159,18 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class).&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="FEMInterface.postprocess_func">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FEMInterface.postprocess_func">[docs]</a>
-    <span class="k">def</span> <span class="nf">postprocess_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">dask_scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+    <span class="k">def</span> <span class="nf">_postprocess_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">dask_scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">pass</span>
 
-
-<div class="viewcode-block" id="FEMInterface.create_postprocess_args">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FEMInterface.create_postprocess_args">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_postprocess_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_postprocess_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
-</div>
 
 
 
 <div class="viewcode-block" id="NoFEM">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.NoFEM">[docs]</a>
 <span class="k">class</span> <span class="nc">NoFEM</span><span class="p">(</span><span class="n">FEMInterface</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface with no FEM for debug.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dummy interface without FEM. Intended for debugging purposes.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="NoFEM.update">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.NoFEM.update">[docs]</a>

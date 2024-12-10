@@ -60,7 +60,7 @@ def add_parametric_results_as_objectives(femopt, indexes, directions) -> bool:
 def _parametric_objective(Femtet, parametric_result_index):
     # load dll and set target femtet
     dll = _get_dll_with_set_femtet(Femtet)
-    dll.GetPrmResult.restype = ctypes.c_double
+    dll.GetPrmResult.restype = ctypes.c_double  # 複素数の場合は実部しか取らない
     return dll.GetPrmResult(parametric_result_index)
 
 

@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
 </ul>
 
@@ -87,7 +87,7 @@
 
 <span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
 <span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetInterface</span><span class="p">,</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
 
 
 <span class="n">here</span><span class="p">,</span> <span class="n">me</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
@@ -96,16 +96,40 @@
 <div class="viewcode-block" id="FemtetWithNXInterface">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithNXInterface">[docs]</a>
 <span class="k">class</span> <span class="nc">FemtetWithNXInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Femtet with NX interface class.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Control Femtet and NX.</span>
+
+<span class="sd">    Using this class, you can import CAD files created</span>
+<span class="sd">    in NX through the Parasolid format into a</span>
+<span class="sd">    Femtet project. It allows you to pass design</span>
+<span class="sd">    variables to NX, update the model, and</span>
+<span class="sd">    perform analysis using the updated model in Femtet.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        prt_path: The path to the prt file.</span>
-<span class="sd">        export_curves(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
-<span class="sd">        export_surfaces(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
-<span class="sd">        export_solids(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
-<span class="sd">        export_flattened_assembly(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.</span>
+<span class="sd">        prt_path (str):</span>
+<span class="sd">            The path to .prt file containing the</span>
+<span class="sd">            CAD data from which the import is made.</span>
 
-<span class="sd">    For details of The other arguments, see ``FemtetInterface``.</span>
+<span class="sd">        export_curves(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        export_surfaces(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        export_solids(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        export_flattened_assembly(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        **kwargs:</span>
+<span class="sd">            For other arguments, please refer to the</span>
+<span class="sd">            :class:`FemtetInterface` class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        ```export_*``` arguments sets</span>
+<span class="sd">        parasolid export setting of NX.</span>
+<span class="sd">        If None, PyFemtet does not change</span>
+<span class="sd">        the current setting of NX.</span>
+
+<span class="sd">        It is recommended not to change these values</span>
+<span class="sd">        from the settings used when exporting the</span>
+<span class="sd">        Parasolid that was imported into Femtet.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -171,7 +195,7 @@
 
 <div class="viewcode-block" id="FemtetWithNXInterface.update_model">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithNXInterface.update_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;pd.DataFrame&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;pd.DataFrame&#39;</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update .x_t&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -238,9 +262,8 @@
         <span class="p">)</span>
 
         <span class="c1"># femprj モデルの変数も更新</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 </div>
-
 
 </pre></div>
 

@@ -6,24 +6,48 @@ import pandas as pd
 from dask.distributed import get_worker
 
 from pyfemtet.core import ModelError
-from pyfemtet.opt.interface import FemtetInterface, logger
-from pyfemtet.message import Msg
+from pyfemtet.opt.interface import FemtetInterface
+from pyfemtet._message import Msg
 
 
 here, me = os.path.split(__file__)
 
 
 class FemtetWithNXInterface(FemtetInterface):
-    """Femtet with NX interface class.
+    """Control Femtet and NX.
+
+    Using this class, you can import CAD files created
+    in NX through the Parasolid format into a
+    Femtet project. It allows you to pass design
+    variables to NX, update the model, and
+    perform analysis using the updated model in Femtet.
 
     Args:
-        prt_path: The path to the prt file.
-        export_curves(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.
-        export_surfaces(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.
-        export_solids(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.
-        export_flattened_assembly(bool or None): Parasolid export setting of NX. If None, PyFemtet does not change the setting of NX. Defaults to None.
+        prt_path (str):
+            The path to .prt file containing the
+            CAD data from which the import is made.
 
-    For details of The other arguments, see ``FemtetInterface``.
+        export_curves(bool or None, optional):
+            Defaults to None.
+        export_surfaces(bool or None, optional):
+            Defaults to None.
+        export_solids(bool or None, optional):
+            Defaults to None.
+        export_flattened_assembly(bool or None, optional):
+            Defaults to None.
+        **kwargs:
+            For other arguments, please refer to the
+            :class:`FemtetInterface` class.
+
+    Notes:
+        ```export_*``` arguments sets
+        parasolid export setting of NX.
+        If None, PyFemtet does not change
+        the current setting of NX.
+
+        It is recommended not to change these values
+        from the settings used when exporting the
+        Parasolid that was imported into Femtet.
 
     """
 
@@ -84,7 +108,7 @@ class FemtetWithNXInterface(FemtetInterface):
         )
         super()._setup_before_parallel(client)
 
-    def update_model(self, parameters: 'pd.DataFrame') -> None:
+    def update_model(self, parameters: 'pd.DataFrame', with_warning=False) -> None:
         """Update .x_t"""
 
         self.parameters = parameters.copy()
@@ -151,5 +175,4 @@ class FemtetWithNXInterface(FemtetInterface):
         )
 
         # femprj モデルの変数も更新
-        super().update_model(parameters)
-
+        super().update_model(parameters, with_warning=False)

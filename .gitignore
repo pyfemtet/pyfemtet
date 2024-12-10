@@ -15,6 +15,7 @@ db.sqlite3
 .vscode
 .idea
 sandbox
+poetry.lock
 
 PyFemtet.egg-info
 /src/PyFemtet/_version.py

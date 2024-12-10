@@ -1,8 +1,8 @@
-from pyfemtet.opt.visualization.base import PyFemtetApplicationBase
+from pyfemtet.opt.visualization._base import PyFemtetApplicationBase
 from pyfemtet.opt.visualization.result_viewer.pages import HomePage, PredictionModelPage
-from pyfemtet.opt.visualization.process_monitor.pages import OptunaVisualizerPage
+from pyfemtet.opt.visualization._process_monitor.pages import OptunaVisualizerPage
 
-from pyfemtet.message import Msg
+from pyfemtet._message import Msg
 
 
 class ResultViewerApplication(PyFemtetApplicationBase):
@@ -18,7 +18,7 @@ class ResultViewerApplication(PyFemtetApplicationBase):
         super().setup_callback()
 
 
-def debug():
+def _debug():
     import os
     os.chdir(os.path.dirname(__file__))
 

@@ -5,11 +5,9 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-import logging
-from pyfemtet.logger import get_logger
-logger = get_logger('FEM')
-logger.setLevel(logging.INFO)
+from pyfemtet.logger import get_module_logger
 
+logger = get_module_logger('opt.interface', __name__)
 
 here, me = os.path.split(__file__)
 
@@ -51,6 +49,12 @@ class FEMInterface(ABC):
         """
         pass
 
+    def load_parameter(self, opt) -> None:  # opt: AbstractOptimizer
+        raise NotImplementedError()
+
+    def load_objective(self, opt) -> None:  # opt: AbstractOptimizer
+        raise NotImplementedError()
+
     def _setup_before_parallel(self, client) -> None:
         """Preprocessing before launching a dask worker (if implemented in concrete class).
 
@@ -64,19 +68,22 @@ class FEMInterface(ABC):
         """
         pass
 
-    def _setup_after_parallel(self):
+    def _setup_after_parallel(self, *args, **kwargs):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
-    def postprocess_func(self, trial: int, *args, dask_scheduler=None, **kwargs):
+    def _postprocess_func(self, trial: int, *args, dask_scheduler=None, **kwargs):
         pass
 
-    def create_postprocess_args(self):
+    def _create_postprocess_args(self):
+        pass
+
+    def quit(self):
         pass
 
 
 class NoFEM(FEMInterface):
-    """Interface with no FEM for debug."""
+    """Dummy interface without FEM. Intended for debugging purposes."""
 
     def update(self, parameters: pd.DataFrame) -> None:
         pass

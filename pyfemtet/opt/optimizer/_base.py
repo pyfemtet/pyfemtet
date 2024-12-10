@@ -8,19 +8,17 @@ from time import sleep
 
 # 3rd-party
 import numpy as np
-import pandas as pd
 
 # pyfemtet relative
-from pyfemtet.opt.interface import FemtetInterface
+from pyfemtet.opt.interface import FEMInterface
 from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
-from pyfemtet.message import Msg
-from pyfemtet.opt.parameter import ExpressionEvaluator
+from pyfemtet._message import Msg
+from pyfemtet.opt.optimizer.parameter import ExpressionEvaluator, Parameter
 
 # logger
-import logging
-from pyfemtet.logger import get_logger
-logger = get_logger('opt')
-logger.setLevel(logging.INFO)
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger('opt.optimizer', __name__)
 
 
 class OptimizationMethodChecker:
@@ -117,17 +115,11 @@ class AbstractOptimizer(ABC):
         fem (FEMInterface): The finite element method object.
         fem_class (type): The class of the finite element method object.
         fem_kwargs (dict): The keyword arguments used to instantiate the finite element method object.
-        parameters (pd.DataFrame): The parameters used in the optimization.
-        objectives (dict): A dictionary containing the objective functions used in the optimization.
-        constraints (dict): A dictionary containing the constraint functions used in the optimization.
-        entire_status (OptimizationStatus): The status of the entire optimization process.
+        variables (ExpressionEvaluator): The variables using optimization process including parameters.
+        objectives (dict[str, Objective]): A dictionary containing the objective functions used in the optimization.
+        constraints (dict[str, Constraint]): A dictionary containing the constraint functions used in the optimization.
         history (History): An actor object that records the history of each iteration in the optimization process.
-        worker_status (OptimizationStatus): The status of each worker in a distributed computing environment.
-        message (str): A message associated with the current state of the optimization process.
         seed (int or None): The random seed used for random number generation during the optimization process.
-        timeout (float or int or None): The maximum time allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.
-        n_trials (int or None): The maximum number of trials allowed for each iteration of the optimization process. If exceeded, it will be interrupted and terminated early.
-        is_cluster (bool): Flag indicating if running on a distributed computing cluster.
 
     """
 
@@ -136,7 +128,7 @@ class AbstractOptimizer(ABC):
         self.fem_class = None
         self.fem_kwargs = dict()
         self.variables: ExpressionEvaluator = ExpressionEvaluator()
-        self.objectives: dict[str, Constraint] = dict()
+        self.objectives: dict[str, Objective] = dict()
         self.constraints: dict[str, Constraint] = dict()
         self.entire_status = None  # actor
         self.history = None  # actor
@@ -149,23 +141,46 @@ class AbstractOptimizer(ABC):
         self.subprocess_idx = None
         self._exception = None
         self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
+        self._retry_counter = 0
 
-    def f(self, x):
-        """Get x, update fem analysis, return objectives (and constraints)."""
-        # interruption の実装は具象クラスに任せる
+    # ===== algorithm specific methods =====
+    @abstractmethod
+    def run(self) -> None:
+        """Start optimization."""
+        pass
+
+    # ----- FEMOpt interfaces -----
+    @abstractmethod
+    def _setup_before_parallel(self, *args, **kwargs):
+        """Setup before parallel processes are launched."""
+        pass
+
+    # ===== calc =====
+    def f(self, x: np.ndarray) -> list[np.ndarray]:
+        """Calculate objectives and constraints.
+
+        Args:
+            x (np.ndarray): Optimization parameters.
+
+        Returns:
+            list[np.ndarray]:
+                The list of internal objective values,
+                un-normalized objective values and
+                constraint values.
+
+        """
+
 
         if isinstance(x, np.float64):
             x = np.array([x])
 
         # Optimizer の x の更新
         self.set_parameter_values(x)
-
-        logger.info('---------------------')
         logger.info(f'input: {x}')
 
         # FEM の更新
-        logger.debug('fem.update() start')
         try:
+            logger.info(f'Solving FEM...')
             df_to_fem = self.variables.get_variables(
                 format='df',
                 filter_pass_to_fem=True
@@ -176,25 +191,20 @@ class AbstractOptimizer(ABC):
             logger.info(f'{type(e).__name__} : {e}')
             logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
             logger.info(x)
-            raise e  # may be just a ModelError, etc.
+            raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
 
         # y, _y, c の更新
-        logger.debug('calculate y start')
         y = [obj.calc(self.fem) for obj in self.objectives.values()]
 
-        logger.debug('calculate _y start')
         _y = [obj.convert(value) for obj, value in zip(self.objectives.values(), y)]
 
-        logger.debug('calculate c start')
         c = [cns.calc(self.fem) for cns in self.constraints.values()]
 
-        logger.debug('history.record start')
-
+        # register to history
         df_to_opt = self.variables.get_variables(
             format='df',
             filter_parameter=True,
         )
-
         self.history.record(
             df_to_opt,
             self.objectives,
@@ -202,16 +212,62 @@ class AbstractOptimizer(ABC):
             y,
             c,
             self.message,
-            postprocess_func=self.fem.postprocess_func,
-            postprocess_args=self.fem.create_postprocess_args(),
+            postprocess_func=self.fem._postprocess_func,
+            postprocess_args=self.fem._create_postprocess_args(),
         )
 
-        logger.debug('history.record end')
-
-        logger.info(f'output: {_y}')
+        logger.info(f'output: {y}')
 
         return np.array(y), np.array(_y), np.array(c)
 
+    # ===== parameter processing =====
+    def get_parameter(self, format='dict'):
+        """Returns the parameters in the specified format.
+
+        Args:
+            format (str, optional):
+                The desired format of the parameters.
+                Can be 'df' (DataFrame),
+                'values' (np.ndarray),
+                'dict' or
+                'raw' (list of Variable object).
+                Defaults to 'dict'.
+
+        Returns:
+            The parameters in the specified format.
+
+        Raises:
+            ValueError: If an invalid format is provided.
+
+        """
+        return self.variables.get_variables(format=format, filter_parameter=True)
+
+    def set_parameter(self, params: dict[str, float]) -> None:
+        """Update parameter.
+
+        Args:
+            params (dict):
+                Key is the name of parameter and
+                the value is the value of it.
+                The partial set is available.
+
+        """
+        for name, value in params.items():
+            self.variables.variables[name].value = value
+        self.variables.evaluate()
+
+    def set_parameter_values(self, values: np.ndarray) -> None:
+        """Update parameter with values.
+
+        Args:
+            values (np.ndarray): Values of all parameters.
+
+        """
+        prm_names = self.variables.get_parameter_names()
+        assert len(values) == len(prm_names)
+        self.set_parameter({k: v for k, v in zip(prm_names, values)})
+
+    # ===== FEMOpt interfaces =====
     def _reconstruct_fem(self, skip_reconstruct=False):
         """Reconstruct FEMInterface in a subprocess."""
         # reconstruct fem
@@ -224,42 +280,6 @@ class AbstractOptimizer(ABC):
         for cns in self.constraints.values():
             cns._restore_constants()
 
-    def get_parameter(self, format='dict'):
-        """Returns the parameters in the specified format.
-
-        Args:
-            format (str, optional): The desired format of the parameters. Can be 'df' (DataFrame), 'value' (alias of values), 'values' (np.ndarray), or 'dict'. Defaults to 'dict'.
-
-        Returns:
-            object: The parameters in the specified format.
-
-        Raises:
-            ValueError: If an invalid format is provided.
-
-        """
-        return self.variables.get_variables(format=format, filter_parameter=True)
-
-    def set_parameter(self, params: dict) -> None:
-        """Update parameter.
-
-        Args:
-            params (dict): Key is the name of parameter and the value is the value of it. The partial set is available.
-
-        """
-        for name, value in params.items():
-            self.variables.variables[name].value = value
-        self.variables.evaluate()
-
-    def set_parameter_values(self, values: np.ndarray) -> None:
-        """Update parameter with values.
-
-        Args:
-            values (np.ndarray): Values of all parameters.
-        """
-        prm_names = self.variables.get_parameter_names()
-        assert len(values) == len(prm_names)
-        self.set_parameter({k: v for k, v in zip(prm_names, values)})
-
     def _check_interruption(self):
         """"""
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
@@ -271,16 +291,17 @@ class AbstractOptimizer(ABC):
 
     def _finalize(self):
         """Destruct fem and set worker status."""
-        del self.fem
+        self.fem.quit()
         if not self.worker_status.get() == OptimizationStatus.CRASHED:
             self.worker_status.set(OptimizationStatus.TERMINATED)
 
+    # run via FEMOpt (considering parallel processing)
     def _run(
             self,
-            subprocess_idx,
-            worker_status_list,
-            wait_setup,
-            skip_set_fem=False,
+            subprocess_idx,  # 自身が何番目の並列プロセスであるかを示す連番
+            worker_status_list,  # 他の worker の status オブジェクト
+            wait_setup,  # 他の worker の status が ready になるまで待つか
+            skip_reconstruct=False,  # reconstruct fem を行うかどうか
     ) -> Optional[Exception]:
 
         # 自分の worker_status の取得
@@ -292,9 +313,8 @@ class AbstractOptimizer(ABC):
             return None
 
         # set_fem をはじめ、終了したらそれを示す
-        if not skip_set_fem:  # なくても動く？？
-            self._reconstruct_fem()
-        self.fem._setup_after_parallel()
+        self._reconstruct_fem(skip_reconstruct)
+        self.fem._setup_after_parallel(opt=self)
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
 
         # wait_setup or not
@@ -304,6 +324,9 @@ class AbstractOptimizer(ABC):
                     return None
                 # 他のすべての worker_status が wait 以上になったら break
                 if all([ws.get() >= OptimizationStatus.WAIT_OTHER_WORKERS for ws in worker_status_list]):
+                    # リソースの競合等を避けるため
+                    # break する前に index 秒待つ
+                    sleep(int(subprocess_idx))
                     break
                 sleep(1)
         else:
@@ -331,12 +354,16 @@ class AbstractOptimizer(ABC):
 
         return self._exception
 
-    @abstractmethod
-    def run(self) -> None:
-        """Start calculation using optimization library."""
-        pass
 
-    @abstractmethod
-    def _setup_before_parallel(self, *args, **kwargs):
-        """Setup before parallel processes are launched."""
-        pass
+if __name__ == '__main__':
+    class Optimizer(AbstractOptimizer):
+        def run(self): pass
+        def _setup_before_parallel(self, *args, **kwargs): pass
+
+    opt = Optimizer()
+    opt.set_parameter(
+        dict(
+            prm1=0.,
+            prm2=1.,
+        )
+    )

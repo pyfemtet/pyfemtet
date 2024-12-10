@@ -20,7 +20,7 @@
 
 - Femtet Website: https://www.muratasoftware.com/
 - Documentation (English): https://pyfemtet.readthedocs.io/en/stable/
-- ドキュメント（日本語）: https://pyfemtet.readthedocs.io/jp/stable/
+- ドキュメント（日本語）: https://pyfemtet.readthedocs.io/ja/stable/
 - Source code: https://github.com/pyfemtet/pyfemtet
 - Bug reports: https://github.com/pyfemtet/pyfemtet/issues
 

@@ -33,48 +33,89 @@ from pyfemtet.dispatch_extensions import (
     _get_pids,
     DispatchExtensionException,
 )
-from pyfemtet.opt.interface import FEMInterface, logger
-from pyfemtet.message import Msg
+from pyfemtet.opt.interface import FEMInterface
+from pyfemtet._message import Msg
+from pyfemtet._femtet_config_util.autosave import _get_autosave_enabled, _set_autosave_enabled
+from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
+
+if __name__ == '__main__':
+    from pyfemtet.logger import get_module_logger
+    logger = get_module_logger('opt.interface.FemtetInterface', __name__)
+else:
+    from pyfemtet.opt.interface._base import logger
 
 
-def post_activate_message(hwnd):
+def _post_activate_message(hwnd):
     win32gui.PostMessage(hwnd, win32con.WM_ACTIVATE, win32con.WA_ACTIVE, 0)
 
 
 class FemtetInterface(FEMInterface):
-    """Concrete class for the interface with Femtet.
+    """Control Femtet from optimizer.
 
-        Args:
-            femprj_path (str or None, optional): The path to the .femprj file. Defaults to None.
-            model_name (str or None, optional): The name of the analysis model. Defaults to None.
-            connect_method (str, optional): The connection method to use. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
-            strictly_pid_specify (bool, optional): If True and connect_method=='new', search launched Femtet process strictly based on its process id.
-            allow_without_project (bool, optional): Allow to launch Femtet with no project file. Default to False.
-            open_result_with_gui (bool, optional): Open analysis result with Femtet GUI. Default to True.
-            parametric_output_indexes_use_as_objective (dict, optional): Parametric output indexes and their directions which will be used as objective functions. Parametric output should be set on Femtet parametric analysis dialog. Note that output 'No.' in dialog is starts with 1, but this 'index' is starts with 0. The key is the 'index', the value is direction ('maximize', 'minimize' or float). Default to None.
+    Args:
+        femprj_path (str, optional):
+            The path to the project file.
+            If not specified, get it from connected Femtet.
 
-        Warning:
-            Even if you specify ``strictly_pid_specify=True`` on the constructor,
-            **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**
-            because of its large overhead.
-            So you should close all Femtet processes before running FEMOpt.optimize()
-            if ``n_parallel`` >= 2.
+        model_name (str, optional):
+            The name of the model.
+            If not specified, get it from connected Femtet or the
+            first model when Femtet open the project file.
 
-        Tip:
-            If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`.
+        connect_method (str, optional):
+            The connection method.
+            Default is 'auto'. Other valid values are 'new' or 'existing'.
+
+        save_pdt (str, optional):
+            The type to save result file.
+            Can specify 'all' or None. Default is 'all'.
+
+        strictly_pid_specify (bool, optional):
+            Whether to strictly specify the PID in Femtet connection.
+            Default is True.
+
+        allow_without_project (bool, optional):
+            Whether to allow without a project. Default is False.
+
+        open_result_with_gui (bool, optional):
+            Whether to open the result with GUI. Default is True.
+
+        parametric_output_indexes_use_as_objective (dict[int, str or float], optional):
+            A list of parametric output indexes and its direction
+            to use as the objective function. If not specified,
+            it will be None and no parametric outputs are used
+            as objectives.
+
+        confirm_before_exit (bool):
+            Whether to confirm before (abnormal) termination.
+            Default is True.
+
+        **kwargs: Additional arguments from inherited classes.
+
+    Warning:
+        Even if you specify ``strictly_pid_specify=True`` on the constructor,
+        **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**
+        because of its large overhead.
+        So you should close all Femtet processes before running FEMOpt.optimize()
+        if ``n_parallel`` >= 2.
+
+    Tip:
+        If you search for information about the method to
+        connect python and Femtet, see :func:`connect_femtet`.
 
     """
 
     def __init__(
             self,
-            femprj_path=None,
-            model_name=None,
-            connect_method='auto',  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
-            save_pdt='all',  # 'all' or None
-            strictly_pid_specify=True,  # dask worker では True にしたいので super() の引数にしない。
-            allow_without_project=False,  # main でのみ True を許容したいので super() の引数にしない。
-            open_result_with_gui=True,
-            parametric_output_indexes_use_as_objective=None,
+            femprj_path: str = None,
+            model_name: str = None,
+            connect_method: str = 'auto',  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
+            save_pdt: str = 'all',  # 'all' or None
+            strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
+            allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
+            open_result_with_gui: bool = True,
+            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
+            confirm_before_exit: bool = True,
             **kwargs  # 継承されたクラスからの引数
     ):
 
@@ -102,8 +143,9 @@ class FemtetInterface(FEMInterface):
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
         self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
-        self._original_autosave_enabled = get_autosave_enabled()
-        set_autosave_enabled(False)
+        self._original_autosave_enabled = _get_autosave_enabled()
+        _set_autosave_enabled(False)
+        self.confirm_before_exit = confirm_before_exit
 
         # dask サブプロセスのときは femprj を更新し connect_method を new にする
         try:
@@ -141,11 +183,12 @@ class FemtetInterface(FEMInterface):
             open_result_with_gui=self.open_result_with_gui,
             parametric_output_indexes_use_as_objective=self.parametric_output_indexes_use_as_objective,
             save_pdt=self.save_pdt,
+            confirm_before_exit=self.confirm_before_exit,
             **kwargs
         )
 
     def __del__(self):
-        set_autosave_enabled(self._original_autosave_enabled)
+        _set_autosave_enabled(self._original_autosave_enabled)
         if self.quit_when_destruct:
             self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
@@ -170,12 +213,12 @@ class FemtetInterface(FEMInterface):
         """Connects to a Femtet process.
 
         Args:
-            connect_method (str, optional): The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'new'.
+            connect_method (str, optional): The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'.
             pid (int or None, optional): The process ID of an existing Femtet process and wanted to connect.
 
         Note:
             When connect_method is 'new', starts a new Femtet process and connects to it.
-            **`pid` will be ignored.**
+            `pid` will be ignored.
 
         Note:
             When 'existing', connect to an existing Femtet process.
@@ -213,7 +256,8 @@ class FemtetInterface(FEMInterface):
             print('================')
             print(message)
             print('================')
-            input('Press enter to finish...')
+            if self.confirm_before_exit:
+                input('Press enter to finish...')
             raise RuntimeError(message)
 
         if self.Femtet is None:
@@ -281,9 +325,6 @@ class FemtetInterface(FEMInterface):
 
         """
 
-        # FIXME: Gaudi へのアクセスなど、self.Femtet.Gaudi.SomeFunc() のような場合、この関数を呼び出す前に Gaudi へのアクセスの時点で com_error が起こる
-        # FIXME: => 文字列で渡して eval() すればよい。
-
         if args is None:
             args = tuple()
         if kwargs is None:
@@ -338,11 +379,11 @@ class FemtetInterface(FEMInterface):
             # さらに、プロジェクトツリーが開いていないとアクティブ化イベントも意味がないらしい。
             if fun.__name__ == 'ReExecute':
                 if self.open_result_with_gui or self.parametric_output_indexes_use_as_objective:
-                    post_activate_message(self.Femtet.hWnd)
+                    _post_activate_message(self.Femtet.hWnd)
                 # API を実行
                 returns = fun(*args, **kwargs)  # can raise pywintypes.error
                 if self.open_result_with_gui or self.parametric_output_indexes_use_as_objective:
-                    post_activate_message(self.Femtet.hWnd)
+                    _post_activate_message(self.Femtet.hWnd)
             else:
                 returns = fun(*args, **kwargs)
 
@@ -504,7 +545,8 @@ class FemtetInterface(FEMInterface):
                 logger.error(Msg.ERR_CANNOT_ACCESS_API + 'GetVariableNames_py')
                 logger.error(Msg.CERTIFY_MACRO_VERSION)
                 print('================')
-                input(Msg.ENTER_TO_QUIT)
+                if self.confirm_before_exit:
+                    input(Msg.ENTER_TO_QUIT)
                 raise e
                 
             if variable_names is not None:
@@ -515,7 +557,8 @@ class FemtetInterface(FEMInterface):
             logger.error(message)
             logger.error(f'`{param_name}` not in {variable_names}')
             print('================')
-            input(Msg.ENTER_TO_QUIT)
+            if self.confirm_before_exit:
+                input(Msg.ENTER_TO_QUIT)
             raise RuntimeError(message)
         else:
             return None
@@ -670,49 +713,33 @@ class FemtetInterface(FEMInterface):
         self.postprocess(self.Femtet)
 
     def preprocess(self, Femtet):
+        """A method called just before :func:`solve`.
+
+        This method is called just before solve.
+        By inheriting from the Interface class
+        and overriding this method, it is possible
+        to perform any desired preprocessing after
+        the model update and before solving.
+        """
         pass
 
     def postprocess(self, Femtet):
+        """A method called just after :func:`solve`.
+
+        This method is called just after solve.
+        By inheriting from the Interface class
+        and overriding this method, it is possible
+        to perform any desired postprocessing after
+        the solve and before evaluating objectives.
+        """
         pass
 
     def quit(self, timeout=1, force=True):
         """Force to terminate connected Femtet."""
-        major, minor, bugfix = 2024, 0, 1
 
-        # すでに終了しているならば何もしない
-        if not self.femtet_is_alive():
-            return
+        _set_autosave_enabled(self._original_autosave_enabled)
 
-        if self._version() >= _version(major, minor, bugfix):
-            # gracefully termination method without save project available from 2024.0.1
-            try:
-                self.Femtet.Exit(True)
-            except AttributeError as e:
-                print('================')
-                logger.error(Msg.ERR_CANNOT_ACCESS_API + 'Femtet.Exit()')
-                logger.error(Msg.CERTIFY_MACRO_VERSION)
-                print('================')
-                input(Msg.ENTER_TO_QUIT)
-                raise e
-
-        else:
-            hwnd = self.Femtet.hWnd
-
-            # terminate
-            util.close_femtet(hwnd, timeout, force)
-
-            try:
-                pid = _get_pid(hwnd)
-                start = time()
-                while psutil.pid_exists(pid):
-                    if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
-                        logger.error(Msg.ERR_CLOSE_FEMTET_FAILED)
-                        break
-                    sleep(1)
-                sleep(1)
-
-            except (AttributeError, OSError):  # already dead
-                pass
+        _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
 
     def _setup_before_parallel(self, client):
         client.upload_file(
@@ -723,9 +750,9 @@ class FemtetInterface(FEMInterface):
     def _version(self):
         return _version(Femtet=self.Femtet)
 
-    def create_postprocess_args(self):
-        file_content = self.create_result_file_content()
-        jpg_content = self.create_jpg_content()
+    def _create_postprocess_args(self):
+        file_content = self._create_result_file_content()
+        jpg_content = self._create_jpg_content()
 
         out = dict(
             original_femprj_path=self.original_femprj_path,
@@ -736,14 +763,14 @@ class FemtetInterface(FEMInterface):
         return out
 
     @staticmethod
-    def create_pdt_path(femprj_path, model_name, trial):
+    def _create_pdt_path(femprj_path, model_name, trial):
         result_dir = femprj_path.replace('.femprj', '.Results')
         pdt_path = os.path.join(result_dir, model_name + f'_trial{trial}.pdt')
         return pdt_path
 
     # noinspection PyMethodOverriding
     @staticmethod
-    def postprocess_func(
+    def _postprocess_func(
             trial: int,
             original_femprj_path: str,
             model_name: str,
@@ -753,7 +780,7 @@ class FemtetInterface(FEMInterface):
     ):
         result_dir = original_femprj_path.replace('.femprj', '.Results')
         if pdt_file_content is not None:
-            pdt_path = FemtetInterface.create_pdt_path(original_femprj_path, model_name, trial)
+            pdt_path = FemtetInterface._create_pdt_path(original_femprj_path, model_name, trial)
             with open(pdt_path, 'wb') as f:
                 f.write(pdt_file_content)
 
@@ -762,7 +789,7 @@ class FemtetInterface(FEMInterface):
             with open(jpg_path, 'wb') as f:
                 f.write(jpg_file_content)
 
-    def create_result_file_content(self):
+    def _create_result_file_content(self):
         """Called after solve"""
         if self.save_pdt == 'all':
             # save to worker space
@@ -786,7 +813,7 @@ class FemtetInterface(FEMInterface):
         else:
             return None
 
-    def create_jpg_content(self):
+    def _create_jpg_content(self):
         result_dir = self.femprj_path.replace('.femprj', '.Results')
         jpg_path = os.path.join(result_dir, self.model_name + '.jpg')
 
@@ -857,38 +884,3 @@ class _UnPicklableNoFEM(FemtetInterface):
         here = os.path.dirname(__file__)
         pdt_path = os.path.join(here, f'trial{trial}.pdt')
         return pdt_path
-
-
-# レジストリのパスと値の名前
-REGISTRY_PATH: Final[str] = r"SOFTWARE\Murata Software\Femtet2014\Femtet"
-VALUE_NAME: Final[str] = "AutoSave"
-
-def get_autosave_enabled() -> bool:
-    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REGISTRY_PATH) as key:
-        value, regtype = winreg.QueryValueEx(key, VALUE_NAME)
-        if regtype == winreg.REG_DWORD:
-            return bool(value)
-        else:
-            raise ValueError("Unexpected registry value type.")
-
-def set_autosave_enabled(enable: bool) -> None:
-    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REGISTRY_PATH, 0, winreg.KEY_SET_VALUE) as key:
-        winreg.SetValueEx(key, VALUE_NAME, 0, winreg.REG_DWORD, int(enable))
-
-
-def _test_autosave_setting():
-
-    # 使用例
-    current_setting = get_autosave_enabled()
-    print(f"Current AutoSave setting is {'enabled' if current_setting else 'disabled'}.")
-
-    # 設定を変更する例
-    new_setting = not current_setting
-    set_autosave_enabled(new_setting)
-    print(f"AutoSave setting has been {'enabled' if new_setting else 'disabled'}.")
-
-    # 再度設定を確認する
-    after_setting = get_autosave_enabled()
-    print(f"Current AutoSave setting is {'enabled' if after_setting else 'disabled'}.")
-
-    assert new_setting == after_setting, "レジストリ編集に失敗しました。" 
