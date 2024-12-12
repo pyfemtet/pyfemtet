@@ -84,7 +84,31 @@ class ExcelInterface(FEMInterface):
             Femtet を呼び出すかどうかを指定します。
             デフォルトは False です。
 
-    
+        setup_xlsm_path (str or Path, optional):
+            セットアップ時に呼ぶ関数を含む xlsm のパスです。
+            指定しない場合は ``input_xlsm_path`` と
+            同じと見做します。
+
+        setup_procedure_name (str, optional):
+            セットアップ時に呼ぶマクロ関数名です。
+            指定しない場合、セットアップ時に何もしません。
+
+        setup_procedure_args (list or tuple, optional):
+            セットアップ時に呼ぶマクロ関数の引数です。
+
+        teardown_xlsm_path (str or Path, optional):
+            終了時に呼ぶ関数を含む xlsm のパスです。
+            指定しない場合は ``input_xlsm_path`` と
+            同じと見做します。
+
+        teardown_procedure_name (str, optional):
+            終了時に呼ぶマクロ関数名です。
+            指定しない場合、終了時に何もしません。
+
+        teardown_procedure_args (list or tuple, optional):
+            終了時に呼ぶマクロ関数の引数です。
+
+
     Attributes:
         input_xlsm_path (Path):
             設計変数の定義を含む Excel ファイルのパス。
@@ -159,6 +183,12 @@ class ExcelInterface(FEMInterface):
     _femtet_autosave_buffer: bool  # Femtet の自動保存機能の一時退避場所。最適化中はオフにする。
     _with_call_femtet: bool  # Femtet を Python から起動するかどうか。Excel から起動できる場合は False でよい。
 
+    setup_xlsm_path: Path
+    setup_procedure_name: str
+    setup_procedure_args: list or tuple
+    teardown_xlsm_path: Path
+    teardown_procedure_name: str
+    teardown_procedure_args: list or tuple
 
     def __init__(
             self,
@@ -170,7 +200,13 @@ class ExcelInterface(FEMInterface):
             procedure_args: list or tuple = None,
             connect_method: str = 'auto',  # or 'new'
             procedure_timeout: float or None = None,
-            with_call_femtet: bool = False
+            with_call_femtet: bool = False,
+            setup_xlsm_path: str or Path = None,
+            setup_procedure_name: str = None,
+            setup_procedure_args: list or tuple = None,
+            teardown_xlsm_path: str or Path = None,
+            teardown_procedure_name: str = None,
+            teardown_procedure_args: list or tuple = None,
     ):
 
         show_experimental_warning("ExcelInterface")
@@ -189,12 +225,23 @@ class ExcelInterface(FEMInterface):
         self._with_call_femtet = with_call_femtet
         self.terminate_excel_when_quit = self.connect_method == 'new'
 
+        self.setup_xlsm_path = None
+        self.setup_procedure_name = setup_procedure_name
+        self.setup_procedure_args = setup_procedure_args or []
+
+        self.teardown_xlsm_path = None
+        self.teardown_procedure_name = teardown_procedure_name
+        self.teardown_procedure_args = teardown_procedure_args or []
+
+
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
             worker = get_worker()
             space = worker.local_directory
             self.input_xlsm_path = Path(os.path.join(space, os.path.basename(input_xlsm_path))).resolve()
             self.output_xlsm_path = Path(os.path.join(space, os.path.basename(output_xlsm_path))).resolve()
+            self.setup_xlsm_path = Path(os.path.join(space, os.path.basename(setup_xlsm_path))).resolve()
+            self.teardown_xlsm_path = Path(os.path.join(space, os.path.basename(teardown_xlsm_path))).resolve()
 
         # main プロセスの場合は絶対パスを参照する
         except ValueError:
@@ -203,6 +250,16 @@ class ExcelInterface(FEMInterface):
                 self.output_xlsm_path = self.input_xlsm_path
             else:
                 self.output_xlsm_path = Path(os.path.abspath(output_xlsm_path)).resolve()
+
+            if setup_xlsm_path is None:
+                self.setup_xlsm_path = self.input_xlsm_path
+            else:
+                self.setup_xlsm_path = Path(os.path.abspath(setup_xlsm_path)).resolve()
+
+            if teardown_xlsm_path is None:
+                self.teardown_xlsm_path = self.input_xlsm_path
+            else:
+                self.teardown_xlsm_path = Path(os.path.abspath(teardown_xlsm_path)).resolve()
 
         # サブプロセスでの restore のための情報保管
         kwargs = dict(
@@ -215,6 +272,12 @@ class ExcelInterface(FEMInterface):
             connect_method='new',  # subprocess で connect する際は new を強制する
             procedure_timeout=self.procedure_timeout,
             with_call_femtet=self._with_call_femtet,
+            setup_xlsm_path=self.setup_xlsm_path,
+            setup_procedure_name=self.setup_procedure_name,
+            setup_procedure_args=self.setup_procedure_args,
+            teardown_xlsm_path=self.teardown_xlsm_path,
+            teardown_procedure_name=self.teardown_procedure_name,
+            teardown_procedure_args=self.teardown_procedure_args,
         )
         FEMInterface.__init__(self, **kwargs)
 
@@ -227,12 +290,64 @@ class ExcelInterface(FEMInterface):
     def _setup_before_parallel(self, client) -> None:
         # メインプロセスで、並列プロセスを開始する前に行う前処理
 
-        input_xlsm_path: Path = self.kwargs['input_xlsm_path']
-        output_xlsm_path: Path = self.kwargs['output_xlsm_path']
+        client.upload_file(str(self.input_xlsm_path), False)
 
-        client.upload_file(str(input_xlsm_path), False)
-        if input_xlsm_path.resolve() != output_xlsm_path.resolve():
-            client.upload_file(str(output_xlsm_path), False)
+        if self.input_xlsm_path.resolve() != self.output_xlsm_path.resolve():
+            client.upload_file(str(self.output_xlsm_path), False)
+
+        if self.input_xlsm_path.resolve() != self.setup_xlsm_path.resolve():
+            client.upload_file(str(self.setup_xlsm_path), False)
+
+        if self.input_xlsm_path.resolve() != self.teardown_xlsm_path.resolve():
+            client.upload_file(str(self.teardown_xlsm_path), False)
+
+    def _setup_after_parallel(self, *args, **kwargs):
+        """サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理"""
+
+        # スレッドが変わっているかもしれないので win32com の初期化
+        CoInitialize()
+
+        # 最適化中は femtet の autosave を無効にする
+        _set_autosave_enabled(False)
+
+        # 必要なら Femtet を起動する
+        if self._with_call_femtet:
+            util.execute_femtet()
+
+            # 直後の Excel 起動に間に合わない場合があるため
+            # Femtet が Dispatch 可能になるまで捨てプロセスで待つ
+            p = _NestableSpawnProcess(target=wait_femtet)
+            p.start()
+            p.join()
+
+        # excel に繋ぐ
+        self.connect_excel(self.connect_method)
+
+        # load_objective は 1 回目に呼ばれたのが main thread なので
+        # subprocess に入った後でもう一度 load objective を行う
+        from pyfemtet.opt.optimizer import AbstractOptimizer
+        from pyfemtet.opt._femopt_core import Objective
+        opt: AbstractOptimizer = kwargs['opt']
+        obj: Objective
+        for obj_name, obj in opt.objectives.items():
+            if isinstance(obj.fun, ScapeGoatObjective):
+                opt.objectives[obj_name].fun = self.objective_from_excel
+
+        # excel の setup 関数を必要なら実行する
+        if self.setup_procedure_name is not None:
+
+            try:
+                with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
+                    self.excel.Run(
+                        f'{self.setup_procedure_name}',
+                        *self.setup_procedure_args
+                    )
+
+                # 再計算
+                self.excel.CalculateFull()
+
+            except com_error as e:
+                raise RuntimeError(f'Failed to run macro {self.setup_procedure_args}. The original message is: {e}')
 
     def connect_excel(self, connect_method):
 
@@ -345,38 +460,6 @@ class ExcelInterface(FEMInterface):
                 if ref.Description == 'FemtetMacro':  # FemtetMacro
                     wb.VBProject.References.Remove(ref)
 
-    def _setup_after_parallel(self, *args, **kwargs):
-        # サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理
-
-        # スレッドが変わっているかもしれないので win32com の初期化
-        CoInitialize()
-
-        # 最適化中は femtet の autosave を無効にする
-        _set_autosave_enabled(False)
-
-        # 必要なら Femtet を起動する
-        if self._with_call_femtet:
-            util.execute_femtet()
-
-            # 直後の Excel 起動に間に合わない場合があるため
-            # Femtet が Dispatch 可能になるまで捨てプロセスで待つ
-            p = _NestableSpawnProcess(target=wait_femtet)
-            p.start()
-            p.join()
-
-        # excel に繋ぐ
-        self.connect_excel(self.connect_method)
-
-        # load_objective は 1 回目に呼ばれたのが main thread なので
-        # subprocess に入った後でもう一度 load objective を行う
-        from pyfemtet.opt.optimizer import AbstractOptimizer
-        from pyfemtet.opt._femopt_core import Objective
-        opt: AbstractOptimizer = kwargs['opt']
-        obj: Objective
-        for obj_name, obj in opt.objectives.items():
-            if isinstance(obj.fun, ScapeGoatObjective):
-                opt.objectives[obj_name].fun = self.objective_from_excel
-
     def update(self, parameters: pd.DataFrame) -> None:
 
         # params を作成
@@ -408,6 +491,23 @@ class ExcelInterface(FEMInterface):
     def quit(self):
         if self.terminate_excel_when_quit:
             logger.info('Excel の終了処理を開始します。')
+
+            # 参照設定解除の前に終了処理を必要なら実施する
+            # excel の setup 関数を必要なら実行する
+            if self.teardown_xlsm_path is not None:
+
+                try:
+                    with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
+                        self.excel.Run(
+                            f'{self.teardown_procedure_name}',
+                            *self.teardown_procedure_args
+                        )
+
+                    # 再計算
+                    self.excel.CalculateFull()
+
+                except com_error as e:
+                    raise RuntimeError(f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
 
             self.remove_femtet_ref_xla(self.wb_input)
             self.remove_femtet_ref_xla(self.wb_output)
@@ -449,6 +549,7 @@ class ExcelInterface(FEMInterface):
 
         logger.info('自動保存機能の設定を元に戻しています。')
         _set_autosave_enabled(self._femtet_autosave_buffer)
+        logger.info('自動保存機能の設定を元に戻しました。')
 
     # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
     @property

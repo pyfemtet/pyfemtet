@@ -34,6 +34,8 @@ def test_excel_interface():
         procedure_timeout=60,
         with_call_femtet=False,
         connect_method='new',
+        setup_procedure_name='launch_femtet',
+        teardown_procedure_name='terminate_femtet',
     )
 
     fem.visible = True
