@@ -34,6 +34,7 @@ optuna-integration = ">=3.6.0, <5.0.0"
 botorch = "==0.9.5"
 torch = "~2.3.0"
 brepmatching = {version = "^0.1.6", optional = true}
+fire = "^0.6.0"
 
 [tool.poetry.group.dev.dependencies]
 # license
@@ -52,6 +53,7 @@ bokeh = "^3.3.3"
 # test
 pytest = "^7.4.3"
 pytest-dashboard = "^0.1.2"
+fire = "^0.6.0"
 
 [tool.poetry.extras]
 brep = ["brepmatching"]  # pip install pyfemtet[brep]
