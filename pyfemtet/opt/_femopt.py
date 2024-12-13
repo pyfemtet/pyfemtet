@@ -749,8 +749,8 @@ class FEMOpt:
         with self.client.cluster as _cluster, self.client as _client:
 
             # actor の設定
-            self.status = OptimizationStatus(_client)
-            self.worker_status_list = [OptimizationStatus(_client, name) for name in worker_addresses]  # tqdm 検討
+            self.status = OptimizationStatus(_client, worker_address=self.monitor_process_worker_name)
+            self.worker_status_list = [OptimizationStatus(_client, worker_address=self.monitor_process_worker_name, name=name) for name in worker_addresses]  # tqdm 検討
             self.status.set(OptimizationStatus.SETTING_UP)
             self.history = History(
                 self.history_path,
