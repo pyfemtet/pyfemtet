@@ -5,7 +5,7 @@ import gc
 
 import pandas as pd
 import numpy as np
-from dask.distributed import get_worker
+from dask.distributed import get_worker, Lock
 
 from win32com.client import DispatchEx, Dispatch
 from win32com.client.dynamic import CDispatch
@@ -27,6 +27,7 @@ from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
 from pyfemtet._femtet_config_util.autosave import _set_autosave_enabled, _get_autosave_enabled
 
 from pyfemtet._util.excel_macro_util import watch_excel_macro_error
+from pyfemtet._util.dask_util import lock_or_no_lock
 
 from pyfemtet._warning import show_experimental_warning
 
@@ -162,7 +163,7 @@ class ExcelInterface(FEMInterface):
     output_xlsm_path: Path  # 操作対象の xlsm パス (指定しない場合、input と同一)
     output_sheet_name: str  # 計算結果セルを定義しているシート名 (指定しない場合、input と同一)
 
-    # TODO: related_file_paths: dict[Path] を必要なら実装  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
+    related_file_paths: list[Path]  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
 
     procedure_name: str  # マクロ関数名（or モジュール名.関数名）
     procedure_args: list  # マクロ関数の引数
@@ -207,6 +208,7 @@ class ExcelInterface(FEMInterface):
             teardown_xlsm_path: str or Path = None,
             teardown_procedure_name: str = None,
             teardown_procedure_args: list or tuple = None,
+            related_file_paths: list[Path] = None,
     ):
 
         show_experimental_warning("ExcelInterface")
@@ -225,14 +227,15 @@ class ExcelInterface(FEMInterface):
         self._with_call_femtet = with_call_femtet
         self.terminate_excel_when_quit = self.connect_method == 'new'
 
-        self.setup_xlsm_path = None
+        self.setup_xlsm_path = None  # あとで取得する
         self.setup_procedure_name = setup_procedure_name
         self.setup_procedure_args = setup_procedure_args or []
 
-        self.teardown_xlsm_path = None
+        self.teardown_xlsm_path = None  # あとで取得する
         self.teardown_procedure_name = teardown_procedure_name
         self.teardown_procedure_args = teardown_procedure_args or []
 
+        self.related_file_paths = related_file_paths or []
 
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
@@ -242,6 +245,7 @@ class ExcelInterface(FEMInterface):
             self.output_xlsm_path = Path(os.path.join(space, os.path.basename(output_xlsm_path))).resolve()
             self.setup_xlsm_path = Path(os.path.join(space, os.path.basename(setup_xlsm_path))).resolve()
             self.teardown_xlsm_path = Path(os.path.join(space, os.path.basename(teardown_xlsm_path))).resolve()
+            self.related_file_paths = [Path(os.path.join(space, os.path.basename(p))).resolve() for p in self.related_file_paths]
 
         # main プロセスの場合は絶対パスを参照する
         except ValueError:
@@ -261,6 +265,8 @@ class ExcelInterface(FEMInterface):
             else:
                 self.teardown_xlsm_path = Path(os.path.abspath(teardown_xlsm_path)).resolve()
 
+            self.related_file_paths = [Path(os.path.abspath(p)).resolve() for p in related_file_paths]
+
         # サブプロセスでの restore のための情報保管
         kwargs = dict(
             input_xlsm_path=self.input_xlsm_path,
@@ -278,6 +284,7 @@ class ExcelInterface(FEMInterface):
             teardown_xlsm_path=self.teardown_xlsm_path,
             teardown_procedure_name=self.teardown_procedure_name,
             teardown_procedure_args=self.teardown_procedure_args,
+            related_file_paths=related_file_paths,
         )
         FEMInterface.__init__(self, **kwargs)
 
@@ -301,6 +308,9 @@ class ExcelInterface(FEMInterface):
         if self.input_xlsm_path.resolve() != self.teardown_xlsm_path.resolve():
             client.upload_file(str(self.teardown_xlsm_path), False)
 
+        for path in self.related_file_paths:
+            client.upload_file(str(path), False)
+
     def _setup_after_parallel(self, *args, **kwargs):
         """サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理"""
 
@@ -312,8 +322,9 @@ class ExcelInterface(FEMInterface):
                 self.output_xlsm_path = Path(os.path.join(space, os.path.basename(self.output_xlsm_path))).resolve()
                 self.setup_xlsm_path = Path(os.path.join(space, os.path.basename(self.setup_xlsm_path))).resolve()
                 self.teardown_xlsm_path = Path(os.path.join(space, os.path.basename(self.teardown_xlsm_path))).resolve()
+                self.related_file_paths = [Path(os.path.join(space, os.path.basename(p))).resolve() for p in self.related_file_paths]
 
-        # connect_method が auto でかつ使用中のファイルを開こうとする場合に備えてファイル名を変更
+        # connect_method が auto でかつ使用中のファイルを開こうとする場合に備えて excel のファイル名を変更
         subprocess_idx = kwargs['opt'].subprocess_idx
 
         def proc_path(path, ignore_no_exists):
@@ -361,19 +372,19 @@ class ExcelInterface(FEMInterface):
 
         # excel の setup 関数を必要なら実行する
         if self.setup_procedure_name is not None:
+            with lock_or_no_lock('excel_setup_procedure'):
+                try:
+                    with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
+                        self.excel.Run(
+                            f'{self.setup_procedure_name}',
+                            *self.setup_procedure_args
+                        )
 
-            try:
-                with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
-                    self.excel.Run(
-                        f'{self.setup_procedure_name}',
-                        *self.setup_procedure_args
-                    )
+                    # 再計算
+                    self.excel.CalculateFull()
 
-                # 再計算
-                self.excel.CalculateFull()
-
-            except com_error as e:
-                raise RuntimeError(f'Failed to run macro {self.setup_procedure_args}. The original message is: {e}')
+                except com_error as e:
+                    raise RuntimeError(f'Failed to run macro {self.setup_procedure_args}. The original message is: {e}')
 
     def connect_excel(self, connect_method):
 
@@ -521,19 +532,19 @@ class ExcelInterface(FEMInterface):
             # 参照設定解除の前に終了処理を必要なら実施する
             # excel の setup 関数を必要なら実行する
             if self.teardown_xlsm_path is not None:
+                with lock_or_no_lock('excel_setup_procedure'):
+                    try:
+                        with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
+                            self.excel.Run(
+                                f'{self.teardown_procedure_name}',
+                                *self.teardown_procedure_args
+                            )
 
-                try:
-                    with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
-                        self.excel.Run(
-                            f'{self.teardown_procedure_name}',
-                            *self.teardown_procedure_args
-                        )
+                        # 再計算
+                        self.excel.CalculateFull()
 
-                    # 再計算
-                    self.excel.CalculateFull()
-
-                except com_error as e:
-                    raise RuntimeError(f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
+                    except com_error as e:
+                        raise RuntimeError(f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
 
             self.remove_femtet_ref_xla(self.wb_input)
             self.remove_femtet_ref_xla(self.wb_output)
