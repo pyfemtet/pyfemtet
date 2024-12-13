@@ -39,9 +39,10 @@ def test_excel_interface():
         setup_procedure_name='launch_femtet',
         teardown_procedure_name='terminate_femtet',
         related_file_paths=[Path(femprj_path)],
+        visible=True,
+        interactive=True,
     )
 
-    fem.visible = True
 
     opt = OptunaOptimizer(
         sampler_class=QMCSampler,
@@ -58,7 +59,7 @@ def test_excel_interface():
     df = femopt.optimize(
         n_trials=30,
         confirm_before_exit=False,
-        n_parallel=2,
+        n_parallel=4,
     )
 
     csv_path = femopt.history_path
