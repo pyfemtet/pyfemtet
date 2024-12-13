@@ -109,6 +109,28 @@ class ExcelInterface(FEMInterface):
         teardown_procedure_args (list or tuple, optional):
             終了時に呼ぶマクロ関数の引数です。
 
+        visible (bool):
+            excel を可視化するかどうかです。
+            ただし、 True を指定した場合でもマクロの実行中は
+            不可視になります。
+            デフォルトは False です。
+
+        display_alerts (bool):
+            excel ダイアログを表示するかどうかです。
+            デバッグ目的の場合以外は True にしないでください。
+            デフォルトは False です。
+
+        terminate_excel_when_quit (bool):
+            終了時に Excel を終了するかどうかです。
+            指定しない場合、 connect_method が 'new' の場合
+            True とふるまい 'auto' の場合 False と振舞います。
+
+        interactive (bool):
+            excel を対話モードにするかどうかです。
+            False にすると、 visible == True であっても
+            自動化プロセス中にユーザーが誤って
+            Excel 本体を操作できないようにします。
+            デフォルトは True です。
 
     Attributes:
         input_xlsm_path (Path):
@@ -174,9 +196,10 @@ class ExcelInterface(FEMInterface):
     wb_output: CDispatch  # システムを構成する Workbook
     sh_output: CDispatch  # 計算結果の定義された WorkSheet (sh_input と同じでもよい)
 
-    visible: bool = False  # excel を可視化するかどうか
-    display_alerts: bool = False  # ダイアログを表示するかどうか
+    visible: bool  # excel を可視化するかどうか
+    display_alerts: bool  # ダイアログを表示するかどうか
     terminate_excel_when_quit: bool  # 終了時に Excel を終了するかどうか
+    interactive: bool  # excel を対話モードにするかどうか
 
     _load_problem_from_me: bool = True
     _excel_pid: int
@@ -209,6 +232,10 @@ class ExcelInterface(FEMInterface):
             teardown_procedure_name: str = None,
             teardown_procedure_args: list or tuple = None,
             related_file_paths: list[Path] = None,
+            visible: bool = False,
+            display_alerts: bool = False,
+            terminate_excel_when_quit: bool = None,
+            interactive: bool = True,
     ):
 
         show_experimental_warning("ExcelInterface")
@@ -225,7 +252,10 @@ class ExcelInterface(FEMInterface):
         self._femtet_autosave_buffer = _get_autosave_enabled()
         self.procedure_timeout = procedure_timeout
         self._with_call_femtet = with_call_femtet
-        self.terminate_excel_when_quit = self.connect_method == 'new'
+        if terminate_excel_when_quit is None:
+            self.terminate_excel_when_quit = self.connect_method == 'new'
+        else:
+            self.terminate_excel_when_quit = terminate_excel_when_quit
 
         self.setup_xlsm_path = None  # あとで取得する
         self.setup_procedure_name = setup_procedure_name
@@ -236,6 +266,10 @@ class ExcelInterface(FEMInterface):
         self.teardown_procedure_args = teardown_procedure_args or []
 
         self.related_file_paths = related_file_paths or []
+
+        self.visible = visible
+        self.interactive = interactive
+        self.display_alerts = display_alerts
 
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
@@ -276,6 +310,7 @@ class ExcelInterface(FEMInterface):
             procedure_name=self.procedure_name,
             procedure_args=self.procedure_args,
             connect_method='new',  # subprocess で connect する際は new を強制する
+            terminate_excel_when_quit=True,  # なので終了時は破棄する
             procedure_timeout=self.procedure_timeout,
             with_call_femtet=self._with_call_femtet,
             setup_xlsm_path=self.setup_xlsm_path,
@@ -284,7 +319,10 @@ class ExcelInterface(FEMInterface):
             teardown_xlsm_path=self.teardown_xlsm_path,
             teardown_procedure_name=self.teardown_procedure_name,
             teardown_procedure_args=self.teardown_procedure_args,
-            related_file_paths=related_file_paths,
+            related_file_paths=self.related_file_paths,
+            visible=self.visible,
+            interactive=self.interactive,
+            display_alerts=self.display_alerts,
         )
         FEMInterface.__init__(self, **kwargs)
 
@@ -405,6 +443,7 @@ class ExcelInterface(FEMInterface):
         # 可視性の設定
         self.excel.Visible = self.visible
         self.excel.DisplayAlerts = self.display_alerts
+        self.excel.Interactive = self.interactive
 
         # 開く
         self.excel.Workbooks.Open(str(self.input_xlsm_path))
