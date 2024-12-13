@@ -719,10 +719,12 @@ class FEMOpt:
             #   これは CLI の --no-nanny オプションも同様らしい。
 
             # クラスターの構築
+            # noinspection PyTypeChecker
             cluster = LocalCluster(
                 processes=True,
                 n_workers=n_parallel,
                 threads_per_worker=1,
+                worker_class=Nanny,
             )
             logger.info('LocalCluster launched successfully.')
 
@@ -800,7 +802,7 @@ class FEMOpt:
                 subprocess_indices,
                 [self.worker_status_list] * len(subprocess_indices),
                 [wait_setup] * len(subprocess_indices),
-                workers=worker_addresses,
+                workers=worker_addresses if self.opt.is_cluster else worker_addresses[1:],
                 allow_other_workers=False,
             )
 
