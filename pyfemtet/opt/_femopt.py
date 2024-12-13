@@ -728,23 +728,28 @@ class FEMOpt:
             )
             logger.info('LocalCluster launched successfully.')
 
-            self.client = Client(cluster, direct_to_workers=False)
-            self.scheduler_address = self.client.scheduler.address
+            self.client = Client(
+                cluster,
+                direct_to_workers=False,
+            )
             logger.info('Client launched successfully.')
 
-            # 最適化タスクを振り分ける worker を指定
-            subprocess_indices = list(range(n_parallel))[1:]
-            worker_addresses = list(self.client.nthreads().keys())
+            self.scheduler_address = self.client.scheduler.address
+
+            # worker address を取得
+            nannies_dict: dict[Any, Nanny] = self.client.cluster.workers
+            nannies = tuple(nannies_dict.values())
 
             # ひとつの Nanny を選んで monitor 用にしつつ
             # その space は main process に使わせるために記憶する
-            nannies: dict[Any, Nanny] = self.client.cluster.workers
-            nanny: Nanny = tuple(nannies.values())[0]
-            self.monitor_process_worker_name = nanny.worker_address
-            self._extra_space_dir = nanny.worker_dir
+            self.monitor_process_worker_name = nannies[0].worker_address
+            self._extra_space_dir = nannies[0].worker_dir
 
-            # TODO: 名前と address がごちゃごちゃになっていて保守性が悪い
-            worker_addresses[0] = 'Main'
+            # 名前と address がごちゃごちゃになっていて可読性が悪いが
+            # 選んだ以外の Nanny は計算を割り当てる用にする
+            worker_addresses = ['Main']
+            worker_addresses.extend([n.worker_address for n in nannies[1:]])
+            subprocess_indices = list(range(n_parallel))[1:]
 
         with self.client.cluster as _cluster, self.client as _client:
 
