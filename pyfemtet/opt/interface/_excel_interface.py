@@ -304,6 +304,32 @@ class ExcelInterface(FEMInterface):
     def _setup_after_parallel(self, *args, **kwargs):
         """サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理"""
 
+        # kwargs で space_dir が与えられている場合、そちらを使用する
+        if 'space_dir' in kwargs.keys():
+            space = kwargs['space_dir']
+            if space is not None:
+                self.input_xlsm_path = Path(os.path.join(space, os.path.basename(self.input_xlsm_path))).resolve()
+                self.output_xlsm_path = Path(os.path.join(space, os.path.basename(self.output_xlsm_path))).resolve()
+                self.setup_xlsm_path = Path(os.path.join(space, os.path.basename(self.setup_xlsm_path))).resolve()
+                self.teardown_xlsm_path = Path(os.path.join(space, os.path.basename(self.teardown_xlsm_path))).resolve()
+
+        # connect_method が auto でかつ使用中のファイルを開こうとする場合に備えてファイル名を変更
+        subprocess_idx = kwargs['opt'].subprocess_idx
+
+        def proc_path(path, ignore_no_exists):
+            exclude_ext, ext = os.path.splitext(path)
+            new_path = exclude_ext + f'{subprocess_idx}' + ext
+            if os.path.exists(path):  # input と output が同じの場合など。input がないのはおかしい
+                os.rename(path, new_path)
+            elif not ignore_no_exists:
+                raise FileNotFoundError(f'{path} が見つかりません。')
+            return Path(new_path)
+
+        self.input_xlsm_path = proc_path(self.input_xlsm_path, False)
+        self.output_xlsm_path = proc_path(self.output_xlsm_path, True)
+        self.setup_xlsm_path = proc_path(self.setup_xlsm_path, True)
+        self.teardown_xlsm_path = proc_path(self.teardown_xlsm_path, True)
+
         # スレッドが変わっているかもしれないので win32com の初期化
         CoInitialize()
 

@@ -12,7 +12,7 @@ from traceback import print_exception
 # 3rd-party
 import numpy as np
 import pandas as pd
-from dask.distributed import LocalCluster, Client
+from dask.distributed import LocalCluster, Client, get_worker, Nanny
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
@@ -136,6 +136,7 @@ class FEMOpt:
         self.monitor_server_kwargs = dict()
         self.monitor_process_worker_name = None
         self._hv_reference = None
+        self._extra_space_dir = None
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -733,8 +734,14 @@ class FEMOpt:
             subprocess_indices = list(range(n_parallel))[1:]
             worker_addresses = list(self.client.nthreads().keys())
 
-            # monitor worker の設定
-            self.monitor_process_worker_name = worker_addresses[0]
+            # ひとつの Nanny を選んで monitor 用にしつつ
+            # その space は main process に使わせるために記憶する
+            nannies: dict[Any, Nanny] = self.client.cluster.workers
+            nanny: Nanny = tuple(nannies.values())[0]
+            self.monitor_process_worker_name = nanny.worker_address
+            self._extra_space_dir = nanny.worker_dir
+
+            # TODO: 名前と address がごちゃごちゃになっていて保守性が悪い
             worker_addresses[0] = 'Main'
 
         with self.client.cluster as _cluster, self.client as _client:
@@ -773,7 +780,6 @@ class FEMOpt:
             logger.info('Process monitor initialized successfully.')
 
             # fem
-            # TODO: n_parallel=1 のときもアップロードしている。これを使うべきか、アップロードしないべき。
             self.fem._setup_before_parallel(_client)
 
             # opt
@@ -818,6 +824,7 @@ class FEMOpt:
                     ),
                     kwargs=dict(
                         skip_reconstruct=True,
+                        space_dir=self._extra_space_dir,
                     )
                 )
                 t_main.start()

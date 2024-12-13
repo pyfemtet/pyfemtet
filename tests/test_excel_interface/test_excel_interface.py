@@ -33,7 +33,7 @@ def test_excel_interface():
         procedure_args=None,
         procedure_timeout=60,
         with_call_femtet=False,
-        connect_method='new',
+        connect_method='auto',
         setup_procedure_name='launch_femtet',
         teardown_procedure_name='terminate_femtet',
     )
@@ -55,7 +55,7 @@ def test_excel_interface():
     df = femopt.optimize(
         n_trials=30,
         confirm_before_exit=False,
-        n_parallel=1,
+        n_parallel=2,
     )
 
     csv_path = femopt.history_path
