@@ -53,6 +53,7 @@ class _ExcelDialogProcessor:
             win32gui.EnumWindows(self.enum_callback_to_close_dialog, found)
             await asyncio.sleep(0.5)
             if any(found):
+                await asyncio.sleep(1.)
                 break
 
         logger.debug('ブックを閉じます。')

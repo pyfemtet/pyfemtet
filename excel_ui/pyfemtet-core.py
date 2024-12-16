@@ -1,14 +1,9 @@
 """同梱する Excel ファイルから pyfemtet を呼び出す際の pyfemtet スクリプト。
 
 Excel 側では下記の前提を守ること。
-- 設計変数を記載するシートは表形式を維持すること。
-- 目的関数を記載するシートは表形式を維持すること。
-- 最適化の各繰り返しの際に呼ばれる関数は拡張子のない femprj ファイル名を引数に取ること
-- 最適化の
-
-
-
-
+- 設計変数を記載するシートは表形式を維持し、 `current` 列のセルは名前付き範囲にすること。
+- 目的関数を記載するシートは表形式を維持し、 `current` 列のセルは名前付き範囲にすること。
+- 最適化の繰り返し計算のたびに呼ばれる関数は拡張子なしのプロジェクトファイル名と解析モデル名を引数に取ること。
 
 """
 
@@ -48,7 +43,7 @@ def get_sampler_class(sampling_method):
 def core(
         xlsm_path: str,
         csv_path: str or None,
-        femprj_path: str,  # xlsm と同じフォルダに配置する前提。
+        femprj_path: str or None,  # xlsm と同じフォルダに配置する前提。
         model_name: str or None,
         input_sheet_name: str,
 
@@ -70,7 +65,16 @@ def core(
     from pyfemtet.opt import FEMOpt, OptunaOptimizer
     from pyfemtet.opt.interface._excel_interface import ExcelInterface
 
-    prj_name = os.path.basename(femprj_path).removesuffix('.femprj')
+    procedure_args = []
+    related_file_paths = []
+    if femprj_path is not None:
+        prj_name = os.path.basename(femprj_path).removesuffix('.femprj')
+        procedure_args.append(prj_name)
+        related_file_paths = [Path(femprj_path)]
+    if model_name is not None:
+        procedure_args.append(model_name)
+    if femprj_path is None and model_name is not None:
+        raise NotImplementedError
 
     fem = ExcelInterface(
         input_xlsm_path=xlsm_path,
@@ -78,15 +82,14 @@ def core(
         output_xlsm_path=None,
         output_sheet_name=output_sheet_name,
         procedure_name=procedure_name,
-        procedure_args=(prj_name,) if model_name is None else (prj_name, model_name,),
+        procedure_args=procedure_args,
         connect_method='new',
         setup_procedure_name=setup_procedure_name,
         teardown_procedure_name=teardown_procedure_name,
-        related_file_paths=[Path(femprj_path)],
+        related_file_paths=related_file_paths,
         visible=False,
         interactive=True,
     )
-
 
     opt = OptunaOptimizer(
         sampler_class=sampler_class,
@@ -106,16 +109,17 @@ def core(
         n_trials=n_trials,
         n_parallel=n_parallel,
         timeout=timeout,
-        confirm_before_exit=False,
+        confirm_before_exit=True,
     )
 
 
 def main(
-        xlsm_path: str,
-        femprj_path: str,  # xlsm と同じフォルダに配置する前提。
-        input_sheet_name: str,
-        n_parallel: int,
+        # これらは Fire キーワード引数指定できるように None を与えているが必須
+        xlsm_path: str = None,
+        input_sheet_name: str = None,
+        n_parallel: int = 1,
 
+        femprj_path: str or None = None,  # 指定する場合は xlsm と同じフォルダに配置する前提にすること
         model_name: str = None,
         csv_path: str or None = None,
         output_sheet_name: str or None = None,
@@ -142,10 +146,25 @@ def main(
     # print(n_parallel, type(n_parallel))  # int か float に自動変換される
     # print(timeout, type(timeout))  # int か float に自動変換される
 
-    # ----- check args -----
+
+    # ----- check 必須 args -----
     logger = get_module_logger('opt.script', __name__)
 
     os.chdir(os.path.dirname(__file__))
+
+    if xlsm_path is None:
+        logger.error(f'xlsm_path を指定してください。')
+        input('終了するには Enter を押してください。')
+        sys.exit(1)
+
+    if input_sheet_name is None:
+        logger.error(f'input_sheet_name を指定してください。')
+        input('終了するには Enter を押してください。')
+        sys.exit(1)
+
+
+    # ----- check args -----
+    logger.info(f'{os.path.basename(__file__)} は {os.path.basename(xlsm_path)} に呼び出されました.')
 
     # xlsm_path
     xlsm_path = os.path.abspath(xlsm_path)
@@ -155,9 +174,16 @@ def main(
         sys.exit(1)
 
     # femprj_path
-    femprj_path = os.path.abspath(femprj_path)
-    if not os.path.exists(femprj_path):
-        logger.error(f'{femprj_path} が見つかりませんでした。')
+    if femprj_path is not None:
+        femprj_path = os.path.abspath(femprj_path)
+        if not os.path.exists(femprj_path):
+            logger.error(f'{femprj_path} が見つかりませんでした。')
+            input('終了するには Enter を押してください。')
+            sys.exit(1)
+
+    # model_name
+    if model_name is not None and femprj_path is None:
+        logger.error(f'model_name ({model_name}) を指定する場合は femprj_path も指定してください。')
         input('終了するには Enter を押してください。')
         sys.exit(1)
 
@@ -218,6 +244,8 @@ def main(
             logger.error(f'algorithm_setting の項目 ({given_key}) は {sampler_class.__name__} に設定できません。詳しくは上記のドキュメントをご覧ください。')
             input('終了するには Enter を押してください。')
             sys.exit(1)
+
+    logger.info('引数の整合性チェックが終了しました。最適化を実行します。しばらくお待ちください...')
 
     core(
         xlsm_path,

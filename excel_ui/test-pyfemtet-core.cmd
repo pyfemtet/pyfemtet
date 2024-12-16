@@ -5,17 +5,18 @@ rem poetry run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3 --n_start
 rem poetry run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3 --n_startup_trials=10 --timeout=5
 rem poetry run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3.14 --n_startup_trials=10 --timeout=5
 poetry run python pyfemtet-core.py ^
-    "インターフェース.xlsm" ^
-    "プロジェクト.femprj" ^
+    インターフェース.xlsm ^
     --input_sheet_name="設計変数" ^
     --output_sheet_name="目的関数" ^
 
     --n_parallel=1 ^
     --csv_path="test.csv" ^
-    --procedure_name="FemtetMacro.FemtetMain" ^
-    --algorithm="Random" ^
+    --procedure_name=FemtetMacro.FemtetMain ^
+    --setup_procedure_name=PrePostProcessing.setup ^
+    --teardown_procedure_name=PrePostProcessing.teardown ^
+
+    --algorithm=QMC ^
     --n_startup_trials=10 ^
-    --constraints_func="asd" ^
 
 
 pause
