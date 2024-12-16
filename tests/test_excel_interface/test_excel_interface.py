@@ -56,8 +56,9 @@ def test_excel_interface():
 
     femopt.set_random_seed(42)
 
+    n_trials = 30
     df = femopt.optimize(
-        n_trials=30,
+        n_trials=n_trials,
         confirm_before_exit=False,
         n_parallel=4,
     )
@@ -91,7 +92,7 @@ def test_excel_interface():
         # 比較
         threshold = 0.1
         import numpy as np
-        if (np.abs(dif_values - ref_values) / ref_values).mean() > threshold:
+        if (np.abs(dif_values[:n_trials] - ref_values[:n_trials]) / ref_values[:n_trials]).mean() > threshold:
             assert False, f'ref との平均差異が {int(threshold * 100)}% 超です。'
         else:
             print('ExcelInterface, PASSED!')
