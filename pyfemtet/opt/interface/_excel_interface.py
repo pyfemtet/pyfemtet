@@ -241,9 +241,9 @@ class ExcelInterface(FEMInterface):
         show_experimental_warning("ExcelInterface")
 
         # 初期化
-        self.input_xlsm_path = None  # あとで取得する
+        self.input_xlsm_path = input_xlsm_path  # あとで再取得する
         self.input_sheet_name = input_sheet_name
-        self.output_xlsm_path = None  # あとで取得する
+        self.output_xlsm_path = input_xlsm_path if output_xlsm_path is None else output_xlsm_path
         self.output_sheet_name = output_sheet_name or self.input_sheet_name
         self.procedure_name = procedure_name or 'FemtetMacro.FemtetMain'
         self.procedure_args = procedure_args or []
@@ -257,11 +257,11 @@ class ExcelInterface(FEMInterface):
         else:
             self.terminate_excel_when_quit = terminate_excel_when_quit
 
-        self.setup_xlsm_path = None  # あとで取得する
+        self.setup_xlsm_path = input_xlsm_path if setup_xlsm_path is None else setup_xlsm_path  # あとで取得する
         self.setup_procedure_name = setup_procedure_name
         self.setup_procedure_args = setup_procedure_args or []
 
-        self.teardown_xlsm_path = None  # あとで取得する
+        self.teardown_xlsm_path = input_xlsm_path if teardown_xlsm_path is None else teardown_xlsm_path  # あとで取得する
         self.teardown_procedure_name = teardown_procedure_name
         self.teardown_procedure_args = teardown_procedure_args or []
 
@@ -275,31 +275,19 @@ class ExcelInterface(FEMInterface):
         try:
             worker = get_worker()
             space = worker.local_directory
-            self.input_xlsm_path = Path(os.path.join(space, os.path.basename(input_xlsm_path))).resolve()
-            self.output_xlsm_path = Path(os.path.join(space, os.path.basename(output_xlsm_path))).resolve()
-            self.setup_xlsm_path = Path(os.path.join(space, os.path.basename(setup_xlsm_path))).resolve()
-            self.teardown_xlsm_path = Path(os.path.join(space, os.path.basename(teardown_xlsm_path))).resolve()
+            self.input_xlsm_path = Path(os.path.join(space, os.path.basename(self.input_xlsm_path))).resolve()
+            self.output_xlsm_path = Path(os.path.join(space, os.path.basename(self.output_xlsm_path))).resolve()
+            self.setup_xlsm_path = Path(os.path.join(space, os.path.basename(self.setup_xlsm_path))).resolve()
+            self.teardown_xlsm_path = Path(os.path.join(space, os.path.basename(self.teardown_xlsm_path))).resolve()
             self.related_file_paths = [Path(os.path.join(space, os.path.basename(p))).resolve() for p in self.related_file_paths]
 
         # main プロセスの場合は絶対パスを参照する
         except ValueError:
-            self.input_xlsm_path = Path(os.path.abspath(input_xlsm_path)).resolve()
-            if output_xlsm_path is None:
-                self.output_xlsm_path = self.input_xlsm_path
-            else:
-                self.output_xlsm_path = Path(os.path.abspath(output_xlsm_path)).resolve()
-
-            if setup_xlsm_path is None:
-                self.setup_xlsm_path = self.input_xlsm_path
-            else:
-                self.setup_xlsm_path = Path(os.path.abspath(setup_xlsm_path)).resolve()
-
-            if teardown_xlsm_path is None:
-                self.teardown_xlsm_path = self.input_xlsm_path
-            else:
-                self.teardown_xlsm_path = Path(os.path.abspath(teardown_xlsm_path)).resolve()
-
-            self.related_file_paths = [Path(os.path.abspath(p)).resolve() for p in related_file_paths]
+            self.input_xlsm_path = Path(os.path.abspath(self.input_xlsm_path)).resolve()
+            self.output_xlsm_path = Path(os.path.abspath(self.output_xlsm_path)).resolve()
+            self.setup_xlsm_path = Path(os.path.abspath(self.setup_xlsm_path)).resolve()
+            self.teardown_xlsm_path = Path(os.path.abspath(self.teardown_xlsm_path)).resolve()
+            self.related_file_paths = [Path(os.path.abspath(p)).resolve() for p in self.related_file_paths]
 
         # サブプロセスでの restore のための情報保管
         kwargs = dict(
@@ -570,7 +558,7 @@ class ExcelInterface(FEMInterface):
 
             # 参照設定解除の前に終了処理を必要なら実施する
             # excel の setup 関数を必要なら実行する
-            if self.teardown_xlsm_path is not None:
+            if self.teardown_procedure_name is not None:
                 with lock_or_no_lock('excel_setup_procedure'):
                     try:
                         with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
