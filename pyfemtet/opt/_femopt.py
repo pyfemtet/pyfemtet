@@ -676,10 +676,6 @@ class FEMOpt:
                     directions,
                 )
 
-            # Femtet の confirm_before_exit のセット
-            self.fem.confirm_before_exit = confirm_before_exit
-            self.fem.kwargs['confirm_before_exit'] = confirm_before_exit
-
             logger.info('Femtet loaded successfully.')
 
         # クラスターの設定
