@@ -302,6 +302,7 @@ class AbstractOptimizer(ABC):
             worker_status_list,  # 他の worker の status オブジェクト
             wait_setup,  # 他の worker の status が ready になるまで待つか
             skip_reconstruct=False,  # reconstruct fem を行うかどうか
+            space_dir=None,  # 特定の space_dir を使うかどうか
     ) -> Optional[Exception]:
 
         # 自分の worker_status の取得
@@ -314,7 +315,7 @@ class AbstractOptimizer(ABC):
 
         # set_fem をはじめ、終了したらそれを示す
         self._reconstruct_fem(skip_reconstruct)
-        self.fem._setup_after_parallel(opt=self)
+        self.fem._setup_after_parallel(opt=self, space_dir=space_dir)
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
 
         # wait_setup or not

@@ -12,7 +12,7 @@ from traceback import print_exception
 # 3rd-party
 import numpy as np
 import pandas as pd
-from dask.distributed import LocalCluster, Client
+from dask.distributed import LocalCluster, Client, get_worker, Nanny
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
@@ -136,6 +136,7 @@ class FEMOpt:
         self.monitor_server_kwargs = dict()
         self.monitor_process_worker_name = None
         self._hv_reference = None
+        self._extra_space_dir = None
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -675,10 +676,6 @@ class FEMOpt:
                     directions,
                 )
 
-            # Femtet の confirm_before_exit のセット
-            self.fem.confirm_before_exit = confirm_before_exit
-            self.fem.kwargs['confirm_before_exit'] = confirm_before_exit
-
             logger.info('Femtet loaded successfully.')
 
         # クラスターの設定
@@ -718,30 +715,43 @@ class FEMOpt:
             #   これは CLI の --no-nanny オプションも同様らしい。
 
             # クラスターの構築
+            # noinspection PyTypeChecker
             cluster = LocalCluster(
                 processes=True,
                 n_workers=n_parallel,
                 threads_per_worker=1,
+                worker_class=Nanny,
             )
             logger.info('LocalCluster launched successfully.')
 
-            self.client = Client(cluster, direct_to_workers=False)
-            self.scheduler_address = self.client.scheduler.address
+            self.client = Client(
+                cluster,
+                direct_to_workers=False,
+            )
             logger.info('Client launched successfully.')
 
-            # 最適化タスクを振り分ける worker を指定
-            subprocess_indices = list(range(n_parallel))[1:]
-            worker_addresses = list(self.client.nthreads().keys())
+            self.scheduler_address = self.client.scheduler.address
 
-            # monitor worker の設定
-            self.monitor_process_worker_name = worker_addresses[0]
-            worker_addresses[0] = 'Main'
+            # worker address を取得
+            nannies_dict: dict[Any, Nanny] = self.client.cluster.workers
+            nannies = tuple(nannies_dict.values())
+
+            # ひとつの Nanny を選んで monitor 用にしつつ
+            # その space は main process に使わせるために記憶する
+            self.monitor_process_worker_name = nannies[0].worker_address
+            self._extra_space_dir = nannies[0].worker_dir
+
+            # 名前と address がごちゃごちゃになっていて可読性が悪いが
+            # 選んだ以外の Nanny は計算を割り当てる用にする
+            worker_addresses = ['Main']
+            worker_addresses.extend([n.worker_address for n in nannies[1:]])
+            subprocess_indices = list(range(n_parallel))[1:]
 
         with self.client.cluster as _cluster, self.client as _client:
 
             # actor の設定
-            self.status = OptimizationStatus(_client)
-            self.worker_status_list = [OptimizationStatus(_client, name) for name in worker_addresses]  # tqdm 検討
+            self.status = OptimizationStatus(_client, worker_address=self.monitor_process_worker_name)
+            self.worker_status_list = [OptimizationStatus(_client, worker_address=self.monitor_process_worker_name, name=name) for name in worker_addresses]  # tqdm 検討
             self.status.set(OptimizationStatus.SETTING_UP)
             self.history = History(
                 self.history_path,
@@ -773,7 +783,6 @@ class FEMOpt:
             logger.info('Process monitor initialized successfully.')
 
             # fem
-            # TODO: n_parallel=1 のときもアップロードしている。これを使うべきか、アップロードしないべき。
             self.fem._setup_before_parallel(_client)
 
             # opt
@@ -794,7 +803,7 @@ class FEMOpt:
                 subprocess_indices,
                 [self.worker_status_list] * len(subprocess_indices),
                 [wait_setup] * len(subprocess_indices),
-                workers=worker_addresses,
+                workers=worker_addresses if self.opt.is_cluster else worker_addresses[1:],
                 allow_other_workers=False,
             )
 
@@ -818,6 +827,7 @@ class FEMOpt:
                     ),
                     kwargs=dict(
                         skip_reconstruct=True,
+                        space_dir=self._extra_space_dir,
                     )
                 )
                 t_main.start()

@@ -5,16 +5,27 @@ import asyncio  # for timeout
 import win32gui
 import win32con
 import win32api
+import win32process
 
 from pyfemtet.logger import get_module_logger
 
 logger = get_module_logger('util.excel', __name__)
 
 
+def _get_pid(hwnd):
+    """Window handle から process ID を取得します."""
+    if hwnd > 0:
+        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+    else:
+        pid = 0
+    return pid
+
+
 class _ExcelDialogProcessor:
 
     def __init__(self, excel_, timeout, restore_book=True):
         self.excel = excel_
+        self.excel_pid = _get_pid(excel_.hWnd)
         self.__excel_window_title = f' - Excel'  # {basename} - Excel
         self.__error_dialog_title = 'Microsoft Visual Basic'
         self.__vbe_window_title = f'Microsoft Visual Basic for Applications - '  # Microsoft Visual Basic for Applications - {basename}
@@ -42,6 +53,7 @@ class _ExcelDialogProcessor:
             win32gui.EnumWindows(self.enum_callback_to_close_dialog, found)
             await asyncio.sleep(0.5)
             if any(found):
+                await asyncio.sleep(1.)
                 break
 
         logger.debug('ブックを閉じます。')
@@ -56,7 +68,7 @@ class _ExcelDialogProcessor:
     def enum_callback_to_activate(self, hwnd, _):
         title = win32gui.GetWindowText(hwnd)
         # Excel 本体
-        if self.__excel_window_title in title:
+        if (self.excel_pid == _get_pid(hwnd)) and (self.__excel_window_title in title):
             # Visible == True の際、エラーが発生した際、
             # 一度 Excel ウィンドウをアクティブ化しないと dialog が出てこない
             # が、これだけではダメかも。
@@ -65,7 +77,7 @@ class _ExcelDialogProcessor:
     def enum_callback_to_close_dialog(self, hwnd, found):
         title = win32gui.GetWindowText(hwnd)
         # エラーダイアログ
-        if self.__error_dialog_title == title:
+        if (self.excel_pid == _get_pid(hwnd)) and (self.__error_dialog_title == title):
             # 何故かこのコマンド以外受け付けず、
             # このコマンドで問答無用でデバッグモードに入る
             logger.debug('エラーダイアログを見つけました。')
@@ -77,14 +89,14 @@ class _ExcelDialogProcessor:
     def enum_callback_to_close_confirm_dialog(self, hwnd, _):
         title = win32gui.GetWindowText(hwnd)
         # 確認ダイアログ
-        if "Microsoft Excel" in title:
+        if (self.excel_pid == _get_pid(hwnd)) and ("Microsoft Excel" in title):
             # DisplayAlerts が False の場合は不要
             win32gui.SendMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_CLOSE, 0)
 
     def enum_callback_to_close_book(self, hwnd, _):
         title = win32gui.GetWindowText(hwnd)
         # VBE
-        if self.__vbe_window_title in title:
+        if (self.excel_pid == _get_pid(hwnd)) and (self.__vbe_window_title in title):
             # 何故かこれで book 本体が閉じる
             win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
 
