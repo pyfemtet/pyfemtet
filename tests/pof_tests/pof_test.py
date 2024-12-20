@@ -50,7 +50,7 @@ def constraint_2(opt):
 def test_pof_basic():
     # ===== problem =====
     seed = 42
-    n_trials = 10
+    n_trials = 20
     n_startup_trials = 5
     hv_reference = [0, 0.5]
 
