@@ -5,7 +5,7 @@ PyFemtet supports the following requirements:
 
 - windows only
 - femtet 2023.0 or later (2024.0 or later recommended)
-- python 3.9.3 or later (3.11 or 3.12 recommended)
+- python >=3.10, <3.13 (3.11 or 3.12 recommended)
 
 
 **See below for installation and setup instructions.**
