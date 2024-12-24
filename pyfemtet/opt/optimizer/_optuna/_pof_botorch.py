@@ -1763,7 +1763,18 @@ class PoFBoTorchSampler(BaseSampler):
             for trial_idx, trial in enumerate(trials):
                 params[trial_idx] = trans.transform(trial.params)
                 if trial.state == TrialState.COMPLETE:
-                    values[trial_idx, 0] = 1.  # feasible
+                    # complete, but infeasible (in case of weak constraint)
+                    if 'constraints' in trial.user_attrs.keys():
+                        cns = trial.user_attrs['constraints']
+                        if cns is None:
+                            values[trial_idx, 0] = 1.  # feasible (or should RuntimeError)
+                        else:
+                            if numpy.array(cns).max() > 0:
+                                values[trial_idx, 0] = 1.  # feasible
+                            else:
+                                values[trial_idx, 0] = 1.  # feasible
+                    else:
+                        values[trial_idx, 0] = 1.  # feasible
                 elif trial.state == TrialState.PRUNED:
                     values[trial_idx, 0] = 0.  # infeasible
                 else:
