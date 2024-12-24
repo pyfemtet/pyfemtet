@@ -18,7 +18,7 @@ from pywintypes import com_error
 
 from pyfemtet.opt import FEMInterface
 from pyfemtet.core import SolveError
-from pyfemtet.opt.optimizer.parameter import Parameter
+from pyfemtet.opt.optimizer.parameter import Parameter, Expression
 
 from pyfemtet.dispatch_extensions import _get_pid, dispatch_specific_femtet
 
@@ -26,6 +26,7 @@ from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
 
 from pyfemtet._util.excel_macro_util import watch_excel_macro_error
 from pyfemtet._util.dask_util import lock_or_no_lock
+from pyfemtet._util.excel_parse_util import *
 
 from pyfemtet._warning import show_experimental_warning
 
@@ -178,6 +179,8 @@ class ExcelInterface(FEMInterface):
     input_sheet_name: str  # 変数セルを定義しているシート名
     output_xlsm_path: str  # 操作対象の xlsm パス (指定しない場合、input と同一)
     output_sheet_name: str  # 計算結果セルを定義しているシート名 (指定しない場合、input と同一)
+    constraint_xlsm_path: Path  # 操作対象の xlsm パス (指定しない場合、input と同一)
+    constraint_sheet_name: str  # 拘束関数セルを定義しているシート名 (指定しない場合、input と同一)
 
     related_file_paths: list[str]  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
 
@@ -189,6 +192,8 @@ class ExcelInterface(FEMInterface):
     sh_input: CDispatch  # 変数の定義された WorkSheet
     wb_output: CDispatch  # システムを構成する Workbook
     sh_output: CDispatch  # 計算結果の定義された WorkSheet (sh_input と同じでもよい)
+    wb_constraint: CDispatch  # システムを構成する Workbook
+    sh_constraint: CDispatch  # 計算結果の定義された WorkSheet (sh_input と同じでもよい)
     wb_setup: CDispatch  # システムを構成する Workbook
     wb_teardown: CDispatch  # システムを構成する Workbook
 
@@ -210,12 +215,16 @@ class ExcelInterface(FEMInterface):
     teardown_procedure_name: str
     teardown_procedure_args: list or tuple
 
+    use_named_range: bool  # input を定義したシートにおいて input の値を名前付き範囲で指定するかどうか。
+
     def __init__(
             self,
             input_xlsm_path: str or Path,
             input_sheet_name: str,
+            output_sheet_name: str,
             output_xlsm_path: str or Path = None,
-            output_sheet_name: str = None,
+            constraint_xlsm_path: str or Path = None,
+            constraint_sheet_name: str = None,
             procedure_name: str = None,
             procedure_args: list or tuple = None,
             connect_method: str = 'auto',  # or 'new'
@@ -231,6 +240,7 @@ class ExcelInterface(FEMInterface):
             display_alerts: bool = False,
             terminate_excel_when_quit: bool = None,
             interactive: bool = True,
+            use_named_range: bool = True,
     ):
 
         show_experimental_warning("ExcelInterface")
@@ -239,7 +249,9 @@ class ExcelInterface(FEMInterface):
         self.input_xlsm_path = str(input_xlsm_path)  # あとで再取得する
         self.input_sheet_name = input_sheet_name
         self.output_xlsm_path = str(input_xlsm_path) if output_xlsm_path is None else str(output_xlsm_path)
-        self.output_sheet_name = output_sheet_name or self.input_sheet_name
+        self.output_sheet_name = output_sheet_name
+        self.constraint_xlsm_path = str(input_xlsm_path) if constraint_xlsm_path is None else str(constraint_xlsm_path)
+        self.constraint_sheet_name = constraint_sheet_name or self.input_sheet_name
         self.procedure_name = procedure_name or 'FemtetMacro.FemtetMain'
         self.procedure_args = procedure_args or []
         assert connect_method in ['new', 'auto']
@@ -264,12 +276,15 @@ class ExcelInterface(FEMInterface):
         self.interactive = interactive
         self.display_alerts = display_alerts
 
+        self.use_named_range = use_named_range
+
         # dask サブプロセスのときは space 直下の input_xlsm_path を参照する
         try:
             worker = get_worker()
             space = os.path.abspath(worker.local_directory)
             self.input_xlsm_path = os.path.join(space, os.path.basename(self.input_xlsm_path))
             self.output_xlsm_path = os.path.join(space, os.path.basename(self.output_xlsm_path))
+            self.constraint_xlsm_path = os.path.join(space, os.path.basename(self.constraint_xlsm_path))
             self.setup_xlsm_path = os.path.join(space, os.path.basename(self.setup_xlsm_path))
             self.teardown_xlsm_path = os.path.join(space, os.path.basename(self.teardown_xlsm_path))
             self.related_file_paths = [os.path.join(space, os.path.basename(p)) for p in self.related_file_paths]
@@ -278,6 +293,7 @@ class ExcelInterface(FEMInterface):
         except ValueError:
             self.input_xlsm_path = os.path.abspath(self.input_xlsm_path)
             self.output_xlsm_path = os.path.abspath(self.output_xlsm_path)
+            self.constraint_xlsm_path = os.path.abspath(self.constraint_xlsm_path)
             self.setup_xlsm_path = os.path.abspath(self.setup_xlsm_path)
             self.teardown_xlsm_path = os.path.abspath(self.teardown_xlsm_path)
             self.related_file_paths = [os.path.abspath(p) for p in self.related_file_paths]
@@ -288,6 +304,8 @@ class ExcelInterface(FEMInterface):
             input_sheet_name=self.input_sheet_name,
             output_xlsm_path=self.output_xlsm_path,
             output_sheet_name=self.output_sheet_name,
+            constraint_xlsm_path=self.constraint_xlsm_path,
+            constraint_sheet_name=self.constraint_sheet_name,
             procedure_name=self.procedure_name,
             procedure_args=self.procedure_args,
             connect_method='new',  # subprocess で connect する際は new を強制する
@@ -303,6 +321,7 @@ class ExcelInterface(FEMInterface):
             visible=self.visible,
             interactive=self.interactive,
             display_alerts=self.display_alerts,
+            use_named_range=self.use_named_range,
         )
         FEMInterface.__init__(self, **kwargs)
 
@@ -316,6 +335,9 @@ class ExcelInterface(FEMInterface):
 
         if not is_same_path(self.input_xlsm_path, self.output_xlsm_path):
             client.upload_file(self.output_xlsm_path, False)
+
+        if not is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
+            client.upload_file(self.constraint_xlsm_path, False)
 
         if not is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
             client.upload_file(self.setup_xlsm_path, False)
@@ -336,6 +358,7 @@ class ExcelInterface(FEMInterface):
             if space is not None:
                 self.input_xlsm_path = os.path.join(space, os.path.basename(self.input_xlsm_path))
                 self.output_xlsm_path = os.path.join(space, os.path.basename(self.output_xlsm_path))
+                self.constraint_xlsm_path = os.path.join(space, os.path.basename(self.constraint_xlsm_path))
                 self.setup_xlsm_path = os.path.join(space, os.path.basename(self.setup_xlsm_path))
                 self.teardown_xlsm_path = os.path.join(space, os.path.basename(self.teardown_xlsm_path))
                 self.related_file_paths = [os.path.join(space, os.path.basename(p)) for p in self.related_file_paths]
@@ -354,6 +377,7 @@ class ExcelInterface(FEMInterface):
 
         self.input_xlsm_path = proc_path(self.input_xlsm_path, False)
         self.output_xlsm_path = proc_path(self.output_xlsm_path, True)
+        self.constraint_xlsm_path = proc_path(self.constraint_xlsm_path, True)
         self.setup_xlsm_path = proc_path(self.setup_xlsm_path, True)
         self.teardown_xlsm_path = proc_path(self.teardown_xlsm_path, True)
 
@@ -372,12 +396,17 @@ class ExcelInterface(FEMInterface):
         # load_objective は 1 回目に呼ばれたのが main thread なので
         # subprocess に入った後でもう一度 load objective を行う
         from pyfemtet.opt.optimizer import AbstractOptimizer
-        from pyfemtet.opt._femopt_core import Objective
+        from pyfemtet.opt._femopt_core import Objective, Constraint
         opt: AbstractOptimizer = kwargs['opt']
         obj: Objective
         for obj_name, obj in opt.objectives.items():
             if isinstance(obj.fun, ScapeGoatObjective):
                 opt.objectives[obj_name].fun = self.objective_from_excel
+
+        cns: Constraint
+        for cns_name, cns in opt.constraints.items():
+            if isinstance(cns.fun, ScapeGoatObjective):
+                opt.constraints[cns_name].fun = self.constraint_from_excel
 
         # excel の setup 関数を必要なら実行する
         if self.setup_procedure_name is not None:
@@ -415,7 +444,9 @@ class ExcelInterface(FEMInterface):
         self.excel.Visible = self.visible
         self.excel.DisplayAlerts = self.display_alerts
         self.excel.Interactive = self.interactive
+        sleep(1)
 
+        # ===== input =====
         # 開く
         self.excel.Workbooks.Open(str(self.input_xlsm_path))
         for wb in self.excel.Workbooks:
@@ -433,6 +464,7 @@ class ExcelInterface(FEMInterface):
         else:
             raise RuntimeError(f'Sheet {self.input_sheet_name} does not exist in the book {self.wb_input.Name}.')
 
+        # ===== output =====
         # 開く (output)
         if is_same_path(self.input_xlsm_path, self.output_xlsm_path):
             self.wb_output = self.wb_input
@@ -453,6 +485,28 @@ class ExcelInterface(FEMInterface):
         else:
             raise RuntimeError(f'Sheet {self.output_sheet_name} does not exist in the book {self.wb_output.Name}.')
 
+        # ===== constraint =====
+        # 開く (constraint)
+        if is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
+            self.wb_constraint = self.wb_input
+        else:
+            self.excel.Workbooks.Open(str(self.constraint_xlsm_path))
+            for wb in self.excel.Workbooks:
+                if wb.Name == os.path.basename(self.constraint_xlsm_path):
+                    self.wb_constraint = wb
+                    break
+            else:
+                raise RuntimeError(f'Cannot open {self.constraint_xlsm_path}')
+
+        # シートを特定する (constraint)
+        for sh in self.wb_constraint.WorkSheets:
+            if sh.Name == self.constraint_sheet_name:
+                self.sh_constraint = sh
+                break
+        else:
+            raise RuntimeError(f'Sheet {self.constraint_sheet_name} does not exist in the book {self.wb_constraint.Name}.')
+
+        # ===== setup =====
         # 開く (setup)
         if is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
             self.wb_setup = self.wb_input
@@ -465,6 +519,7 @@ class ExcelInterface(FEMInterface):
             else:
                 raise RuntimeError(f'Cannot open {self.setup_xlsm_path}')
 
+        # ===== teardown =====
         # 開く (teardown)
         if is_same_path(self.input_xlsm_path, self.teardown_xlsm_path):
             self.wb_teardown = self.wb_input
@@ -477,11 +532,13 @@ class ExcelInterface(FEMInterface):
             else:
                 raise RuntimeError(f'Cannot open {self.teardown_xlsm_path}')
 
+
         # book に参照設定を追加する
         self.add_femtet_ref_xla(self.wb_input)
         self.add_femtet_ref_xla(self.wb_output)
         self.add_femtet_ref_xla(self.wb_setup)
         self.add_femtet_ref_xla(self.wb_teardown)
+        self.add_femtet_ref_xla(self.wb_constraint)
 
     def add_femtet_ref_xla(self, wb):
 
@@ -540,8 +597,21 @@ class ExcelInterface(FEMInterface):
             params[row['name']] = row['value']
 
         # excel シートの変数更新
-        for key, value in params.items():
-            self.sh_input.Range(key).value = value
+        if self.use_named_range:
+            for key, value in params.items():
+                try:
+                    self.sh_input.Range(key).value = value
+                except com_error:
+                    logger.warn('The cell address specification by named range is failed. '
+                                'The process changes the specification way to table based method.')
+                    self.use_named_range = False
+                    break
+
+        if not self.use_named_range:  # else にしないこと
+            for name, value in params.items():
+                r = 1 + search_r(self.input_xlsm_path, self.input_sheet_name, name)
+                c = 1 + search_c(self.input_xlsm_path, self.input_sheet_name, ParseAsParameter.value)
+                self.sh_input.Cells(r, c).value = value
 
         # 再計算
         self.excel.CalculateFull()
@@ -595,6 +665,7 @@ class ExcelInterface(FEMInterface):
             # シートの COM オブジェクト変数を削除する
             del self.sh_input
             del self.sh_output
+            del self.sh_constraint
 
             # workbook を閉じる
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
@@ -603,6 +674,10 @@ class ExcelInterface(FEMInterface):
             if not is_same_path(self.input_xlsm_path, self.output_xlsm_path):
                 with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                     self.wb_output.Close(SaveChanges := False)
+
+            if not is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
+                with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
+                    self.wb_constraint.Close(SaveChanges := False)
 
             if not is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
                 with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
@@ -614,6 +689,7 @@ class ExcelInterface(FEMInterface):
 
             del self.wb_input
             del self.wb_output
+            del self.wb_constraint
             del self.wb_setup
             del self.wb_teardown
 
@@ -653,91 +729,162 @@ class ExcelInterface(FEMInterface):
         from pyfemtet.opt.optimizer import AbstractOptimizer, logger
         opt: AbstractOptimizer
 
-        df = pd.read_excel(
-            self.input_xlsm_path,
-            self.input_sheet_name,
-            header=0,
-            index_col=None,
-        )
+        df = ParseAsParameter.parse(self.input_xlsm_path, self.input_sheet_name)
 
-        # TODO: 使い勝手を考える
         for i, row in df.iterrows():
-            try:
-                name = row['name']
-                value = row['current']
-                lb = row['lower']
-                ub = row['upper']
-                step = row['step']
-            except KeyError:
-                logger.warn('列名が「name」「current」「lower」「upper」「step」になっていません。この順に並んでいると仮定して処理を続けます。')
-                name, value, lb, ub, step, *_residuals = row.iloc[0]
 
-            name = str(name)
-            value = float(value)
-            lb = float(lb) if not np.isnan(lb) else None
-            ub = float(ub) if not np.isnan(ub) else None
-            step = float(step) if not np.isnan(step) else None
+            # use(optional)
+            use = True
+            if ParseAsParameter.use in df.columns:
+                _use = row[ParseAsParameter.use]
+                use = False if np.isnan(_use) else bool(_use)  # bool or NaN
 
-            prm = Parameter(
-                name=name,
-                value=value,
-                lower_bound=lb,
-                upper_bound=ub,
-                step=step,
-                pass_to_fem=True,
-                properties=None,
-            )
-            opt.variables.add_parameter(prm)
+            # name
+            name = str(row[ParseAsParameter.name])
+
+            # value
+            value = float(row[ParseAsParameter.value])
+
+            # lb (optional)
+            lb = None
+            if ParseAsParameter.lb in df.columns:
+                lb = row[ParseAsParameter.lb]
+                lb = None if np.isnan(lb) else float(lb)
+
+            # ub (optional)
+            ub = None
+            if ParseAsParameter.ub in df.columns:
+                ub = row[ParseAsParameter.ub]
+                ub = None if np.isnan(ub) else float(ub)
+
+            # step (optional)
+            step = None
+            if ParseAsParameter.step in df.columns:
+                step = row[ParseAsParameter.step]
+                step = None if np.isnan(step) else float(step)
+
+            if use:
+                prm = Parameter(
+                    name=name,
+                    value=value,
+                    lower_bound=lb,
+                    upper_bound=ub,
+                    step=step,
+                    pass_to_fem=True,
+                    properties=None,
+                )
+                opt.variables.add_parameter(prm)
+
+            else:
+                fixed_prm = Expression(
+                    name=name,
+                    fun=lambda: value,
+                    value=None,
+                    pass_to_fem=True,
+                    properties=dict(
+                        lower_bound=lb,
+                        upper_bound=ub,
+                    ),
+                    kwargs=dict(),
+                )
+                opt.variables.add_expression(fixed_prm)
 
     def load_objective(self, opt):
         from pyfemtet.opt.optimizer import AbstractOptimizer, logger
         from pyfemtet.opt._femopt_core import Objective
         opt: AbstractOptimizer
 
-        df = pd.read_excel(
-            self.output_xlsm_path,
-            self.output_sheet_name,
-            header=0,
-            index_col=None,
-        )
+        df = ParseAsObjective.parse(self.output_xlsm_path, self.output_sheet_name)
 
-        # TODO: 使い勝手を考える
         for i, row in df.iterrows():
-            try:
-                name = row['name']
-                _ = row['current']
-                direction = row['direction']
-                value_column_index = list(df.columns).index('current')
-            except KeyError:
-                logger.warn('列名が「name」「current」「direction」になっていません。この順に並んでいると仮定して処理を続けます。')
-                name, _, direction, *_residuals = row.iloc[0]
-                value_column_index = 1
 
-            name = str(name)
+            # use(optional)
+            use = True
+            if ParseAsObjective.use in df.columns:
+                _use = row[ParseAsObjective.use]
+                use = False if np.isnan(_use) else bool(_use)  # bool or NaN
 
-            # direction は minimize or maximize or float
+            # name
+            name = str(row[ParseAsObjective.name])
+
+            # direction
+            direction = row[ParseAsObjective.value]
+            assert not np.isnan(direction), 'direction is empty.'
             try:
-                # float or not
                 direction = float(direction)
-
             except ValueError:
-                # 'minimize' or 'maximize
                 direction = str(direction).lower()
-                assert (direction == 'minimize') or (direction == 'maximize')
+                assert direction in ['minimize', 'maximize']
 
-            # objective を作る
-            opt.objectives[name] = Objective(
-                fun=ScapeGoatObjective(),
-                name=name,
-                direction=direction,
-                args=(i, value_column_index, ),
-                kwargs=dict(),
-            )
+            if use:
+                # objective を作る
+                opt.objectives[name] = Objective(
+                    fun=ScapeGoatObjective(),
+                    name=name,
+                    direction=direction,
+                    args=(name,),
+                    kwargs=dict(),
+                )
 
-    def objective_from_excel(self, i: int, value_column_index: int):
-        r = i + 2  # header が 1
-        c = value_column_index + 1
+    def load_constraint(self, opt):
+        from pyfemtet.opt.optimizer import AbstractOptimizer, logger
+        from pyfemtet.opt._femopt_core import Constraint
+        opt: AbstractOptimizer
+
+        df = ParseAsConstraint.parse(self.output_xlsm_path, self.output_sheet_name)
+
+        for i, row in df.iterrows():
+
+            # use(optional)
+            use = True
+            if ParseAsConstraint.use in df.columns:
+                _use = row[ParseAsConstraint.use]
+                use = False if np.isnan(_use) else bool(_use)  # bool or NaN
+
+            # name
+            name = str(row[ParseAsConstraint.name])
+
+            # lb (optional)
+            lb = None
+            if ParseAsConstraint.lb in df.columns:
+                lb = row[ParseAsConstraint.lb]
+                lb = None if np.isnan(lb) else float(lb)
+
+            # ub (optional)
+            ub = None
+            if ParseAsConstraint.ub in df.columns:
+                ub = row[ParseAsConstraint.ub]
+                ub = None if np.isnan(ub) else float(ub)
+
+            # strict (optional)
+            strict = True
+            if ParseAsConstraint.strict in df.columns:
+                _strict = row[ParseAsConstraint.strict]
+                strict = True if np.isnan(_strict) else bool(_strict)  # bool or NaN
+
+            if use:
+                # constraint を作る
+                opt.constraints[name] = Constraint(
+                    fun=ScapeGoatObjective(),
+                    name=name,
+                    lb=lb,
+                    ub=ub,
+                    strict=strict,
+                    args=(name,),
+                    kwargs=dict(),
+                    using_fem=False,  # 継承クラスで use_femtet に入ることを避けるため
+                )
+
+    def objective_from_excel(self, name: str):
+        r = 1 + search_r(self.output_xlsm_path, self.output_sheet_name, name)
+        c = 1 + search_c(self.output_xlsm_path, self.output_sheet_name, ParseAsObjective.value)
         v = self.sh_output.Cells(r, c).value
+        return float(v)
+
+    def constraint_from_excel(self, name: str):
+        r = 1 + search_r(self.constraint_xlsm_path, self.constraint_sheet_name, name)
+        c = 1 + search_c(self.constraint_xlsm_path, self.constraint_sheet_name, ParseAsConstraint.value)
+        v = self.sh_constraint.Cells(r, c).value
         return float(v)
 
 

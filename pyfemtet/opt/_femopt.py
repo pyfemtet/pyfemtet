@@ -612,6 +612,7 @@ class FEMOpt:
             if self.fem._load_problem_from_me:
                 self.fem.load_parameter(self.opt)
                 self.fem.load_objective(self.opt)
+                self.fem.load_constraint(self.opt)
 
         # resolve expression dependencies
         self.opt.variables.resolve()
