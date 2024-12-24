@@ -112,7 +112,7 @@ class Message:
     GRAPH_TITLE_HYPERVOLUME = _('Hypervolume Plot')
     GRAPH_TITLE_SINGLE_OBJECTIVE = _('Objective Plot')
     GRAPH_TITLE_MULTI_OBJECTIVE = _('Multi Objective Pair Plot')
-    GRAPH_AXIS_LABEL_TRIAL = _('trial number')
+    GRAPH_AXIS_LABEL_TRIAL = _('Succeeded trial number')
     LEGEND_LABEL_ALL_SOLUTIONS = _('All solutions')
     LEGEND_LABEL_OPTIMAL_SOLUTIONS = _('Transition of optimal solutions')
     LEGEND_LABEL_OBJECTIVE_TARGET = _('Target value')

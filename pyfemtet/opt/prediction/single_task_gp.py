@@ -3,46 +3,20 @@ import torch
 import gpytorch
 
 from botorch.models import SingleTaskGP
+from botorch.models.transforms.input import Normalize
+from botorch.models.transforms.outcome import Standardize
 from botorch.fit import fit_gpytorch_mll
 from gpytorch.mlls import ExactMarginalLogLikelihood
 
 from pyfemtet.opt.prediction._base import PredictionModelBase
 
 
-class _StandardScaler:
-
-    # noinspection PyAttributeOutsideInit
-    def fit_transform(self, x: torch.Tensor) -> torch.Tensor:
-        self.m = x.numpy().mean(axis=0)
-        self.s = x.numpy().std(axis=0, ddof=1)
-        return self.transform(x)
-
-    def transform(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.tensor((x.numpy() - self.m) / self.s).double()
-
-    def inverse_transform_mean(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.tensor(x.numpy() * self.s + self.m).double()
-
-    def inverse_transform_var(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.tensor(x.numpy() * self.s**2).double()
+DEVICE = 'cpu'
+DTYPE = torch.float64
 
 
-class _MinMaxScaler:
-
-    # noinspection PyAttributeOutsideInit
-    def fit_transform(self, x: torch.Tensor) -> torch.Tensor:
-        self.max = x.numpy().max(axis=0)
-        self.min = x.numpy().min(axis=0)
-        return self.transform(x)
-
-    def transform(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.tensor((x.numpy() - self.min) / (self.max - self.min)).double()
-
-    def inverse_transform_mean(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.tensor(x.numpy() * (self.max - self.min) + self.min).double()
-
-    def inverse_transform_var(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.tensor(x.numpy() * (self.max - self.min)**2).double()
+def tensor(x_):
+    return torch.tensor(x_, dtype=DTYPE, device=DEVICE)
 
 
 class SingleTaskGPModel(PredictionModelBase):
@@ -52,43 +26,52 @@ class SingleTaskGPModel(PredictionModelBase):
         https://botorch.org/api/models.html#botorch.models.gp_regression.SingleTaskGP
     """
 
+    def __init__(self, bounds=None, is_noise_free=True):
+        self.bounds = tensor(np.array(bounds)).T
+        self.is_noise_free = is_noise_free
+
     # noinspection PyAttributeOutsideInit
     def fit(self, x: np.ndarray, y: np.ndarray):
-        train_x = torch.tensor(x).double()
-        train_y = torch.tensor(y).double()
-
-        # check y shape (if single objective problem, output dimension is (n,) )
-        self._is_single_objective = len(y[0]) == 1
-
-        # Normalize the input data to the unit cube
-        self.scaler_x = _MinMaxScaler()
-        train_x = self.scaler_x.fit_transform(train_x)
-
-        # Standardize the output data
-        self.scaler_y = _StandardScaler()
-        train_y = self.scaler_y.fit_transform(train_y)
+        X = tensor(x)
+        Y = tensor(y)
 
         # Fit a Gaussian Process model using the extracted data
-        self.gp = SingleTaskGP(train_x, train_y)
+        standardizer = Standardize(m=Y.shape[-1],)
+        standardizer.forward(Y)
+        _, YVar = standardizer.untransform(Y, torch.full_like(Y, 1e-6))
+        self.gp = SingleTaskGP(
+            train_X=X,
+            train_Y=Y,
+            train_Yvar=YVar if self.is_noise_free else None,
+            input_transform=Normalize(d=X.shape[-1], bounds=self.bounds),
+            outcome_transform=standardizer,
+        )
         mll = ExactMarginalLogLikelihood(self.gp.likelihood, self.gp)
         fit_gpytorch_mll(mll)
 
     def predict(self, x: np.ndarray) -> list[np.ndarray, np.ndarray]:
-        x = torch.tensor(x).double()
+        X = tensor(x)
+
         self.gp.eval()
         with torch.no_grad(), gpytorch.settings.fast_pred_var():
-            # normalized
-            scaled_x = self.scaler_x.transform(x)
             # predict
-            pred = self.gp(scaled_x)
-            if self._is_single_objective:
-                scaled_mean = pred.mean.reshape((-1, 1))
-                scaled_var = pred.variance.reshape((-1, 1))
-            else:
-                scaled_mean = torch.permute(pred.mean, (1, 0))
-                scaled_var = torch.permute(pred.variance, (1, 0))
-            # unscaling
-            mean = self.scaler_y.inverse_transform_mean(scaled_mean).numpy()
-            var = self.scaler_y.inverse_transform_var(scaled_var).numpy()
+            post = self.gp.posterior(X)
+            mean = post.mean.detach().numpy()
+            var = post.variance.detach().numpy()
         std = np.sqrt(var)
         return mean, std
+
+
+if __name__ == '__main__':
+    dim = 3
+    N = 20
+    bounds = (np.arange(dim*2)**2).reshape((-1, 2))
+    x = np.random.rand(N, dim)
+    x = x * (bounds[:, 1] - bounds[:, 0]) + bounds[:, 0]
+    y = (x ** 2).sum(axis=1, keepdims=True)
+
+    model = SingleTaskGPModel()
+    model.fit(x, y)
+    print(model.predict(np.array([(b[1] + b[0])/2 for b in bounds])))
+
+

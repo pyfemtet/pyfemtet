@@ -220,6 +220,24 @@ class FEMOpt:
         )
         self.opt.variables.add_parameter(prm)
 
+    def add_fixed_parameter(
+            self,
+            name: str,
+            value: float = None,
+            lower_bound: float = None,
+            upper_bound: float = None,
+    ):
+        warnings.filterwarnings('ignore', category=UserWarning, message="The function 'add_expression' is experimental")
+        self.add_expression(
+            name=name,
+            fun=lambda: value,
+            pass_to_fem=True,
+            properties=dict(
+                lower_bound=lower_bound,
+                upper_bound=upper_bound,
+            )
+        )
+
     @experimental_feature
     def add_expression(
             self,
@@ -402,7 +420,6 @@ class FEMOpt:
                 args=args,
                 kwargs=kwargs,
             )
-
 
     def add_constraint(
             self,

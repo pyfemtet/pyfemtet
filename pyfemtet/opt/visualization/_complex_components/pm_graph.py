@@ -606,5 +606,5 @@ class PredictionModelGraph(AbstractPage):
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:
-            df = self.application.history.get_df()
+            df = self.application.history.get_df(valid_only=True)  # TODO: prediction グラフで infeasible な結果を反映する
         return df

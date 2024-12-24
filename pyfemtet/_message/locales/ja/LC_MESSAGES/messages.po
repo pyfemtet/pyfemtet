@@ -275,8 +275,8 @@ msgid "Multi Objective Pair Plot"
 msgstr "目的関数ペアプロット"
 
 #: pyfemtet/_message/messages.py:115
-msgid "trial number"
-msgstr "trial 番号"
+msgid "Succeeded trial number"
+msgstr "成功した解析数"
 
 #: pyfemtet/_message/messages.py:116
 msgid "All solutions"
