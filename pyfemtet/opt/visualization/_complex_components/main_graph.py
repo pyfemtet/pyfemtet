@@ -460,6 +460,12 @@ class MainGraph(AbstractPage):
             bbox = pt["bbox"]
 
             # get row of the history from customdata defined in main_figure
+            if 'customdata' not in pt.keys():
+                raise PreventUpdate
+
+            if len(pt['customdata']) == 0:
+                raise PreventUpdate
+
             trial = pt['customdata'][0]
 
             df = self.data_accessor()
