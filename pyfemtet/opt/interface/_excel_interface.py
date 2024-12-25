@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from time import sleep
 import gc
+from typing import Optional, List
 
 import pandas as pd
 import numpy as np
@@ -591,8 +592,7 @@ class ExcelInterface(FEMInterface):
                 if ref.Description == 'FemtetMacro':  # FemtetMacro
                     wb.VBProject.References.Remove(ref)
 
-    def update(self, parameters: pd.DataFrame) -> None:
-
+    def update_parameter(self, parameters: pd.DataFrame, with_warning=False) -> Optional[List[str]]:
         # params を作成
         params = dict()
         for _, row in parameters.iterrows():
@@ -617,6 +617,9 @@ class ExcelInterface(FEMInterface):
 
         # 再計算
         self.excel.CalculateFull()
+
+    def update(self, parameters: pd.DataFrame) -> None:
+        self.update_parameter(parameters)
 
         # マクロ実行
         try:
