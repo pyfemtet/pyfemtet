@@ -155,12 +155,18 @@ class AbstractOptimizer(ABC):
         """Setup before parallel processes are launched."""
         pass
 
+    def generate_infeasible_result(self):
+        y = np.full_like(np.zeros(len(self.objectives)), np.nan)
+        c = np.full_like(np.zeros(len(self.constraints)), np.nan)
+        return y, y, c
+
     # ===== calc =====
-    def f(self, x: np.ndarray) -> list[np.ndarray]:
+    def f(self, x: np.ndarray, _record_infeasible=False) -> list[np.ndarray]:
         """Calculate objectives and constraints.
 
         Args:
             x (np.ndarray): Optimization parameters.
+            _record_infeasible (bool): If True, skip fem.update() and record self.generate_invalid_results().
 
         Returns:
             list[np.ndarray]:
@@ -178,27 +184,31 @@ class AbstractOptimizer(ABC):
         self.set_parameter_values(x)
         logger.info(f'input: {x}')
 
-        # FEM の更新
-        try:
-            logger.info(f'Solving FEM...')
-            df_to_fem = self.variables.get_variables(
-                format='df',
-                filter_pass_to_fem=True
-            )
-            self.fem.update(df_to_fem)
+        if not _record_infeasible:
+            # FEM の更新
+            try:
+                logger.info(f'Solving FEM...')
+                df_to_fem = self.variables.get_variables(
+                    format='df',
+                    filter_pass_to_fem=True
+                )
+                self.fem.update(df_to_fem)
 
-        except Exception as e:
-            logger.info(f'{type(e).__name__} : {e}')
-            logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
-            logger.info(x)
-            raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
+            except Exception as e:
+                logger.info(f'{type(e).__name__} : {e}')
+                logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
+                logger.info(x)
+                raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
 
-        # y, _y, c の更新
-        y = [obj.calc(self.fem) for obj in self.objectives.values()]
+            # y, _y, c の更新
+            y = [obj.calc(self.fem) for obj in self.objectives.values()]
 
-        _y = [obj.convert(value) for obj, value in zip(self.objectives.values(), y)]
+            _y = [obj.convert(value) for obj, value in zip(self.objectives.values(), y)]
 
-        c = [cns.calc(self.fem) for cns in self.constraints.values()]
+            c = [cns.calc(self.fem) for cns in self.constraints.values()]
+
+        else:
+            y, _y, c = self.generate_infeasible_result()
 
         # register to history
         df_to_opt = self.variables.get_variables(

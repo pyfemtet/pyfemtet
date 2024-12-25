@@ -262,6 +262,8 @@ def is_feasible(value, lb, ub):
     Returns:
         bool: True if the value satisfies the bounds; False otherwise.
     """
+    if np.isnan(value):
+        return False
     if lb is None and ub is not None:
         return value <= ub
     elif lb is not None and ub is None:
@@ -621,16 +623,29 @@ class History:
 
         self.set_df(df)
 
-    def get_df(self) -> pd.DataFrame:
+    def filter_valid(self, df_):
+        buff = df_[self.obj_names].notna()
+        idx = buff.prod(axis=1).astype(bool)
+        filtered_df = df_[idx]
+        filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1  # TODO: いくつかグラフを描いてみてこれが違和感あるかないか調べる
+        return filtered_df
+
+    def get_df(self, valid_only=False) -> pd.DataFrame:
         if self.__scheduler_address is None:
-            return self._df
+            if valid_only:
+                return self.filter_valid(self._df)
+            else:
+                return self._df
         else:
             # scheduler がまだ存命か確認する
             try:
                 with Lock('access-df'):
                     client_: 'Client' = get_client(self.__scheduler_address)
                     if 'df' in client_.list_datasets():
-                        return client_.get_dataset('df')
+                        if valid_only:
+                            return self.filter_valid(client_.get_dataset('df'))
+                        else:
+                            return client_.get_dataset('df')
                     else:
                         logger.debug('Access df of History before it is initialized.')
                         return pd.DataFrame()

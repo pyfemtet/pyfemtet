@@ -32,6 +32,14 @@ class PyFemtetPredictionModel:
     def __init__(self, history: History, df: pd.DataFrame, MetaModel: type):
         assert issubclass(MetaModel, PredictionModelBase)
         self.meta_model: PredictionModelBase = MetaModel()
+
+        from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
+        if isinstance(self.meta_model, SingleTaskGPModel):
+            self.meta_model.set_bounds_from_history(
+                df,
+                history,
+            )
+
         self.obj_names = history.obj_names
         self.prm_names = history.prm_names
         self.df = df

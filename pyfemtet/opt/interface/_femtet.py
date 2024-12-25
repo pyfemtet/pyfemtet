@@ -181,9 +181,7 @@ class FemtetInterface(FEMInterface):
         )
 
     def __del__(self):
-        _set_autosave_enabled(self._original_autosave_enabled)
-        if self.quit_when_destruct:
-            self.quit()
+        self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
     def _connect_new_femtet(self):
@@ -726,7 +724,8 @@ class FemtetInterface(FEMInterface):
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
-        _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
+        if self.quit_when_destruct:
+            _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
 
     def _setup_before_parallel(self, client):
         client.upload_file(

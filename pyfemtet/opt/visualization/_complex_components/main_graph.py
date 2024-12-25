@@ -460,6 +460,12 @@ class MainGraph(AbstractPage):
             bbox = pt["bbox"]
 
             # get row of the history from customdata defined in main_figure
+            if 'customdata' not in pt.keys():
+                raise PreventUpdate
+
+            if len(pt['customdata']) == 0:
+                raise PreventUpdate
+
             trial = pt['customdata'][0]
 
             df = self.data_accessor()
@@ -560,5 +566,5 @@ class MainGraph(AbstractPage):
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:
-            df = self.application.history.get_df()
+            df = self.application.history.get_df(valid_only=True)
         return df
