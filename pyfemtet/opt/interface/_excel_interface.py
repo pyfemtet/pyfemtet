@@ -533,14 +533,27 @@ class ExcelInterface(FEMInterface):
                 raise RuntimeError(f'Cannot open {self.teardown_xlsm_path}')
 
 
-        # book に参照設定を追加する
-        self.add_femtet_ref_xla(self.wb_input)
-        self.add_femtet_ref_xla(self.wb_output)
-        self.add_femtet_ref_xla(self.wb_setup)
-        self.add_femtet_ref_xla(self.wb_teardown)
-        self.add_femtet_ref_xla(self.wb_constraint)
+        # # book に参照設定を追加する
+        # self.add_femtet_ref_xla(self.wb_input)
+        # self.add_femtet_ref_xla(self.wb_output)
+        # self.add_femtet_ref_xla(self.wb_setup)
+        # self.add_femtet_ref_xla(self.wb_teardown)
+        # self.add_femtet_ref_xla(self.wb_constraint)
 
     def add_femtet_ref_xla(self, wb):
+
+        # search
+        ref_file_2 = os.path.abspath(util._get_femtetmacro_dllpath())
+        contain_2 = False
+        for ref in wb.VBProject.References:
+            if ref.Description is not None:
+                if ref.Description == 'FemtetMacro':  # FemtetMacro
+                    contain_2 = True
+                    break
+
+        # add
+        if not contain_2:
+            wb.VBProject.References.AddFromFile(ref_file_2)
 
         # search
         ref_file_1 = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
@@ -557,17 +570,6 @@ class ExcelInterface(FEMInterface):
         # add
         if not contain_1:
             wb.VBProject.References.AddFromFile(ref_file_1)
-
-        # search
-        ref_file_2 = os.path.abspath(util._get_femtetmacro_dllpath())
-        contain_2 = False
-        for ref in wb.VBProject.References:
-            if ref.Description is not None:
-                if ref.Description == 'FemtetMacro':  # FemtetMacro
-                    contain_2 = True
-        # add
-        if not contain_2:
-            wb.VBProject.References.AddFromFile(ref_file_2)
 
     def remove_femtet_ref_xla(self, wb):
 
@@ -657,10 +659,11 @@ class ExcelInterface(FEMInterface):
                         raise RuntimeError(f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
 
             # 参照設定を解除する（不要な処理かも）
-            self.remove_femtet_ref_xla(self.wb_input)
-            self.remove_femtet_ref_xla(self.wb_output)
-            self.remove_femtet_ref_xla(self.wb_setup)
-            self.remove_femtet_ref_xla(self.wb_teardown)
+            # self.remove_femtet_ref_xla(self.wb_input)
+            # self.remove_femtet_ref_xla(self.wb_output)
+            # self.remove_femtet_ref_xla(self.wb_constraint)
+            # self.remove_femtet_ref_xla(self.wb_setup)
+            # self.remove_femtet_ref_xla(self.wb_teardown)
 
             # シートの COM オブジェクト変数を削除する
             del self.sh_input
@@ -737,7 +740,7 @@ class ExcelInterface(FEMInterface):
             use = True
             if ParseAsParameter.use in df.columns:
                 _use = row[ParseAsParameter.use]
-                use = False if np.isnan(_use) else bool(_use)  # bool or NaN
+                use = False if is_cell_value_empty(_use) else bool(_use)  # bool or NaN
 
             # name
             name = str(row[ParseAsParameter.name])
@@ -749,19 +752,19 @@ class ExcelInterface(FEMInterface):
             lb = None
             if ParseAsParameter.lb in df.columns:
                 lb = row[ParseAsParameter.lb]
-                lb = None if np.isnan(lb) else float(lb)
+                lb = None if is_cell_value_empty(lb) else float(lb)
 
             # ub (optional)
             ub = None
             if ParseAsParameter.ub in df.columns:
                 ub = row[ParseAsParameter.ub]
-                ub = None if np.isnan(ub) else float(ub)
+                ub = None if is_cell_value_empty(ub) else float(ub)
 
             # step (optional)
             step = None
             if ParseAsParameter.step in df.columns:
                 step = row[ParseAsParameter.step]
-                step = None if np.isnan(step) else float(step)
+                step = None if is_cell_value_empty(step) else float(step)
 
             if use:
                 prm = Parameter(
@@ -802,14 +805,14 @@ class ExcelInterface(FEMInterface):
             use = True
             if ParseAsObjective.use in df.columns:
                 _use = row[ParseAsObjective.use]
-                use = False if np.isnan(_use) else bool(_use)  # bool or NaN
+                use = False if is_cell_value_empty(_use) else bool(_use)  # bool or NaN
 
             # name
             name = str(row[ParseAsObjective.name])
 
             # direction
-            direction = row[ParseAsObjective.value]
-            assert not np.isnan(direction), 'direction is empty.'
+            direction = row[ParseAsObjective.direction]
+            assert not is_cell_value_empty(direction), 'direction is empty.'
             try:
                 direction = float(direction)
             except ValueError:
@@ -831,7 +834,17 @@ class ExcelInterface(FEMInterface):
         from pyfemtet.opt._femopt_core import Constraint
         opt: AbstractOptimizer
 
-        df = ParseAsConstraint.parse(self.output_xlsm_path, self.output_sheet_name)
+        # TODO:
+        #   constraint は optional である。
+        #   現在は実装していないが、シートから問題を取得するよりよいロジックができたら
+        #   （つまり、同じシートからパラメータと拘束を取得出来るようになったら）__init__ 内で
+        #   constraint に None が与えられたのか故意に input_sheet_name と同じシート名を
+        #   与えられたのか分別できる実装に変えてそのチェック処理をここに反映する。
+        # constraint_sheet_name が指定されていない場合何もしない
+        if (self.constraint_sheet_name == self.input_sheet_name) and is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
+            return
+
+        df = ParseAsConstraint.parse(self.constraint_xlsm_path, self.constraint_sheet_name)
 
         for i, row in df.iterrows():
 
@@ -839,7 +852,7 @@ class ExcelInterface(FEMInterface):
             use = True
             if ParseAsConstraint.use in df.columns:
                 _use = row[ParseAsConstraint.use]
-                use = False if np.isnan(_use) else bool(_use)  # bool or NaN
+                use = False if is_cell_value_empty(_use) else bool(_use)  # bool or NaN
 
             # name
             name = str(row[ParseAsConstraint.name])
@@ -848,19 +861,25 @@ class ExcelInterface(FEMInterface):
             lb = None
             if ParseAsConstraint.lb in df.columns:
                 lb = row[ParseAsConstraint.lb]
-                lb = None if np.isnan(lb) else float(lb)
+                lb = None if is_cell_value_empty(lb) else float(lb)
 
             # ub (optional)
             ub = None
             if ParseAsConstraint.ub in df.columns:
                 ub = row[ParseAsConstraint.ub]
-                ub = None if np.isnan(ub) else float(ub)
+                ub = None if is_cell_value_empty(ub) else float(ub)
 
             # strict (optional)
             strict = True
             if ParseAsConstraint.strict in df.columns:
                 _strict = row[ParseAsConstraint.strict]
-                strict = True if np.isnan(_strict) else bool(_strict)  # bool or NaN
+                strict = True if is_cell_value_empty(_strict) else bool(_strict)  # bool or NaN
+
+            # using_fem (optional)
+            calc_before_solve = True
+            if ParseAsConstraint.calc_before_solve in df.columns:
+                _calc_before_solve = row[ParseAsConstraint.calc_before_solve]
+                calc_before_solve = True if is_cell_value_empty(_calc_before_solve) else bool(_calc_before_solve)  # bool or NaN
 
             if use:
                 # constraint を作る
@@ -872,7 +891,7 @@ class ExcelInterface(FEMInterface):
                     strict=strict,
                     args=(name,),
                     kwargs=dict(),
-                    using_fem=False,  # 継承クラスで use_femtet に入ることを避けるため
+                    using_fem=not calc_before_solve,
                 )
 
     def objective_from_excel(self, name: str):
@@ -904,8 +923,8 @@ def _terminate_femtet(femtet_pid_):
 # main thread で作成した excel への参照を含む関数を
 # 直接 thread や process に渡すと機能しない
 class ScapeGoatObjective:
-    def __call__(self, *args, fem: ExcelInterface or None = None, **kwargs):
-        fem.objective_from_excel(*args, **kwargs)
+    # def __call__(self, *args, fem: ExcelInterface or None = None, **kwargs):
+    #     fem.objective_from_excel(*args, **kwargs)
 
     @property
     def __globals__(self):
@@ -917,6 +936,17 @@ def is_same_path(p1, p2):
     _p2 = os.path.abspath(p2).lower()
     return _p1 == _p2
 
+
+def is_cell_value_empty(cell_value):
+    if isinstance(cell_value, str):
+        return cell_value == ''
+    elif isinstance(cell_value, int) \
+            or isinstance(cell_value, float):
+        return np.isnan(cell_value)
+    elif cell_value is None:
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':

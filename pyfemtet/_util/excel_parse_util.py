@@ -109,9 +109,10 @@ class ParseAsConstraint(ParseBase):
     ub = '上限'
     strict = '厳守'
     use = '使用'
+    calc_before_solve = 'ソルブ前に計算'
     KEYWORD = name
     REQUIRED_COLUMNS = [value]
-    OPTIONAL_COLUMNS = [lb, ub, strict, use]
+    OPTIONAL_COLUMNS = [lb, ub, strict, use, calc_before_solve]
 
 
 def search_index(book_path, sheet_name, value):

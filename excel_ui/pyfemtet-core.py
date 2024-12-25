@@ -48,6 +48,7 @@ def core(
         input_sheet_name: str,
 
         output_sheet_name: str or None,
+        constraint_sheet_name: str or None,
         procedure_name: str or None,  # 引数に拡張子を除く femprj ファイル名を取るように実装すること
         setup_procedure_name: str or None,
         teardown_procedure_name: str or None,
@@ -81,6 +82,8 @@ def core(
         input_sheet_name=input_sheet_name,
         output_xlsm_path=None,
         output_sheet_name=output_sheet_name,
+        constraint_xlsm_path=None,
+        constraint_sheet_name=constraint_sheet_name,
         procedure_name=procedure_name,
         procedure_args=procedure_args,
         connect_method='new',
@@ -118,11 +121,12 @@ def main(
         xlsm_path: str = None,
         input_sheet_name: str = None,
         n_parallel: int = 1,
+        output_sheet_name: str or None = None,
 
         femprj_path: str or None = None,  # 指定する場合は xlsm と同じフォルダに配置する前提にすること
         model_name: str = None,
         csv_path: str or None = None,
-        output_sheet_name: str or None = None,
+        constraint_sheet_name: str or None = None,
         procedure_name: str or None = None,  # 引数に拡張子を除く femprj ファイル名を取るように実装すること
         setup_procedure_name: str or None = None,
         teardown_procedure_name: str or None = None,
@@ -159,6 +163,11 @@ def main(
 
     if input_sheet_name is None:
         logger.error(f'input_sheet_name を指定してください。')
+        input('終了するには Enter を押してください。')
+        sys.exit(1)
+
+    if output_sheet_name is None:
+        logger.error(f'output_sheet_name を指定してください。')
         input('終了するには Enter を押してください。')
         sys.exit(1)
 
@@ -255,6 +264,7 @@ def main(
         input_sheet_name,
 
         output_sheet_name,
+        constraint_sheet_name,
         procedure_name,  # 引数に拡張子を除く femprj ファイル名を取るように実装すること
         setup_procedure_name,
         teardown_procedure_name,
