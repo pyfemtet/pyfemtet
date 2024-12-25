@@ -26,12 +26,12 @@ plotly = "^5.22.0"
 dash-bootstrap-components = "^1.5.0"
 # numerical
 numpy = "^2.0.0"
-chaospy = "^4.3.17"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 scipy = "^1.14.1"
 optuna = "^4.1.0"
 optuna-integration = "^4.1.0"
+salib = "^1.5.1"
 # torch
 torch = "~2.5.1"
 botorch = "~0.12.0"
