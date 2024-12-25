@@ -27,8 +27,32 @@ class SingleTaskGPModel(PredictionModelBase):
     """
 
     def __init__(self, bounds=None, is_noise_free=True):
-        self.bounds = tensor(np.array(bounds)).T
+        if bounds is not None:
+            if isinstance(bounds, np.ndarray):
+                self.bounds = tensor(bounds).T
+            elif isinstance(bounds, list) or isinstance(bounds, tuple):
+                self.bounds = tensor(np.array(bounds)).T
+            else:
+                raise NotImplementedError('Bounds must be a np.ndarray or list or tuple.')
+        else:
+            self.bounds = None
         self.is_noise_free = is_noise_free
+
+    def set_bounds_from_history(self, df, history):
+        from pyfemtet.opt._femopt_core import History
+        history: History
+        metadata: str
+
+        columns = df.columns
+        metadata_columns = history.metadata
+        target_columns = [
+            col for col, metadata in zip(columns, metadata_columns)
+            if metadata == 'prm_lb' or metadata == 'prm_ub'
+        ]
+
+        bounds_buff = df.iloc[0][target_columns].values  # 2*len(prm_names) array
+        bounds = bounds_buff.reshape(-1, 2).astype(float)
+        self.bounds = tensor(bounds).T
 
     # noinspection PyAttributeOutsideInit
     def fit(self, x: np.ndarray, y: np.ndarray):

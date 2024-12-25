@@ -6,7 +6,7 @@ from scipy.stats.distributions import norm
 
 from pyfemtet.core import SolveError
 from pyfemtet.logger import get_module_logger
-from pyfemtet.opt._femopt_core import History
+from pyfemtet.opt._femopt_core import History, Objective
 from pyfemtet.opt.interface._base import FEMInterface
 from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
 from pyfemtet.opt.optimizer._base import AbstractOptimizer
@@ -14,7 +14,11 @@ from pyfemtet.opt.optimizer._base import AbstractOptimizer
 logger = get_module_logger('opt.interface', __name__)
 
 
-class PoFBoTorchInterface(FEMInterface):
+class SurrogateModelInterface(FEMInterface):
+    pass
+
+
+class PoFBoTorchInterface(SurrogateModelInterface):
 
     def __init__(
             self,
@@ -93,27 +97,18 @@ class PoFBoTorchInterface(FEMInterface):
 
         opt: AbstractOptimizer = kwargs['opt']
 
-        # bounds を取得
-        df_unfixed_prm: pd.DataFrame = opt.get_parameter(format='df')
-        df_prm: pd.DataFrame = opt.variables.get_variables(format='df')
+        obj: Objective
+        for obj_name, obj in opt.objectives.items():
+            obj.fun = lambda: self.obj[obj_name]
 
-        bounds_dict = dict()
-        # unfixed parameter は get_parameter で取得可能
-        for i, row in df_unfixed_prm.iterrows():
-            bounds_dict[row['name']] = row['lower_bound'], row['upper_bound']
-
-        # fixed parameter は properties を通じて取得（add_fixed_parameter で property を設定している前提の実装）
-        for i, row in df_prm.iterrows():
-            if row['name'] not in df_unfixed_prm['name'].values:
-                bounds_dict[row['name']] = row['properties']['lower_bound'], row['properties']['upper_bound']
-
-        # history.prm_names 順に並び替え
-        bounds = np.array([bounds_dict[prm_name] for prm_name in self.history.prm_names])
-
-        self.model = SingleTaskGPModel(bounds)
+        # model training
+        self.model = SingleTaskGPModel()
+        self.model.set_bounds_from_history(self.history.get_df(), self.history)
         self.train()
 
-        self.model_f = SingleTaskGPModel(bounds, is_noise_free=False)
+        # model_f training
+        self.model_f = SingleTaskGPModel(is_noise_free=False)
+        self.model_f.set_bounds_from_history(self.history.get_df(), self.history)
         self.train_f()
 
     def update_parameter(self, parameters: pd.DataFrame, with_warning=False) -> Optional[List[str]]:

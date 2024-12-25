@@ -165,6 +165,7 @@ class FEMOpt:
             step: float = None,
             properties: dict[str, str or float] = None,
             pass_to_fem: bool = True,
+            fix: bool = False,
     ):
         # noinspection PyUnresolvedReferences
         """Adds a parameter to the optimization problem.
@@ -177,6 +178,15 @@ class FEMOpt:
             step (float, optional): The step of parameter. If specified, parameter is used as discrete. Defaults to None.
             properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.
             pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
+            fix (bool, optiona):
+                パラメータを initial_value で固定します。
+                開発時にパラメータを振るか振らないかを
+                簡単に変更するための便利引数です。
+                True のとき、lower_bound, upper_bound, step, properties の
+                値は、有効かどうかのチェックには使われますが、最適化では
+                使われなくなります。
+                デフォルトは False です。
+
 
         Raises:
             ValueError: If initial_value is not specified and the value for the given name is also not specified in FEM.
@@ -209,34 +219,27 @@ class FEMOpt:
             if initial_value is None:
                 raise ValueError('initial_value を指定してください.')
 
-        prm = Parameter(
-            name=name,
-            value=float(initial_value),
-            lower_bound=float(lower_bound) if lower_bound is not None else None,
-            upper_bound=float(upper_bound) if upper_bound is not None else None,
-            step=float(step) if step is not None else None,
-            pass_to_fem=pass_to_fem,
-            properties=properties,
-        )
-        self.opt.variables.add_parameter(prm)
-
-    def add_fixed_parameter(
-            self,
-            name: str,
-            value: float = None,
-            lower_bound: float = None,
-            upper_bound: float = None,
-    ):
-        warnings.filterwarnings('ignore', category=UserWarning, message="The function 'add_expression' is experimental")
-        self.add_expression(
-            name=name,
-            fun=lambda: value,
-            pass_to_fem=True,
-            properties=dict(
-                lower_bound=lower_bound,
-                upper_bound=upper_bound,
+        if not fix:
+            prm = Parameter(
+                name=name,
+                value=float(initial_value),
+                lower_bound=float(lower_bound) if lower_bound is not None else None,
+                upper_bound=float(upper_bound) if upper_bound is not None else None,
+                step=float(step) if step is not None else None,
+                pass_to_fem=pass_to_fem,
+                properties=properties,
             )
-        )
+            self.opt.variables.add_parameter(prm)
+
+        else:
+            warnings.filterwarnings('ignore', category=UserWarning, message="The function 'add_expression' is experimental")
+            self.add_expression(
+                name=name,
+                fun=lambda: initial_value,
+                pass_to_fem=pass_to_fem,
+                properties=properties,
+            )
+
 
     @experimental_feature
     def add_expression(
