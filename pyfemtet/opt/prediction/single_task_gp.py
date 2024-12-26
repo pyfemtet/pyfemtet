@@ -38,10 +38,13 @@ class SingleTaskGPModel(PredictionModelBase):
             self.bounds = None
         self.is_noise_free = is_noise_free
 
-    def set_bounds_from_history(self, df, history):
+    def set_bounds_from_history(self, history, df=None):
         from pyfemtet.opt._femopt_core import History
         history: History
         metadata: str
+
+        if df is None:
+            df = history.get_df()
 
         columns = df.columns
         metadata_columns = history.metadata
