@@ -180,7 +180,7 @@ class ExcelInterface(FEMInterface):
     input_sheet_name: str  # 変数セルを定義しているシート名
     output_xlsm_path: str  # 操作対象の xlsm パス (指定しない場合、input と同一)
     output_sheet_name: str  # 計算結果セルを定義しているシート名 (指定しない場合、input と同一)
-    constraint_xlsm_path: Path  # 操作対象の xlsm パス (指定しない場合、input と同一)
+    constraint_xlsm_path: str  # 操作対象の xlsm パス (指定しない場合、input と同一)
     constraint_sheet_name: str  # 拘束関数セルを定義しているシート名 (指定しない場合、input と同一)
 
     related_file_paths: list[str]  # 並列時に個別に並列プロセスの space にアップロードする必要のあるパス
@@ -222,8 +222,8 @@ class ExcelInterface(FEMInterface):
             self,
             input_xlsm_path: str or Path,
             input_sheet_name: str,
-            output_sheet_name: str,
             output_xlsm_path: str or Path = None,
+            output_sheet_name: str = None,
             constraint_xlsm_path: str or Path = None,
             constraint_sheet_name: str = None,
             procedure_name: str = None,
@@ -250,7 +250,7 @@ class ExcelInterface(FEMInterface):
         self.input_xlsm_path = str(input_xlsm_path)  # あとで再取得する
         self.input_sheet_name = input_sheet_name
         self.output_xlsm_path = str(input_xlsm_path) if output_xlsm_path is None else str(output_xlsm_path)
-        self.output_sheet_name = output_sheet_name
+        self.output_sheet_name = output_sheet_name if output_sheet_name is not None else input_sheet_name
         self.constraint_xlsm_path = str(input_xlsm_path) if constraint_xlsm_path is None else str(constraint_xlsm_path)
         self.constraint_sheet_name = constraint_sheet_name or self.input_sheet_name
         self.procedure_name = procedure_name or 'FemtetMacro.FemtetMain'
@@ -392,7 +392,9 @@ class ExcelInterface(FEMInterface):
             _set_autosave_enabled(False)
 
         # excel に繋ぐ
-        self.connect_excel(self.connect_method)
+        with lock_or_no_lock('connect-excel'):
+            self.connect_excel(self.connect_method)
+            sleep(1)
 
         # load_objective は 1 回目に呼ばれたのが main thread なので
         # subprocess に入った後でもう一度 load objective を行う
@@ -421,6 +423,7 @@ class ExcelInterface(FEMInterface):
 
                     # 再計算
                     self.excel.CalculateFull()
+                    sleep(1)
 
                 except com_error as e:
                     raise RuntimeError(f'Failed to run macro {self.setup_procedure_name}. The original message is: {e}')
@@ -647,7 +650,7 @@ class ExcelInterface(FEMInterface):
             # 参照設定解除の前に終了処理を必要なら実施する
             # excel の setup 関数を必要なら実行する
             if self.teardown_procedure_name is not None:
-                with lock_or_no_lock('excel_setup_procedure'):
+                with lock_or_no_lock('excel_teardown_procedure'):
                     try:
                         with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
                             self.excel.Run(
