@@ -423,7 +423,7 @@ class ExcelInterface(FEMInterface):
                     self.excel.CalculateFull()
 
                 except com_error as e:
-                    raise RuntimeError(f'Failed to run macro {self.setup_procedure_args}. The original message is: {e}')
+                    raise RuntimeError(f'Failed to run macro {self.setup_procedure_name}. The original message is: {e}')
 
     def connect_excel(self, connect_method):
 
@@ -534,12 +534,12 @@ class ExcelInterface(FEMInterface):
                 raise RuntimeError(f'Cannot open {self.teardown_xlsm_path}')
 
 
-        # # book に参照設定を追加する
-        # self.add_femtet_ref_xla(self.wb_input)
-        # self.add_femtet_ref_xla(self.wb_output)
-        # self.add_femtet_ref_xla(self.wb_setup)
-        # self.add_femtet_ref_xla(self.wb_teardown)
-        # self.add_femtet_ref_xla(self.wb_constraint)
+        # book に参照設定を追加する
+        self.add_femtet_ref_xla(self.wb_input)
+        self.add_femtet_ref_xla(self.wb_output)
+        self.add_femtet_ref_xla(self.wb_setup)
+        self.add_femtet_ref_xla(self.wb_teardown)
+        self.add_femtet_ref_xla(self.wb_constraint)
 
     def add_femtet_ref_xla(self, wb):
 
@@ -661,7 +661,7 @@ class ExcelInterface(FEMInterface):
                     except com_error as e:
                         raise RuntimeError(f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
 
-            # 参照設定を解除する（不要な処理かも）
+            # 不具合の原因になる場合があるので参照設定は解除しないこと
             # self.remove_femtet_ref_xla(self.wb_input)
             # self.remove_femtet_ref_xla(self.wb_output)
             # self.remove_femtet_ref_xla(self.wb_constraint)

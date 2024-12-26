@@ -62,7 +62,6 @@ def core(
         seed: int or None,
 ):
     from pathlib import Path
-    from optuna.samplers import BaseSampler
     from pyfemtet.opt import FEMOpt, OptunaOptimizer
     from pyfemtet.opt.interface._excel_interface import ExcelInterface
 
@@ -281,3 +280,18 @@ def main(
 
 if __name__ == '__main__':
     Fire(main)
+
+    # ===== Debug Code =====
+    # import os
+    # os.chdir(os.path.dirname(__file__))
+    # main(
+    #     xlsm_path='インターフェース.xlsm',
+    #     input_sheet_name='設計変数',
+    #     n_parallel=1,
+    #     output_sheet_name='目的関数',
+    #     constraint_sheet_name='拘束関数',
+    #     procedure_name='FemtetMacro.FemtetMain',
+    #     setup_procedure_name='setup',
+    #     teardown_procedure_name='teardown',
+    #     n_trials=3,
+    # )
