@@ -5,7 +5,7 @@ from optuna.samplers import RandomSampler, TPESampler
 
 from pyfemtet.opt import FEMOpt, NoFEM
 from pyfemtet.opt.optimizer import OptunaOptimizer
-from pyfemtet.opt.interface._singletaskgp import PoFBoTorchInterface
+from pyfemtet.opt.interface import PoFBoTorchInterface
 
 import pytest
 

@@ -3,7 +3,7 @@ import os
 from optuna.samplers import TPESampler
 
 from pyfemtet.opt import FEMOpt, OptunaOptimizer
-from pyfemtet.opt.interface._singletaskgp import PoFBoTorchInterface
+from pyfemtet.opt.interface import PoFBoTorchInterface
 
 
 if __name__ == '__main__':
