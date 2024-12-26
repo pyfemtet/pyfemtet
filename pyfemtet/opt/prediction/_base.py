@@ -36,8 +36,8 @@ class PyFemtetPredictionModel:
         from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
         if isinstance(self.meta_model, SingleTaskGPModel):
             self.meta_model.set_bounds_from_history(
-                df,
                 history,
+                df,
             )
 
         self.obj_names = history.obj_names
