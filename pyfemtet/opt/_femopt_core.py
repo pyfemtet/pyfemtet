@@ -623,11 +623,12 @@ class History:
 
         self.set_df(df)
 
-    def filter_valid(self, df_):
+    def filter_valid(self, df_, keep_trial_num=False):
         buff = df_[self.obj_names].notna()
         idx = buff.prod(axis=1).astype(bool)
         filtered_df = df_[idx]
-        filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1  # TODO: いくつかグラフを描いてみてこれが違和感あるかないか調べる
+        if not keep_trial_num:
+            filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1
         return filtered_df
 
     def get_df(self, valid_only=False) -> pd.DataFrame:
@@ -831,7 +832,7 @@ class History:
 
         # 最小化問題に変換された objective values を取得
         raw_objective_values = df[self.obj_names].values
-        objective_values = np.empty_like(raw_objective_values)
+        objective_values = np.full_like(raw_objective_values, np.nan)
         for n_trial in range(len(raw_objective_values)):
             for obj_idx, (_, objective) in enumerate(objectives.items()):
                 objective_values[n_trial, obj_idx] = objective.convert(raw_objective_values[n_trial, obj_idx])
@@ -845,13 +846,20 @@ class History:
             pareto_set_ = np.empty((0, len(self.obj_names)))
             for i in range(len(objective_values_)):
                 target = objective_values_[i]
-                dominated = False
-                # TODO: Array の計算に直して高速化する
-                for j in range(len(objective_values_)):
-                    compare = objective_values_[j]
-                    if all(target > compare):
-                        dominated = True
-                        break
+
+                if any(np.isnan(target)):
+                    # infeasible な場合 pareto_set の計算に含めない
+                    dominated = True
+
+                else:
+                    dominated = False
+                    # TODO: Array の計算に直して高速化する
+                    for j in range(len(objective_values_)):
+                        compare = objective_values_[j]
+                        if all(target > compare):
+                            dominated = True
+                            break
+
                 if not dominated:
                     pareto_set_ = np.concatenate([pareto_set_, [target]], axis=0)
 
