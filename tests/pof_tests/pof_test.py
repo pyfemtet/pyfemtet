@@ -108,7 +108,13 @@ def test_pof_basic():
         confirm_before_exit=False,
     )
 
-    if not record_mode:
+    if record_mode:
+        os.rename(
+            path,
+            str(path).replace('.csv', '.reccsv')
+        )
+
+    else:
         # ===== check =====
         import numpy as np
         import pandas as pd
@@ -123,7 +129,7 @@ def test_pof_basic():
             pdf_['obj_1'] = df_['obj_1']
             return pdf_.values
 
-        ref = simplify_df(Path(__file__).parent / 'pof_reference.csv')
+        ref = simplify_df(Path(__file__).parent / 'pof_reference.reccsv')
         dif = simplify_df(Path(__file__).parent / 'pof_test.csv')
 
         assert (np.abs(dif - ref) / ref).max() < 0.1, "前回結果から 10% 以上の乖離あり"
