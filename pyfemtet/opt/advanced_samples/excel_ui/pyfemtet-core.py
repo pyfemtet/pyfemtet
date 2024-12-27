@@ -243,6 +243,7 @@ def main(
 
     # sampler_kwargs
     sampler_kwargs = algorithm_settings
+    # noinspection PyUnboundLocalVariable
     available_sampler_kwarg_keys = inspect.signature(sampler_class).parameters.keys()
     for given_key in sampler_kwargs.keys():
         if given_key not in available_sampler_kwarg_keys:
