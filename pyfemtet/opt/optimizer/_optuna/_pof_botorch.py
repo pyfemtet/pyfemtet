@@ -169,6 +169,21 @@ def symlog(x):
     )
 
 
+def get_minimum_YVar_and_standardizer(Y: torch.Tensor):
+    standardizer = Standardize(m=Y.shape[-1])
+    if _get_use_fixed_noise():
+        import gpytorch
+        min_noise = gpytorch.settings.min_fixed_noise.value(Y.dtype)
+
+        standardizer.forward(Y)  # require to un-transform
+        _, YVar = standardizer.untransform(Y, min_noise * torch.ones_like(Y))
+
+    else:
+        YVar = None
+
+    return YVar, standardizer
+
+
 # ベースとなる獲得関数クラスに pof 係数を追加したクラスを作成する関数
 def acqf_patch_factory(acqf_class, pof_config=None):
     """ベース acqf クラスに pof 係数の計算を追加したクラスを作成します。
@@ -394,11 +409,13 @@ def logei_candidates_func(
 
     train_x = normalize(train_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -540,11 +557,13 @@ def qei_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -641,11 +660,13 @@ def qnei_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -747,11 +768,13 @@ def qehvi_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -850,11 +873,13 @@ def ehvi_candidates_func(
     train_y = train_obj
     train_x = normalize(train_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -962,11 +987,13 @@ def qnehvi_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -1083,11 +1110,13 @@ def qparego_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -1184,11 +1213,13 @@ def qkg_candidates_func(
     if pending_x is not None:
         pending_x = normalize(pending_x, bounds=bounds)
 
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+
     model = SingleTaskGP(
         train_x,
         train_y,
-        train_Yvar=1e-4*torch.ones_like(train_y) if _get_use_fixed_noise() else None,
-        outcome_transform=Standardize(m=train_y.size(-1))
+        train_Yvar=train_yvar,
+        outcome_transform=standardizer,
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
@@ -1286,7 +1317,7 @@ def qhvkg_candidates_func(
         SingleTaskGP(
             train_x,
             train_y[..., [i]],
-            train_Yvar=1e-4*torch.ones_like(train_y[..., [i]]) if _get_use_fixed_noise() else None,
+            train_Yvar=get_minimum_YVar_and_standardizer(train_y[..., [i]])[0],
             outcome_transform=Standardize(m=1)
         )
         for i in range(train_y.shape[-1])
