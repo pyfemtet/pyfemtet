@@ -30,6 +30,7 @@ from pyfemtet._util.dask_util import lock_or_no_lock
 from pyfemtet._util.excel_parse_util import *
 
 from pyfemtet._warning import show_experimental_warning
+from pyfemtet._message.messages import Message as Msg
 
 from pyfemtet.opt.interface._base import logger
 
@@ -645,7 +646,7 @@ class ExcelInterface(FEMInterface):
             if already_terminated:
                 return
 
-            logger.info('Excel の終了処理を開始します。')
+            logger.info(Msg.INFO_TERMINATING_EXCEL)
 
             # 参照設定解除の前に終了処理を必要なら実施する
             # excel の setup 関数を必要なら実行する
@@ -702,7 +703,6 @@ class ExcelInterface(FEMInterface):
             del self.wb_setup
             del self.wb_teardown
 
-
             # excel の終了
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.excel.Quit()
@@ -710,12 +710,12 @@ class ExcelInterface(FEMInterface):
 
             # ここで Excel のプロセスが残らず落ちる
             gc.collect()
+            logger.info(Msg.INFO_TERMINATED_EXCEL)
 
             if self._with_femtet_autosave_setting:
                 from pyfemtet._femtet_config_util.autosave import _set_autosave_enabled
-                logger.info('自動保存機能の設定を元に戻しています。')
+                logger.info(Msg.INFO_RESTORING_FEMTET_AUTOSAVE)
                 _set_autosave_enabled(self._femtet_autosave_buffer)
-                logger.info('自動保存機能の設定を元に戻しました。')
 
     # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
     @property

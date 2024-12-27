@@ -822,7 +822,8 @@ class History:
         df['non_domi'] = False
 
         # feasible のものに non_domi の評価結果を代入する
-        df.loc[idx, 'non_domi'] = non_domi
+        if len(non_domi) > 0:
+            df.loc[idx, 'non_domi'] = non_domi
 
     def _calc_hypervolume(self, objectives, df):
 

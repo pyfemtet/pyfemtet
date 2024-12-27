@@ -7,6 +7,8 @@ from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
 from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
 
+from pyfemtet._message.messages import Message as Msg
+
 
 logger = get_module_logger('opt.interface', __name__)
 
@@ -14,6 +16,7 @@ logger = get_module_logger('opt.interface', __name__)
 class PoFBoTorchInterface(SurrogateModelInterfaceBase):
     model_f: SingleTaskGPModel
     model: SingleTaskGPModel
+    threshold = 0.5
 
     def train(self):
         # df そのまま用いて training する
@@ -56,9 +59,9 @@ class PoFBoTorchInterface(SurrogateModelInterfaceBase):
 
         # feasibility の計算
         mean_f, std_f = self.model_f.predict(np.array([x]))
-        pof = 1. - norm.cdf(0.5, loc=mean_f, scale=std_f)
-        if pof < 0.5:
-            raise SolveError('PoF < 0.5')
+        pof = 1. - norm.cdf(self.threshold, loc=mean_f, scale=std_f)
+        if pof < self.threshold:
+            raise SolveError(Msg.INFO_POF_IS_LESS_THAN_THRESHOLD)
 
         # 実際の計算(mean は history.obj_names 順)
         mean, _ = self.model.predict(np.array([x]))
