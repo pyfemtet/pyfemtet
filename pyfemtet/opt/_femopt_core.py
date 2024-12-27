@@ -959,7 +959,7 @@ class History:
         study = optuna.create_study(**kwargs)
 
         # add trial to study
-        df: pd.DataFrame = self.get_df()
+        df: pd.DataFrame = self.get_df(valid_only=True)
         for i, row in df.iterrows():
             FD = optuna.distributions.FloatDistribution
             kwargs = dict(
