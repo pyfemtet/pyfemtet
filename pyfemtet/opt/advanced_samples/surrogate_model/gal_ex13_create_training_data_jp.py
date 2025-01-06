@@ -40,7 +40,7 @@ if __name__ == '__main__':
         history_path='training_data.csv'
     )
 
-    # 最適化問題を指定します。
+    # 設計変数を設定します。
     femopt.add_parameter('length', 0.1, 0.02, 0.2)
     femopt.add_parameter('width', 0.01, 0.001, 0.02)
     femopt.add_parameter('base_radius', 0.008, 0.006, 0.01)
@@ -49,6 +49,9 @@ if __name__ == '__main__':
     femopt.add_objective(fun=get_res_freq, name='第一共振周波数(Hz)')
 
     # 学習データ作成を行います。
-    # 終了条件を指定していないので、手動で停止するまで
+    # 終了条件を指定しない場合、手動で停止するまで
     # 学習データ作成を続けます。
-    femopt.optimize()
+    femopt.set_random_seed(42)
+    femopt.optimize(
+        # n_trials=100
+    )

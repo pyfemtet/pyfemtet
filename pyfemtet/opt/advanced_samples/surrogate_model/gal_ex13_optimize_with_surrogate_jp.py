@@ -38,15 +38,13 @@ def main(target):
 
     # 学習時は設計変数としていたが最適化時に固定したいパラメータがある場合
     # initial_value のみを指定して fix 引数を True にしてください。
-    # 逆に、学習時に設計変数にしていなかった変数を
-    # 最適化時に追加することはできません。
+    # 学習時に設定しなかった設計変数を最適化時に追加することはできません。
     femopt.add_parameter('base_radius', 0.008, fix=True)
 
     # 学習時に設定した目的関数のうち
     # 最適化したいものを指定します。
-    # fun 引数は与えてもいいですが、無視されます。
-    # 学習時に設定しなかった目的関数を
-    # 使用することはできません。
+    # fun 引数は与えてもいいですが、サロゲートモデル作成時に上書きされるため無視されます。
+    # 学習時に設定しなかった目的関数を最適化時に使用することはできません。
     obj_name = '第一共振周波数(Hz)'
     femopt.add_objective(
         name=obj_name,
@@ -54,6 +52,7 @@ def main(target):
     )
 
     # 最適化を実行します。
+    femopt.set_random_seed(42)
     df = femopt.optimize(
         n_trials=50,
         confirm_before_exit=False
@@ -84,8 +83,8 @@ if __name__ == '__main__':
     message_1000 = main(target=1000)
 
     # 続いて、同じサロゲートモデルで
-    # 共振周波数が 500 になる設計を見つけます。
-    message_500 = main(target=2000)
+    # 共振周波数が 2000 になる設計を見つけます。
+    message_2000 = main(target=2000)
 
     print(message_1000)
-    print(message_500)
+    print(message_2000)
