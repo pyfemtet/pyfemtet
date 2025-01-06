@@ -292,10 +292,11 @@ class Function:
         # COM 定数を一度 _Scapegoat 型のオブジェクトにする
         # ParametricIF で使う dll 関数は _FuncPtr 型であって __globals__ を持たないが、
         # これは絶対に constants を持たないので単に無視すればよい。
-        if not isinstance(fun, ctypes._CFuncPtr):
-            for varname in fun.__globals__:
-                if isinstance(fun.__globals__[varname], Constants):
-                    fun.__globals__[varname] = _Scapegoat()
+        if fun is not None:
+            if not isinstance(fun, ctypes._CFuncPtr):
+                for varname in fun.__globals__:
+                    if isinstance(fun.__globals__[varname], Constants):
+                        fun.__globals__[varname] = _Scapegoat()
 
         self.fun = fun
         self.name = name
@@ -311,6 +312,9 @@ class Function:
         Returns:
             float
         """
+        if self.fun is None:
+            RuntimeError(f'`fun` of {self.name} is not specified.')
+
         args = self.args
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
@@ -320,11 +324,12 @@ class Function:
     def _restore_constants(self):
         """Helper function for parallelize Femtet."""
         fun = self.fun
-        if not isinstance(fun, ctypes._CFuncPtr):
-            for varname in fun.__globals__:
-                if isinstance(fun.__globals__[varname], _Scapegoat):
-                    if not fun.__globals__[varname]._ignore_when_restore_constants:
-                        fun.__globals__[varname] = constants
+        if fun is not None:
+            if not isinstance(fun, ctypes._CFuncPtr):
+                for varname in fun.__globals__:
+                    if isinstance(fun.__globals__[varname], _Scapegoat):
+                        if not fun.__globals__[varname]._ignore_when_restore_constants:
+                            fun.__globals__[varname] = constants
 
 
 class Objective(Function):

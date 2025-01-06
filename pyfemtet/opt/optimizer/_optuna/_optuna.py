@@ -4,6 +4,7 @@ from typing import Iterable
 # built-in
 import os
 import inspect
+import gc
 
 # 3rd-party
 import optuna
@@ -285,8 +286,19 @@ class OptunaOptimizer(AbstractOptimizer):
             from optuna.samplers import TPESampler
             if issubclass(self.sampler_class, TPESampler):
 
-                if os.path.exists(self._temporary_storage_path):
-                    os.remove(self._temporary_storage_path)
+                import re
+                pattern = r'_\d+$'
+
+                while os.path.exists(self._temporary_storage_path):
+                    name, ext = os.path.splitext(self._temporary_storage_path)
+
+                    if bool(re.search(pattern, name)):
+                        base = '_'.join(name.split('_')[:-1])
+                        n = int(name.split('_')[-1])
+                        self._temporary_storage_path = name + '_' + str(n+1) + ext
+
+                    else:
+                        self._temporary_storage_path = name + '_2' + ext
 
                 self._temporary_storage = optuna.integration.dask.DaskStorage(
                     f'sqlite:///{self._temporary_storage_path}',
@@ -404,7 +416,6 @@ class OptunaOptimizer(AbstractOptimizer):
                 self._temporary_storage.remove_session()
                 del self._temporary_storage
                 del _study
-                import gc
                 gc.collect()
                 if os.path.exists(self._temporary_storage_path):
                     os.remove(self._temporary_storage_path)
