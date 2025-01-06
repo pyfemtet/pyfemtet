@@ -32,6 +32,9 @@ Copy-Item -Path $INSTALLER -Destination $INSTALLER_ON_DOC_SOURCE -Force
 if (Test-Path "docs/source/modules") {Remove-Item "docs/source/modules" -Force -Recurse}
 poetry run sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs/source/modules" pyfemtet
 
+# setup other sample files
+powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1"
+
 # build English document
 poetry run python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
 
@@ -54,6 +57,9 @@ Copy-Item -Path $INSTALLER_JP -Destination $INSTALLER_ON_DOC_SOURCE -Force
 
 # update api references
 poetry run sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs/source/modules" pyfemtet
+
+# setup other sample files
+powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1" 1  # is_JP
 
 # build Japanese document
 poetry run python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
