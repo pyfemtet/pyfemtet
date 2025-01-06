@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Optimization Using a surrogate model &mdash; PyFemtet Project  ドキュメント</title>
+  <title>サロゲートモデルを用いた最適化 &mdash; PyFemtet Project  ドキュメント</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -23,8 +23,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="検索" href="../../search.html" />
-    <link rel="next" title="API Reference" href="../../pages/api.html" />
-    <link rel="prev" title="Advanced Examples" href="../../pages/advanced_examples.html" /> 
+    <link rel="next" title="GUI" href="../../pages/script_builder.html" />
+    <link rel="prev" title="発展的な例題" href="../../pages/advanced_examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,19 +50,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/examples.html">例題</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/advanced_examples.html">発展的な例題</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">サロゲートモデルを用いた最適化</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample-files">サンプルファイル</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#design-variables">設計変数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objective-function">目的関数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-code">サンプルコード</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#execution-result-of-the-sample-code">サンプルコードの実行結果</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../pages/advanced_examples.html">Advanced Examples</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Optimization Using a surrogate model</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#sample-files">Sample Files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#design-variables">Design Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#objective-function">Objective Function</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sample-code">Sample Code</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#execution-result-of-the-sample-code">Execution Result of the Sample Code</a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
 </ul>
@@ -81,8 +81,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../pages/advanced_examples.html">Advanced Examples</a></li>
-      <li class="breadcrumb-item active">Optimization Using a surrogate model</li>
+          <li class="breadcrumb-item"><a href="../../pages/advanced_examples.html">発展的な例題</a></li>
+      <li class="breadcrumb-item active">サロゲートモデルを用いた最適化</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/advanced_examples/surrogate_model/surrogate_model.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -93,82 +93,67 @@
            <div itemprop="articleBody">
              
   <section id="optimization-using-a-surrogate-model">
-<h1>Optimization Using a surrogate model<a class="headerlink" href="#optimization-using-a-surrogate-model" title="Link to this heading"></a></h1>
-<p>このサンプルでは Femtet を使って学習データを作成し
-サロゲートモデルを用いて最適化を行う方法を説明します。</p>
+<h1>サロゲートモデルを用いた最適化<a class="headerlink" href="#optimization-using-a-surrogate-model" title="Link to this heading"></a></h1>
+<p>このサンプルでは Femtet を用いて訓練データを作成し、サロゲートモデルを用いて最適化を行う方法のデモを行います。</p>
 <section id="sample-files">
-<h2>Sample Files<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
+<h2>サンプルファイル<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>Keep the <a class="reference download internal" download="" href="../../_downloads/65f3bcce1c19e3f8342ded7b79bface3/gal_ex13_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">project</span></code></a>,
-<a class="reference download internal" download="" href="../../_downloads/363160c325e73844f7a4a0564b912131/gal_ex13_create_training_data.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">script</span> <span class="pre">1</span></code></a>
-to create training data <strong>with Femtet</strong> and
-<a class="reference download internal" download="" href="../../_downloads/24fd676e1647f6c8baf25939e6367c0e/gal_ex13_optimize_with_surrogate.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">script</span> <span class="pre">2</span></code></a>
-to make a surrogate model <strong>without Femtet</strong> and optimize
-on same folder.</p>
+<p><a class="reference download internal" download="" href="../../_downloads/65f3bcce1c19e3f8342ded7b79bface3/gal_ex13_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> と、 <strong>Femtet を用いた</strong> 訓練データ作成のための <a class="reference download internal" download="" href="../../_downloads/363160c325e73844f7a4a0564b912131/gal_ex13_create_training_data.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルスクリプト1</span></code></a> と <strong>Femtet を用いずに</strong> 最適化を行う <a class="reference download internal" download="" href="../../_downloads/24fd676e1647f6c8baf25939e6367c0e/gal_ex13_optimize_with_surrogate.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルスクリプト2</span></code></a> を同じフォルダに配置してください.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>サロゲートモデル:</p>
-<p>PyFemtet で扱うサロゲートモデルは、既知の設計変数と目的関数のセットを学習することで
-未知の設計変数に対して目的関数の予測値を計算するための機械学習モデルです。</p>
-<p>一般に質の良い学習データを作成するためには例題に記載しているような
-通常の最適化よりも多くの FEM 解析データが必要になりますが、
-一度学習データを作成できれば一度の目的関数計算を
-非常に高速に行うことができます。</p>
-<p>そのため、例えば設計変数や目的関数の項目はある程度決まっており、
-それらの範囲や目的値が異なる課題が頻発する状況では、所望の
-目標値を満たす設計変数のあたり付けを非常に高速に行うことができます。</p>
+<p><strong>What’s Surrogate Model?</strong></p>
+<p>PyFemtetで扱うサロゲートモデルは、既知の設計変数と目的関数のセットを学習することで未知の設計変数に対して目的関数を予測するための機械学習モデルです。</p>
+<p>一般に質の良い学習データを作成するためには例題に記載しているような通常の最適化よりも多くの FEM 解析データが必要になりますが、一度学習データを作成できれば一度の目的関数計算を非常に高速に行うことができます。</p>
+<p>そのため、例えば設計変数や目的関数の項目はある程度決まっており、それらの範囲や目的値が異なる課題が頻発する状況では、所望の目標値を満たす設計変数のあたり付けを非常に高速に行うことができます。</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>実行手順:</p>
-<p><cite>gal_ex13_create_training_data.py</cite> をダブルクリックで実行すると、
-Femtet を用いたサロゲートモデルの訓練データ作成が始まります。
-Femtet の解析実行数が 100 程度を超えたら
-<cite>gal_ex13_optimize_with_surrogate.py</cite> をダブルクリックで実行してください。
-(ページ下部の最適化結果は 100 解析データを元にモデルを作成しています。)</p>
+<p><strong>How this sample works?</strong></p>
+<p><cite>gal_ex13_create_training_data.py</cite> をダブルクリックで実行すると、Femtet を用いたサロゲートモデルの訓練データ作成が始まります。</p>
+<p>Femtet の解析実行数が 100 程度を超えたら <cite>gal_ex13_optimize_with_surrogate.py</cite> をダブルクリックで実行してください。(ページ下部の最適化結果は 100 解析データを元にモデルを作成しています。)</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>For details on the FEM problem, please refer to FemtetHelp / Examples / Heat Conduction Analysis / Example 14.</p>
+<p>FEM 問題としての詳細は、 Femtet ヘルプ / 例題 / 応力解析 / 例題 13 をご覧ください。</p>
 </div>
 </section>
 <section id="design-variables">
-<h2>Design Variables<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
+<h2>設計変数<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
 <figure class="align-default" id="id1">
 <img alt="../../_images/gal_ex13_parametric.png" src="../../_images/gal_ex13_parametric.png" />
 <figcaption>
-<p><span class="caption-text">Appearance of the Model</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+<p><span class="caption-text">モデルの外観</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>説明</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>length</p></td>
-<td><p>Length of the tuning fork</p></td>
+<td><p>音叉の長さ</p></td>
 </tr>
 <tr class="row-odd"><td><p>width</p></td>
-<td><p>Thickness of the tuning fork</p></td>
+<td><p>音叉の太さ</p></td>
 </tr>
 <tr class="row-even"><td><p>base_radius</p></td>
-<td><p>Thickness of the base (fixed in optimization)</p></td>
+<td><p>音叉のベースの半径 (最適化では固定)</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="objective-function">
-<h2>Objective Function<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
+<h2>目的関数<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>First resonance frequency (aim to 1000 and 20000)</p></li>
+<li><p>第一共振周波数 (1000 および 2000 を目標とする)</p></li>
 </ul>
 </section>
 <section id="sample-code">
-<h2>Sample Code<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
+<h2>サンプルコード<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">gal_ex13_create_training_data.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">os</span>
@@ -328,23 +313,21 @@ Femtet の解析実行数が 100 程度を超えたら
 </div>
 </section>
 <section id="execution-result-of-the-sample-code">
-<h2>Execution Result of the Sample Code<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
+<h2>サンプルコードの実行結果<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
 <figure class="align-default" id="id4">
 <a class="reference internal image-reference" href="../../_images/optimized_result_target_1000.png"><img alt="../../_images/optimized_result_target_1000.png" src="../../_images/optimized_result_target_1000.png" style="width: 300px;" /></a>
 <figcaption>
-<p><span class="caption-text">Optimization result (target: 1000 Hz)</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+<p><span class="caption-text">最適化結果 (ターゲット: 1000 Hz)</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <figure class="align-default" id="id5">
 <a class="reference internal image-reference" href="../../_images/optimized_result_target_2000.png"><img alt="../../_images/optimized_result_target_2000.png" src="../../_images/optimized_result_target_2000.png" style="width: 300px;" /></a>
 <figcaption>
-<p><span class="caption-text">Optimization result (target: 2000 Hz)</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+<p><span class="caption-text">最適化結果 (ターゲット: 2000 Hz)</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<p>サロゲートモデルを用いて第一共振周波数が 1000 または 2000 となる
-音叉の設計変数を探索した。得られた設計変数はそれぞれ図の右上に記載した。
-得られた設計変数を用いて Femtet でモデルを再作成し解析を実行した結果を
-それぞれの図の右下に記載し、サロゲートモデルと FEM 解析結果の比較を行った。</p>
+<p>第一共振周波数が 1000 または 2000 の音叉の設計変数をサロゲートモデルを用いて探索しました。得られた設計変数は図の右上に示されています。</p>
+<p>これらの設計変数を使用して Femtet でモデルを再現し、解析を実行しました。その結果は各図の右下に示されており、サロゲートモデルと FEM 結果との比較が可能となっています。</p>
 </section>
 </section>
 
@@ -352,8 +335,8 @@ Femtet の解析実行数が 100 程度を超えたら
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../../pages/advanced_examples.html" class="btn btn-neutral float-left" title="Advanced Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../pages/api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../../pages/advanced_examples.html" class="btn btn-neutral float-left" title="発展的な例題" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../pages/script_builder.html" class="btn btn-neutral float-right" title="GUI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

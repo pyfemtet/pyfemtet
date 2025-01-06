@@ -11,7 +11,7 @@ Advanced Examples
         .. image:: ../advanced_examples/surrogate_model/surrogate_model.png
             :scale: 50
         +++
-        サロゲートモデルを用いて最適化を行います。
+        Create training data by Femtet and optimize with surrogate model.
 
 
 .. toctree::

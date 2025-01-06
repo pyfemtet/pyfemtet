@@ -1,8 +1,8 @@
-Optimization Using a surrogate model
+Optimization Using a Surrogate Model
 ==================================================
 
-このサンプルでは Femtet を使って学習データを作成し
-サロゲートモデルを用いて最適化を行う方法を説明します。
+This sample demonstrates how to use Femtet to create
+training data and optimize using surrogate models.
 
 
 Sample Files
@@ -18,34 +18,44 @@ Sample Files
 
 
 .. note::
-    サロゲートモデル:
+    **What's Surrogate Model?**
 
-    PyFemtet で扱うサロゲートモデルは、既知の設計変数と目的関数のセットを学習することで
-    未知の設計変数に対して目的関数の予測値を計算するための機械学習モデルです。
+    The surrogate model handled by PyFemtet is a machine learning
+    model that predicts values of the objective function for unknown
+    design variables by learning a set of known design variables and
+    objective functions.
 
-    一般に質の良い学習データを作成するためには例題に記載しているような
-    通常の最適化よりも多くの FEM 解析データが必要になりますが、
-    一度学習データを作成できれば一度の目的関数計算を
-    非常に高速に行うことができます。
+    Generally, to create high-quality training data, more FEM
+    analysis data is required than what is typically needed for
+    regular optimization, as mentioned in the examples. However,
+    once training data has been created, it allows for very fast
+    calculations of the objective function.
 
-    そのため、例えば設計変数や目的関数の項目はある程度決まっており、
-    それらの範囲や目的値が異なる課題が頻発する状況では、所望の
-    目標値を満たす設計変数のあたり付けを非常に高速に行うことができます。
-
-
-.. note::
-    実行手順:
-
-    `gal_ex13_create_training_data.py` をダブルクリックで実行すると、
-    Femtet を用いたサロゲートモデルの訓練データ作成が始まります。
-    Femtet の解析実行数が 100 程度を超えたら
-    `gal_ex13_optimize_with_surrogate.py` をダブルクリックで実行してください。
-    (ページ下部の最適化結果は 100 解析データを元にモデルを作成しています。)
+    Therefore, in situations where the items for design variables
+    and objective functions are somewhat fixed and problems
+    frequently arise with varying ranges or target values, it
+    becomes possible to quickly approximate design variables that
+    meet desired target values.
 
 
 .. note::
+    **How this sample works?**
 
-   For details on the FEM problem, please refer to FemtetHelp / Examples / Heat Conduction Analysis / Example 14.
+    When you double-click on `gal_ex13_create_training_data.py`,
+    the creation of training data for the surrogate model using
+    Femtet will begin.
+    
+    Once the number of Femtet analysis executions exceeds
+    approximately 100, please double-click on
+    `gal_ex13_optimize_with_surrogate.py` to run it.
+    (The optimization results at the bottom of the page are
+    based on a model created from 100 analysis data points.)
+
+
+.. note::
+
+   For details on the FEM problem, please refer to
+   FemtetHelp / Examples / Stress Analysis / Example 13.
 
 
 Design Variables
@@ -67,7 +77,7 @@ base_radius    Thickness of the base (fixed in optimization)
 Objective Function
 --------------------------------------------------
 
-- First resonance frequency (aim to 1000 and 20000)
+- First resonance frequency (aim to 1000 and 2000)
 
 
 Sample Code
@@ -97,7 +107,10 @@ Execution Result of the Sample Code
    Optimization result (target: 2000 Hz)
 
 
-サロゲートモデルを用いて第一共振周波数が 1000 または 2000 となる
-音叉の設計変数を探索した。得られた設計変数はそれぞれ図の右上に記載した。
-得られた設計変数を用いて Femtet でモデルを再作成し解析を実行した結果を
-それぞれの図の右下に記載し、サロゲートモデルと FEM 解析結果の比較を行った。
+The design variables for a tuning fork with first resonance frequencies
+of 1000 or 2000 were explored using a surrogate model. The resulting
+design variables are listed in the upper right corner of the figure.
+
+Using these design variables, we recreated the model in Femtet and
+executed analyses, with results shown in the lower right corner of each
+figure, allowing for comparison between the surrogate model and FEM results.

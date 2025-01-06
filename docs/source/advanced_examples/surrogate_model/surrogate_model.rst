@@ -1,4 +1,4 @@
-Optimization Using a surrogate model
+Optimization Using a Surrogate Model
 ==================================================
 
 This sample demonstrates how to use Femtet to create
@@ -18,7 +18,7 @@ Sample Files
 
 
 .. note::
-    What's Surrogate Model?:
+    **What's Surrogate Model?**
 
     The surrogate model handled by PyFemtet is a machine learning
     model that predicts values of the objective function for unknown
@@ -39,7 +39,7 @@ Sample Files
 
 
 .. note::
-    How this sample works?:
+    **How this sample works?**
 
     When you double-click on `gal_ex13_create_training_data.py`,
     the creation of training data for the surrogate model using
@@ -77,7 +77,7 @@ base_radius    Thickness of the base (fixed in optimization)
 Objective Function
 --------------------------------------------------
 
-- First resonance frequency (aim to 1000 and 20000)
+- First resonance frequency (aim to 1000 and 2000)
 
 
 Sample Code
