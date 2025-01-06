@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">Advanced Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
 </ul>
@@ -85,11 +86,9 @@
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.logger</span> <span class="kn">import</span> <span class="n">get_logger</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;FEM&#39;</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.logger</span> <span class="kn">import</span> <span class="n">get_module_logger</span>
 
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.interface&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">here</span><span class="p">,</span> <span class="n">me</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 
@@ -142,6 +141,24 @@
         <span class="k">pass</span></div>
 
 
+<div class="viewcode-block" id="FEMInterface.load_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FEMInterface.load_parameter">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">load_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># opt: AbstractOptimizer</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FEMInterface.load_objective">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FEMInterface.load_objective">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">load_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># opt: AbstractOptimizer</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FEMInterface.load_constraint">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FEMInterface.load_constraint">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">load_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># opt: AbstractOptimizer</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+
     <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Preprocessing before launching a dask worker (if implemented in concrete class).</span>
 
@@ -155,7 +172,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class).&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
@@ -163,7 +180,13 @@
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_create_postprocess_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="FEMInterface.quit">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FEMInterface.quit">[ドキュメント]</a>
+    <span class="k">def</span> <span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
+</div>
 
 
 

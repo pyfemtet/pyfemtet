@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/advanced_examples.html">Advanced Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../pages/api.html#most-major-classes">Most Major Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pages/api.html#other-major-classes">Other Major Classes</a></li>
@@ -187,7 +188,7 @@
 <dd><p>An actor object that records the history of each iteration in the optimization process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>History</p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyfemtet.opt.History" title="pyfemtet.opt.History">History</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -205,11 +206,14 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.AbstractOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.AbstractOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.AbstractOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -221,6 +225,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.AbstractOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.generate_infeasible_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.AbstractOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.AbstractOptimizer.get_parameter">
@@ -309,6 +318,41 @@ The partial set is available.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.load_constraint">
+<span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base.html#FEMInterface.load_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMInterface.load_constraint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.load_objective">
+<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base.html#FEMInterface.load_objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMInterface.load_objective" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.load_parameter">
+<span class="sig-name descname"><span class="pre">load_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base.html#FEMInterface.load_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMInterface.load_parameter" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.quit">
+<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base.html#FEMInterface.quit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMInterface.quit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.update">
@@ -402,9 +446,9 @@ of the scheduler computer here.</p>
 </dl>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">`strict`</span></code> == True and using OptunaOptimizer along with BoTorchSampler,
-Pyfemtet will solve an optimization subproblem to propose new variables.
-During this process, the constraint function fun will be executed at each
+<p>When <code class="docutils literal notranslate"><span class="pre">`strict`</span></code> == True and using OptunaOptimizer along with <code class="xref py py-class docutils literal notranslate"><span class="pre">PoFBoTorchSampler</span></code>,
+PyFemtet will solve an optimization subproblem to propose new variables.
+During this process, the constraint function <code class="docutils literal notranslate"><span class="pre">`fun`</span></code> will be executed at each
 iteration of the subproblem, which may include time-consuming operations such
 as retrieving 3D model information via FEMInterface.
 As a result, it may not be feasible to complete the overall optimization within
@@ -421,7 +465,7 @@ the following approach may require a very long time.</p>
 </pre></div>
 </div>
 <p>Instead, please do the following.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bottom_area</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  <span class="c1"># 第一引数 Femtet にはアクセスしないようにします。  </span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bottom_area</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  <span class="c1"># Not to access the 1st argument.  </span>
 <span class="gp">... </span>    <span class="n">params</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">()</span>  
 <span class="gp">... </span>    <span class="n">w</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span>  
@@ -509,12 +553,12 @@ function, we write</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FEMOpt.add_objective">
-<span class="sig-name descname"><span class="pre">add_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt.html#FEMOpt.add_objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMOpt.add_objective" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt.html#FEMOpt.add_objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMOpt.add_objective" title="Link to this definition"></a></dt>
 <dd><p>Adds an objective to the optimization problem.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fun</strong> (<em>callable</em>) – The objective function.</p></li>
+<li><p><strong>fun</strong> (<em>callable</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The objective function. This argument is optional but</p></li>
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – The name of the objective. Defaults to None.</p></li>
 <li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – The optimization direction. Varid values are ‘maximize’, ‘minimize’ or a float value. Defaults to ‘minimize’.</p></li>
 <li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Additional arguments for the objective function. Defaults to None.</p></li>
@@ -552,8 +596,25 @@ the parameters as objective) , we write</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FEMOpt.add_objectives">
+<span class="sig-name descname"><span class="pre">add_objectives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_return</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt.html#FEMOpt.add_objectives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMOpt.add_objectives" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fun</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.13)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.SupportsFloat" title="(in Python v3.13)"><em>SupportsFloat</em></a><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>n_return</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – </p></li>
+<li><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>directions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – </p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FEMOpt.add_parameter">
-<span class="sig-name descname"><span class="pre">add_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_to_fem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt.html#FEMOpt.add_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMOpt.add_parameter" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_to_fem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt.html#FEMOpt.add_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMOpt.add_parameter" title="Link to this definition"></a></dt>
 <dd><p>Adds a parameter to the optimization problem.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -565,6 +626,13 @@ the parameters as objective) , we write</p>
 <li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – The step of parameter. If specified, parameter is used as discrete. Defaults to None.</p></li>
 <li><p><strong>properties</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – Additional information about the parameter. Defaults to None.</p></li>
 <li><p><strong>pass_to_fem</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.</p></li>
+<li><p><strong>fix</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optiona</em>) – パラメータを initial_value で固定します。
+開発時にパラメータを振るか振らないかを
+簡単に変更するための便利引数です。
+True のとき、lower_bound, upper_bound, step, properties の
+値は、有効かどうかのチェックには使われますが、最適化では
+使われなくなります。
+デフォルトは False です。</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -790,6 +858,36 @@ it will not try existing another Femtet process.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.load_constraint">
+<span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.load_constraint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.load_objective">
+<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.load_objective" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.load_parameter">
+<span class="sig-name descname"><span class="pre">load_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.load_parameter" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.open">
 <span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">femprj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet.html#FemtetInterface.open"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.open" title="Link to this definition"></a></dt>
 <dd><p>Open specific analysis model with connected Femtet.</p>
@@ -970,6 +1068,36 @@ it will not try existing another Femtet process.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.load_constraint">
+<span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.load_constraint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.load_objective">
+<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.load_objective" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.load_parameter">
+<span class="sig-name descname"><span class="pre">load_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.load_parameter" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.open">
 <span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">femprj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.open" title="Link to this definition"></a></dt>
 <dd><p>Open specific analysis model with connected Femtet.</p>
@@ -1068,7 +1196,7 @@ the model update and before solving.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.</span></span><span class="sig-name descname"><span class="pre">FemtetWithSolidworksInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sldprt_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_sldworks.html#FemtetWithSolidworksInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.</span></span><span class="sig-name descname"><span class="pre">FemtetWithSolidworksInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sldprt_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quit_sldworks_on_terminate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_sldworks.html#FemtetWithSolidworksInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetInterface" title="pyfemtet.opt.interface._femtet.FemtetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FemtetInterface</span></code></a></p>
 <p>Control Femtet and Solidworks.</p>
 <p>Using this class, you can import CAD files created
@@ -1143,6 +1271,36 @@ it will not try existing another Femtet process.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.load_constraint">
+<span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.load_constraint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.load_objective">
+<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.load_objective" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.load_parameter">
+<span class="sig-name descname"><span class="pre">load_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.load_parameter" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.open">
 <span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">femprj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.open" title="Link to this definition"></a></dt>
 <dd><p>Open specific analysis model with connected Femtet.</p>
@@ -1183,7 +1341,7 @@ the model update and before solving.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.quit">
-<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.quit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_sldworks.html#FemtetWithSolidworksInterface.quit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.quit" title="Link to this definition"></a></dt>
 <dd><p>Force to terminate connected Femtet.</p>
 </dd></dl>
 
@@ -1276,11 +1434,139 @@ the model update and before solving.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.update_sw_model">
-<span class="sig-name descname"><span class="pre">update_sw_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_sldworks.html#FemtetWithSolidworksInterface.update_sw_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.update_sw_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_sw_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_t_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_sldworks.html#FemtetWithSolidworksInterface.update_sw_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.update_sw_model" title="Link to this definition"></a></dt>
 <dd><p>Update .sldprt</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parameters</strong> (<em>DataFrame</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.History">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.</span></span><span class="sig-name descname"><span class="pre">History</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prm_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hv_reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for managing the history of optimization results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The path to the csv file.</p></li>
+<li><p><strong>prm_names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – The names of parameters. Defaults to None.</p></li>
+<li><p><strong>obj_names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – The names of objectives. Defaults to None.</p></li>
+<li><p><strong>cns_names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – The names of constraints. Defaults to None.</p></li>
+<li><p><strong>client</strong> (<em>dask.distributed.Client</em>) – Dask client.</p></li>
+<li><p><strong>additional_metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – metadata of optimization process.</p></li>
+<li><p><strong>hv_reference</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The method to calculate hypervolume or
+the reference point itself.
+Valid values are ‘dynamic-pareto’ or
+‘dynamic-nadir’ or ‘nadir’ or ‘pareto’
+or fixed point (in objective function space).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.ENCODING">
+<span class="sig-name descname"><span class="pre">ENCODING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'932'</span></em><a class="headerlink" href="#pyfemtet.opt.History.ENCODING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.HEADER_ROW">
+<span class="sig-name descname"><span class="pre">HEADER_ROW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pyfemtet.opt.History.HEADER_ROW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.cns_names">
+<span class="sig-name descname"><span class="pre">cns_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#pyfemtet.opt.History.cns_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.create_df_columns">
+<span class="sig-name descname"><span class="pre">create_df_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.create_df_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.create_df_columns" title="Link to this definition"></a></dt>
+<dd><p>Create columns of history.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.create_optuna_study">
+<span class="sig-name descname"><span class="pre">create_optuna_study</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.create_optuna_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.create_optuna_study" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.filter_valid">
+<span class="sig-name descname"><span class="pre">filter_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_trial_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.filter_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.filter_valid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.get_df">
+<span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">valid_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.get_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.get_df" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.is_processing">
+<span class="sig-name descname"><span class="pre">is_processing</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.History.is_processing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.is_restart">
+<span class="sig-name descname"><span class="pre">is_restart</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.History.is_restart" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.load" title="Link to this definition"></a></dt>
+<dd><p>Load existing result csv.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.obj_names">
+<span class="sig-name descname"><span class="pre">obj_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#pyfemtet.opt.History.obj_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.prm_names">
+<span class="sig-name descname"><span class="pre">prm_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#pyfemtet.opt.History.prm_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.record">
+<span class="sig-name descname"><span class="pre">record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objectives</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postprocess_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postprocess_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.record" title="Link to this definition"></a></dt>
+<dd><p>Records the optimization results in the history.</p>
+<p>Record only. NOT save.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<em>pd.DataFrame</em>) – The parameter values.</p></li>
+<li><p><strong>objectives</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – The objective functions.</p></li>
+<li><p><strong>constraints</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – The constraint functions.</p></li>
+<li><p><strong>obj_values</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – The objective values.</p></li>
+<li><p><strong>cns_values</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – The constraint values.</p></li>
+<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Additional information or messages related to the optimization results.</p></li>
+<li><p><strong>postprocess_func</strong> (<em>Callable</em>) – fem method to call after solving. i.e. save result file. Must take trial(int) for 1st argument.</p></li>
+<li><p><strong>postprocess_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – arguments for <cite>postprocess_func</cite>. i.e. create binary data of result file in the worker process.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.save" title="Link to this definition"></a></dt>
+<dd><p>Save csv file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.set_df">
+<span class="sig-name descname"><span class="pre">set_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.set_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.set_df" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>DataFrame</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -1302,6 +1588,41 @@ the model update and before solving.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.load_constraint">
+<span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.NoFEM.load_constraint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.load_objective">
+<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.NoFEM.load_objective" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.load_parameter">
+<span class="sig-name descname"><span class="pre">load_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.NoFEM.load_parameter" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.quit">
+<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.NoFEM.quit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.update">
@@ -1337,7 +1658,7 @@ it is able to get parameter via FEMInterface.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.</span></span><span class="sig-name descname"><span class="pre">OptunaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_init_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna.html#OptunaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.</span></span><span class="sig-name descname"><span class="pre">OptunaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_init_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_optuna.html#OptunaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer._base.AbstractOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code></a></p>
 <p>Optimizer using <code class="docutils literal notranslate"><span class="pre">`optuna`</span></code>.</p>
 <p>This class provides an interface for the optimization
@@ -1373,7 +1694,7 @@ It is generated and provided by <a class="reference internal" href="#pyfemtet.op
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer.add_init_parameter">
-<span class="sig-name descname"><span class="pre">add_init_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna.html#OptunaOptimizer.add_init_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.add_init_parameter" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_init_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_optuna.html#OptunaOptimizer.add_init_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.add_init_parameter" title="Link to this definition"></a></dt>
 <dd><p>Add additional initial parameter for evaluate.</p>
 <p>The parameter set is ignored if the main() is continued.</p>
 <dl class="field-list simple">
@@ -1388,11 +1709,14 @@ It is generated and provided by <a class="reference internal" href="#pyfemtet.op
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -1404,6 +1728,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer.get_parameter">
@@ -1429,7 +1758,7 @@ Defaults to ‘dict’.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna.html#OptunaOptimizer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_optuna.html#OptunaOptimizer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.run" title="Link to this definition"></a></dt>
 <dd><p>Set random seed, sampler, study and run study.optimize().</p>
 </dd></dl>
 
@@ -1496,11 +1825,14 @@ the Scipy documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.ScipyOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -1512,6 +1844,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.ScipyOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.ScipyOptimizer.get_parameter">
@@ -1604,11 +1941,14 @@ the Scipy documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.ScipyScalarOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyScalarOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyScalarOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -1620,6 +1960,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.ScipyScalarOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyScalarOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.ScipyScalarOptimizer.get_parameter">

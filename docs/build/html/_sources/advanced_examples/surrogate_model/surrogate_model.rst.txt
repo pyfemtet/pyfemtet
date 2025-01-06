@@ -1,0 +1,103 @@
+Optimization Using a surrogate model
+==================================================
+
+このサンプルでは Femtet を使って学習データを作成し
+サロゲートモデルを用いて最適化を行う方法を説明します。
+
+
+Sample Files
+--------------------------------------------------
+
+.. note::
+   Keep the :download:`sample project<gal_ex13_parametric.femprj>`,
+   :download:`sample script 1<gal_ex13_create_training_data.py>`
+   to create training data **with Femtet** and 
+   :download:`sample script 2<gal_ex13_optimize_with_surrogate.py>`
+   to make a surrogate model **without Femtet** and optimize
+   on same folder.
+
+
+.. note::
+    サロゲートモデル:
+
+    PyFemtet で扱うサロゲートモデルは、既知の設計変数と目的関数のセットを学習することで
+    未知の設計変数に対して目的関数の予測値を計算するための機械学習モデルです。
+
+    一般に質の良い学習データを作成するためには例題に記載しているような
+    通常の最適化よりも多くの FEM 解析データが必要になりますが、
+    一度学習データを作成できれば一度の目的関数計算を
+    非常に高速に行うことができます。
+
+    そのため、例えば設計変数や目的関数の項目はある程度決まっており、
+    それらの範囲や目的値が異なる課題が頻発する状況では、所望の
+    目標値を満たす設計変数のあたり付けを非常に高速に行うことができます。
+
+
+.. note::
+    実行手順:
+
+    `gal_ex13_create_training_data.py` をダブルクリックで実行すると、
+    Femtet を用いたサロゲートモデルの訓練データ作成が始まります。
+    Femtet の解析実行数が 100 程度を超えたら
+    `gal_ex13_optimize_with_surrogate.py` をダブルクリックで実行してください。
+    (ページ下部の最適化結果は 100 解析データを元にモデルを作成しています。)
+
+
+.. note::
+
+   For details on the FEM problem, please refer to FemtetHelp / Examples / Heat Conduction Analysis / Example 14.
+
+
+Design Variables
+--------------------------------------------------
+
+.. figure:: gal_ex13_parametric.png
+   
+   Appearance of the Model
+
+============== ==============================================
+Variable Name  Description
+============== ==============================================
+length         Length of the tuning fork
+width          Thickness of the tuning fork
+base_radius    Thickness of the base (fixed in optimization)
+============== ==============================================
+
+
+Objective Function
+--------------------------------------------------
+
+- First resonance frequency (aim to 1000 and 20000)
+
+
+Sample Code
+--------------------------------------------------
+.. literalinclude:: gal_ex13_create_training_data.py
+   :language: python
+   :linenos:
+   :caption: gal_ex13_create_training_data.py
+
+.. literalinclude:: gal_ex13_optimize_with_surrogate.py
+   :language: python
+   :linenos:
+   :caption: gal_ex13_optimize_with_surrogate.py
+
+
+
+Execution Result of the Sample Code
+--------------------------------------------------
+.. figure:: optimized_result_target_1000.png
+   :width: 300
+
+   Optimization result (target: 1000 Hz)
+
+.. figure:: optimized_result_target_2000.png
+   :width: 300
+
+   Optimization result (target: 2000 Hz)
+
+
+サロゲートモデルを用いて第一共振周波数が 1000 または 2000 となる
+音叉の設計変数を探索した。得られた設計変数はそれぞれ図の右上に記載した。
+得られた設計変数を用いて Femtet でモデルを再作成し解析を実行した結果を
+それぞれの図の右下に記載し、サロゲートモデルと FEM 解析結果の比較を行った。

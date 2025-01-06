@@ -69,6 +69,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/advanced_examples.html">Advanced Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
 </ul>
@@ -150,8 +151,8 @@ to execute it.</p>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="kn">from</span> <span class="nn">optuna_integration</span> <span class="kn">import</span> <span class="n">BoTorchSampler</span>
-<span class="linenos"> 9</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
+<span class="linenos"> 8</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
+<span class="linenos"> 9</span><span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">PoFBoTorchSampler</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span><span class="k">def</span> <span class="nf">mises_stress</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
@@ -210,36 +211,35 @@ to execute it.</p>
 <span class="linenos">65</span>    <span class="n">external_r</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;external_r&#39;</span><span class="p">]</span>
 <span class="linenos">66</span>    <span class="k">return</span> <span class="n">external_r</span> <span class="o">-</span> <span class="n">internal_r</span>
 <span class="linenos">67</span>
-<span class="linenos">68</span>
-<span class="linenos">69</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-<span class="linenos">70</span>    <span class="c1"># Setup optimization method</span>
-<span class="linenos">71</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
-<span class="linenos">72</span>        <span class="n">sampler_class</span><span class="o">=</span><span class="n">BoTorchSampler</span><span class="p">,</span>
-<span class="linenos">73</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-<span class="linenos">74</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="c1"># The first three samples are randomly sampled.</span>
-<span class="linenos">75</span>        <span class="p">)</span>
-<span class="linenos">76</span>    <span class="p">)</span>
-<span class="linenos">77</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
-<span class="linenos">78</span>
-<span class="linenos">79</span>    <span class="c1"># Add parameters</span>
-<span class="linenos">80</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;external_r&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="linenos">81</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;internal_r&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="linenos">82</span>
-<span class="linenos">83</span>    <span class="c1"># Add the strict constraint not to exceed the</span>
-<span class="linenos">84</span>    <span class="c1"># outer radius while the optimization is running.</span>
-<span class="linenos">85</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span>
-<span class="linenos">86</span>        <span class="n">radius_diff</span><span class="p">,</span>  <span class="c1"># Constraint function (returns external radius - internal radius).</span>
-<span class="linenos">87</span>        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;wall thickness&#39;</span><span class="p">,</span>  <span class="c1"># You can name the function anything you want.</span>
-<span class="linenos">88</span>        <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Lower bound of constraint function (set minimum wall thickness is 1).</span>
-<span class="linenos">89</span>        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">,)</span>  <span class="c1"># Additional arguments passed to the function.</span>
-<span class="linenos">90</span>    <span class="p">)</span>
-<span class="linenos">91</span>
-<span class="linenos">92</span>    <span class="c1"># Add the objective</span>
-<span class="linenos">93</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">mises_stress</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mises Stress&#39;</span><span class="p">)</span>
-<span class="linenos">94</span>
-<span class="linenos">95</span>    <span class="c1"># Run optimization.</span>
-<span class="linenos">96</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="linenos">97</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">68</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">69</span>    <span class="c1"># Setup optimization method</span>
+<span class="linenos">70</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
+<span class="linenos">71</span>        <span class="n">sampler_class</span><span class="o">=</span><span class="n">PoFBoTorchSampler</span><span class="p">,</span>
+<span class="linenos">72</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<span class="linenos">73</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="c1"># The first three samples are randomly sampled.</span>
+<span class="linenos">74</span>        <span class="p">)</span>
+<span class="linenos">75</span>    <span class="p">)</span>
+<span class="linenos">76</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
+<span class="linenos">77</span>
+<span class="linenos">78</span>    <span class="c1"># Add parameters</span>
+<span class="linenos">79</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;external_r&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">80</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;internal_r&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">81</span>
+<span class="linenos">82</span>    <span class="c1"># Add the strict constraint not to exceed the</span>
+<span class="linenos">83</span>    <span class="c1"># outer radius while the optimization is running.</span>
+<span class="linenos">84</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span>
+<span class="linenos">85</span>        <span class="n">radius_diff</span><span class="p">,</span>  <span class="c1"># Constraint function (returns external radius - internal radius).</span>
+<span class="linenos">86</span>        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;wall thickness&#39;</span><span class="p">,</span>  <span class="c1"># You can name the function anything you want.</span>
+<span class="linenos">87</span>        <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Lower bound of constraint function (set minimum wall thickness is 1).</span>
+<span class="linenos">88</span>        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">,)</span>  <span class="c1"># Additional arguments passed to the function.</span>
+<span class="linenos">89</span>    <span class="p">)</span>
+<span class="linenos">90</span>
+<span class="linenos">91</span>    <span class="c1"># Add the objective</span>
+<span class="linenos">92</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">mises_stress</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mises Stress&#39;</span><span class="p">)</span>
+<span class="linenos">93</span>
+<span class="linenos">94</span>    <span class="c1"># Run optimization.</span>
+<span class="linenos">95</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">96</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

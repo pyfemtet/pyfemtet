@@ -109,5 +109,6 @@ Table of Contents
     pages/examples
     pages/script_builder
     pages/usage
+    pages/advanced_examples
     pages/api
     pages/LICENSE

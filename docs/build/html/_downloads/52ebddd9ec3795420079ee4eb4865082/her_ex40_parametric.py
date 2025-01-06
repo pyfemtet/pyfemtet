@@ -11,10 +11,10 @@ from time import sleep
 import numpy as np
 from scipy.signal import find_peaks
 from tqdm import tqdm
-from optuna.integration.botorch import BoTorchSampler
 
 from pyfemtet.core import SolveError
 from pyfemtet.opt import OptunaOptimizer, FEMOpt
+from pyfemtet.opt.optimizer import PoFBoTorchSampler
 
 
 class SParameterCalculator:
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     # Initialize the numerical optimization problem.
     # (determine the optimization method)
     opt = OptunaOptimizer(
-        sampler_class=BoTorchSampler,
+        sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
             n_startup_trials=10,
         )
