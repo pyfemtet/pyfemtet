@@ -438,6 +438,10 @@ class ExcelInterface(FEMInterface):
         else:
             self.excel = DispatchEx('Excel.Application')
 
+        # FemtetRef を追加する
+        self.open_femtet_ref_xla()  # ここでエラーが発生しているかも？
+        sleep(0.5)
+
         # 起動した excel の pid を記憶する
         self._excel_hwnd = self.excel.hWnd
         self._excel_pid = 0
@@ -449,7 +453,7 @@ class ExcelInterface(FEMInterface):
         self.excel.Visible = self.visible
         self.excel.DisplayAlerts = self.display_alerts
         self.excel.Interactive = self.interactive
-        sleep(1)
+        sleep(0.5)
 
         # ===== input =====
         # 開く
@@ -537,15 +541,30 @@ class ExcelInterface(FEMInterface):
             else:
                 raise RuntimeError(f'Cannot open {self.teardown_xlsm_path}')
 
-
         # book に参照設定を追加する
-        self.add_femtet_ref_xla(self.wb_input)
-        self.add_femtet_ref_xla(self.wb_output)
-        self.add_femtet_ref_xla(self.wb_setup)
-        self.add_femtet_ref_xla(self.wb_teardown)
-        self.add_femtet_ref_xla(self.wb_constraint)
+        self.add_femtet_macro_reference(self.wb_input)
+        self.add_femtet_macro_reference(self.wb_output)
+        self.add_femtet_macro_reference(self.wb_setup)
+        self.add_femtet_macro_reference(self.wb_teardown)
+        self.add_femtet_macro_reference(self.wb_constraint)
 
-    def add_femtet_ref_xla(self, wb):
+    def open_femtet_ref_xla(self):
+
+        # get 64 bit
+        xla_file_path = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+
+        # if not exist, get 32bit
+        if not os.path.exists(xla_file_path):
+            xla_file_path = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+
+        # certify
+        if not os.path.exists(xla_file_path):
+            raise FileNotFoundError(f'{xla_file_path} not found. Please check the "Enable Macros" command was fired.')
+
+        # self.excel.Workbooks.Add(xla_file_path)
+        self.excel.Workbooks.Open(xla_file_path, ReadOnly=True)
+
+    def add_femtet_macro_reference(self, wb):
 
         # search
         ref_file_2 = os.path.abspath(util._get_femtetmacro_dllpath())
@@ -555,41 +574,11 @@ class ExcelInterface(FEMInterface):
                 if ref.Description == 'FemtetMacro':  # FemtetMacro
                     contain_2 = True
                     break
-
         # add
         if not contain_2:
             wb.VBProject.References.AddFromFile(ref_file_2)
 
-        # search
-        ref_file_1 = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
-        if not os.path.exists(ref_file_1):
-            # 32bit
-            ref_file_1 = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
-        if not os.path.exists(ref_file_1):
-            raise FileNotFoundError(f'{ref_file_1} not found. Please check the "Enable Macros" command was fired.')
-        contain_1 = False
-        for ref in wb.VBProject.References:
-            if ref.FullPath is not None:
-                if ref.FullPath.lower() == ref_file_1.lower():
-                    contain_1 = True
-        # add
-        if not contain_1:
-            wb.VBProject.References.AddFromFile(ref_file_1)
-
     def remove_femtet_ref_xla(self, wb):
-
-        # search
-        ref_file_1 = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
-        if not os.path.exists(ref_file_1):
-            # 32bit
-            ref_file_1 = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
-        if not os.path.exists(ref_file_1):
-            raise FileNotFoundError(f'{ref_file_1} not found. Please check the "Enable Macros" command was fired.')
-        for ref in wb.VBProject.References:
-            if ref.FullPath is not None:
-                if ref.FullPath == ref_file_1:  # or ``FemtetMacroを使用するための参照設定を自動で行ないます。``
-                    wb.VBProject.References.Remove(ref)
-
         # search
         for ref in wb.VBProject.References:
             if ref.Description is not None:
