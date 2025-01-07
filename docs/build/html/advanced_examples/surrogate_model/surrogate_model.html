@@ -53,6 +53,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../pages/advanced_examples.html">Advanced Examples</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Optimization Using a Surrogate Model</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sample-files">Sample Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-run-this-sample">How to run this Sample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#design-variables">Design Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#objective-function">Objective Function</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sample-code">Sample Code</a></li>
@@ -107,8 +108,26 @@ to create training data <strong>with Femtet</strong> and
 to make a surrogate model <strong>without Femtet</strong> and optimize
 on same folder.</p>
 </div>
+</section>
+<section id="how-to-run-this-sample">
+<h2>How to run this Sample<a class="headerlink" href="#how-to-run-this-sample" title="Link to this heading"></a></h2>
+<p>When you double-click on <cite>gal_ex13_create_training_data.py</cite>,
+the creation of training data for the surrogate model using
+Femtet will begin.</p>
+<p>Once the number of Femtet analysis executions exceeds
+approximately 100, please double-click on
+<cite>gal_ex13_optimize_with_surrogate.py</cite> to run it.
+(The optimization results at the bottom of the page are
+based on a model created from 100 analysis data points.)</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
+<p>Since the surrogate model optimization requires no
+Femtet execution, you can run <cite>gal_ex13_optimize_with_surrogate.py</cite>
+during running <cite>gal_ex13_create_training_data.py</cite>
+without any additional Femtet license.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p><strong>What’s Surrogate Model?</strong></p>
 <p>The surrogate model handled by PyFemtet is a machine learning
 model that predicts values of the objective function for unknown
@@ -124,18 +143,6 @@ and objective functions are somewhat fixed and problems
 frequently arise with varying ranges or target values, it
 becomes possible to quickly approximate design variables that
 meet desired target values.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><strong>How this sample works?</strong></p>
-<p>When you double-click on <cite>gal_ex13_create_training_data.py</cite>,
-the creation of training data for the surrogate model using
-Femtet will begin.</p>
-<p>Once the number of Femtet analysis executions exceeds
-approximately 100, please double-click on
-<cite>gal_ex13_optimize_with_surrogate.py</cite> to run it.
-(The optimization results at the bottom of the page are
-based on a model created from 100 analysis data points.)</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

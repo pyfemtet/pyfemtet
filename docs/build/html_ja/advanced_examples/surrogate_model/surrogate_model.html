@@ -53,6 +53,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../pages/advanced_examples.html">発展的な例題</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">サロゲートモデルを用いた最適化</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sample-files">サンプルファイル</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-run-this-sample">このサンプルの使い方</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#design-variables">設計変数</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#objective-function">目的関数</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sample-code">サンプルコード</a></li>
@@ -101,18 +102,21 @@
 <p class="admonition-title">注釈</p>
 <p><a class="reference download internal" download="" href="../../_downloads/65f3bcce1c19e3f8342ded7b79bface3/gal_ex13_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> と、 <strong>Femtet を用いた</strong> 訓練データ作成のための <a class="reference download internal" download="" href="../../_downloads/363160c325e73844f7a4a0564b912131/gal_ex13_create_training_data.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルスクリプト1</span></code></a> と <strong>Femtet を用いずに</strong> 最適化を行う <a class="reference download internal" download="" href="../../_downloads/24fd676e1647f6c8baf25939e6367c0e/gal_ex13_optimize_with_surrogate.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルスクリプト2</span></code></a> を同じフォルダに配置してください.</p>
 </div>
+</section>
+<section id="how-to-run-this-sample">
+<h2>このサンプルの使い方<a class="headerlink" href="#how-to-run-this-sample" title="Link to this heading"></a></h2>
+<p><cite>gal_ex13_create_training_data.py</cite> をダブルクリックで実行すると、Femtet を用いたサロゲートモデルの訓練データ作成が始まります。</p>
+<p>Femtet の解析実行数が 100 程度を超えたら <cite>gal_ex13_optimize_with_surrogate.py</cite> をダブルクリックで実行してください。(ページ下部の最適化結果は 100 解析データを元にモデルを作成しています。)</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p><strong>What’s Surrogate Model?</strong></p>
+<p>サロゲートモデルによる最適化では Femtet を使用しないので、 <cite>gal_ex13_create_training_data.py</cite> の実行中に追加の Femtet ライセンスなしで <cite>gal_ex13_optimize_with_surrogate.py</cite> を実行することができます。</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>サロゲートモデルとは？</strong></p>
 <p>PyFemtetで扱うサロゲートモデルは、既知の設計変数と目的関数のセットを学習することで未知の設計変数に対して目的関数を予測するための機械学習モデルです。</p>
 <p>一般に質の良い学習データを作成するためには例題に記載しているような通常の最適化よりも多くの FEM 解析データが必要になりますが、一度学習データを作成できれば一度の目的関数計算を非常に高速に行うことができます。</p>
 <p>そのため、例えば設計変数や目的関数の項目はある程度決まっており、それらの範囲や目的値が異なる課題が頻発する状況では、所望の目標値を満たす設計変数のあたり付けを非常に高速に行うことができます。</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
-<p><strong>How this sample works?</strong></p>
-<p><cite>gal_ex13_create_training_data.py</cite> をダブルクリックで実行すると、Femtet を用いたサロゲートモデルの訓練データ作成が始まります。</p>
-<p>Femtet の解析実行数が 100 程度を超えたら <cite>gal_ex13_optimize_with_surrogate.py</cite> をダブルクリックで実行してください。(ページ下部の最適化結果は 100 解析データを元にモデルを作成しています。)</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>

@@ -214,7 +214,7 @@ msgstr "20 回の反復計算の結果、 ミーゼス応力と質量のパレ�
 
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:2
 msgid "Restrict parameter combinations"
-msgstr "設計変数の組合せを拘束します。"
+msgstr "設計変数の拘束式"
 
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:4
 msgid "This example explains how to use the constraint function when you want to restrict parameter combinations."

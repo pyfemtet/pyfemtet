@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-06 16:49+0900\n"
+"POT-Creation-Date: 2025-01-07 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,113 +33,117 @@ msgid "Keep the :download:`sample project<gal_ex13_parametric.femprj>`, :downloa
 msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:21
-msgid "**What's Surrogate Model?**"
+msgid "How to run this Sample"
 msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:23
-msgid "The surrogate model handled by PyFemtet is a machine learning model that predicts values of the objective function for unknown design variables by learning a set of known design variables and objective functions."
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:28
-msgid "Generally, to create high-quality training data, more FEM analysis data is required than what is typically needed for regular optimization, as mentioned in the examples. However, once training data has been created, it allows for very fast calculations of the objective function."
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:34
-msgid "Therefore, in situations where the items for design variables and objective functions are somewhat fixed and problems frequently arise with varying ranges or target values, it becomes possible to quickly approximate design variables that meet desired target values."
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:42
-msgid "**How this sample works?**"
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:44
 msgid "When you double-click on `gal_ex13_create_training_data.py`, the creation of training data for the surrogate model using Femtet will begin."
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:48
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:27
 msgid "Once the number of Femtet analysis executions exceeds approximately 100, please double-click on `gal_ex13_optimize_with_surrogate.py` to run it. (The optimization results at the bottom of the page are based on a model created from 100 analysis data points.)"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:57
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:34
+msgid "Since the surrogate model optimization requires no Femtet execution, you can run `gal_ex13_optimize_with_surrogate.py` during running `gal_ex13_create_training_data.py` without any additional Femtet license."
+msgstr ""
+
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:41
+msgid "**What's Surrogate Model?**"
+msgstr ""
+
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:43
+msgid "The surrogate model handled by PyFemtet is a machine learning model that predicts values of the objective function for unknown design variables by learning a set of known design variables and objective functions."
+msgstr ""
+
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:48
+msgid "Generally, to create high-quality training data, more FEM analysis data is required than what is typically needed for regular optimization, as mentioned in the examples. However, once training data has been created, it allows for very fast calculations of the objective function."
+msgstr ""
+
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:54
+msgid "Therefore, in situations where the items for design variables and objective functions are somewhat fixed and problems frequently arise with varying ranges or target values, it becomes possible to quickly approximate design variables that meet desired target values."
+msgstr ""
+
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:63
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Stress Analysis / Example 13."
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:62
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:68
 msgid "Design Variables"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:66
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
 msgid "Appearance of the Model"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:69
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Variable Name"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:69
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Description"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:71
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:77
 msgid "length"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:71
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:77
 msgid "Length of the tuning fork"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:78
 msgid "width"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:78
 msgid "Thickness of the tuning fork"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:73
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:79
 msgid "base_radius"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:73
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:79
 msgid "Thickness of the base (fixed in optimization)"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:78
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
 msgid "Objective Function"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:80
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:86
 msgid "First resonance frequency (aim to 1000 and 2000)"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:90
 msgid "Sample Code"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:85
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:91
 msgid "gal_ex13_create_training_data.py"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:90
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:96
 msgid "gal_ex13_optimize_with_surrogate.py"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:98
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:104
 msgid "Execution Result of the Sample Code"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:102
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:108
 msgid "Optimization result (target: 1000 Hz)"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:107
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:113
 msgid "Optimization result (target: 2000 Hz)"
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:110
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:116
 msgid "The design variables for a tuning fork with first resonance frequencies of 1000 or 2000 were explored using a surrogate model. The resulting design variables are listed in the upper right corner of the figure."
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:114
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:120
 msgid "Using these design variables, we recreated the model in Femtet and executed analyses, with results shown in the lower right corner of each figure, allowing for comparison between the surrogate model and FEM results."
 msgstr ""

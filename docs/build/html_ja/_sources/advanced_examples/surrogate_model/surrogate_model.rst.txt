@@ -17,7 +17,27 @@ Sample Files
    on same folder.
 
 
+How to run this Sample
+--------------------------------------------------
+
+When you double-click on `gal_ex13_create_training_data.py`,
+the creation of training data for the surrogate model using
+Femtet will begin.
+
+Once the number of Femtet analysis executions exceeds
+approximately 100, please double-click on
+`gal_ex13_optimize_with_surrogate.py` to run it.
+(The optimization results at the bottom of the page are
+based on a model created from 100 analysis data points.)
+
 .. note::
+   Since the surrogate model optimization requires no
+   Femtet execution, you can run `gal_ex13_optimize_with_surrogate.py`
+   during running `gal_ex13_create_training_data.py`
+   without any additional Femtet license.
+
+
+.. tip::
     **What's Surrogate Model?**
 
     The surrogate model handled by PyFemtet is a machine learning
@@ -36,20 +56,6 @@ Sample Files
     frequently arise with varying ranges or target values, it
     becomes possible to quickly approximate design variables that
     meet desired target values.
-
-
-.. note::
-    **How this sample works?**
-
-    When you double-click on `gal_ex13_create_training_data.py`,
-    the creation of training data for the surrogate model using
-    Femtet will begin.
-    
-    Once the number of Femtet analysis executions exceeds
-    approximately 100, please double-click on
-    `gal_ex13_optimize_with_surrogate.py` to run it.
-    (The optimization results at the bottom of the page are
-    based on a model created from 100 analysis data points.)
 
 
 .. note::
