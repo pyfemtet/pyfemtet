@@ -832,6 +832,7 @@ class History:
 
     def _calc_hypervolume(self, objectives, df):
 
+        # 単目的最適化ならば 0 埋めして終了
         if len(objectives) < 2:
             df.loc[len(df) - 1, 'hypervolume'] = 0.
             return
@@ -877,34 +878,63 @@ class History:
             else:
                 return pareto_set_
 
+        def get_valid_worst_converted_objective_values(objective_values_: np.ndarray) -> np.ndarray:
+            # objective_values.max(axis=0)
+            ret = []
+            for row in objective_values_:
+                if not any(np.isnan(row)):
+                    ret.append(row)
+            return np.array(ret).max(axis=0)
+
         if self._hv_reference == 'dynamic-pareto':
             pareto_set, pareto_set_list = get_pareto(objective_values, with_partial=True)
             for i, partial_pareto_set in enumerate(pareto_set_list):
-                ref_point = pareto_set.max(axis=0) + 1e-8
-                hv = compute_hypervolume(partial_pareto_set, ref_point)
-                df.loc[i, 'hypervolume'] = hv
+                # 並列計算時など Valid な解がまだ一つもない場合は pareto_set が長さ 0 になる
+                # その場合 max() を取るとエラーになる
+                if len(pareto_set) == 0:
+                    df.loc[i, 'hypervolume'] = 0
+                else:
+                    ref_point = pareto_set.max(axis=0) + 1e-8
+                    hv = compute_hypervolume(partial_pareto_set, ref_point)
+                    df.loc[i, 'hypervolume'] = hv
             return
 
         elif self._hv_reference == 'dynamic-nadir':
             _, pareto_set_list = get_pareto(objective_values, with_partial=True)
             for i, partial_pareto_set in enumerate(pareto_set_list):
-                ref_point = objective_values.max(axis=0) + 1e-8
-                hv = compute_hypervolume(partial_pareto_set, ref_point)
-                df.loc[i, 'hypervolume'] = hv
+                # filter valid objective values only
+                values = get_valid_worst_converted_objective_values(objective_values)
+
+                # 並列計算時など Valid な解がまだ一つもない場合は長さ 0 になる
+                # その場合 max() を取るとエラーになる
+                if len(values) == 0:
+                    df.loc[i, 'hypervolume'] = 0
+
+                else:
+                    ref_point = values.max(axis=0) + 1e-8
+                    hv = compute_hypervolume(partial_pareto_set, ref_point)
+                    df.loc[i, 'hypervolume'] = hv
             return
 
         elif self._hv_reference == 'nadir':
             pareto_set = get_pareto(objective_values)
-            ref_point = objective_values.max(axis=0) + 1e-8
-            hv = compute_hypervolume(pareto_set, ref_point)
-            df.loc[len(df) - 1, 'hypervolume'] = hv
+            values = get_valid_worst_converted_objective_values(objective_values)
+            if len(values) == 0:
+                df.loc[len(df) - 1, 'hypervolume'] = 0
+            else:
+                ref_point = values.max(axis=0) + 1e-8
+                hv = compute_hypervolume(pareto_set, ref_point)
+                df.loc[len(df) - 1, 'hypervolume'] = hv
             return
 
         elif self._hv_reference == 'pareto':
             pareto_set = get_pareto(objective_values)
-            ref_point = pareto_set.max(axis=0) + 1e-8
-            hv = compute_hypervolume(pareto_set, ref_point)
-            df.loc[len(df) - 1, 'hypervolume'] = hv
+            if len(pareto_set) == 0:
+                df.loc[len(df) - 1, 'hypervolume'] = 0
+            else:
+                ref_point = pareto_set.max(axis=0) + 1e-8
+                hv = compute_hypervolume(pareto_set, ref_point)
+                df.loc[len(df) - 1, 'hypervolume'] = hv
             return
 
         elif (
