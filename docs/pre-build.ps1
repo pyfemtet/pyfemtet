@@ -34,6 +34,7 @@ poetry run sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs
 
 # setup other sample files
 powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1"
+powershell "$SOURCE_DIR\advanced_examples\excel_ui\copy_files.ps1"
 
 # build English document
 poetry run python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
@@ -60,6 +61,7 @@ poetry run sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs
 
 # setup other sample files
 powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1" 1  # is_JP
+powershell "$SOURCE_DIR\advanced_examples\excel_ui\copy_files.ps1" 1  # is_JP
 
 # build Japanese document
 poetry run python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA

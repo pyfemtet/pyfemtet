@@ -8,13 +8,136 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-07 09:34+0900\n"
+"POT-Creation-Date: 2025-01-08 13:09+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:2
+msgid "Use pyfemtet.opt with Microsoft Excel"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:4
+msgid "This sample demonstrates how to use PyFemtet without migrating the existing Excel macro processes to Python."
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:9
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
+msgid "Sample Files"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:12
+msgid "Keep the :download:`UI file (Japanese only)<femtet-macro.xlsm>` and :download:`core script<pyfemtet-core.py>` on same folder."
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:17
+msgid ":download:`here<(ref) original_project.femprj>` is a sample file to create UI file's macro base."
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:22
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:21
+msgid "How to run this Sample"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:25
+msgid "To run macros from an xlsm file downloaded from the internet, you need to change the security settings."
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:28
+msgid "Open the Excel file and check the settings listed on the \"Optimization Settings\" sheet. Then, press the \"call pyfemtet\" button at the bottom of the same sheet."
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:33
+msgid "The macros included in this xlsm file are based on the macro auto-generation feature from the original Femtet project. Therefore, when you run the Excel macro, Femtet will launch and automatically create the original analysis model. Additionally, this macro has been modified to read variable values from cells within the xlsm file and reflect them in the created analysis model. For detailed specifications, please refer to the \"Notes\" sheet in Excel and the comments in the source code."
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:46
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:68
+msgid "Design Variables"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:50
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
+msgid "Appearance of the Model"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
+msgid "Variable Name"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
+msgid "Description"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+msgid "section_radius"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+msgid "Radius of wire"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+msgid "coil_radius"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+msgid "Bottom radius of coil"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+msgid "coil_pitch"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+msgid "Pitch of coil"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+msgid "n"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+msgid "Number of turns"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+msgid "coil_radius_grad"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+msgid "Coil radius increment per pitch"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:64
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
+msgid "Objective Function"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:66
+msgid "Self-inductance (aim to 100 nH)"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:67
+msgid "Approx. Volume (minimize)"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:71
+msgid "Execution Result of the Samples"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:74
+msgid "Screenshot in progress"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:77
+msgid "The pyfemtet-core.py performs optimization by controlling the values of various cells in the xlsm file and executing macros instead of directly running Femtet. This allows for integration with PyFemtet without needing to rewrite all existing code if you are already using Excel macros for an automated design flow with Femtet."
+msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:2
 msgid "Optimization Using a Surrogate Model"
@@ -24,16 +147,8 @@ msgstr ""
 msgid "This sample demonstrates how to use Femtet to create training data and optimize using surrogate models."
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
-msgid "Sample Files"
-msgstr ""
-
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:12
 msgid "Keep the :download:`sample project<gal_ex13_parametric.femprj>`, :download:`sample script 1<gal_ex13_create_training_data.py>` to create training data **with Femtet** and :download:`sample script 2<gal_ex13_optimize_with_surrogate.py>` to make a surrogate model **without Femtet** and optimize on same folder."
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:21
-msgid "How to run this Sample"
 msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:23
@@ -68,22 +183,6 @@ msgstr ""
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Stress Analysis / Example 13."
 msgstr ""
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:68
-msgid "Design Variables"
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
-msgid "Appearance of the Model"
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
-msgid "Variable Name"
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
-msgid "Description"
-msgstr ""
-
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:77
 msgid "length"
 msgstr ""
@@ -106,10 +205,6 @@ msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:79
 msgid "Thickness of the base (fixed in optimization)"
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
-msgid "Objective Function"
 msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:86

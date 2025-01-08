@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Use pyfemtet.opt with Microsoft Excel &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="GUI" href="../../pages/script_builder.html" />
+    <link rel="prev" title="Optimization Using a Surrogate Model" href="../surrogate_model/surrogate_model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/advanced_examples.html">Advanced Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../surrogate_model/surrogate_model.html">Optimization Using a Surrogate Model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Use pyfemtet.opt with Microsoft Excel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample-files">Sample Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-run-this-sample">How to run this Sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#design-variables">Design Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objective-function">Objective Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#execution-result-of-the-samples">Execution Result of the Samples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../pages/advanced_examples.html">Advanced Examples</a></li>
+      <li class="breadcrumb-item active">Use pyfemtet.opt with Microsoft Excel</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/advanced_examples/excel_ui/excel_ui.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="use-pyfemtet-opt-with-microsoft-excel">
+<h1>Use pyfemtet.opt with Microsoft Excel<a class="headerlink" href="#use-pyfemtet-opt-with-microsoft-excel" title="Link to this heading"></a></h1>
+<p>This sample demonstrates how to use PyFemtet without
+migrating the existing Excel macro processes to Python.</p>
+<section id="sample-files">
+<h2>Sample Files<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Keep the <a class="reference download internal" download="" href="../../_downloads/f7b5db04cba81523f6dd8e32b830536f/femtet-macro.xlsm"><code class="xref download docutils literal notranslate"><span class="pre">UI</span> <span class="pre">file</span> <span class="pre">(Japanese</span> <span class="pre">only)</span></code></a> and
+<a class="reference download internal" download="" href="../../_downloads/4db317254b12364cd9b7f5dda06c3fd0/pyfemtet-core.py"><code class="xref download docutils literal notranslate"><span class="pre">core</span> <span class="pre">script</span></code></a> on same
+folder.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference download internal" download="" href="../../_downloads/96080773215dd07952a2bbb1180e6b1b/%28ref%29%20original_project.femprj"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> is a
+sample file to create UI file’s macro base.</p>
+</div>
+</section>
+<section id="how-to-run-this-sample">
+<h2>How to run this Sample<a class="headerlink" href="#how-to-run-this-sample" title="Link to this heading"></a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>To run macros from an xlsm file downloaded from the
+internet, you need to change the security settings.</p>
+</div>
+<p>Open the Excel file and check the settings listed on
+the “最適化の設定” sheet. Then, press the
+“call pyfemtet” button at the bottom of the same sheet.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The macros included in this xlsm file are based on
+the macro auto-generation feature from the original
+Femtet project. Therefore, when you run the Excel
+macro, Femtet will launch and automatically create
+the original analysis model. Additionally, this
+macro has been modified to read variable values from
+cells within the xlsm file and reflect them in the
+created analysis model. For detailed specifications,
+please refer to the “備考” sheet in Excel and the
+comments in the source code.</p>
+</div>
+</section>
+<section id="design-variables">
+<h2>Design Variables<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/tapered_inductor.png"><img alt="../../_images/tapered_inductor.png" src="../../_images/tapered_inductor.png" style="width: 500px;" /></a>
+<figcaption>
+<p><span class="caption-text">Appearance of the Model</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>section_radius</p></td>
+<td><p>Radius of wire</p></td>
+</tr>
+<tr class="row-odd"><td><p>coil_radius</p></td>
+<td><p>Bottom radius of coil</p></td>
+</tr>
+<tr class="row-even"><td><p>coil_pitch</p></td>
+<td><p>Pitch of coil</p></td>
+</tr>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>Number of turns</p></td>
+</tr>
+<tr class="row-even"><td><p>coil_radius_grad</p></td>
+<td><p>Coil radius increment per pitch</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="objective-function">
+<h2>Objective Function<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Self-inductance (aim to 100 nH)</p></li>
+<li><p>Approx. Volume (minimize)</p></li>
+</ul>
+</section>
+<section id="execution-result-of-the-samples">
+<h2>Execution Result of the Samples<a class="headerlink" href="#execution-result-of-the-samples" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../../_images/running_excel_migration.png"><img alt="../../_images/running_excel_migration.png" src="../../_images/running_excel_migration.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">Screenshot in progress</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The pyfemtet-core.py performs optimization by controlling
+the values of various cells in the xlsm file and executing
+macros instead of directly running Femtet. This allows for
+integration with PyFemtet without needing to rewrite all
+existing code if you are already using Excel macros for an
+automated design flow with Femtet.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../surrogate_model/surrogate_model.html" class="btn btn-neutral float-left" title="Optimization Using a Surrogate Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../pages/script_builder.html" class="btn btn-neutral float-right" title="GUI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-06 16:49+0900\n"
+"POT-Creation-Date: 2025-01-08 13:09+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -58,6 +58,14 @@ msgstr "サロゲートモデル"
 #: ../source/pages/advanced_examples.rst:14
 msgid "Create training data by Femtet and optimize with surrogate model."
 msgstr "Femtet で訓練データを作成し、サロゲートモデルで最適化します。"
+
+#: ../source/pages/advanced_examples.rst:16
+msgid "Excel Migration"
+msgstr "Excel 連携"
+
+#: ../source/pages/advanced_examples.rst:24
+msgid "Integrate pyfemtet.opt with the macro of **Microsoft Excel**."
+msgstr "**Microsoft Excel** のマクロ機能と最適化を統合します。"
 
 #: ../source/pages/api.rst:2
 msgid "API Reference"
