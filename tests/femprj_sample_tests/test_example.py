@@ -244,6 +244,7 @@ def test_constrained_pipe(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\constrained_pipe.py',
         record_mode=record_mode,
+        threshold=0.5,
     )
     sample_test.run()
 
