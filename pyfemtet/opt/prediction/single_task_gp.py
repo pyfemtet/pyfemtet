@@ -37,6 +37,7 @@ class SingleTaskGPModel(PredictionModelBase):
         else:
             self.bounds = None
         self.is_noise_free = is_noise_free
+        self._standardizer: Standardize = None
 
     def set_bounds_from_history(self, history, df=None):
         from pyfemtet.opt._femopt_core import History
@@ -62,30 +63,40 @@ class SingleTaskGPModel(PredictionModelBase):
         X = tensor(x)
         Y = tensor(y)
 
-        # Fit a Gaussian Process model using the extracted data
+        # Standardize を SingleTaskGP に任せると
+        # 小さい Variance を勝手に 1e-10 に丸めるので
+        # 外で Standardize してから渡す
         standardizer = Standardize(m=Y.shape[-1],)
-        standardizer.forward(Y)
-        _, YVar = standardizer.untransform(Y, torch.full_like(Y, 1e-6))
+        std_Y, _ = standardizer.forward(Y)
+        YVar = torch.full_like(Y, 1e-6)
+        self._standardizer = standardizer
+
+        # Fit a Gaussian Process model using the extracted data
         self.gp = SingleTaskGP(
             train_X=X,
-            train_Y=Y,
+            train_Y=std_Y,
             train_Yvar=YVar if self.is_noise_free else None,
             input_transform=Normalize(d=X.shape[-1], bounds=self.bounds),
-            outcome_transform=standardizer,
+            # BoTorch 0.13 前後で None を渡すと
+            # Standardize しない挙動は変わらないので None を渡せばよい
+            outcome_transform=None,
         )
         mll = ExactMarginalLogLikelihood(self.gp.likelihood, self.gp)
         fit_gpytorch_mll(mll)
 
-    def predict(self, x: np.ndarray) -> list[np.ndarray, np.ndarray]:
+    def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         X = tensor(x)
 
-        self.gp.eval()
-        with torch.no_grad(), gpytorch.settings.fast_pred_var():
-            # predict
-            post = self.gp.posterior(X)
-            mean = post.mean.detach().numpy()
-            var = post.variance.detach().numpy()
+        post = self.gp.posterior(X)
+
+        # fit() で Standardize してから SingleTaskGP に渡したので
+        # posterior は手動で un-standardize する必要がある
+        M, V = self._standardizer.untransform(post.mean, post.variance)
+
+        mean = M.detach().numpy()
+        var = V.detach().numpy()
         std = np.sqrt(var)
+
         return mean, std
 
 
@@ -95,10 +106,12 @@ if __name__ == '__main__':
     bounds = (np.arange(dim*2)**2).reshape((-1, 2))
     x = np.random.rand(N, dim)
     x = x * (bounds[:, 1] - bounds[:, 0]) + bounds[:, 0]
-    y = (x ** 2).sum(axis=1, keepdims=True)
+    y = (x ** 2).sum(axis=1, keepdims=True) * 1e-7
 
     model = SingleTaskGPModel()
     model.fit(x, y)
-    print(model.predict(np.array([(b[1] + b[0])/2 for b in bounds])))
+    print(model.predict(np.array([[(b[1] + b[0])/2 for b in bounds]])))
 
-
+    # 外挿
+    print(model.predict(np.array([[b[1] for b in bounds]])))
+    print(model.predict(np.array([[b[1] * 2 for b in bounds]])))
