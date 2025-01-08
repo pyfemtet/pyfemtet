@@ -55,11 +55,11 @@ def test_pof_basic():
     hv_reference = [0, 0.5]
 
     # reference が存在しないならば記録モード
-    record_mode = not (Path(__file__).parent / 'pof_reference.csv').is_file()
+    record_mode = not (Path(__file__).parent / 'pof_reference.reccsv').is_file()
 
     # 記録モードならば記録ヒストリを作る
     if record_mode:
-        path = Path(__file__).parent / 'pof_reference.csv'
+        path = Path(__file__).parent / 'pof_reference.reccsv'
 
     # そうでなければテストヒストリを作る
     else:
@@ -69,7 +69,6 @@ def test_pof_basic():
         path2 = Path(__file__).parent / 'pof_test.db'
         if os.path.exists(path2):
             os.remove(path2)
-
 
     # ===== configuration =====
     Sampler = PoFBoTorchSampler
@@ -89,7 +88,7 @@ def test_pof_basic():
     femopt = FEMOpt(
         fem=fem,
         opt=opt,
-        history_path=path,
+        history_path=str(path),
     )
 
     femopt.add_parameter('r', 0.5, 0, 1)
@@ -108,13 +107,7 @@ def test_pof_basic():
         confirm_before_exit=False,
     )
 
-    if record_mode:
-        os.rename(
-            path,
-            str(path).replace('.csv', '.reccsv')
-        )
-
-    else:
+    if not record_mode:
         # ===== check =====
         import numpy as np
         import pandas as pd
@@ -127,12 +120,14 @@ def test_pof_basic():
             pdf_['theta'] = df_['theta']
             pdf_['obj_0'] = df_['obj_0']
             pdf_['obj_1'] = df_['obj_1']
+            pdf_.dropna(inplace=True, axis=0)
             return pdf_.values
 
         ref = simplify_df(Path(__file__).parent / 'pof_reference.reccsv')
         dif = simplify_df(Path(__file__).parent / 'pof_test.csv')
 
-        assert (np.abs(dif - ref) / ref).max() < 0.1, "前回結果から 10% 以上の乖離あり"
+        dif_ratio = (np.abs(dif - ref) / ref).max()
+        assert dif_ratio < 0.1, f"前回結果との差が {dif_ratio*100}% で、 10% 以上の乖離です"
         print('PoF test Passed!')
 
 
