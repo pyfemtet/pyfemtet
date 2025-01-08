@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-07 09:34+0900\n"
+"POT-Creation-Date: 2025-01-08 13:09+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -19,6 +19,130 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:2
+msgid "Use pyfemtet.opt with Microsoft Excel"
+msgstr "Microsoft Excel との統合"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:4
+msgid "This sample demonstrates how to use PyFemtet without migrating the existing Excel macro processes to Python."
+msgstr "このサンプルは、既存のExcelマクロの処理をPythonに移植することなく、PyFemtetで利用するためのデモを行います。"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:9
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
+msgid "Sample Files"
+msgstr "サンプルファイル"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:12
+msgid "Keep the :download:`UI file (Japanese only)<femtet-macro.xlsm>` and :download:`core script<pyfemtet-core.py>` on same folder."
+msgstr ":download:`UI ファイル<femtet-macro.xlsm>` と :download:`コアスクリプト<pyfemtet-core.py>` を同じフォルダに配置してください。"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:17
+msgid ":download:`here<(ref) original_project.femprj>` is a sample file to create UI file's macro base."
+msgstr ":download:`ここ<(ref) original_project.femprj>` に UI ファイルのマクロのベース作成に用いたプロジェクトファイルがあります。"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:22
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:21
+msgid "How to run this Sample"
+msgstr "このサンプルの使い方"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:25
+msgid "To run macros from an xlsm file downloaded from the internet, you need to change the security settings."
+msgstr "インターネットからダウンロードしたxlsmファイルのマクロを実行するには、セキュリティ設定を変更する必要があります。"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:28
+msgid "Open the Excel file and check the settings listed on the \"最適化の設定\" sheet. Then, press the \"call pyfemtet\" button at the bottom of the same sheet."
+msgstr "Excelファイルを開き、「最適化の設定」シートに記載された設定を確認してください。同じシートの下部にある「call pyfemtet」ボタンを押してください。"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:33
+msgid "The macros included in this xlsm file are based on the macro auto-generation feature from the original Femtet project. Therefore, when you run the Excel macro, Femtet will launch and automatically create the original analysis model. Additionally, this macro has been modified to read variable values from cells within the xlsm file and reflect them in the created analysis model. For detailed specifications, please refer to the \"備考\" sheet in Excel and the comments in the source code."
+msgstr "このxlsmファイルに含まれるマクロは、元となるFemtetプロジェクトからのマクロ自動生成機能をベースに作成されています。そのため、Excelマクロを実行するとFemtetが起動し、元となる解析モデルを自動的に作成します。また、このマクロはxlsmファイル内のセルの変数を読み込んで、作成する解析モデルに反映するように改変されています。詳細な仕様については、Excelの「備考」シートおよびソースコードのコメントを参照してください。"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:46
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:68
+msgid "Design Variables"
+msgstr "設計変数"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:50
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
+msgid "Appearance of the Model"
+msgstr "モデルの外観"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
+msgid "Variable Name"
+msgstr "変数名"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
+msgid "Description"
+msgstr "説明"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+msgid "section_radius"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+msgid "Radius of wire"
+msgstr "ワイヤ線の半径"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+msgid "coil_radius"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+msgid "Bottom radius of coil"
+msgstr "コイル底面の半径"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+msgid "coil_pitch"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+msgid "Pitch of coil"
+msgstr "コイルの巻きピッチ"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+msgid "n"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+msgid "Number of turns"
+msgstr "巻き数"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+msgid "coil_radius_grad"
+msgstr ""
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+msgid "Coil radius increment per pitch"
+msgstr "コイルのピッチごとの半径の増分"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:64
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
+msgid "Objective Function"
+msgstr "目的関数"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:66
+msgid "Self-inductance (aim to 100 nH)"
+msgstr "自己インダクタンス（目標 100 nH）"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:67
+msgid "Approx. Volume (minimize)"
+msgstr "概算体積（最小化）"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:71
+#, fuzzy
+msgid "Execution Result of the Samples"
+msgstr "サンプルコードの実行結果"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:74
+msgid "Screenshot in progress"
+msgstr "実行中のスクリーンショット"
+
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:77
+msgid "The pyfemtet-core.py performs optimization by controlling the values of various cells in the xlsm file and executing macros instead of directly running Femtet. This allows for integration with PyFemtet without needing to rewrite all existing code if you are already using Excel macros for an automated design flow with Femtet."
+msgstr "pyfemtet-core.pyは、Femtetを直接実行する代わりに、xlsmファイルの各種セルの値を制御し、マクロを実行することで最適化を実施します。これにより、すでにExcelマクロを用いてFemtetによる自動設計フローを運用している場合、そのコードをすべてPythonに書き直すことなくPyFemtetとの統合が可能です。"
+
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:2
 msgid "Optimization Using a Surrogate Model"
 msgstr "サロゲートモデルを用いた最適化"
@@ -27,17 +151,9 @@ msgstr "サロゲートモデルを用いた最適化"
 msgid "This sample demonstrates how to use Femtet to create training data and optimize using surrogate models."
 msgstr "このサンプルでは Femtet を用いて訓練データを作成し、サロゲートモデルを用いて最適化を行う方法のデモを行います。"
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
-msgid "Sample Files"
-msgstr "サンプルファイル"
-
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:12
 msgid "Keep the :download:`sample project<gal_ex13_parametric.femprj>`, :download:`sample script 1<gal_ex13_create_training_data.py>` to create training data **with Femtet** and :download:`sample script 2<gal_ex13_optimize_with_surrogate.py>` to make a surrogate model **without Femtet** and optimize on same folder."
 msgstr ":download:`サンプルプロジェクト<gal_ex13_parametric.femprj>` と、 **Femtet を用いた** 訓練データ作成のための :download:`サンプルスクリプト1<gal_ex13_create_training_data.py>` と **Femtet を用いずに** 最適化を行う :download:`サンプルスクリプト2<gal_ex13_optimize_with_surrogate.py>` を同じフォルダに配置してください."
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:21
-msgid "How to run this Sample"
-msgstr "このサンプルの使い方"
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:23
 msgid "When you double-click on `gal_ex13_create_training_data.py`, the creation of training data for the surrogate model using Femtet will begin."
@@ -71,22 +187,6 @@ msgstr "そのため、例えば設計変数や目的関数の項目はある程
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Stress Analysis / Example 13."
 msgstr "FEM 問題としての詳細は、 Femtet ヘルプ / 例題 / 応力解析 / 例題 13 をご覧ください。"
 
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:68
-msgid "Design Variables"
-msgstr "設計変数"
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
-msgid "Appearance of the Model"
-msgstr "モデルの外観"
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
-msgid "Variable Name"
-msgstr "変数名"
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
-msgid "Description"
-msgstr "説明"
-
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:77
 msgid "length"
 msgstr ""
@@ -110,10 +210,6 @@ msgstr ""
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:79
 msgid "Thickness of the base (fixed in optimization)"
 msgstr "音叉のベースの半径 (最適化では固定)"
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
-msgid "Objective Function"
-msgstr "目的関数"
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:86
 msgid "First resonance frequency (aim to 1000 and 2000)"
