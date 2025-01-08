@@ -165,6 +165,7 @@ class FEMOpt:
             step: float = None,
             properties: dict[str, str or float] = None,
             pass_to_fem: bool = True,
+            fix: bool = False,
     ):
         # noinspection PyUnresolvedReferences
         """Adds a parameter to the optimization problem.
@@ -177,6 +178,15 @@ class FEMOpt:
             step (float, optional): The step of parameter. If specified, parameter is used as discrete. Defaults to None.
             properties (dict[str, str or float], optional): Additional information about the parameter. Defaults to None.
             pass_to_fem (bool, optional): If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True.
+            fix (bool, optiona):
+                パラメータを initial_value で固定します。
+                開発時にパラメータを振るか振らないかを
+                簡単に変更するための便利引数です。
+                True のとき、lower_bound, upper_bound, step, properties の
+                値は、有効かどうかのチェックには使われますが、最適化では
+                使われなくなります。
+                デフォルトは False です。
+
 
         Raises:
             ValueError: If initial_value is not specified and the value for the given name is also not specified in FEM.
@@ -209,16 +219,27 @@ class FEMOpt:
             if initial_value is None:
                 raise ValueError('initial_value を指定してください.')
 
-        prm = Parameter(
-            name=name,
-            value=float(initial_value),
-            lower_bound=float(lower_bound) if lower_bound is not None else None,
-            upper_bound=float(upper_bound) if upper_bound is not None else None,
-            step=float(step) if step is not None else None,
-            pass_to_fem=pass_to_fem,
-            properties=properties,
-        )
-        self.opt.variables.add_parameter(prm)
+        if not fix:
+            prm = Parameter(
+                name=name,
+                value=float(initial_value),
+                lower_bound=float(lower_bound) if lower_bound is not None else None,
+                upper_bound=float(upper_bound) if upper_bound is not None else None,
+                step=float(step) if step is not None else None,
+                pass_to_fem=pass_to_fem,
+                properties=properties,
+            )
+            self.opt.variables.add_parameter(prm)
+
+        else:
+            warnings.filterwarnings('ignore', category=UserWarning, message="The function 'add_expression' is experimental")
+            self.add_expression(
+                name=name,
+                fun=lambda: initial_value,
+                pass_to_fem=pass_to_fem,
+                properties=properties,
+            )
+
 
     @experimental_feature
     def add_expression(
@@ -299,7 +320,7 @@ class FEMOpt:
 
     def add_objective(
             self,
-            fun,
+            fun: callable or None = None,
             name: str or None = None,
             direction: str or float = 'minimize',
             args: tuple or None = None,
@@ -309,7 +330,7 @@ class FEMOpt:
         """Adds an objective to the optimization problem.
 
         Args:
-            fun (callable): The objective function.
+            fun (callable or None, optional): The objective function. This argument is optional but
             name (str or None, optional): The name of the objective. Defaults to None.
             direction (str or float, optional): The optimization direction. Varid values are 'maximize', 'minimize' or a float value. Defaults to 'minimize'.
             args (tuple or None, optional): Additional arguments for the objective function. Defaults to None.
@@ -344,6 +365,10 @@ class FEMOpt:
         """
 
         # 引数の処理
+        if fun is None:
+            from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
+            if not isinstance(self.fem, SurrogateModelInterfaceBase):
+                raise ValueError('`fun` argument is not specified.')
         if args is None:
             args = tuple()
         elif not isinstance(args, tuple):
@@ -402,7 +427,6 @@ class FEMOpt:
                 args=args,
                 kwargs=kwargs,
             )
-
 
     def add_constraint(
             self,
@@ -612,6 +636,7 @@ class FEMOpt:
             if self.fem._load_problem_from_me:
                 self.fem.load_parameter(self.opt)
                 self.fem.load_objective(self.opt)
+                self.fem.load_constraint(self.opt)
 
         # resolve expression dependencies
         self.opt.variables.resolve()
@@ -892,7 +917,10 @@ class FEMOpt:
                 print('='*len(Msg.CONFIRM_BEFORE_EXIT))
                 input()
 
-            return self.history.get_df()  # with 文を抜けると actor は消えるが .copy() はこの段階では不要
+            df = self.history.get_df()  # with 文を抜けると actor は消えるが .copy() はこの段階では不要
+
+        return df
+
 
     @staticmethod
     def terminate_all():

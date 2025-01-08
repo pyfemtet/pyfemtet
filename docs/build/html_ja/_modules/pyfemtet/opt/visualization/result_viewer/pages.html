@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/advanced_examples.html">発展的な例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API Reference</a></li>
@@ -371,7 +372,7 @@
                 <span class="n">trial</span> <span class="o">=</span> <span class="n">pt</span><span class="p">[</span><span class="s1">&#39;customdata&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
                 <span class="c1"># get parameter and update model</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">valid_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">row</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">trial</span><span class="p">]</span>
                 <span class="n">metadata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metadata</span> <span class="o">==</span> <span class="s1">&#39;prm&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>

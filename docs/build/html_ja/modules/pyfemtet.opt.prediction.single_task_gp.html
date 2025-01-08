@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/advanced_examples.html">発展的な例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">使い方</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API Reference</a><ul class="current">
@@ -99,7 +100,7 @@
              
   <dl class="py class" id="module-pyfemtet.opt.prediction.single_task_gp">
 <dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.single_task_gp.</span></span><span class="sig-name descname"><span class="pre">SingleTaskGPModel</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#SingleTaskGPModel"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.single_task_gp.</span></span><span class="sig-name descname"><span class="pre">SingleTaskGPModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_noise_free</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#SingleTaskGPModel"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel" title="Link to this definition"></a></dt>
 <dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModelBase</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">`SingleTaskGP`</span></code> を使用したシンプルなインターフェースサロゲートモデルです。</p>
 <div class="admonition seealso">
@@ -135,7 +136,17 @@
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.set_bounds_from_history">
+<span class="sig-name descname"><span class="pre">set_bounds_from_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#SingleTaskGPModel.set_bounds_from_history"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.set_bounds_from_history" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfemtet.opt.prediction.single_task_gp.tensor">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.prediction.single_task_gp.</span></span><span class="sig-name descname"><span class="pre">tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/prediction/single_task_gp.html#tensor"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.prediction.single_task_gp.tensor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 
 

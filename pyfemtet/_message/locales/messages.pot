@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-27 21:24+0900\n"
+"POT-Creation-Date: 2024-12-27 09:45+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -173,351 +173,367 @@ msgstr ""
 msgid "Failed to update model in solidworks."
 msgstr ""
 
+#: pyfemtet/_message/messages.py:84
+msgid "Probability of feasibility is less than threshold."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:85
+msgid "Terminating Excel process..."
+msgstr ""
+
 #: pyfemtet/_message/messages.py:86
-msgid "The following features are not supported by the specified optimization method. "
+msgid "Excel process is terminated."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:87
-msgid "The parameter set does not match the one added with add_init_parameter."
-msgstr ""
-
-#: pyfemtet/_message/messages.py:88
-msgid "An exception has occurred during FEM update. Current parameters are: "
-msgstr ""
-
-#: pyfemtet/_message/messages.py:89
-msgid "The constraints were not satisfied for the following sets of variables:"
+msgid "Restore Femtet setting of autosave."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:90
-msgid "Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated."
+msgid "The following features are not supported by the specified optimization method. "
 msgstr ""
 
 #: pyfemtet/_message/messages.py:91
-msgid "Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`."
+msgid "The parameter set does not match the one added with add_init_parameter."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:92
-msgid "You can use parameter constraint only with BoTorchSampler."
+msgid "An exception has occurred during FEM update. Current parameters are: "
 msgstr ""
 
 #: pyfemtet/_message/messages.py:93
-msgid "Scipy is deterministic, so whether you set a seed or not will not change the results."
+msgid "The constraints were not satisfied for the following sets of variables:"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:94
-msgid "Start to candidate new parameter set with constraints. This process may take a long time."
+msgid "Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:95
-msgid "Updating FEM parameter during evaluating constraints take a long time. Please consider not to use FEM variables in constraint functions and set `update_fem` to False."
+msgid "Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:96
+msgid "You can use parameter constraint only with BoTorchSampler."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:97
+msgid "Scipy is deterministic, so whether you set a seed or not will not change the results."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:98
+msgid "Start to candidate new parameter set with constraints. This process may take a long time."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:99
-msgid "Connect to Femtet"
-msgstr ""
-
-#: pyfemtet/_message/messages.py:100
-msgid "Analysis model name described in csv does not exist in project."
-msgstr ""
-
-#: pyfemtet/_message/messages.py:101
-msgid "History csv is not read yet. Open your project manually."
-msgstr ""
-
-#: pyfemtet/_message/messages.py:102
-msgid "Cannot read project data from csv. Open your project manually."
+msgid "Updating FEM parameter during evaluating constraints take a long time. Please consider not to use FEM variables in constraint functions and set `update_fem` to False."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:103
-msgid ".femprj file described in csv is not found. Open your project manually."
+msgid "Connect to Femtet"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:104
-msgid "Analysis model name is not specified. Open your model in the project manually."
+msgid "Analysis model name described in csv does not exist in project."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:105
+msgid "History csv is not read yet. Open your project manually."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:106
-msgid "Constraint"
+msgid "Cannot read project data from csv. Open your project manually."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:107
-msgid "feasible"
+msgid ".femprj file described in csv is not found. Open your project manually."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:108
-msgid "infeasible"
-msgstr ""
-
-#: pyfemtet/_message/messages.py:109
-msgid "Optimality"
+msgid "Analysis model name is not specified. Open your model in the project manually."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:110
-msgid "non dominated"
+msgid "Constraint"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:111
-msgid "dominated"
+msgid "feasible"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:112
-msgid "Hypervolume Plot"
+msgid "infeasible"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:113
-msgid "Objective Plot"
+msgid "Optimality"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:114
-msgid "Multi Objective Pair Plot"
+msgid "non dominated"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:115
-msgid "trial number"
+msgid "dominated"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:116
-msgid "All solutions"
+msgid "Hypervolume Plot"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:117
-msgid "Transition of optimal solutions"
+msgid "Objective Plot"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:118
-msgid "Target value"
+msgid "Multi Objective Pair Plot"
+msgstr ""
+
+#: pyfemtet/_message/messages.py:119
+msgid "Succeeded trial number"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:120
-msgid "Objectives"
+msgid "All solutions"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:121
-msgid "Objectives (all)"
+msgid "Transition of<br>optimal solutions"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:123
-msgid "Prediction Model"
+#: pyfemtet/_message/messages.py:122
+msgid "Target value"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:124
-msgid " Recalculate Model"
+msgid "Objectives"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:125
-msgid " Redraw graph"
-msgstr ""
-
-#: pyfemtet/_message/messages.py:126
-msgid "Parameter"
+msgid "Objectives (all)"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:127
-msgid "Parameter2"
+msgid "Prediction Model"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:128
-msgid "Objective"
+msgid " Recalculate Model"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:129
-msgid "No history selected."
+msgid " Redraw graph"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:130
-msgid "No FEM result (yet)."
+msgid "Parameter"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:131
-msgid "Prediction model is not calculated yet."
+msgid "Parameter2"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:132
-msgid "Cannot select same parameter"
+msgid "Objective"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:133
-msgid "3D graph (two or more parameters required)"
+msgid "No history selected."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:134
+msgid "No FEM result (yet)."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:135
-msgid "Prediction Model of Objective"
+msgid "Prediction model is not calculated yet."
 msgstr ""
 
 #: pyfemtet/_message/messages.py:136
-msgid "prediction model"
+msgid "Cannot select same parameter"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:137
-msgid "std. dev. of model"
+msgid "3D graph (two or more parameters required)"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:139
-msgid "Progress"
+msgid "Prediction Model of Objective"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:140
-msgid "Prediction"
+msgid "prediction model"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:141
-msgid "Workers"
+msgid "std. dev. of model"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:142
-msgid "Details"
+#: pyfemtet/_message/messages.py:143
+msgid "Progress"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:144
-msgid "Optimization status will be shown here."
+msgid "Prediction"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:145
-msgid "Auto-update graph"
+msgid "Workers"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:146
-msgid "Interrupt Optimization"
+msgid "Details"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:148
-msgid "Result"
+msgid "Optimization status will be shown here."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:149
+msgid "Auto-update graph"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:150
-msgid "Open Result in Femtet"
-msgstr ""
-
-#: pyfemtet/_message/messages.py:151
-msgid "Reconstruct Model"
+msgid "Interrupt Optimization"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:152
-msgid "Drag and drop or select csv file"
-msgstr ""
-
-#: pyfemtet/_message/messages.py:153
-msgid "Connection to Femtet is not established. Launch Femtet and Open a project."
+msgid "Result"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:154
-msgid "No result plot is selected."
+msgid "Open Result in Femtet"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:155
-msgid "The femprj file path in the history csv is not found or valid."
+msgid "Reconstruct Model"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:156
-msgid "The model name in the history csv is not found."
+msgid "Drag and drop or select csv file"
 msgstr ""
 
 #: pyfemtet/_message/messages.py:157
+msgid "Connection to Femtet is not established. Launch Femtet and Open a project."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:158
+msgid "No result plot is selected."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:159
+msgid "The femprj file path in the history csv is not found or valid."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:160
+msgid "The model name in the history csv is not found."
+msgstr ""
+
+#: pyfemtet/_message/messages.py:161
 msgid ".pdt file is not found. Please check the .Results folder. Note that .pdt file save mode depends on the `save_pdt` argument of FemtetInterface in optimization script(default to `all`)."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:162
+#: pyfemtet/_message/messages.py:166
 msgid "Failed to open "
 msgstr ""
 
-#: pyfemtet/_message/messages.py:163
+#: pyfemtet/_message/messages.py:167
 msgid "Specified model is not in current project. Please check opened project. For example, not \"analysis model only\" but your .femprj file."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:166
+#: pyfemtet/_message/messages.py:170
 msgid ".femprj file path of the history csv is invalid. Please certify matching between csv and opening .femprj file."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:167
+#: pyfemtet/_message/messages.py:171
 msgid "Analysis model name of the history csv is invalid. Please certify matching between csv and opening analysis model."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:168
+#: pyfemtet/_message/messages.py:172
 msgid "Analysis model name of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and opening analysis model."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:169
+#: pyfemtet/_message/messages.py:173
 msgid "tutorial mode"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:170
+#: pyfemtet/_message/messages.py:174
 msgid "Load Sample CSV"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:171
+#: pyfemtet/_message/messages.py:175
 msgid "Load CSV"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:172
+#: pyfemtet/_message/messages.py:176
 msgid "Open your optimization result. Then connecting to femtet will start automatically. Note that in tutorial mode, this button loads the ready-made sample csv and open sample femprj."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:174
+#: pyfemtet/_message/messages.py:178
 msgid "Main Graph"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:175
+#: pyfemtet/_message/messages.py:179
 msgid "Here the optimization history is shown. Each plot represents single FEM result. You can pick a result to open the corresponding result in Femtet. "
 msgstr ""
 
-#: pyfemtet/_message/messages.py:178
+#: pyfemtet/_message/messages.py:182
 msgid "Open Result"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:179
+#: pyfemtet/_message/messages.py:183
 msgid "After pick a point in the main graph, This button shows the corresponding FEM result in Femtet."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:181
+#: pyfemtet/_message/messages.py:185
 msgid "Re-connect to Femtet."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:182
+#: pyfemtet/_message/messages.py:186
 msgid "Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:183
+#: pyfemtet/_message/messages.py:187
 msgid "Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:184
+#: pyfemtet/_message/messages.py:188
 msgid "Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:186
+#: pyfemtet/_message/messages.py:190
 msgid "Loading data..."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:187
+#: pyfemtet/_message/messages.py:191
 msgid "Plots of objectives versus trials"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:188
+#: pyfemtet/_message/messages.py:192
 msgid "The vertical axis is the objective, and the horizontal axis is the number of trials."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:189
+#: pyfemtet/_message/messages.py:193
 msgid "Parallel coordinate plots"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:190
+#: pyfemtet/_message/messages.py:194
 msgid "The vertical axis is an objective or parameters, and one polyline indicates one result."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:191
+#: pyfemtet/_message/messages.py:195
 msgid "The heatmap of objectives"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:192
+#: pyfemtet/_message/messages.py:196
 msgid "The axes are parameters, and the color shows objective value."
 msgstr ""
 
-#: pyfemtet/_message/messages.py:193
+#: pyfemtet/_message/messages.py:197
 msgid "The response of an objective versus one parameter"
 msgstr ""
 
-#: pyfemtet/_message/messages.py:194
+#: pyfemtet/_message/messages.py:198
 msgid "The vertical axis is objective, and the horizontal axis is parameter."
 msgstr ""
 

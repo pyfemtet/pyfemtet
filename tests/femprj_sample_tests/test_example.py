@@ -234,6 +234,8 @@ def _get_simplified_df_values(csv_path):
     for col in obj_names:
         pdf[col] = df[col]
 
+    pdf.dropna(axis=1, inplace=True)
+
     return pdf.values.astype(float)
 
 
@@ -242,6 +244,7 @@ def test_constrained_pipe(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\constrained_pipe.py',
         record_mode=record_mode,
+        threshold=0.5,
     )
     sample_test.run()
 
@@ -321,12 +324,12 @@ def test_cad_sample_nx_ex01(record_mode=False):
 
 
 if __name__ == '__main__':
-    test_constrained_pipe(record_mode=True)
-    test_sample_gau_ex08_parametric(record_mode=True)
-    test_sample_her_ex40_parametric(record_mode=True)
-    test_sample_wat_ex14_parametric(record_mode=True)
-    test_sample_paswat_ex1_parametric(record_mode=True)
-    test_sample_gal_ex58_parametric(record_mode=True)
-    test_sample_parametric_if(record_mode=True)
-    test_cad_sample_sldworks_ex01(record_mode=True)
-    test_cad_sample_nx_ex01(record_mode=True)
+    test_constrained_pipe(record_mode=False)
+    # test_sample_gau_ex08_parametric(record_mode=True)
+    # test_sample_her_ex40_parametric(record_mode=True)
+    # test_sample_wat_ex14_parametric(record_mode=True)
+    # test_sample_paswat_ex1_parametric(record_mode=True)
+    # test_sample_gal_ex58_parametric(record_mode=True)
+    # test_sample_parametric_if(record_mode=True)
+    # test_cad_sample_sldworks_ex01(record_mode=True)
+    # test_cad_sample_nx_ex01(record_mode=True)

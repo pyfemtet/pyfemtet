@@ -55,6 +55,9 @@ class FEMInterface(ABC):
     def load_objective(self, opt) -> None:  # opt: AbstractOptimizer
         raise NotImplementedError()
 
+    def load_constraint(self, opt) -> None:  # opt: AbstractOptimizer
+        raise NotImplementedError()
+
     def _setup_before_parallel(self, client) -> None:
         """Preprocessing before launching a dask worker (if implemented in concrete class).
 

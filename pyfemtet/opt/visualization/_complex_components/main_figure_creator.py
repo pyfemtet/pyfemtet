@@ -150,21 +150,21 @@ def _get_single_objective_plot(history, df):
     # ===== その時点までの最小の点を青で打つ =====
     fig.add_trace(
         go.Scatter(
-            x=df['trial'][indices],
-            y=df[obj_name][indices],
+            x=df['trial'].iloc[indices],
+            y=df[obj_name].iloc[indices],
             mode="markers+lines",
             marker=dict(color='#007bff', size=9),
             name=Msg.LEGEND_LABEL_OPTIMAL_SOLUTIONS,
             line=dict(width=1, color='#6c757d',),
-            customdata=df['trial'][indices].values.reshape((-1, 1)),
+            customdata=df['trial'].iloc[indices].values.reshape((-1, 1)),
             legendgroup='optimal',
         )
     )
 
     # ===== その時点までの最小の点から現在までの平行点線を引く =====
     if len(indices) > 1:
-        x = [df['trial'][indices].iloc[-1], df['trial'].iloc[-1]]
-        y = [df[obj_name][indices].iloc[-1]] * 2
+        x = [df['trial'].iloc[indices].iloc[-1], df['trial'].iloc[-1]]
+        y = [df[obj_name].iloc[indices].iloc[-1]] * 2
         fig.add_trace(
             go.Scatter(
                 x=x,

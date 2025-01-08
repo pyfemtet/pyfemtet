@@ -262,6 +262,8 @@ def is_feasible(value, lb, ub):
     Returns:
         bool: True if the value satisfies the bounds; False otherwise.
     """
+    if np.isnan(value):
+        return False
     if lb is None and ub is not None:
         return value <= ub
     elif lb is not None and ub is None:
@@ -290,10 +292,11 @@ class Function:
         # COM 定数を一度 _Scapegoat 型のオブジェクトにする
         # ParametricIF で使う dll 関数は _FuncPtr 型であって __globals__ を持たないが、
         # これは絶対に constants を持たないので単に無視すればよい。
-        if not isinstance(fun, ctypes._CFuncPtr):
-            for varname in fun.__globals__:
-                if isinstance(fun.__globals__[varname], Constants):
-                    fun.__globals__[varname] = _Scapegoat()
+        if fun is not None:
+            if not isinstance(fun, ctypes._CFuncPtr):
+                for varname in fun.__globals__:
+                    if isinstance(fun.__globals__[varname], Constants):
+                        fun.__globals__[varname] = _Scapegoat()
 
         self.fun = fun
         self.name = name
@@ -309,6 +312,9 @@ class Function:
         Returns:
             float
         """
+        if self.fun is None:
+            RuntimeError(f'`fun` of {self.name} is not specified.')
+
         args = self.args
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
@@ -318,11 +324,12 @@ class Function:
     def _restore_constants(self):
         """Helper function for parallelize Femtet."""
         fun = self.fun
-        if not isinstance(fun, ctypes._CFuncPtr):
-            for varname in fun.__globals__:
-                if isinstance(fun.__globals__[varname], _Scapegoat):
-                    if not fun.__globals__[varname]._ignore_when_restore_constants:
-                        fun.__globals__[varname] = constants
+        if fun is not None:
+            if not isinstance(fun, ctypes._CFuncPtr):
+                for varname in fun.__globals__:
+                    if isinstance(fun.__globals__[varname], _Scapegoat):
+                        if not fun.__globals__[varname]._ignore_when_restore_constants:
+                            fun.__globals__[varname] = constants
 
 
 class Objective(Function):
@@ -621,16 +628,30 @@ class History:
 
         self.set_df(df)
 
-    def get_df(self) -> pd.DataFrame:
+    def filter_valid(self, df_, keep_trial_num=False):
+        buff = df_[self.obj_names].notna()
+        idx = buff.prod(axis=1).astype(bool)
+        filtered_df = df_[idx]
+        if not keep_trial_num:
+            filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1
+        return filtered_df
+
+    def get_df(self, valid_only=False) -> pd.DataFrame:
         if self.__scheduler_address is None:
-            return self._df
+            if valid_only:
+                return self.filter_valid(self._df)
+            else:
+                return self._df
         else:
             # scheduler がまだ存命か確認する
             try:
                 with Lock('access-df'):
                     client_: 'Client' = get_client(self.__scheduler_address)
                     if 'df' in client_.list_datasets():
-                        return client_.get_dataset('df')
+                        if valid_only:
+                            return self.filter_valid(client_.get_dataset('df'))
+                        else:
+                            return client_.get_dataset('df')
                     else:
                         logger.debug('Access df of History before it is initialized.')
                         return pd.DataFrame()
@@ -806,17 +827,19 @@ class History:
         df['non_domi'] = False
 
         # feasible のものに non_domi の評価結果を代入する
-        df.loc[idx, 'non_domi'] = non_domi
+        if len(non_domi) > 0:
+            df.loc[idx, 'non_domi'] = non_domi
 
     def _calc_hypervolume(self, objectives, df):
 
+        # 単目的最適化ならば 0 埋めして終了
         if len(objectives) < 2:
             df.loc[len(df) - 1, 'hypervolume'] = 0.
             return
 
         # 最小化問題に変換された objective values を取得
         raw_objective_values = df[self.obj_names].values
-        objective_values = np.empty_like(raw_objective_values)
+        objective_values = np.full_like(raw_objective_values, np.nan)
         for n_trial in range(len(raw_objective_values)):
             for obj_idx, (_, objective) in enumerate(objectives.items()):
                 objective_values[n_trial, obj_idx] = objective.convert(raw_objective_values[n_trial, obj_idx])
@@ -830,13 +853,20 @@ class History:
             pareto_set_ = np.empty((0, len(self.obj_names)))
             for i in range(len(objective_values_)):
                 target = objective_values_[i]
-                dominated = False
-                # TODO: Array の計算に直して高速化する
-                for j in range(len(objective_values_)):
-                    compare = objective_values_[j]
-                    if all(target > compare):
-                        dominated = True
-                        break
+
+                if any(np.isnan(target)):
+                    # infeasible な場合 pareto_set の計算に含めない
+                    dominated = True
+
+                else:
+                    dominated = False
+                    # TODO: Array の計算に直して高速化する
+                    for j in range(len(objective_values_)):
+                        compare = objective_values_[j]
+                        if all(target > compare):
+                            dominated = True
+                            break
+
                 if not dominated:
                     pareto_set_ = np.concatenate([pareto_set_, [target]], axis=0)
 
@@ -848,34 +878,63 @@ class History:
             else:
                 return pareto_set_
 
+        def get_valid_worst_converted_objective_values(objective_values_: np.ndarray) -> np.ndarray:
+            # objective_values.max(axis=0)
+            ret = []
+            for row in objective_values_:
+                if not any(np.isnan(row)):
+                    ret.append(row)
+            return np.array(ret).max(axis=0)
+
         if self._hv_reference == 'dynamic-pareto':
             pareto_set, pareto_set_list = get_pareto(objective_values, with_partial=True)
             for i, partial_pareto_set in enumerate(pareto_set_list):
-                ref_point = pareto_set.max(axis=0) + 1e-8
-                hv = compute_hypervolume(partial_pareto_set, ref_point)
-                df.loc[i, 'hypervolume'] = hv
+                # 並列計算時など Valid な解がまだ一つもない場合は pareto_set が長さ 0 になる
+                # その場合 max() を取るとエラーになる
+                if len(pareto_set) == 0:
+                    df.loc[i, 'hypervolume'] = 0
+                else:
+                    ref_point = pareto_set.max(axis=0) + 1e-8
+                    hv = compute_hypervolume(partial_pareto_set, ref_point)
+                    df.loc[i, 'hypervolume'] = hv
             return
 
         elif self._hv_reference == 'dynamic-nadir':
             _, pareto_set_list = get_pareto(objective_values, with_partial=True)
             for i, partial_pareto_set in enumerate(pareto_set_list):
-                ref_point = objective_values.max(axis=0) + 1e-8
-                hv = compute_hypervolume(partial_pareto_set, ref_point)
-                df.loc[i, 'hypervolume'] = hv
+                # filter valid objective values only
+                values = get_valid_worst_converted_objective_values(objective_values)
+
+                # 並列計算時など Valid な解がまだ一つもない場合は長さ 0 になる
+                # その場合 max() を取るとエラーになる
+                if len(values) == 0:
+                    df.loc[i, 'hypervolume'] = 0
+
+                else:
+                    ref_point = values.max(axis=0) + 1e-8
+                    hv = compute_hypervolume(partial_pareto_set, ref_point)
+                    df.loc[i, 'hypervolume'] = hv
             return
 
         elif self._hv_reference == 'nadir':
             pareto_set = get_pareto(objective_values)
-            ref_point = objective_values.max(axis=0) + 1e-8
-            hv = compute_hypervolume(pareto_set, ref_point)
-            df.loc[len(df) - 1, 'hypervolume'] = hv
+            values = get_valid_worst_converted_objective_values(objective_values)
+            if len(values) == 0:
+                df.loc[len(df) - 1, 'hypervolume'] = 0
+            else:
+                ref_point = values.max(axis=0) + 1e-8
+                hv = compute_hypervolume(pareto_set, ref_point)
+                df.loc[len(df) - 1, 'hypervolume'] = hv
             return
 
         elif self._hv_reference == 'pareto':
             pareto_set = get_pareto(objective_values)
-            ref_point = pareto_set.max(axis=0) + 1e-8
-            hv = compute_hypervolume(pareto_set, ref_point)
-            df.loc[len(df) - 1, 'hypervolume'] = hv
+            if len(pareto_set) == 0:
+                df.loc[len(df) - 1, 'hypervolume'] = 0
+            else:
+                ref_point = pareto_set.max(axis=0) + 1e-8
+                hv = compute_hypervolume(pareto_set, ref_point)
+                df.loc[len(df) - 1, 'hypervolume'] = hv
             return
 
         elif (
@@ -935,7 +994,7 @@ class History:
         study = optuna.create_study(**kwargs)
 
         # add trial to study
-        df: pd.DataFrame = self.get_df()
+        df: pd.DataFrame = self.get_df(valid_only=True)
         for i, row in df.iterrows():
             FD = optuna.distributions.FloatDistribution
             kwargs = dict(

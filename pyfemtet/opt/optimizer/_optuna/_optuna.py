@@ -4,6 +4,7 @@ from typing import Iterable
 # built-in
 import os
 import inspect
+import gc
 
 # 3rd-party
 import optuna
@@ -92,10 +93,7 @@ class OptunaOptimizer(AbstractOptimizer):
     def _objective(self, trial):
 
         logger.info('')
-        if self._retry_counter == 0:
-            logger.info(f'===== trial {1 + len(self.history.get_df())} start =====')
-        else:
-            logger.info(f'===== trial {1 + len(self.history.get_df())} (retry {self._retry_counter}) start =====')
+        logger.info(f'===== trial {1 + len(self.history.get_df())} ({len(self.history.get_df(valid_only=True))} succeeded trials) start =====')
 
         # 中断の確認 (FAIL loop に陥る対策)
         if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
@@ -124,6 +122,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # fem 経由で変数を取得して constraint を計算する時のためにアップデート
         df_fem = self.variables.get_variables(format='df', filter_pass_to_fem=True)
         self.fem.update_parameter(df_fem)
+        x = self.variables.get_variables(format='values', filter_parameter=True)
 
         # strict 拘束
         strict_constraints = [cns for cns in self.constraints.values() if cns.strict]
@@ -140,10 +139,11 @@ class OptunaOptimizer(AbstractOptimizer):
                 logger.info(f'Constraint: {cns.name}')
                 logger.info(self.variables.get_variables('dict', filter_parameter=True))
                 self._retry_counter += 1
+                self.message = f'Failed to calculate objectives because of the constraint violation: {cns.name}'
+                self.f(x, _record_infeasible=True)
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
-        x = self.variables.get_variables(format='values', filter_parameter=True)
         try:
             _, _y, c = self.f(x)  # f の中で info は出している
         except (ModelError, MeshError, SolveError) as e:
@@ -162,6 +162,8 @@ class OptunaOptimizer(AbstractOptimizer):
                            'or analysis.')
 
             self._retry_counter += 1
+            self.message = f'Failed to calculate objectives because of the parameter broke the FEM model.'
+            self.f(x, _record_infeasible=True)
             raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 拘束 attr の更新
@@ -284,8 +286,19 @@ class OptunaOptimizer(AbstractOptimizer):
             from optuna.samplers import TPESampler
             if issubclass(self.sampler_class, TPESampler):
 
-                if os.path.exists(self._temporary_storage_path):
-                    os.remove(self._temporary_storage_path)
+                import re
+                pattern = r'_\d+$'
+
+                while os.path.exists(self._temporary_storage_path):
+                    name, ext = os.path.splitext(self._temporary_storage_path)
+
+                    if bool(re.search(pattern, name)):
+                        base = '_'.join(name.split('_')[:-1])
+                        n = int(name.split('_')[-1])
+                        self._temporary_storage_path = name + '_' + str(n+1) + ext
+
+                    else:
+                        self._temporary_storage_path = name + '_2' + ext
 
                 self._temporary_storage = optuna.integration.dask.DaskStorage(
                     f'sqlite:///{self._temporary_storage_path}',
@@ -403,7 +416,6 @@ class OptunaOptimizer(AbstractOptimizer):
                 self._temporary_storage.remove_session()
                 del self._temporary_storage
                 del _study
-                import gc
                 gc.collect()
                 if os.path.exists(self._temporary_storage_path):
                     os.remove(self._temporary_storage_path)

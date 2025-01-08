@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/advanced_examples.html">Advanced Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API Reference</a><ul class="current">
@@ -188,7 +189,7 @@
 <dd><p>An actor object that records the history of each iteration in the optimization process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>History</p>
+<dd class="field-odd"><p><a class="reference internal" href="pyfemtet.opt.html#pyfemtet.opt.History" title="pyfemtet.opt.History">History</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -206,11 +207,14 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -222,6 +226,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.generate_infeasible_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.get_parameter">
@@ -290,7 +299,7 @@ The partial set is available.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">OptunaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_init_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna.html#OptunaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">OptunaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_init_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_optuna.html#OptunaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer._base.AbstractOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code></a></p>
 <p>Optimizer using <code class="docutils literal notranslate"><span class="pre">`optuna`</span></code>.</p>
 <p>This class provides an interface for the optimization
@@ -326,7 +335,7 @@ It is generated and provided by <code class="xref py py-func docutils literal no
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.add_init_parameter">
-<span class="sig-name descname"><span class="pre">add_init_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna.html#OptunaOptimizer.add_init_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.add_init_parameter" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_init_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_optuna.html#OptunaOptimizer.add_init_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.add_init_parameter" title="Link to this definition"></a></dt>
 <dd><p>Add additional initial parameter for evaluate.</p>
 <p>The parameter set is ignored if the main() is continued.</p>
 <dl class="field-list simple">
@@ -341,11 +350,14 @@ It is generated and provided by <code class="xref py py-func docutils literal no
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -357,6 +369,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.get_parameter">
@@ -382,7 +399,7 @@ Defaults to ‘dict’.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna.html#OptunaOptimizer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_optuna.html#OptunaOptimizer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.run" title="Link to this definition"></a></dt>
 <dd><p>Set random seed, sampler, study and run study.optimize().</p>
 </dd></dl>
 
@@ -419,6 +436,351 @@ The partial set is available.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">PoFBoTorchSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidates_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_startup_trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_running_trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">independent_sampler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pof_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFBoTorchSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSampler</span></code></p>
+<p>A sampler that forked from BoTorchSampler.</p>
+<p>This sampler improves the BoTorchSampler to account
+for known/hidden constraints and repeated penalties.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://optuna.readthedocs.io/en/v3.0.0-b1/reference/generated/optuna.integration.BoTorchSampler.html">https://optuna.readthedocs.io/en/v3.0.0-b1/reference/generated/optuna.integration.BoTorchSampler.html</a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>candidates_func</strong> (<em>Callable</em><em>[</em><em>[</em><em>'torch.Tensor'</em><em>, </em><em>'torch.Tensor'</em><em>, </em><em>'torch.Tensor'</em><em> | </em><em>None</em><em>, </em><em>'torch.Tensor'</em><em>, </em><em>'torch.Tensor'</em><em> | </em><em>None</em><em>, </em><em>'SingleTaskGP'</em><em>, </em><em>'list</em><em>[</em><em>Constraint</em><em>]</em><em>'</em><em>, </em><em>'Study'</em><em>, </em><em>'OptunaOptimizer'</em><em>, </em><em>'PoFConfig'</em><em>]</em><em>, </em><em>'torch.Tensor'</em><em>] </em><em>| </em><em>None</em>) – <p>An optional function that suggests the next candidates. It must take the training
+data, the objectives, the constraints, the search space bounds and return the next
+candidates. The arguments are of type <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>. The return value must be a
+<code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>. However, if <code class="docutils literal notranslate"><span class="pre">constraints_func</span></code> is omitted, constraints will be
+<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>. For any constraints that failed to compute, the tensor will contain
+NaN.</p>
+<p>If omitted, it is determined automatically based on the number of objectives and
+whether a constraint is specified. If the
+number of objectives is one and no constraint is specified, log-Expected Improvement
+is used. If constraints are specified, quasi MC-based batch Expected Improvement
+(qEI) is used.
+If the number of objectives is either two or three, Quasi MC-based
+batch Expected Hypervolume Improvement (qEHVI) is used. Otherwise, for a larger number
+of objectives, analytic Expected Hypervolume Improvement is used if no constraints
+are specified, or the faster Quasi MC-based extended ParEGO (qParEGO) is used if
+constraints are present.</p>
+<p>The function should assume <em>maximization</em> of the objective.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See <code class="xref py py-func docutils literal notranslate"><span class="pre">optuna_integration.botorch.qei_candidates_func()</span></code> for an example.</p>
+</div>
+</p></li>
+<li><p><strong>constraints_func</strong> (<em>Callable</em><em>[</em><em>[</em><em>FrozenTrial</em><em>]</em><em>, </em><em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em><em>] </em><em>| </em><em>None</em>) – <p>An optional function that computes the objective constraints. It must take a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenTrial</span></code> and return the constraints. The return value must
+be a sequence of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> s. A value strictly larger than 0 means that a
+constraint is violated. A value equal to or smaller than 0 is considered feasible.</p>
+<p>If omitted, no constraints will be passed to <code class="docutils literal notranslate"><span class="pre">candidates_func</span></code> nor taken into
+account during suggestion.</p>
+</p></li>
+<li><p><strong>n_startup_trials</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of initial trials, that is the number of trials to resort to independent
+sampling.</p></li>
+<li><p><strong>consider_running_trials</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – <p>If True, the acquisition function takes into consideration the running parameters
+whose evaluation has not completed. Enabling this option is considered to improve the
+performance of parallel optimization.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Added in v3.2.0 as an experimental argument.</p>
+</div>
+</p></li>
+<li><p><strong>independent_sampler</strong> (<em>BaseSampler</em><em> | </em><em>None</em>) – An independent sampler to use for the initial trials and for parameters that are
+conditional.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>) – Seed for random number generator.</p></li>
+<li><p><strong>device</strong> (<em>'torch.device'</em><em> | </em><em>None</em>) – A <code class="docutils literal notranslate"><span class="pre">torch.device</span></code> to store input and output data of BoTorch. Please set a CUDA device
+if you fasten sampling.</p></li>
+<li><p><strong>pof_config</strong> (<a class="reference internal" href="#pyfemtet.opt.optimizer.PoFConfig" title="pyfemtet.opt.optimizer.PoFConfig"><em>PoFConfig</em></a><em> or </em><em>None</em>) – Sampler settings.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Added in v2.4.0 as an experimental feature. The interface may change in newer versions
+without prior notice. See <a class="reference external" href="https://github.com/optuna/optuna/releases/tag/v2.4.0">https://github.com/optuna/optuna/releases/tag/v2.4.0</a>.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.after_trial">
+<span class="sig-name descname"><span class="pre">after_trial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFBoTorchSampler.after_trial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.after_trial" title="Link to this definition"></a></dt>
+<dd><p>Trial post-processing.</p>
+<p>This method is called after the objective function returns and right before the trial is
+finished and its state is stored.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Added in v2.4.0 as an experimental feature. The interface may change in newer versions
+without prior notice. See <a class="reference external" href="https://github.com/optuna/optuna/releases/tag/v2.4.0">https://github.com/optuna/optuna/releases/tag/v2.4.0</a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>Study</em>) – Target study object.</p></li>
+<li><p><strong>trial</strong> (<em>FrozenTrial</em>) – Target trial object.
+Take a copy before modifying this object.</p></li>
+<li><p><strong>state</strong> (<em>TrialState</em>) – Resulting trial state.</p></li>
+<li><p><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.13)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><em>None</em>) – Resulting trial values. Guaranteed to not be <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> if trial succeeded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.before_trial">
+<span class="sig-name descname"><span class="pre">before_trial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFBoTorchSampler.before_trial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.before_trial" title="Link to this definition"></a></dt>
+<dd><p>Trial pre-processing.</p>
+<p>This method is called before the objective function is called and right after the trial is
+instantiated. More precisely, this method is called during trial initialization, just
+before the <code class="xref py py-func docutils literal notranslate"><span class="pre">infer_relative_search_space()</span></code> call. In other
+words, it is responsible for pre-processing that should be done before inferring the search
+space.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Added in v3.3.0 as an experimental feature. The interface may change in newer versions
+without prior notice. See <a class="reference external" href="https://github.com/optuna/optuna/releases/tag/v3.3.0">https://github.com/optuna/optuna/releases/tag/v3.3.0</a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>Study</em>) – Target study object.</p></li>
+<li><p><strong>trial</strong> (<em>FrozenTrial</em>) – Target trial object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.infer_relative_search_space">
+<span class="sig-name descname"><span class="pre">infer_relative_search_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFBoTorchSampler.infer_relative_search_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.infer_relative_search_space" title="Link to this definition"></a></dt>
+<dd><p>Infer the search space that will be used by relative sampling in the target trial.</p>
+<p>This method is called right before <code class="xref py py-func docutils literal notranslate"><span class="pre">sample_relative()</span></code>
+method, and the search space returned by this method is passed to it. The parameters not
+contained in the search space will be sampled by using
+<code class="xref py py-func docutils literal notranslate"><span class="pre">sample_independent()</span></code> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>Study</em>) – Target study object.</p></li>
+<li><p><strong>trial</strong> (<em>FrozenTrial</em>) – Target trial object.
+Take a copy before modifying this object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the parameter names and parameter’s distributions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <em>BaseDistribution</em>]</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Please refer to <code class="xref py py-func docutils literal notranslate"><span class="pre">intersection_search_space()</span></code> as an
+implementation of <code class="xref py py-func docutils literal notranslate"><span class="pre">infer_relative_search_space()</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.reseed_rng">
+<span class="sig-name descname"><span class="pre">reseed_rng</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFBoTorchSampler.reseed_rng"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.reseed_rng" title="Link to this definition"></a></dt>
+<dd><p>Reseed sampler’s random number generator.</p>
+<p>This method is called by the <code class="xref py py-class docutils literal notranslate"><span class="pre">Study</span></code> instance if trials are executed
+in parallel with the option <code class="docutils literal notranslate"><span class="pre">n_jobs&gt;1</span></code>. In that case, the sampler instance will be
+replicated including the state of the random number generator, and they may suggest the
+same values. To prevent this issue, this method assigns a different seed to each random
+number generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_independent">
+<span class="sig-name descname"><span class="pre">sample_independent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_distribution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFBoTorchSampler.sample_independent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_independent" title="Link to this definition"></a></dt>
+<dd><p>Sample a parameter for a given distribution.</p>
+<p>This method is called only for the parameters not contained in the search space returned
+by <code class="xref py py-func docutils literal notranslate"><span class="pre">sample_relative()</span></code> method. This method is suitable
+for sampling algorithms that do not use relationship between parameters such as random
+sampling and TPE.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The failed trials are ignored by any build-in samplers when they sample new
+parameters. Thus, failed trials are regarded as deleted in the samplers’
+perspective.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>Study</em>) – Target study object.</p></li>
+<li><p><strong>trial</strong> (<em>FrozenTrial</em>) – Target trial object.
+Take a copy before modifying this object.</p></li>
+<li><p><strong>param_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the sampled parameter.</p></li>
+<li><p><strong>param_distribution</strong> (<em>BaseDistribution</em>) – Distribution object that specifies a prior and/or scale of the sampling algorithm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A parameter value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_relative">
+<span class="sig-name descname"><span class="pre">sample_relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_space</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFBoTorchSampler.sample_relative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_relative" title="Link to this definition"></a></dt>
+<dd><p>Sample parameters in a given search space.</p>
+<p>This method is called once at the beginning of each trial, i.e., right before the
+evaluation of the objective function. This method is suitable for sampling algorithms
+that use relationship between parameters such as Gaussian Process and CMA-ES.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The failed trials are ignored by any build-in samplers when they sample new
+parameters. Thus, failed trials are regarded as deleted in the samplers’
+perspective.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>Study</em>) – Target study object.</p></li>
+<li><p><strong>trial</strong> (<em>FrozenTrial</em>) – Target trial object.
+Take a copy before modifying this object.</p></li>
+<li><p><strong>search_space</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>BaseDistribution</em><em>]</em>) – The search space returned by
+<code class="xref py py-func docutils literal notranslate"><span class="pre">infer_relative_search_space()</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the parameter names and the values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.use_fixed_noise">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_fixed_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.use_fixed_noise" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">PoFConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_pof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_positive_only_pof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_dynamic_pof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_dynamic_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_repeat_penalty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_repeat_penalty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_dynamic_repeat_penalty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_watch_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_watch_norm_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_repeat_penalty_gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_no_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_optuna/_pof_botorch.html#PoFConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Configuration of PoFBoTorchSampler</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enable_pof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to consider Probability of Feasibility.
+Defaults to True.</p></li>
+<li><p><strong>gamma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>torch.Tensor</em>) – Exponent for Probability of Feasibility. A larger value places more emphasis on feasibility.
+If 0, Probability of Feasibility is not considered.
+Defaults to 1.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>torch.Tensor</em>) – Boundary value for calculating Probability of Feasibility with CDF.
+Generally between 0 and 1, with 0.5 being recommended. A larger value places more emphasis on feasibility.
+Defaults to 0.5.</p></li>
+<li><p><strong>enable_log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to apply symlog to the base acquisition function values.
+Defaults to True.</p></li>
+<li><p><strong>enable_positive_only_pof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to apply Probability of Feasibility only when the base acquisition function is positive.
+Defaults to False.</p></li>
+<li><p><strong>enable_dynamic_pof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to change gamma dynamically. When True, <code class="docutils literal notranslate"><span class="pre">`gamma`</span></code> argument is ignored.
+Defaults to True.</p></li>
+<li><p><strong>enable_dynamic_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to change threshold dynamically. When True, <code class="docutils literal notranslate"><span class="pre">`threshold`</span></code> argument is ignored.
+Defaults to False.</p></li>
+<li><p><strong>enable_repeat_penalty</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to apply a penalty coefficient on the base acquisition function values near sampled points.
+Defaults to True.</p></li>
+<li><p><strong>enable_dynamic_repeat_penalty</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Enhances the penalty coefficient if the same value is repeated. When True, it behaves as if enable_repeat_penalty is set to True.
+Defaults to True.</p></li>
+<li><p><strong>repeat_watch_window</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Specifies how many recent proposal values are referenced when determining the magnitude of penalties when enable_dynamic_repeat_penalty is True.
+Defaults to 3.</p></li>
+<li><p><strong>repeat_watch_norm_distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Defines how small the norm distance between proposed parameters needs to be in normalized parameter space [0, 1]
+for a stronger penalty effect. Extreme values may cause numerical instability.
+Defaults to 0.1.</p></li>
+<li><p><strong>enable_no_noise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to treat observation errors as non-existent
+when training the regression model with the objective
+function value. The default is True because there is
+essentially no observational error in a FEM analysis.
+This is different from the original BoTorchSampler
+implementation.</p></li>
+<li><p><strong>_repeat_penalty</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – </p></li>
+<li><p><strong>_repeat_penalty_gamma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_dynamic_pof">
+<span class="sig-name descname"><span class="pre">enable_dynamic_pof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_dynamic_pof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_dynamic_repeat_penalty">
+<span class="sig-name descname"><span class="pre">enable_dynamic_repeat_penalty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_dynamic_repeat_penalty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_dynamic_threshold">
+<span class="sig-name descname"><span class="pre">enable_dynamic_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_dynamic_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_log">
+<span class="sig-name descname"><span class="pre">enable_log</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_no_noise">
+<span class="sig-name descname"><span class="pre">enable_no_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_no_noise" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_pof">
+<span class="sig-name descname"><span class="pre">enable_pof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_pof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_positive_only_pof">
+<span class="sig-name descname"><span class="pre">enable_positive_only_pof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_positive_only_pof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.enable_repeat_penalty">
+<span class="sig-name descname"><span class="pre">enable_repeat_penalty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.enable_repeat_penalty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.gamma">
+<span class="sig-name descname"><span class="pre">gamma</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.gamma" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.repeat_watch_norm_distance">
+<span class="sig-name descname"><span class="pre">repeat_watch_norm_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.repeat_watch_norm_distance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.repeat_watch_window">
+<span class="sig-name descname"><span class="pre">repeat_watch_window</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.repeat_watch_window" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">ScipyOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">minimize_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_scipy.html#ScipyOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer._base.AbstractOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code></a></p>
@@ -449,11 +811,14 @@ the Scipy documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -465,6 +830,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.get_parameter">
@@ -557,11 +927,14 @@ the Scipy documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyScalarOptimizer.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyScalarOptimizer.f" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_record_infeasible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyScalarOptimizer.f" title="Link to this definition"></a></dt>
 <dd><p>Calculate objectives and constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Optimization parameters.</p></li>
+<li><p><strong>_record_infeasible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, skip fem.update() and record self.generate_invalid_results().</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The list of internal objective values,
@@ -573,6 +946,11 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyScalarOptimizer.generate_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyScalarOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyScalarOptimizer.get_parameter">

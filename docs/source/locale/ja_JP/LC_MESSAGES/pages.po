@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-07 10:49+0900\n"
+"POT-Creation-Date: 2025-01-08 13:09+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -46,6 +46,26 @@ msgstr ""
 #: ../../LICENSE:12
 msgid "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 msgstr ""
+
+#: ../source/pages/advanced_examples.rst:2
+msgid "Advanced Examples"
+msgstr "発展的な例題"
+
+#: ../source/pages/advanced_examples.rst:6
+msgid "Surrogate Model"
+msgstr "サロゲートモデル"
+
+#: ../source/pages/advanced_examples.rst:14
+msgid "Create training data by Femtet and optimize with surrogate model."
+msgstr "Femtet で訓練データを作成し、サロゲートモデルで最適化します。"
+
+#: ../source/pages/advanced_examples.rst:16
+msgid "Excel Migration"
+msgstr "Excel 連携"
+
+#: ../source/pages/advanced_examples.rst:24
+msgid "Integrate pyfemtet.opt with the macro of **Microsoft Excel**."
+msgstr "**Microsoft Excel** のマクロ機能と最適化を統合します。"
 
 #: ../source/pages/api.rst:2
 msgid "API Reference"

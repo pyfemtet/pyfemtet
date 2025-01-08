@@ -1,7 +1,10 @@
+import warnings
+
+
 try:
     import brepmatching
+
 except ModuleNotFoundError as e:
-    import warnings
     warnings.warn(
         'There is no installation of `brepmatching`. '
         'Please confirm installation via '
@@ -10,5 +13,6 @@ except ModuleNotFoundError as e:
     )
     raise e
 
-from brepmatching.pyfemtet_scripts.replace_model_considering_their_matching import ModelUpdater
-
+except FileNotFoundError as e:
+    warnings.warn(str(e))
+    raise e

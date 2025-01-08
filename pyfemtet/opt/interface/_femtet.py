@@ -49,6 +49,10 @@ def _post_activate_message(hwnd):
     win32gui.PostMessage(hwnd, win32con.WM_ACTIVATE, win32con.WA_ACTIVE, 0)
 
 
+class FailedToPostProcess(Exception):
+    pass
+
+
 class FemtetInterface(FEMInterface):
     """Control Femtet from optimizer.
 
@@ -181,9 +185,7 @@ class FemtetInterface(FEMInterface):
         )
 
     def __del__(self):
-        _set_autosave_enabled(self._original_autosave_enabled)
-        if self.quit_when_destruct:
-            self.quit()
+        self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
 
     def _connect_new_femtet(self):
@@ -726,7 +728,8 @@ class FemtetInterface(FEMInterface):
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
-        _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
+        if self.quit_when_destruct:
+            _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
 
     def _setup_before_parallel(self, client):
         client.upload_file(
@@ -738,8 +741,15 @@ class FemtetInterface(FEMInterface):
         return _version(Femtet=self.Femtet)
 
     def _create_postprocess_args(self):
-        file_content = self._create_result_file_content()
-        jpg_content = self._create_jpg_content()
+        try:
+            file_content = self._create_result_file_content()
+        except FailedToPostProcess:
+            file_content = None
+
+        try:
+            jpg_content = self._create_jpg_content()
+        except FailedToPostProcess:
+            jpg_content = None
 
         out = dict(
             original_femprj_path=self.original_femprj_path,
@@ -787,7 +797,7 @@ class FemtetInterface(FEMInterface):
                 fun=self.Femtet.SavePDT,
                 args=(pdt_path, True),
                 return_value_if_failed=False,
-                if_error=SolveError,
+                if_error=FailedToPostProcess,
                 error_message=Msg.ERR_FAILED_TO_SAVE_PDT,
                 is_Gaudi_method=False,
             )
@@ -815,10 +825,10 @@ class FemtetInterface(FEMInterface):
         self.Femtet.RedrawMode = True  # 逐一の描画をオン
 
         if not succeed:
-            raise Exception(Msg.ERR_FAILED_TO_SAVE_JPG)
+            raise FailedToPostProcess(Msg.ERR_FAILED_TO_SAVE_JPG)
 
         if not os.path.exists(jpg_path):
-            raise Exception(Msg.ERR_JPG_NOT_FOUND)
+            raise FailedToPostProcess(Msg.ERR_JPG_NOT_FOUND)
 
         with open(jpg_path, 'rb') as f:
             content = f.read()

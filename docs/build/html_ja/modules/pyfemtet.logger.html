@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/installation.html">インストール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/advanced_examples.html">発展的な例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">使い方</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API Reference</a><ul class="current">
@@ -100,18 +101,19 @@
 <section id="module-pyfemtet.logger">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.logger" title="Link to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyfemtet.logger.get_logger">
-<span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger/_impl.html#get_logger"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_logger" title="Link to this definition"></a></dt>
-<dd><p>ロガーを返します。</p>
-<p class="rubric">サンプル</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Retrieves a specific logger used in pyfemtet.opt.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">logging</span>  
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyfemtet.logger</span> <span class="kn">import</span> <span class="n">get_logger</span>  
-<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;opt&#39;</span><span class="p">)</span>  <span class="c1"># logger of optimizer  </span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>  <span class="c1"># disable all log from optimizer  </span>
-</pre></div>
-</div>
-</dd></dl>
+<dt class="sig sig-object py" id="pyfemtet.logger.get_dash_logger">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_dash_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger.html#get_dash_logger"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_dash_logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfemtet.logger.get_dask_logger">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_dask_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger.html#get_dask_logger"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_dask_logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfemtet.logger.get_optuna_logger">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_optuna_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger.html#get_optuna_logger"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_optuna_logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 </section>

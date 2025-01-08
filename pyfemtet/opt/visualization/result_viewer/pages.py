@@ -281,7 +281,7 @@ class HomePage(AbstractPage):
                 trial = pt['customdata'][0]
 
                 # get parameter and update model
-                df = self.application.history.get_df()
+                df = self.application.history.get_df(valid_only=True)
                 row = df[df['trial'] == trial]
                 metadata = np.array(self.application.history.metadata)
                 idx = np.where(metadata == 'prm')[0]

@@ -81,6 +81,10 @@ class Message:
     ERR_FAILED_TO_SAVE_JPG = _('Failed to save screenshot (.jpg).')
     ERR_JPG_NOT_FOUND = _('Screenshot (.jpg) is not found.')
     ERR_UPDATE_SOLIDWORKS_MODEL_FAILED = _('Failed to update model in solidworks.')
+    INFO_POF_IS_LESS_THAN_THRESHOLD = _('Probability of feasibility is less than threshold.')
+    INFO_TERMINATING_EXCEL = _('Terminating Excel process...')
+    INFO_TERMINATED_EXCEL = _('Excel process is terminated.')
+    INFO_RESTORING_FEMTET_AUTOSAVE = _('Restore Femtet setting of autosave.')
 
     # ===== pyfemtet.opt.optimizer =====
     ERR_NOT_IMPLEMENTED = _('The following features are not supported by the specified optimization method. ')
@@ -112,9 +116,9 @@ class Message:
     GRAPH_TITLE_HYPERVOLUME = _('Hypervolume Plot')
     GRAPH_TITLE_SINGLE_OBJECTIVE = _('Objective Plot')
     GRAPH_TITLE_MULTI_OBJECTIVE = _('Multi Objective Pair Plot')
-    GRAPH_AXIS_LABEL_TRIAL = _('trial number')
+    GRAPH_AXIS_LABEL_TRIAL = _('Succeeded trial number')
     LEGEND_LABEL_ALL_SOLUTIONS = _('All solutions')
-    LEGEND_LABEL_OPTIMAL_SOLUTIONS = _('Transition of optimal solutions')
+    LEGEND_LABEL_OPTIMAL_SOLUTIONS = _('Transition of<br>optimal solutions')
     LEGEND_LABEL_OBJECTIVE_TARGET = _('Target value')
     # main_graph.py
     TAB_LABEL_OBJECTIVE_PLOT = _('Objectives')
