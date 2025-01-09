@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-08 13:09+0900\n"
+"POT-Creation-Date: 2025-01-09 16:15+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,11 +47,11 @@ msgid "To run macros from an xlsm file downloaded from the internet, you need to
 msgstr ""
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:28
-msgid "Open the Excel file and check the settings listed on the \"Optimization Settings\" sheet. Then, press the \"call pyfemtet\" button at the bottom of the same sheet."
+msgid "Open the Excel file and check the settings listed on the \"最適化の設定\" sheet. Then, press the \"call pyfemtet\" button at the bottom of the same sheet."
 msgstr ""
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:33
-msgid "The macros included in this xlsm file are based on the macro auto-generation feature from the original Femtet project. Therefore, when you run the Excel macro, Femtet will launch and automatically create the original analysis model. Additionally, this macro has been modified to read variable values from cells within the xlsm file and reflect them in the created analysis model. For detailed specifications, please refer to the \"Notes\" sheet in Excel and the comments in the source code."
+msgid "The macros included in this xlsm file are based on the macro auto-generation feature from the original Femtet project. Therefore, when you run the Excel macro, Femtet will launch and automatically create the original analysis model. Additionally, this macro has been modified to read variable values from cells within the xlsm file and reflect them in the created analysis model. For detailed specifications, please refer to the \"備考\" sheet in Excel and the comments in the source code."
 msgstr ""
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:46
@@ -59,83 +59,83 @@ msgstr ""
 msgid "Design Variables"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:50
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:51
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
 msgid "Appearance of the Model"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:54
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Variable Name"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:54
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Description"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
 msgid "section_radius"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
 msgid "Radius of wire"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
 msgid "coil_radius"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
 msgid "Bottom radius of coil"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
 msgid "coil_pitch"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
 msgid "Pitch of coil"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
 msgid "n"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
 msgid "Number of turns"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:60
 msgid "coil_radius_grad"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:60
 msgid "Coil radius increment per pitch"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:64
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:65
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
 msgid "Objective Function"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:66
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:67
 msgid "Self-inductance (aim to 100 nH)"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:67
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:68
 msgid "Approx. Volume (minimize)"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:71
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:72
 msgid "Execution Result of the Samples"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:74
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:76
 msgid "Screenshot in progress"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:77
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:79
 msgid "The pyfemtet-core.py performs optimization by controlling the values of various cells in the xlsm file and executing macros instead of directly running Femtet. This allows for integration with PyFemtet without needing to rewrite all existing code if you are already using Excel macros for an automated design flow with Femtet."
 msgstr ""
 

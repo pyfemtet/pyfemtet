@@ -5,7 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 4
 
    pyfemtet.opt.interface
    pyfemtet.opt.optimizer

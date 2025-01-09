@@ -4,10 +4,13 @@ pyfemtet.opt.optimizer package
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 1
+pyfemtet.opt.optimizer.parameter module
+---------------------------------------
 
-   pyfemtet.opt.optimizer.parameter
+.. automodule:: pyfemtet.opt.optimizer.parameter
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
