@@ -4,10 +4,13 @@ pyfemtet.opt.prediction package
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 1
+pyfemtet.opt.prediction.single\_task\_gp module
+-----------------------------------------------
 
-   pyfemtet.opt.prediction.single_task_gp
+.. automodule:: pyfemtet.opt.prediction.single_task_gp
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

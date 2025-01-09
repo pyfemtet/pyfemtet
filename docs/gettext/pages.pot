@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-08 13:09+0900\n"
+"POT-Creation-Date: 2025-01-09 16:15+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -269,7 +269,7 @@ msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:8
-msgid "python 3.9.3 or later (3.11 or 3.12 recommended)"
+msgid "python 3.10 or later (3.11 or 3.12 recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:11
@@ -410,7 +410,7 @@ msgid "|Python|"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_python.rst:16
-msgid "**If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.** PyFemtet itself supports Python 3.9.3 and above."
+msgid "**If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.** PyFemtet itself supports Python 3.10 and above."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_python.rst:22
