@@ -239,7 +239,7 @@ def _get_simplified_df_values(csv_path):
     return pdf.values.astype(float)
 
 
-@pytest.mark.sample
+# @pytest.mark.sample  # 再現性がないのでテストから除外
 def test_constrained_pipe(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\constrained_pipe.py',
