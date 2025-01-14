@@ -1,0 +1,73 @@
+import types
+import importlib
+from typing import TYPE_CHECKING, Any
+
+
+def _lazy_class_factory(module, cls_name):
+    class MetaClass(type):
+        __original_cls__: type
+
+        def __repr__(self):
+            if hasattr(self, '__original_cls__'):
+                return f'<LazyClass of {self.__original_cls__}>'
+            else:
+                return f'<LazyClass of <unloaded class>>'
+
+    class LazyClass(object, metaclass=MetaClass):
+        # 継承を正しくコピーすることができていないので
+        # issubclass を使う際は注意
+        def __new__(cls, *args, **kwargs):
+            cls.__original_cls__ = getattr(module, cls_name)
+            self = cls.__original_cls__(*args, **kwargs)
+            return self
+
+    return LazyClass
+
+
+class _LazyImport(types.ModuleType):
+    """Module wrapper for lazy import.
+
+    Note:
+        This module is totally derived from `optuna._imports._LazyImport`.
+        The following author has the copyright of this code.
+
+        *******************************************
+        Copyright (c) 2018 Preferred Networks, Inc.
+        *******************************************
+
+    This class wraps the specified modules and lazily imports them only when accessed.
+    Otherwise, `import optuna` is slowed down by importing all submodules and
+    dependencies even if not required.
+    Within this project's usage, importlib override this module's attribute on the first
+    access and the imported submodule is directly accessed from the second access.
+
+    Args:
+        name: Name of module to apply lazy import.
+    """
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self._name = name
+
+    def _load(self) -> types.ModuleType:
+        module = importlib.import_module(self._name)
+        self.__dict__.update(module.__dict__)
+        return module
+
+    def __getattr__(self, item: str) -> Any:
+        return getattr(self._load(), item)
+
+
+if __name__ == '__main__':
+    if TYPE_CHECKING:
+        # for type check only
+        import numpy
+        NDArray = numpy.ndarray
+    else:
+        # runtime
+        numpy = _LazyImport('numpy')
+        NDArray = _lazy_class_factory(numpy, 'ndarray')
+
+    print('numpy is loaded:', numpy.__doc__ is not None)
+    a = NDArray(shape=[1])
+    print('numpy is loaded:', numpy.__doc__ is not None)

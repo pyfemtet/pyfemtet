@@ -1,5 +1,5 @@
 # typing
-from typing import List
+from typing import List, TYPE_CHECKING
 
 # built-in
 import os
@@ -9,6 +9,7 @@ import ast
 import csv
 import ctypes
 from packaging import version
+import platform
 
 # 3rd-party
 import numpy as np
@@ -25,7 +26,12 @@ else:
 from dask.distributed import Lock, get_client, Client
 
 # win32com
-from win32com.client import constants, Constants
+if (platform.system() == 'Windows') or TYPE_CHECKING:
+    from win32com.client import constants, Constants
+else:
+    class Constants:
+        pass
+    constants = None
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
