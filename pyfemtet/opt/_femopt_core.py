@@ -36,6 +36,7 @@ else:
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface, FemtetInterface
 from pyfemtet._message import encoding, Msg
+from pyfemtet._imports import *
 
 # logger
 from pyfemtet.logger import get_module_logger
@@ -323,7 +324,7 @@ class Function:
 
         args = self.args
         # Femtet 特有の処理
-        if isinstance(fem, FemtetInterface):
+        if isinstance_wrapper(fem, FemtetInterface):
             args = (fem.Femtet, *args)
         return float(self.fun(*args, **self.kwargs))
 

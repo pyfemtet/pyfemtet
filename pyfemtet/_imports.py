@@ -3,23 +3,35 @@ import importlib
 from typing import TYPE_CHECKING, Any
 
 
+__all__ = [
+    'isinstance_wrapper',
+    '_LazyImport',
+    '_lazy_class_factory',
+]
+
+
+class _MetaClass(type):
+    __original_cls__: type
+
+    def __repr__(self):
+        if hasattr(self, '__original_cls__'):
+            return f'<LazyClass of {self.__original_cls__()}>'
+        else:
+            return f'<LazyClass of <unloaded class>>'
+
+
 def _lazy_class_factory(module, cls_name):
-    class MetaClass(type):
-        __original_cls__: type
-
-        def __repr__(self):
-            if hasattr(self, '__original_cls__'):
-                return f'<LazyClass of {self.__original_cls__}>'
-            else:
-                return f'<LazyClass of <unloaded class>>'
-
-    class LazyClass(object, metaclass=MetaClass):
-        # 継承を正しくコピーすることができていないので
+    class LazyClass(object, metaclass=_MetaClass):
+        # 継承を正しくコピーできていないので
         # issubclass を使う際は注意
         def __new__(cls, *args, **kwargs):
-            cls.__original_cls__ = getattr(module, cls_name)
-            self = cls.__original_cls__(*args, **kwargs)
+            OriginalClass = cls.__original_cls__()
+            self = OriginalClass(*args, **kwargs)
             return self
+
+        @staticmethod
+        def __original_cls__():
+            return getattr(module, cls_name)
 
     return LazyClass
 
@@ -58,16 +70,38 @@ class _LazyImport(types.ModuleType):
         return getattr(self._load(), item)
 
 
+def isinstance_wrapper(obj: object, cls: type) -> bool:
+    if isinstance(cls, _MetaClass):
+        try:
+            cls_ = cls.__original_cls__()
+        except ModuleNotFoundError:
+            return False
+        return isinstance(obj, cls_)
+    else:
+        return isinstance(obj, cls)
+
+
 if __name__ == '__main__':
     if TYPE_CHECKING:
         # for type check only
         import numpy
         NDArray = numpy.ndarray
+        import no_module
     else:
         # runtime
         numpy = _LazyImport('numpy')
         NDArray = _lazy_class_factory(numpy, 'ndarray')
+        NDArray2 = _lazy_class_factory(numpy, 'ndarray')
+        no_module = _LazyImport('no_module')
+        NoClass = _lazy_class_factory(no_module, 'NoClass')
 
     print('numpy is loaded:', numpy.__doc__ is not None)
     a = NDArray(shape=[1])
     print('numpy is loaded:', numpy.__doc__ is not None)
+
+    print(f"{isinstance(None, NoClass)=}")
+    print(f"{isinstance_wrapper(None, NoClass)=}")
+    print(f"{isinstance(a, NDArray)=}")
+    print(f"{isinstance_wrapper(a, NDArray)=}")
+    print(f"{isinstance_wrapper(a, NoClass)=}")
+    print(f"{isinstance_wrapper(a, NDArray2)=}")
