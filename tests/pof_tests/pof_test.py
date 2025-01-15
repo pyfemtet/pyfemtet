@@ -59,7 +59,7 @@ def test_pof_basic():
 
     # 記録モードならば記録ヒストリを作る
     if record_mode:
-        path = Path(__file__).parent / 'pof_reference.reccsv'
+        path = Path(__file__).parent / 'pof_reference.csv'
 
     # そうでなければテストヒストリを作る
     else:
@@ -92,7 +92,7 @@ def test_pof_basic():
     )
 
     femopt.add_parameter('r', 0.5, 0, 1)
-    femopt.add_parameter('theta', 1.5*COEF, 0, 2*pi)
+    femopt.add_parameter('theta', 0.5*1.5*COEF, 0, 2*pi)
 
     femopt.add_objective(x, direction='maximize', args=femopt.opt)
     femopt.add_objective(y, direction='maximize', args=femopt.opt)
@@ -107,7 +107,10 @@ def test_pof_basic():
         confirm_before_exit=False,
     )
 
-    if not record_mode:
+    if record_mode:
+        os.rename(path, str(path).replace('.csv', '.reccsv'))
+
+    else:
         # ===== check =====
         import numpy as np
         import pandas as pd
