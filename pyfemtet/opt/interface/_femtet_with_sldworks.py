@@ -10,7 +10,7 @@ from win32com.client import DispatchEx
 from pythoncom import CoInitialize, CoUninitialize, com_error
 
 from pyfemtet.core import ModelError
-from pyfemtet.opt.interface import FemtetInterface
+from pyfemtet.opt.interface._femtet import FemtetInterface
 from pyfemtet._message import Msg
 
 

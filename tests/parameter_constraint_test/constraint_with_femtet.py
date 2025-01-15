@@ -48,4 +48,4 @@ if __name__ == '__main__':
     femopt.add_objective(mises_stress, '最大ミーゼス応力')
 
     femopt.set_random_seed(42)
-    femopt.optimize(timeout=600)
+    femopt.optimize(timeout=600, confirm_before_exit=False)

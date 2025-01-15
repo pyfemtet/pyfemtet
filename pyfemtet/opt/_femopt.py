@@ -31,6 +31,7 @@ from pyfemtet.opt._femopt_core import (
 from pyfemtet._message import Msg, encoding
 from pyfemtet.opt.optimizer.parameter import Parameter, Expression
 from pyfemtet._warning import experimental_feature
+from pyfemtet._imports import *
 
 from dask import config as cfg
 cfg.set({'distributed.scheduler.worker-ttl': None})
@@ -366,8 +367,8 @@ class FEMOpt:
 
         # 引数の処理
         if fun is None:
-            from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
-            if not isinstance(self.fem, SurrogateModelInterfaceBase):
+            from pyfemtet.opt.interface import SurrogateModelInterfaceBase
+            if not isinstance_wrapper(self.fem, SurrogateModelInterfaceBase):
                 raise ValueError('`fun` argument is not specified.')
         if args is None:
             args = tuple()
@@ -510,13 +511,13 @@ class FEMOpt:
             name = candidate
         if using_fem is None:
             # 自動推定機能は Femtet 特有の処理とする
-            if isinstance(self.fem, FemtetInterface):
+            if isinstance_wrapper(self.fem, FemtetInterface):
                 using_fem = _is_access_femtet(fun)
             else:
                 using_fem = False
 
         # strict constraint の場合、solve 前に評価したいので Gogh へのアクセスを禁ずる
-        if strict and isinstance(self.fem, FemtetInterface):
+        if strict and isinstance_wrapper(self.fem, FemtetInterface):
             if _is_access_gogh(fun):
                 message = Msg.ERR_CONTAIN_GOGH_ACCESS_IN_STRICT_CONSTRAINT
                 raise Exception(message)
@@ -680,7 +681,7 @@ class FEMOpt:
 
         # Femtet 特有の処理
         metadata = None
-        if isinstance(self.fem, FemtetInterface):
+        if isinstance_wrapper(self.fem, FemtetInterface):
 
             # 結果 csv に記載する femprj に関する情報の作成
             metadata = json.dumps(

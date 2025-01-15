@@ -17,22 +17,25 @@ from pythoncom import CoInitialize, CoUninitialize
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error
 
-from pyfemtet.opt import FEMInterface
+# pyfemtet.core
 from pyfemtet.core import SolveError
-from pyfemtet.opt.optimizer.parameter import Parameter, Expression
 
-from pyfemtet.dispatch_extensions import _get_pid, dispatch_specific_femtet
-
+# pyfemtet._util
 from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate
-
 from pyfemtet._util.excel_macro_util import watch_excel_macro_error
 from pyfemtet._util.dask_util import lock_or_no_lock
 from pyfemtet._util.excel_parse_util import *
-
 from pyfemtet._warning import show_experimental_warning
 from pyfemtet._message.messages import Message as Msg
 
-from pyfemtet.opt.interface._base import logger
+# dispatch extension
+from pyfemtet.dispatch_extensions import _get_pid, dispatch_specific_femtet
+
+# interface
+from pyfemtet.opt.interface._base import FEMInterface, logger
+
+# expression
+from pyfemtet.opt.optimizer.parameter import Parameter, Expression
 
 
 class ExcelInterface(FEMInterface):
