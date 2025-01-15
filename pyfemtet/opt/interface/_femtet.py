@@ -33,7 +33,7 @@ from pyfemtet.dispatch_extensions import (
     _get_pids,
     DispatchExtensionException,
 )
-from pyfemtet.opt.interface import FEMInterface
+from pyfemtet.opt.interface._base import FEMInterface
 from pyfemtet._message import Msg
 from pyfemtet._femtet_config_util.autosave import _get_autosave_enabled, _set_autosave_enabled
 from pyfemtet._femtet_config_util.exit import _exit_or_force_terminate

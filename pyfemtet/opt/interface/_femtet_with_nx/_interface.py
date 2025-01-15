@@ -6,7 +6,7 @@ import pandas as pd
 from dask.distributed import get_worker
 
 from pyfemtet.core import ModelError
-from pyfemtet.opt.interface import FemtetInterface
+from pyfemtet.opt.interface._femtet import FemtetInterface
 from pyfemtet._message import Msg
 
 
