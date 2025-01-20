@@ -1,6 +1,7 @@
 import types
 import importlib
 from typing import TYPE_CHECKING, Any
+from abc import ABCMeta
 
 
 __all__ = [
@@ -10,7 +11,7 @@ __all__ = [
 ]
 
 
-class _MetaClass(type):
+class _MetaClass(ABCMeta):
     __original_cls__: type
 
     def __repr__(self):

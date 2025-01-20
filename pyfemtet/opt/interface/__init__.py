@@ -1,40 +1,30 @@
 from typing import TYPE_CHECKING
-import platform
+from pyfemtet._imports import _LazyImport, _lazy_class_factory
 
 from pyfemtet.opt.interface._base import FEMInterface
 from pyfemtet.opt.interface._base import NoFEM
 
-if (platform.system() == 'Windows') or TYPE_CHECKING:
-    # win32
+if TYPE_CHECKING:
     from pyfemtet.opt.interface._femtet import FemtetInterface
     from pyfemtet.opt.interface._femtet_with_sldworks import FemtetWithSolidworksInterface
     from pyfemtet.opt.interface._femtet_with_nx import FemtetWithNXInterface
+    from pyfemtet.opt.interface._surrogate import PoFBoTorchInterface
     from pyfemtet.opt.interface._excel_interface import ExcelInterface
 
 else:
-    class NotAvailableInWindows:
-        def __init__(self, *args, **kwargs):
-            raise RuntimeError('This feature is Windows only.')
+    FemtetInterface = _lazy_class_factory(_LazyImport('pyfemtet.opt.interface._femtet'), 'FemtetInterface')
+    FemtetWithSolidworksInterface = _lazy_class_factory(_LazyImport('pyfemtet.opt.interface._femtet_with_sldworks'), 'FemtetWithSolidworksInterface')
+    FemtetWithNXInterface = _lazy_class_factory(_LazyImport('pyfemtet.opt.interface._femtet_with_nx'), 'FemtetWithNXInterface')
+    PoFBoTorchInterface = _lazy_class_factory(_LazyImport('pyfemtet.opt.interface._surrogate'), 'PoFBoTorchInterface')
+    ExcelInterface = _lazy_class_factory(_LazyImport('pyfemtet.opt.interface._excel_interface'), 'ExcelInterface')
 
 
-    class FemtetInterface(NotAvailableInWindows):
-        pass
-    class FemtetWithSolidworksInterface(FemtetInterface):
-        pass
-    class FemtetWithNXInterface(FemtetInterface):
-        pass
-    class ExcelInterface(NotAvailableInWindows):
-        pass
-
-from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
-from pyfemtet.opt.interface._surrogate._singletaskgp import PoFBoTorchInterface
 
 __all__ = [
     'FEMInterface',
     'NoFEM',
     'FemtetInterface',
-    'FemtetWithSolidworksInterface',
     'FemtetWithNXInterface',
-    'SurrogateModelInterfaceBase',
+    'FemtetWithSolidworksInterface',
     'PoFBoTorchInterface',
 ]
