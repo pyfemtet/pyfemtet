@@ -23,11 +23,12 @@ else:
 
 from pyfemtet.opt.interface._surrogate import PoFBoTorchInterface
 
-__all__ = [
+__all__ =[
     'FEMInterface',
     'NoFEM',
     'FemtetInterface',
-    'FemtetWithNXInterface',
     'FemtetWithSolidworksInterface',
+    'FemtetWithNXInterface',
+    'ExcelInterface',
     'PoFBoTorchInterface',
 ]
