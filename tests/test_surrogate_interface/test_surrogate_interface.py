@@ -155,7 +155,7 @@ def test_surrogate():
 
 
 if __name__ == '__main__':
-    create_training_data()
-    optimize_with_surrogate()
+    # create_training_data()
+    # optimize_with_surrogate()
     optimize_with_surrogate_with_override()
 
