@@ -17,6 +17,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
             self,
             history_path: str = None,
             history: History = None,
+            override_objective: bool = True,
     ):
 
         self.history: History
@@ -25,6 +26,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
         self.obj: dict[str, float] = dict()
         self.df_prm: pd.DataFrame
         self.df_obj: pd.DataFrame
+        self.override_objective: bool = override_objective
 
         # history_path が与えられた場合、history をコンストラクトする
         if history_path is not None:
@@ -57,27 +59,25 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
         FEMInterface.__init__(
             self,
             history=history,  # コンストラクト済み history を渡せば並列計算時も何もしなくてよい
+            override_objective=self.override_objective
         )
 
     def filter_feasible(self, x: np.ndarray, y: np.ndarray, return_feasibility=False):
         feasible_idx = np.where(~np.isnan(y.sum(axis=1)))
         if return_feasibility:
             # calculated or not
-            y = np.zeros_like(y)
-            y[feasible_idx] = 1.
-            # satisfy weak feasibility or not
-            infeasible_idx = np.where(~self.history.get_df()['feasible'].values)
-            y[infeasible_idx] = .0
-            return x, y.reshape((-1, 1))
+            feas = np.zeros((len(y), 1), dtype=float)
+            feas[feasible_idx] = 1.
+            return x, feas
         else:
             return x[feasible_idx], y[feasible_idx]
 
     def _setup_after_parallel(self, *args, **kwargs):
-
-        opt: AbstractOptimizer = kwargs['opt']
-        obj: Objective
-        for obj_name, obj in opt.objectives.items():
-            obj.fun = lambda: self.obj[obj_name]
+        if self.override_objective:
+            opt: AbstractOptimizer = kwargs['opt']
+            obj: Objective
+            for obj_name, obj in opt.objectives.items():
+                obj.fun = lambda obj_name_=obj_name: self.obj[obj_name_]
 
     def update_parameter(self, parameters: pd.DataFrame, with_warning=False) -> Optional[List[str]]:
         for i, row in parameters.iterrows():
