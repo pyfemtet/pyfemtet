@@ -403,7 +403,7 @@ class FEMOpt:
 
         if names is not None:
             if isinstance(names, str):
-                names = [f'name_{i}' for i in range(n_return)]
+                names = [f'{names}_{i}' for i in range(n_return)]
             else:
                 # names = names
                 pass

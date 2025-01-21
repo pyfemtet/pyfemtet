@@ -85,6 +85,8 @@ class SingleTaskGPModel(PredictionModelBase):
         fit_gpytorch_mll(mll)
 
     def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        assert len(x.shape) >= 2
+
         X = tensor(x)
 
         post = self.gp.posterior(X)

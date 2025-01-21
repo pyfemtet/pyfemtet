@@ -27,8 +27,8 @@ class PoFBoTorchInterface(SurrogateModelInterfaceBase):
     def train_f(self):
         # df そのまま用いて training する
         x, y = self.filter_feasible(self.df_prm.values, self.df_obj.values, return_feasibility=True)
-        if y.min() == 1:
-            self.model_f.predict = lambda *args, **kwargs: (1., 0.001)
+        if y.min() == 1:  # feasible values only
+            self.model_f.predict = lambda *args, **kwargs: (1., 0.001)  # mean, std
         self.model_f.fit(x, y)
 
     def _setup_after_parallel(self, *args, **kwargs):
@@ -64,7 +64,8 @@ class PoFBoTorchInterface(SurrogateModelInterfaceBase):
             raise SolveError(Msg.INFO_POF_IS_LESS_THAN_THRESHOLD)
 
         # 実際の計算(mean は history.obj_names 順)
-        mean, _ = self.model.predict(np.array([x]))
+        _mean, _std = self.model.predict(np.array([x]))
+        mean = _mean[0]
 
         # 目的関数の更新
         self.obj = {obj_name: value for obj_name, value in zip(self.history.obj_names, mean)}
