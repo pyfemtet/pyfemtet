@@ -577,6 +577,7 @@ class FEMOpt:
             timeout: float = None,
             wait_setup: bool = True,
             confirm_before_exit: bool = True,
+            _port_record_path: str = None,
     ):
         """Runs the main optimization process.
 
@@ -799,6 +800,7 @@ class FEMOpt:
                 self.status,
                 worker_addresses,
                 self.worker_status_list,
+                _port_record_path,
                 # kwargs
                 **self.monitor_server_kwargs,
                 # kwargs of submit
@@ -945,6 +947,7 @@ def _start_monitor_server(
         status,
         worker_addresses,
         worker_status_list,
+        _port_record_path,
         host=None,
         port=None,
 ):
@@ -955,5 +958,6 @@ def _start_monitor_server(
         worker_status_list,
         host,
         port,
+        _port_record_path,
     )
     return 'Exit monitor server process gracefully'
