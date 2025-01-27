@@ -96,7 +96,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
 
             return jsonify(result)
 
-    def start_server(self, host=None, port=None, _port_record_path=None):
+    def start_server(self, host=None, port=None, host_record=None):
         """Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"""
 
         self._should_get_actor_data = True
@@ -111,7 +111,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         server_thread = Thread(
             target=self.run,
             args=(host, port,),
-            kwargs=dict(_port_record_path=_port_record_path),
+            kwargs=dict(host_record=host_record),
             daemon=True,
         )
         server_thread.start()
@@ -205,7 +205,7 @@ def g_debug():
     g_application.run(debug=False)
 
 
-def main(history, status, worker_addresses, worker_status_list, host=None, port=None, _port_record_path=None):
+def main(history, status, worker_addresses, worker_status_list, host=None, port=None, host_record=None):
     g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
 
     g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
@@ -219,7 +219,7 @@ def main(history, status, worker_addresses, worker_status_list, host=None, port=
     g_application.add_page(g_worker_page, 3)
     g_application.setup_callback()
 
-    g_application.start_server(host, port, _port_record_path)
+    g_application.start_server(host, port, host_record)
 
 
 if __name__ == '__main__':

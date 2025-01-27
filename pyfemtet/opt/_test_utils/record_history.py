@@ -10,7 +10,7 @@ from pyfemtet.opt import FEMOpt
 from pyfemtet._message import encoding as ENCODING
 
 
-def remove_femprj_metadata_from_csv(csv_path, encoding=ENCODING):
+def remove_extra_data_from_csv(csv_path, encoding=ENCODING):
 
     with open(csv_path, mode="r", encoding=encoding, newline="\n") as f:
         reader = csv.reader(f, delimiter=",")

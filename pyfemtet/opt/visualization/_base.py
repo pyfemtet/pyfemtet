@@ -197,7 +197,7 @@ class SidebarApplicationBase:
                     className="p-3 bg-light rounded-3",
                 )
 
-    def run(self, host='localhost', port=None, debug=False, _port_record_path=None):
+    def run(self, host='localhost', port=None, debug=False, host_record=None):
         self._setup_layout()
         port = port or self.DEFAULT_PORT
         # port を検証
@@ -209,9 +209,8 @@ class SidebarApplicationBase:
             webbrowser.open(f'http://{host}:{str(port)}')
         self.host = host
         self.port = port
-        if _port_record_path is not None:
-            with open(_port_record_path, 'w') as f:
-                json.dump(dict(host=host, port=port), f)
+        if host_record is not None:
+            host_record.set(self.host, self.port)
 
         self.app.run(debug=debug, host=host, port=port)
 

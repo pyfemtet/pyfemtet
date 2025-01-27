@@ -138,18 +138,18 @@ class FemtetControl(AbstractPage):
 
         # check holding history
         if self.application.history is None:
-            return kwargs, Msg.ERR_HISTORY_CSV_NOT_READ
+            return kwargs, Msg.WARN_HISTORY_CSV_NOT_READ
 
-        # get metadata
-        additional_metadata = self.application.history.metadata[0]
+        # get extra_data
+        extra_data = self.application.history.meta_columns[0]
 
-        # check metadata exists
-        if additional_metadata == '':
+        # check extra_data exists
+        if extra_data == '':
             return kwargs, Msg.WARN_INVALID_METADATA
 
-        # check the metadata is valid json
+        # check the extra_data is valid json
         try:
-            d = json.loads(additional_metadata)
+            d = json.loads(extra_data)
             femprj_path = os.path.abspath(d['femprj_path'])
         except (TypeError, json.decoder.JSONDecodeError, KeyError):
             return kwargs, Msg.WARN_INVALID_METADATA

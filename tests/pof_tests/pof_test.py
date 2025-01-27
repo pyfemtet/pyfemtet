@@ -105,7 +105,6 @@ def test_pof_basic():
     femopt.optimize(
         n_trials=n_trials,
         confirm_before_exit=False,
-        _port_record_path=r'c:\temp\port.json'
     )
 
     if record_mode:

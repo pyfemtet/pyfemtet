@@ -547,9 +547,9 @@ class PredictionModelGraph(AbstractPage):
             return tuple(ret.values())
 
     def create_formatted_parameter(self, row) -> Component:
-        metadata = self.application.history.metadata
+        meta_columns = self.application.history.meta_columns
         pd.options.display.float_format = '{:.4e}'.format
-        parameters = row.iloc[:, np.where(np.array(metadata) == 'prm')[0]]
+        parameters = row.iloc[:, np.where(np.array(meta_columns) == 'prm')[0]]
         names = parameters.columns
         values = [f'{value:.3e}' for value in parameters.values.ravel()]
         data = pd.DataFrame(dict(
@@ -563,10 +563,10 @@ class PredictionModelGraph(AbstractPage):
 
     def create_image_content_if_femtet(self, trial) -> Component:
         img_url = None
-        metadata = self.application.history.metadata
-        if metadata[0] != '':
+        meta_columns = self.application.history.meta_columns
+        if meta_columns[0] != '':
             # get img path
-            d = json.loads(metadata[0])
+            d = json.loads(meta_columns[0])
             femprj_path = d['femprj_path']
             model_name = d['model_name']
             femprj_result_dir = femprj_path.replace('.femprj', '.Results')

@@ -66,7 +66,7 @@ def test_excel_interface():
     csv_path = femopt.history_path
 
     if RECORD_MODE:
-        rh.remove_femprj_metadata_from_csv(
+        rh.remove_extra_data_from_csv(
             csv_path=ref_csv_path,
         )
 

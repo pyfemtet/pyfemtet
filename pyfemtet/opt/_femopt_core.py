@@ -1,4 +1,5 @@
 # typing
+import json
 from typing import List, TYPE_CHECKING
 
 # built-in
@@ -524,7 +525,6 @@ class History:
         obj_names (List[str], optional): The names of objectives. Defaults to None.
         cns_names (List[str], optional): The names of constraints. Defaults to None.
         client (dask.distributed.Client): Dask client.
-        additional_metadata (str, optional): metadata of optimization process.
         hv_reference (str or list[float or np.ndarray, optional):
             The method to calculate hypervolume or
             the reference point itself.
@@ -550,7 +550,6 @@ class History:
             obj_names=None,
             cns_names=None,
             client=None,
-            additional_metadata=None,
             hv_reference=None,
     ):
         # hypervolume 計算メソッド
@@ -561,7 +560,8 @@ class History:
         self.prm_names = prm_names
         self.obj_names = obj_names
         self.cns_names = cns_names
-        self.additional_metadata = additional_metadata or ''
+        self.extra_data = dict()
+        self.meta_columns = None
         self.__scheduler_address = client.scheduler.address if client is not None else None
 
         # 最適化実行中かどうか
@@ -575,15 +575,15 @@ class History:
 
             # 続きからなら df を読み込んで df にコピー
             if self.is_restart:
-                self.load()
+                self.load()  # 中で meta_columns を読む
 
             # そうでなければ df を初期化
             else:
-                columns, metadata = self.create_df_columns()
+                columns, meta_columns = self.create_df_columns()
                 df = pd.DataFrame()
                 for c in columns:
                     df[c] = None
-                self.metadata = metadata
+                self.meta_columns = meta_columns
                 self.set_df(df)
 
             # 一時ファイルに書き込みを試み、UnicodeEncodeError が出ないかチェック
@@ -609,16 +609,16 @@ class History:
         # df を読み込む
         df = pd.read_csv(self.path, encoding=self.ENCODING, header=self.HEADER_ROW)
 
-        # metadata を読み込む
+        # meta_columns を読み込む
         with open(self.path, mode='r', encoding=self.ENCODING, newline='\n') as f:
             reader = csv.reader(f, delimiter=',')
-            self.metadata = reader.__next__()
+            self.meta_columns = reader.__next__()
 
         # 最適化問題を読み込む
         columns = df.columns
-        prm_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'prm']
-        obj_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'obj']
-        cns_names = [column for i, column in enumerate(columns) if self.metadata[i] == 'cns']
+        prm_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'prm']
+        obj_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'obj']
+        cns_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'cns']
 
         # is_restart の場合、読み込んだ names と引数の names が一致するか確認しておく
         if self.is_restart:
@@ -662,7 +662,7 @@ class History:
                         logger.debug('Access df of History before it is initialized.')
                         return pd.DataFrame()
             except OSError:
-                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
+                logger.error('Scheduler is already dead. Most frequent reason to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
                 return pd.DataFrame()
 
     def set_df(self, df: pd.DataFrame):
@@ -687,46 +687,46 @@ class History:
         columns = list()
 
         # columns のメタデータを作成
-        metadata = list()
+        meta_columns = list()
 
         # trial
         columns.append('trial')  # index
-        metadata.append(self.additional_metadata)
+        meta_columns.append('')  # extra_data. save 時に中身を記入する。
 
         # parameter
         for prm_name in self.prm_names:
             columns.extend([prm_name, prm_name + '_lower_bound', prm_name + '_upper_bound'])
-            metadata.extend(['prm', 'prm_lb', 'prm_ub'])
+            meta_columns.extend(['prm', 'prm_lb', 'prm_ub'])
 
         # objective relative
         for name in self.obj_names:
             columns.append(name)
-            metadata.append('obj')
+            meta_columns.append('obj')
             columns.append(name + '_direction')
-            metadata.append('obj_direction')
+            meta_columns.append('obj_direction')
         columns.append('non_domi')
-        metadata.append('')
+        meta_columns.append('')
 
         # constraint relative
         for name in self.cns_names:
             columns.append(name)
-            metadata.append('cns')
+            meta_columns.append('cns')
             columns.append(name + '_lower_bound')
-            metadata.append('cns_lb')
+            meta_columns.append('cns_lb')
             columns.append(name + '_upper_bound')
-            metadata.append('cns_ub')
+            meta_columns.append('cns_ub')
         columns.append('feasible')
-        metadata.append('')
+        meta_columns.append('')
 
         # the others
         columns.append('hypervolume')
-        metadata.append('')
+        meta_columns.append('')
         columns.append('message')
-        metadata.append('')
+        meta_columns.append('')
         columns.append('time')
-        metadata.append('')
+        meta_columns.append('')
 
-        return columns, metadata
+        return columns, meta_columns
 
     def record(
             self,
@@ -973,13 +973,16 @@ class History:
 
         df = self.get_df()
 
+        # extra_data の更新
+        self.meta_columns[0] = json.dumps(self.extra_data)
+
         if _f is None:
             # save df with columns with prefix
             with open(self.path, 'w', encoding=self.ENCODING) as f:
                 writer = csv.writer(f, delimiter=',', lineterminator="\n")
-                writer.writerow(self.metadata)
+                writer.writerow(self.meta_columns)
                 for i in range(self.HEADER_ROW-1):
-                    writer.writerow([''] * len(self.metadata))
+                    writer.writerow([''] * len(self.meta_columns))
                 df.to_csv(f, index=None, encoding=self.ENCODING, lineterminator='\n')
         else:  # test
             df.to_csv(_f, index=None, encoding=self.ENCODING, lineterminator='\n')
@@ -1088,3 +1091,35 @@ class OptimizationStatus:
     def get_text(self) -> str:
         """Get optimization status message."""
         return self._actor.status
+
+
+class _MonitorHostRecordActor:
+    host = None
+    port = None
+
+    def set(self, host, port):
+        self.host = host
+        self.port = port
+
+
+class MonitorHostRecord:
+
+    def __init__(self, client, worker_name):
+        self._future = client.submit(
+            _MonitorHostRecordActor,
+            actor=True,
+            workers=(worker_name,),
+            allow_other_workers=False,
+        )
+        self._actor = self._future.result()
+
+    def set(self, host, port):
+        self._actor.set(host, port).result()
+
+    def get(self):
+        host = self._actor.host
+        port = self._actor.port
+        if host is None and port is None:
+            return dict()
+        else:
+            return dict(host=host, port=port)

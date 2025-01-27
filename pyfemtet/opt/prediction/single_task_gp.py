@@ -42,16 +42,16 @@ class SingleTaskGPModel(PredictionModelBase):
     def set_bounds_from_history(self, history, df=None):
         from pyfemtet.opt._femopt_core import History
         history: History
-        metadata: str
+        meta_column: str
 
         if df is None:
             df = history.get_df()
 
         columns = df.columns
-        metadata_columns = history.metadata
+
         target_columns = [
-            col for col, metadata in zip(columns, metadata_columns)
-            if metadata == 'prm_lb' or metadata == 'prm_ub'
+            col for col, meta_column in zip(columns, history.meta_columns)
+            if meta_column == 'prm_lb' or meta_column == 'prm_ub'
         ]
 
         bounds_buff = df.iloc[0][target_columns].values  # 2*len(prm_names) array

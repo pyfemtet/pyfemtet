@@ -183,11 +183,11 @@ class HomePage(AbstractPage):
                 return alerts
 
             # get femprj in history csv
-            kwargs = self.femtet_control.create_femtet_interface_args()[0]  # read metadata from history.
+            kwargs = self.femtet_control.create_femtet_interface_args()[0]  # read extra_data from history.
             femprj_path = kwargs['femprj_path']
             model_name = kwargs['model_name']
 
-            # check metadata is valid
+            # check extra_data is valid
             if femprj_path is None:
                 msg = Msg.ERR_FEMPRJ_IN_CSV_NOT_FOUND
                 alerts = self.alert_region.create_alerts(msg, color='danger')
@@ -283,8 +283,8 @@ class HomePage(AbstractPage):
                 # get parameter and update model
                 df = self.application.history.get_df(valid_only=True)
                 row = df[df['trial'] == trial]
-                metadata = np.array(self.application.history.metadata)
-                idx = np.where(metadata == 'prm')[0]
+                meta_columns = np.array(self.application.history.meta_columns)
+                idx = np.where(meta_columns == 'prm')[0]
 
                 names = np.array(row.columns)[idx]
                 values = np.array(row.iloc[:, idx]).ravel()
@@ -346,7 +346,7 @@ class HomePage(AbstractPage):
 
             # check the corresponding between history and Femtet
             # ├ history-side
-            kwargs = self.femtet_control.create_femtet_interface_args()[0]  # read metadata from history.
+            kwargs = self.femtet_control.create_femtet_interface_args()[0]  # read extra_data from history.
             femprj_path_history_on_history: str or None = kwargs['femprj_path']
             model_name_on_history: str or None = kwargs['model_name']
             # ├ Femtet-side
@@ -673,7 +673,7 @@ class Tutorial(AbstractPage):
             destination_folder = source_folder.replace('wat_ex14_parametric', 'tutorial')
             shutil.copytree(source_folder, destination_folder, dirs_exist_ok=True)
 
-            self.application.history.metadata[0] = json.dumps(
+            self.application.history.meta_columns[0] = json.dumps(
                 dict(
                     femprj_path=destination_file,
                     model_name='Ex14',
