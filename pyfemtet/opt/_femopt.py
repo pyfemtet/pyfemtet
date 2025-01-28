@@ -27,6 +27,7 @@ from pyfemtet.opt._femopt_core import (
     History,
     OptimizationStatus,
     logger,
+    MonitorHostRecord,
 )
 from pyfemtet._message import Msg, encoding
 from pyfemtet.opt.optimizer.parameter import Parameter, Expression
@@ -135,6 +136,7 @@ class FEMOpt:
         self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
         self.monitor_process_worker_name = None
+        self.monitor_host_record = None
         self._hv_reference = None
         self._extra_space_dir = None
 
@@ -679,11 +681,11 @@ class FEMOpt:
         # ===== fem の設定 ==--=
 
         # Femtet 特有の処理
-        metadata = None
+        extra_data = dict()
         if isinstance(self.fem, FemtetInterface):
 
             # 結果 csv に記載する femprj に関する情報の作成
-            metadata = json.dumps(
+            extra_data.update(
                 dict(
                     femprj_path=self.fem.original_femprj_path,
                     model_name=self.fem.model_name
@@ -774,23 +776,25 @@ class FEMOpt:
 
         with self.client.cluster as _cluster, self.client as _client:
 
-            # actor の設定
+            # ===== status actor の設定 =====
             self.status = OptimizationStatus(_client, worker_address=self.monitor_process_worker_name)
             self.worker_status_list = [OptimizationStatus(_client, worker_address=self.monitor_process_worker_name, name=name) for name in worker_addresses]  # tqdm 検討
             self.status.set(OptimizationStatus.SETTING_UP)
+            self.monitor_host_record = MonitorHostRecord(_client, self.monitor_process_worker_name)
+            logger.info('Status Actor initialized successfully.')
+
+            # ===== initialize history =====
             self.history = History(
                 self.history_path,
                 self.opt.variables.get_parameter_names(),
                 list(self.opt.objectives.keys()),
                 list(self.opt.constraints.keys()),
                 _client,
-                metadata,
                 self._hv_reference
             )
-            logger.info('Status Actor initialized successfully.')
 
+            # ===== launch monitor =====
             # launch monitor
-            # noinspection PyTypeChecker
             self.monitor_process_future = _client.submit(
                 # func
                 _start_monitor_server,
@@ -799,6 +803,7 @@ class FEMOpt:
                 self.status,
                 worker_addresses,
                 self.worker_status_list,
+                self.monitor_host_record,
                 # kwargs
                 **self.monitor_server_kwargs,
                 # kwargs of submit
@@ -807,6 +812,16 @@ class FEMOpt:
             )
             logger.info('Process monitor initialized successfully.')
 
+            # update extra_data of history to notify
+            # how to emit interruption signal by
+            # external processes
+            start = time()
+            while len(self.monitor_host_record.get()) == 0:
+                sleep(0.1)
+            extra_data.update(self.monitor_host_record.get())
+            self.history.extra_data.update(extra_data)
+
+            # ===== setup fem and opt before parallelization =====
             # fem
             self.fem._setup_before_parallel(_client)
 
@@ -817,6 +832,11 @@ class FEMOpt:
             self.opt.history = self.history
             self.opt._setup_before_parallel()
 
+            # ===== 最適化ループ開始 =====
+            # opt から non-serializable な com を
+            # 有している可能性のある fem を削除
+            # ただし main process の sub thread では
+            # これをそのまま使うので buff に退避
             buff = self.opt.fem
             del self.opt.fem
 
@@ -832,8 +852,12 @@ class FEMOpt:
                 allow_other_workers=False,
             )
 
+            # 退避した fem を戻す
             self.opt.fem = buff
 
+            # リモートクラスタではない場合
+            # main process の sub thread で
+            # 計算開始
             t_main = None
             if not self.opt.is_cluster:
                 # ローカルプロセスでの計算(opt._run 相当の処理)
@@ -857,7 +881,7 @@ class FEMOpt:
                 )
                 t_main.start()
 
-            # save history
+            # ===== save history during optimization =====
             def save_history():
                 while True:
                     sleep(2)
@@ -872,7 +896,6 @@ class FEMOpt:
             t_save_history.start()
 
             # ===== 終了 =====
-
             # クラスターの Unexpected Exception のリストを取得
             opt_exceptions: list[Exception or None] = _client.gather(calc_futures)  # gather() で終了待ちも兼ねる
 
@@ -884,7 +907,7 @@ class FEMOpt:
                     local_opt_exception = self.opt._exception  # Exception を取得
             opt_exceptions.append(local_opt_exception)
 
-            # 終了
+            # 終了シグナルを送る
             self.status.set(OptimizationStatus.TERMINATED)
             end = time()
 
@@ -910,6 +933,8 @@ class FEMOpt:
                     print()
 
             # monitor worker を残してユーザーが結果を確認できるようにする
+            # with 文を抜けると monitor worker が終了して
+            # daemon thread である run_forever が終了する
             if confirm_before_exit:
                 print()
                 print('='*len(Msg.CONFIRM_BEFORE_EXIT))
@@ -945,6 +970,7 @@ def _start_monitor_server(
         status,
         worker_addresses,
         worker_status_list,
+        host_record,
         host=None,
         port=None,
 ):
@@ -955,5 +981,6 @@ def _start_monitor_server(
         worker_status_list,
         host,
         port,
+        host_record,
     )
     return 'Exit monitor server process gracefully'

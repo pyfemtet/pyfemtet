@@ -2,6 +2,7 @@
 from dash.development.base_component import Component
 
 # application
+from flask import Flask
 from dash import Dash
 import webbrowser
 
@@ -20,6 +21,7 @@ from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
 from abc import ABC, abstractmethod
 import logging
 import psutil
+import json
 from pyfemtet.logger import get_module_logger, get_dash_logger
 
 logger = get_module_logger('opt.monitor', __name__)
@@ -132,15 +134,19 @@ class SidebarApplicationBase:
         # define app
         self.title = title if title is not None else 'App'
         self.subtitle = subtitle if title is not None else ''
+        self.server = Flask(__name__)
         self.app = Dash(
             __name__,
             external_stylesheets=[dash_bootstrap_components.themes.BOOTSTRAP],
             title=title,
             update_title=None,
+            server=self.server,
         )
         self.pages = dict()
         self.nav_links = dict()
         self.page_objects = []
+        self.host = None
+        self.port = None
 
     def add_page(self, page: AbstractPage, order: int = None):
         page.set_application(self)
@@ -191,7 +197,7 @@ class SidebarApplicationBase:
                     className="p-3 bg-light rounded-3",
                 )
 
-    def run(self, host='localhost', port=None, debug=False):
+    def run(self, host='localhost', port=None, debug=False, host_record=None):
         self._setup_layout()
         port = port or self.DEFAULT_PORT
         # port を検証
@@ -201,6 +207,11 @@ class SidebarApplicationBase:
             webbrowser.open(f'http://localhost:{str(port)}')
         else:
             webbrowser.open(f'http://{host}:{str(port)}')
+        self.host = host
+        self.port = port
+        if host_record is not None:
+            host_record.set(self.host, self.port)
+
         self.app.run(debug=debug, host=host, port=port)
 
 

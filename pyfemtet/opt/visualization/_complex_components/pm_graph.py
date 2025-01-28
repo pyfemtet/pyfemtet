@@ -547,9 +547,9 @@ class PredictionModelGraph(AbstractPage):
             return tuple(ret.values())
 
     def create_formatted_parameter(self, row) -> Component:
-        metadata = self.application.history.metadata
+        meta_columns = self.application.history.meta_columns
         pd.options.display.float_format = '{:.4e}'.format
-        parameters = row.iloc[:, np.where(np.array(metadata) == 'prm')[0]]
+        parameters = row.iloc[:, np.where(np.array(meta_columns) == 'prm')[0]]
         names = parameters.columns
         values = [f'{value:.3e}' for value in parameters.values.ravel()]
         data = pd.DataFrame(dict(
@@ -563,20 +563,21 @@ class PredictionModelGraph(AbstractPage):
 
     def create_image_content_if_femtet(self, trial) -> Component:
         img_url = None
-        metadata = self.application.history.metadata
-        if metadata[0] != '':
-            # get img path
-            d = json.loads(metadata[0])
-            femprj_path = d['femprj_path']
-            model_name = d['model_name']
-            femprj_result_dir = femprj_path.replace('.femprj', '.Results')
-            img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
-            if os.path.exists(img_path):
-                # create encoded image
-                with open(img_path, 'rb') as f:
-                    content = f.read()
-                encoded_image = base64.b64encode(content).decode('utf-8')
-                img_url = 'data:image/jpeg;base64, ' + encoded_image
+        meta_columns = self.application.history.meta_columns
+        if meta_columns[0] != '':
+            extra_data = json.loads(meta_columns[0])
+            if 'femprj_path' in extra_data:
+                # get img path
+                femprj_path = extra_data['femprj_path']
+                model_name = extra_data['model_name']
+                femprj_result_dir = femprj_path.replace('.femprj', '.Results')
+                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
+                if os.path.exists(img_path):
+                    # create encoded image
+                    with open(img_path, 'rb') as f:
+                        content = f.read()
+                    encoded_image = base64.b64encode(content).decode('utf-8')
+                    img_url = 'data:image/jpeg;base64, ' + encoded_image
         return html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
 
     # def get_fig_by_tab_id(self, tab_id, with_length=False):

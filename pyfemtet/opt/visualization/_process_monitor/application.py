@@ -3,6 +3,7 @@ from time import sleep
 from threading import Thread
 
 import pandas as pd
+from flask import jsonify
 
 from pyfemtet.opt.visualization._base import PyFemtetApplicationBase, logger
 from pyfemtet.opt.visualization._process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
@@ -80,7 +81,22 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         if not debug:
             super().setup_callback()
 
-    def start_server(self, host=None, port=None):
+        from pyfemtet.opt._femopt_core import OptimizationStatus
+
+        @self.server.route('/interrupt')
+        def some_command():
+
+            # If the entire_state < INTERRUPTING, set INTERRUPTING
+            if self.local_entire_status_int < OptimizationStatus.INTERRUPTING:
+                self.local_entire_status_int = OptimizationStatus.INTERRUPTING
+                result = {"message": "Interrupting signal emitted successfully."}
+
+            else:
+                result = {"message": "Interrupting signal is already emitted."}
+
+            return jsonify(result)
+
+    def start_server(self, host=None, port=None, host_record=None):
         """Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"""
 
         self._should_get_actor_data = True
@@ -95,6 +111,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         server_thread = Thread(
             target=self.run,
             args=(host, port,),
+            kwargs=dict(host_record=host_record),
             daemon=True,
         )
         server_thread.start()
@@ -188,7 +205,7 @@ def g_debug():
     g_application.run(debug=False)
 
 
-def main(history, status, worker_addresses, worker_status_list, host=None, port=None):
+def main(history, status, worker_addresses, worker_status_list, host=None, port=None, host_record=None):
     g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
 
     g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
@@ -202,7 +219,7 @@ def main(history, status, worker_addresses, worker_status_list, host=None, port=
     g_application.add_page(g_worker_page, 3)
     g_application.setup_callback()
 
-    g_application.start_server(host, port)
+    g_application.start_server(host, port, host_record)
 
 
 if __name__ == '__main__':

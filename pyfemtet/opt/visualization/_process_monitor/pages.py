@@ -209,11 +209,11 @@ class HomePage(AbstractPage):
                           Input('debug-button-2', 'n_clicks'),
                           prevent_initial_call=True)
             def add_data(*_):
-                metadata = self.application.history.metadata
+                meta_columns = self.application.history.meta_columns
                 df = self.application.local_data
 
                 new_row = df.iloc[-2:]
-                obj_index = np.where(np.array(metadata) == 'obj')[0]
+                obj_index = np.where(np.array(meta_columns) == 'obj')[0]
                 for idx in obj_index:
                     new_row.iloc[:, idx] = np.random.rand(len(new_row))
 

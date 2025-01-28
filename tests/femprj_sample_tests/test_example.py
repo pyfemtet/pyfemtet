@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 from femtetutils import util
 from win32com.client import Dispatch
-from pyfemtet.opt._test_utils.record_history import remove_femprj_metadata_from_csv
+from pyfemtet.opt._test_utils.record_history import remove_extra_data_from_csv
 
 import pytest
 
@@ -188,9 +188,9 @@ class SampleTest:
             # 起動した Femtet を終了
             Femtet.Exit(force := True)
 
-        # record_mode なら、metadata を削除する
+        # record_mode なら、extra_data を削除する
         if self.record_mode:
-            remove_femprj_metadata_from_csv(self.ref_path)
+            remove_extra_data_from_csv(self.ref_path)
 
         # そうでなければ、ref と比較する
         else:

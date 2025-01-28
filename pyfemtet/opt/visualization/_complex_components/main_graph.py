@@ -447,17 +447,50 @@ class MainGraph(AbstractPage):
             Output(self.tooltip.id, "show"),
             Output(self.tooltip.id, "bbox"),
             Output(self.tooltip.id, "children"),
-            Input(self.graph.id, "hoverData"),)
-        def show_hover(hoverData):
+            Output(self.tooltip.id, "direction"),
+            Input(self.graph.id, "hoverData"),
+            State(self.graph.id, "figure"),
+        )
+        def show_hover(hoverData, figure):
             if hoverData is None:
-                return False, no_update, no_update
+                return False, no_update, no_update, no_update
 
             if self.application.history is None:
                 raise PreventUpdate
 
-            # get hover location
+            # pt = {'curveNumber': 1, 'pointNumber': 0, 'pointIndex': 0, 'x': 1, 'y': 2369132.929996869, 'bbox': {'x0': 341.5, 'x1': 350.5, 'y0': 235, 'y1': 244}, 'customdata': [1]}
+            # bbox = {'x0': 341.5, 'x1': 350.5, 'y0': 235, 'y1': 244}  # point の大きさ？
+            # figure = {'data': [{'customdata': [[1], [2], [3], [4], [5]], 'marker': {'color': '#6c757d', 'size': 6}, 'mode': 'markers', 'name': 'すべての解', 'x': [1, 2, 3, 4, 5], 'y': [2369132.929996866, 5797829.746579617, 1977631.590419346, 2083867.2403273676, 1539203.6452652698], 'type': 'scatter', 'hoverinfo': 'none'}, {'customdata': [[1], [3], [5]], 'legendgroup': 'optimal', 'line': {'color': '#6c757d', 'width': 1}, 'marker': {'color': '#007bff', 'size': 9}, 'mode': 'markers+lines', 'name': '最適解の推移', 'x': [1, 3, 5], 'y': [2369132.929996866, 1977631.590419346, 1539203.6452652698], 'type': 'scatter', 'hoverinfo': 'none'}, {'legendgroup': 'optimal', 'line': {'color': '#6c757d', 'dash': 'dash', 'width': 0.5}, 'mode': 'lines', 'showlegend': False, 'x': [5, 5], 'y': [1539203.6452652698, 1539203.6452652698], 'type': 'scatter', 'hoverinfo': 'none'}], 'layout': {'template': {'data': {'histogram2dcontour': [{'type': 'histogram2dcontour', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'choropleth': [{'type': 'choropleth', 'colorbar': {'outlinewidth': 0, 'ticks': ''}}], 'histogram2d': [{'type': 'histogram2d', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'heatmap': [{'type': 'heatmap', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'heatmapgl': [{'type': 'heatmapgl', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'contourcarpet': [{'type': 'contourcarpet', 'colorbar': {'outlinewidth': 0, 'ticks': ''}}], 'contour': [{'type': 'contour', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'surface': [{'type': 'surface', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'mesh3d': [{'type': 'mesh3d', 'colorbar': {'outlinewidth': 0, 'ticks': ''}}], 'scatter': [{'fillpattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}, 'type': 'scatter'}], 'parcoords': [{'type': 'parcoords', 'line': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatterpolargl': [{'type': 'scatterpolargl', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'bar': [{'error_x': {'color': '#2a3f5f'}, 'error_y': {'color': '#2a3f5f'}, 'marker': {'line': {'color': '#E5ECF6', 'width': 0.5}, 'pattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}}, 'type': 'bar'}], 'scattergeo': [{'type': 'scattergeo', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatterpolar': [{'type': 'scatterpolar', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'histogram': [{'marker': {'pattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}}, 'type': 'histogram'}], 'scattergl': [{'type': 'scattergl', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatter3d': [{'type': 'scatter3d', 'line': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}, 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scattermapbox': [{'type': 'scattermapbox', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatterternary': [{'type': 'scatterternary', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scattercarpet': [{'type': 'scattercarpet', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'carpet': [{'aaxis': {'endlinecolor': '#2a3f5f', 'gridcolor': 'white', 'linecolor': 'white', 'minorgridcolor': 'white', 'startlinecolor': '#2a3f5f'}, 'baxis': {'endlinecolor': '#2a3f5f', 'gridcolor': 'white', 'linecolor': 'white', 'minorgridcolor': 'white', 'startlinecolor': '#2a3f5f'}, 'type': 'carpet'}], 'table': [{'cells': {'fill': {'color': '#EBF0F8'}, 'line': {'color': 'white'}}, 'header': {'fill': {'color': '#C8D4E3'}, 'line': {'color': 'white'}}, 'type': 'table'}], 'barpolar': [{'marker': {'line': {'color': '#E5ECF6', 'width': 0.5}, 'pattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}}, 'type': 'barpolar'}], 'pie': [{'automargin': True, 'type': 'pie'}]}, 'layout': {'autotypenumbers': 'strict', 'colorway': ['#636efa', '#EF553B', '#00cc96', '#ab63fa', '#FFA15A', '#19d3f3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'], 'font': {'color': '#2a3f5f'}, 'hovermode': 'closest', 'hoverlabel': {'align': 'left'}, 'paper_bgcolor': 'white', 'plot_bgcolor': '#E5ECF6', 'polar': {'bgcolor': '#E5ECF6', 'angularaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}, 'radialaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}}, 'ternary': {'bgcolor': '#E5ECF6', 'aaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}, 'baxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}, 'caxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}}, 'coloraxis': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}, 'colorscale': {'sequential': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']], 'sequentialminus': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']], 'diverging': [[0, '#8e0152'], [0.1, '#c51b7d'], [0.2, '#de77ae'], [0.3, '#f1b6da'], [0.4, '#fde0ef'], [0.5, '#f7f7f7'], [0.6, '#e6f5d0'], [0.7, '#b8e186'], [0.8, '#7fbc41'], [0.9, '#4d9221'], [1, '#276419']]}, 'xaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': '', 'title': {'standoff': 15}, 'zerolinecolor': 'white', 'automargin': True, 'zerolinewidth': 2}, 'yaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': '', 'title': {'standoff': 15}, 'zerolinecolor': 'white', 'automargin': True, 'zerolinewidth': 2}, 'scene': {'xaxis': {'backgroundcolor': '#E5ECF6', 'gridcolor': 'white', 'linecolor': 'white', 'showbackground': True, 'ticks': '', 'zerolinecolor': 'white', 'gridwidth': 2}, 'yaxis': {'backgroundcolor': '#E5ECF6', 'gridcolor': 'white', 'linecolor': 'white', 'showbackground': True, 'ticks': '', 'zerolinecolor': 'white', 'gridwidth': 2}, 'zaxis': {'backgroundcolor': '#E5ECF6', 'gridcolor': 'white', 'linecolor': 'white', 'showbackground': True, 'ticks': '', 'zerolinecolor': 'white', 'gridwidth': 2}}, 'shapedefaults': {'line': {'color': '#2a3f5f'}}, 'annotationdefaults': {'arrowcolor': '#2a3f5f', 'arrowhead': 0, 'arrowwidth': 1}, 'geo': {'bgcolor': 'white', 'landcolor': '#E5ECF6', 'subunitcolor': 'white', 'showland': True, 'showlakes': True, 'lakecolor': 'white'}, 'title': {'x': 0.05}, 'mapbox': {'style': 'light'}}}, 'title': {'text': '目的関数プロット'}, 'xaxis': {'title': {'text': '成功した解析数'}, 'type': 'linear', 'range': [0.7173255954539959, 5.282674404546004], 'autorange': False}, 'yaxis': {'title': {'text': 'Mises Stress'}, 'type': 'linear', 'range': [1194338.1744483153, 6109662.126322151], 'autorange': False}, 'transition': {'duration': 1000}, 'clickmode': 'event+select'}}
+
+            # get point location
             pt = hoverData["points"][0]
-            bbox = pt["bbox"]
+
+            # get the bounding box of target
+            bbox = pt['bbox']
+
+            # get relative location of point
+            xrange = figure['layout']['xaxis']['range']
+            # yrange = figure['layout']['yaxis']['range']
+
+            is_left = pt['x'] < np.mean(xrange)
+
+            # デフォルトでは Hover が Point に重なり、
+            # Hover した瞬間に Un-hover する場合があるので
+            # offset を追加
+            if is_left:
+                direction = 'right'
+                bbox['x0'] = bbox['x0'] + 40
+                bbox['x1'] = bbox['x1'] + 40
+
+            else:
+                direction = 'left'
+                bbox['x0'] = bbox['x0'] + 15
+                bbox['x1'] = bbox['x1'] + 15
+
+            # ついでに縦方向も適当に調整
+            bbox['y0'] = bbox['y0'] + 80
+            bbox['y1'] = bbox['y1'] + 80
+
 
             # get row of the history from customdata defined in main_figure
             if 'customdata' not in pt.keys():
@@ -482,18 +515,20 @@ class MainGraph(AbstractPage):
                 title_component,
                 tbl_component_prm,
             ])
-            tooltip_layout = html.Div([
-                html.Div(img_component, style={'display': 'inline-block', 'margin-right': '10px', 'vertical-align': 'top'}),
-                html.Div(description, style={'display': 'inline-block', 'margin-right': '10px'}),
-                html.Div(tbl_component_obj, style={'display': 'inline-block', 'margin-right': '10px'}),
-            ])
+            tooltip_layout = html.Div(
+                children=[
+                    html.Div(img_component, style={'display': 'inline-block', 'margin-right': '10px'}),
+                    html.Div(description, style={'display': 'inline-block', 'margin-right': '10px'}),
+                    html.Div(tbl_component_obj, style={'display': 'inline-block', 'margin-right': '10px'}),
+                ],
+            )
 
-            return True, bbox, tooltip_layout
+            return True, bbox, tooltip_layout, direction
 
     def create_formatted_parameter(self, row) -> Component:
-        metadata = self.application.history.metadata
+        meta_columns = self.application.history.meta_columns
         pd.options.display.float_format = '{:.4e}'.format
-        parameters = row.iloc[:, np.where(np.array(metadata) == 'prm')[0]]
+        parameters = row.iloc[:, np.where(np.array(meta_columns) == 'prm')[0]]
         names = parameters.columns
         values = [f'{value:.3e}' for value in parameters.values.ravel()]
         data = pd.DataFrame(dict(
@@ -506,9 +541,9 @@ class MainGraph(AbstractPage):
         return table
 
     def create_formatted_objective(self, row) -> Component:
-        metadata = self.application.history.metadata
+        meta_columns = self.application.history.meta_columns
         pd.options.display.float_format = '{:.4e}'.format
-        objectives = row.iloc[:, np.where(np.array(metadata) == 'obj')[0]]
+        objectives = row.iloc[:, np.where(np.array(meta_columns) == 'obj')[0]]
         names = objectives.columns
         values = [f'{value:.3e}' for value in objectives.values.ravel()]
         data = pd.DataFrame(dict(
@@ -522,20 +557,21 @@ class MainGraph(AbstractPage):
 
     def create_image_content_if_femtet(self, trial) -> Component:
         img_url = None
-        metadata = self.application.history.metadata
-        if metadata[0] != '':
-            # get img path
-            d = json.loads(metadata[0])
-            femprj_path = d['femprj_path']
-            model_name = d['model_name']
-            femprj_result_dir = femprj_path.replace('.femprj', '.Results')
-            img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
-            if os.path.exists(img_path):
-                # create encoded image
-                with open(img_path, 'rb') as f:
-                    content = f.read()
-                encoded_image = base64.b64encode(content).decode('utf-8')
-                img_url = 'data:image/jpeg;base64, ' + encoded_image
+        meta_columns = self.application.history.meta_columns
+        if meta_columns[0] != '':
+            extra_data = json.loads(meta_columns[0])
+            if 'femprj_path' in extra_data.keys():
+                # get img path
+                femprj_path = extra_data['femprj_path']
+                model_name = extra_data['model_name']
+                femprj_result_dir = femprj_path.replace('.femprj', '.Results')
+                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
+                if os.path.exists(img_path):
+                    # create encoded image
+                    with open(img_path, 'rb') as f:
+                        content = f.read()
+                    encoded_image = base64.b64encode(content).decode('utf-8')
+                    img_url = 'data:image/jpeg;base64, ' + encoded_image
         return html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
 
     def get_fig_by_tab_id(self, tab_id, with_length=False, kwargs: dict = None):
