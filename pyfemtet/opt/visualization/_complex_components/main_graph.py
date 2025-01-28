@@ -523,11 +523,11 @@ class MainGraph(AbstractPage):
     def create_image_content_if_femtet(self, trial) -> Component:
         img_url = None
         meta_columns = self.application.history.meta_columns
-        if meta_columns[0] != '':
+        extra_data = json.loads(meta_columns[0])
+        if 'femprj_path' in extra_data.keys():
             # get img path
-            d = json.loads(meta_columns[0])
-            femprj_path = d['femprj_path']
-            model_name = d['model_name']
+            femprj_path = extra_data['femprj_path']
+            model_name = extra_data['model_name']
             femprj_result_dir = femprj_path.replace('.femprj', '.Results')
             img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
             if os.path.exists(img_path):
