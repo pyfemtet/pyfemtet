@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt package &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -414,14 +414,14 @@ of the scheduler computer here.</p>
 </dl>
 <p class="rubric">Examples</p>
 <p>When specifying and opening a femprj and model, we write</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">FemtetInterface</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">FemtetInterface</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">(</span><span class="n">femprj_path</span><span class="o">=</span><span class="s1">&#39;path/to/project.femprj&#39;</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;NewModel&#39;</span><span class="p">)</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>  
 </pre></div>
 </div>
 <p>When specifying optimization algorithm, we write</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">optuna.samplers</span> <span class="kn">import</span> <span class="n">TPESampler</span>  
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TPESampler</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span><span class="n">sampler_class</span><span class="o">=</span><span class="n">TPESampler</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>  
 </pre></div>
@@ -456,7 +456,7 @@ a realistic timeframe.</p>
 <dl>
 <dt>Examples:</dt><dd><p>For example, in a case where the bottom area of the model is constrained,
 the following approach may require a very long time.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bottom_area</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">bottom_area</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="n">w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">)</span>  
 <span class="gp">... </span>    <span class="n">d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;depth&#39;</span><span class="p">)</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span>  
@@ -465,7 +465,7 @@ the following approach may require a very long time.</p>
 </pre></div>
 </div>
 <p>Instead, please do the following.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bottom_area</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  <span class="c1"># Not to access the 1st argument.  </span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">bottom_area</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  <span class="c1"># Not to access the 1st argument.  </span>
 <span class="gp">... </span>    <span class="n">params</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">()</span>  
 <span class="gp">... </span>    <span class="n">w</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span>  
@@ -512,7 +512,7 @@ variables but an optimization parameter, b is not a parameter but
 a model variable and the relationship of these 2 variables is
 <code class="docutils literal notranslate"><span class="pre">`b</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">**</span> <span class="pre">2`</span></code>, we write:</p>
 <blockquote>
-<div><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">calc_b</span><span class="p">(</span><span class="n">parameter_a</span><span class="p">):</span>  
+<div><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">calc_b</span><span class="p">(</span><span class="n">parameter_a</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">parameter_a</span> <span class="o">**</span> <span class="mi">2</span>  
 <span class="gp">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;parameter_a&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pass_to_fem</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  
@@ -531,13 +531,13 @@ for <code class="docutils literal notranslate"><span class="pre">`name`</span></
 <p>When adding variable r, theta and x, y; r, theta is an optimization
 parameter and x, y is an intermediate variable to calculate constraint
 function, we write</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">calc_x</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">calc_x</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>  
 <span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">calc_y</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">calc_y</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>  
 <span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">constraint</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">constraint</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="n">d</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>  
 <span class="gp">... </span>    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>  
@@ -574,12 +574,12 @@ function, we write</p>
 <p>When add a complex objective (for example, want to dynamically set body
 to calculate temperature and use product of the temperature and one of
 the parameters as objective) , we write</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>  
-<span class="gp">... </span>    <span class="k">def</span> <span class="nf">get_body_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>  
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_body_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
 <span class="gp">... </span>        <span class="o">...</span>  <span class="c1"># process something and detect body name  </span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="n">body_name</span>  
 <span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">complex_objective</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">some_object</span><span class="p">):</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">complex_objective</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">some_object</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="n">body_name</span> <span class="o">=</span> <span class="n">some_object</span><span class="o">.</span><span class="n">get_body_name</span><span class="p">()</span>  <span class="c1"># dynamically get body name to calculate temperature  </span>
 <span class="gp">... </span>    <span class="n">temp</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Watt</span><span class="o">.</span><span class="n">GetTemp</span><span class="p">(</span><span class="n">body_name</span><span class="p">)</span>  <span class="c1"># calculate temperature  </span>
 <span class="gp">... </span>    <span class="n">some_param</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">()[</span><span class="s1">&#39;some_param&#39;</span><span class="p">]</span>  <span class="c1"># get ome parameter  </span>
@@ -782,10 +782,24 @@ Can specify ‘all’ or None. Default is ‘all’.</p></li>
 Default is True.</p></li>
 <li><p><strong>allow_without_project</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to allow without a project. Default is False.</p></li>
 <li><p><strong>open_result_with_gui</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to open the result with GUI. Default is True.</p></li>
-<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – A list of parametric output indexes and its direction
+<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – <p>A list of parametric output indexes and its direction
 to use as the objective function. If not specified,
 it will be None and no parametric outputs are used
-as objectives.</p></li>
+as objectives.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Indexes start at 0, but the parametric analysis
+output settings in the Femtet dialog box indicate
+setting numbers starting at 1.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Setting this argument deletes the parametric
+analysis swept table set in the femprj file.</strong>
+If you do not want to delete the swept table,
+make a copy of the original file.</p>
+</div>
+</p></li>
 <li><p><strong>**kwargs</strong> – Additional arguments from inherited classes.</p></li>
 </ul>
 </dd>
@@ -1447,7 +1461,7 @@ the model update and before solving.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.History">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.</span></span><span class="sig-name descname"><span class="pre">History</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prm_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hv_reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.</span></span><span class="sig-name descname"><span class="pre">History</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prm_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hv_reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for managing the history of optimization results.</p>
 <dl class="field-list simple">
@@ -1458,7 +1472,6 @@ the model update and before solving.</p>
 <li><p><strong>obj_names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – The names of objectives. Defaults to None.</p></li>
 <li><p><strong>cns_names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – The names of constraints. Defaults to None.</p></li>
 <li><p><strong>client</strong> (<em>dask.distributed.Client</em>) – Dask client.</p></li>
-<li><p><strong>additional_metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – metadata of optimization process.</p></li>
 <li><p><strong>hv_reference</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The method to calculate hypervolume or
 the reference point itself.
 Valid values are ‘dynamic-pareto’ or

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt.optimizer._optuna._pof_botorch &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -117,109 +117,109 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="c1"># ===== constant =====</span>
 <span class="n">_USE_FIXED_NOISE</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="k">def</span> <span class="nf">_get_use_fixed_noise</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_use_fixed_noise</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">_USE_FIXED_NOISE</span>
-<span class="k">def</span> <span class="nf">_set_use_fixed_noise</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_set_use_fixed_noise</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">_USE_FIXED_NOISE</span>
     <span class="n">_USE_FIXED_NOISE</span> <span class="o">=</span> <span class="n">value</span>
 
 <span class="c1"># ignore warnings</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">botorch.exceptions.warnings</span> <span class="kn">import</span> <span class="n">InputDataWarning</span>
-<span class="kn">from</span> <span class="nn">optuna.exceptions</span> <span class="kn">import</span> <span class="n">ExperimentalWarning</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">botorch.exceptions.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputDataWarning</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperimentalWarning</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">InputDataWarning</span><span class="p">)</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ExperimentalWarning</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer._optuna._botorch_patch.enable_nonlinear_constraint</span> <span class="kn">import</span> <span class="n">NonlinearInequalityConstraints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._optuna._botorch_patch.enable_nonlinear_constraint</span><span class="w"> </span><span class="kn">import</span> <span class="n">NonlinearInequalityConstraints</span>
 
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
-<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
 
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">optuna</span> <span class="kn">import</span> <span class="n">logging</span>
-<span class="kn">from</span> <span class="nn">optuna._experimental</span> <span class="kn">import</span> <span class="n">experimental_class</span>
-<span class="kn">from</span> <span class="nn">optuna._experimental</span> <span class="kn">import</span> <span class="n">experimental_func</span>
-<span class="kn">from</span> <span class="nn">optuna._imports</span> <span class="kn">import</span> <span class="n">try_import</span>
-<span class="kn">from</span> <span class="nn">optuna._transform</span> <span class="kn">import</span> <span class="n">_SearchSpaceTransform</span>
-<span class="kn">from</span> <span class="nn">optuna.distributions</span> <span class="kn">import</span> <span class="n">BaseDistribution</span>
-<span class="kn">from</span> <span class="nn">optuna.samplers</span> <span class="kn">import</span> <span class="n">BaseSampler</span>
-<span class="kn">from</span> <span class="nn">optuna.samplers</span> <span class="kn">import</span> <span class="n">RandomSampler</span>
-<span class="kn">from</span> <span class="nn">optuna.samplers._base</span> <span class="kn">import</span> <span class="n">_CONSTRAINTS_KEY</span>
-<span class="kn">from</span> <span class="nn">optuna.samplers._base</span> <span class="kn">import</span> <span class="n">_process_constraints_after_trial</span>
-<span class="kn">from</span> <span class="nn">optuna.search_space</span> <span class="kn">import</span> <span class="n">IntersectionSearchSpace</span>
-<span class="kn">from</span> <span class="nn">optuna.study</span> <span class="kn">import</span> <span class="n">Study</span>
-<span class="kn">from</span> <span class="nn">optuna.study</span> <span class="kn">import</span> <span class="n">StudyDirection</span>
-<span class="kn">from</span> <span class="nn">optuna.trial</span> <span class="kn">import</span> <span class="n">FrozenTrial</span>
-<span class="kn">from</span> <span class="nn">optuna.trial</span> <span class="kn">import</span> <span class="n">TrialState</span>
-<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna</span><span class="w"> </span><span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna._experimental</span><span class="w"> </span><span class="kn">import</span> <span class="n">experimental_class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna._experimental</span><span class="w"> </span><span class="kn">import</span> <span class="n">experimental_func</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna._imports</span><span class="w"> </span><span class="kn">import</span> <span class="n">try_import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna._transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">_SearchSpaceTransform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseDistribution</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSampler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomSampler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_CONSTRAINTS_KEY</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_process_constraints_after_trial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.search_space</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntersectionSearchSpace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.study</span><span class="w"> </span><span class="kn">import</span> <span class="n">Study</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.study</span><span class="w"> </span><span class="kn">import</span> <span class="n">StudyDirection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.trial</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrozenTrial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.trial</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrialState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">packaging</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span>
 
 <span class="k">with</span> <span class="n">try_import</span><span class="p">()</span> <span class="k">as</span> <span class="n">_imports</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.knowledge_gradient</span> <span class="kn">import</span> <span class="n">qKnowledgeGradient</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.monte_carlo</span> <span class="kn">import</span> <span class="n">qExpectedImprovement</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.monte_carlo</span> <span class="kn">import</span> <span class="n">qNoisyExpectedImprovement</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.multi_objective</span> <span class="kn">import</span> <span class="n">monte_carlo</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.multi_objective.analytic</span> <span class="kn">import</span> <span class="n">ExpectedHypervolumeImprovement</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.multi_objective.objective</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.knowledge_gradient</span><span class="w"> </span><span class="kn">import</span> <span class="n">qKnowledgeGradient</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.monte_carlo</span><span class="w"> </span><span class="kn">import</span> <span class="n">qExpectedImprovement</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.monte_carlo</span><span class="w"> </span><span class="kn">import</span> <span class="n">qNoisyExpectedImprovement</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.multi_objective</span><span class="w"> </span><span class="kn">import</span> <span class="n">monte_carlo</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.multi_objective.analytic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExpectedHypervolumeImprovement</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.multi_objective.objective</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">FeasibilityWeightedMCMultiOutputObjective</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.multi_objective.objective</span> <span class="kn">import</span> <span class="n">IdentityMCMultiOutputObjective</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.objective</span> <span class="kn">import</span> <span class="n">ConstrainedMCObjective</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.objective</span> <span class="kn">import</span> <span class="n">GenericMCObjective</span>
-    <span class="kn">from</span> <span class="nn">botorch.models</span> <span class="kn">import</span> <span class="n">ModelListGP</span>
-    <span class="kn">from</span> <span class="nn">botorch.models</span> <span class="kn">import</span> <span class="n">SingleTaskGP</span>
-    <span class="kn">from</span> <span class="nn">botorch.models.transforms.outcome</span> <span class="kn">import</span> <span class="n">Standardize</span>
-    <span class="kn">from</span> <span class="nn">botorch.optim</span> <span class="kn">import</span> <span class="n">optimize_acqf</span>
-    <span class="kn">from</span> <span class="nn">botorch.sampling</span> <span class="kn">import</span> <span class="n">SobolQMCNormalSampler</span>
-    <span class="kn">from</span> <span class="nn">botorch.sampling.list_sampler</span> <span class="kn">import</span> <span class="n">ListSampler</span>
-    <span class="kn">import</span> <span class="nn">botorch.version</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.multi_objective.objective</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdentityMCMultiOutputObjective</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.objective</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstrainedMCObjective</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.objective</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericMCObjective</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelListGP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleTaskGP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.models.transforms.outcome</span><span class="w"> </span><span class="kn">import</span> <span class="n">Standardize</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.optim</span><span class="w"> </span><span class="kn">import</span> <span class="n">optimize_acqf</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">SobolQMCNormalSampler</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.sampling.list_sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListSampler</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">botorch.version</span>
 
     <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">botorch</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">version</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;0.8.0&quot;</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">botorch.fit</span> <span class="kn">import</span> <span class="n">fit_gpytorch_model</span> <span class="k">as</span> <span class="n">fit_gpytorch_mll</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.fit</span><span class="w"> </span><span class="kn">import</span> <span class="n">fit_gpytorch_model</span> <span class="k">as</span> <span class="n">fit_gpytorch_mll</span>
 
 
-        <span class="k">def</span> <span class="nf">_get_sobol_qmc_normal_sampler</span><span class="p">(</span><span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SobolQMCNormalSampler</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_get_sobol_qmc_normal_sampler</span><span class="p">(</span><span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SobolQMCNormalSampler</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">SobolQMCNormalSampler</span><span class="p">(</span><span class="n">num_samples</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">botorch.fit</span> <span class="kn">import</span> <span class="n">fit_gpytorch_mll</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.fit</span><span class="w"> </span><span class="kn">import</span> <span class="n">fit_gpytorch_mll</span>
 
 
-        <span class="k">def</span> <span class="nf">_get_sobol_qmc_normal_sampler</span><span class="p">(</span><span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SobolQMCNormalSampler</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_get_sobol_qmc_normal_sampler</span><span class="p">(</span><span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SobolQMCNormalSampler</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">SobolQMCNormalSampler</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,)))</span>
 
-    <span class="kn">from</span> <span class="nn">gpytorch.mlls</span> <span class="kn">import</span> <span class="n">ExactMarginalLogLikelihood</span>
-    <span class="kn">from</span> <span class="nn">gpytorch.mlls.sum_marginal_log_likelihood</span> <span class="kn">import</span> <span class="n">SumMarginalLogLikelihood</span>
-    <span class="kn">import</span> <span class="nn">torch</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">gpytorch.mlls</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExactMarginalLogLikelihood</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">gpytorch.mlls.sum_marginal_log_likelihood</span><span class="w"> </span><span class="kn">import</span> <span class="n">SumMarginalLogLikelihood</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-    <span class="kn">from</span> <span class="nn">botorch.utils.multi_objective.box_decompositions</span> <span class="kn">import</span> <span class="n">NondominatedPartitioning</span>
-    <span class="kn">from</span> <span class="nn">botorch.utils.multi_objective.scalarization</span> <span class="kn">import</span> <span class="n">get_chebyshev_scalarization</span>
-    <span class="kn">from</span> <span class="nn">botorch.utils.sampling</span> <span class="kn">import</span> <span class="n">manual_seed</span>
-    <span class="kn">from</span> <span class="nn">botorch.utils.sampling</span> <span class="kn">import</span> <span class="n">sample_simplex</span>
-    <span class="kn">from</span> <span class="nn">botorch.utils.transforms</span> <span class="kn">import</span> <span class="n">normalize</span>
-    <span class="kn">from</span> <span class="nn">botorch.utils.transforms</span> <span class="kn">import</span> <span class="n">unnormalize</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.utils.multi_objective.box_decompositions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NondominatedPartitioning</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.utils.multi_objective.scalarization</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_chebyshev_scalarization</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.utils.sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">manual_seed</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.utils.sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_simplex</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.utils.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.utils.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">unnormalize</span>
 
 <span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">try_import</span><span class="p">()</span> <span class="k">as</span> <span class="n">_imports_logei</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.analytic</span> <span class="kn">import</span> <span class="n">LogConstrainedExpectedImprovement</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.analytic</span> <span class="kn">import</span> <span class="n">LogExpectedImprovement</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.analytic</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogConstrainedExpectedImprovement</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.analytic</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogExpectedImprovement</span>
 
 <span class="k">with</span> <span class="n">try_import</span><span class="p">()</span> <span class="k">as</span> <span class="n">_imports_qhvkg</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">botorch.acquisition.multi_objective.hypervolume_knowledge_gradient</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.multi_objective.hypervolume_knowledge_gradient</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">qHypervolumeKnowledgeGradient</span><span class="p">,</span>
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_validate_botorch_version_for_constrained_opt</span><span class="p">(</span><span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_botorch_version_for_constrained_opt</span><span class="p">(</span><span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">botorch</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">version</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;0.9.0&quot;</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2"> requires botorch&gt;=0.9.0 for constrained problems, but got &quot;</span>
@@ -228,12 +228,12 @@
         <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_constraint_funcs</span><span class="p">(</span><span class="n">n_constraints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;torch.Tensor&quot;</span><span class="p">],</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_constraint_funcs</span><span class="p">(</span><span class="n">n_constraints</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;torch.Tensor&quot;</span><span class="p">],</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">]]:</span>
     <span class="k">return</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">Z</span><span class="p">:</span> <span class="n">Z</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="n">n_constraints</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_constraints</span><span class="p">)]</span>
 
 
 <span class="c1"># helper function</span>
-<span class="k">def</span> <span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Symmetric logarithm function.</span>
 
 <span class="sd">    Args:</span>
@@ -250,10 +250,10 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">get_minimum_YVar_and_standardizer</span><span class="p">(</span><span class="n">Y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_minimum_YVar_and_standardizer</span><span class="p">(</span><span class="n">Y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
     <span class="n">standardizer</span> <span class="o">=</span> <span class="n">Standardize</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">_get_use_fixed_noise</span><span class="p">():</span>
-        <span class="kn">import</span> <span class="nn">gpytorch</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">gpytorch</span>
         <span class="n">min_noise</span> <span class="o">=</span> <span class="n">gpytorch</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">min_fixed_noise</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="n">standardizer</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>  <span class="c1"># require to un-transform</span>
@@ -266,20 +266,20 @@
 
 
 <span class="c1"># ベースとなる獲得関数クラスに pof 係数を追加したクラスを作成する関数</span>
-<span class="k">def</span> <span class="nf">acqf_patch_factory</span><span class="p">(</span><span class="n">acqf_class</span><span class="p">,</span> <span class="n">pof_config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">acqf_patch_factory</span><span class="p">(</span><span class="n">acqf_class</span><span class="p">,</span> <span class="n">pof_config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ベース acqf クラスに pof 係数の計算を追加したクラスを作成します。</span>
 
 <span class="sd">    出力されたクラスは、 set_model_c() メソッドで学習済みの</span>
 <span class="sd">    feasibility を評価するための SingleTaskGP オブジェクトを</span>
 <span class="sd">    指定する必要があります。</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">torch.distributions</span> <span class="kn">import</span> <span class="n">Normal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normal</span>
 
     <span class="k">if</span> <span class="n">pof_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">pof_config</span> <span class="o">=</span> <span class="n">PoFConfig</span><span class="p">()</span>
 
     <span class="c1"># optuna_integration.botorch.botorch.qExpectedImprovement</span>
-    <span class="k">class</span> <span class="nc">ACQFWithPOF</span><span class="p">(</span><span class="n">acqf_class</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">ACQFWithPOF</span><span class="p">(</span><span class="n">acqf_class</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Introduces PoF coefficients for a given class of acquisition functions.&quot;&quot;&quot;</span>
         <span class="n">model_c</span><span class="p">:</span> <span class="n">SingleTaskGP</span>
 
@@ -302,10 +302,10 @@
         <span class="n">_repeat_penalty_gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pof_config</span><span class="o">.</span><span class="n">_repeat_penalty_gamma</span>  <span class="c1"># _repeat_penalty の指数で、内部変数です。</span>
 
 
-        <span class="k">def</span> <span class="nf">set_model_c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_c</span><span class="p">:</span> <span class="n">SingleTaskGP</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">set_model_c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_c</span><span class="p">:</span> <span class="n">SingleTaskGP</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_c</span> <span class="o">=</span> <span class="n">model_c</span>
 
-        <span class="k">def</span> <span class="nf">pof</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">pof</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
             <span class="c1"># 予測点の平均と標準偏差をもとにした正規分布の関数を作る</span>
             <span class="n">_X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">posterior</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_c</span><span class="o">.</span><span class="n">posterior</span><span class="p">(</span><span class="n">_X</span><span class="p">)</span>
@@ -324,7 +324,7 @@
 
             <span class="k">return</span> <span class="n">cdf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
             <span class="c1"># ===== ベース目的関数 =====</span>
             <span class="n">base_acqf</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
@@ -408,7 +408,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;3.3.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">logei_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">logei_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -557,7 +557,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;2.4.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">qei_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qei_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -700,7 +700,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;3.3.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">qnei_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qnei_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -803,7 +803,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;2.4.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">qehvi_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qehvi_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -925,7 +925,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;3.5.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">ehvi_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ehvi_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -1026,7 +1026,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;3.1.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">qnehvi_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qnehvi_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -1146,7 +1146,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;2.4.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">qparego_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qparego_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -1253,7 +1253,7 @@
 
 
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;4.0.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">qkg_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qkg_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -1355,7 +1355,7 @@
 
 <span class="c1"># noinspection PyIncorrectDocstring,SpellCheckingInspection</span>
 <span class="nd">@experimental_func</span><span class="p">(</span><span class="s2">&quot;4.0.0&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">qhvkg_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qhvkg_candidates_func</span><span class="p">(</span>
         <span class="n">train_x</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_obj</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span><span class="p">,</span>
         <span class="n">train_con</span><span class="p">:</span> <span class="s2">&quot;torch.Tensor&quot;</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -1472,7 +1472,7 @@
     <span class="k">return</span> <span class="n">candidates</span>
 
 
-<span class="k">def</span> <span class="nf">_get_default_candidates_func</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_default_candidates_func</span><span class="p">(</span>
         <span class="n">n_objectives</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">has_constraint</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">consider_running_trials</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -1507,7 +1507,7 @@
 <div class="viewcode-block" id="PoFConfig">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFConfig">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">PoFConfig</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PoFConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration of PoFBoTorchSampler</span>
 
 <span class="sd">    Args:</span>
@@ -1587,7 +1587,7 @@
 
     <span class="n">enable_no_noise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">_disable_all_features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_disable_all_features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># 拘束以外のすべてを disable にすることで、</span>
         <span class="c1"># BoTorchSampler の実装と同じにします。</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_pof</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1604,7 +1604,7 @@
 <div class="viewcode-block" id="PoFBoTorchSampler">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFBoTorchSampler">[docs]</a>
 <span class="nd">@experimental_class</span><span class="p">(</span><span class="s2">&quot;2.4.0&quot;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">PoFBoTorchSampler</span><span class="p">(</span><span class="n">BaseSampler</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PoFBoTorchSampler</span><span class="p">(</span><span class="n">BaseSampler</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A sampler that forked from BoTorchSampler.</span>
 
 <span class="sd">    This sampler improves the BoTorchSampler to account</span>
@@ -1667,7 +1667,7 @@
 <span class="sd">            Sampler settings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">candidates_func</span><span class="p">:</span> <span class="p">(</span>
@@ -1714,16 +1714,16 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_fixed_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_fixed_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_get_use_fixed_noise</span><span class="p">()</span>
 
     <span class="nd">@use_fixed_noise</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_fixed_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_fixed_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="n">_set_use_fixed_noise</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PoFBoTorchSampler.infer_relative_search_space">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFBoTorchSampler.infer_relative_search_space">[docs]</a>
-    <span class="k">def</span> <span class="nf">infer_relative_search_space</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">infer_relative_search_space</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span>
             <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">,</span>
@@ -1749,7 +1749,7 @@
 
 <div class="viewcode-block" id="PoFBoTorchSampler.sample_relative">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_relative">[docs]</a>
-    <span class="k">def</span> <span class="nf">sample_relative</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_relative</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span>
             <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">,</span>
@@ -1977,7 +1977,7 @@
 
 <div class="viewcode-block" id="PoFBoTorchSampler.sample_independent">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_independent">[docs]</a>
-    <span class="k">def</span> <span class="nf">sample_independent</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_independent</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span>
             <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">,</span>
@@ -1991,7 +1991,7 @@
 
 <div class="viewcode-block" id="PoFBoTorchSampler.reseed_rng">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFBoTorchSampler.reseed_rng">[docs]</a>
-    <span class="k">def</span> <span class="nf">reseed_rng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reseed_rng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_independent_sampler</span><span class="o">.</span><span class="n">reseed_rng</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">)</span></div>
@@ -1999,13 +1999,13 @@
 
 <div class="viewcode-block" id="PoFBoTorchSampler.before_trial">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFBoTorchSampler.before_trial">[docs]</a>
-    <span class="k">def</span> <span class="nf">before_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">before_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_independent_sampler</span><span class="o">.</span><span class="n">before_trial</span><span class="p">(</span><span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PoFBoTorchSampler.after_trial">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.PoFBoTorchSampler.after_trial">[docs]</a>
-    <span class="k">def</span> <span class="nf">after_trial</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">after_trial</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span>
             <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">,</span>

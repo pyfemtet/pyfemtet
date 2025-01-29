@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt.visualization.result_viewer.application &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -79,18 +79,18 @@
            <div itemprop="articleBody">
              
   <h1>pyfemtet.opt.visualization.result_viewer.application のソースコード</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization._base</span> <span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization.result_viewer.pages</span> <span class="kn">import</span> <span class="n">HomePage</span><span class="p">,</span> <span class="n">PredictionModelPage</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.visualization._process_monitor.pages</span> <span class="kn">import</span> <span class="n">OptunaVisualizerPage</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.visualization._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyFemtetApplicationBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.visualization.result_viewer.pages</span><span class="w"> </span><span class="kn">import</span> <span class="n">HomePage</span><span class="p">,</span> <span class="n">PredictionModelPage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.visualization._process_monitor.pages</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptunaVisualizerPage</span>
 
-<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._message</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span>
 
 
 <div class="viewcode-block" id="ResultViewerApplication">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.application.html#pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication">[ドキュメント]</a>
-<span class="k">class</span> <span class="nc">ResultViewerApplication</span><span class="p">(</span><span class="n">PyFemtetApplicationBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ResultViewerApplication</span><span class="p">(</span><span class="n">PyFemtetApplicationBase</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">title</span><span class="o">=</span><span class="s1">&#39;PyFemtet ResultView&#39;</span><span class="p">,</span>
             <span class="n">subtitle</span><span class="o">=</span><span class="s1">&#39;visualize optimization result&#39;</span><span class="p">,</span>
@@ -99,14 +99,14 @@
 
 <div class="viewcode-block" id="ResultViewerApplication.setup_callback">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.application.html#pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication.setup_callback">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">setup_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup_callback</span><span class="p">()</span></div>
 </div>
 
 
 
-<span class="k">def</span> <span class="nf">_debug</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">os</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_debug</span><span class="p">():</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 
     <span class="n">g_application</span> <span class="o">=</span> <span class="n">ResultViewerApplication</span><span class="p">()</span>
@@ -125,7 +125,7 @@
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.result_viewer.application.html#pyfemtet.opt.visualization.result_viewer.application.main">[ドキュメント]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     <span class="n">g_application</span> <span class="o">=</span> <span class="n">ResultViewerApplication</span><span class="p">()</span>
 
     <span class="n">g_home_page</span> <span class="o">=</span> <span class="n">HomePage</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">PAGE_TITLE_RESULT</span><span class="p">)</span>

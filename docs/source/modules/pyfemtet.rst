@@ -5,7 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    pyfemtet.brep
    pyfemtet.dispatch_extensions
@@ -15,13 +15,10 @@ Subpackages
 Submodules
 ----------
 
-pyfemtet.core module
---------------------
+.. toctree::
+   :maxdepth: 1
 
-.. automodule:: pyfemtet.core
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   pyfemtet.core
 
 Module contents
 ---------------
