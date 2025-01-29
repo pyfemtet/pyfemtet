@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt._femopt_core &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -80,40 +80,47 @@
              
   <h1>Source code for pyfemtet.opt._femopt_core</h1><div class="highlight"><pre>
 <span></span><span class="c1"># typing</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="c1"># built-in</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">import</span> <span class="nn">ast</span>
-<span class="kn">import</span> <span class="nn">csv</span>
-<span class="kn">import</span> <span class="nn">ctypes</span>
-<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">packaging</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
 
 <span class="c1"># 3rd-party</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.stats.qmc</span> <span class="kn">import</span> <span class="n">LatinHypercube</span>
-<span class="kn">import</span> <span class="nn">optuna</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats.qmc</span><span class="w"> </span><span class="kn">import</span> <span class="n">LatinHypercube</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
 <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;4.0.0&#39;</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">optuna._hypervolume</span> <span class="kn">import</span> <span class="n">WFG</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">optuna._hypervolume</span><span class="w"> </span><span class="kn">import</span> <span class="n">WFG</span>
     <span class="n">wfg</span> <span class="o">=</span> <span class="n">WFG</span><span class="p">()</span>
     <span class="n">compute_hypervolume</span> <span class="o">=</span> <span class="n">wfg</span><span class="o">.</span><span class="n">compute</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">optuna._hypervolume</span> <span class="kn">import</span> <span class="n">wfg</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">optuna._hypervolume</span><span class="w"> </span><span class="kn">import</span> <span class="n">wfg</span>
     <span class="n">compute_hypervolume</span> <span class="o">=</span> <span class="n">wfg</span><span class="o">.</span><span class="n">compute_hypervolume</span>
-<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Lock</span><span class="p">,</span> <span class="n">get_client</span><span class="p">,</span> <span class="n">Client</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Lock</span><span class="p">,</span> <span class="n">get_client</span><span class="p">,</span> <span class="n">Client</span>
 
 <span class="c1"># win32com</span>
-<span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">Constants</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Windows&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">Constants</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Constants</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">constants</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="c1"># pyfemtet relative</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">FemtetInterface</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">Msg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">FemtetInterface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._message</span><span class="w"> </span><span class="kn">import</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">Msg</span>
 
 <span class="c1"># logger</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.logger</span> <span class="kn">import</span> <span class="n">get_module_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.core&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
 
@@ -131,7 +138,7 @@
 <span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">generate_lhs</span><span class="p">(</span><span class="n">bounds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_lhs</span><span class="p">(</span><span class="n">bounds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Latin Hypercube Sampling from given design parameter bounds.</span>
 
 <span class="sd">    If the number of parameters is d,</span>
@@ -160,13 +167,13 @@
 
     <span class="n">LIMIT</span> <span class="o">=</span> <span class="mi">100</span>
 
-    <span class="k">def</span> <span class="nf">is_prime</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_prime</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">p</span> <span class="o">%</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">get_prime</span><span class="p">(</span><span class="n">_minimum</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_prime</span><span class="p">(</span><span class="n">_minimum</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_minimum</span><span class="p">,</span> <span class="n">LIMIT</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">is_prime</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">p</span>
@@ -183,7 +190,7 @@
     <span class="k">return</span> <span class="n">data</span>  <span class="c1"># data.shape = (N, d)</span>
 
 
-<span class="k">def</span> <span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Log function whose domain is extended to the negative region.</span>
 
 <span class="sd">    Symlog processing is performed internally as a measure to reduce</span>
@@ -212,14 +219,14 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 
-<span class="k">def</span> <span class="nf">_check_bound</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_bound</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">message</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CHECK_MINMAX</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">lb</span> <span class="o">&gt;</span> <span class="n">ub</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_scope_indent</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_scope_indent</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="n">SPACES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">]</span>
     <span class="n">indent</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -230,14 +237,14 @@
     <span class="k">return</span> <span class="n">indent</span>
 
 
-<span class="k">def</span> <span class="nf">_remove_indent</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>  <span class="c1"># returns source</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove_indent</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>  <span class="c1"># returns source</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
     <span class="n">edited_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="n">indent</span><span class="p">:]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span>
     <span class="n">edited_source</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edited_lines</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">edited_source</span>
 
 
-<span class="k">def</span> <span class="nf">_check_access_femtet_objects</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Femtet&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_access_femtet_objects</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Femtet&#39;</span><span class="p">):</span>
 
     <span class="c1"># 関数fのソースコードを取得</span>
     <span class="n">source</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
@@ -323,15 +330,15 @@
     <span class="k">return</span> <span class="kc">False</span>
 
 
-<span class="k">def</span> <span class="nf">_is_access_gogh</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_access_gogh</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_check_access_femtet_objects</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;Gogh&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_is_access_femtet</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_access_femtet</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_check_access_femtet_objects</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;Femtet&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">is_feasible</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_feasible</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if a value is within the specified lower bound and upper bound.</span>
 
@@ -355,19 +362,19 @@
         <span class="k">return</span> <span class="kc">True</span>
 
 
-<span class="k">class</span> <span class="nc">_Scapegoat</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Scapegoat</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper class for parallelize Femtet.&quot;&quot;&quot;</span>
     <span class="c1"># constants を含む関数を並列化するために</span>
     <span class="c1"># メイン処理で一時的に constants への参照を</span>
     <span class="c1"># このオブジェクトにして、後で restore する</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ignore_when_restore_constants</span> <span class="o">=</span> <span class="n">ignore</span>
 
 
-<span class="k">class</span> <span class="nc">Function</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Function</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Objective and Constraint.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># serializable でない COM 定数を parallelize するため</span>
         <span class="c1"># COM 定数を一度 _Scapegoat 型のオブジェクトにする</span>
@@ -384,7 +391,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
-    <span class="k">def</span> <span class="nf">calc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">FEMInterface</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">FEMInterface</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute user-defined fun.</span>
 
 <span class="sd">        Args:</span>
@@ -402,7 +409,7 @@
             <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">Femtet</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_restore_constants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_restore_constants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function for parallelize Femtet.&quot;&quot;&quot;</span>
         <span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fun</span>
         <span class="k">if</span> <span class="n">fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -413,12 +420,12 @@
                             <span class="n">fun</span><span class="o">.</span><span class="vm">__globals__</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">=</span> <span class="n">constants</span>
 
 
-<span class="k">class</span> <span class="nc">Objective</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Objective</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for registering user-defined objective function.&quot;&quot;&quot;</span>
 
     <span class="n">default_name</span> <span class="o">=</span> <span class="s1">&#39;obj&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">with_symlog</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">with_symlog</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an Objective instance.</span>
 
 <span class="sd">        Args:</span>
@@ -442,7 +449,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">with_symlog</span> <span class="o">=</span> <span class="n">with_symlog</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts an evaluation value to the value of objective function based on the specified direction.</span>
 
 <span class="sd">        When direction is `&#39;minimize&#39;`, ``value`` is calculated.</span>
@@ -475,7 +482,7 @@
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_check_direction</span><span class="p">(</span><span class="n">direction</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_direction</span><span class="p">(</span><span class="n">direction</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">Msg</span><span class="o">.</span><span class="n">ERR_CHECK_DIRECTION</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">pass</span>
@@ -486,12 +493,12 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">Constraint</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Constraint</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for registering user-defined constraint function.&quot;&quot;&quot;</span>
 
     <span class="n">default_name</span> <span class="o">=</span> <span class="s1">&#39;cns&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">using_fem</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">using_fem</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a Constraint instance.</span>
 
 <span class="sd">        Args:</span>
@@ -517,7 +524,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">ObjectivesFunc</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ObjectivesFunc</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;複数の値を返す関数を objective として扱うためのクラス</span>
 
 <span class="sd">    複数の値を返す関数を受け取る。</span>
@@ -528,17 +535,17 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">n_return</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">n_return</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_return</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_return</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="n">fun</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_return</span> <span class="o">=</span> <span class="n">n_return</span>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># iter の長さ</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_return</span><span class="p">:</span>
@@ -549,15 +556,15 @@
         <span class="c1"># self の情報にもアクセスする必要があり</span>
         <span class="c1"># それぞれが iter された時点での i 番目という</span>
         <span class="c1"># 情報も必要なのでこのスコープで定義する必要がある</span>
-        <span class="k">class</span> <span class="nc">NthFunc</span><span class="p">:</span>
-            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">NthFunc</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
                 <span class="c1"># 何番目の要素であるかを保持</span>
                 <span class="c1"># self._i を直接参照すると</span>
                 <span class="c1"># 実行時点での ObjectiveFunc の</span>
                 <span class="c1"># 値を参照してしまう</span>
                 <span class="n">self_</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
 
-            <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="c1"># 何番目の要素であるか</span>
                 <span class="n">i</span> <span class="o">=</span> <span class="n">self_</span><span class="o">.</span><span class="n">i</span>
 
@@ -577,7 +584,7 @@
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
             <span class="nd">@property</span>
-            <span class="k">def</span> <span class="nf">__globals__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">__globals__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
                 <span class="c1"># ScapeGoat 実装への対処</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="o">.</span><span class="vm">__globals__</span>
 
@@ -592,7 +599,7 @@
 
 <div class="viewcode-block" id="History">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History">[docs]</a>
-<span class="k">class</span> <span class="nc">History</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">History</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for managing the history of optimization results.</span>
 
 <span class="sd">    Args:</span>
@@ -601,7 +608,6 @@
 <span class="sd">        obj_names (List[str], optional): The names of objectives. Defaults to None.</span>
 <span class="sd">        cns_names (List[str], optional): The names of constraints. Defaults to None.</span>
 <span class="sd">        client (dask.distributed.Client): Dask client.</span>
-<span class="sd">        additional_metadata (str, optional): metadata of optimization process.</span>
 <span class="sd">        hv_reference (str or list[float or np.ndarray, optional):</span>
 <span class="sd">            The method to calculate hypervolume or</span>
 <span class="sd">            the reference point itself.</span>
@@ -620,14 +626,13 @@
     <span class="n">is_processing</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">_df</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># in case without client</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">history_path</span><span class="p">,</span>
             <span class="n">prm_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">obj_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">cns_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">additional_metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">hv_reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># hypervolume 計算メソッド</span>
@@ -638,7 +643,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span> <span class="o">=</span> <span class="n">prm_names</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span> <span class="o">=</span> <span class="n">obj_names</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span> <span class="o">=</span> <span class="n">cns_names</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">additional_metadata</span> <span class="o">=</span> <span class="n">additional_metadata</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scheduler_address</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">address</span> <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="c1"># 最適化実行中かどうか</span>
@@ -652,19 +658,19 @@
 
             <span class="c1"># 続きからなら df を読み込んで df にコピー</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>  <span class="c1"># 中で meta_columns を読む</span>
 
             <span class="c1"># そうでなければ df を初期化</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">columns</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_df_columns</span><span class="p">()</span>
+                <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_df_columns</span><span class="p">()</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
                     <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span> <span class="o">=</span> <span class="n">meta_columns</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
             <span class="c1"># 一時ファイルに書き込みを試み、UnicodeEncodeError が出ないかチェック</span>
-            <span class="kn">import</span> <span class="nn">tempfile</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryFile</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">_f</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
@@ -682,22 +688,22 @@
 
 <div class="viewcode-block" id="History.load">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.load">[docs]</a>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load existing result csv.&quot;&quot;&quot;</span>
 
         <span class="c1"># df を読み込む</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">HEADER_ROW</span><span class="p">)</span>
 
-        <span class="c1"># metadata を読み込む</span>
+        <span class="c1"># meta_columns を読み込む</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
 
         <span class="c1"># 最適化問題を読み込む</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
-        <span class="n">prm_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;prm&#39;</span><span class="p">]</span>
-        <span class="n">obj_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;obj&#39;</span><span class="p">]</span>
-        <span class="n">cns_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cns&#39;</span><span class="p">]</span>
+        <span class="n">prm_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;prm&#39;</span><span class="p">]</span>
+        <span class="n">obj_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;obj&#39;</span><span class="p">]</span>
+        <span class="n">cns_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cns&#39;</span><span class="p">]</span>
 
         <span class="c1"># is_restart の場合、読み込んだ names と引数の names が一致するか確認しておく</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
@@ -716,7 +722,7 @@
 
 <div class="viewcode-block" id="History.filter_valid">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.filter_valid">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_</span><span class="p">,</span> <span class="n">keep_trial_num</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_</span><span class="p">,</span> <span class="n">keep_trial_num</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">buff</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">buff</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
         <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
@@ -727,7 +733,7 @@
 
 <div class="viewcode-block" id="History.get_df">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.get_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valid_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valid_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scheduler_address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">valid_only</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_valid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">)</span>
@@ -747,13 +753,13 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Access df of History before it is initialized.&#39;</span><span class="p">)</span>
                         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Scheduler is already dead. Most frequent reason to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="History.set_df">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.set_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scheduler_address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">df</span>
         <span class="k">else</span><span class="p">:</span>
@@ -771,58 +777,58 @@
 
 <div class="viewcode-block" id="History.create_df_columns">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.create_df_columns">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_df_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_df_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create columns of history.&quot;&quot;&quot;</span>
 
         <span class="c1"># df として保有するカラムを生成</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
         <span class="c1"># columns のメタデータを作成</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">meta_columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
         <span class="c1"># trial</span>
         <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;trial&#39;</span><span class="p">)</span>  <span class="c1"># index</span>
-        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_metadata</span><span class="p">)</span>
+        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>  <span class="c1"># extra_data. save 時に中身を記入する。</span>
 
         <span class="c1"># parameter</span>
         <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span><span class="p">:</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">prm_name</span> <span class="o">+</span> <span class="s1">&#39;_lower_bound&#39;</span><span class="p">,</span> <span class="n">prm_name</span> <span class="o">+</span> <span class="s1">&#39;_upper_bound&#39;</span><span class="p">])</span>
-            <span class="n">metadata</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;prm&#39;</span><span class="p">,</span> <span class="s1">&#39;prm_lb&#39;</span><span class="p">,</span> <span class="s1">&#39;prm_ub&#39;</span><span class="p">])</span>
+            <span class="n">meta_columns</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;prm&#39;</span><span class="p">,</span> <span class="s1">&#39;prm_lb&#39;</span><span class="p">,</span> <span class="s1">&#39;prm_ub&#39;</span><span class="p">])</span>
 
         <span class="c1"># objective relative</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">)</span>
+            <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">)</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_direction&#39;</span><span class="p">)</span>
-            <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obj_direction&#39;</span><span class="p">)</span>
+            <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obj_direction&#39;</span><span class="p">)</span>
         <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;non_domi&#39;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
         <span class="c1"># constraint relative</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">:</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">)</span>
+            <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">)</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_lower_bound&#39;</span><span class="p">)</span>
-            <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns_lb&#39;</span><span class="p">)</span>
+            <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns_lb&#39;</span><span class="p">)</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_upper_bound&#39;</span><span class="p">)</span>
-            <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns_ub&#39;</span><span class="p">)</span>
+            <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns_ub&#39;</span><span class="p">)</span>
         <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;feasible&#39;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
         <span class="c1"># the others</span>
         <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;hypervolume&#39;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">columns</span><span class="p">,</span> <span class="n">metadata</span></div>
+        <span class="k">return</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span></div>
 
 
 <div class="viewcode-block" id="History.record">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.record">[docs]</a>
-    <span class="k">def</span> <span class="nf">record</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">parameters</span><span class="p">,</span>
             <span class="n">objectives</span><span class="p">,</span>
@@ -906,7 +912,7 @@
                 <span class="n">client</span><span class="o">.</span><span class="n">run_on_scheduler</span><span class="p">(</span><span class="n">postprocess_func</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="o">**</span><span class="n">postprocess_args</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_calc_non_domi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectives</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_non_domi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectives</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 
         <span class="c1"># feasible のもののみ取り出してくる</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;feasible&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -931,8 +937,9 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_domi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;non_domi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">non_domi</span>
 
-    <span class="k">def</span> <span class="nf">_calc_hypervolume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectives</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_hypervolume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectives</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 
+        <span class="c1"># 単目的最適化ならば 0 埋めして終了</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
             <span class="k">return</span>
@@ -945,7 +952,7 @@
                 <span class="n">objective_values</span><span class="p">[</span><span class="n">n_trial</span><span class="p">,</span> <span class="n">obj_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">objective</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">raw_objective_values</span><span class="p">[</span><span class="n">n_trial</span><span class="p">,</span> <span class="n">obj_idx</span><span class="p">])</span>
 
         <span class="c1"># pareto front を取得</span>
-        <span class="k">def</span> <span class="nf">get_pareto</span><span class="p">(</span><span class="n">objective_values_</span><span class="p">,</span> <span class="n">with_partial</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_pareto</span><span class="p">(</span><span class="n">objective_values_</span><span class="p">,</span> <span class="n">with_partial</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">with_partial</span><span class="p">:</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
@@ -978,34 +985,63 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">pareto_set_</span>
 
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_valid_worst_converted_objective_values</span><span class="p">(</span><span class="n">objective_values_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="c1"># objective_values.max(axis=0)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">objective_values_</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">)):</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hv_reference</span> <span class="o">==</span> <span class="s1">&#39;dynamic-pareto&#39;</span><span class="p">:</span>
             <span class="n">pareto_set</span><span class="p">,</span> <span class="n">pareto_set_list</span> <span class="o">=</span> <span class="n">get_pareto</span><span class="p">(</span><span class="n">objective_values</span><span class="p">,</span> <span class="n">with_partial</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">partial_pareto_set</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pareto_set_list</span><span class="p">):</span>
-                <span class="n">ref_point</span> <span class="o">=</span> <span class="n">pareto_set</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
-                <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">partial_pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
+                <span class="c1"># 並列計算時など Valid な解がまだ一つもない場合は pareto_set が長さ 0 になる</span>
+                <span class="c1"># その場合 max() を取るとエラーになる</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pareto_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ref_point</span> <span class="o">=</span> <span class="n">pareto_set</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+                    <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">partial_pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
             <span class="k">return</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hv_reference</span> <span class="o">==</span> <span class="s1">&#39;dynamic-nadir&#39;</span><span class="p">:</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">pareto_set_list</span> <span class="o">=</span> <span class="n">get_pareto</span><span class="p">(</span><span class="n">objective_values</span><span class="p">,</span> <span class="n">with_partial</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">partial_pareto_set</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pareto_set_list</span><span class="p">):</span>
-                <span class="n">ref_point</span> <span class="o">=</span> <span class="n">objective_values</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
-                <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">partial_pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
+                <span class="c1"># filter valid objective values only</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">get_valid_worst_converted_objective_values</span><span class="p">(</span><span class="n">objective_values</span><span class="p">)</span>
+
+                <span class="c1"># 並列計算時など Valid な解がまだ一つもない場合は長さ 0 になる</span>
+                <span class="c1"># その場合 max() を取るとエラーになる</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ref_point</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+                    <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">partial_pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
             <span class="k">return</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hv_reference</span> <span class="o">==</span> <span class="s1">&#39;nadir&#39;</span><span class="p">:</span>
             <span class="n">pareto_set</span> <span class="o">=</span> <span class="n">get_pareto</span><span class="p">(</span><span class="n">objective_values</span><span class="p">)</span>
-            <span class="n">ref_point</span> <span class="o">=</span> <span class="n">objective_values</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
-            <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">get_valid_worst_converted_objective_values</span><span class="p">(</span><span class="n">objective_values</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ref_point</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+                <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
             <span class="k">return</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hv_reference</span> <span class="o">==</span> <span class="s1">&#39;pareto&#39;</span><span class="p">:</span>
             <span class="n">pareto_set</span> <span class="o">=</span> <span class="n">get_pareto</span><span class="p">(</span><span class="n">objective_values</span><span class="p">)</span>
-            <span class="n">ref_point</span> <span class="o">=</span> <span class="n">pareto_set</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
-            <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pareto_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ref_point</span> <span class="o">=</span> <span class="n">pareto_set</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+                <span class="n">hv</span> <span class="o">=</span> <span class="n">compute_hypervolume</span><span class="p">(</span><span class="n">pareto_set</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv</span>
             <span class="k">return</span>
 
         <span class="k">elif</span> <span class="p">(</span>
@@ -1035,18 +1071,21 @@
 
 <div class="viewcode-block" id="History.save">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.save">[docs]</a>
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_f</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_f</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save csv file.&quot;&quot;&quot;</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+
+        <span class="c1"># extra_data の更新</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra_data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">_f</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># save df with columns with prefix</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">lineterminator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">HEADER_ROW</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-                    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+                    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">))</span>
                 <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">lineterminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># test</span>
             <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">_f</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">lineterminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
@@ -1054,7 +1093,7 @@
 
 <div class="viewcode-block" id="History.create_optuna_study">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.html#pyfemtet.opt.History.create_optuna_study">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_optuna_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_optuna_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># create study</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="c1"># storage=&#39;sqlite:///&#39; + os.path.basename(self.path) + &#39;_dummy.db&#39;,</span>
@@ -1093,16 +1132,16 @@
 
 
 
-<span class="k">class</span> <span class="nc">_OptimizationStatusActor</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_OptimizationStatusActor</span><span class="p">:</span>
     <span class="n">status_int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;undefined&#39;</span>
 
-    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status_int</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">text</span>
 
 
-<span class="k">class</span> <span class="nc">OptimizationStatus</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OptimizationStatus</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization status.&quot;&quot;&quot;</span>
 
     <span class="n">UNDEFINED</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -1117,7 +1156,7 @@
     <span class="n">TERMINATE_ALL</span> <span class="o">=</span> <span class="mi">60</span>
     <span class="n">CRASHED</span> <span class="o">=</span> <span class="mi">70</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">worker_address</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;entire&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">worker_address</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;entire&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
             <span class="n">_OptimizationStatusActor</span><span class="p">,</span>
             <span class="n">actor</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1129,7 +1168,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INITIALIZING</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">const_to_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">status_const</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">const_to_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">status_const</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert optimization status integer to message.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">status_const</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">UNDEFINED</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Undefined&#39;</span>
         <span class="k">if</span> <span class="n">status_const</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">INITIALIZING</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Initializing&#39;</span>
@@ -1143,7 +1182,7 @@
         <span class="k">if</span> <span class="n">status_const</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">TERMINATE_ALL</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Terminate_all&#39;</span>
         <span class="k">if</span> <span class="n">status_const</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">CRASHED</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;Crashed&#39;</span>
 
-    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status_const</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status_const</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set optimization status.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_actor</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_const</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">const_to_str</span><span class="p">(</span><span class="n">status_const</span><span class="p">))</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;---</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">const_to_str</span><span class="p">(</span><span class="n">status_const</span><span class="p">)</span><span class="si">}</span><span class="s1">---&#39;</span>
@@ -1153,13 +1192,45 @@
             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;(entire) &#39;</span> <span class="o">+</span> <span class="n">msg</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get optimization status.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actor</span><span class="o">.</span><span class="n">status_int</span>
 
-    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get optimization status message.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actor</span><span class="o">.</span><span class="n">status</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_MonitorHostRecordActor</span><span class="p">:</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="n">host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MonitorHostRecord</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+            <span class="n">_MonitorHostRecordActor</span><span class="p">,</span>
+            <span class="n">actor</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">workers</span><span class="o">=</span><span class="p">(</span><span class="n">worker_name</span><span class="p">,),</span>
+            <span class="n">allow_other_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_actor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_actor</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actor</span><span class="o">.</span><span class="n">host</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actor</span><span class="o">.</span><span class="n">port</span>
+        <span class="k">if</span> <span class="n">host</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
 </pre></div>
 
            </div>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-06 16:49+0900\n"
+"POT-Creation-Date: 2025-01-29 16:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -118,7 +118,8 @@ msgstr "最適化ライブラリのインターフェースのための抽象基
 msgid "The finite element method object."
 msgstr "有限要素法オブジェクトです。"
 
-#: of pyfemtet.opt.optimizer._base.AbstractOptimizer
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface
+#: pyfemtet.opt.optimizer._base.AbstractOptimizer
 #: pyfemtet.opt.optimizer._base.AbstractOptimizer:13
 #: pyfemtet.opt.optimizer._scipy.ScipyOptimizer
 #: pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer
@@ -199,6 +200,11 @@ msgstr "目的関数と拘束を計算します。"
 #: pyfemtet.opt.interface._base.FEMInterface.update
 #: pyfemtet.opt.interface._base.FEMInterface.update_parameter
 #: pyfemtet.opt.interface._base.NoFEM.update
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.constraint_from_excel
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.objective_from_excel
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.update
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter
 #: pyfemtet.opt.interface._femtet.FemtetInterface
 #: pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet
 #: pyfemtet.opt.interface._femtet.FemtetInterface.open
@@ -210,6 +216,7 @@ msgstr "目的関数と拘束を計算します。"
 #: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface
 #: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_model
 #: pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_sw_model
+#: pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase
 #: pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.filter_feasible
 #: pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter
 #: pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface
@@ -271,6 +278,9 @@ msgstr "内部的に使用されるために変換された目的関数の値、
 #: pyfemtet.opt.interface._base.FEMInterface.update
 #: pyfemtet.opt.interface._base.FEMInterface.update_parameter
 #: pyfemtet.opt.interface._base.NoFEM.update
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.load_parameter
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.update
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter
 #: pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive
 #: pyfemtet.opt.interface._femtet.FemtetInterface.open
 #: pyfemtet.opt.interface._femtet.FemtetInterface.solve
@@ -358,16 +368,19 @@ msgstr "具象クラスで実装されている場合、FEMモデル内のパラ
 
 #: of pyfemtet.opt.interface._base.FEMInterface.update:1
 #: pyfemtet.opt.interface._base.NoFEM.update:1
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.update:1
 #: pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface.update:1
 msgid "Updates the FEM analysis based on the proposed parameters."
 msgstr "提案されたパラメータに基づいてFEM解析を更新します。"
 
 #: of pyfemtet.opt.interface._base.FEMInterface.update_parameter:1
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:1
 #: pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:1
 msgid "Updates only FEM variables (if implemented in concrete class)."
 msgstr "具象クラスで実装されている場合、FEM変数のみを更新します。"
 
 #: of pyfemtet.opt.interface._base.FEMInterface.update_parameter:3
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:3
 #: pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:3
 msgid "If this method is implemented, it is able to get parameter via FEMInterface."
 msgstr "このメソッドが実装されている場合、FEMInterfaceを介してパラメータを取得できます。"
@@ -711,6 +724,7 @@ msgid "In current version, the termination processes are automatically execute i
 msgstr "現在のバージョンでは、終了処理は :func:`FEMOpt.optimize` の最後で自動的に実行されます。"
 
 #: of pyfemtet.opt.interface._base.NoFEM:1
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:1
 #: pyfemtet.opt.interface._femtet.FemtetInterface:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`"
 msgstr ""
@@ -748,18 +762,31 @@ msgid "Whether to open the result with GUI. Default is True."
 msgstr "結果を GUI で開くかどうかです。デフォルトは True です。"
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface:23
+#, fuzzy
+msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives.   .. note::     Indexes start at 0, but the parametric analysis    output settings in the Femtet dialog box indicate    setting numbers starting at 1.  .. warning::     **Setting this argument deletes the parametric    analysis swept table set in the femprj file.**    If you do not want to delete the swept table,    make a copy of the original file."
+msgstr "目的関数として使用するパラメトリック出力インデックスのリストとその方向です。指定されていない場合は None となり、パラメトリック出力は目的として使用されません。  .. note::     インデックスは0から始まりますが、Femtet のパラメトリック解析ダイアログの結果出力設定タブには、1から始まる設定番号が表示されます。  .. warning::     **この引数を設定すると、femprj ファイルに設定されているパラメトリック解析スイープテーブルが削除されます。** スイープテーブルを削除したくない場合は、元のファイルをコピーしてください。"
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:23
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives."
 msgstr "目的関数として使用するパラメトリック出力インデックスのリストとその方向です。指定されていない場合は None となり、パラメトリック出力は目的として使用されません。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:28
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:31
+msgid "Indexes start at 0, but the parametric analysis output settings in the Femtet dialog box indicate setting numbers starting at 1."
+msgstr "インデックスは0から始まりますが、Femtet のパラメトリック解析ダイアログの結果出力設定タブには、1から始まる設定番号が表示されます。"
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:37
+msgid "**Setting this argument deletes the parametric analysis swept table set in the femprj file.** If you do not want to delete the swept table, make a copy of the original file."
+msgstr "**この引数を設定すると、femprj ファイルに設定されているパラメトリック解析スイープテーブルが削除されます。** スイープテーブルを削除したくない場合は、元のファイルをコピーしてください。"
+
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:42
 msgid "Additional arguments from inherited classes."
 msgstr "継承されたクラスからの追加引数です。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:32
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:46
 msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
 msgstr "コンストラクタで ``strictly_pid_specify=True`` を指定しても、**並列処理では接続の動作が** ``strictly_pid_specify=False`` **のようになります**。これは大きなオーバーヘッドによるものです。したがって、``n_parallel`` が 2 以上の場合は、FEMOpt.optimize() を実行する前にすべての Femtet プロセスを閉じるべきです。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:40
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:54
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr "Python と Femtet を接続する方法についての情報を探している場合は、:func:`connect_femtet` を参照してください。"
 
@@ -958,11 +985,6 @@ msgid "Dask client."
 msgstr ""
 
 #: of pyfemtet.opt._femopt_core.History:13
-#, fuzzy
-msgid "metadata of optimization process."
-msgstr "最適化プロセスを実行します。"
-
-#: of pyfemtet.opt._femopt_core.History:15
 msgid "The method to calculate hypervolume or the reference point itself. Valid values are 'dynamic-pareto' or 'dynamic-nadir' or 'nadir' or 'pareto' or fixed point (in objective function space)."
 msgstr ""
 
@@ -1129,8 +1151,182 @@ msgstr "```scipy.optimize.minimize_scalar``` の戻り値です。"
 msgid "pyfemtet.opt.interface package"
 msgstr ""
 
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:1
+msgid "Excel を計算コアとして利用するためのクラス。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:3
+msgid "通常の有限要素法を Excel に 置き換えて使用することが可能です。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:6
+msgid "すでに Excel マクロと Femtet を 連携させた自動解析システムを 構築している場合、このクラスは それをラップします。これにより、 PyFemtet を用いた最適化を 行う際に便利な機能を提供します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:13
+msgid "設計変数の定義を含む Excel ファイルのパスを指定 します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:16
+msgid "設計変数の定義を含むシートの名前を指定します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:18
+msgid "目的関数の定義を含む Excel ファイルのパスを指定 します。指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:22
+msgid "目的関数の定義を含む含むシートの名前を指定します。 指定しない場合は ``input_sheet_name`` と同じと見 做します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:26
+msgid "Excel マクロ関数名を指定します。指定しない場合は ``FemtetMacro.FemtetMain`` と見做します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:29
+msgid "Excel マクロ関数に渡す引数をリストまたはタプルで 指定します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:32
+msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'auto' です。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:35
+msgid "Excel マクロ関数のタイムアウト時間を秒単位で指定 します。 None の場合はタイムアウトなしとなります。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:38
+msgid "セットアップ時に呼ぶ関数を含む xlsm のパスです。 指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:42
+msgid "セットアップ時に呼ぶマクロ関数名です。 指定しない場合、セットアップ時に何もしません。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:45
+msgid "セットアップ時に呼ぶマクロ関数の引数です。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:47
+msgid "終了時に呼ぶ関数を含む xlsm のパスです。 指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:51
+msgid "終了時に呼ぶマクロ関数名です。 指定しない場合、終了時に何もしません。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:54
+msgid "終了時に呼ぶマクロ関数の引数です。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:56
+msgid "excel を可視化するかどうかです。 ただし、 True を指定した場合でもマクロの実行中は 不可視になります。 デフォルトは False です。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:61
+msgid "excel ダイアログを表示するかどうかです。 デバッグ目的の場合以外は True にしないでください。 デフォルトは False です。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:65
+msgid "終了時に Excel を終了するかどうかです。 指定しない場合、 connect_method が 'new' の場合 True とふるまい 'auto' の場合 False と振舞います。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:69
+msgid "excel を対話モードにするかどうかです。 False にすると、 visible == True であっても 自動化プロセス中にユーザーが誤って Excel 本体を操作できないようにします。 デフォルトは True です。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:78
+msgid "設計変数の定義を含む Excel ファイルのパス。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:80
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:92
+msgid "Path"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:84
+msgid "設計変数の定義を含むシートの名前。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:86
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:98
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:104
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:116
+msgid "str"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:90
+msgid "目的関数の定義を含む Excel ファイルのパス。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:96
+msgid "目的関数の定義を含む含むシートの名前。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:102
+msgid "実行する Excel マクロ関数名。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:108
+msgid "Excel マクロ関数に渡す引数のリストまたはタプル。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:110
+msgid "list or tuple"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:114
+msgid "接続方法。'new' または 'auto'。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:120
+msgid "Excel マクロ関数の実行タイムアウト。 Noneの場合は無制限。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:123
+#, fuzzy
+msgid "float or None"
+msgstr "デフォルトは None です。"
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:127
+msgid "プログラム終了時に Excel を終了するかどうか。 connect_method が 'new' の場合 True, 'auto' の場合 False。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:131
+msgid "bool"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:135
+msgid "Excel の COM オブジェクト。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:137
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:143
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:149
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:155
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:161
+msgid "CDispatch"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:141
+msgid "設計変数を含むシートの COM オブジェクト。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:147
+msgid "目的関数を含むシートの COM オブジェクト。"
+msgstr ""
+
+#: of pyfemtet.opt.interface._excel_interface.ExcelInterface:153
+#: pyfemtet.opt.interface._excel_interface.ExcelInterface:159
+msgid "設計変数を含む xlsm ファイルの COM オブジェクト。"
+msgstr ""
+
 #: of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase`"
+msgstr ""
+
+#: of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`, :py:class:`~abc.ABC`"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:2
@@ -1491,4 +1687,7 @@ msgstr ""
 
 #~ msgid "Returns a logger."
 #~ msgstr "ロガーを返します。"
+
+#~ msgid "metadata of optimization process."
+#~ msgstr "最適化プロセスを実行します。"
 

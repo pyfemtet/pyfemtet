@@ -91,6 +91,19 @@ class FemtetInterface(FEMInterface):
             it will be None and no parametric outputs are used
             as objectives.
 
+
+            Note:
+                Indexes start at 0, but the parametric analysis
+                output settings in the Femtet dialog box indicate
+                setting numbers starting at 1.
+
+
+            Warning:
+                **Setting this argument deletes the parametric
+                analysis swept table set in the femprj file.**
+                If you do not want to delete the swept table,
+                make a copy of the original file.
+
         **kwargs: Additional arguments from inherited classes.
 
     Warning:

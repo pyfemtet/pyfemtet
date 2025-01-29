@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>External CAD (Solidworks) Integration &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -134,20 +134,20 @@ and double-click on <a class="reference download internal" download="" href="../
 <span class="linenos"> 13</span><span class="sd">    - cad_ex01_SW.femprj</span>
 <span class="linenos"> 14</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="linenos"> 15</span>
-<span class="linenos"> 16</span><span class="kn">import</span> <span class="nn">os</span>
+<span class="linenos"> 16</span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="linenos"> 17</span>
-<span class="linenos"> 18</span><span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">constants</span>
+<span class="linenos"> 18</span><span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
 <span class="linenos"> 19</span>
-<span class="linenos"> 20</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
-<span class="linenos"> 21</span><span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetWithSolidworksInterface</span>
-<span class="linenos"> 22</span><span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
+<span class="linenos"> 20</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span>
+<span class="linenos"> 21</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">FemtetWithSolidworksInterface</span>
+<span class="linenos"> 22</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelError</span>
 <span class="linenos"> 23</span>
 <span class="linenos"> 24</span>
 <span class="linenos"> 25</span><span class="n">here</span><span class="p">,</span> <span class="n">me</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="linenos"> 26</span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">here</span><span class="p">)</span>
 <span class="linenos"> 27</span>
 <span class="linenos"> 28</span>
-<span class="linenos"> 29</span><span class="k">def</span> <span class="nf">von_mises</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 29</span><span class="k">def</span><span class="w"> </span><span class="nf">von_mises</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
 <span class="linenos"> 30</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtain the maximum von Mises stress of the model.</span>
 <span class="linenos"> 31</span>
 <span class="linenos"> 32</span><span class="sd">    Note:</span>
@@ -181,12 +181,12 @@ and double-click on <a class="reference download internal" download="" href="../
 <span class="linenos"> 60</span>    <span class="k">return</span> <span class="n">mises</span>
 <span class="linenos"> 61</span>
 <span class="linenos"> 62</span>
-<span class="linenos"> 63</span><span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 63</span><span class="k">def</span><span class="w"> </span><span class="nf">mass</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
 <span class="linenos"> 64</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtain model mass.&quot;&quot;&quot;</span>
 <span class="linenos"> 65</span>    <span class="k">return</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMass</span><span class="p">(</span><span class="s1">&#39;H_beam&#39;</span><span class="p">)</span>
 <span class="linenos"> 66</span>
 <span class="linenos"> 67</span>
-<span class="linenos"> 68</span><span class="k">def</span> <span class="nf">C_minus_B</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+<span class="linenos"> 68</span><span class="k">def</span><span class="w"> </span><span class="nf">C_minus_B</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
 <span class="linenos"> 69</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the difference between C and B dimensions.</span>
 <span class="linenos"> 70</span>
 <span class="linenos"> 71</span><span class="sd">    Another example uses the following snippet to access design variables:</span>

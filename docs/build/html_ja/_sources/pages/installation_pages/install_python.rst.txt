@@ -14,7 +14,7 @@ Download the installer for windows 64-bit and run it.
 .. note::
 
     **If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.**
-    PyFemtet itself supports Python 3.9.3 and above.
+    PyFemtet itself supports Python 3.10 and above.
     
 
 .. tip::

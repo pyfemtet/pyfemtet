@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt.prediction.single_task_gp &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -79,17 +79,17 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pyfemtet.opt.prediction.single_task_gp</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">gpytorch</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gpytorch</span>
 
-<span class="kn">from</span> <span class="nn">botorch.models</span> <span class="kn">import</span> <span class="n">SingleTaskGP</span>
-<span class="kn">from</span> <span class="nn">botorch.models.transforms.input</span> <span class="kn">import</span> <span class="n">Normalize</span>
-<span class="kn">from</span> <span class="nn">botorch.models.transforms.outcome</span> <span class="kn">import</span> <span class="n">Standardize</span>
-<span class="kn">from</span> <span class="nn">botorch.fit</span> <span class="kn">import</span> <span class="n">fit_gpytorch_mll</span>
-<span class="kn">from</span> <span class="nn">gpytorch.mlls</span> <span class="kn">import</span> <span class="n">ExactMarginalLogLikelihood</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">botorch.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleTaskGP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">botorch.models.transforms.input</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normalize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">botorch.models.transforms.outcome</span><span class="w"> </span><span class="kn">import</span> <span class="n">Standardize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">botorch.fit</span><span class="w"> </span><span class="kn">import</span> <span class="n">fit_gpytorch_mll</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gpytorch.mlls</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExactMarginalLogLikelihood</span>
 
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.prediction._base</span> <span class="kn">import</span> <span class="n">PredictionModelBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.prediction._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">PredictionModelBase</span>
 
 
 <span class="n">DEVICE</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span>
@@ -98,21 +98,21 @@
 
 <div class="viewcode-block" id="tensor">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.tensor">[docs]</a>
-<span class="k">def</span> <span class="nf">tensor</span><span class="p">(</span><span class="n">x_</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tensor</span><span class="p">(</span><span class="n">x_</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">DTYPE</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">DEVICE</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="SingleTaskGPModel">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel">[docs]</a>
-<span class="k">class</span> <span class="nc">SingleTaskGPModel</span><span class="p">(</span><span class="n">PredictionModelBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SingleTaskGPModel</span><span class="p">(</span><span class="n">PredictionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple interface surrogate model using ```SingleTaskGP```.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        https://botorch.org/api/models.html#botorch.models.gp_regression.SingleTaskGP</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_noise_free</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_noise_free</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
@@ -123,22 +123,23 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_noise_free</span> <span class="o">=</span> <span class="n">is_noise_free</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span><span class="p">:</span> <span class="n">Standardize</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="SingleTaskGPModel.set_bounds_from_history">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.set_bounds_from_history">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_bounds_from_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">History</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_bounds_from_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">History</span>
         <span class="n">history</span><span class="p">:</span> <span class="n">History</span>
-        <span class="n">metadata</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="n">meta_column</span><span class="p">:</span> <span class="nb">str</span>
 
         <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
 
         <span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
-        <span class="n">metadata_columns</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">metadata</span>
+
         <span class="n">target_columns</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">col</span> <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">metadata</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">metadata_columns</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">metadata</span> <span class="o">==</span> <span class="s1">&#39;prm_lb&#39;</span> <span class="ow">or</span> <span class="n">metadata</span> <span class="o">==</span> <span class="s1">&#39;prm_ub&#39;</span>
+            <span class="n">col</span> <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">meta_column</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">history</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">meta_column</span> <span class="o">==</span> <span class="s1">&#39;prm_lb&#39;</span> <span class="ow">or</span> <span class="n">meta_column</span> <span class="o">==</span> <span class="s1">&#39;prm_ub&#39;</span>
         <span class="p">]</span>
 
         <span class="n">bounds_buff</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">target_columns</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># 2*len(prm_names) array</span>
@@ -149,20 +150,27 @@
     <span class="c1"># noinspection PyAttributeOutsideInit</span>
 <div class="viewcode-block" id="SingleTaskGPModel.fit">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">Y</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-        <span class="c1"># Fit a Gaussian Process model using the extracted data</span>
+        <span class="c1"># Standardize を SingleTaskGP に任せると</span>
+        <span class="c1"># 小さい Variance を勝手に 1e-10 に丸めるので</span>
+        <span class="c1"># 外で Standardize してから渡す</span>
         <span class="n">standardizer</span> <span class="o">=</span> <span class="n">Standardize</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],)</span>
-        <span class="n">standardizer</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">YVar</span> <span class="o">=</span> <span class="n">standardizer</span><span class="o">.</span><span class="n">untransform</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">))</span>
+        <span class="n">std_Y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">standardizer</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">YVar</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span> <span class="o">=</span> <span class="n">standardizer</span>
+
+        <span class="c1"># Fit a Gaussian Process model using the extracted data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gp</span> <span class="o">=</span> <span class="n">SingleTaskGP</span><span class="p">(</span>
             <span class="n">train_X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
-            <span class="n">train_Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span>
+            <span class="n">train_Y</span><span class="o">=</span><span class="n">std_Y</span><span class="p">,</span>
             <span class="n">train_Yvar</span><span class="o">=</span><span class="n">YVar</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_noise_free</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">input_transform</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">),</span>
-            <span class="n">outcome_transform</span><span class="o">=</span><span class="n">standardizer</span><span class="p">,</span>
+            <span class="c1"># BoTorch 0.13 前後で None を渡すと</span>
+            <span class="c1"># Standardize しない挙動は変わらないので None を渡せばよい</span>
+            <span class="n">outcome_transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">mll</span> <span class="o">=</span> <span class="n">ExactMarginalLogLikelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">likelihood</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gp</span><span class="p">)</span>
         <span class="n">fit_gpytorch_mll</span><span class="p">(</span><span class="n">mll</span><span class="p">)</span></div>
@@ -170,16 +178,21 @@
 
 <div class="viewcode-block" id="SingleTaskGPModel.predict">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict">[docs]</a>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+
         <span class="n">X</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">(),</span> <span class="n">gpytorch</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">fast_pred_var</span><span class="p">():</span>
-            <span class="c1"># predict</span>
-            <span class="n">post</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">posterior</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-            <span class="n">mean</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-            <span class="n">var</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">variance</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">posterior</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># fit() で Standardize してから SingleTaskGP に渡したので</span>
+        <span class="c1"># posterior は手動で un-standardize する必要がある</span>
+        <span class="n">M</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span><span class="o">.</span><span class="n">untransform</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span>
+
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span></div>
 </div>
 
@@ -191,13 +204,15 @@
     <span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="n">bounds</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bounds</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-7</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">SingleTaskGPModel</span><span class="p">()</span>
     <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">])))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">]])))</span>
 
-
+    <span class="c1"># 外挿</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">]])))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">]])))</span>
 </pre></div>
 
            </div>
