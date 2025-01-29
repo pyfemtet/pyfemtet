@@ -4,6 +4,7 @@ import ctypes
 import logging
 import warnings
 from time import sleep, time
+from packaging.version import Version
 
 import numpy as np
 import pandas as pd
@@ -12,13 +13,135 @@ from femtetutils import logger as util_logger
 
 from pyfemtet.dispatch_extensions import _get_pid
 from pyfemtet.core import SolveError
-from pyfemtet._message.messages import encoding
+from pyfemtet._message.messages import encoding, Message
 from pyfemtet.logger import get_module_logger
-
 
 logger = get_module_logger('opt.fem.ParametricIF', __name__)
 
 util_logger.setLevel(logging.ERROR)
+
+# singleton pattern
+_P_CSV: 'ParametricResultCSVProcessor' = None
+
+
+def get_csv_processor(Femtet):
+    global _P_CSV
+    if _P_CSV is None:
+        _P_CSV = ParametricResultCSVProcessor(Femtet)
+    return _P_CSV
+
+
+class ParametricResultCSVProcessor:
+
+    def __init__(self, Femtet):
+        self.Femtet = Femtet
+
+    def refresh_csv(self):
+        # 存在するならば削除する
+        csv_paths = self.get_csv_paths()
+        for path in csv_paths:
+            if os.path.exists(path):
+                os.remove(path)
+
+    def get_csv_paths(self):
+        # 結果フォルダを取得
+        path: str = self.Femtet.Project
+        res_dir_path = path.removesuffix('.femprj') + '.Results'
+
+        # csv を取得
+        model_name = self.Femtet.AnalysisModelName
+        csv_path = os.path.join(res_dir_path, f'{model_name}.csv')
+        table_csv_path = os.path.join(res_dir_path, f'{model_name}_table.csv')
+
+        return csv_path, table_csv_path
+
+    def check_csv_after_succeeded_PrmCalcExecute(self):
+        """Parametric Solve の後に呼ぶこと。"""
+
+        csv_path, table_csv_path = self.get_csv_paths()
+
+        # csv が生成されているか
+        start = time()
+        while not os.path.exists(csv_path):
+            # solve が succeeded であるにもかかわらず
+            # 数秒経過しても csv が存在しないのはおかしい
+            if time() - start > 3.:
+                return False
+            sleep(0.25)
+
+        # csv は存在するが、Femtet が古いと
+        # table は生成されない
+        if not os.path.exists(table_csv_path):
+            warnings.warn('テーブル形式 csv が生成されていないため、'
+                          '結果出力エラーチェックが行われません。'
+                          'そのため、結果出力にエラーがある場合は'
+                          '目的関数が 0 と記録される場合があります。'
+                          '結果出力エラーチェック機能を利用するためには、'
+                          'Femtet を最新バージョンにアップデートして'
+                          'ください。')
+
+        return True
+
+    def is_succeeded(self, parametric_output_index):
+
+        # まず csv 保存が成功しているかどうか。通常あるはず。
+        if not self.check_csv_after_succeeded_PrmCalcExecute():
+            return False, 'Reason: output csv not found.'
+
+        # 成功しているならば table があるかどうか
+        csv_path, table_csv_path = self.get_csv_paths()
+
+        # なければエラーチェックできないので
+        # エラーなしとみなす (warning の記載通り)
+        if not os.path.exists(table_csv_path):
+            return True, None
+
+        # table があれば読み込む
+        df = pd.read_csv(table_csv_path, encoding=encoding)
+
+        # 結果出力用に行番号を付記する
+        df['row_num'] = range(2, len(df) + 2)  # row=0 は header, excel は 1 始まり
+
+        # 「結果出力設定番号」カラムが存在するか
+        if '結果出力設定番号' in df.columns:  # TODO: 英語版対応
+
+            # 与えられた output_number に関連する行だけ抜き出し
+            # エラーがあるかどうかチェックする
+            pdf = df['結果出力設定番号'] == parametric_output_index + 1
+
+        # 結果出力設定番号 カラムが存在しない
+        else:
+            # output_number に関係なくエラーがあればエラーにする
+            pdf = df
+
+        # エラーの有無を確認
+        if 'エラー' in pdf.columns:  # TODO: 英語版対応
+            is_no_error = np.all(pdf['エラー'].isna().values)
+
+            if not is_no_error:
+                error_message_row_numbers = pdf['row_num'][~pdf['エラー'].isna()].values.astype(str)
+                error_messages = pdf['エラー'][~pdf['エラー'].isna()].values.astype(str)
+
+                def add_st_or_nd_or_th(n_: int):
+                    if n_ == 1:
+                        return f'{n_}st'
+                    elif n_ == 2:
+                        return f'{n_}nd'
+                    elif n_ == 3:
+                        return f'{n_}rd'
+                    else:
+                        return f'{n_}th'
+
+                error_msg = f'Error message(s) from {os.path.basename(table_csv_path)}: ' + ', '.join(
+                    [f'({add_st_or_nd_or_th(row)} row) {message}' for row, message in zip(error_message_row_numbers, error_messages)])
+            else:
+                error_msg = None
+
+        else:
+            raise RuntimeError('Internal Error! Parametric Analysis '
+                               'output csv has no error column.')
+
+        return is_no_error, error_msg
 
 
 def _get_dll():
@@ -69,6 +192,15 @@ def add_parametric_results_as_objectives(femopt, indexes, directions) -> bool:
 
 
 def _parametric_objective(Femtet, parametric_result_index):
+    # csv から結果取得エラーの有無を確認する
+    # (解析自体は成功していないと objective は呼ばれないはず)
+    csv_processor = get_csv_processor(Femtet)
+    succeeded, error_msg = csv_processor.is_succeeded(parametric_result_index)
+    if not succeeded:
+        logger.error(Message.ERR_PARAMETRIC_CSV_CONTAINS_ERROR)
+        logger.error(error_msg)
+        raise SolveError
+
     # load dll and set target femtet
     dll = _get_dll_with_set_femtet(Femtet)
     dll.GetPrmResult.restype = ctypes.c_double  # 複素数の場合は実部しか取らない
@@ -76,16 +208,12 @@ def _parametric_objective(Femtet, parametric_result_index):
 
 
 def solve_via_parametric_dll(Femtet) -> bool:
+    csv_processor = get_csv_processor(Femtet)
+
     # remove previous csv if exists
     #   消さなくても解析はできるが
     #   エラーハンドリングのため
-    csv_paths = _get_csv_paths(Femtet)
-    for path in csv_paths:
-        if os.path.exists(path):
-            os.remove(path)
-
-    # 後で使う
-    csv_path, table_csv_path = csv_paths
+    csv_processor.refresh_csv()
 
     # load dll and set target femtet
     dll = _get_dll_with_set_femtet(Femtet)
@@ -94,14 +222,14 @@ def solve_via_parametric_dll(Femtet) -> bool:
     dll.ClearPrmSweepTable.restype = ctypes.c_bool
     succeed = dll.ClearPrmSweepTable()
     if not succeed:
-        logger.error('Failed to remove existing sweep table!')
+        logger.error('Failed to remove existing sweep table!')  # 通常ありえないので error
         return False
 
     # solve
     dll.PrmCalcExecute.restype = ctypes.c_bool
     succeed = dll.PrmCalcExecute()
     if not succeed:
-        logger.error('Failed to solve!')
+        logger.warning('Failed to solve!')  # 通常起こりえるので warn
         return False
 
     # Check post-processing error
@@ -109,61 +237,17 @@ def solve_via_parametric_dll(Femtet) -> bool:
     #   エラーがどの番号のものかわからない。
     #   ただし、エラーがそのまま出力されるよりマシなので
     #   安全目に引っ掛けることにする
-
-    # csv が生成されているか
-    start = time()
-    while not os.path.exists(csv_path):
-        # solve が succeeded であるにもかかわらず
-        # 3 秒経過しても csv が存在しないのはおかしい
-        if time() - start > 3.:
-            raise RuntimeError('Internal Error! The result csv of Parametric Analysis is not created.')
-        sleep(0.25)
-
-    # csv は存在するが、Femtet が古いと
-    # table は生成されない
-    if not os.path.exists(table_csv_path):
-        warnings.warn('テーブル形式 csv が生成されていないため、'
-                      '結果出力エラーチェックが行われません。'
-                      'そのため、結果出力にエラーがある場合は'
-                      '目的関数が 0 と記録される場合があります。'
-                      '結果出力エラーチェック機能を利用するためには、'
-                      'Femtet を最新バージョンにアップデートして'
-                      'ください。')
-        return True  # 最適化自体は OK とする
-
-    # get df and error check
-    df = pd.read_csv(table_csv_path, encoding=encoding)
-    if 'エラー' in df.columns:
-        error_column_data = df['エラー']
-    elif 'error' in df.columns:
-        error_column_data = df['error']
-    else:
-        raise RuntimeError('Internal Error! Error message column not found in table csv.')
-
-    # 全部が空欄でないならエラーあり
-    if not np.all(error_column_data.isna().values):
-        logger.error('Outputs of Parametric Analysis contain some errors!')
-        return False
+    succeed = csv_processor.check_csv_after_succeeded_PrmCalcExecute()
+    if not succeed:
+        logger.error('Failed to save parametric result csv!')
+        return False  # 通常ありえないので error
 
     return succeed  # 成功した場合はTRUE、失敗した場合はFALSEを返す
 
 
-def _get_csv_paths(Femtet):
-
-    # 結果フォルダを取得
-    path: str = Femtet.Project
-    res_dir_path = path.removesuffix('.femprj') + '.Results'
-
-    # csv を取得
-    model_name = Femtet.AnalysisModelName
-    csv_path = os.path.join(res_dir_path, f'{model_name}.csv')
-    table_csv_path = os.path.join(res_dir_path, f'{model_name}_table.csv')
-
-    return csv_path, table_csv_path
-
-
 if __name__ == '__main__':
     from win32com.client import Dispatch
+
     g_Femtet = Dispatch('FemtetMacro.Femtet')
     g_dll = _get_dll_with_set_femtet(g_Femtet)
 
