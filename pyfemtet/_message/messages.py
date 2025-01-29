@@ -85,6 +85,8 @@ class Message:
     INFO_TERMINATING_EXCEL = _('Terminating Excel process...')
     INFO_TERMINATED_EXCEL = _('Excel process is terminated.')
     INFO_RESTORING_FEMTET_AUTOSAVE = _('Restore Femtet setting of autosave.')
+    ERR_PARAMETRIC_CSV_CONTAINS_ERROR = _('Failed to make output from Femtet. '
+                                          'Please check output settings of Parametric Analysis.')
 
     # ===== pyfemtet.opt.optimizer =====
     ERR_NOT_IMPLEMENTED = _('The following features are not supported by the specified optimization method. ')

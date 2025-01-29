@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-09 16:15+0900\n"
+"POT-Creation-Date: 2025-01-29 16:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,6 +119,7 @@ msgstr ""
 msgid "The finite element method object."
 msgstr ""
 
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:0
 #: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:0
 #: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:13
 #: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:0
@@ -205,6 +206,11 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM.update:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.constraint_from_excel:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.objective_from_excel:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
@@ -224,6 +230,10 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_model:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_sw_model:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.filter_feasible:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.filter_feasible:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface:0
@@ -312,6 +322,10 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM.update:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.load_parameter:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update:0
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
@@ -335,6 +349,12 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
@@ -451,22 +471,30 @@ msgid "keyword arguments for FEMInterface (re)constructor."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
 msgid "Checks the value of a parameter in the FEM model (if implemented in concrete class)."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:1
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM.update:1
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update:1
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:1
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface.update:1
 msgid "Updates the FEM analysis based on the proposed parameters."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:1
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:1
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:1
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:1
 msgid "Updates only FEM variables (if implemented in concrete class)."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:3
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:3
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:3
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:3
 msgid "If this method is implemented, it is able to get parameter via FEMInterface."
 msgstr ""
@@ -807,6 +835,7 @@ msgid "In current version, the termination processes are automatically execute i
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM:1
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:1
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`"
 msgstr ""
@@ -844,18 +873,30 @@ msgid "Whether to open the result with GUI. Default is True."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:23
+msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives.   .. note::     Indexes start at 0, but the parametric analysis    output settings in the Femtet dialog box indicate    setting numbers starting at 1.  .. warning::     **Setting this argument deletes the parametric    analysis swept table set in the femprj file.**    If you do not want to delete the swept table,    make a copy of the original file."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:23
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:28
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:31
+msgid "Indexes start at 0, but the parametric analysis output settings in the Femtet dialog box indicate setting numbers starting at 1."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:37
+msgid "**Setting this argument deletes the parametric analysis swept table set in the femprj file.** If you do not want to delete the swept table, make a copy of the original file."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:42
 msgid "Additional arguments from inherited classes."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:32
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:46
 msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:40
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:54
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr ""
 
@@ -1067,10 +1108,6 @@ msgid "Dask client."
 msgstr ""
 
 #: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:13
-msgid "metadata of optimization process."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:15
 msgid "The method to calculate hypervolume or the reference point itself. Valid values are 'dynamic-pareto' or 'dynamic-nadir' or 'nadir' or 'pareto' or fixed point (in objective function space)."
 msgstr ""
 
@@ -1227,8 +1264,181 @@ msgstr ""
 msgid "pyfemtet.opt.interface package"
 msgstr ""
 
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:1
+msgid "Excel を計算コアとして利用するためのクラス。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:3
+msgid "通常の有限要素法を Excel に 置き換えて使用することが可能です。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:6
+msgid "すでに Excel マクロと Femtet を 連携させた自動解析システムを 構築している場合、このクラスは それをラップします。これにより、 PyFemtet を用いた最適化を 行う際に便利な機能を提供します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:13
+msgid "設計変数の定義を含む Excel ファイルのパスを指定 します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:16
+msgid "設計変数の定義を含むシートの名前を指定します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:18
+msgid "目的関数の定義を含む Excel ファイルのパスを指定 します。指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:22
+msgid "目的関数の定義を含む含むシートの名前を指定します。 指定しない場合は ``input_sheet_name`` と同じと見 做します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:26
+msgid "Excel マクロ関数名を指定します。指定しない場合は ``FemtetMacro.FemtetMain`` と見做します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:29
+msgid "Excel マクロ関数に渡す引数をリストまたはタプルで 指定します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:32
+msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'auto' です。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:35
+msgid "Excel マクロ関数のタイムアウト時間を秒単位で指定 します。 None の場合はタイムアウトなしとなります。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:38
+msgid "セットアップ時に呼ぶ関数を含む xlsm のパスです。 指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:42
+msgid "セットアップ時に呼ぶマクロ関数名です。 指定しない場合、セットアップ時に何もしません。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:45
+msgid "セットアップ時に呼ぶマクロ関数の引数です。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:47
+msgid "終了時に呼ぶ関数を含む xlsm のパスです。 指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:51
+msgid "終了時に呼ぶマクロ関数名です。 指定しない場合、終了時に何もしません。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:54
+msgid "終了時に呼ぶマクロ関数の引数です。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:56
+msgid "excel を可視化するかどうかです。 ただし、 True を指定した場合でもマクロの実行中は 不可視になります。 デフォルトは False です。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:61
+msgid "excel ダイアログを表示するかどうかです。 デバッグ目的の場合以外は True にしないでください。 デフォルトは False です。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:65
+msgid "終了時に Excel を終了するかどうかです。 指定しない場合、 connect_method が 'new' の場合 True とふるまい 'auto' の場合 False と振舞います。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:69
+msgid "excel を対話モードにするかどうかです。 False にすると、 visible == True であっても 自動化プロセス中にユーザーが誤って Excel 本体を操作できないようにします。 デフォルトは True です。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:78
+msgid "設計変数の定義を含む Excel ファイルのパス。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:80
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:92
+msgid "Path"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:84
+msgid "設計変数の定義を含むシートの名前。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:86
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:98
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:104
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:116
+msgid "str"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:90
+msgid "目的関数の定義を含む Excel ファイルのパス。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:96
+msgid "目的関数の定義を含む含むシートの名前。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:102
+msgid "実行する Excel マクロ関数名。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:108
+msgid "Excel マクロ関数に渡す引数のリストまたはタプル。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:110
+msgid "list or tuple"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:114
+msgid "接続方法。'new' または 'auto'。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:120
+msgid "Excel マクロ関数の実行タイムアウト。 Noneの場合は無制限。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:123
+msgid "float or None"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:127
+msgid "プログラム終了時に Excel を終了するかどうか。 connect_method が 'new' の場合 True, 'auto' の場合 False。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:131
+msgid "bool"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:135
+msgid "Excel の COM オブジェクト。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:137
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:143
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:149
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:155
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:161
+msgid "CDispatch"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:141
+msgid "設計変数を含むシートの COM オブジェクト。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:147
+msgid "目的関数を含むシートの COM オブジェクト。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:153
+#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:159
+msgid "設計変数を含む xlsm ファイルの COM オブジェクト。"
+msgstr ""
+
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase`"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`, :py:class:`~abc.ABC`"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:2

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt.interface._femtet_with_sldworks &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -79,25 +79,25 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pyfemtet.opt.interface._femtet_with_sldworks</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
 
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">get_worker</span><span class="p">,</span> <span class="n">Lock</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_worker</span><span class="p">,</span> <span class="n">Lock</span>
 
-<span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">DispatchEx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">DispatchEx</span>
 <span class="c1"># noinspection PyUnresolvedReferences</span>
-<span class="kn">from</span> <span class="nn">pythoncom</span> <span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span><span class="p">,</span> <span class="n">com_error</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pythoncom</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span><span class="p">,</span> <span class="n">com_error</span>
 
-<span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">ModelError</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.interface</span> <span class="kn">import</span> <span class="n">FemtetInterface</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._femtet</span><span class="w"> </span><span class="kn">import</span> <span class="n">FemtetInterface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._message</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span>
 
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface">[docs]</a>
-<span class="k">class</span> <span class="nc">FemtetWithSolidworksInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FemtetWithSolidworksInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Control Femtet and Solidworks.</span>
 
 <span class="sd">    Using this class, you can import CAD files created</span>
@@ -128,7 +128,7 @@
     <span class="n">swSaveWithReferencesOptions_None</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># https://help-solidworks-com.translate.goog/2023/english/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swSaveWithReferencesOptions_e.html?_x_tr_sl=auto&amp;_x_tr_tl=ja&amp;_x_tr_hl=ja&amp;_x_tr_pto=wapp</span>
     <span class="n">swDocPART</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swDocumentTypes_e.html</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">sldprt_path</span><span class="p">,</span>
             <span class="n">quit_sldworks_on_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -174,7 +174,7 @@
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.initialize_sldworks_connection">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.initialize_sldworks_connection">[docs]</a>
-    <span class="k">def</span> <span class="nf">initialize_sldworks_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sldworks_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># SolidWorks を捕まえ、ファイルを開く</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">swApp</span> <span class="o">=</span> <span class="n">DispatchEx</span><span class="p">(</span><span class="s1">&#39;SLDWORKS.Application&#39;</span><span class="p">)</span>
@@ -189,7 +189,7 @@
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.check_param_value">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.check_param_value">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_param_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_param_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Override FemtetInterface.check_param_value().</span>
 
 <span class="sd">        Do nothing because the parameter can be registered</span>
@@ -199,20 +199,20 @@
         <span class="k">pass</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
         <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;sldprt_path&#39;</span><span class="p">],</span>
             <span class="kc">False</span>
         <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">CoInitialize</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialize_sldworks_connection</span><span class="p">()</span>
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.update_model">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update .x_t&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -278,7 +278,7 @@
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.update_sw_model">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_sw_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_sw_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">x_t_path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_sw_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">x_t_path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update .sldprt&quot;&quot;&quot;</span>
 
         <span class="c1"># df を dict に変換</span>
@@ -352,7 +352,7 @@
             <span class="k">break</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_get_name_from_equation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equation</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_name_from_equation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equation</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^\s*&quot;(.+?)&quot;\s*$&#39;</span>
         <span class="n">matched</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">equation</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">matched</span><span class="p">:</span>
@@ -362,7 +362,7 @@
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.quit">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.quit">[docs]</a>
-    <span class="k">def</span> <span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quit_sldworks_on_terminate</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">get_worker</span><span class="p">()</span>
@@ -377,12 +377,12 @@
 
 
 
-<span class="k">def</span> <span class="nf">get_model_by_basename</span><span class="p">(</span><span class="n">swApp</span><span class="p">,</span> <span class="n">basename</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_model_by_basename</span><span class="p">(</span><span class="n">swApp</span><span class="p">,</span> <span class="n">basename</span><span class="p">):</span>
     <span class="n">swModel</span> <span class="o">=</span> <span class="n">swApp</span><span class="o">.</span><span class="n">GetFirstDocument</span>
     <span class="k">while</span> <span class="n">swModel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">pathname</span> <span class="o">=</span> <span class="n">swModel</span><span class="o">.</span><span class="n">GetPathName</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span> <span class="o">==</span> <span class="n">basename</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">Dispatch</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dispatch</span>
             <span class="c1"># swModel_ = swApp.ActivateDoc3(</span>
             <span class="c1">#     basename,</span>
             <span class="c1">#     False,</span>

@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional, List, Final
 
 import os
@@ -90,6 +91,19 @@ class FemtetInterface(FEMInterface):
             it will be None and no parametric outputs are used
             as objectives.
 
+
+            Note:
+                Indexes start at 0, but the parametric analysis
+                output settings in the Femtet dialog box indicate
+                setting numbers starting at 1.
+
+
+            Warning:
+                **Setting this argument deletes the parametric
+                analysis swept table set in the femprj file.**
+                If you do not want to delete the swept table,
+                make a copy of the original file.
+
         **kwargs: Additional arguments from inherited classes.
 
     Warning:
@@ -117,6 +131,9 @@ class FemtetInterface(FEMInterface):
             parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
             **kwargs  # 継承されたクラスからの引数
     ):
+        # warning
+        if parametric_output_indexes_use_as_objective is not None:
+            warnings.warn('解析モデルに設定された既存のスイープテーブルは削除されます。')
 
         # win32com の初期化
         CoInitialize()

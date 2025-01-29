@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.interface._excel_interface &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.interface._excel_interface</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.interface._excel_interface</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_worker</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">DispatchEx</span><span class="p">,</span> <span class="n">Dispatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client.dynamic</span><span class="w"> </span><span class="kn">import</span> <span class="n">CDispatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">femtetutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span>
+
+<span class="c1"># noinspection PyUnresolvedReferences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pythoncom</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span>
+<span class="c1"># noinspection PyUnresolvedReferences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pywintypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">com_error</span>
+
+<span class="c1"># pyfemtet.core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolveError</span>
+
+<span class="c1"># pyfemtet._util</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._femtet_config_util.exit</span><span class="w"> </span><span class="kn">import</span> <span class="n">_exit_or_force_terminate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.excel_macro_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">watch_excel_macro_error</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.dask_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">lock_or_no_lock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.excel_parse_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._warning</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_experimental_warning</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._message.messages</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span> <span class="k">as</span> <span class="n">Msg</span>
+
+<span class="c1"># dispatch extension</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.dispatch_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">_get_pid</span><span class="p">,</span> <span class="n">dispatch_specific_femtet</span>
+
+<span class="c1"># interface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">logger</span>
+
+<span class="c1"># expression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Expression</span>
+
+
+<div class="viewcode-block" id="ExcelInterface">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExcelInterface</span><span class="p">(</span><span class="n">FEMInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Excel を計算コアとして利用するためのクラス。</span>
+
+<span class="sd">    通常の有限要素法を Excel に</span>
+<span class="sd">    置き換えて使用することが可能です。</span>
+
+<span class="sd">    すでに Excel マクロと Femtet を</span>
+<span class="sd">    連携させた自動解析システムを</span>
+<span class="sd">    構築している場合、このクラスは</span>
+<span class="sd">    それをラップします。これにより、</span>
+<span class="sd">    PyFemtet を用いた最適化を</span>
+<span class="sd">    行う際に便利な機能を提供します。</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_xlsm_path (str or Path):</span>
+<span class="sd">            設計変数の定義を含む Excel ファイルのパスを指定</span>
+<span class="sd">            します。</span>
+<span class="sd">            </span>
+<span class="sd">        input_sheet_name (str):</span>
+<span class="sd">            設計変数の定義を含むシートの名前を指定します。</span>
+<span class="sd">            </span>
+<span class="sd">        output_xlsm_path (str or Path, optional):</span>
+<span class="sd">            目的関数の定義を含む Excel ファイルのパスを指定</span>
+<span class="sd">            します。指定しない場合は ``input_xlsm_path`` と</span>
+<span class="sd">            同じと見做します。</span>
+<span class="sd">            </span>
+<span class="sd">        output_sheet_name (str, optional):</span>
+<span class="sd">            目的関数の定義を含む含むシートの名前を指定します。</span>
+<span class="sd">            指定しない場合は ``input_sheet_name`` と同じと見</span>
+<span class="sd">            做します。</span>
+<span class="sd">            </span>
+<span class="sd">        procedure_name (str, optional):</span>
+<span class="sd">            Excel マクロ関数名を指定します。指定しない場合は</span>
+<span class="sd">            ``FemtetMacro.FemtetMain`` と見做します。</span>
+<span class="sd">            </span>
+<span class="sd">        procedure_args (list or tuple, optional):</span>
+<span class="sd">            Excel マクロ関数に渡す引数をリストまたはタプルで</span>
+<span class="sd">            指定します。</span>
+<span class="sd">            </span>
+<span class="sd">        connect_method (str, optional):</span>
+<span class="sd">            Excel との接続方法を指定します。 &#39;auto&#39; または</span>
+<span class="sd">            &#39;new&#39; が利用可能です。デフォルトは &#39;auto&#39; です。</span>
+<span class="sd">            </span>
+<span class="sd">        procedure_timeout (float or None, optional):</span>
+<span class="sd">            Excel マクロ関数のタイムアウト時間を秒単位で指定</span>
+<span class="sd">            します。 None の場合はタイムアウトなしとなります。</span>
+<span class="sd">            </span>
+<span class="sd">        setup_xlsm_path (str or Path, optional):</span>
+<span class="sd">            セットアップ時に呼ぶ関数を含む xlsm のパスです。</span>
+<span class="sd">            指定しない場合は ``input_xlsm_path`` と</span>
+<span class="sd">            同じと見做します。</span>
+
+<span class="sd">        setup_procedure_name (str, optional):</span>
+<span class="sd">            セットアップ時に呼ぶマクロ関数名です。</span>
+<span class="sd">            指定しない場合、セットアップ時に何もしません。</span>
+
+<span class="sd">        setup_procedure_args (list or tuple, optional):</span>
+<span class="sd">            セットアップ時に呼ぶマクロ関数の引数です。</span>
+
+<span class="sd">        teardown_xlsm_path (str or Path, optional):</span>
+<span class="sd">            終了時に呼ぶ関数を含む xlsm のパスです。</span>
+<span class="sd">            指定しない場合は ``input_xlsm_path`` と</span>
+<span class="sd">            同じと見做します。</span>
+
+<span class="sd">        teardown_procedure_name (str, optional):</span>
+<span class="sd">            終了時に呼ぶマクロ関数名です。</span>
+<span class="sd">            指定しない場合、終了時に何もしません。</span>
+
+<span class="sd">        teardown_procedure_args (list or tuple, optional):</span>
+<span class="sd">            終了時に呼ぶマクロ関数の引数です。</span>
+
+<span class="sd">        visible (bool):</span>
+<span class="sd">            excel を可視化するかどうかです。</span>
+<span class="sd">            ただし、 True を指定した場合でもマクロの実行中は</span>
+<span class="sd">            不可視になります。</span>
+<span class="sd">            デフォルトは False です。</span>
+
+<span class="sd">        display_alerts (bool):</span>
+<span class="sd">            excel ダイアログを表示するかどうかです。</span>
+<span class="sd">            デバッグ目的の場合以外は True にしないでください。</span>
+<span class="sd">            デフォルトは False です。</span>
+
+<span class="sd">        terminate_excel_when_quit (bool):</span>
+<span class="sd">            終了時に Excel を終了するかどうかです。</span>
+<span class="sd">            指定しない場合、 connect_method が &#39;new&#39; の場合</span>
+<span class="sd">            True とふるまい &#39;auto&#39; の場合 False と振舞います。</span>
+
+<span class="sd">        interactive (bool):</span>
+<span class="sd">            excel を対話モードにするかどうかです。</span>
+<span class="sd">            False にすると、 visible == True であっても</span>
+<span class="sd">            自動化プロセス中にユーザーが誤って</span>
+<span class="sd">            Excel 本体を操作できないようにします。</span>
+<span class="sd">            デフォルトは True です。</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        input_xlsm_path (Path):</span>
+<span class="sd">            設計変数の定義を含む Excel ファイルのパス。</span>
+<span class="sd">            </span>
+<span class="sd">        input_sheet_name (str):</span>
+<span class="sd">            設計変数の定義を含むシートの名前。</span>
+
+<span class="sd">        output_xlsm_path (Path):</span>
+<span class="sd">            目的関数の定義を含む Excel ファイルのパス。</span>
+
+<span class="sd">        output_sheet_name (str):</span>
+<span class="sd">            目的関数の定義を含む含むシートの名前。</span>
+
+<span class="sd">        procedure_name (str):</span>
+<span class="sd">            実行する Excel マクロ関数名。</span>
+
+<span class="sd">        procedure_args (list or tuple):</span>
+<span class="sd">            Excel マクロ関数に渡す引数のリストまたはタプル。</span>
+
+<span class="sd">        connect_method (str):</span>
+<span class="sd">            接続方法。&#39;new&#39; または &#39;auto&#39;。</span>
+
+<span class="sd">        procedure_timeout (float or None):</span>
+<span class="sd">            Excel マクロ関数の実行タイムアウト。</span>
+<span class="sd">            Noneの場合は無制限。</span>
+
+<span class="sd">        terminate_excel_when_quit (bool):</span>
+<span class="sd">            プログラム終了時に Excel を終了するかどうか。</span>
+<span class="sd">            connect_method が &#39;new&#39; の場合 True,</span>
+<span class="sd">            &#39;auto&#39; の場合 False。</span>
+
+<span class="sd">        excel (CDispatch):</span>
+<span class="sd">            Excel の COM オブジェクト。</span>
+
+<span class="sd">        input_sheet (CDispatch):</span>
+<span class="sd">            設計変数を含むシートの COM オブジェクト。</span>
+
+<span class="sd">        output_sheet (CDispatch):</span>
+<span class="sd">            目的関数を含むシートの COM オブジェクト。</span>
+
+<span class="sd">        input_workbook (CDispatch):</span>
+<span class="sd">            設計変数を含む xlsm ファイルの COM オブジェクト。</span>
+
+<span class="sd">        output_workbook (CDispatch):</span>
+<span class="sd">            設計変数を含む xlsm ファイルの COM オブジェクト。</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_xlsm_path</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># 操作対象の xlsm パス</span>
+    <span class="n">input_sheet_name</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># 変数セルを定義しているシート名</span>
+    <span class="n">output_xlsm_path</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># 操作対象の xlsm パス (指定しない場合、input と同一)</span>
+    <span class="n">output_sheet_name</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># 計算結果セルを定義しているシート名 (指定しない場合、input と同一)</span>
+    <span class="n">constraint_xlsm_path</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># 操作対象の xlsm パス (指定しない場合、input と同一)</span>
+    <span class="n">constraint_sheet_name</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># 拘束関数セルを定義しているシート名 (指定しない場合、input と同一)</span>
+
+    <span class="n">related_file_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>  <span class="c1"># 並列時に個別に並列プロセスの space にアップロードする必要のあるパス</span>
+
+    <span class="n">procedure_name</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># マクロ関数名（or モジュール名.関数名）</span>
+    <span class="n">procedure_args</span><span class="p">:</span> <span class="nb">list</span>  <span class="c1"># マクロ関数の引数</span>
+
+    <span class="n">excel</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># Excel Application</span>
+    <span class="n">wb_input</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># システムを構成する Workbook</span>
+    <span class="n">sh_input</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># 変数の定義された WorkSheet</span>
+    <span class="n">wb_output</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># システムを構成する Workbook</span>
+    <span class="n">sh_output</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># 計算結果の定義された WorkSheet (sh_input と同じでもよい)</span>
+    <span class="n">wb_constraint</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># システムを構成する Workbook</span>
+    <span class="n">sh_constraint</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># 計算結果の定義された WorkSheet (sh_input と同じでもよい)</span>
+    <span class="n">wb_setup</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># システムを構成する Workbook</span>
+    <span class="n">wb_teardown</span><span class="p">:</span> <span class="n">CDispatch</span>  <span class="c1"># システムを構成する Workbook</span>
+
+    <span class="n">visible</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># excel を可視化するかどうか</span>
+    <span class="n">display_alerts</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># ダイアログを表示するかどうか</span>
+    <span class="n">terminate_excel_when_quit</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># 終了時に Excel を終了するかどうか</span>
+    <span class="n">interactive</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># excel を対話モードにするかどうか</span>
+
+    <span class="n">_load_problem_from_me</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_excel_pid</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">_excel_hwnd</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">_with_femtet_autosave_setting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Femtet の自動保存機能の自動設定を行うかどうか。Femtet がインストールされていない場合はオフにする。クラス変数なので、インスタンス化前に設定する。</span>
+    <span class="n">_femtet_autosave_buffer</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># Femtet の自動保存機能の一時退避場所。最適化中はオフにする。</span>
+
+    <span class="n">setup_xlsm_path</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">setup_procedure_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">setup_procedure_args</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span>
+    <span class="n">teardown_xlsm_path</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">teardown_procedure_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">teardown_procedure_args</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span>
+
+    <span class="n">use_named_range</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># input を定義したシートにおいて input の値を名前付き範囲で指定するかどうか。</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">input_xlsm_path</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Path</span><span class="p">,</span>
+            <span class="n">input_sheet_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">output_xlsm_path</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">output_sheet_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">constraint_xlsm_path</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">constraint_sheet_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">procedure_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">procedure_args</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">connect_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>  <span class="c1"># or &#39;new&#39;</span>
+            <span class="n">procedure_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">setup_xlsm_path</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">setup_procedure_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">setup_procedure_args</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">teardown_xlsm_path</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">teardown_procedure_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">teardown_procedure_args</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">related_file_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="ow">or</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">visible</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">display_alerts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">terminate_excel_when_quit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">interactive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">use_named_range</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="n">show_experimental_warning</span><span class="p">(</span><span class="s2">&quot;ExcelInterface&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 初期化</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_xlsm_path</span><span class="p">)</span>  <span class="c1"># あとで再取得する</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span> <span class="o">=</span> <span class="n">input_sheet_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_xlsm_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">output_xlsm_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_xlsm_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span> <span class="o">=</span> <span class="n">output_sheet_name</span> <span class="k">if</span> <span class="n">output_sheet_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_sheet_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_xlsm_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">constraint_xlsm_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">constraint_xlsm_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span> <span class="o">=</span> <span class="n">constraint_sheet_name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">procedure_name</span> <span class="o">=</span> <span class="n">procedure_name</span> <span class="ow">or</span> <span class="s1">&#39;FemtetMacro.FemtetMain&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">procedure_args</span> <span class="o">=</span> <span class="n">procedure_args</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">assert</span> <span class="n">connect_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;new&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_method</span> <span class="o">=</span> <span class="n">connect_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">procedure_timeout</span> <span class="o">=</span> <span class="n">procedure_timeout</span>
+        <span class="k">if</span> <span class="n">terminate_excel_when_quit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">terminate_excel_when_quit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_method</span> <span class="o">==</span> <span class="s1">&#39;new&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">terminate_excel_when_quit</span> <span class="o">=</span> <span class="n">terminate_excel_when_quit</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_xlsm_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">setup_xlsm_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">setup_xlsm_path</span><span class="p">)</span>  <span class="c1"># あとで取得する</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span> <span class="o">=</span> <span class="n">setup_procedure_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_args</span> <span class="o">=</span> <span class="n">setup_procedure_args</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_xlsm_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">teardown_xlsm_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">teardown_xlsm_path</span><span class="p">)</span>  <span class="c1"># あとで取得する</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span> <span class="o">=</span> <span class="n">teardown_procedure_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_args</span> <span class="o">=</span> <span class="n">teardown_procedure_args</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">related_file_paths</span><span class="p">]</span> <span class="k">if</span> <span class="n">related_file_paths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="n">visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span> <span class="o">=</span> <span class="n">interactive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display_alerts</span> <span class="o">=</span> <span class="n">display_alerts</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span> <span class="o">=</span> <span class="n">use_named_range</span>
+
+        <span class="c1"># dask サブプロセスのときは space 直下の input_xlsm_path を参照する</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">worker</span> <span class="o">=</span> <span class="n">get_worker</span><span class="p">()</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">local_directory</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span><span class="p">]</span>
+
+        <span class="c1"># main プロセスの場合は絶対パスを参照する</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span><span class="p">]</span>
+
+        <span class="c1"># サブプロセスでの restore のための情報保管</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">input_xlsm_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span>
+            <span class="n">input_sheet_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">,</span>
+            <span class="n">output_xlsm_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span>
+            <span class="n">output_sheet_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">,</span>
+            <span class="n">constraint_xlsm_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span>
+            <span class="n">constraint_sheet_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="p">,</span>
+            <span class="n">procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_name</span><span class="p">,</span>
+            <span class="n">procedure_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_args</span><span class="p">,</span>
+            <span class="n">connect_method</span><span class="o">=</span><span class="s1">&#39;new&#39;</span><span class="p">,</span>  <span class="c1"># subprocess で connect する際は new を強制する</span>
+            <span class="n">terminate_excel_when_quit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># なので終了時は破棄する</span>
+            <span class="n">procedure_timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_timeout</span><span class="p">,</span>
+            <span class="n">setup_xlsm_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">,</span>
+            <span class="n">setup_procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span><span class="p">,</span>
+            <span class="n">setup_procedure_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_args</span><span class="p">,</span>
+            <span class="n">teardown_xlsm_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">,</span>
+            <span class="n">teardown_procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span><span class="p">,</span>
+            <span class="n">teardown_procedure_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_args</span><span class="p">,</span>
+            <span class="n">related_file_paths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span><span class="p">,</span>
+            <span class="n">visible</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">visible</span><span class="p">,</span>
+            <span class="n">interactive</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">,</span>
+            <span class="n">display_alerts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">display_alerts</span><span class="p">,</span>
+            <span class="n">use_named_range</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">FEMInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># メインプロセスで、並列プロセスを開始する前に行う前処理</span>
+
+        <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">):</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">):</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">):</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">):</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span><span class="p">:</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理&quot;&quot;&quot;</span>
+
+        <span class="c1"># kwargs で space_dir が与えられている場合、そちらを使用する</span>
+        <span class="c1"># メインプロセスで呼ばれることを想定</span>
+        <span class="k">if</span> <span class="s1">&#39;space_dir&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;space_dir&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span><span class="p">]</span>
+
+        <span class="c1"># connect_method が auto でかつ使用中のファイルを開こうとする場合に備えて excel のファイル名を変更</span>
+        <span class="n">subprocess_idx</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">subprocess_idx</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">proc_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_no_exists</span><span class="p">):</span>
+            <span class="n">exclude_ext</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="n">exclude_ext</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">subprocess_idx</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">ext</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>  <span class="c1"># input と output が同じの場合など。input がないのはおかしい</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">new_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">ignore_no_exists</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1"> が見つかりません。&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_path</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span> <span class="o">=</span> <span class="n">proc_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span> <span class="o">=</span> <span class="n">proc_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span> <span class="o">=</span> <span class="n">proc_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span> <span class="o">=</span> <span class="n">proc_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span> <span class="o">=</span> <span class="n">proc_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># スレッドが変わっているかもしれないので win32com の初期化</span>
+        <span class="n">CoInitialize</span><span class="p">()</span>
+
+        <span class="c1"># 最適化中は femtet の autosave を無効にする</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_femtet_autosave_setting</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._femtet_config_util.autosave</span><span class="w"> </span><span class="kn">import</span> <span class="n">_set_autosave_enabled</span><span class="p">,</span> <span class="n">_get_autosave_enabled</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_femtet_autosave_buffer</span> <span class="o">=</span> <span class="n">_get_autosave_enabled</span><span class="p">()</span>
+            <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># excel に繋ぐ</span>
+        <span class="k">with</span> <span class="n">lock_or_no_lock</span><span class="p">(</span><span class="s1">&#39;connect-excel&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect_excel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_method</span><span class="p">)</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># load_objective は 1 回目に呼ばれたのが main thread なので</span>
+        <span class="c1"># subprocess に入った後でもう一度 load objective を行う</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Objective</span><span class="p">,</span> <span class="n">Constraint</span>
+        <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="p">:</span> <span class="n">Objective</span>
+        <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">fun</span><span class="p">,</span> <span class="n">ScapeGoatObjective</span><span class="p">):</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="p">[</span><span class="n">obj_name</span><span class="p">]</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_from_excel</span>
+
+        <span class="n">cns</span><span class="p">:</span> <span class="n">Constraint</span>
+        <span class="k">for</span> <span class="n">cns_name</span><span class="p">,</span> <span class="n">cns</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cns</span><span class="o">.</span><span class="n">fun</span><span class="p">,</span> <span class="n">ScapeGoatObjective</span><span class="p">):</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="n">cns_name</span><span class="p">]</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_from_excel</span>
+
+        <span class="c1"># excel の setup 関数を必要なら実行する</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">lock_or_no_lock</span><span class="p">(</span><span class="s1">&#39;excel_setup_procedure&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_timeout</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_args</span>
+                        <span class="p">)</span>
+
+                    <span class="c1"># 再計算</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">CalculateFull</span><span class="p">()</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="k">except</span> <span class="n">com_error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed to run macro </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span><span class="si">}</span><span class="s1">. The original message is: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExcelInterface.connect_excel">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.connect_excel">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connect_method</span><span class="p">):</span>
+
+        <span class="c1"># ===== 新しい excel instance を起動 =====</span>
+        <span class="c1"># 起動</span>
+        <span class="k">if</span> <span class="n">connect_method</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;Excel.Application&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span> <span class="o">=</span> <span class="n">DispatchEx</span><span class="p">(</span><span class="s1">&#39;Excel.Application&#39;</span><span class="p">)</span>
+
+        <span class="c1"># FemtetRef を追加する</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_femtet_ref_xla</span><span class="p">()</span>  <span class="c1"># ここでエラーが発生しているかも？</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="c1"># 起動した excel の pid を記憶する</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_excel_hwnd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">hWnd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_excel_pid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excel_pid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_excel_pid</span> <span class="o">=</span> <span class="n">_get_pid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">hWnd</span><span class="p">)</span>
+
+        <span class="c1"># 可視性の設定</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Visible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">DisplayAlerts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_alerts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Interactive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="c1"># ===== input =====</span>
+        <span class="c1"># 開く</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">wb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">wb</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span> <span class="o">=</span> <span class="n">wb</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot open </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># シートを特定する</span>
+        <span class="k">for</span> <span class="n">sh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span><span class="o">.</span><span class="n">WorkSheets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sh</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span> <span class="o">=</span> <span class="n">sh</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Sheet </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="si">}</span><span class="s1"> does not exist in the book </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span><span class="o">.</span><span class="n">Name</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ===== output =====</span>
+        <span class="c1"># 開く (output)</span>
+        <span class="k">if</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">wb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">wb</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span> <span class="o">=</span> <span class="n">wb</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot open </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># シートを特定する (output)</span>
+        <span class="k">for</span> <span class="n">sh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span><span class="o">.</span><span class="n">WorkSheets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sh</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sh_output</span> <span class="o">=</span> <span class="n">sh</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Sheet </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="si">}</span><span class="s1"> does not exist in the book </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span><span class="o">.</span><span class="n">Name</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ===== constraint =====</span>
+        <span class="c1"># 開く (constraint)</span>
+        <span class="k">if</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb_constraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">wb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">wb</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_constraint</span> <span class="o">=</span> <span class="n">wb</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot open </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># シートを特定する (constraint)</span>
+        <span class="k">for</span> <span class="n">sh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_constraint</span><span class="o">.</span><span class="n">WorkSheets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sh</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sh_constraint</span> <span class="o">=</span> <span class="n">sh</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Sheet </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="si">}</span><span class="s1"> does not exist in the book </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_constraint</span><span class="o">.</span><span class="n">Name</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ===== setup =====</span>
+        <span class="c1"># 開く (setup)</span>
+        <span class="k">if</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb_setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">wb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">wb</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_setup</span> <span class="o">=</span> <span class="n">wb</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot open </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ===== teardown =====</span>
+        <span class="c1"># 開く (teardown)</span>
+        <span class="k">if</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb_teardown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">wb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">wb</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_teardown</span> <span class="o">=</span> <span class="n">wb</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot open </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># book に参照設定を追加する</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_setup</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_teardown</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb_constraint</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.open_femtet_ref_xla">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.open_femtet_ref_xla">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_femtet_ref_xla</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># get 64 bit</span>
+        <span class="n">xla_file_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla&#39;</span>
+
+        <span class="c1"># if not exist, get 32bit</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">xla_file_path</span><span class="p">):</span>
+            <span class="n">xla_file_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla&#39;</span>
+
+        <span class="c1"># certify</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">xla_file_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">xla_file_path</span><span class="si">}</span><span class="s1"> not found. Please check the &quot;Enable Macros&quot; command was fired.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># self.excel.Workbooks.Add(xla_file_path)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Workbooks</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">xla_file_path</span><span class="p">,</span> <span class="n">ReadOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.add_femtet_macro_reference">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.add_femtet_macro_reference">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wb</span><span class="p">):</span>
+
+        <span class="c1"># search</span>
+        <span class="n">ref_file_2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">_get_femtetmacro_dllpath</span><span class="p">())</span>
+        <span class="n">contain_2</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">wb</span><span class="o">.</span><span class="n">VBProject</span><span class="o">.</span><span class="n">References</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Description</span> <span class="o">==</span> <span class="s1">&#39;FemtetMacro&#39;</span><span class="p">:</span>  <span class="c1"># FemtetMacro</span>
+                    <span class="n">contain_2</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+        <span class="c1"># add</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">contain_2</span><span class="p">:</span>
+            <span class="n">wb</span><span class="o">.</span><span class="n">VBProject</span><span class="o">.</span><span class="n">References</span><span class="o">.</span><span class="n">AddFromFile</span><span class="p">(</span><span class="n">ref_file_2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.remove_femtet_ref_xla">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.remove_femtet_ref_xla">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_femtet_ref_xla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wb</span><span class="p">):</span>
+        <span class="c1"># search</span>
+        <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">wb</span><span class="o">.</span><span class="n">VBProject</span><span class="o">.</span><span class="n">References</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Description</span> <span class="o">==</span> <span class="s1">&#39;FemtetMacro&#39;</span><span class="p">:</span>  <span class="c1"># FemtetMacro</span>
+                    <span class="n">wb</span><span class="o">.</span><span class="n">VBProject</span><span class="o">.</span><span class="n">References</span><span class="o">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.update_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.update_parameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="c1"># params を作成</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+
+        <span class="c1"># excel シートの変数更新</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">except</span> <span class="n">com_error</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;The cell address specification by named range is failed. &#39;</span>
+                                <span class="s1">&#39;The process changes the specification way to table based method.&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span><span class="p">:</span>  <span class="c1"># else にしないこと</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">,</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span><span class="o">.</span><span class="n">Cells</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># 再計算</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">CalculateFull</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.update">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="c1"># マクロ実行</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_timeout</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_args</span>
+                <span class="p">)</span>
+
+            <span class="c1"># 再計算</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">CalculateFull</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="n">com_error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SolveError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed to run macro </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_name</span><span class="si">}</span><span class="s1">. The original message is: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.quit">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.quit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_excel_when_quit</span><span class="p">:</span>
+
+            <span class="n">already_terminated</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;excel&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">already_terminated</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_TERMINATING_EXCEL</span><span class="p">)</span>
+
+            <span class="c1"># 参照設定解除の前に終了処理を必要なら実施する</span>
+            <span class="c1"># excel の setup 関数を必要なら実行する</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">lock_or_no_lock</span><span class="p">(</span><span class="s1">&#39;excel_teardown_procedure&#39;</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_timeout</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_args</span>
+                            <span class="p">)</span>
+
+                        <span class="c1"># 再計算</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">CalculateFull</span><span class="p">()</span>
+
+                    <span class="k">except</span> <span class="n">com_error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed to run macro </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_args</span><span class="si">}</span><span class="s1">. The original message is: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># 不具合の原因になる場合があるので参照設定は解除しないこと</span>
+            <span class="c1"># self.remove_femtet_ref_xla(self.wb_input)</span>
+            <span class="c1"># self.remove_femtet_ref_xla(self.wb_output)</span>
+            <span class="c1"># self.remove_femtet_ref_xla(self.wb_constraint)</span>
+            <span class="c1"># self.remove_femtet_ref_xla(self.wb_setup)</span>
+            <span class="c1"># self.remove_femtet_ref_xla(self.wb_teardown)</span>
+
+            <span class="c1"># シートの COM オブジェクト変数を削除する</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_output</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_constraint</span>
+
+            <span class="c1"># workbook を閉じる</span>
+            <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span><span class="o">.</span><span class="n">Close</span><span class="p">(</span><span class="n">SaveChanges</span> <span class="o">:=</span> <span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span><span class="o">.</span><span class="n">Close</span><span class="p">(</span><span class="n">SaveChanges</span> <span class="o">:=</span> <span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_constraint</span><span class="o">.</span><span class="n">Close</span><span class="p">(</span><span class="n">SaveChanges</span> <span class="o">:=</span> <span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_xlsm_path</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_setup</span><span class="o">.</span><span class="n">Close</span><span class="p">(</span><span class="n">SaveChanges</span> <span class="o">:=</span> <span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">teardown_xlsm_path</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wb_teardown</span><span class="o">.</span><span class="n">Close</span><span class="p">(</span><span class="n">SaveChanges</span> <span class="o">:=</span> <span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_constraint</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_setup</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_teardown</span>
+
+            <span class="c1"># excel の終了</span>
+            <span class="k">with</span> <span class="n">watch_excel_macro_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">restore_book</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">Quit</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">excel</span>
+
+            <span class="c1"># ここで Excel のプロセスが残らず落ちる</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_TERMINATED_EXCEL</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_femtet_autosave_setting</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._femtet_config_util.autosave</span><span class="w"> </span><span class="kn">import</span> <span class="n">_set_autosave_enabled</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_RESTORING_FEMTET_AUTOSAVE</span><span class="p">)</span>
+                <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_femtet_autosave_buffer</span><span class="p">)</span></div>
+
+
+    <span class="c1"># 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">output_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_output</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">output_workbook</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_workbook</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span>
+
+<div class="viewcode-block" id="ExcelInterface.load_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.load_parameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+        <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+
+            <span class="c1"># use(optional)</span>
+            <span class="n">use</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">use</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">_use</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">use</span><span class="p">]</span>
+                <span class="n">use</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">_use</span><span class="p">)</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_use</span><span class="p">)</span>  <span class="c1"># bool or NaN</span>
+
+            <span class="c1"># name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+            <span class="c1"># value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+
+            <span class="c1"># lb (optional)</span>
+            <span class="n">lb</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">lb</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">lb</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">lb</span><span class="p">]</span>
+                <span class="n">lb</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">lb</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">lb</span><span class="p">)</span>
+
+            <span class="c1"># ub (optional)</span>
+            <span class="n">ub</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">ub</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">ub</span><span class="p">]</span>
+                <span class="n">ub</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">ub</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">ub</span><span class="p">)</span>
+
+            <span class="c1"># step (optional)</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">step</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">step</span><span class="p">]</span>
+                <span class="n">step</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">use</span><span class="p">:</span>
+                <span class="n">prm</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">lower_bound</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span>
+                    <span class="n">upper_bound</span><span class="o">=</span><span class="n">ub</span><span class="p">,</span>
+                    <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+                    <span class="n">pass_to_fem</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fixed_prm</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">fun</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pass_to_fem</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">properties</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">lower_bound</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span>
+                        <span class="n">upper_bound</span><span class="o">=</span><span class="n">ub</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+                <span class="p">)</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">add_expression</span><span class="p">(</span><span class="n">fixed_prm</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.load_objective">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.load_objective">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Objective</span>
+        <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+
+            <span class="c1"># use(optional)</span>
+            <span class="n">use</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">use</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">_use</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">use</span><span class="p">]</span>
+                <span class="n">use</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">_use</span><span class="p">)</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_use</span><span class="p">)</span>  <span class="c1"># bool or NaN</span>
+
+            <span class="c1"># name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+            <span class="c1"># direction</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">direction</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">direction</span><span class="p">),</span> <span class="s1">&#39;direction is empty.&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">direction</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">direction</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">assert</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span> <span class="s1">&#39;maximize&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">use</span><span class="p">:</span>
+                <span class="c1"># objective を作る</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Objective</span><span class="p">(</span>
+                    <span class="n">fun</span><span class="o">=</span><span class="n">ScapeGoatObjective</span><span class="p">(),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,),</span>
+                    <span class="n">kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+                <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.load_constraint">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.load_constraint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constraint</span>
+        <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
+
+        <span class="c1"># TODO:</span>
+        <span class="c1">#   constraint は optional である。</span>
+        <span class="c1">#   現在は実装していないが、シートから問題を取得するよりよいロジックができたら</span>
+        <span class="c1">#   （つまり、同じシートからパラメータと拘束を取得出来るようになったら）__init__ 内で</span>
+        <span class="c1">#   constraint に None が与えられたのか故意に input_sheet_name と同じシート名を</span>
+        <span class="c1">#   与えられたのか分別できる実装に変えてそのチェック処理をここに反映する。</span>
+        <span class="c1"># constraint_sheet_name が指定されていない場合何もしない</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_same_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+
+            <span class="c1"># use(optional)</span>
+            <span class="n">use</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">use</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">_use</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">use</span><span class="p">]</span>
+                <span class="n">use</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">_use</span><span class="p">)</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_use</span><span class="p">)</span>  <span class="c1"># bool or NaN</span>
+
+            <span class="c1"># name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+            <span class="c1"># lb (optional)</span>
+            <span class="n">lb</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">lb</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">lb</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">lb</span><span class="p">]</span>
+                <span class="n">lb</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">lb</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">lb</span><span class="p">)</span>
+
+            <span class="c1"># ub (optional)</span>
+            <span class="n">ub</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">ub</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">ub</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">ub</span><span class="p">]</span>
+                <span class="n">ub</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">ub</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">ub</span><span class="p">)</span>
+
+            <span class="c1"># strict (optional)</span>
+            <span class="n">strict</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">strict</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">_strict</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">strict</span><span class="p">]</span>
+                <span class="n">strict</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">_strict</span><span class="p">)</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_strict</span><span class="p">)</span>  <span class="c1"># bool or NaN</span>
+
+            <span class="c1"># using_fem (optional)</span>
+            <span class="n">calc_before_solve</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">calc_before_solve</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">_calc_before_solve</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">calc_before_solve</span><span class="p">]</span>
+                <span class="n">calc_before_solve</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">_calc_before_solve</span><span class="p">)</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_calc_before_solve</span><span class="p">)</span>  <span class="c1"># bool or NaN</span>
+
+            <span class="k">if</span> <span class="n">use</span><span class="p">:</span>
+                <span class="c1"># constraint を作る</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span>
+                    <span class="n">fun</span><span class="o">=</span><span class="n">ScapeGoatObjective</span><span class="p">(),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">lb</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span>
+                    <span class="n">ub</span><span class="o">=</span><span class="n">ub</span><span class="p">,</span>
+                    <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,),</span>
+                    <span class="n">kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+                    <span class="n">using_fem</span><span class="o">=</span><span class="ow">not</span> <span class="n">calc_before_solve</span><span class="p">,</span>
+                <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.objective_from_excel">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.objective_from_excel">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">objective_from_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">,</span> <span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_output</span><span class="o">.</span><span class="n">Cells</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExcelInterface.constraint_from_excel">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.constraint_from_excel">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">constraint_from_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="p">,</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_constraint</span><span class="o">.</span><span class="n">Cells</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wait_femtet</span><span class="p">():</span>
+    <span class="n">Femtet</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">Femtet</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_terminate_femtet</span><span class="p">(</span><span class="n">femtet_pid_</span><span class="p">):</span>
+    <span class="n">CoInitialize</span><span class="p">()</span>
+    <span class="n">Femtet</span><span class="p">,</span> <span class="n">caught_pid</span> <span class="o">=</span> <span class="n">dispatch_specific_femtet</span><span class="p">(</span><span class="n">femtet_pid_</span><span class="p">)</span>
+    <span class="n">_exit_or_force_terminate</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">Femtet</span><span class="o">=</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="c1"># main thread で作成した excel への参照を含む関数を</span>
+<span class="c1"># 直接 thread や process に渡すと機能しない</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ScapeGoatObjective</span><span class="p">:</span>
+    <span class="c1"># def __call__(self, *args, fem: ExcelInterface or None = None, **kwargs):</span>
+    <span class="c1">#     fem.objective_from_excel(*args, **kwargs)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__globals__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">is_same_path</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+    <span class="n">_p1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">_p2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_p1</span> <span class="o">==</span> <span class="n">_p2</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">is_cell_value_empty</span><span class="p">(</span><span class="n">cell_value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cell_value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> \
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">cell_value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cell_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">ExcelInterface</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
