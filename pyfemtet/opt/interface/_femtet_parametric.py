@@ -2,16 +2,23 @@ import os
 import ctypes
 # from ctypes import wintypes
 import logging
+import warnings
+from time import sleep, time
 
 import numpy as np
 import pandas as pd
-from femtetutils import util, logger
+from femtetutils import util
+from femtetutils import logger as util_logger
 
 from pyfemtet.dispatch_extensions import _get_pid
 from pyfemtet.core import SolveError
 from pyfemtet._message.messages import encoding
+from pyfemtet.logger import get_module_logger
 
-logger.setLevel(logging.ERROR)
+
+logger = get_module_logger('opt.fem.ParametricIF', __name__)
+
+util_logger.setLevel(logging.ERROR)
 
 
 def _get_dll():
@@ -51,7 +58,6 @@ def add_parametric_results_as_objectives(femopt, indexes, directions) -> bool:
 
     # get objective names
     dll.GetPrmnResult.restype = ctypes.c_int
-    n = dll.GetPrmnResult()
     for i, direction in zip(indexes, directions):
         # objective name
         dll.GetPrmResultName.restype = ctypes.c_char_p
@@ -71,29 +77,78 @@ def _parametric_objective(Femtet, parametric_result_index):
 
 def solve_via_parametric_dll(Femtet) -> bool:
     # remove previous csv if exists
-    # 消さなくても解析はできるが
-    # のちのエラーハンドリングのため
-    csv_paths = get_csv_paths(Femtet)
+    #   消さなくても解析はできるが
+    #   エラーハンドリングのため
+    csv_paths = _get_csv_paths(Femtet)
     for path in csv_paths:
         if os.path.exists(path):
             os.remove(path)
 
+    # 後で使う
+    csv_path, table_csv_path = csv_paths
+
     # load dll and set target femtet
     dll = _get_dll_with_set_femtet(Femtet)
 
-    # reset
+    # reset existing sweep table
     dll.ClearPrmSweepTable.restype = ctypes.c_bool
     succeed = dll.ClearPrmSweepTable()
     if not succeed:
+        logger.error('Failed to remove existing sweep table!')
         return False
 
     # solve
     dll.PrmCalcExecute.restype = ctypes.c_bool
     succeed = dll.PrmCalcExecute()
+    if not succeed:
+        logger.error('Failed to solve!')
+        return False
+
+    # Check post-processing error
+    #   現時点では table csv に index の情報がないので、
+    #   エラーがどの番号のものかわからない。
+    #   ただし、エラーがそのまま出力されるよりマシなので
+    #   安全目に引っ掛けることにする
+
+    # csv が生成されているか
+    start = time()
+    while not os.path.exists(csv_path):
+        # solve が succeeded であるにもかかわらず
+        # 3 秒経過しても csv が存在しないのはおかしい
+        if time() - start > 3.:
+            raise RuntimeError('Internal Error! The result csv of Parametric Analysis is not created.')
+        sleep(0.25)
+
+    # csv は存在するが、Femtet が古いと
+    # table は生成されない
+    if not os.path.exists(table_csv_path):
+        warnings.warn('テーブル形式 csv が生成されていないため、'
+                      '結果出力エラーチェックが行われません。'
+                      'そのため、結果出力にエラーがある場合は'
+                      '目的関数が 0 と記録される場合があります。'
+                      '結果出力エラーチェック機能を利用するためには、'
+                      'Femtet を最新バージョンにアップデートして'
+                      'ください。')
+        return True  # 最適化自体は OK とする
+
+    # get df and error check
+    df = pd.read_csv(table_csv_path, encoding=encoding)
+    if 'エラー' in df.columns:
+        error_column_data = df['エラー']
+    elif 'error' in df.columns:
+        error_column_data = df['error']
+    else:
+        raise RuntimeError('Internal Error! Error message column not found in table csv.')
+
+    # 全部が空欄でないならエラーあり
+    if not np.all(error_column_data.isna().values):
+        logger.error('Outputs of Parametric Analysis contain some errors!')
+        return False
+
     return succeed  # 成功した場合はTRUE、失敗した場合はFALSEを返す
 
 
-def get_csv_paths(Femtet):
+def _get_csv_paths(Femtet):
 
     # 結果フォルダを取得
     path: str = Femtet.Project
@@ -107,62 +162,27 @@ def get_csv_paths(Femtet):
     return csv_path, table_csv_path
 
 
-def get_table_data_frame(Femtet):
-
-    # csv path を取得
-    _, table_csv_path = get_csv_paths(Femtet)
-
-    # csv の存在を確認
-    if not os.path.exists(table_csv_path):
-        raise SolveError
-
-    # csv があれば読み込む
-    df = pd.read_csv(table_csv_path, encoding=encoding)
-
-    return df
-
-
 if __name__ == '__main__':
     from win32com.client import Dispatch
-    Femtet = Dispatch('FemtetMacro.Femtet')
-    dll = _get_dll_with_set_femtet(Femtet)
+    g_Femtet = Dispatch('FemtetMacro.Femtet')
+    g_dll = _get_dll_with_set_femtet(g_Femtet)
 
     # solve
-    succeeded = solve_via_parametric_dll(Femtet)
-    if not succeeded:
-        dll.GetLastErrorMsg.restype = ctypes.c_char_p  # or wintypes.LPCSTR
-        error_msg: bytes = dll.GetLastErrorMsg()
-        error_msg: str = error_msg.decode(encoding='932')
+    g_succeeded = solve_via_parametric_dll(g_Femtet)
+    if not g_succeeded:
+        g_dll.GetLastErrorMsg.restype = ctypes.c_char_p  # or wintypes.LPCSTR
+        g_error_msg: bytes = g_dll.GetLastErrorMsg()
+        g_error_msg: str = g_error_msg.decode(encoding='932')
 
     # 結果取得：内部的にはエラーになっているはず
-    parametric_result_index = 1
-    dll = _get_dll_with_set_femtet(Femtet)
-    dll.GetPrmResult.restype = ctypes.c_double  # 複素数やベクトルの場合は実部や第一成分しか取らない PIF の仕様
-    output = dll.GetPrmResult(parametric_result_index)
+    g_parametric_result_index = 1
+    g_dll = _get_dll_with_set_femtet(g_Femtet)
+    g_dll.GetPrmResult.restype = ctypes.c_double  # 複素数やベクトルの場合は実部や第一成分しか取らない PIF の仕様
+    g_output = g_dll.GetPrmResult(g_parametric_result_index)
 
     # ... だが、下記のコードでそれは出てこない。
     # 値が実際に 0 である場合と切り分けられないので、
-    # csv を見てエラーがあるかどうか判断する。
-    # dll.GetLastErrorMsg.restype = ctypes.c_char_p  # or wintypes.LPCSTR
-    # error_msg: bytes = dll.GetLastErrorMsg()
-    # error_msg: str = error_msg.decode(encoding='932')
-
-    # 現時点では table csv に index の情報がないので、
-    # エラーがどの番号のものかわからない。
-    # ただし、エラーがそのまま出力されるよりマシなので
-    # 安全目に引っ掛けることにする
-    df = get_table_data_frame(Femtet)
-    if 'エラー' in df.columns:
-        error_column_data = df['エラー']
-    elif 'error' in df.columns:
-        error_column_data = df['error']
-    else:
-        raise RuntimeError('Internal Error! Error message column not found in table csv.')
-
-    # 全部が空欄でないならエラーあり
-
-    if not np.all(error_column_data.isna().values):
-        raise SolveError(f'パラメトリック解析結果出力エラー')  # 本当は PostError にすべき
-
-    # そうでなければ結果を返すなどする
-    ...
+    # csv を見てエラーがあるかどうか判断せざるを得ない。
+    g_dll.GetLastErrorMsg.restype = ctypes.c_char_p  # or wintypes.LPCSTR
+    g_error_msg: bytes = g_dll.GetLastErrorMsg()
+    g_error_msg: str = g_error_msg.decode(encoding='932')

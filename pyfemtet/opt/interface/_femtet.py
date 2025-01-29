@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional, List, Final
 
 import os
@@ -117,6 +118,9 @@ class FemtetInterface(FEMInterface):
             parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
             **kwargs  # 継承されたクラスからの引数
     ):
+        # warning
+        if parametric_output_indexes_use_as_objective is not None:
+            warnings.warn('解析モデルに設定された既存のスイープテーブルは削除されます。')
 
         # win32com の初期化
         CoInitialize()
