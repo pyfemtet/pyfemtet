@@ -27,7 +27,7 @@ class PolynomialChaosInterface(SurrogateModelInterfaceBase):
 
         # train model
         self.model = PolynomialExpansionModel()
-        self.model.set_bounds_from_history(self.history)
+        self.model.set_bounds_from_history(self.train_history)
         self.train()
 
     def update(self, parameters: pd.DataFrame) -> None:
@@ -37,13 +37,13 @@ class PolynomialChaosInterface(SurrogateModelInterfaceBase):
         )
 
         # history.prm_name 順に並べ替え
-        x = np.array([self.prm[k] for k in self.history.prm_names])
+        x = np.array([self.prm[k] for k in self.train_history.prm_names])
 
         # prediction
         dist_mean, _ = self.model.predict(x)
 
         # 目的関数の更新
-        self.obj = {obj_name: value for obj_name, value in zip(self.history.obj_names, dist_mean)}
+        self.obj = {obj_name: value for obj_name, value in zip(self.train_history.obj_names, dist_mean)}
 
 
 if __name__ == '__main__':

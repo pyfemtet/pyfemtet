@@ -40,12 +40,12 @@ class PoFBoTorchInterface(SurrogateModelInterfaceBase):
 
         # model training
         self.model = SingleTaskGPModel()
-        self.model.set_bounds_from_history(self.history)
+        self.model.set_bounds_from_history(self.train_history)
         self.train()
 
         # model_f training
         self.model_f = SingleTaskGPModel(is_noise_free=False)
-        self.model_f.set_bounds_from_history(self.history)
+        self.model_f.set_bounds_from_history(self.train_history)
         self.train_f()
 
     def update(self, parameters: pd.DataFrame) -> None:
@@ -54,8 +54,8 @@ class PoFBoTorchInterface(SurrogateModelInterfaceBase):
             self, parameters
         )
 
-        # history.prm_name 順に並べ替え
-        x = np.array([self.prm[k] for k in self.history.prm_names])
+        # train_history.prm_name 順に並べ替え
+        x = np.array([self.prm[k] for k in self.train_history.prm_names])
 
         # feasibility の計算
         mean_f, std_f = self.model_f.predict(np.array([x]))
@@ -63,9 +63,9 @@ class PoFBoTorchInterface(SurrogateModelInterfaceBase):
         if pof < self.threshold:
             raise SolveError(Msg.INFO_POF_IS_LESS_THAN_THRESHOLD)
 
-        # 実際の計算(mean は history.obj_names 順)
+        # 実際の計算(現時点で mean は train_history.obj_names 順)
         _mean, _std = self.model.predict(np.array([x]))
         mean = _mean[0]
 
         # 目的関数の更新
-        self.obj = {obj_name: value for obj_name, value in zip(self.history.obj_names, mean)}
+        self.obj = {obj_name: value for obj_name, value in zip(self.train_history.obj_names, mean)}

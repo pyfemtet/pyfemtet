@@ -16,37 +16,35 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
     def __init__(
             self,
             history_path: str = None,
-            history: History = None,
-            override_objective: bool = True,
+            train_history: History = None,
     ):
 
-        self.history: History
+        self.train_history: History
         self.model: Any
         self.prm: dict[str, float] = dict()
         self.obj: dict[str, float] = dict()
         self.df_prm: pd.DataFrame
         self.df_obj: pd.DataFrame
-        self.override_objective: bool = override_objective
 
-        # history_path が与えられた場合、history をコンストラクトする
+        # history_path が与えられた場合、train_history をコンストラクトする
         if history_path is not None:
-            history = History(history_path=history_path)
+            train_history = History(history_path=history_path)
 
-        # history が与えられるかコンストラクトされている場合
-        if history is not None:
+        # train_history が与えられるかコンストラクトされている場合
+        if train_history is not None:
             # 学習データを準備する
-            df_prm = history.get_df()[history.prm_names]
-            df_obj = history.get_df()[history.obj_names]
+            df_prm = train_history.get_df()[train_history.prm_names]
+            df_obj = train_history.get_df()[train_history.obj_names]
 
             # obj の名前を作る
-            for obj_name in history.obj_names:
+            for obj_name in train_history.obj_names:
                 self.obj[obj_name] = np.nan
 
             # prm の名前を作る
-            for prm_name in history.prm_names:
+            for prm_name in train_history.prm_names:
                 self.prm[prm_name] = np.nan
 
-            self.history = history
+            self.train_history = train_history
 
         # history から作らない場合、引数チェック
         else:
@@ -58,8 +56,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
 
         FEMInterface.__init__(
             self,
-            history=history,  # コンストラクト済み history を渡せば並列計算時も何もしなくてよい
-            override_objective=self.override_objective
+            train_history=train_history,  # コンストラクト済み train_history を渡せば並列計算時も何もしなくてよい
         )
 
     def filter_feasible(self, x: np.ndarray, y: np.ndarray, return_feasibility=False):
@@ -73,10 +70,14 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
             return x[feasible_idx], y[feasible_idx]
 
     def _setup_after_parallel(self, *args, **kwargs):
-        if self.override_objective:
-            opt: AbstractOptimizer = kwargs['opt']
-            obj: Objective
-            for obj_name, obj in opt.objectives.items():
+        opt: AbstractOptimizer = kwargs['opt']
+        obj: Objective
+
+        # add_objective された目的のうち、
+        # training data に含まれる名前で
+        # あるものは fun を上書き
+        for obj_name, obj in opt.objectives.items():
+            if obj_name in self.train_history.obj_names:
                 obj.fun = lambda obj_name_=obj_name: self.obj[obj_name_]
 
     def update_parameter(self, parameters: pd.DataFrame, with_warning=False) -> Optional[List[str]]:

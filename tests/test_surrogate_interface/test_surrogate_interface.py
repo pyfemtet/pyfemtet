@@ -90,7 +90,7 @@ def optimize_with_surrogate():
         os.remove(training_csv_path)
     shutil.copy(training_data_path, training_csv_path)
 
-    fem = PoFBoTorchInterface(history_path=training_csv_path, override_objective=False)
+    fem = PoFBoTorchInterface(history_path=training_csv_path)
     opt = OptunaOptimizer(sampler_class=TPESampler)
     femopt = FEMOpt(opt=opt, fem=fem, history_path=csv_path)
 
@@ -156,6 +156,6 @@ def test_surrogate():
 
 if __name__ == '__main__':
     # create_training_data()
-    # optimize_with_surrogate()
+    optimize_with_surrogate()
     optimize_with_surrogate_with_override()
 
