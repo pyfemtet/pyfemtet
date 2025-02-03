@@ -206,7 +206,7 @@ class OptunaOptimizer(AbstractOptimizer):
         """Create storage, study and set initial parameter."""
 
         # create storage
-        self.study_name = os.path.basename(self.history.path)
+        self.study_name = 'pyfemtet-study'
         storage_path = self.history.path.replace('.csv', '.db')  # history と同じところに保存
         if self.is_cluster:  # remote cluster なら scheduler の working dir に保存
             storage_path = os.path.basename(self.history.path).replace('.csv', '.db')
@@ -374,6 +374,17 @@ class OptunaOptimizer(AbstractOptimizer):
             sampler._pyfemtet_optimizer = self
 
         # load study
+        self.storage: optuna.storages.BaseStorage
+        studies = self.storage.get_all_studies()
+        if self.study_name in [s.study_name for s in studies]:
+            pass
+
+        elif len(studies) >= 1:
+            self.study_name = studies[-1].study_name
+
+        else:
+            raise ValueError('An empty db is passed.')
+
         study = optuna.load_study(
             study_name=self.study_name,
             storage=self.storage,
