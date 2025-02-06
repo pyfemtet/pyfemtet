@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-29 16:41+0900\n"
+"POT-Creation-Date: 2025-02-06 09:15+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,16 +217,19 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_model:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.update_model:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_model:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_sw_model:0
@@ -292,6 +295,9 @@ msgstr ""
 msgid "If True, skip fem.update() and record self.generate_invalid_results()."
 msgstr ""
 
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
+#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
 #: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
 #: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
@@ -334,6 +340,7 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_model:0
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
@@ -341,6 +348,7 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.update_model:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
@@ -349,6 +357,7 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:0
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
+#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
@@ -1006,6 +1015,30 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:1
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:1
 msgid "Update parameter of femprj."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:1
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:1
+#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:1
+msgid "Use output setting of Femtet parametric analysis as an objective function."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:3
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:3
+#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:3
+msgid "The index of output settings tab in parametric analysis dialog of Femtet. Starts at 1."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:5
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:5
+#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:5
+msgid "Objective direction. Valid input is one of 'minimize', 'maximize' or a specific value. Defaults to 'minimize'."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:8
+#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:8
+#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:8
+msgid "None"
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:1

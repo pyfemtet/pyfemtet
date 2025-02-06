@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt.interface._surrogate._singletaskgp &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -79,16 +79,16 @@
            <div itemprop="articleBody">
              
   <h1>pyfemtet.opt.interface._surrogate._singletaskgp のソースコード</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">norm</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.stats.distributions</span> <span class="kn">import</span> <span class="n">norm</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolveError</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._surrogate._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SurrogateModelInterfaceBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.prediction.single_task_gp</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleTaskGPModel</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">SolveError</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.logger</span> <span class="kn">import</span> <span class="n">get_module_logger</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.interface._surrogate._base</span> <span class="kn">import</span> <span class="n">SurrogateModelInterfaceBase</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.opt.prediction.single_task_gp</span> <span class="kn">import</span> <span class="n">SingleTaskGPModel</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._message.messages</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span> <span class="k">as</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">pyfemtet._message.messages</span> <span class="kn">import</span> <span class="n">Message</span> <span class="k">as</span> <span class="n">Msg</span>
 
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.interface&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
@@ -96,14 +96,14 @@
 
 <div class="viewcode-block" id="PoFBoTorchInterface">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.PoFBoTorchInterface">[ドキュメント]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PoFBoTorchInterface</span><span class="p">(</span><span class="n">SurrogateModelInterfaceBase</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PoFBoTorchInterface</span><span class="p">(</span><span class="n">SurrogateModelInterfaceBase</span><span class="p">):</span>
     <span class="n">model_f</span><span class="p">:</span> <span class="n">SingleTaskGPModel</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">SingleTaskGPModel</span>
     <span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.5</span>
 
 <div class="viewcode-block" id="PoFBoTorchInterface.train">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.PoFBoTorchInterface.train">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># df そのまま用いて training する</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_feasible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_prm</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_obj</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;No feasible results in training data.&#39;</span>
@@ -112,7 +112,7 @@
 
 <div class="viewcode-block" id="PoFBoTorchInterface.train_f">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.PoFBoTorchInterface.train_f">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">train_f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># df そのまま用いて training する</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_feasible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_prm</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_obj</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">return_feasibility</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># feasible values only</span>
@@ -120,7 +120,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model_f</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># update objectives</span>
         <span class="n">SurrogateModelInterfaceBase</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span>
@@ -129,24 +129,24 @@
 
         <span class="c1"># model training</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">SingleTaskGPModel</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set_bounds_from_history</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set_bounds_from_history</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
         <span class="c1"># model_f training</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_f</span> <span class="o">=</span> <span class="n">SingleTaskGPModel</span><span class="p">(</span><span class="n">is_noise_free</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_f</span><span class="o">.</span><span class="n">set_bounds_from_history</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_f</span><span class="o">.</span><span class="n">set_bounds_from_history</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_f</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PoFBoTorchInterface.update">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.PoFBoTorchInterface.update">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># self.prm 更新</span>
         <span class="n">SurrogateModelInterfaceBase</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span>
         <span class="p">)</span>
 
-        <span class="c1"># history.prm_name 順に並べ替え</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prm</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">])</span>
+        <span class="c1"># train_history.prm_name 順に並べ替え</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prm</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">])</span>
 
         <span class="c1"># feasibility の計算</span>
         <span class="n">mean_f</span><span class="p">,</span> <span class="n">std_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_f</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">]))</span>
@@ -154,12 +154,12 @@
         <span class="k">if</span> <span class="n">pof</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SolveError</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_POF_IS_LESS_THAN_THRESHOLD</span><span class="p">)</span>
 
-        <span class="c1"># 実際の計算(mean は history.obj_names 順)</span>
+        <span class="c1"># 実際の計算(現時点で mean は train_history.obj_names 順)</span>
         <span class="n">_mean</span><span class="p">,</span> <span class="n">_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">]))</span>
         <span class="n">mean</span> <span class="o">=</span> <span class="n">_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># 目的関数の更新</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="n">mean</span><span class="p">)}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="n">mean</span><span class="p">)}</span></div>
 </div>
 
 </pre></div>

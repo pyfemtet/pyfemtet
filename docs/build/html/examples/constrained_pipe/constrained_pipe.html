@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Restrict parameter combinations &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#parametric-analysis-integration">Parametric Analysis Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#single-objective-optimization">Single Objective Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#multi-objective-optimization">Multi-Objective Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#parallel-computing">Parallel Computing</a></li>
@@ -151,11 +152,11 @@ to execute it.</p>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
-<span class="linenos"> 9</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">PoFBoTorchSampler</span>
+<span class="linenos"> 8</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
+<span class="linenos"> 9</span><span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">PoFBoTorchSampler</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span>
-<span class="linenos">12</span><span class="k">def</span><span class="w"> </span><span class="nf">mises_stress</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos">12</span><span class="k">def</span> <span class="nf">mises_stress</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
 <span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the von Mises stress as the objective function.</span>
 <span class="linenos">14</span>
 <span class="linenos">15</span><span class="sd">    This function is called automatically by the FEMOpt</span>
@@ -172,7 +173,7 @@ to execute it.</p>
 <span class="linenos">26</span>    <span class="k">return</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxStress_py</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
 <span class="linenos">27</span>
 <span class="linenos">28</span>
-<span class="linenos">29</span><span class="k">def</span><span class="w"> </span><span class="nf">radius_diff</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+<span class="linenos">29</span><span class="k">def</span> <span class="nf">radius_diff</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
 <span class="linenos">30</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the difference between the outer and inner radii of the pipe.</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span><span class="sd">    This constraint is called to ensure that the</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.logger &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -79,8 +79,8 @@
            <div itemprop="articleBody">
              
   <h1>pyfemtet.logger のソースコード</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger._impl</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pyfemtet.logger._impl</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_module_logger</span><span class="p">,</span>
     <span class="n">add_file_output</span><span class="p">,</span>
     <span class="n">set_stdout_output</span><span class="p">,</span>
@@ -92,22 +92,22 @@
 
 <div class="viewcode-block" id="get_dask_logger">
 <a class="viewcode-back" href="../../modules/pyfemtet.logger.html#pyfemtet.logger.get_dask_logger">[ドキュメント]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_dask_logger</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">get_dask_logger</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;distributed&#39;</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_optuna_logger">
 <a class="viewcode-back" href="../../modules/pyfemtet.logger.html#pyfemtet.logger.get_optuna_logger">[ドキュメント]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_optuna_logger</span><span class="p">():</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+<span class="k">def</span> <span class="nf">get_optuna_logger</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">optuna</span>
     <span class="k">return</span> <span class="n">optuna</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;optuna&#39;</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_dash_logger">
 <a class="viewcode-back" href="../../modules/pyfemtet.logger.html#pyfemtet.logger.get_dash_logger">[ドキュメント]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_dash_logger</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">get_dash_logger</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;werkzeug&#39;</span><span class="p">)</span></div>
 
 </pre></div>

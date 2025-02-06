@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt.interface package &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -887,6 +887,26 @@ connect_method が 『new』 の場合 True,
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.use_parametric_output_as_objective">
+<span class="sig-name descname"><span class="pre">use_parametric_output_as_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet.html#FemtetInterface.use_parametric_output_as_objective"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.use_parametric_output_as_objective" title="Link to this definition"></a></dt>
+<dd><p>Femtetのパラメトリック解析の出力設定を目的関数として使用します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Femtet のパラメトリック分析ダイアログにおける出力設定タブの行番号です。1 から始まります。</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – 最適化の方向です。変数の値は 『maximize』 、 『minimize』 、または浮動小数点値です。デフォルトは 『minimize』 です。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1067,6 +1087,26 @@ connect_method が 『new』 の場合 True,
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parameters</strong> (<em>DataFrame</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.use_parametric_output_as_objective">
+<span class="sig-name descname"><span class="pre">use_parametric_output_as_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface.use_parametric_output_as_objective" title="Link to this definition"></a></dt>
+<dd><p>Femtetのパラメトリック解析の出力設定を目的関数として使用します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Femtet のパラメトリック分析ダイアログにおける出力設定タブの行番号です。1 から始まります。</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – 最適化の方向です。変数の値は 『maximize』 、 『minimize』 、または浮動小数点値です。デフォルトは 『minimize』 です。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1301,6 +1341,26 @@ connect_method が 『new』 の場合 True,
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.use_parametric_output_as_objective">
+<span class="sig-name descname"><span class="pre">use_parametric_output_as_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.use_parametric_output_as_objective" title="Link to this definition"></a></dt>
+<dd><p>Femtetのパラメトリック解析の出力設定を目的関数として使用します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Femtet のパラメトリック分析ダイアログにおける出力設定タブの行番号です。1 から始まります。</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – 最適化の方向です。変数の値は 『maximize』 、 『minimize』 、または浮動小数点値です。デフォルトは 『minimize』 です。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1387,14 +1447,13 @@ connect_method が 『new』 の場合 True,
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.PoFBoTorchInterface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">PoFBoTorchInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">override_objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_singletaskgp.html#PoFBoTorchInterface"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.PoFBoTorchInterface" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">PoFBoTorchInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_singletaskgp.html#PoFBoTorchInterface"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.PoFBoTorchInterface" title="Link to this definition"></a></dt>
 <dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase" title="pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SurrogateModelInterfaceBase</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>history</strong> (<a class="reference internal" href="pyfemtet.opt.html#pyfemtet.opt.History" title="pyfemtet.opt._femopt_core.History"><em>History</em></a>) – </p></li>
-<li><p><strong>override_objective</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
+<li><p><strong>train_history</strong> (<a class="reference internal" href="pyfemtet.opt.html#pyfemtet.opt.History" title="pyfemtet.opt._femopt_core.History"><em>History</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -1515,14 +1574,13 @@ connect_method が 『new』 の場合 True,
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.SurrogateModelInterfaceBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">SurrogateModelInterfaceBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">override_objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_base.html#SurrogateModelInterfaceBase"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">SurrogateModelInterfaceBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_base.html#SurrogateModelInterfaceBase"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase" title="Link to this definition"></a></dt>
 <dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.interface.FEMInterface" title="pyfemtet.opt.interface._base.FEMInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEMInterface</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>history</strong> (<a class="reference internal" href="pyfemtet.opt.html#pyfemtet.opt.History" title="pyfemtet.opt._femopt_core.History"><em>History</em></a>) – </p></li>
-<li><p><strong>override_objective</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
+<li><p><strong>train_history</strong> (<a class="reference internal" href="pyfemtet.opt.html#pyfemtet.opt.History" title="pyfemtet.opt._femopt_core.History"><em>History</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>

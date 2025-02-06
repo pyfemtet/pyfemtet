@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to PyFemtet’s documentation! &mdash; PyFemtet Project  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -147,13 +147,13 @@ Resonant frequency of a circular patch antenna</div>
 <section id="simple-api">
 <h2>Simple API<a class="headerlink" href="#simple-api" title="Link to this heading"></a></h2>
 <p>Below is an example of multi-objective optimization. You can set up the problem with <code class="docutils literal notranslate"><span class="pre">add_parameter()</span></code> and <code class="docutils literal notranslate"><span class="pre">add_objective()</span></code>, and then execute it with <code class="docutils literal notranslate"><span class="pre">optimize()</span></code>. For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the <a class="reference internal" href="pages/usage.html"><span class="doc">Usage</span></a> section.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">max_displacement</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">max_displacement</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
     <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Galileo</span><span class="o">.</span><span class="n">GetMaxDisplacement</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">dy</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">volume</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
@@ -176,6 +176,7 @@ Resonant frequency of a circular patch antenna</div>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pages/examples.html#parametric-analysis-integration">Parametric Analysis Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pages/examples.html#single-objective-optimization">Single Objective Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pages/examples.html#multi-objective-optimization">Multi-Objective Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pages/examples.html#parallel-computing">Parallel Computing</a></li>

@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt package &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -398,14 +398,14 @@
 </dl>
 <p class="rubric">サンプル</p>
 <p>femprjとモデルを指定して開くときは、次のように記述します。</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">FemtetInterface</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">FemtetInterface</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">(</span><span class="n">femprj_path</span><span class="o">=</span><span class="s1">&#39;path/to/project.femprj&#39;</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;NewModel&#39;</span><span class="p">)</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>  
 </pre></div>
 </div>
 <p>最適化アルゴリズムを指定する際は、次のように記述します。</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TPESampler</span>  
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">optuna.samplers</span> <span class="kn">import</span> <span class="n">TPESampler</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span><span class="n">sampler_class</span><span class="o">=</span><span class="n">TPESampler</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>  
 <span class="gp">&gt;&gt;&gt; </span><span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>  
 </pre></div>
@@ -439,7 +439,7 @@ As a result, it may not be feasible to complete the overall optimization within
 a realistic timeframe.</p>
 <dl>
 <dt>Examples:</dt><dd><p>例えば、モデルの底面積が拘束されている場合、次のアプローチは非常に長い時間を要する可能性があります。</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">bottom_area</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bottom_area</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="n">w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">)</span>  
 <span class="gp">... </span>    <span class="n">d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;depth&#39;</span><span class="p">)</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span>  
@@ -448,7 +448,7 @@ a realistic timeframe.</p>
 </pre></div>
 </div>
 <p>代わりに、次のことを行ってください。</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">bottom_area</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  <span class="c1"># Not to access the 1st argument.  </span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bottom_area</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>  <span class="c1"># Not to access the 1st argument.  </span>
 <span class="gp">... </span>    <span class="n">params</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">()</span>  
 <span class="gp">... </span>    <span class="n">w</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span>  
@@ -491,7 +491,7 @@ a realistic timeframe.</p>
 <p class="rubric">サンプル</p>
 <p>変数aとbを追加する場合; aはモデル変数として直接含まれず最適化パラメータであり、bはパラメータではなくモデル変数で、これら2つの変数の関係が <code class="docutils literal notranslate"><span class="pre">`b</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">**</span> <span class="pre">2`</span></code> である場合、次のように記述します:</p>
 <blockquote>
-<div><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">calc_b</span><span class="p">(</span><span class="n">parameter_a</span><span class="p">):</span>  
+<div><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">calc_b</span><span class="p">(</span><span class="n">parameter_a</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">parameter_a</span> <span class="o">**</span> <span class="mi">2</span>  
 <span class="gp">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;parameter_a&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pass_to_fem</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  
@@ -506,13 +506,13 @@ a realistic timeframe.</p>
 </dl>
 </div></blockquote>
 <p>変数r、theta、x、yを追加する場合; r、thetaは最適化パラメータであり、x、yは拘束関数を計算するための中間変数であるため、次のように記述します。</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">calc_x</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">calc_x</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>  
 <span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">calc_y</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">calc_y</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>  
 <span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">constraint</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">constraint</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="n">d</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>  
 <span class="gp">... </span>    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>  
 <span class="gp">... </span>    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>  
@@ -547,12 +547,12 @@ a realistic timeframe.</p>
 </div>
 <p class="rubric">サンプル</p>
 <p>複雑な目的関数を追加する場合（例えば、温度を計算するために動的にボディを設定し、温度とパラメータの1つの積を目的関数として使用したい場合）、次のように記述します。</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>  
-<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_body_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>  
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">get_body_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
 <span class="gp">... </span>        <span class="o">...</span>  <span class="c1"># process something and detect body name  </span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="n">body_name</span>  
 <span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">complex_objective</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">some_object</span><span class="p">):</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">complex_objective</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">some_object</span><span class="p">):</span>  
 <span class="gp">... </span>    <span class="n">body_name</span> <span class="o">=</span> <span class="n">some_object</span><span class="o">.</span><span class="n">get_body_name</span><span class="p">()</span>  <span class="c1"># dynamically get body name to calculate temperature  </span>
 <span class="gp">... </span>    <span class="n">temp</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Watt</span><span class="o">.</span><span class="n">GetTemp</span><span class="p">(</span><span class="n">body_name</span><span class="p">)</span>  <span class="c1"># calculate temperature  </span>
 <span class="gp">... </span>    <span class="n">some_param</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">()[</span><span class="s1">&#39;some_param&#39;</span><span class="p">]</span>  <span class="c1"># get ome parameter  </span>
@@ -911,6 +911,26 @@ True のとき、lower_bound, upper_bound, step, properties の
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.use_parametric_output_as_objective">
+<span class="sig-name descname"><span class="pre">use_parametric_output_as_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet.html#FemtetInterface.use_parametric_output_as_objective"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.use_parametric_output_as_objective" title="Link to this definition"></a></dt>
+<dd><p>Femtetのパラメトリック解析の出力設定を目的関数として使用します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Femtet のパラメトリック分析ダイアログにおける出力設定タブの行番号です。1 から始まります。</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – 最適化の方向です。変数の値は 『maximize』 、 『minimize』 、または浮動小数点値です。デフォルトは 『minimize』 です。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1091,6 +1111,26 @@ True のとき、lower_bound, upper_bound, step, properties の
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parameters</strong> (<em>DataFrame</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.use_parametric_output_as_objective">
+<span class="sig-name descname"><span class="pre">use_parametric_output_as_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.use_parametric_output_as_objective" title="Link to this definition"></a></dt>
+<dd><p>Femtetのパラメトリック解析の出力設定を目的関数として使用します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Femtet のパラメトリック分析ダイアログにおける出力設定タブの行番号です。1 から始まります。</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – 最適化の方向です。変数の値は 『maximize』 、 『minimize』 、または浮動小数点値です。デフォルトは 『minimize』 です。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1321,6 +1361,26 @@ True のとき、lower_bound, upper_bound, step, properties の
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parameters</strong> (<em>DataFrame</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.use_parametric_output_as_objective">
+<span class="sig-name descname"><span class="pre">use_parametric_output_as_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minimize'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.use_parametric_output_as_objective" title="Link to this definition"></a></dt>
+<dd><p>Femtetのパラメトリック解析の出力設定を目的関数として使用します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Femtet のパラメトリック分析ダイアログにおける出力設定タブの行番号です。1 から始まります。</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – 最適化の方向です。変数の値は 『maximize』 、 『minimize』 、または浮動小数点値です。デフォルトは 『minimize』 です。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>

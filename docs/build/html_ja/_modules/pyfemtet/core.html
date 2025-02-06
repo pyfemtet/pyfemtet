@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.core &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -81,7 +81,7 @@
   <h1>pyfemtet.core のソースコード</h1><div class="highlight"><pre>
 <div class="viewcode-block" id="ModelError">
 <a class="viewcode-back" href="../../modules/pyfemtet.core.html#pyfemtet.core.ModelError">[ドキュメント]</a>
-<span></span><span class="k">class</span><span class="w"> </span><span class="nc">ModelError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span></span><span class="k">class</span> <span class="nc">ModelError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised for errors in the model update.</span>
 <span class="sd">    </span>
 <span class="sd">    If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible.</span>
@@ -93,7 +93,7 @@
 
 <div class="viewcode-block" id="MeshError">
 <a class="viewcode-back" href="../../modules/pyfemtet.core.html#pyfemtet.core.MeshError">[ドキュメント]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MeshError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MeshError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised for errors in the meshing.</span>
 <span class="sd">    </span>
 <span class="sd">    If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible.</span>
@@ -105,7 +105,7 @@
 
 <div class="viewcode-block" id="SolveError">
 <a class="viewcode-back" href="../../modules/pyfemtet.core.html#pyfemtet.core.SolveError">[ドキュメント]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SolveError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SolveError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised for errors in the solver.</span>
 <span class="sd">    </span>
 <span class="sd">    If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible.</span>
@@ -125,13 +125,13 @@
 
 <div class="viewcode-block" id="FemtetAutomationError">
 <a class="viewcode-back" href="../../modules/pyfemtet.core.html#pyfemtet.core.FemtetAutomationError">[ドキュメント]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">FemtetAutomationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">FemtetAutomationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised for errors in automating Femtet.&quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_version</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_version</span><span class="p">(</span>
         <span class="n">main</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">major</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">minor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

@@ -1,6 +1,28 @@
 Examples
 ===============
 
+Parametric Analysis Integration
+-------------------------------
+
+.. grid:: 2
+
+    .. grid-item-card:: Using GUI settings as objectives
+        :link: ../examples/parametric_output_objective/parametric_output_objective
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ../examples/parametric_output_objective/thumbnail.png
+            :scale: 50
+        +++
+        Use the output settings in Femtet as simple objective functions.
+
+.. toctree::
+    :titlesonly:
+    :hidden:
+
+    ../examples/parametric_output_objective/parametric_output_objective
+
+
 Single Objective Optimization
 ------------------------------
 

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parametric Output as Objective &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Self-inductance of a solenoid coil" href="../gau_ex08/gau_ex08.html" />
+    <link rel="prev" title="Examples" href="../../pages/examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#parametric-analysis-integration">Parametric Analysis Integration</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Parametric Output as Objective</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#motivation">Motivation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sample-files">Sample Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#note">Note</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-variables-and-analysis-conditions">Design Variables and Analysis Conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#objective-function">Objective Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sample-code">Sample Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">Execution Result of the Sample Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reference-how-to-set-output-on-femtet">(Reference) How to Set Output on Femtet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#single-objective-optimization">Single Objective Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#multi-objective-optimization">Multi-Objective Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#parallel-computing">Parallel Computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#cad-integration">CAD Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#constrained-model">Constrained Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../pages/examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Parametric Output as Objective</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/parametric_output_objective/parametric_output_objective.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="parametric-output-as-objective">
+<h1>Parametric Output as Objective<a class="headerlink" href="#parametric-output-as-objective" title="Link to this heading"></a></h1>
+<p>This example explains how to use the output settings
+of parametric analysis of Femtet as objective functions.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p>With PyFemtet, you can perform optimization
+with low code. However, you have to code the
+objective function by using Femtet Python Macro.
+With this function, you can use the results set
+on the Femtet GUI as the objective function for
+optimization without coding the objective function.</p>
+</section>
+<section id="sample-files">
+<h2>Sample Files<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Keep the <a class="reference download internal" download="" href="../../_downloads/de88404fad5cca95e92b57e22e4ff3e5/gau_ex12_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">project</span></code></a>
+open in Femtet and double-click on the <a class="reference download internal" download="" href="../../_downloads/dba3c39530c87879199f679dd0231b4c/gau_ex12_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">code</span></code></a>
+to execute it.</p>
+</div>
+</section>
+<section id="note">
+<h2>Note<a class="headerlink" href="#note" title="Link to this heading"></a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This feature;</p>
+<ul class="simple">
+<li><p>removes existing sweep table of parametric analysis from your project file.</p></li>
+<li><p>uses only the first component of the vector / complex output (e.g. X component / real part.).</p></li>
+</ul>
+</div>
+</section>
+<section id="design-variables-and-analysis-conditions">
+<h2>Design Variables and Analysis Conditions<a class="headerlink" href="#design-variables-and-analysis-conditions" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/model1.png"><img alt="../../_images/model1.png" src="../../_images/model1.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">Model appearance, analysis conditions and design variables</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>out_radius</p></td>
+<td><p>The radius of outer coil.</p></td>
+</tr>
+<tr class="row-odd"><td><p>in_radius</p></td>
+<td><p>The radius of inner coil.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="objective-function">
+<h2>Objective Function<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>mutual inductance (aim to 150 nH)</p></li>
+<li><p>Z component of magnetic field at the center of the coils (minimize)</p></li>
+</ol>
+</section>
+<section id="sample-code">
+<h2>Sample Code<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">gau_ex12_parametric.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;Optimization using parametric analysis output settings as the objective function</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="sd">This demo shows how to use the values outputted by Femtet&#39;s parametric</span>
+<span class="linenos"> 4</span><span class="sd">analysis output setting feature as the objective function for optimization.</span>
+<span class="linenos"> 5</span><span class="sd">This feature allows you to perform optimization without coding the objective function.</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="sd">Note:</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="sd">    Please be aware of the following when using this feature.</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="sd">    - The sweep table from the parametric analysis will be deleted.</span>
+<span class="linenos">13</span><span class="sd">    - Output settings that produce complex numbers or vectors will only use</span>
+<span class="linenos">14</span><span class="sd">      the first value as the objective function. (For complex numbers, it will be</span>
+<span class="linenos">15</span><span class="sd">      the real part, and for vector values, it will be components such as X.)</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="sd">Corresponding project: gau_ex12_parametric.femprj</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">FemtetInterface</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="c1"># Initialize an object to connect to</span>
+<span class="linenos">28</span>    <span class="c1"># Femtet for referencing Femtet settings.</span>
+<span class="linenos">29</span>    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">()</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span>    <span class="c1"># Set the output settings of the parametric analysis as the objective function.</span>
+<span class="linenos">32</span>    <span class="c1"># `number` is the index from the `results output settings` tab of the</span>
+<span class="linenos">33</span>    <span class="c1"># Femtet parametric analysis dialog, and `direction` is</span>
+<span class="linenos">34</span>    <span class="c1"># the goal of that objective function (similar to FEMOpt.add_objective).</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span>    <span class="c1"># Mutual inductance</span>
+<span class="linenos">37</span>    <span class="n">fem</span><span class="o">.</span><span class="n">use_parametric_output_as_objective</span><span class="p">(</span><span class="n">number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">1.5e-7</span><span class="p">)</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span>    <span class="c1"># Strength of magnetic field at the center of the coil</span>
+<span class="linenos">40</span>    <span class="n">fem</span><span class="o">.</span><span class="n">use_parametric_output_as_objective</span><span class="p">(</span><span class="n">number</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span>    <span class="c1"># Initialize optimization object.</span>
+<span class="linenos">43</span>    <span class="c1"># Pass in the previously initialized fem object.</span>
+<span class="linenos">44</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
+<span class="linenos">45</span>
+<span class="linenos">46</span>    <span class="c1">#  Set parameters.</span>
+<span class="linenos">47</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;in_radius&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="linenos">48</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;out_radius&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+<span class="linenos">49</span>
+<span class="linenos">50</span>    <span class="c1"># Execute optimization.</span>
+<span class="linenos">51</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>  <span class="c1"># Fix random seed</span>
+<span class="linenos">52</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="execution-result-of-the-sample-code">
+<h2>Execution Result of the Sample Code<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../../_images/result1.png"><img alt="../../_images/result1.png" src="../../_images/result1.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">Execution result of gau_ex12_parametric.py.
+There is no codes about objective function calculation
+but the optimization correctly uses the output settings
+as its objective functions.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Results may vary slightly depending on the versions of Femtet,
+PyFemtet, and the optimization engine it depends on.</p>
+</div>
+</section>
+<section id="reference-how-to-set-output-on-femtet">
+<h2>(Reference) How to Set Output on Femtet<a class="headerlink" href="#reference-how-to-set-output-on-femtet" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id4">
+<a class="reference internal image-reference" href="../../_images/where_is_parametric_analysis.png"><img alt="../../_images/where_is_parametric_analysis.png" src="../../_images/where_is_parametric_analysis.png" style="width: 400px;" /></a>
+<figcaption>
+<p><span class="caption-text">Open the dialog from here.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id5">
+<a class="reference internal image-reference" href="../../_images/how_to_set_output.png"><img alt="../../_images/how_to_set_output.png" src="../../_images/how_to_set_output.png" style="width: 400px;" /></a>
+<figcaption>
+<p><span class="caption-text">Open ‘output’, press ‘add’,
+(then choose items you want to get as output,)
+and press ‘save’.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>For more detail, see the Femtet’s help.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../pages/examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gau_ex08/gau_ex08.html" class="btn btn-neutral float-right" title="Self-inductance of a solenoid coil" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
