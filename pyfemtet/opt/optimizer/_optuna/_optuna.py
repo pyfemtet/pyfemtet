@@ -207,9 +207,9 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # create storage
         self.study_name = 'pyfemtet-study'
-        storage_path = self.history.path.replace('.csv', '.db')  # history と同じところに保存
+        storage_path = os.path.splitext(self.history.path)[0] + '.db'  # history と同じところに保存
         if self.is_cluster:  # remote cluster なら scheduler の working dir に保存
-            storage_path = os.path.basename(self.history.path).replace('.csv', '.db')
+            storage_path = os.path.splitext(os.path.basename(self.history.path))[0] + '.db'
 
         # callback to terminate
         if self.n_trials is not None:

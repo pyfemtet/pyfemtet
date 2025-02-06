@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>最適化のリスタート &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="GUI" href="../../pages/script_builder.html" />
+    <link rel="prev" title="Microsoft Excel との統合" href="../excel_ui/excel_ui.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/examples.html">例題</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/advanced_examples.html">発展的な例題</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../surrogate_model/surrogate_model.html">サロゲートモデルを用いた最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../excel_ui/excel_ui.html">Microsoft Excel との統合</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">最適化のリスタート</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample-files">サンプルファイル</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-this-sample-will-do">このサンプルの動作</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#design-variables">設計変数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objective-function">目的関数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#execution-result-of-the-samples">サンプルコードの実行結果</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../pages/advanced_examples.html">発展的な例題</a></li>
+      <li class="breadcrumb-item active">最適化のリスタート</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/advanced_examples/restart/restart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="restarting-optimization">
+<h1>最適化のリスタート<a class="headerlink" href="#restarting-optimization" title="Link to this heading"></a></h1>
+<p>このサンプルでは、中断した最適化を再開する方法を解説します。</p>
+<section id="sample-files">
+<h2>サンプルファイル<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><a class="reference download internal" download="" href="../../_downloads/f5f8af3a95abcbd0aba5df07e202bbd3/gal_ex13_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> と <a class="reference download internal" download="" href="../../_downloads/00ff5caaa377d7bdc849f6fbf278cd31/gal_ex13_parametric_restart.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> を同じフォルダに配置してください。</p>
+</div>
+</section>
+<section id="what-this-sample-will-do">
+<h2>このサンプルの動作<a class="headerlink" href="#what-this-sample-will-do" title="Link to this heading"></a></h2>
+<p>最初に、FEM 問題に対し、ランダムサンプリングで設計パラメータを決め 3 回の解析を行います。</p>
+<p>次に遺伝的アルゴリズム NSGA2 を用いて 3 回の試行を行います。</p>
+<p>最後に、ガウス過程回帰ベイズ最適化アルゴリズムを用いて 3 回の最適化試行を行います。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>このようにすることで、最適化の進行を見ながら途中で最適化手法を切り替えたり、サロゲートモデル作成のためのランダムサンプリングを追加することができます。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>リスタートする場合、変数の数と名前、目的関数の数と名前、および拘束関数の数と名前が一貫している必要があります。ただし、変数の上下限や目的関数の方向、拘束関数の内容などは変更できます。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>OptunaOptimizer を使用する場合、csv と同名の .db ファイル (ここでは restarting-sample.db) が csv ファイルと同じフォルダにある必要があります。</p>
+<p>このファイルを削除しないでください。</p>
+</div>
+</section>
+<section id="design-variables">
+<h2>設計変数<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/model.png"><img alt="../../_images/model.png" src="../../_images/model.png" style="width: 400px;" /></a>
+<figcaption>
+<p><span class="caption-text">モデルの外観</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>width</p></td>
+<td><p>音叉の太さ</p></td>
+</tr>
+<tr class="row-odd"><td><p>length</p></td>
+<td><p>音叉の長さ</p></td>
+</tr>
+<tr class="row-even"><td><p>base_radius</p></td>
+<td><p>音叉の太さ</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="objective-function">
+<h2>目的関数<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>第一共振周波数 (ターゲット値: 800)</p></li>
+</ul>
+</section>
+<section id="execution-result-of-the-samples">
+<h2>サンプルコードの実行結果<a class="headerlink" href="#execution-result-of-the-samples" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../../_images/result.png"><img alt="../../_images/result.png" src="../../_images/result.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">実行結果のスクリーンショット</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>実際の問題で効果的な最適化を行う場合、より多くの試行が必要です。</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../excel_ui/excel_ui.html" class="btn btn-neutral float-left" title="Microsoft Excel との統合" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../pages/script_builder.html" class="btn btn-neutral float-right" title="GUI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
