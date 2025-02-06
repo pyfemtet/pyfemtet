@@ -25,6 +25,10 @@ Sample Files
    open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/gau_ex12_parametric.py>`
    to execute it.
 
+.. note::
+
+   For details on the FEM problem, please refer to FemtetHelp / Examples / Magnetic Analysis / Example 12.
+
 
 Note
 ----
