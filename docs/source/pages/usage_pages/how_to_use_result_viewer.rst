@@ -16,6 +16,33 @@ Installation
     See :doc:`../installation_pages/install_pyfemtet` or :doc:`../installation_pages/install_pyfemtet_manually` .
 
 
+.. tip::
+
+    If you installed PyFemtet without using the installer,
+    you can find the executable in the following location
+
+    ```<Folder containing python.exe>\Scripts\pyfemtet-opt-result-viewer.exe```
+
+    Please create a shortcut to this file. Do not copy or move it.
+
+
+.. tip::
+
+    The path to the folder containing python.exe can be found
+    by opening the command prompt and executing the following command:
+
+    ```py -c "import sys;print(sys.executable)"```
+
+    If you have not installed the py launcher, please replace 'py' with 'python'.
+
+
+.. note::
+
+    If you installed PyFemtet using a virtual environment,
+    you can use the viewer by executing the 'pyfemtet-opt-result-viewer'
+    command in the command line.
+
+
 Launch GUI
 ----------
 

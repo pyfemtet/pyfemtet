@@ -491,12 +491,12 @@ msgid "More information, see :doc:`installation_pages/install_pyfemtet` or :ref:
 msgstr ""
 
 #: ../source/pages/script_builder.rst:20
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:20
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:47
 msgid "Launch GUI"
 msgstr ""
 
 #: ../source/pages/script_builder.rst:22
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:22
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:49
 msgid "Double click desktop icon."
 msgstr ""
 
@@ -506,7 +506,7 @@ msgstr ""
 
 #: ../source/pages/script_builder.rst:30
 #: ../source/pages/usage.rst:2
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:28
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:55
 msgid "Usage"
 msgstr ""
 
@@ -830,18 +830,46 @@ msgstr ""
 msgid "See :doc:`../installation_pages/install_pyfemtet` or :doc:`../installation_pages/install_pyfemtet_manually` ."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:30
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:21
+msgid "If you installed PyFemtet without using the installer, you can find the executable in the following location"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:24
+msgid "```<Folder containing python.exe>\\Scripts\\pyfemtet-opt-result-viewer.exe```"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:26
+msgid "Please create a shortcut to this file. Do not copy or move it."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:31
+msgid "The path to the folder containing python.exe can be found by opening the command prompt and executing the following command:"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:34
+msgid "```py -c \"import sys;print(sys.executable)\"```"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:36
+msgid "If you have not installed the py launcher, please replace 'py' with 'python'."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:41
+msgid "If you installed PyFemtet using a virtual environment, you can use the viewer by executing the 'pyfemtet-opt-result-viewer' command in the command line."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:57
 msgid "Before launch tool, you run an optimization and get ``.csv`` file that contains the optimization history."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:33
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:60
 msgid "Then Launch the tool and Femtet and load csv."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:35
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:62
 msgid "Finally, you can select each solution plot and open corresponding FEM result in Femtet."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:40
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:67
 msgid "To learn usage with ready-made sample project, you can use `tutorial mode` in tool. It starts few minutes journy to explain how to use the tool."
 msgstr ""

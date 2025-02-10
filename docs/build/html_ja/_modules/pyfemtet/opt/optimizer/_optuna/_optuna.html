@@ -290,7 +290,11 @@
 
         <span class="c1"># create storage</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">study_name</span> <span class="o">=</span> <span class="s1">&#39;pyfemtet-study&#39;</span>
+<<<<<<< Updated upstream
         <span class="n">storage_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.db&#39;</span>  <span class="c1"># history と同じところに保存</span>
+=======
+        <span class="n">storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;.db&#39;</span><span class="p">)</span>  <span class="c1"># history と同じところに保存</span>
+>>>>>>> Stashed changes
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_cluster</span><span class="p">:</span>  <span class="c1"># remote cluster なら scheduler の working dir に保存</span>
             <span class="n">storage_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.db&#39;</span>
 
