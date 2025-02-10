@@ -155,11 +155,6 @@ class AbstractOptimizer(ABC):
         """Setup before parallel processes are launched."""
         pass
 
-    def generate_infeasible_result(self):
-        y = np.full_like(np.zeros(len(self.objectives)), np.nan)
-        c = np.full_like(np.zeros(len(self.constraints)), np.nan)
-        return y, y, c
-
     # ===== calc =====
     def f(self, x: np.ndarray, _record_infeasible=False) -> list[np.ndarray]:
         """Calculate objectives and constraints.
@@ -208,7 +203,8 @@ class AbstractOptimizer(ABC):
             c = [cns.calc(self.fem) for cns in self.constraints.values()]
 
         else:
-            y, _y, c = self.generate_infeasible_result()
+            y, c = self.history.generate_hidden_infeasible_result()
+            _y = y
 
         # register to history
         df_to_opt = self.variables.get_variables(

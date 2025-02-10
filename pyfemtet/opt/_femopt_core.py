@@ -553,7 +553,7 @@ class History:
             hv_reference=None,
     ):
         # hypervolume 計算メソッド
-        self._hv_reference = hv_reference or 'dynamic-pareto'
+        self._hv_reference = 'dynamic-pareto' if hv_reference is None else hv_reference
 
         # 引数の処理
         self.path = history_path  # .csv
@@ -728,6 +728,14 @@ class History:
 
         return columns, meta_columns
 
+    def generate_hidden_infeasible_result(self):
+        y = np.full_like(np.zeros(len(self.obj_names)), np.nan)
+        c = np.full_like(np.zeros(len(self.cns_names)), np.nan)
+        return y, c
+
+    def is_hidden_infeasible_result(self, y):
+        return np.all(np.isnan(y))
+
     def record(
             self,
             parameters,
@@ -780,7 +788,7 @@ class History:
             feasible_list.append(is_feasible(cns_value, cns.lb, cns.ub))
 
         # feasibility
-        row.append(all(feasible_list))
+        row.append(all(feasible_list) and not self.is_hidden_infeasible_result(obj_values))
 
         # the others
         row.append(-1.)  # dummy hypervolume
@@ -892,7 +900,29 @@ class History:
                     ret.append(row)
             return np.array(ret).max(axis=0)
 
-        if self._hv_reference == 'dynamic-pareto':
+        if (
+                isinstance(self._hv_reference, np.ndarray)
+                or isinstance(self._hv_reference, list)
+        ):
+            _buff = np.array(self._hv_reference)
+            assert _buff.shape == (len(self.obj_names),)
+
+            ref_point = np.array(
+                [obj.convert(raw_value) for obj, raw_value in zip(objectives.values(), _buff)]
+            )
+
+            _buff = get_pareto(objective_values)
+
+            pareto_set = np.empty((0, len(objectives)))
+            for pareto_sol in _buff:
+                if all(pareto_sol < ref_point):
+                    pareto_set = np.concatenate([pareto_set, [pareto_sol]], axis=0)
+
+            hv = compute_hypervolume(pareto_set, ref_point)
+            df.loc[len(df) - 1, 'hypervolume'] = hv
+            return
+
+        elif self._hv_reference == 'dynamic-pareto':
             pareto_set, pareto_set_list = get_pareto(objective_values, with_partial=True)
             for i, partial_pareto_set in enumerate(pareto_set_list):
                 # 並列計算時など Valid な解がまだ一つもない場合は pareto_set が長さ 0 になる
@@ -941,28 +971,6 @@ class History:
                 ref_point = pareto_set.max(axis=0) + 1e-8
                 hv = compute_hypervolume(pareto_set, ref_point)
                 df.loc[len(df) - 1, 'hypervolume'] = hv
-            return
-
-        elif (
-                isinstance(self._hv_reference, np.ndarray)
-                or isinstance(self._hv_reference, list)
-        ):
-            _buff = np.array(self._hv_reference)
-            assert _buff.shape == (len(self.obj_names),)
-
-            ref_point = np.array(
-                [obj.convert(raw_value) for obj, raw_value in zip(objectives.values(), _buff)]
-            )
-
-            _buff = get_pareto(objective_values)
-
-            pareto_set = np.empty((0, len(objectives)))
-            for pareto_sol in _buff:
-                if all(pareto_sol < ref_point):
-                    pareto_set = np.concatenate([pareto_set, [pareto_sol]], axis=0)
-
-            hv = compute_hypervolume(pareto_set, ref_point)
-            df.loc[len(df) - 1, 'hypervolume'] = hv
             return
 
         else:
