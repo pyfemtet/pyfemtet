@@ -131,7 +131,7 @@ class FEMOpt:
         # メンバーの宣言
         self.client = None
         self.status = None  # actor
-        self.history = None  # actor
+        self.history: History = None
         self.worker_status_list = None  # [actor]
         self.monitor_process_future = None
         self.monitor_server_kwargs = dict()
