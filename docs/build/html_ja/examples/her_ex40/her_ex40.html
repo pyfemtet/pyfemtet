@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>円形パッチアンテナの共振周波数 &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -157,28 +157,28 @@
 <span class="linenos">  5</span>
 <span class="linenos">  6</span><span class="sd">対応プロジェクト: her_ex40_parametric_jp.femprj</span>
 <span class="linenos">  7</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos">  8</span><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
 <span class="linenos">  9</span>
-<span class="linenos"> 10</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="linenos"> 11</span><span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span>
-<span class="linenos"> 12</span><span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="linenos"> 13</span><span class="kn">from</span> <span class="nn">optuna.integration.botorch</span> <span class="kn">import</span> <span class="n">BoTorchSampler</span>
+<span class="linenos"> 10</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos"> 11</span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_peaks</span>
+<span class="linenos"> 12</span><span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="linenos"> 13</span><span class="kn">from</span><span class="w"> </span><span class="nn">optuna.integration.botorch</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoTorchSampler</span>
 <span class="linenos"> 14</span>
-<span class="linenos"> 15</span><span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">SolveError</span>
-<span class="linenos"> 16</span><span class="kn">from</span> <span class="nn">pyfemtet.opt</span> <span class="kn">import</span> <span class="n">OptunaOptimizer</span><span class="p">,</span> <span class="n">FEMOpt</span>
+<span class="linenos"> 15</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolveError</span>
+<span class="linenos"> 16</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptunaOptimizer</span><span class="p">,</span> <span class="n">FEMOpt</span>
 <span class="linenos"> 17</span>
 <span class="linenos"> 18</span>
-<span class="linenos"> 19</span><span class="k">class</span> <span class="nc">SParameterCalculator</span><span class="p">:</span>
+<span class="linenos"> 19</span><span class="k">class</span><span class="w"> </span><span class="nc">SParameterCalculator</span><span class="p">:</span>
 <span class="linenos"> 20</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Sパラメータ計算用クラス&quot;&quot;&quot;</span>
 <span class="linenos"> 21</span>    
-<span class="linenos"> 22</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos"> 22</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="linenos"> 23</span>        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="linenos"> 24</span>        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="linenos"> 25</span>        <span class="bp">self</span><span class="o">.</span><span class="n">interpolated_function</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="linenos"> 26</span>        <span class="bp">self</span><span class="o">.</span><span class="n">resonance_frequency</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="linenos"> 27</span>        <span class="bp">self</span><span class="o">.</span><span class="n">minimum_S</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="linenos"> 28</span>
-<span class="linenos"> 29</span>    <span class="k">def</span> <span class="nf">_get_freq_and_S_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 29</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_freq_and_S_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
 <span class="linenos"> 30</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;周波数とSパラメータの関係を取得します。&quot;&quot;&quot;</span>
 <span class="linenos"> 31</span>
 <span class="linenos"> 32</span>        <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
@@ -205,7 +205,7 @@
 <span class="linenos"> 53</span>        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="n">freq_list</span>
 <span class="linenos"> 54</span>        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">dB_S_list</span>
 <span class="linenos"> 55</span>
-<span class="linenos"> 56</span>    <span class="k">def</span> <span class="nf">_calc_resonance_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos"> 56</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_resonance_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="linenos"> 57</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Sパラメータの第一ピークを与える周波数を取得します。&quot;&quot;&quot;</span>
 <span class="linenos"> 58</span>        <span class="n">peaks</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">),</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prominence</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wlen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">plateau_size</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 <span class="linenos"> 59</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -213,7 +213,7 @@
 <span class="linenos"> 61</span>        <span class="bp">self</span><span class="o">.</span><span class="n">resonance_frequency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">[</span><span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 <span class="linenos"> 62</span>        <span class="bp">self</span><span class="o">.</span><span class="n">minimum_S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">[</span><span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 <span class="linenos"> 63</span>
-<span class="linenos"> 64</span>    <span class="k">def</span> <span class="nf">get_resonance_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
+<span class="linenos"> 64</span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_resonance_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
 <span class="linenos"> 65</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;パッチアンテナの共振周波数を計算します。</span>
 <span class="linenos"> 66</span>
 <span class="linenos"> 67</span><span class="sd">        Note:</span>
@@ -232,7 +232,7 @@
 <span class="linenos"> 80</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resonance_frequency</span>  <span class="c1"># 単位: Hz</span>
 <span class="linenos"> 81</span>        
 <span class="linenos"> 82</span>
-<span class="linenos"> 83</span><span class="k">def</span> <span class="nf">antenna_is_smaller_than_substrate</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+<span class="linenos"> 83</span><span class="k">def</span><span class="w"> </span><span class="nf">antenna_is_smaller_than_substrate</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
 <span class="linenos"> 84</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;アンテナの大きさと基板の大きさの関係を計算します。</span>
 <span class="linenos"> 85</span>
 <span class="linenos"> 86</span><span class="sd">    この関数は、変数の更新によってモデル形状が破綻しないように</span>
@@ -250,7 +250,7 @@
 <span class="linenos"> 98</span>    <span class="k">return</span> <span class="n">w</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">r</span>  <span class="c1"># 単位: mm</span>
 <span class="linenos"> 99</span>
 <span class="linenos">100</span>
-<span class="linenos">101</span><span class="k">def</span> <span class="nf">port_is_inside_antenna</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+<span class="linenos">101</span><span class="k">def</span><span class="w"> </span><span class="nf">port_is_inside_antenna</span><span class="p">(</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
 <span class="linenos">102</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;給電ポートの位置とアンテナの大きさの関係を計算します。&quot;&quot;&quot;</span>
 <span class="linenos">103</span>    <span class="n">params</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">()</span>
 <span class="linenos">104</span>    <span class="n">r</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;antenna_radius&#39;</span><span class="p">]</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyfemtet.opt.interface._excel_interface &mdash; PyFemtet Project  ドキュメント</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
 
@@ -79,49 +79,49 @@
            <div itemprop="articleBody">
              
   <h1>pyfemtet.opt.interface._excel_interface のソースコード</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
-<span class="kn">import</span> <span class="nn">gc</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">get_worker</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_worker</span>
 
-<span class="kn">from</span> <span class="nn">win32com.client</span> <span class="kn">import</span> <span class="n">DispatchEx</span><span class="p">,</span> <span class="n">Dispatch</span>
-<span class="kn">from</span> <span class="nn">win32com.client.dynamic</span> <span class="kn">import</span> <span class="n">CDispatch</span>
-<span class="kn">from</span> <span class="nn">femtetutils</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">DispatchEx</span><span class="p">,</span> <span class="n">Dispatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client.dynamic</span><span class="w"> </span><span class="kn">import</span> <span class="n">CDispatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">femtetutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span>
 
 <span class="c1"># noinspection PyUnresolvedReferences</span>
-<span class="kn">from</span> <span class="nn">pythoncom</span> <span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pythoncom</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span>
 <span class="c1"># noinspection PyUnresolvedReferences</span>
-<span class="kn">from</span> <span class="nn">pywintypes</span> <span class="kn">import</span> <span class="n">com_error</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pywintypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">com_error</span>
 
 <span class="c1"># pyfemtet.core</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.core</span> <span class="kn">import</span> <span class="n">SolveError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolveError</span>
 
 <span class="c1"># pyfemtet._util</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._femtet_config_util.exit</span> <span class="kn">import</span> <span class="n">_exit_or_force_terminate</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._util.excel_macro_util</span> <span class="kn">import</span> <span class="n">watch_excel_macro_error</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._util.dask_util</span> <span class="kn">import</span> <span class="n">lock_or_no_lock</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._util.excel_parse_util</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._warning</span> <span class="kn">import</span> <span class="n">show_experimental_warning</span>
-<span class="kn">from</span> <span class="nn">pyfemtet._message.messages</span> <span class="kn">import</span> <span class="n">Message</span> <span class="k">as</span> <span class="n">Msg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._femtet_config_util.exit</span><span class="w"> </span><span class="kn">import</span> <span class="n">_exit_or_force_terminate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.excel_macro_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">watch_excel_macro_error</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.dask_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">lock_or_no_lock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.excel_parse_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._warning</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_experimental_warning</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._message.messages</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span> <span class="k">as</span> <span class="n">Msg</span>
 
 <span class="c1"># dispatch extension</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.dispatch_extensions</span> <span class="kn">import</span> <span class="n">_get_pid</span><span class="p">,</span> <span class="n">dispatch_specific_femtet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.dispatch_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">_get_pid</span><span class="p">,</span> <span class="n">dispatch_specific_femtet</span>
 
 <span class="c1"># interface</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.interface._base</span> <span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMInterface</span><span class="p">,</span> <span class="n">logger</span>
 
 <span class="c1"># expression</span>
-<span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Expression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Expression</span>
 
 
 <div class="viewcode-block" id="ExcelInterface">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface">[ドキュメント]</a>
-<span class="k">class</span> <span class="nc">ExcelInterface</span><span class="p">(</span><span class="n">FEMInterface</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExcelInterface</span><span class="p">(</span><span class="n">FEMInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Excel を計算コアとして利用するためのクラス。</span>
 
 <span class="sd">    通常の有限要素法を Excel に</span>
@@ -305,7 +305,7 @@
 
     <span class="n">use_named_range</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># input を定義したシートにおいて input の値を名前付き範囲で指定するかどうか。</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">input_xlsm_path</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Path</span><span class="p">,</span>
             <span class="n">input_sheet_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -413,10 +413,10 @@
         <span class="p">)</span>
         <span class="n">FEMInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># メインプロセスで、並列プロセスを開始する前に行う前処理</span>
 
         <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -436,7 +436,7 @@
         <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">related_file_paths</span><span class="p">:</span>
             <span class="n">client</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理&quot;&quot;&quot;</span>
 
         <span class="c1"># kwargs で space_dir が与えられている場合、そちらを使用する</span>
@@ -454,7 +454,7 @@
         <span class="c1"># connect_method が auto でかつ使用中のファイルを開こうとする場合に備えて excel のファイル名を変更</span>
         <span class="n">subprocess_idx</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">subprocess_idx</span>
 
-        <span class="k">def</span> <span class="nf">proc_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_no_exists</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">proc_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_no_exists</span><span class="p">):</span>
             <span class="n">exclude_ext</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
             <span class="n">new_path</span> <span class="o">=</span> <span class="n">exclude_ext</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">subprocess_idx</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">ext</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>  <span class="c1"># input と output が同じの場合など。input がないのはおかしい</span>
@@ -474,7 +474,7 @@
 
         <span class="c1"># 最適化中は femtet の autosave を無効にする</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_femtet_autosave_setting</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pyfemtet._femtet_config_util.autosave</span> <span class="kn">import</span> <span class="n">_set_autosave_enabled</span><span class="p">,</span> <span class="n">_get_autosave_enabled</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._femtet_config_util.autosave</span><span class="w"> </span><span class="kn">import</span> <span class="n">_set_autosave_enabled</span><span class="p">,</span> <span class="n">_get_autosave_enabled</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_femtet_autosave_buffer</span> <span class="o">=</span> <span class="n">_get_autosave_enabled</span><span class="p">()</span>
             <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
@@ -485,8 +485,8 @@
 
         <span class="c1"># load_objective は 1 回目に呼ばれたのが main thread なので</span>
         <span class="c1"># subprocess に入った後でもう一度 load objective を行う</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">Objective</span><span class="p">,</span> <span class="n">Constraint</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Objective</span><span class="p">,</span> <span class="n">Constraint</span>
         <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span>
         <span class="n">obj</span><span class="p">:</span> <span class="n">Objective</span>
         <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -517,7 +517,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.connect_excel">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.connect_excel">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">connect_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connect_method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connect_method</span><span class="p">):</span>
 
         <span class="c1"># ===== 新しい excel instance を起動 =====</span>
         <span class="c1"># 起動</span>
@@ -639,7 +639,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.open_femtet_ref_xla">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.open_femtet_ref_xla">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">open_femtet_ref_xla</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_femtet_ref_xla</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># get 64 bit</span>
         <span class="n">xla_file_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla&#39;</span>
@@ -658,7 +658,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.add_femtet_macro_reference">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.add_femtet_macro_reference">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wb</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_femtet_macro_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wb</span><span class="p">):</span>
 
         <span class="c1"># search</span>
         <span class="n">ref_file_2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">_get_femtetmacro_dllpath</span><span class="p">())</span>
@@ -675,7 +675,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.remove_femtet_ref_xla">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.remove_femtet_ref_xla">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">remove_femtet_ref_xla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wb</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_femtet_ref_xla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wb</span><span class="p">):</span>
         <span class="c1"># search</span>
         <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">wb</span><span class="o">.</span><span class="n">VBProject</span><span class="o">.</span><span class="n">References</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -685,7 +685,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.update_parameter">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.update_parameter">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
         <span class="c1"># params を作成</span>
         <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
@@ -714,7 +714,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.update">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.update">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
         <span class="c1"># マクロ実行</span>
@@ -734,7 +734,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.quit">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.quit">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_excel_when_quit</span><span class="p">:</span>
 
             <span class="n">already_terminated</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;excel&#39;</span><span class="p">)</span>
@@ -808,32 +808,32 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_TERMINATED_EXCEL</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_femtet_autosave_setting</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">pyfemtet._femtet_config_util.autosave</span> <span class="kn">import</span> <span class="n">_set_autosave_enabled</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._femtet_config_util.autosave</span><span class="w"> </span><span class="kn">import</span> <span class="n">_set_autosave_enabled</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_RESTORING_FEMTET_AUTOSAVE</span><span class="p">)</span>
                 <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_femtet_autosave_buffer</span><span class="p">)</span></div>
 
 
     <span class="c1"># 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">output_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">output_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_output</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">input_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">output_workbook</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">output_workbook</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_output</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">input_workbook</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_workbook</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CDispatch</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb_input</span>
 
 <div class="viewcode-block" id="ExcelInterface.load_parameter">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.load_parameter">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">load_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
         <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">)</span>
@@ -899,9 +899,9 @@
 
 <div class="viewcode-block" id="ExcelInterface.load_objective">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.load_objective">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">load_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">Objective</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Objective</span>
         <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">)</span>
@@ -939,9 +939,9 @@
 
 <div class="viewcode-block" id="ExcelInterface.load_constraint">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.load_constraint">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">load_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
-        <span class="kn">from</span> <span class="nn">pyfemtet.opt._femopt_core</span> <span class="kn">import</span> <span class="n">Constraint</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">logger</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constraint</span>
         <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
 
         <span class="c1"># TODO:</span>
@@ -1007,7 +1007,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.objective_from_excel">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.objective_from_excel">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">objective_from_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">objective_from_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_sheet_name</span><span class="p">,</span> <span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_output</span><span class="o">.</span><span class="n">Cells</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
@@ -1016,7 +1016,7 @@
 
 <div class="viewcode-block" id="ExcelInterface.constraint_from_excel">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.constraint_from_excel">[ドキュメント]</a>
-    <span class="k">def</span> <span class="nf">constraint_from_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">constraint_from_excel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint_sheet_name</span><span class="p">,</span> <span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_constraint</span><span class="o">.</span><span class="n">Cells</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
@@ -1025,14 +1025,14 @@
 
 
 
-<span class="k">def</span> <span class="nf">wait_femtet</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wait_femtet</span><span class="p">():</span>
     <span class="n">Femtet</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">Femtet</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_terminate_femtet</span><span class="p">(</span><span class="n">femtet_pid_</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_terminate_femtet</span><span class="p">(</span><span class="n">femtet_pid_</span><span class="p">):</span>
     <span class="n">CoInitialize</span><span class="p">()</span>
     <span class="n">Femtet</span><span class="p">,</span> <span class="n">caught_pid</span> <span class="o">=</span> <span class="n">dispatch_specific_femtet</span><span class="p">(</span><span class="n">femtet_pid_</span><span class="p">)</span>
     <span class="n">_exit_or_force_terminate</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">Femtet</span><span class="o">=</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1040,22 +1040,22 @@
 
 <span class="c1"># main thread で作成した excel への参照を含む関数を</span>
 <span class="c1"># 直接 thread や process に渡すと機能しない</span>
-<span class="k">class</span> <span class="nc">ScapeGoatObjective</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ScapeGoatObjective</span><span class="p">:</span>
     <span class="c1"># def __call__(self, *args, fem: ExcelInterface or None = None, **kwargs):</span>
     <span class="c1">#     fem.objective_from_excel(*args, **kwargs)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">__globals__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__globals__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">()</span>
 
 
-<span class="k">def</span> <span class="nf">is_same_path</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_same_path</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
     <span class="n">_p1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="n">_p2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">_p1</span> <span class="o">==</span> <span class="n">_p2</span>
 
 
-<span class="k">def</span> <span class="nf">is_cell_value_empty</span><span class="p">(</span><span class="n">cell_value</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_cell_value_empty</span><span class="p">(</span><span class="n">cell_value</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">cell_value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> \
