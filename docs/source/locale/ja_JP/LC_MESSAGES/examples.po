@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-17 15:36+0900\n"
+"POT-Creation-Date: 2025-02-06 10:23+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.15.0\n"
+"Generated-By: Babel 2.16.0\n"
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:2
 msgid "External CAD (NX) Integration"
@@ -77,6 +77,7 @@ msgstr "モデルの外観 (設計変数)"
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:54
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:37
 #: ../source/examples/wat_ex14/wat_ex14.rst:28
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
@@ -87,6 +88,7 @@ msgstr "変数名"
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:54
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:37
 #: ../source/examples/wat_ex14/wat_ex14.rst:28
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:29
@@ -121,6 +123,7 @@ msgstr "フランジ曲げ"
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:33
 #: ../source/examples/gau_ex08/gau_ex08.rst:37
 #: ../source/examples/her_ex40/her_ex40.rst:37
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:62
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:46
 #: ../source/examples/wat_ex14/wat_ex14.rst:36
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:36
@@ -140,6 +143,7 @@ msgstr "体積（最小にする）"
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:39
 #: ../source/examples/gau_ex08/gau_ex08.rst:43
 #: ../source/examples/her_ex40/her_ex40.rst:43
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:69
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:54
 #: ../source/examples/wat_ex14/wat_ex14.rst:44
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:44
@@ -155,6 +159,7 @@ msgstr ""
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:48
 #: ../source/examples/gau_ex08/gau_ex08.rst:52
 #: ../source/examples/her_ex40/her_ex40.rst:52
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:78
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:63
 #: ../source/examples/wat_ex14/wat_ex14.rst:53
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:58
@@ -174,6 +179,7 @@ msgstr "20 回の反復計算の結果、 ミーゼス応力と質量のパレ�
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:59
 #: ../source/examples/gau_ex08/gau_ex08.rst:63
 #: ../source/examples/her_ex40/her_ex40.rst:63
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:91
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:103
 #: ../source/examples/wat_ex14/wat_ex14.rst:81
 #: ../source/examples/wat_ex14_parallel/wat_ex14_parallel.rst:90
@@ -229,6 +235,7 @@ msgid "Design Variables and analysis conditions"
 msgstr "設計変数と解析条件"
 
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:22
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:50
 msgid "Model appearance, analysis conditions and design variables"
 msgstr "解析モデルの概要と設計変数"
 
@@ -379,6 +386,102 @@ msgstr "her_ex40_parametric.py の実行結果。 横軸が試行回数、 縦�
 #: ../source/examples/her_ex40/her_ex40.rst:59
 msgid "After 20 iterations, the the best frequency was calculated to be 2.991 GHz."
 msgstr "20 回の反復計算の結果、 最良の共振周波数は 2.991 GHz となります。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:2
+msgid "Parametric Output as Objective"
+msgstr "パラメトリック解析結果出力の利用"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:4
+msgid "This example explains how to use the output settings of parametric analysis of Femtet as objective functions."
+msgstr "この例では、Femtetのパラメトリック解析の出力設定を目的関数として使用する方法について説明します。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:9
+msgid "Motivation"
+msgstr "動機"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:11
+msgid "With PyFemtet, you can perform optimization with low code. However, you have to code the objective function by using Femtet Python Macro. With this function, you can use the results set on the Femtet GUI as the objective function for optimization without coding the objective function."
+msgstr "PyFemtet を使用すると、少ないコードで最適化を実行できます。ただし、目的関数は Femtet Python マクロを使ってコーディングする必要があります。この機能を使用すると、目的関数をコーディングすることなく、Femtet GUI で設定された結果を最適化のための目的関数として利用できます。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:20
+msgid "Sample Files"
+msgstr "サンプルファイル"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:24
+msgid "Keep the :download:`sample project<../_temporary_sample_files/gau_ex12_parametric.femprj>` open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/gau_ex12_parametric.py>` to execute it."
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/gau_ex08_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/gau_ex08_parametric.py>` をダブルクリックして実行してください。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:30
+msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Magnetic Analysis / Example 12."
+msgstr "FEM 問題としての詳細については、FemtetHelp / 例題集 / 磁場解析 / 例題12 を参照してください。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:34
+msgid "Note"
+msgstr "備考"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:38
+msgid "This feature;"
+msgstr "この機能に関して、以下のことに注意してください。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:40
+msgid "removes existing sweep table of parametric analysis from your project file."
+msgstr "プロジェクトファイルからパラメトリック解析のスイープテーブルが削除されます。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:41
+msgid "uses only the first component of the vector / complex output (e.g. X component / real part.)."
+msgstr "ベクトル・複素数などの複数の値の出力に関しては、第一の成分しか考慮しません（例：ベクトルなら X 成分、複素数なら実部）。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:45
+msgid "Design Variables and Analysis Conditions"
+msgstr "設計変数と解析条件"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:56
+msgid "out_radius"
+msgstr ""
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:56
+msgid "The radius of outer coil."
+msgstr "外側コイルの半径"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:57
+msgid "in_radius"
+msgstr ""
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:57
+msgid "The radius of inner coil."
+msgstr "内側コイルの半径"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:64
+msgid "mutual inductance (aim to 150 nH)"
+msgstr "相互インダクタンス（ターゲット値 150 nH）"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:65
+msgid "Z component of magnetic field at the center of the coils (minimize)"
+msgstr "コイル中央部での磁界の Z 成分（最小化）"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:71
+msgid "gau_ex12_parametric.py"
+msgstr ""
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:83
+msgid "Execution result of gau_ex12_parametric.py. There is no codes about objective function calculation but the optimization correctly uses the output settings as its objective functions."
+msgstr "gau_ex12_parametric.py の実行結果です。目的関数の計算に関するコードはありませんが、最適化は出力設定を目的関数として正しく利用しています。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:96
+msgid "(Reference) How to Set Output on Femtet"
+msgstr "（参考） Femtet での結果出力設定の概要"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:101
+msgid "Open the dialog from here."
+msgstr "ここからダイアログを開きます。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:107
+msgid "Open 'output', press 'add', (then choose items you want to get as output,) and press 'save'."
+msgstr "「結果出力設定」タブを開き、「追加」を押し、（その後出力設定を行い、）「設定保存」を押します。"
+
+#: ../source/examples/parametric_output_objective/parametric_output_objective.rst:112
+msgid "For more detail, see the Femtet's help."
+msgstr "より詳細は、Femtet ヘルプを参照してください。"
 
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:2
 msgid "Air cooling of IC substrate"
@@ -648,4 +751,7 @@ msgstr "実行環境や解析モデルによって並列化による高速化効
 
 #~ msgid "Keep the :download:`sample project <../_temporary_sample_files/wat_ex14_parametric.femprj>` open in Femtet, then double-click on the :download:`sample code <../_temporary_sample_files/wat_ex14_parallel_parametric.py>` to execute it."
 #~ msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/wat_ex14_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parallel_parametric.py>` をダブルクリックして実行してください。"
+
+#~ msgid "About the coding, see below section `Sample Code`."
+#~ msgstr "プログラム作成方法については、下部セクション「サンプルコード」をご覧ください。"
 

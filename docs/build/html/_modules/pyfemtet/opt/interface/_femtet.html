@@ -284,6 +284,43 @@
             <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
 
+<div class="viewcode-block" id="FemtetInterface.use_parametric_output_as_objective">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.use_parametric_output_as_objective">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_parametric_output_as_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s1">&#39;minimize&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Use output setting of Femtet parametric analysis as an objective function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            number (int): The index of output settings tab in parametric analysis dialog of Femtet. Starts at 1.</span>
+<span class="sd">            direction (str | float): Objective direction. Valid input is one of &#39;minimize&#39;, &#39;maximize&#39; or a specific value. Defaults to &#39;minimize&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span> <span class="s1">&#39;maximize&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;direction must be one of &quot;minimize&quot;, &quot;maximize&quot; or a specific value. Passed value is </span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">direction</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;direction must be one of &quot;minimize&quot;, &quot;maximize&quot; or a specific value. Passed value is </span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">number</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">direction</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="o">=</span> <span class="n">index</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="c1"># TODO: FEMInterface.__init__ の仕様を変えたらここも変える</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;parametric_output_indexes_use_as_objective&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span></div>
+
+
+
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
         <span class="c1"># CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748</span>
@@ -785,6 +822,14 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._femtet_parametric</span><span class="w"> </span><span class="kn">import</span> <span class="n">solve_via_parametric_dll</span>
+
+            <span class="n">pdt_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">ResultFilePath</span> <span class="o">+</span> <span class="s1">&#39;.pdt&#39;</span>
+
+            <span class="c1"># 前のものが残っているとややこしいので消しておく</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">)</span>
+
+            <span class="c1"># parametric analysis 経由で解析</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
                 <span class="n">fun</span><span class="o">=</span><span class="n">solve_via_parametric_dll</span><span class="p">,</span>
                 <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -793,8 +838,23 @@
                 <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">,),</span>
             <span class="p">)</span>
+
+            <span class="c1"># parametric analysis の場合</span>
+            <span class="c1"># ダイアログで「解析結果を保存する」に</span>
+            <span class="c1"># チェックがついていないと次にすべき</span>
+            <span class="c1"># OpenCurrentResult に失敗するので</span>
+            <span class="c1"># parametric の場合も pdt を保存する</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
+                <span class="n">fun</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SavePDT</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pdt_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">if_error</span><span class="o">=</span><span class="n">SolveError</span><span class="p">,</span>
+                <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_SAVE_PDT</span><span class="p">,</span>
+                <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># # ソルブする</span>
+            <span class="c1"># ソルブする</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Solve</span><span class="p">,</span>
                 <span class="kc">False</span><span class="p">,</span>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-09 16:15+0900\n"
+"POT-Creation-Date: 2025-02-06 12:52+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -66,6 +66,14 @@ msgstr "Excel 連携"
 #: ../source/pages/advanced_examples.rst:24
 msgid "Integrate pyfemtet.opt with the macro of **Microsoft Excel**."
 msgstr "**Microsoft Excel** のマクロ機能と最適化を統合します。"
+
+#: ../source/pages/advanced_examples.rst:29
+msgid "Restart Optimization"
+msgstr "最適化を続きから実行"
+
+#: ../source/pages/advanced_examples.rst:37
+msgid "Restarts an optimization that was interrupted."
+msgstr "中断又は終了した最適化を再開します。"
 
 #: ../source/pages/api.rst:2
 msgid "API Reference"
@@ -170,86 +178,98 @@ msgid "Examples"
 msgstr "例題"
 
 #: ../source/pages/examples.rst:5
+msgid "Parametric Analysis Integration"
+msgstr "Femtet パラメトリック解析結果出力設定の利用"
+
+#: ../source/pages/examples.rst:9
+msgid "Using GUI settings as objectives"
+msgstr "結果出力を目的関数にする方法"
+
+#: ../source/pages/examples.rst:17
+msgid "Use the output settings in Femtet as simple objective functions."
+msgstr "Femtet で設定した結果出力設定を最適化の目的関数として利用します。"
+
+#: ../source/pages/examples.rst:27
 msgid "Single Objective Optimization"
 msgstr "単目的最適化"
 
-#: ../source/pages/examples.rst:9
+#: ../source/pages/examples.rst:31
 msgid "Inductance of a Solenoid Coil"
 msgstr "ソレノイドコイルのインダクタンス"
 
-#: ../source/pages/examples.rst:17
+#: ../source/pages/examples.rst:39
 msgid "In magnetic field analysis, set the self-inductance of a finite-length solenoid coil to a specific value."
 msgstr "磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。"
 
-#: ../source/pages/examples.rst:20
+#: ../source/pages/examples.rst:42
 msgid "Resonant Frequency of Circular Patch Antenna"
 msgstr "円形パッチアンテナの共振周波数"
 
-#: ../source/pages/examples.rst:28
+#: ../source/pages/examples.rst:50
 msgid "In electromagnetic wave analysis, set the resonant frequency of a circular patch antenna to a specific value."
 msgstr "電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。"
 
-#: ../source/pages/examples.rst:39
+#: ../source/pages/examples.rst:61
 msgid "Multi-Objective Optimization"
 msgstr "多目的最適化"
 
-#: ../source/pages/examples.rst:42
+#: ../source/pages/examples.rst:64
 msgid "Heating Element on Substrate"
 msgstr "基板上の発熱体"
 
-#: ../source/pages/examples.rst:50
+#: ../source/pages/examples.rst:72
 msgid "In thermal conduction analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate."
 msgstr "熱伝導解析で基板上の IC チップの温度と基板サイズを最小にします。"
 
-#: ../source/pages/examples.rst:52
+#: ../source/pages/examples.rst:74
 msgid "Air cooling of IC Substrate"
 msgstr "IC 基板の空冷"
 
-#: ../source/pages/examples.rst:60
+#: ../source/pages/examples.rst:82
 msgid "In simple fluid-thermal analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate under forced convection."
 msgstr "簡易熱流体解析で基板上の IC チップの温度と基板サイズを最小にします。"
 
-#: ../source/pages/examples.rst:71
+#: ../source/pages/examples.rst:93
 msgid "Parallel Computing"
 msgstr "並列計算"
 
-#: ../source/pages/examples.rst:74
+#: ../source/pages/examples.rst:96
 msgid "Heating Element on Substrate (Parallel Computing)"
 msgstr "基板上の発熱体（並列計算）"
 
-#: ../source/pages/examples.rst:82
+#: ../source/pages/examples.rst:104
 msgid "Speed up 'Heating Element on Substrate' using parallel computing in multiple Femtet instances."
 msgstr "「基板上の発熱体」を複数 Femtet の並列計算により高速化します。"
 
-#: ../source/pages/examples.rst:92
+#: ../source/pages/examples.rst:114
 msgid "CAD Integration"
 msgstr "CAD 連携"
 
-#: ../source/pages/examples.rst:95
+#: ../source/pages/examples.rst:117
 msgid "External CAD (NX) Integration"
 msgstr "外部 CAD (NX) 連携"
 
-#: ../source/pages/examples.rst:103
+#: ../source/pages/examples.rst:125
 msgid "Explore dimensions of sturdy and lightweight H-beams using NX integration."
 msgstr "CAD (NX) 連携で丈夫で軽量な H 型鋼の寸法を探索します。"
 
-#: ../source/pages/examples.rst:105
+#: ../source/pages/examples.rst:127
 msgid "External CAD (Solidworks) Integration"
 msgstr "外部 CAD (Solidworks) 連携"
 
-#: ../source/pages/examples.rst:113
+#: ../source/pages/examples.rst:135
 msgid "Explore the same problem as left with Solidworks integration."
 msgstr "外部 CAD (NX) 連携 と同じ問題を Solidworks との連携で探索します。"
 
-#: ../source/pages/examples.rst:125
+#: ../source/pages/examples.rst:147
 msgid "Constrained Model"
 msgstr "モデルの拘束"
 
-#: ../source/pages/examples.rst:129
+#: ../source/pages/examples.rst:151
 msgid "Strict constraint"
 msgstr "Strict な拘束"
 
-#: ../source/pages/examples.rst:137
+#: ../source/pages/examples.rst:159
 msgid "Constrains combinations of variables."
 msgstr "設計変数の組合せを拘束します。"
 
@@ -473,12 +493,12 @@ msgid "More information, see :doc:`installation_pages/install_pyfemtet` or :ref:
 msgstr "詳細は :doc:`installation_pages/install_pyfemtet` 又は :ref:`manualinstallation` をご覧ください。"
 
 #: ../source/pages/script_builder.rst:20
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:20
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:47
 msgid "Launch GUI"
 msgstr "起動方法"
 
 #: ../source/pages/script_builder.rst:22
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:22
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:49
 msgid "Double click desktop icon."
 msgstr "デスクトップアイコンをダブルクリックします。"
 
@@ -487,7 +507,7 @@ msgid "It may takes a long time for first time launching."
 msgstr "初回起動には少し時間がかかる場合があります。"
 
 #: ../source/pages/script_builder.rst:30 ../source/pages/usage.rst:2
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:28
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:55
 msgid "Usage"
 msgstr "使い方"
 
@@ -811,19 +831,48 @@ msgstr "``pyfemtet.opt`` は最適化結果を可視化するための GUI ツ�
 msgid "See :doc:`../installation_pages/install_pyfemtet` or :doc:`../installation_pages/install_pyfemtet_manually` ."
 msgstr "詳しくは :doc:`../installation_pages/install_pyfemtet` 又は :doc:`../installation_pages/install_pyfemtet_manually` をご覧ください。"
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:30
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:21
+#, fuzzy
+msgid "If you installed PyFemtet without using the installer, you can find the executable in the following location"
+msgstr "もしあなたがインストーラを使わずに PyFemtet をインストールした場合でも、以下の場所に実行ファイルを見つけることができます。"
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:24
+msgid "```<Folder containing python.exe>\\Scripts\\pyfemtet-opt-result-viewer.exe```"
+msgstr "```<python.exe のあるフォルダ>\\Scripts\\pyfemtet-opt-result-viewer.exe```"
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:26
+msgid "Please create a shortcut to this file. Do not copy or move it."
+msgstr "このファイルに対してショートカットを作成してください。コピーや移動はしないでください。"
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:31
+msgid "The path to the folder containing python.exe can be found by opening the command prompt and executing the following command:"
+msgstr "python.exe のあるフォルダのパスは、コマンドプロンプトを開いて以下のコマンドを実行すると調べられます:"
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:34
+msgid "```py -c \"import sys;print(sys.executable)\"```"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:36
+msgid "If you have not installed the py launcher, please replace 'py' with 'python'."
+msgstr "py launcher をインストールしていない場合、 py を python に置き換えてください。"
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:41
+msgid "If you installed PyFemtet using a virtual environment, you can use the viewer by executing the 'pyfemtet-opt-result-viewer' command in the command line."
+msgstr "仮想環境を使って PyFemtet をインストールした場合、コマンドラインで \"pyfemtet-opt-result-viewer\" コマンドを実行してもビューワを使用できます。"
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:57
 msgid "Before launch tool, you run an optimization and get ``.csv`` file that contains the optimization history."
 msgstr "GUI ツールを起動する前に、最適化を実行して生成される ``.csv`` ファイルを取得してください。"
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:33
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:60
 msgid "Then Launch the tool and Femtet and load csv."
 msgstr "次に Femtet とツールを起動し、csv を読み込んでください。"
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:35
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:62
 msgid "Finally, you can select each solution plot and open corresponding FEM result in Femtet."
 msgstr "最終的に、ツール上で各解析結果のプロットを選択し、対応する FEM 結果を Femtet で開くことができます。"
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:40
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:67
 msgid "To learn usage with ready-made sample project, you can use `tutorial mode` in tool. It starts few minutes journy to explain how to use the tool."
 msgstr "ツールの `チュートリアルモード` によってサンプルプロジェクトを用いてツールの使い方を学習することができます。"
 

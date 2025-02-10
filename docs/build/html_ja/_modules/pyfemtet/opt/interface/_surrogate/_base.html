@@ -99,37 +99,35 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">history_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">override_objective</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">train_history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="p">:</span> <span class="n">History</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span> <span class="n">Any</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prm</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df_prm</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df_obj</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">override_objective</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">override_objective</span>
 
-        <span class="c1"># history_path が与えられた場合、history をコンストラクトする</span>
+        <span class="c1"># history_path が与えられた場合、train_history をコンストラクトする</span>
         <span class="k">if</span> <span class="n">history_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">history_path</span><span class="o">=</span><span class="n">history_path</span><span class="p">)</span>
+            <span class="n">train_history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">history_path</span><span class="o">=</span><span class="n">history_path</span><span class="p">)</span>
 
-        <span class="c1"># history が与えられるかコンストラクトされている場合</span>
-        <span class="k">if</span> <span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># train_history が与えられるかコンストラクトされている場合</span>
+        <span class="k">if</span> <span class="n">train_history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># 学習データを準備する</span>
-            <span class="n">df_prm</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()[</span><span class="n">history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">]</span>
-            <span class="n">df_obj</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()[</span><span class="n">history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span>
+            <span class="n">df_prm</span> <span class="o">=</span> <span class="n">train_history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()[</span><span class="n">train_history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">]</span>
+            <span class="n">df_obj</span> <span class="o">=</span> <span class="n">train_history</span><span class="o">.</span><span class="n">get_df</span><span class="p">()[</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span>
 
             <span class="c1"># obj の名前を作る</span>
-            <span class="k">for</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">[</span><span class="n">obj_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
             <span class="c1"># prm の名前を作る</span>
-            <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="n">train_history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">prm</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">history</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span> <span class="o">=</span> <span class="n">train_history</span>
 
         <span class="c1"># history から作らない場合、引数チェック</span>
         <span class="k">else</span><span class="p">:</span>
@@ -141,8 +139,7 @@
 
         <span class="n">FEMInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>  <span class="c1"># コンストラクト済み history を渡せば並列計算時も何もしなくてよい</span>
-            <span class="n">override_objective</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">override_objective</span>
+            <span class="n">train_history</span><span class="o">=</span><span class="n">train_history</span><span class="p">,</span>  <span class="c1"># コンストラクト済み train_history を渡せば並列計算時も何もしなくてよい</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="SurrogateModelInterfaceBase.filter_feasible">
@@ -159,10 +156,14 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">override_objective</span><span class="p">:</span>
-            <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span>
-            <span class="n">obj</span><span class="p">:</span> <span class="n">Objective</span>
-            <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="p">:</span> <span class="n">Objective</span>
+
+        <span class="c1"># add_objective された目的のうち、</span>
+        <span class="c1"># training data に含まれる名前で</span>
+        <span class="c1"># あるものは fun を上書き</span>
+        <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SurrogateModelInterfaceBase.update_parameter">

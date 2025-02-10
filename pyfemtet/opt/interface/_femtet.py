@@ -201,6 +201,40 @@ class FemtetInterface(FEMInterface):
             **kwargs
         )
 
+    def use_parametric_output_as_objective(self, number: int, direction: str | float = 'minimize') -> None:
+        """Use output setting of Femtet parametric analysis as an objective function.
+
+        Args:
+            number (int): The index of output settings tab in parametric analysis dialog of Femtet. Starts at 1.
+            direction (str | float): Objective direction. Valid input is one of 'minimize', 'maximize' or a specific value. Defaults to 'minimize'.
+
+        Returns:
+            None
+
+        """
+        # check
+        if isinstance(direction, str):
+            if direction not in ('minimize', 'maximize'):
+                raise ValueError(f'direction must be one of "minimize", "maximize" or a specific value. Passed value is {direction}')
+        else:
+            try:
+                direction = float(direction)
+            except (TypeError, ValueError):
+                raise ValueError(f'direction must be one of "minimize", "maximize" or a specific value. Passed value is {direction}')
+
+        index = {number - 1: direction}
+
+        if self.parametric_output_indexes_use_as_objective is None:
+            self.parametric_output_indexes_use_as_objective = index
+
+        else:
+            self.parametric_output_indexes_use_as_objective.update(index)
+
+        # TODO: FEMInterface.__init__ の仕様を変えたらここも変える
+        self.kwargs['parametric_output_indexes_use_as_objective'] = self.parametric_output_indexes_use_as_objective
+
+
+
     def __del__(self):
         self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748
@@ -682,6 +716,14 @@ class FemtetInterface(FEMInterface):
 
         if self.parametric_output_indexes_use_as_objective is not None:
             from pyfemtet.opt.interface._femtet_parametric import solve_via_parametric_dll
+
+            pdt_path = self.Femtet.ResultFilePath + '.pdt'
+
+            # 前のものが残っているとややこしいので消しておく
+            if os.path.exists(pdt_path):
+                os.remove(pdt_path)
+
+            # parametric analysis 経由で解析
             self._call_femtet_api(
                 fun=solve_via_parametric_dll,
                 return_value_if_failed=False,
@@ -690,8 +732,23 @@ class FemtetInterface(FEMInterface):
                 is_Gaudi_method=True,
                 args=(self.Femtet,),
             )
+
+            # parametric analysis の場合
+            # ダイアログで「解析結果を保存する」に
+            # チェックがついていないと次にすべき
+            # OpenCurrentResult に失敗するので
+            # parametric の場合も pdt を保存する
+            self._call_femtet_api(
+                fun=self.Femtet.SavePDT,
+                args=(pdt_path, True),
+                return_value_if_failed=False,
+                if_error=SolveError,
+                error_message=Msg.ERR_FAILED_TO_SAVE_PDT,
+                is_Gaudi_method=False,
+            )
+
         else:
-            # # ソルブする
+            # ソルブする
             self._call_femtet_api(
                 self.Femtet.Solve,
                 False,

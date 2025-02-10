@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-29 16:30+0900\n"
+"POT-Creation-Date: 2025-02-10 09:23+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,6 +62,14 @@ msgstr ""
 
 #: ../source/pages/advanced_examples.rst:24
 msgid "Integrate pyfemtet.opt with the macro of **Microsoft Excel**."
+msgstr ""
+
+#: ../source/pages/advanced_examples.rst:29
+msgid "Restart Optimization"
+msgstr ""
+
+#: ../source/pages/advanced_examples.rst:37
+msgid "Restarts an optimization that was interrupted."
 msgstr ""
 
 #: ../source/pages/api.rst:2
@@ -167,86 +175,98 @@ msgid "Examples"
 msgstr ""
 
 #: ../source/pages/examples.rst:5
-msgid "Single Objective Optimization"
+msgid "Parametric Analysis Integration"
 msgstr ""
 
 #: ../source/pages/examples.rst:9
-msgid "Inductance of a Solenoid Coil"
+msgid "Using GUI settings as objectives"
 msgstr ""
 
 #: ../source/pages/examples.rst:17
-msgid "In magnetic field analysis, set the self-inductance of a finite-length solenoid coil to a specific value."
+msgid "Use the output settings in Femtet as simple objective functions."
 msgstr ""
 
-#: ../source/pages/examples.rst:20
-msgid "Resonant Frequency of Circular Patch Antenna"
+#: ../source/pages/examples.rst:27
+msgid "Single Objective Optimization"
 msgstr ""
 
-#: ../source/pages/examples.rst:28
-msgid "In electromagnetic wave analysis, set the resonant frequency of a circular patch antenna to a specific value."
+#: ../source/pages/examples.rst:31
+msgid "Inductance of a Solenoid Coil"
 msgstr ""
 
 #: ../source/pages/examples.rst:39
-msgid "Multi-Objective Optimization"
+msgid "In magnetic field analysis, set the self-inductance of a finite-length solenoid coil to a specific value."
 msgstr ""
 
 #: ../source/pages/examples.rst:42
-msgid "Heating Element on Substrate"
+msgid "Resonant Frequency of Circular Patch Antenna"
 msgstr ""
 
 #: ../source/pages/examples.rst:50
+msgid "In electromagnetic wave analysis, set the resonant frequency of a circular patch antenna to a specific value."
+msgstr ""
+
+#: ../source/pages/examples.rst:61
+msgid "Multi-Objective Optimization"
+msgstr ""
+
+#: ../source/pages/examples.rst:64
+msgid "Heating Element on Substrate"
+msgstr ""
+
+#: ../source/pages/examples.rst:72
 msgid "In thermal conduction analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate."
 msgstr ""
 
-#: ../source/pages/examples.rst:52
+#: ../source/pages/examples.rst:74
 msgid "Air cooling of IC Substrate"
 msgstr ""
 
-#: ../source/pages/examples.rst:60
+#: ../source/pages/examples.rst:82
 msgid "In simple fluid-thermal analysis, minimize the temperature of the IC chip on the substrate and the size of the substrate under forced convection."
 msgstr ""
 
-#: ../source/pages/examples.rst:71
+#: ../source/pages/examples.rst:93
 msgid "Parallel Computing"
 msgstr ""
 
-#: ../source/pages/examples.rst:74
+#: ../source/pages/examples.rst:96
 msgid "Heating Element on Substrate (Parallel Computing)"
 msgstr ""
 
-#: ../source/pages/examples.rst:82
+#: ../source/pages/examples.rst:104
 msgid "Speed up 'Heating Element on Substrate' using parallel computing in multiple Femtet instances."
 msgstr ""
 
-#: ../source/pages/examples.rst:92
+#: ../source/pages/examples.rst:114
 msgid "CAD Integration"
 msgstr ""
 
-#: ../source/pages/examples.rst:95
+#: ../source/pages/examples.rst:117
 msgid "External CAD (NX) Integration"
 msgstr ""
 
-#: ../source/pages/examples.rst:103
+#: ../source/pages/examples.rst:125
 msgid "Explore dimensions of sturdy and lightweight H-beams using NX integration."
 msgstr ""
 
-#: ../source/pages/examples.rst:105
+#: ../source/pages/examples.rst:127
 msgid "External CAD (Solidworks) Integration"
 msgstr ""
 
-#: ../source/pages/examples.rst:113
+#: ../source/pages/examples.rst:135
 msgid "Explore the same problem as left with Solidworks integration."
 msgstr ""
 
-#: ../source/pages/examples.rst:125
+#: ../source/pages/examples.rst:147
 msgid "Constrained Model"
 msgstr ""
 
-#: ../source/pages/examples.rst:129
+#: ../source/pages/examples.rst:151
 msgid "Strict constraint"
 msgstr ""
 
-#: ../source/pages/examples.rst:137
+#: ../source/pages/examples.rst:159
 msgid "Constrains combinations of variables."
 msgstr ""
 
@@ -471,12 +491,12 @@ msgid "More information, see :doc:`installation_pages/install_pyfemtet` or :ref:
 msgstr ""
 
 #: ../source/pages/script_builder.rst:20
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:20
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:47
 msgid "Launch GUI"
 msgstr ""
 
 #: ../source/pages/script_builder.rst:22
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:22
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:49
 msgid "Double click desktop icon."
 msgstr ""
 
@@ -486,7 +506,7 @@ msgstr ""
 
 #: ../source/pages/script_builder.rst:30
 #: ../source/pages/usage.rst:2
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:28
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:55
 msgid "Usage"
 msgstr ""
 
@@ -810,18 +830,46 @@ msgstr ""
 msgid "See :doc:`../installation_pages/install_pyfemtet` or :doc:`../installation_pages/install_pyfemtet_manually` ."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:30
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:21
+msgid "If you installed PyFemtet without using the installer, you can find the executable in the following location"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:24
+msgid "```<Folder containing python.exe>\\Scripts\\pyfemtet-opt-result-viewer.exe```"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:26
+msgid "Please create a shortcut to this file. Do not copy or move it."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:31
+msgid "The path to the folder containing python.exe can be found by opening the command prompt and executing the following command:"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:34
+msgid "```py -c \"import sys;print(sys.executable)\"```"
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:36
+msgid "If you have not installed the py launcher, please replace 'py' with 'python'."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:41
+msgid "If you installed PyFemtet using a virtual environment, you can use the viewer by executing the 'pyfemtet-opt-result-viewer' command in the command line."
+msgstr ""
+
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:57
 msgid "Before launch tool, you run an optimization and get ``.csv`` file that contains the optimization history."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:33
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:60
 msgid "Then Launch the tool and Femtet and load csv."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:35
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:62
 msgid "Finally, you can select each solution plot and open corresponding FEM result in Femtet."
 msgstr ""
 
-#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:40
+#: ../source/pages/usage_pages/how_to_use_result_viewer.rst:67
 msgid "To learn usage with ready-made sample project, you can use `tutorial mode` in tool. It starts few minutes journy to explain how to use the tool."
 msgstr ""

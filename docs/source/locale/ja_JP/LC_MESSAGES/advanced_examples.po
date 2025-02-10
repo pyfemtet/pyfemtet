@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-08 13:09+0900\n"
+"POT-Creation-Date: 2025-02-06 11:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -28,6 +28,7 @@ msgid "This sample demonstrates how to use PyFemtet without migrating the existi
 msgstr "このサンプルは、既存のExcelマクロの処理をPythonに移植することなく、PyFemtetで利用するためのデモを行います。"
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:9
+#: ../source/advanced_examples/restart/restart.rst:9
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
 msgid "Sample Files"
 msgstr "サンプルファイル"
@@ -58,90 +59,178 @@ msgid "The macros included in this xlsm file are based on the macro auto-generat
 msgstr "このxlsmファイルに含まれるマクロは、元となるFemtetプロジェクトからのマクロ自動生成機能をベースに作成されています。そのため、Excelマクロを実行するとFemtetが起動し、元となる解析モデルを自動的に作成します。また、このマクロはxlsmファイル内のセルの変数を読み込んで、作成する解析モデルに反映するように改変されています。詳細な仕様については、Excelの「備考」シートおよびソースコードのコメントを参照してください。"
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:46
+#: ../source/advanced_examples/restart/restart.rst:62
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:68
 msgid "Design Variables"
 msgstr "設計変数"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:50
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:51
+#: ../source/advanced_examples/restart/restart.rst:67
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:72
 msgid "Appearance of the Model"
 msgstr "モデルの外観"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:54
+#: ../source/advanced_examples/restart/restart.rst:70
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Variable Name"
 msgstr "変数名"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:53
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:54
+#: ../source/advanced_examples/restart/restart.rst:70
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Description"
 msgstr "説明"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
 msgid "section_radius"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:55
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
 msgid "Radius of wire"
 msgstr "ワイヤ線の半径"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
 msgid "coil_radius"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:56
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
 msgid "Bottom radius of coil"
 msgstr "コイル底面の半径"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
 msgid "coil_pitch"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:57
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
 msgid "Pitch of coil"
 msgstr "コイルの巻きピッチ"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
 msgid "n"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:58
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
 msgid "Number of turns"
 msgstr "巻き数"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:60
 msgid "coil_radius_grad"
 msgstr ""
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:59
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:60
 msgid "Coil radius increment per pitch"
 msgstr "コイルのピッチごとの半径の増分"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:64
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:65
+#: ../source/advanced_examples/restart/restart.rst:79
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:84
 msgid "Objective Function"
 msgstr "目的関数"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:66
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:67
 msgid "Self-inductance (aim to 100 nH)"
 msgstr "自己インダクタンス（目標 100 nH）"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:67
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:68
 msgid "Approx. Volume (minimize)"
 msgstr "概算体積（最小化）"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:71
-#, fuzzy
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:72
+#: ../source/advanced_examples/restart/restart.rst:85
 msgid "Execution Result of the Samples"
 msgstr "サンプルコードの実行結果"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:74
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:76
 msgid "Screenshot in progress"
 msgstr "実行中のスクリーンショット"
 
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:77
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:79
 msgid "The pyfemtet-core.py performs optimization by controlling the values of various cells in the xlsm file and executing macros instead of directly running Femtet. This allows for integration with PyFemtet without needing to rewrite all existing code if you are already using Excel macros for an automated design flow with Femtet."
 msgstr "pyfemtet-core.pyは、Femtetを直接実行する代わりに、xlsmファイルの各種セルの値を制御し、マクロを実行することで最適化を実施します。これにより、すでにExcelマクロを用いてFemtetによる自動設計フローを運用している場合、そのコードをすべてPythonに書き直すことなくPyFemtetとの統合が可能です。"
+
+#: ../source/advanced_examples/restart/restart.rst:2
+msgid "Restarting Optimization"
+msgstr "最適化のリスタート"
+
+#: ../source/advanced_examples/restart/restart.rst:4
+msgid "This sample explains how to resume an optimization that was interrupted partway through."
+msgstr "このサンプルでは、中断した最適化を再開する方法を解説します。"
+
+#: ../source/advanced_examples/restart/restart.rst:12
+msgid "Keep the :download:`sample project<gal_ex13_parametric.femprj>` and :download:`sample script<gal_ex13_parametric_restart.py>` on same folder."
+msgstr ":download:`サンプルプロジェクト<gal_ex13_parametric.femprj>` と :download:`サンプルコード<gal_ex13_parametric_restart.py>` を同じフォルダに配置してください。"
+
+#: ../source/advanced_examples/restart/restart.rst:20
+msgid "What This Sample Will Do"
+msgstr "このサンプルの動作"
+
+#: ../source/advanced_examples/restart/restart.rst:22
+msgid "For the FEM problem, we will determine the design parameters through random sampling and conduct three analyses."
+msgstr "最初に、FEM 問題に対し、ランダムサンプリングで設計パラメータを決め 3 回の解析を行います。"
+
+#: ../source/advanced_examples/restart/restart.rst:26
+msgid "Next, we will conduct three optimization trials using the geneticalgorithm NSGA-II."
+msgstr "次に遺伝的アルゴリズム NSGA2 を用いて 3 回の試行を行います。"
+
+#: ../source/advanced_examples/restart/restart.rst:29
+msgid "Finally, we will conduct three optimization trials using the Gaussian Process Regression Bayesian Optimization algorithm."
+msgstr "最後に、ガウス過程回帰ベイズ最適化アルゴリズムを用いて 3 回の最適化試行を行います。"
+
+#: ../source/advanced_examples/restart/restart.rst:36
+msgid "By doing this, we can switch optimization methods during the process while monitoring the progress of optimization, or add random sampling for creating surrogate models."
+msgstr "このようにすることで、最適化の進行を見ながら途中で最適化手法を切り替えたり、サロゲートモデル作成のためのランダムサンプリングを追加することができます。"
+
+#: ../source/advanced_examples/restart/restart.rst:44
+msgid "When restarting, the number and names of variables, as well as the number and names of objective functions and constraints must be consistent. However, you can change the bounds of variables, direction of objective functions, and content of constraints."
+msgstr "リスタートする場合、変数の数と名前、目的関数の数と名前、および拘束関数の数と名前が一貫している必要があります。ただし、変数の上下限や目的関数の方向、拘束関数の内容などは変更できます。"
+
+#: ../source/advanced_examples/restart/restart.rst:54
+msgid "When using OptunaOptimizer, the .db file with the same name (in this case restarting-sample.db) that is saved along with csv is required to be in the same folder as the csv file."
+msgstr "OptunaOptimizer を使用する場合、csv と同名の .db ファイル (ここでは restarting-sample.db) が csv ファイルと同じフォルダにある必要があります。"
+
+#: ../source/advanced_examples/restart/restart.rst:58
+msgid "Please do not delete or rename it."
+msgstr "このファイルを削除しないでください。"
+
+#: ../source/advanced_examples/restart/restart.rst:72
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:78
+msgid "width"
+msgstr ""
+
+#: ../source/advanced_examples/restart/restart.rst:72
+msgid "The thickness of the tuning fork."
+msgstr "音叉の太さ"
+
+#: ../source/advanced_examples/restart/restart.rst:73
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:77
+msgid "length"
+msgstr ""
+
+#: ../source/advanced_examples/restart/restart.rst:73
+msgid "The length of the tuning fork."
+msgstr "音叉の長さ"
+
+#: ../source/advanced_examples/restart/restart.rst:74
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:79
+msgid "base_radius"
+msgstr ""
+
+#: ../source/advanced_examples/restart/restart.rst:74
+msgid "The radius of the tuning fork's handle."
+msgstr "音叉の太さ"
+
+#: ../source/advanced_examples/restart/restart.rst:81
+msgid "First Resonant Frequency (target value: 800)"
+msgstr "第一共振周波数 (ターゲット値: 800)"
+
+#: ../source/advanced_examples/restart/restart.rst:90
+msgid "Screenshot of the result"
+msgstr "実行結果のスクリーンショット"
+
+#: ../source/advanced_examples/restart/restart.rst:95
+msgid "When performing effective optimization on real-world problems, a greater number of trials is necessary."
+msgstr "実際の問題で効果的な最適化を行う場合、より多くの試行が必要です。"
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:2
 msgid "Optimization Using a Surrogate Model"
@@ -188,24 +277,12 @@ msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / S
 msgstr "FEM 問題としての詳細は、 Femtet ヘルプ / 例題 / 応力解析 / 例題 13 をご覧ください。"
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:77
-msgid "length"
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:77
 msgid "Length of the tuning fork"
 msgstr "音叉の長さ"
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:78
-msgid "width"
-msgstr ""
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:78
 msgid "Thickness of the tuning fork"
 msgstr "音叉の太さ"
-
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:79
-msgid "base_radius"
-msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:79
 msgid "Thickness of the base (fixed in optimization)"

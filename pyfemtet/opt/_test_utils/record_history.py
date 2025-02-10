@@ -92,6 +92,7 @@ def is_equal_result(ref_path, dif_path, log_path=None, threashold=0.05):
     assert len(ref_columns) == len(dif_columns), "結果 csv の column 数が異なります。"
     assert len(ref_df) == len(dif_df), "結果 csv の row 数が異なります。"
     assert difference <= threashold*100, f"前回の結果との平均差異が {int(difference)}% で {int(threashold*100)}% を超えています。"
+    print(f"OK! 前回の結果との平均差異が {int(difference)}% で {int(threashold*100)}% 以下です。")
 
 
 def _get_simplified_df_values(csv_path, exclude_columns=None):

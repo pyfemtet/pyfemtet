@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>パラメトリック解析結果出力の利用 &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="ソレノイドコイルの自己インダクタンス" href="../gau_ex08/gau_ex08.html" />
+    <link rel="prev" title="例題" href="../../pages/examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/examples.html">例題</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../pages/examples.html#parametric-analysis-integration">Femtet パラメトリック解析結果出力設定の利用</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">パラメトリック解析結果出力の利用</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#motivation">動機</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sample-files">サンプルファイル</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#note">備考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-variables-and-analysis-conditions">設計変数と解析条件</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#objective-function">目的関数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sample-code">サンプルコード</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">サンプルコードの実行結果</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reference-how-to-set-output-on-femtet">（参考） Femtet での結果出力設定の概要</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#single-objective-optimization">単目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#multi-objective-optimization">多目的最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#parallel-computing">並列計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#cad-integration">CAD 連携</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pages/examples.html#constrained-model">モデルの拘束</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/advanced_examples.html">発展的な例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../pages/examples.html">例題</a></li>
+      <li class="breadcrumb-item active">パラメトリック解析結果出力の利用</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/parametric_output_objective/parametric_output_objective.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="parametric-output-as-objective">
+<h1>パラメトリック解析結果出力の利用<a class="headerlink" href="#parametric-output-as-objective" title="Link to this heading"></a></h1>
+<p>この例では、Femtetのパラメトリック解析の出力設定を目的関数として使用する方法について説明します。</p>
+<section id="motivation">
+<h2>動機<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p>PyFemtet を使用すると、少ないコードで最適化を実行できます。ただし、目的関数は Femtet Python マクロを使ってコーディングする必要があります。この機能を使用すると、目的関数をコーディングすることなく、Femtet GUI で設定された結果を最適化のための目的関数として利用できます。</p>
+</section>
+<section id="sample-files">
+<h2>サンプルファイル<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><a class="reference download internal" download="" href="../../_downloads/46bbd32467e2ea157b8f4d01d98624aa/gau_ex08_parametric.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> を Femtet で開いたまま、 <a class="reference download internal" download="" href="../../_downloads/85a9b4c31bf24faa81b5d49928cfc4c8/gau_ex08_parametric.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> をダブルクリックして実行してください。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>FEM 問題としての詳細については、FemtetHelp / 例題集 / 磁場解析 / 例題12 を参照してください。</p>
+</div>
+</section>
+<section id="note">
+<h2>備考<a class="headerlink" href="#note" title="Link to this heading"></a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>この機能に関して、以下のことに注意してください。</p>
+<ul class="simple">
+<li><p>プロジェクトファイルからパラメトリック解析のスイープテーブルが削除されます。</p></li>
+<li><p>ベクトル・複素数などの複数の値の出力に関しては、第一の成分しか考慮しません（例：ベクトルなら X 成分、複素数なら実部）。</p></li>
+</ul>
+</div>
+</section>
+<section id="design-variables-and-analysis-conditions">
+<h2>設計変数と解析条件<a class="headerlink" href="#design-variables-and-analysis-conditions" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/model2.png"><img alt="../../_images/model2.png" src="../../_images/model2.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">解析モデルの概要と設計変数</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>out_radius</p></td>
+<td><p>外側コイルの半径</p></td>
+</tr>
+<tr class="row-odd"><td><p>in_radius</p></td>
+<td><p>内側コイルの半径</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="objective-function">
+<h2>目的関数<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>相互インダクタンス（ターゲット値 150 nH）</p></li>
+<li><p>コイル中央部での磁界の Z 成分（最小化）</p></li>
+</ol>
+</section>
+<section id="sample-code">
+<h2>サンプルコード<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">gau_ex12_parametric.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;パラメトリック解析出力設定を目的関数とする最適化</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="sd">Femtet のパラメトリック解析の結果出力設定機能で出力される値を</span>
+<span class="linenos"> 4</span><span class="sd">最適化の目的関数として使用する方法をデモします。</span>
+<span class="linenos"> 5</span><span class="sd">この機能により、目的関数をコーディングすることなく</span>
+<span class="linenos"> 6</span><span class="sd">最適化を実施できます。</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="sd">注意:</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="sd">    この機能を使う際は、以下のことに注意してください。</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="sd">    - パラメトリック解析のスイープテーブルが削除されます。</span>
+<span class="linenos">14</span><span class="sd">    - 複素数やベクトルを出力する出力設定は、第一の値のみが</span>
+<span class="linenos">15</span><span class="sd">      目的関数として使用されます。（複素数の場合は実数、</span>
+<span class="linenos">16</span><span class="sd">      ベクトル値の場合は X 成分など）</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="sd">対応するプロジェクト: gau_ex12_parametric.femprj</span>
+<span class="linenos">20</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">FemtetInterface</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="c1"># Femtet の設定を参照するため、Femtet と接続を</span>
+<span class="linenos">28</span>    <span class="c1"># 行うためのオブジェクトを初期化します。</span>
+<span class="linenos">29</span>    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">()</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span>    <span class="c1"># パラメトリック解析の結果出力設定を目的関数にします。</span>
+<span class="linenos">32</span>    <span class="c1"># number は Femtet パラメトリック解析ダイアログの</span>
+<span class="linenos">33</span>    <span class="c1"># 結果出力設定タブのテーブルの番号で、direction は</span>
+<span class="linenos">34</span>    <span class="c1"># その目的関数の目標です(FEMOpt.add_objective と同様)。</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span>    <span class="c1"># 相互インダクタンス</span>
+<span class="linenos">37</span>    <span class="n">fem</span><span class="o">.</span><span class="n">use_parametric_output_as_objective</span><span class="p">(</span><span class="n">number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">1.5e-7</span><span class="p">)</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span>    <span class="c1"># コイル中央の磁界の強さ</span>
+<span class="linenos">40</span>    <span class="n">fem</span><span class="o">.</span><span class="n">use_parametric_output_as_objective</span><span class="p">(</span><span class="n">number</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span>    <span class="c1"># 最適化用オブジェクトを初期化します。</span>
+<span class="linenos">43</span>    <span class="c1"># さきほど初期化した fem を渡します。</span>
+<span class="linenos">44</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
+<span class="linenos">45</span>
+<span class="linenos">46</span>    <span class="c1"># パラメータを設定します。</span>
+<span class="linenos">47</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;in_radius&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="linenos">48</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;out_radius&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+<span class="linenos">49</span>
+<span class="linenos">50</span>    <span class="c1"># 最適化を実行します。</span>
+<span class="linenos">51</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>  <span class="c1"># 乱数シードの固定</span>
+<span class="linenos">52</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="execution-result-of-the-sample-code">
+<h2>サンプルコードの実行結果<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../../_images/result2.png"><img alt="../../_images/result2.png" src="../../_images/result2.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">gau_ex12_parametric.py の実行結果です。目的関数の計算に関するコードはありませんが、最適化は出力設定を目的関数として正しく利用しています。</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Femtet, PyFemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。</p>
+</div>
+</section>
+<section id="reference-how-to-set-output-on-femtet">
+<h2>（参考） Femtet での結果出力設定の概要<a class="headerlink" href="#reference-how-to-set-output-on-femtet" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id4">
+<a class="reference internal image-reference" href="../../_images/where_is_parametric_analysis.png"><img alt="../../_images/where_is_parametric_analysis.png" src="../../_images/where_is_parametric_analysis.png" style="width: 400px;" /></a>
+<figcaption>
+<p><span class="caption-text">ここからダイアログを開きます。</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id5">
+<a class="reference internal image-reference" href="../../_images/how_to_set_output.png"><img alt="../../_images/how_to_set_output.png" src="../../_images/how_to_set_output.png" style="width: 400px;" /></a>
+<figcaption>
+<p><span class="caption-text">「結果出力設定」タブを開き、「追加」を押し、（その後出力設定を行い、）「設定保存」を押します。</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>より詳細は、Femtet ヘルプを参照してください。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../pages/examples.html" class="btn btn-neutral float-left" title="例題" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gau_ex08/gau_ex08.html" class="btn btn-neutral float-right" title="ソレノイドコイルの自己インダクタンス" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
