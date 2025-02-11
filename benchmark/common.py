@@ -113,7 +113,7 @@ def create_history_path(a: Algorithm, p: Problem, ext='.csv', forced_counter=Non
     def path_wo_ext():
         problem_name = type(p).__name__
         algorithm_name = type(a).__name__
-        algorithm_config = '_'.join([f'{''.join(term[0].upper() for term in k.split('_'))}={str(v)}' for k, v in a.config.items()])
+        algorithm_config = '_'.join([f'{"".join(term[0].upper() for term in k.split("_"))}={str(v)}' for k, v in a.config.items()])
 
         if algorithm_config == '':
             algorithm_config = ' '
@@ -132,12 +132,17 @@ def create_history_path(a: Algorithm, p: Problem, ext='.csv', forced_counter=Non
 
         return path_without_ext
 
-    counter = 1
-    while True:
+    if forced_counter is None:
+        counter = 1
+        while True:
+            path = f'{path_wo_ext()}__{counter}{ext}'
+            counter += 1
+            if not os.path.exists(path):
+                break
+
+    else:
+        counter = forced_counter
         path = f'{path_wo_ext()}__{counter}{ext}'
-        counter += 1
-        if not os.path.exists(path):
-            break
 
     return path, counter
 
@@ -152,11 +157,11 @@ def parse_history_path(result_path):
     return problem_name, algorithm_name, algorithm_config, seed
 
 
-def main(algorithm: Algorithm, problem: Problem, n_trials=1, timeout=None):
+def main(algorithm: Algorithm, problem: Problem, n_trials=1, timeout=None, forced_counter=None):
 
     fem = NoFEM()
     opt = algorithm.opt
-    history_path, seed = create_history_path(algorithm, problem)
+    history_path, seed = create_history_path(algorithm, problem, forced_counter=forced_counter)
     femopt = FEMOpt(fem=fem, opt=opt, history_path=history_path)
     femopt.set_random_seed(seed)
     problem.setup(femopt)
@@ -176,7 +181,7 @@ def main(algorithm: Algorithm, problem: Problem, n_trials=1, timeout=None):
         target_values = pdf['hypervolume'].values
 
     target_values: np.ndarray
-    txt_path, _ = create_history_path(algorithm, problem, '.txt')
+    txt_path, _ = create_history_path(algorithm, problem, '.txt', forced_counter)
     np.savetxt(txt_path, target_values)
 
     return target_values, txt_path
