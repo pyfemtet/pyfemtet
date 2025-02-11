@@ -201,6 +201,10 @@ class FemtetInterface(FEMInterface):
             **kwargs
         )
 
+    @property
+    def object_passed_to_functions(self):
+        return self.Femtet
+
     def use_parametric_output_as_objective(self, number: int, direction: str | float = 'minimize') -> None:
         """Use output setting of Femtet parametric analysis as an objective function.
 

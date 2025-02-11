@@ -327,7 +327,7 @@ class Function:
 
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
-            args = (fem.Femtet, *args)
+            args = (fem.object_passed_to_functions, *args)
 
         else:
 
@@ -353,7 +353,7 @@ class Function:
             
             # 数を比較し、足りなければ追加する
             if len(req_pos_params) - len(args) == 1:
-                args = (fem, *args)
+                args = (fem.object_passed_to_functions, *args)
 
             # 数が同じならば FutureWarning
             elif len(req_pos_params) == len(args):

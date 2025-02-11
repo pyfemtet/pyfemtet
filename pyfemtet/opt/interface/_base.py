@@ -36,6 +36,10 @@ class FEMInterface(ABC):
         """Updates the FEM analysis based on the proposed parameters."""
         raise NotImplementedError('update() must be implemented.')
 
+    @property
+    def object_passed_to_functions(self):
+        return self
+
     def check_param_value(self, param_name) -> float or None:
         """Checks the value of a parameter in the FEM model (if implemented in concrete class)."""
         pass
