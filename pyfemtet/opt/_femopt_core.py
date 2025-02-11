@@ -11,6 +11,7 @@ import csv
 import ctypes
 from packaging import version
 import platform
+import warnings
 
 # 3rd-party
 import numpy as np
@@ -323,9 +324,70 @@ class Function:
             RuntimeError(f'`fun` of {self.name} is not specified.')
 
         args = self.args
+
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
             args = (fem.Femtet, *args)
+
+        else:
+
+            # 仕様変更までの猶予処理:
+            #   fun の引数と与えられている引数を比較し
+            #   与えられている positional 引数が 1 足りなければ
+            #   fem を加える
+
+            # fun の引数を調べる
+            req_pos_params = dict()
+            parameters = inspect.signature(self.fun).parameters
+            for k, v in parameters.items():
+                if v.default == v.empty:
+                    req_pos_params.update({k: v})
+
+            # fun の positional 引数の内
+            # 与えられていないものを探す
+            
+            # まず kwargs を引く
+            # これで req_pos_params のうち
+            # kw 指定されていないものが残る
+            [req_pos_params.pop(k) for k in self.kwargs.keys() if k in req_pos_params.keys()]
+            
+            # 数を比較し、足りなければ追加する
+            if len(req_pos_params) - len(args) == 1:
+                args = (fem, *args)
+
+            # 数が同じならば FutureWarning
+            elif len(req_pos_params) == len(args):
+
+                shown = False
+                message = ("When using an interface other than Femtet, "
+                           "it is planned that the first argument will "
+                           "be automatically passed as FEMInterface in "
+                           "future versions. To accommodate this change,"
+                           " please ensure that your function takes an "
+                           "argument of type FEMInterface as its first "
+                           "parameter.")
+
+                for fil in warnings.filters:
+                    if fil[1] is not None:  # re.compile(message)
+                        if fil[1].pattern == message:
+                            shown = True
+
+                if not shown:
+                    warnings.filterwarnings(
+                        'once',
+                        message,
+                        FutureWarning,
+                    )
+                    warnings.warn(
+                        message,
+                        FutureWarning,
+                    )
+
+            # 数が合わないが、次でエラーになるほうが
+            # 分かりやすいので何もしない
+            else:
+                pass
+
         return float(self.fun(*args, **self.kwargs))
 
     def _restore_constants(self):
