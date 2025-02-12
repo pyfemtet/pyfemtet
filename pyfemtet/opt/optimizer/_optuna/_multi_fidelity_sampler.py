@@ -206,6 +206,8 @@ def logei_candidates_func(
 
     """
 
+    main_fedelity = 1
+
     # Validation and process arguments
     with nullcontext():
 
@@ -225,7 +227,8 @@ def logei_candidates_func(
             train_y = torch.cat([train_obj, train_con], dim=-1)
 
             is_feas = (train_con <= 0).all(dim=-1)
-            train_obj_feas = train_obj[is_feas]
+            is_main = train_x[:, 0] == main_fedelity
+            train_obj_feas = train_obj[is_feas & is_main]
 
             if train_obj_feas.numel() == 0:
                 _logger.warning(
@@ -237,7 +240,8 @@ def logei_candidates_func(
 
         else:
             train_y = train_obj
-            best_f = train_obj.max()
+            is_main = train_x[:, 0] == main_fedelity
+            best_f = train_obj[is_main].max()
 
     # Select GP Model by the fidelity parameter.
     fixed_features, exclude_first_feature, model = get_gp(

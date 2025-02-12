@@ -155,7 +155,7 @@ class AbstractOptimizer(ABC):
     def should_calc(self, *args) -> bool:
         return self._should_solve(*args)
 
-    def set_solve_condition(self, fun: Callable[[tuple['np.ndarray', 'History']], bool]):
+    def set_solve_condition(self, fun: Callable[['np.ndarray', 'History'], bool]):
         self._should_solve = fun
 
     # ===== algorithm specific methods =====

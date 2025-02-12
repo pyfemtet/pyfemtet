@@ -1122,11 +1122,23 @@ class SubFidelity(FEMOpt):
 
     def validate(self, main_opt: 'AbstractOptimizer'):
 
+        # check number
         assert len(main_opt.objectives) == len(
             self.opt.objectives), 'The number of objectives between main model and sub-fidelity model must be same.'
 
+        # check names
         for sub_obj_name in self.opt.objectives.keys():
             assert sub_obj_name in main_opt.objectives.keys(), 'The function must have a corresponding function in mein femopt.'
+
+        # sync directions
+        obj_sub: Objective
+        obj_main: Objective
+        for sub_obj_name in self.opt.objectives.keys():
+            obj_sub = self.opt.objectives[sub_obj_name]
+            obj_main = main_opt.objectives[sub_obj_name]
+            obj_sub.direction = obj_main.direction
+
+        # TODO: sort
 
     def calc_objectives(self) -> list[float]:
         return [obj.calc(self.fem) for obj in self.opt.objectives.values()]

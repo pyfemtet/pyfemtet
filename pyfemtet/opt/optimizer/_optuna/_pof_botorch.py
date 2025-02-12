@@ -1886,7 +1886,7 @@ class PoFBoTorchSampler(BaseSampler):
         bounds: numpy.ndarray = trans.bounds
         if add_feature_dim:
             bounds: numpy.ndarray = numpy.concatenate([[[0, 1]], bounds], axis=0)
-        params: numpy.ndarray = numpy.empty((len(main_trials), trans.bounds.shape[0]), dtype=numpy.float64)
+        params: numpy.ndarray = numpy.empty((len(main_trials), bounds.shape[0]), dtype=numpy.float64)
         values: numpy.ndarray = numpy.empty((len(main_trials), 1), dtype=numpy.float64)
 
         # 元実装と違い、このモデルを基に次の点を提案する
