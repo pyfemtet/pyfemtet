@@ -58,6 +58,8 @@ bokeh = "^3.3.3"
 pytest = "^7.4.3"
 pytest-dashboard = "^0.1.2"
 fire = "^0.6.0"
+# others
+black = "^25.1.0"
 
 [[tool.poetry.source]]
 name = "pytorch-cpu"

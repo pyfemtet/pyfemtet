@@ -233,8 +233,6 @@ class FemtetInterface(FEMInterface):
         # TODO: FEMInterface.__init__ の仕様を変えたらここも変える
         self.kwargs['parametric_output_indexes_use_as_objective'] = self.parametric_output_indexes_use_as_objective
 
-
-
     def __del__(self):
         self.quit()
         # CoUninitialize()  # Win32 exception occurred releasing IUnknown at 0x0000022427692748

@@ -95,7 +95,10 @@ with try_import() as _imports:
     from botorch.acquisition.objective import GenericMCObjective
     from botorch.models import ModelListGP
     from botorch.models import SingleTaskGP
+    from botorch.models import MultiTaskGP
+    from botorch.models import SingleTaskMultiFidelityGP
     from botorch.models.transforms.outcome import Standardize
+    from botorch.models.transforms.input import Normalize
     from botorch.optim import optimize_acqf
     from botorch.sampling import SobolQMCNormalSampler
     from botorch.sampling.list_sampler import ListSampler
@@ -137,192 +140,16 @@ with try_import() as _imports_qhvkg:
         qHypervolumeKnowledgeGradient,
     )
 
+from pyfemtet.opt.optimizer._optuna._pof_botorch import (
+    PoFBoTorchSampler,
+    PoFConfig,
+    _validate_botorch_version_for_constrained_opt,
+    _get_constraint_funcs,
+    get_minimum_YVar_and_standardizer,
+    acqf_patch_factory,
+)
 
-def _validate_botorch_version_for_constrained_opt(func_name: str) -> None:
-    if version.parse(botorch.version.version) < version.parse("0.9.0"):
-        raise ImportError(
-            f"{func_name} requires botorch>=0.9.0 for constrained problems, but got "
-            f"botorch={botorch.version.version}.\n"
-            "Please run ``pip install botorch --upgrade``."
-        )
-
-
-def _get_constraint_funcs(n_constraints: int) -> list[Callable[["torch.Tensor"], "torch.Tensor"]]:
-    return [lambda Z: Z[..., -n_constraints + i] for i in range(n_constraints)]
-
-
-# helper function
-def symlog(x):
-    """Symmetric logarithm function.
-
-    Args:
-        x (torch.Tensor): Input tensor.
-
-    Returns:
-        torch.Tensor: The symlog of the input tensor.
-    """
-    # Apply the symlog transformation
-    return torch.where(
-        x >= 0,
-        torch.log(x + 1),
-        -torch.log(1 - x)
-    )
-
-
-def get_minimum_YVar_and_standardizer(Y: torch.Tensor):
-    standardizer = Standardize(m=Y.shape[-1])
-    if _get_use_fixed_noise():
-        import gpytorch
-        min_noise = gpytorch.settings.min_fixed_noise.value(Y.dtype)
-
-        standardizer.forward(Y)  # require to un-transform
-        _, YVar = standardizer.untransform(Y, min_noise * torch.ones_like(Y))
-
-    else:
-        YVar = None
-
-    return YVar, standardizer
-
-
-# ベースとなる獲得関数クラスに pof 係数を追加したクラスを作成する関数
-def acqf_patch_factory(acqf_class, pof_config=None):
-    """ベース acqf クラスに pof 係数の計算を追加したクラスを作成します。
-
-    出力されたクラスは、 set_model_c() メソッドで学習済みの
-    feasibility を評価するための SingleTaskGP オブジェクトを
-    指定する必要があります。
-    """
-    from torch.distributions import Normal
-
-    if pof_config is None:
-        pof_config = PoFConfig()
-
-    # optuna_integration.botorch.botorch.qExpectedImprovement
-    class ACQFWithPOF(acqf_class):
-        """Introduces PoF coefficients for a given class of acquisition functions."""
-        model_c: SingleTaskGP
-
-        enable_pof: bool = pof_config.enable_pof  # PoF を考慮するかどうかを規定します。
-        gamma: float or torch.Tensor = pof_config.gamma  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
-        threshold: float or torch.Tensor = pof_config.threshold  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
-
-        enable_log: bool = pof_config.enable_log  # ベース獲得関数値に symlog を適用します。
-        enable_positive_only_pof: bool = pof_config.enable_positive_only_pof  # ベース獲得関数が正のときのみ PoF を乗じます。
-
-        enable_dynamic_pof: bool = pof_config.enable_dynamic_pof  # gamma を動的に変更します。 True のとき、gamma は無視されます。
-        enable_dynamic_threshold: bool = pof_config.enable_dynamic_threshold  # threshold を動的に変更します。 True のとき、threshold は無視されます。
-
-        enable_repeat_penalty: bool = pof_config.enable_repeat_penalty  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
-        _repeat_penalty: float or torch.Tensor = pof_config._repeat_penalty  # enable_repeat_penalty が True のときに使用される内部変数です。
-
-        enable_dynamic_repeat_penalty: bool = pof_config.enable_dynamic_repeat_penalty  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
-        repeat_watch_window: int = pof_config.repeat_watch_window  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
-        repeat_watch_norm_distance: float = pof_config.repeat_watch_norm_distance  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
-        _repeat_penalty_gamma: float or torch.Tensor = pof_config._repeat_penalty_gamma  # _repeat_penalty の指数で、内部変数です。
-
-
-        def set_model_c(self, model_c: SingleTaskGP):
-            self.model_c = model_c
-
-        def pof(self, X: torch.Tensor):
-            # 予測点の平均と標準偏差をもとにした正規分布の関数を作る
-            _X = X.squeeze(1)
-            posterior = self.model_c.posterior(_X)
-            mean = posterior.mean
-            sigma = posterior.variance.sqrt()
-
-            # 積分する
-            normal = Normal(mean, sigma)
-            # ここの閾値を true に近づけるほど厳しくなる
-            # true の値を超えて大きくしすぎると、多分 true も false も
-            # 差が出なくなる
-            if isinstance(self.threshold, float):
-                cdf = 1. - normal.cdf(torch.tensor(self.threshold, device='cpu').double())
-            else:
-                cdf = 1. - normal.cdf(self.threshold)
-
-            return cdf.squeeze(1)
-
-        def forward(self, X: torch.Tensor) -> torch.Tensor:
-            # ===== ベース目的関数 =====
-            base_acqf = super().forward(X)
-
-            # ===== 各種 dynamic 手法を使う際の共通処理 =====
-            if (
-                    self.enable_dynamic_pof
-                    or self.enable_dynamic_threshold
-                    or self.enable_dynamic_threshold
-                    or self.enable_repeat_penalty
-                    or self.enable_dynamic_repeat_penalty
-            ):
-                # ===== 正規化不確実性の計算 =====
-                _X = X.squeeze(1)  # batch x 1 x dim -> batch x dim
-                # X の予測標準偏差を取得する
-                post = self.model_c.posterior(_X)
-                current_stddev = post.variance.sqrt()  # batch x dim
-                # 既知のポイントの標準偏差を取得する
-                post = self.model_c.posterior(self.model_c.train_inputs[0])
-                known_stddev = post.variance.sqrt().mean(dim=0)
-                # known_stddev: サンプル済みポイントの標準偏差なので小さいはず。
-                # current_stddev: 未知の点の標準偏差なので大きいはず。逆に、小さければ既知の点に近い。
-                # 既知のポイントの標準偏差で規格化し、平均を取って一次元にする
-                buff = current_stddev / known_stddev
-                norm_stddev = buff.mean(dim=1)  # (batch, ), 1 ~ 100 くらいの値
-
-                # ===== 動的 gamma =====
-                if self.enable_dynamic_pof:
-                    buff = 1000. / norm_stddev  # 1 ~ 100 くらいの値
-                    buff = symlog(buff)  # 1 ~ 4 くらいの値?
-                    self.gamma = buff
-
-                # ===== 動的 threshold =====
-                if self.enable_dynamic_threshold:
-                    # 効きすぎる傾向？
-                    self.threshold = (1 - torch.sigmoid(norm_stddev - 1 - 4) / 2).unsqueeze(1)
-
-                # ===== 繰り返しペナルティ =====
-                if self.enable_repeat_penalty:
-                    # ベースペナルティは不確実性
-                    # stddev が小さい
-                    # = サンプル済み付近
-                    # = 獲得関数を小さくしたい
-                    # = stddev をそのまま係数にする
-                    self._repeat_penalty = norm_stddev
-
-                # ===== 動的繰り返しペナルティ =====
-                if self.enable_dynamic_repeat_penalty:
-                    # 計算コストが多くないので念のためベースペナルティを(再)定義
-                    self._repeat_penalty = norm_stddev
-                    # サンプル数が watch_window 以下なら何もできない
-                    if len(self.model_c.train_inputs[0]) > self.repeat_watch_window:
-                        # 直近 N サンプルの x のばらつきが小さいほど
-                        # その optimize_scipy 全体でペナルティを強化する
-                        monitor_window = self.model_c.train_inputs[0][-self.repeat_watch_window:]
-                        g = monitor_window.mean(dim=0)
-                        distance = torch.norm(monitor_window - g, dim=1).mean()
-                        self._repeat_penalty_gamma = self.repeat_watch_norm_distance / distance
-
-            # ===== PoF 計算 =====
-            if self.enable_pof:
-                pof = self.pof(X)
-            else:
-                pof = 1.
-
-            # ===== その他 =====
-            if self.enable_log:
-                base_acqf = symlog(base_acqf)
-
-            if self.enable_positive_only_pof:
-                pof = torch.where(
-                    base_acqf >= 0,
-                    pof,
-                    torch.ones_like(pof)
-                )
-
-            ret = -torch.log(1 - torch.sigmoid(base_acqf)) * pof ** self.gamma * self._repeat_penalty ** self._repeat_penalty_gamma
-            return ret
-
-    return ACQFWithPOF
+from contextlib import nullcontext
 
 
 # noinspection PyIncorrectDocstring
@@ -338,6 +165,7 @@ def logei_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Log Expected Improvement (LogEI).
 
@@ -378,100 +206,111 @@ def logei_candidates_func(
 
     """
 
-    # We need botorch >=0.8.1 for LogExpectedImprovement.
-    if not _imports_logei.is_successful():
-        raise ImportError(
-            "logei_candidates_func requires botorch >=0.8.1. "
-            "Please upgrade botorch or use qei_candidates_func as candidates_func instead."
-        )
+    # Validation and process arguments
+    with nullcontext():
 
-    if train_obj.size(-1) != 1:
-        raise ValueError("Objective may only contain single values with logEI.")
-    n_constraints = train_con.size(1) if train_con is not None else 0
-    if n_constraints > 0:
-        assert train_con is not None
-        train_y = torch.cat([train_obj, train_con], dim=-1)
-
-        is_feas = (train_con <= 0).all(dim=-1)
-        train_obj_feas = train_obj[is_feas]
-
-        if train_obj_feas.numel() == 0:
-            _logger.warning(
-                "No objective values are feasible. Using 0 as the best objective in logEI."
+        # We need botorch >=0.8.1 for LogExpectedImprovement.
+        if not _imports_logei.is_successful():
+            raise ImportError(
+                "logei_candidates_func requires botorch >=0.8.1. "
+                "Please upgrade botorch or use qei_candidates_func as candidates_func instead."
             )
-            best_f = train_obj.min()
+
+        if train_obj.size(-1) != 1:
+            raise ValueError("Objective may only contain single values with logEI.")
+
+        n_constraints = train_con.size(1) if train_con is not None else 0
+        if n_constraints > 0:
+            assert train_con is not None
+            train_y = torch.cat([train_obj, train_con], dim=-1)
+
+            is_feas = (train_con <= 0).all(dim=-1)
+            train_obj_feas = train_obj[is_feas]
+
+            if train_obj_feas.numel() == 0:
+                _logger.warning(
+                    "No objective values are feasible. Using 0 as the best objective in logEI."
+                )
+                best_f = train_obj.min()
+            else:
+                best_f = train_obj_feas.max()
+
         else:
-            best_f = train_obj_feas.max()
+            train_y = train_obj
+            best_f = train_obj.max()
 
-    else:
-        train_y = train_obj
-        best_f = train_obj.max()
-
-    train_x = normalize(train_x, bounds=bounds)
-
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
-
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
-    mll = ExactMarginalLogLikelihood(model.likelihood, model)
-    fit_gpytorch_mll(mll)
-    if n_constraints > 0:
-        ACQF = acqf_patch_factory(LogConstrainedExpectedImprovement, pof_config)
-        acqf = ACQF(
-            model=model,
-            best_f=best_f,
-            objective_index=0,
-            constraints={i: (None, 0.0) for i in range(1, n_constraints + 1)},
-        )
-    else:
-        ACQF = acqf_patch_factory(LogExpectedImprovement, pof_config)
-        acqf = ACQF(
-            model=model,
-            best_f=best_f,
-        )
-    acqf.set_model_c(model_c)
 
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
+    # ACQF setup
+    with nullcontext():
 
-    # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+        mll = ExactMarginalLogLikelihood(model.likelihood, model)
+        fit_gpytorch_mll(mll)
+        if n_constraints > 0:
+            ACQF = acqf_patch_factory(LogConstrainedExpectedImprovement, pof_config)
+            acqf = ACQF(
+                model=model,
+                best_f=best_f,
+                objective_index=0,
+                constraints={i: (None, 0.0) for i in range(1, n_constraints + 1)},
+            )
+        else:
+            ACQF = acqf_patch_factory(
+                LogExpectedImprovement,
+                pof_config,
+                # exclude_first_feature  # TODO: 第一引数を考慮したほうがよいかどうかは切り替えられるようにする
+            )
+            acqf = ACQF(
+                model=model,
+                best_f=best_f,
+            )
+        acqf.set_model_c(model_c)
 
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
+    # Add nonlinear_constraint and run optimize_acqf
+    with nullcontext():
+        # optimize_acqf の探索に parameter constraints を追加します。
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": batch_limit, "maxiter": 200},
-            sequential=True,
-            **kwargs
-        )
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": 5, "maxiter": 200},
-            sequential=True,
-        )
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": batch_limit, "maxiter": 200},
+                sequential=True,
+                fixed_features=fixed_features,
+                **kwargs
+            )
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": 5, "maxiter": 200},
+                sequential=True,
+                fixed_features=fixed_features,
+            )
 
-    return candidates
+        ret = candidates.detach()
+
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 # noinspection PyIncorrectDocstring
@@ -487,6 +326,7 @@ def qei_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Improvement (qEI).
 
@@ -523,98 +363,103 @@ def qei_candidates_func(
 
     """
 
-    if train_obj.size(-1) != 1:
-        raise ValueError("Objective may only contain single values with qEI.")
-    if train_con is not None:
-        _validate_botorch_version_for_constrained_opt("qei_candidates_func")
-        train_y = torch.cat([train_obj, train_con], dim=-1)
+    # Validation and process arguments
+    with nullcontext():
 
-        is_feas = (train_con <= 0).all(dim=-1)
-        train_obj_feas = train_obj[is_feas]
+        if train_obj.size(-1) != 1:
+            raise ValueError("Objective may only contain single values with qEI.")
 
-        if train_obj_feas.numel() == 0:
-            # TODO(hvy): Do not use 0 as the best observation.
-            _logger.warning(
-                "No objective values are feasible. Using 0 as the best objective in qEI."
-            )
-            best_f = torch.zeros(())
+        if train_con is not None:
+            _validate_botorch_version_for_constrained_opt("qei_candidates_func")
+            train_y = torch.cat([train_obj, train_con], dim=-1)
+
+            is_feas = (train_con <= 0).all(dim=-1)
+            train_obj_feas = train_obj[is_feas]
+
+            if train_obj_feas.numel() == 0:
+                # TODO(hvy): Do not use 0 as the best observation.
+                _logger.warning(
+                    "No objective values are feasible. Using 0 as the best objective in qEI."
+                )
+                best_f = torch.zeros(())
+            else:
+                best_f = train_obj_feas.max()
+
+            n_constraints = train_con.size(1)
+            additonal_qei_kwargs = {
+                "objective": GenericMCObjective(lambda Z, X: Z[..., 0]),
+                "constraints": _get_constraint_funcs(n_constraints),
+            }
         else:
-            best_f = train_obj_feas.max()
+            train_y = train_obj
 
-        n_constraints = train_con.size(1)
-        additonal_qei_kwargs = {
-            "objective": GenericMCObjective(lambda Z, X: Z[..., 0]),
-            "constraints": _get_constraint_funcs(n_constraints),
-        }
-    else:
-        train_y = train_obj
+            best_f = train_obj.max()
 
-        best_f = train_obj.max()
+            additonal_qei_kwargs = {}
 
-        additonal_qei_kwargs = {}
-
-    train_x = normalize(train_x, bounds=bounds)
-    if pending_x is not None:
-        pending_x = normalize(pending_x, bounds=bounds)
-
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
-
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
-    mll = ExactMarginalLogLikelihood(model.likelihood, model)
-    fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qExpectedImprovement, pof_config)
-    acqf = ACQF(
-        model=model,
-        best_f=best_f,
-        sampler=_get_sobol_qmc_normal_sampler(256),
-        X_pending=pending_x,
-        **additonal_qei_kwargs,
-    )
-    acqf.set_model_c(model_c)
+    # ACQF setup
+    with nullcontext():
 
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
-
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
-
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
-
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": batch_limit, "maxiter": 200},
-            sequential=True,
-            **kwargs
+        ACQF = acqf_patch_factory(
+            qExpectedImprovement,
+            pof_config,
+            # exclude_first_feature,
         )
-
-    else:
-
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": 5, "maxiter": 200},
-            sequential=True,
+        acqf = ACQF(
+            model=model,
+            best_f=best_f,
+            sampler=_get_sobol_qmc_normal_sampler(256),
+            X_pending=pending_x,
+            **additonal_qei_kwargs,
         )
+        acqf.set_model_c(model_c)
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+    # Add nonlinear_constraint and run optimize_acqf
+    with nullcontext():
 
-    return candidates
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
+
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": batch_limit, "maxiter": 200},
+                sequential=True,
+                **kwargs
+            )
+
+        else:
+
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": 5, "maxiter": 200},
+                sequential=True,
+            )
+
+        ret = candidates.detach()
+
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 # noinspection PyIncorrectDocstring
@@ -1407,118 +1252,77 @@ def _get_default_candidates_func(
         "Study",
         "OptunaOptimizer",
         "PoFConfig",
+        str,
     ],
     "torch.Tensor",
 ]:
     if n_objectives > 3 and not has_constraint and not consider_running_trials:
-        return ehvi_candidates_func
+        # return ehvi_candidates_func
+        raise NotImplementedError
     elif n_objectives > 3:
-        return qparego_candidates_func
+        # return qparego_candidates_func
+        raise NotImplementedError
     elif n_objectives > 1:
-        return qehvi_candidates_func
+        # return qehvi_candidates_func
+        raise NotImplementedError
     elif consider_running_trials:
-        return qei_candidates_func
+        # return qei_candidates_func
+        raise NotImplementedError
     else:
         return logei_candidates_func
 
 
 # ===== main re-implementation of BoTorchSampler =====
-@dataclass
-class PoFConfig:
-    """Configuration of PoFBoTorchSampler
 
-    Args:
-        enable_pof (bool):
-            Whether to consider Probability of Feasibility.
-            Defaults to True.
+def get_gp(
+        gp_model_name: str,
+        train_x,
+        train_y,
+        bounds,
+) -> tuple[dict | None, bool, 'ExactGP']:
+    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
 
-        gamma (float or torch.Tensor):
-            Exponent for Probability of Feasibility. A larger value places more emphasis on feasibility.
-            If 0, Probability of Feasibility is not considered.
-            Defaults to 1.
+    fixed_features = None
+    exclude_first_feature = False
+    if gp_model_name == 'SingleTaskMultiFidelityGP':
+        fixed_features = {0: 1.}
+        exclude_first_feature = True
+        model = SingleTaskMultiFidelityGP(
+            train_x,
+            train_y,
+            train_yvar,
+            data_fidelities=[0],
+            outcome_transform=standardizer,
+            input_transform=Normalize(
+                train_x.shape[-1],
+                indices=list(range(1, train_x.shape[-1])),
+                bounds=bounds[:, 1:]
+            ),
+        )
 
-        threshold (float or torch.Tensor):
-            Boundary value for calculating Probability of Feasibility with CDF.
-            Generally between 0 and 1, with 0.5 being recommended. A larger value places more emphasis on feasibility.
-            Defaults to 0.5.
+    elif gp_model_name == 'MultiTaskGP':
+        model = MultiTaskGP(
+            train_x,
+            train_y,
+            train_Yvar=train_yvar,
+            task_feature=0,
+            output_tasks=[1],
+            outcome_transform=standardizer,
+            input_transform=Normalize(
+                train_x.shape[-1],
+                indices=list(range(1, train_x.shape[-1])),
+                bounds=bounds
+            ),
+        )
 
-        enable_log (bool):
-            Whether to apply symlog to the base acquisition function values.
-            Defaults to True.
+    else:
+        raise NotImplementedError
 
-        enable_positive_only_pof (bool):
-            Whether to apply Probability of Feasibility only when the base acquisition function is positive.
-            Defaults to False.
-
-        enable_dynamic_pof (bool):
-            Whether to change gamma dynamically. When True, ```gamma``` argument is ignored.
-            Defaults to True.
-
-        enable_dynamic_threshold (bool):
-            Whether to change threshold dynamically. When True, ```threshold``` argument is ignored.
-            Defaults to False.
-
-        enable_repeat_penalty (bool):
-            Whether to apply a penalty coefficient on the base acquisition function values near sampled points.
-            Defaults to True.
-
-        enable_dynamic_repeat_penalty (bool):
-            Enhances the penalty coefficient if the same value is repeated. When True, it behaves as if enable_repeat_penalty is set to True.
-            Defaults to True.
-
-        repeat_watch_window (int):
-           Specifies how many recent proposal values are referenced when determining the magnitude of penalties when enable_dynamic_repeat_penalty is True.
-           Defaults to 3.
-
-        repeat_watch_norm_distance (float):
-           Defines how small the norm distance between proposed parameters needs to be in normalized parameter space [0, 1]
-           for a stronger penalty effect. Extreme values may cause numerical instability.
-           Defaults to 0.1.
-
-        enable_no_noise (bool):
-            Whether to treat observation errors as non-existent
-            when training the regression model with the objective
-            function value. The default is True because there is
-            essentially no observational error in a FEM analysis.
-            This is different from the original BoTorchSampler
-            implementation.
-
-    """
-    enable_pof: bool = True  # PoF を考慮するかどうかを規定します。
-    gamma: float or torch.Tensor = 1.0  # PoF に対する指数です。大きいほど feasibility を重視します。0 だと PoF を考慮しません。
-    threshold: float or torch.Tensor = 0.5  # PoF を cdf で計算する際の境界値です。0 ~ 1 が基本で、 0.5 が推奨です。大きいほど feasibility を重視します。
-
-    enable_log: bool = True  # ベース獲得関数値に symlog を適用します。
-    enable_positive_only_pof: bool = False  # ベース獲得関数が正のときのみ PoF を乗じます。
-
-    enable_dynamic_pof: bool = False  # gamma を動的に変更します。 True のとき、gamma は無視されます。
-    enable_dynamic_threshold: bool = False  # threshold を動的に変更します。 True のとき、threshold は無視されます。
-
-    enable_repeat_penalty: bool = False  # サンプル済みの点の近傍のベース獲得関数値にペナルティ係数を適用します。
-    _repeat_penalty: float or torch.Tensor = 1.  # enable_repeat_penalty が True のときに使用される内部変数です。
-
-    enable_dynamic_repeat_penalty: bool = False  # 同じ値が繰り返された場合にペナルティ係数を強化します。True の場合、enable_repeat_penalty は True として振舞います。
-    repeat_watch_window: int = 3  # enable_dynamic_repeat_penalty が True のとき、直近いくつの提案値を参照してペナルティの大きさを決めるかを既定します。
-    repeat_watch_norm_distance: float = 0.1  # [0, 1] で正規化されたパラメータ空間においてパラメータの提案同士のノルムがどれくらいの大きさ以下であればペナルティを強くするかを規定します。極端な値は数値不安定性を引き起こす可能性があります。
-    _repeat_penalty_gamma: float or torch.Tensor = 1.  # _repeat_penalty の指数で、内部変数です。
-
-    enable_no_noise: bool = True
-
-    def _disable_all_features(self):
-        # 拘束以外のすべてを disable にすることで、
-        # BoTorchSampler の実装と同じにします。
-        self.enable_pof = False
-        self.enable_log = False
-        self.enable_positive_only_pof = False
-        self.enable_dynamic_pof = False
-        self.enable_dynamic_threshold = False
-        self.enable_repeat_penalty = False
-        self.enable_dynamic_repeat_penalty = False
-        self.enable_no_noise = False
+    return fixed_features, exclude_first_feature, model
 
 
 @experimental_class("2.4.0")
-class PoFBoTorchSampler(BaseSampler):
+class MultiFidelityPoFBoTorchSampler(PoFBoTorchSampler):
     """A sampler that forked from BoTorchSampler.
 
     This sampler improves the BoTorchSampler to account
@@ -1581,83 +1385,6 @@ class PoFBoTorchSampler(BaseSampler):
             Sampler settings.
     """
 
-    def __init__(
-            self,
-            *,
-            candidates_func: (
-                    Callable[
-                        [
-                            "torch.Tensor",
-                            "torch.Tensor",
-                            "torch.Tensor" | None,
-                            "torch.Tensor",
-                            "torch.Tensor" | None,
-                            "SingleTaskGP",
-                            "list[Constraint]",
-                            "Study",
-                            "OptunaOptimizer",
-                            "PoFConfig",
-                        ],
-                        "torch.Tensor",
-                    ]
-                    | None
-            ) = None,
-            constraints_func: Callable[[FrozenTrial], Sequence[float]] | None = None,
-            n_startup_trials: int = 10,
-            consider_running_trials: bool = False,
-            independent_sampler: BaseSampler | None = None,
-            seed: int | None = None,
-            device: "torch.device" | None = None,
-            pof_config: PoFConfig or None = None,
-    ):
-        _imports.check()
-
-        self._candidates_func = candidates_func
-        self._constraints_func = constraints_func
-        self._consider_running_trials = consider_running_trials
-        self._independent_sampler = independent_sampler or RandomSampler(seed=seed)
-        self._n_startup_trials = n_startup_trials
-        self._seed = seed
-
-        self._study_id: int | None = None
-        self._search_space = IntersectionSearchSpace()
-        self._device = device or torch.device("cpu")
-
-        self.pof_config = pof_config or PoFConfig()
-        _set_use_fixed_noise(self.pof_config.enable_no_noise)
-
-
-    @property
-    def use_fixed_noise(self) -> bool:
-        return _get_use_fixed_noise()
-
-    @use_fixed_noise.setter
-    def use_fixed_noise(self, value: bool):
-        _set_use_fixed_noise(value)
-
-    def infer_relative_search_space(
-            self,
-            study: Study,
-            trial: FrozenTrial,
-    ) -> dict[str, BaseDistribution]:
-        if self._study_id is None:
-            self._study_id = study._study_id
-        if self._study_id != study._study_id:
-            # Note that the check below is meaningless when `InMemoryStorage` is used
-            # because `InMemoryStorage.create_new_study` always returns the same study ID.
-            raise RuntimeError("BoTorchSampler cannot handle multiple studies.")
-
-        search_space: dict[str, BaseDistribution] = {}
-        for name, distribution in self._search_space.calculate(study).items():
-            if distribution.single():
-                # built-in `candidates_func` cannot handle distributions that contain just a
-                # single value, so we skip them. Note that the parameter values for such
-                # distributions are sampled in `Trial`.
-                continue
-            search_space[name] = distribution
-
-        return search_space
-
     def sample_relative(
             self,
             study: Study,
@@ -1670,60 +1397,150 @@ class PoFBoTorchSampler(BaseSampler):
             return {}
 
         completed_trials = study.get_trials(deepcopy=False, states=(TrialState.COMPLETE,))
-        running_trials = [
-            t for t in study.get_trials(deepcopy=False, states=(TrialState.RUNNING,)) if t != trial
-        ]
-        trials = completed_trials + running_trials
+        running_trials = [t for t in study.get_trials(deepcopy=False, states=(TrialState.RUNNING,)) if t != trial]
+        all_trials = study.get_trials(deepcopy=False)
 
+        trials = completed_trials + running_trials
         n_trials = len(trials)
-        n_completed_trials = len(completed_trials)
         if n_trials < self._n_startup_trials:
             return {}
 
         trans = _SearchSpaceTransform(search_space)
         n_objectives = len(study.directions)
-        values: numpy.ndarray | torch.Tensor = numpy.empty(
-            (n_trials, n_objectives), dtype=numpy.float64
-        )
-        params: numpy.ndarray | torch.Tensor
+
         con: numpy.ndarray | torch.Tensor | None = None
         bounds: numpy.ndarray | torch.Tensor = trans.bounds
-        params = numpy.empty((n_trials, trans.bounds.shape[0]), dtype=numpy.float64)
-        for trial_idx, trial in enumerate(trials):
-            if trial.state == TrialState.COMPLETE:
-                params[trial_idx] = trans.transform(trial.params)
-                assert len(study.directions) == len(trial.values)
-                for obj_idx, (direction, value) in enumerate(zip(study.directions, trial.values)):
-                    assert value is not None
-                    if (
-                            direction == StudyDirection.MINIMIZE
-                    ):  # BoTorch always assumes maximization.
-                        value *= -1
-                    values[trial_idx, obj_idx] = value
-                if self._constraints_func is not None:
-                    constraints = study._storage.get_trial_system_attrs(trial._trial_id).get(
-                        _CONSTRAINTS_KEY
-                    )
-                    if constraints is not None:
-                        n_constraints = len(constraints)
 
-                        if con is None:
-                            con = numpy.full(
-                                (n_completed_trials, n_constraints), numpy.nan, dtype=numpy.float64
-                            )
-                        elif n_constraints != con.shape[1]:
-                            raise RuntimeError(
-                                f"Expected {con.shape[1]} constraints "
-                                f"but received {n_constraints}."
-                            )
-                        con[trial_idx] = constraints
-            elif trial.state == TrialState.RUNNING:
-                if all(p in trial.params for p in search_space):
-                    params[trial_idx] = trans.transform(trial.params)
-                else:
-                    params[trial_idx] = numpy.nan
-            else:
-                assert False, "trail.state must be TrialState.COMPLETE or TrialState.RUNNING."
+        # ===== completed trials =====
+        n_completed_trials = len(completed_trials)
+        completed_values: numpy.ndarray | torch.Tensor = numpy.empty((n_completed_trials, n_objectives), dtype=numpy.float64)
+        completed_params: numpy.ndarray | torch.Tensor
+        completed_params = numpy.empty((n_completed_trials, 1 + trans.bounds.shape[0]), dtype=numpy.float64)  # +1 is task index
+
+        # Task index (int starts with 1)
+        # or fidelity parameter (main is 1.0)
+        completed_params[:, 0] = 1
+
+        for trial_idx, trial in enumerate(completed_trials):
+            completed_params[trial_idx, 1:] = trans.transform(trial.params)
+            assert len(study.directions) == len(trial.values)
+
+            for obj_idx, (direction, value) in enumerate(zip(study.directions, trial.values)):
+                assert value is not None
+                if (
+                        direction == StudyDirection.MINIMIZE
+                ):  # BoTorch always assumes maximization.
+                    value *= -1
+                completed_values[trial_idx, obj_idx] = value
+
+            if self._constraints_func is not None:
+                constraints = study._storage.get_trial_system_attrs(trial._trial_id).get(
+                    _CONSTRAINTS_KEY
+                )
+                if constraints is not None:
+                    n_constraints = len(constraints)
+
+                    if con is None:
+                        con = numpy.full(
+                            (n_completed_trials, n_constraints), numpy.nan, dtype=numpy.float64
+                        )
+                    elif n_constraints != con.shape[1]:
+                        raise RuntimeError(
+                            f"Expected {con.shape[1]} constraints "
+                            f"but received {n_constraints}."
+                        )
+                    con[trial_idx] = constraints
+
+        # ===== Add Task information to the completed_params for MultiTaskGP. =====
+        # Add fidelity values
+        # TODO:
+        #   SingleTaskMultiFidelityGP の bounds の扱いが複雑すぎるので根本から分ける
+        #   gp_model_name を str ではなく enum にする
+        #   SingleTaskMultiFidelityGP が MultiTaskGP より極端に悪いことの原因調査
+        #   ★ _pof_botorch module との統合と継承
+        #   GUI (fidelity 別の進捗)
+        #   History ( history の形で保存するか、又は main history に入れる)
+        #       restart 性も考えれば、main history には入れたい。けど閲覧性が悪いか？
+        _transformed_x: numpy.ndarray
+        _sub_fid_y: dict[int, list[float]]
+        _sub_y: list[float]
+        fidelity_int_map: dict[str, int] = {}
+        gp_model_name: str = None
+        for trial_idx, trial in enumerate(all_trials):
+
+            # Get x
+            if len(trial.params) != len(trans.bounds):
+                # unknown FAIL or RUNNING
+                continue
+            _transformed_x = trans.transform(trial.params)
+
+            # If sub-fidelity-values are recorded, process them.
+            if 'sub-fidelity-values' in trial.user_attrs.keys():
+                _sub_fid_y = trial.user_attrs['sub-fidelity-values']
+
+                # For each fidelity values, add them to x and y.
+                for fidelity, _sub_y in _sub_fid_y.items():
+
+                    # FrozenTrial の際に user_attr の key は
+                    # str にされてしまう模様
+                    try:
+                        fidelity = float(fidelity)
+                    except (TypeError, ValueError):
+                        pass
+
+                    # If fidelity is str, re-index as int
+                    # for MultiTaskGP.
+                    if isinstance(fidelity, str):
+
+                        if gp_model_name is None:
+                            gp_model_name = 'MultiTaskGP'
+                        else:
+                            assert gp_model_name == 'MultiTaskGP', 'Mixed fidelity specification detected.'
+
+                        if fidelity not in fidelity_int_map:
+                            fidelity_int_map[fidelity] = len(fidelity_int_map) + 2  # 1 is for main
+                        fidelity = fidelity_int_map[fidelity]
+                        assert isinstance(fidelity, int)
+
+                    # elif float and 0<= fid < 1,
+                    # as SingleTaskMultiFidelityGP.
+                    elif isinstance(fidelity, float):
+
+                        if 0 <= fidelity < 1:
+                            if gp_model_name is None:
+                                gp_model_name = 'SingleTaskMultiFidelityGP'
+
+                            else:
+                                assert gp_model_name == 'SingleTaskMultiFidelityGP', 'Mixed fidelity specification detected.'
+
+                        else:
+                            raise NotImplementedError('Invalid fidelity specification.')
+
+                    else:
+                        raise NotImplementedError('Invalid fidelity specification.')
+
+                    # Add to x.
+                    _row = numpy.array([fidelity, *_transformed_x], dtype=numpy.float64)
+                    completed_params = numpy.concatenate([completed_params, [_row]], axis=0)
+
+                    # Add to y.
+                    for obj_idx, (direction, value) in enumerate(zip(study.directions, _sub_y)):
+                        assert value is not None
+                        if (
+                                direction == StudyDirection.MINIMIZE
+                        ):  # BoTorch always assumes maximization.
+                            _sub_y[obj_idx] = -1 * value
+
+                    completed_values = numpy.concatenate([completed_values, [_sub_y]], axis=0)
+
+        # No sub-fidelity specification
+        if gp_model_name is None:
+            gp_model_name = 'MultiTaskGP'
+
+        if gp_model_name == 'SingleTaskMultiFidelityGP':
+            bounds = numpy.concatenate(
+                [[[0, 1]], bounds], axis=0
+            )
 
         if self._constraints_func is not None:
             if con is None:
@@ -1737,15 +1554,15 @@ class PoFBoTorchSampler(BaseSampler):
                     "constraints. Constraints passed to `candidates_func` will contain NaN."
                 )
 
-        values = torch.from_numpy(values).to(self._device)
-        params = torch.from_numpy(params).to(self._device)
-        if con is not None:
-            con = torch.from_numpy(con).to(self._device)
-        bounds = torch.from_numpy(bounds).to(self._device)
+        completed_values = torch.from_numpy(completed_values).to(self._device)
+        completed_params = torch.from_numpy(completed_params).to(self._device)
 
         if con is not None:
+            con = torch.from_numpy(con).to(self._device)
             if con.dim() == 1:
                 con.unsqueeze_(-1)
+
+        bounds = torch.from_numpy(bounds).to(self._device)
         bounds.transpose_(0, 1)
 
         if self._candidates_func is None:
@@ -1755,11 +1572,22 @@ class PoFBoTorchSampler(BaseSampler):
                 consider_running_trials=self._consider_running_trials,
             )
 
-        completed_values = values[:n_completed_trials]
-        completed_params = params[:n_completed_trials]
         if self._consider_running_trials:
-            running_params = params[n_completed_trials:]
-            running_params = running_params[~torch.isnan(running_params).any(dim=1)]
+            n_running_trials = len(running_trials)
+            running_params: numpy.ndarray | torch.Tensor = numpy.empty(
+                (n_running_trials, 1 + trans.bounds.shape[0]), dtype=numpy.float64
+            )
+            running_params[:, 0] = 0
+
+            for trial_idx, trial in enumerate(running_trials):
+                running_params[trial_idx, 1:] = trans.transform(trial.params)
+                assert len(study.directions) == len(trial.values)
+
+                if all(p in trial.params for p in search_space):
+                    running_params[trial_idx] = trans.transform(trial.params)
+                else:
+                    running_params[trial_idx] = numpy.nan
+
         else:
             running_params = None
 
@@ -1773,8 +1601,11 @@ class PoFBoTorchSampler(BaseSampler):
 
         with manual_seed(self._seed):
 
-            # ===== model_c 構築 =====
-            model_c = self.process_constraint(study, search_space)
+            model_c = self.process_constraint(
+                study,
+                search_space,
+                gp_model_name,
+            )
 
             # ===== NonlinearConstraints の実装に必要なクラスを渡す =====
             # PyFemtet 専用関数が前提になっているからこの実装をせざるを得ない。
@@ -1801,7 +1632,10 @@ class PoFBoTorchSampler(BaseSampler):
                 study,
                 _opt,
                 self.pof_config,
+                gp_model_name,
             )
+            if gp_model_name == 'SingleTaskMultiFidelityGP':
+                bounds = bounds[:, 1:]
             if self._seed is not None:
                 self._seed += 1
 
@@ -1825,140 +1659,3 @@ class PoFBoTorchSampler(BaseSampler):
             )
 
         return trans.untransform(candidates.cpu().numpy())
-
-    def sample_independent(
-            self,
-            study: Study,
-            trial: FrozenTrial,
-            param_name: str,
-            param_distribution: BaseDistribution,
-    ) -> Any:
-        return self._independent_sampler.sample_independent(
-            study, trial, param_name, param_distribution
-        )
-
-    def reseed_rng(self) -> None:
-        self._independent_sampler.reseed_rng()
-        if self._seed is not None:
-            self._seed = numpy.random.RandomState().randint(numpy.iinfo(numpy.int32).max)
-
-    def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        self._independent_sampler.before_trial(study, trial)
-
-    def after_trial(
-            self,
-            study: Study,
-            trial: FrozenTrial,
-            state: TrialState,
-            values: Sequence[float] | None,
-    ) -> None:
-        if self._constraints_func is not None:
-            _process_constraints_after_trial(self._constraints_func, study, trial, state)
-        self._independent_sampler.after_trial(study, trial, state, values)
-
-    def process_constraint(self, study, search_space, gp_model_name=None):
-
-        # ===== argument processing =====
-        add_feature_dim = False
-        if gp_model_name is not None:
-            if gp_model_name == 'SingleTaskMultiFidelityGP':
-                add_feature_dim = True
-
-
-        # ===== trials の整理 =====
-
-        # 正常に終了した trial
-        completed_trials = study.get_trials(deepcopy=False, states=(TrialState.COMPLETE,))
-
-        # strict constraint 違反またはモデル破綻で prune された trial
-        pruned_trials = study.get_trials(deepcopy=False, states=(TrialState.PRUNED,))
-
-        # solve_condition で skip された trial or 何らかの理由で失敗した trial
-        # multi-fidelity など
-        failed_trials = study.get_trials(deepcopy=False, states=(TrialState.FAIL,))
-
-        main_trials = completed_trials + pruned_trials
-        all_trials = main_trials + failed_trials
-
-
-        # ===== bounds, train_x(=params), train_y(=feasibility) の作成 =====
-        trans = _SearchSpaceTransform(search_space)
-        bounds: numpy.ndarray = trans.bounds
-        if add_feature_dim:
-            bounds: numpy.ndarray = numpy.concatenate([[[0, 1]], bounds], axis=0)
-        params: numpy.ndarray = numpy.empty((len(main_trials), trans.bounds.shape[0]), dtype=numpy.float64)
-        values: numpy.ndarray = numpy.empty((len(main_trials), 1), dtype=numpy.float64)
-
-        # 元実装と違い、このモデルを基に次の点を提案する
-        # わけではないので running は考えなくてよい
-        for trial_idx, trial in enumerate(main_trials):
-
-            # for train_x
-            if add_feature_dim:
-                params[trial_idx, 0] = 1.
-                params[trial_idx, 1:] = trans.transform(trial.params)
-
-            else:
-                params[trial_idx] = trans.transform(trial.params)
-
-            # If COMPLETE, check explicit constraint violation.
-            if trial.state == TrialState.COMPLETE:
-
-                # Assume containing explicit constraints
-                if 'constraints' in trial.user_attrs.keys():
-                    cns = trial.user_attrs['constraints']
-
-                    # No explicit constraints
-                    if cns is None:
-                        values[trial_idx, 0] = 1.  # feasible (or should RuntimeError)
-
-                    # Has explicit constraints
-                    else:
-
-                        # No violation
-                        if numpy.array(cns).max() <= 0:
-                            values[trial_idx, 0] = 1.  # feasible
-
-                        # Violation exists (both soft or hard constraint)
-                        else:
-                            values[trial_idx, 0] = 0.  # infeasible
-
-                # No explicit constraints
-                else:
-                    values[trial_idx, 0] = 1.  # feasible
-
-            # Hidden constraint violation
-            elif trial.state == TrialState.PRUNED:
-                values[trial_idx, 0] = 0.  # infeasible
-
-
-            else:
-                assert False, "trial.state must be TrialState.COMPLETE or TrialState.PRUNED."
-
-        bounds: torch.Tensor = torch.from_numpy(bounds).to(self._device)
-        params: torch.Tensor = torch.from_numpy(params).to(self._device)  # 未正規化, n_points x n_parameters Tensor
-        values: torch.Tensor = torch.from_numpy(values).to(self._device)  # 0 or 1, n_points x 1 Tensor
-        bounds.transpose_(0, 1)  # 未正規化, 2 x n_parameters Tensor
-
-        # ----- model_c を作る -----
-        # train_x, train_y は元実装にあわせないと
-        # ACQF.forward(X) の引数と一致しなくなる。
-
-        # with manual_seed(self._seed):
-        train_x_c = normalize(params, bounds=bounds)
-        train_y_c = values
-        model_c = SingleTaskGP(
-            train_x_c,  # n_data x n_prm
-            train_y_c,  # n_data x n_obj
-            # no train_yvar_c
-            outcome_transform=Standardize(
-                m=train_y_c.shape[-1],  # The output dimension.
-            )
-        )
-        mll_c = ExactMarginalLogLikelihood(
-            model_c.likelihood,
-            model_c
-        )
-        fit_gpytorch_mll(mll_c)
-
-        return model_c

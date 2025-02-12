@@ -139,6 +139,7 @@ class FEMOpt:
         self.monitor_host_record = None
         self._hv_reference = None
         self._extra_space_dir = None
+        self.sub_fidelity_models: 'SubFidelityModels' = SubFidelityModels()
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
     def __getstate__(self):
@@ -538,6 +539,12 @@ class FEMOpt:
 
         self.opt.constraints[name] = Constraint(fun, name, lower_bound, upper_bound, strict, args, kwargs, using_fem)
 
+    def add_sub_fidelity(
+            self,
+            sub_fidelity_model: 'SubFidelity',
+    ):
+        self.sub_fidelity_models.append(sub_fidelity_model)
+
     def get_parameter(self, format='dict'):
         """Deprecated method.
 
@@ -571,6 +578,30 @@ class FEMOpt:
             host=host,
             port=port
         )
+
+    def _read_problem_from_interface(self):
+        # Interface から設定を読む場合の処理
+        # 設定ファイルから設定を読む場合は最適化問題が
+        # この時点で不定なので actor 等の設定をする前に
+        # ここで確定する必要がある。
+        if hasattr(self.fem, '_load_problem_from_me'):
+            if self.fem._load_problem_from_me:
+                self.fem.load_parameter(self.opt)
+                self.fem.load_objective(self.opt)
+                self.fem.load_constraint(self.opt)
+
+        # Femtet のパラメトリック解析結果出力を
+        # 使う場合の設定
+        if hasattr(self.fem, 'parametric_output_indexes_use_as_objective'):
+            if self.fem.parametric_output_indexes_use_as_objective is not None:
+                from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
+                indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
+                directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
+                add_parametric_results_as_objectives(
+                    self,
+                    indexes,
+                    directions,
+                )
 
     def optimize(
             self,
@@ -629,16 +660,9 @@ class FEMOpt:
         """
 
         # ===== opt の設定 =====
-
-        # Interface から設定を読む場合の処理
-        # 設定ファイルから設定を読む場合は最適化問題が
-        # この時点で不定なので actor 等の設定をする前に
-        # ここで確定する必要がある。
-        if hasattr(self.fem, '_load_problem_from_me'):
-            if self.fem._load_problem_from_me:
-                self.fem.load_parameter(self.opt)
-                self.fem.load_objective(self.opt)
-                self.fem.load_constraint(self.opt)
+        self._read_problem_from_interface()
+        self.sub_fidelity_models.read_problem_from_interface()
+        self.sub_fidelity_models.validate(self.opt)
 
         # resolve expression dependencies
         self.opt.variables.resolve()
@@ -678,11 +702,11 @@ class FEMOpt:
             self.opt.method_checker.check_incomplete_bounds()
 
 
-        # ===== fem の設定 ==--=
-
+        # ===== fem の設定 =====
         # Femtet 特有の処理
         extra_data = dict()
         if isinstance(self.fem, FemtetInterface):
+            self.fem: FemtetInterface
 
             # 結果 csv に記載する femprj に関する情報の作成
             extra_data.update(
@@ -691,17 +715,6 @@ class FEMOpt:
                     model_name=self.fem.model_name
                 )
             )
-
-            # Femtet の parametric 設定を目的関数に用いるかどうか
-            if self.fem.parametric_output_indexes_use_as_objective is not None:
-                from pyfemtet.opt.interface._femtet_parametric import add_parametric_results_as_objectives
-                indexes = list(self.fem.parametric_output_indexes_use_as_objective.keys())
-                directions = list(self.fem.parametric_output_indexes_use_as_objective.values())
-                add_parametric_results_as_objectives(
-                    self,
-                    indexes,
-                    directions,
-                )
 
             logger.info('Femtet loaded successfully.')
 
@@ -824,8 +837,10 @@ class FEMOpt:
             # ===== setup fem and opt before parallelization =====
             # fem
             self.fem._setup_before_parallel(_client)
+            self.sub_fidelity_models.setup_before_parallel(_client)
 
             # opt
+            self.sub_fidelity_models.prepare_restoring_fem()
             self.opt.fem_class = type(self.fem)
             self.opt.fem_kwargs = self.fem.kwargs
             self.opt.entire_status = self.status
@@ -839,6 +854,8 @@ class FEMOpt:
             # これをそのまま使うので buff に退避
             buff = self.opt.fem
             del self.opt.fem
+
+            # FIXME: ここで sub_fidelity の中身の fem への参照を一旦消す
 
             # クラスターでの計算開始
             self.status.set(OptimizationStatus.LAUNCHING_FEM)
@@ -865,6 +882,7 @@ class FEMOpt:
 
                 # set_fem
                 self.opt.fem = self.fem
+                self.opt.sub_fidelity_models = self.sub_fidelity_models
 
                 # fem の _setup_after_parallel はこの場合も呼ばれる
                 t_main = Thread(
@@ -984,3 +1002,141 @@ def _start_monitor_server(
         host_record,
     )
     return 'Exit monitor server process gracefully'
+
+
+class SubFidelityModels:
+
+    sub_fidelity_models: list['SubFidelity'] = []
+    model = 'MultiTaskGP'
+
+    def __len__(self):
+        return len(self.sub_fidelity_models)
+
+    def reindex_fidelity(self):
+        """Re-index fidelity to pass **MultiTaskGP** or **SingleTaskMultiFidelityGP**"""
+        if self.model == 'MultiTaskGP':
+            for i, sub in enumerate(self.sub_fidelity_models):
+                sub.fidelity = f'sub-fidelity-{i}'
+
+        elif self.model == 'SingleTaskMultiFidelityGP':
+            pass
+
+        else:
+            raise NotImplementedError
+
+    def append(self, sub_fidelity_model: 'SubFidelity'):
+        self.sub_fidelity_models.append(sub_fidelity_model)
+
+    def validate(self, main_opt: 'AbstractOptimizer'):
+
+        fidelity_list = []
+        for sub in self.sub_fidelity_models:
+            sub.validate(main_opt)
+            fidelity_list.append(sub.fidelity)
+
+        # If all fidelity is None, use MultiTaskGP.
+        # Else, use SingleTaskMultiFidelityGP.
+        if all([f is None for f in fidelity_list]):
+            self.model = 'MultiTaskGP'
+
+        elif all([f is not None for f in fidelity_list]):
+            self.model = 'SingleTaskMultiFidelityGP'
+
+        else:
+            raise ValueError("All fidelity must be None or float. "
+                             "Do not mix them.")
+        self.reindex_fidelity()
+
+    def read_problem_from_interface(self):
+        for sub in self.sub_fidelity_models:
+            sub.read_problem_from_interface()
+
+    def setup_before_parallel(self, *args, **kwargs):
+        for sub in self.sub_fidelity_models:
+            sub.fem._setup_before_parallel(*args, **kwargs)
+
+    def setup_after_parallel(self, *args, **kwargs):
+        for sub in self.sub_fidelity_models:
+            sub.fem._setup_after_parallel(*args, **kwargs)
+
+    def update(self, x, *should_solve_args):
+        for sub in self.sub_fidelity_models:
+            if sub.opt.should_calc(*should_solve_args):
+                sub.fem.update(x)
+
+    def calc_objectives(self, *should_solve_args) -> dict[int | float | str, list[float]]:
+        out = dict()
+        for sub in self.sub_fidelity_models:
+            if sub.opt.should_calc(*should_solve_args):
+                out.update(
+                    {
+                        sub.fidelity: sub.calc_objectives()
+                    }
+                )
+        return out
+
+    def _reconstruct_fem(self, *args, **kwargs):
+        for sub in self.sub_fidelity_models:
+            sub.opt._reconstruct_fem(*args, **kwargs)
+
+    def prepare_restoring_fem(self):
+        for sub in self.sub_fidelity_models:
+            sub.prepare_restoring_fem()
+
+    def get_internal_objectives(self, sub_y_dict: dict[int | float | str, list[float]]) -> dict[int | float | str, list[float]]:
+        out = {}
+        for fid, sub_y_values in sub_y_dict.items():
+            for sub in self.sub_fidelity_models:
+                if sub.fidelity == fid:
+                    out.update({fid: sub.get_internal_objectives(sub_y_values)})
+                else:
+                    raise RuntimeError('Invalid fidelity index is contained in sub_y_dict.')
+        return out
+
+    # def picklablize(self):
+    #     for sub in self.sub_fidelity_models:
+    #         sub.picklablize()
+
+
+class SubFidelity(FEMOpt):
+
+    def add_objective(self, fun: callable or None = None, name: str or None = None,
+                      direction: str or float = None, args: tuple or None = None, kwargs: dict or None = None):
+        if direction is not None:
+            logger.warning('Note that direction is not ignored in SubFidelity.add_objective.')
+        direction = 'minimize'
+        return super().add_objective(fun, name, direction, args, kwargs)
+
+    # noinspection PyMissingConstructor
+    def __init__(self, fem: FEMInterface, fidelity: float | None = None):
+
+        from pyfemtet._warning import show_experimental_warning
+        show_experimental_warning('SubFidelity')
+
+        if isinstance(fidelity, float):
+            assert 0 < fidelity < 1, 'Fidelity must be 0 <= fidelity < 1.'
+
+        self.fem: FEMInterface = fem
+        self.opt: AbstractOptimizer = AbstractOptimizer()
+        self.fidelity: float | None = fidelity
+
+    def validate(self, main_opt: 'AbstractOptimizer'):
+
+        assert len(main_opt.objectives) == len(
+            self.opt.objectives), 'The number of objectives between main model and sub-fidelity model must be same.'
+
+        for sub_obj_name in self.opt.objectives.keys():
+            assert sub_obj_name in main_opt.objectives.keys(), 'The function must have a corresponding function in mein femopt.'
+
+    def calc_objectives(self) -> list[float]:
+        return [obj.calc(self.fem) for obj in self.opt.objectives.values()]
+
+    def read_problem_from_interface(self):
+        self._read_problem_from_interface()
+
+    def prepare_restoring_fem(self):
+        self.opt.fem_class = type(self.fem)
+        self.opt.fem_kwargs = self.fem.kwargs
+
+    def get_internal_objectives(self, y_values) -> list[float]:
+        return [obj.convert(y) for obj, y in zip(self.opt.objectives.values(), y_values)]

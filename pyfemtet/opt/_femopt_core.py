@@ -11,6 +11,7 @@ import csv
 import ctypes
 from packaging import version
 import platform
+import enum
 
 # 3rd-party
 import numpy as np
@@ -516,6 +517,13 @@ class ObjectivesFunc:
         return f
 
 
+class OptTrialState(enum.Enum):
+    succeeded = 'Succeeded'
+    hidden_constraint_violation = 'Hidden Constraint Violation'
+    strict_constraint_violation = 'Strict Constraint Violation'
+    skipped = 'Skipped'
+
+
 class History:
     """Class for managing the history of optimization results.
 
@@ -634,7 +642,12 @@ class History:
 
         self.set_df(df)
 
-    def filter_valid(self, df_, keep_trial_num=False):
+    def get_filtered_df(self, states: list[OptTrialState]) -> pd.DataFrame:
+        df = self.get_df()
+        indices = [s in set([state.value for state in states]) for s in df['state']]
+        return df[indices]
+
+    def filter_valid(self, df_, keep_trial_num=False, include_skip=False):
         buff = df_[self.obj_names].notna()
         idx = buff.prod(axis=1).astype(bool)
         filtered_df = df_[idx]
@@ -642,7 +655,7 @@ class History:
             filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1
         return filtered_df
 
-    def get_df(self, valid_only=False) -> pd.DataFrame:
+    def get_df(self, valid_only=False, include_skip=False) -> pd.DataFrame:
         if self.__scheduler_address is None:
             if valid_only:
                 return self.filter_valid(self._df)
@@ -653,11 +666,15 @@ class History:
             try:
                 with Lock('access-df'):
                     client_: 'Client' = get_client(self.__scheduler_address)
+
                     if 'df' in client_.list_datasets():
+                        df = client_.get_dataset('df')
+
                         if valid_only:
-                            return self.filter_valid(client_.get_dataset('df'))
-                        else:
-                            return client_.get_dataset('df')
+                            df = self.filter_valid(df, include_skip)
+
+                        return df
+
                     else:
                         logger.debug('Access df of History before it is initialized.')
                         return pd.DataFrame()
@@ -723,7 +740,11 @@ class History:
         meta_columns.append('')
         columns.append('message')
         meta_columns.append('')
-        columns.append('time')
+        columns.append('state')
+        meta_columns.append('')
+        columns.append('time_start')
+        meta_columns.append('')
+        columns.append('time_end')
         meta_columns.append('')
 
         return columns, meta_columns
@@ -744,6 +765,9 @@ class History:
             obj_values,
             cns_values,
             message,
+            state,
+            time_start,
+            time_end,
             postprocess_func,
             postprocess_args,
     ):
@@ -758,6 +782,9 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
+            state (str): The state messages.
+            time_start (datetime.datetime | None): The time to start updating.
+            time_end (datetime.datetime | None): The time to record this.
             postprocess_func (Callable): fem method to call after solving. i.e. save result file. Must take trial(int) for 1st argument.
             postprocess_args (dict): arguments for `postprocess_func`. i.e. create binary data of result file in the worker process.
         """
@@ -793,7 +820,9 @@ class History:
         # the others
         row.append(-1.)  # dummy hypervolume
         row.append(message)  # message
-        row.append(datetime.datetime.now())  # time
+        row.append(state)  # state
+        row.append(time_start)  # time_start
+        row.append(time_end)  # time_complete
 
         with Lock('calc-history'):
 
