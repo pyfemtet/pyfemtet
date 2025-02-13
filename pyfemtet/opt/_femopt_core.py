@@ -517,6 +517,73 @@ class ObjectivesFunc:
         return f
 
 
+class _HistoryColumnProcessor:
+
+    def __init__(
+            self,
+            history,
+            prm_names,
+            obj_names,
+            cns_names,
+            sub_fidelity_names,
+    ):
+        self.history: 'History' = history
+        self.prm_names: list[str] | None = prm_names
+        self.obj_names: list[str] | None = obj_names
+        self.cns_names: list[str] | None = cns_names
+        self.sub_fidelity_names: list[str] | None = sub_fidelity_names
+
+    @staticmethod
+    def extract_prm_names(columns, meta_columns):
+        return [c for c, m in zip(columns, meta_columns) if m == 'prm']
+
+    @staticmethod
+    def extract_obj_names(columns, meta_columns):
+        return [c for c, m in zip(columns, meta_columns) if m == 'obj']
+
+    @staticmethod
+    def extract_cns_names(columns, meta_columns):
+        return [c for c, m in zip(columns, meta_columns) if m == 'cns']
+
+    @staticmethod
+    def extract_fidelity_names(columns, meta_columns):
+        out = []
+        for c, m in zip(columns, meta_columns):
+            if ('fidelity_' in m) and ('_obj0' in m):  # 0 only
+                name = c.split(' of ')[-1]
+                out.append(name)
+        return out
+
+    @staticmethod
+    def extract_fidelity_obj_columns(columns, meta_columns, sub_fidelity_name):
+        out = []
+        for c, m in zip(columns, meta_columns):
+            if ('fidelity_' in m) and ('_obj' in m):  # all
+                name = c.split(' of ')[-1]
+                if name == sub_fidelity_name:  # given name only
+                    out.append(name)
+        return out
+
+    def parse_csv(self, path) -> tuple[
+        pd.DataFrame,
+        list,  # columns
+        list,  # meta_columns
+    ]:
+
+        # df を読み込む
+        df = pd.read_csv(path, encoding=self.history.ENCODING, header=self.history.HEADER_ROW)
+
+        # meta_columns を読み込む
+        with open(path, mode='r', encoding=self.history.ENCODING, newline='\n') as f:
+            reader = csv.reader(f, delimiter=',')
+            meta_columns = reader.__next__()
+
+        # 最適化問題を読み込む
+        columns = df.columns
+
+        return df, columns, meta_columns
+
+
 class History:
     """Class for managing the history of optimization results.
 
@@ -572,6 +639,13 @@ class History:
         self.extra_data = dict()
         self.meta_columns = None
         self.__scheduler_address = client.scheduler.address if client is not None else None
+        self._column_mgr = _HistoryColumnProcessor(
+            self,
+            self.prm_names,
+            self.obj_names,
+            self.cns_names,
+            self.sub_fidelity_names,
+        )
 
         # 最適化実行中かどうか
         self.is_processing = client is not None
@@ -612,22 +686,25 @@ class History:
             # csv の読み込み
             self.load()
 
+    def get_fidelity_obj_columns(self, sub_fidelity_name):
+        columns, meta_columns = self.create_df_columns()
+        return self._column_mgr.extract_fidelity_obj_columns(
+            columns,
+            meta_columns,
+            sub_fidelity_name
+        )
+
     def load(self):
         """Load existing result csv."""
 
         # df を読み込む
-        df = pd.read_csv(self.path, encoding=self.ENCODING, header=self.HEADER_ROW)
-
-        # meta_columns を読み込む
-        with open(self.path, mode='r', encoding=self.ENCODING, newline='\n') as f:
-            reader = csv.reader(f, delimiter=',')
-            self.meta_columns = reader.__next__()
+        df, old_columns, old_meta_columns = self._column_mgr.parse_csv(self.path)
 
         # 最適化問題を読み込む
-        columns = df.columns
-        prm_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'prm']
-        obj_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'obj']
-        cns_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'cns']
+        prm_names = self._column_mgr.extract_prm_names(old_columns, old_meta_columns)
+        obj_names = self._column_mgr.extract_obj_names(old_columns, old_meta_columns)
+        cns_names = self._column_mgr.extract_cns_names(old_columns, old_meta_columns)
+        sub_fidelity_names = self._column_mgr.extract_fidelity_names(old_columns, old_meta_columns)
 
         # is_restart の場合、読み込んだ names と引数の names が一致するか確認しておく
         if self.is_restart:
@@ -640,6 +717,9 @@ class History:
             self.prm_names = prm_names
             self.obj_names = obj_names
             self.cns_names = cns_names
+            self.sub_fidelity_names = sub_fidelity_names
+
+        self.meta_columns = old_meta_columns
 
         self.set_df(df)
 
@@ -740,9 +820,9 @@ class History:
         # add n_sub_fidelity * n_obj columns
         if self.sub_fidelity_names is not None:
             for i, sub_fidelity_name in enumerate(self.sub_fidelity_names):
-                for obj_name in self.obj_names:
+                for j, obj_name in enumerate(self.obj_names):
                     columns.append(f'{obj_name} of {sub_fidelity_name}')
-                    meta_columns.append(f'fidelity{i}_obj')
+                    meta_columns.append(f'fidelity{i}_obj{j}')
 
         # the others
         columns.append('hypervolume')
@@ -766,7 +846,7 @@ class History:
     def is_hidden_infeasible_result(self, y):
         return np.all(np.isnan(y))
 
-    def record(
+    def _record(
             self,
             parameters,
             objectives,

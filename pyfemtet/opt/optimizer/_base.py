@@ -242,7 +242,7 @@ class AbstractOptimizer(ABC):
             format='df',
             filter_parameter=True,
         )
-        self.history.record(
+        self.history._record(
             df_to_opt,
             self.objectives,
             self.constraints,
@@ -273,7 +273,7 @@ class AbstractOptimizer(ABC):
             format='df',
             filter_parameter=True,
         )
-        self.history.record(
+        self.history._record(
             df_to_opt,
             self.objectives,
             self.constraints,
