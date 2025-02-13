@@ -15,7 +15,6 @@ from optuna.study import MaxTrialsCallback, Study
 from pyfemtet.opt._femopt_core import OptimizationStatus, generate_lhs
 from pyfemtet.opt.optimizer import AbstractOptimizer, logger, OptimizationMethodChecker
 from pyfemtet.core import MeshError, ModelError, SolveError
-from pyfemtet.opt._femopt_core import OptTrialState
 from pyfemtet._message import Msg
 
 # filter warnings
@@ -141,7 +140,7 @@ class OptunaOptimizer(AbstractOptimizer):
                 logger.info(self.variables.get_variables('dict', filter_parameter=True))
                 self._retry_counter += 1
                 self.message = f'Failed to calculate objectives because of the constraint violation: {cns.name}'
-                self.record_infeasible(x, OptTrialState.strict_constraint_violation.value)
+                self.record_infeasible(x, self.history.OptTrialState.strict_constraint_violation.value)
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
@@ -149,12 +148,18 @@ class OptunaOptimizer(AbstractOptimizer):
             _1, _y, c, _2, _sub_y = self.f(x)  # f の中で info は出している
 
             if _sub_y is not None:
-                trial.set_user_attr('sub-fidelity-values', _sub_y)
+                _sub_y: dict[str, tuple['Fidelity', list[float]]]
+                __sub_y = {
+                    fidelity: sub_fidelity_obj_values
+                    for fidelity, sub_fidelity_obj_values
+                    in _sub_y.values()
+                }
+                trial.set_user_attr('sub-fidelity-values', __sub_y)
 
             if _y is None:
                 logger.info('Solving main fidelity model skipped by user set condition.')
                 self.message = 'Solve skipped by user set condition.'
-                self.record_infeasible(x, OptTrialState.skipped.value)
+                self.record_infeasible(x, self.history.OptTrialState.skipped.value)
                 return None
 
             if _sub_y is None and _y is None:
@@ -179,7 +184,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
             self._retry_counter += 1
             self.message = f'Failed to calculate objectives because of the parameter broke the FEM model.'
-            self.record_infeasible(x, OptTrialState.hidden_constraint_violation.value)
+            self.record_infeasible(x, self.history.OptTrialState.hidden_constraint_violation.value)
             raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 拘束 attr の更新

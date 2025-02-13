@@ -517,13 +517,6 @@ class ObjectivesFunc:
         return f
 
 
-class OptTrialState(enum.Enum):
-    succeeded = 'Succeeded'
-    hidden_constraint_violation = 'Hidden Constraint Violation'
-    strict_constraint_violation = 'Strict Constraint Violation'
-    skipped = 'Skipped'
-
-
 class History:
     """Class for managing the history of optimization results.
 
@@ -551,12 +544,19 @@ class History:
     is_processing = False
     _df = None  # in case without client
 
+    class OptTrialState(enum.Enum):
+        succeeded = 'Succeeded'
+        hidden_constraint_violation = 'Hidden Constraint Violation'
+        strict_constraint_violation = 'Strict Constraint Violation'
+        skipped = 'Skipped'
+
     def __init__(
             self,
             history_path,
             prm_names=None,
             obj_names=None,
             cns_names=None,
+            sub_fidelity_names = None,
             client=None,
             hv_reference=None,
     ):
@@ -568,6 +568,7 @@ class History:
         self.prm_names = prm_names
         self.obj_names = obj_names
         self.cns_names = cns_names
+        self.sub_fidelity_names = sub_fidelity_names
         self.extra_data = dict()
         self.meta_columns = None
         self.__scheduler_address = client.scheduler.address if client is not None else None
@@ -735,6 +736,14 @@ class History:
         columns.append('feasible')
         meta_columns.append('')
 
+        # sub-fidelity relative
+        # add n_sub_fidelity * n_obj columns
+        if self.sub_fidelity_names is not None:
+            for i, sub_fidelity_name in enumerate(self.sub_fidelity_names):
+                for obj_name in self.obj_names:
+                    columns.append(f'{obj_name} of {sub_fidelity_name}')
+                    meta_columns.append(f'fidelity{i}_obj')
+
         # the others
         columns.append('hypervolume')
         meta_columns.append('')
@@ -764,6 +773,7 @@ class History:
             constraints,
             obj_values,
             cns_values,
+            sub_fidelity_obj_values: dict[str, tuple['Fidelity', list[float]]],
             message,
             state,
             time_start,
@@ -816,6 +826,10 @@ class History:
 
         # feasibility
         row.append(all(feasible_list) and not self.is_hidden_infeasible_result(obj_values))
+
+        # sub-fidelity
+        for _, (_, values) in sub_fidelity_obj_values.items():
+            row.extend(values)
 
         # the others
         row.append(-1.)  # dummy hypervolume

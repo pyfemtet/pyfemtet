@@ -7,7 +7,6 @@ from pyfemtet.opt import FEMOpt, NoFEM, OptunaOptimizer, History
 from pyfemtet.opt.optimizer import PoFBoTorchSampler
 
 from pyfemtet.opt._femopt import SubFidelity
-from pyfemtet.opt._femopt_core import OptTrialState
 from pyfemtet.opt.optimizer._optuna._multi_fidelity_sampler import MultiFidelityPoFBoTorchSampler
 
 import pytest
@@ -35,8 +34,8 @@ def sub_model(opt_: OptunaOptimizer):
 
 
 def should_solve_main(x: np.ndarray, history: History):
-    n_main_solved = len(history.get_filtered_df([OptTrialState.succeeded]))
-    n_all_solved = len(history.get_filtered_df([OptTrialState.succeeded, OptTrialState.skipped]))
+    n_main_solved = len(history.get_filtered_df([history.OptTrialState.succeeded]))
+    n_all_solved = len(history.get_filtered_df([history.OptTrialState.succeeded, history.OptTrialState.skipped]))
     if (n_all_solved > N_STARTUP_TRIALS) and (n_all_solved % DIM * 2 == 0):
         return True
     else:
@@ -57,7 +56,11 @@ if __name__ == '__main__':
 
     obj_name = 'sun of 1 + cos(x)'
 
-    femopt = FEMOpt(fem, opt)
+    femopt = FEMOpt(
+        fem,
+        opt,
+        history_path='multi-fid-history.csv'
+    )
     for i in range(DIM):
         femopt.add_parameter(f'x{i}', 0.5 * pi, 0, 2 * pi)
     femopt.add_objective(main_model, obj_name, args=(opt,), direction='minimize')

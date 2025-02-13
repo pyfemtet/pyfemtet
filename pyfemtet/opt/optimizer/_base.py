@@ -12,7 +12,7 @@ import numpy as np
 
 # pyfemtet relative
 from pyfemtet.opt.interface import FEMInterface
-from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint, OptTrialState
+from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
 from pyfemtet._message import Msg
 from pyfemtet.opt.optimizer.parameter import ExpressionEvaluator
 
@@ -197,7 +197,8 @@ class AbstractOptimizer(ABC):
         )
 
         # default values
-        y, _y, c = None, None, None
+        y, c = self.history.generate_hidden_infeasible_result()
+        _y = y
 
         # shouldn't calc であっても record_infeasible で
         # この値を使うので if の前に時間計測開始
@@ -220,36 +221,41 @@ class AbstractOptimizer(ABC):
                 raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
 
             else:
-                # register to history
-                df_to_opt = self.variables.get_variables(
-                    format='df',
-                    filter_parameter=True,
-                )
-                self.history.record(
-                    df_to_opt,
-                    self.objectives,
-                    self.constraints,
-                    y,
-                    c,
-                    self.message,
-                    state=OptTrialState.succeeded.value,
-                    time_start=self.current_time_start,
-                    time_end=datetime.datetime.now(),
-                    postprocess_func=self.fem._postprocess_func,
-                    postprocess_args=self.fem._create_postprocess_args(),
-                )
+                pass
 
         # sub-fidelity FEM の更新
         try:
             self.sub_fidelity_models.update(df_to_fem, x, self.history)
-            sub_fid_y = self.sub_fidelity_models.calc_objectives(x, self.history)
-            sub_fid_y_internal = self.sub_fidelity_models.get_internal_objectives(sub_fid_y)
+            sub_fid_y: dict[str, tuple['Fidelity', list[float]]] = self.sub_fidelity_models.calc_objectives(x, self.history)
+            sub_fid_y_internal: dict[str, tuple['Fidelity', list[float]]] = self.sub_fidelity_models.get_internal_objectives(sub_fid_y)
 
         except Exception as e:
             logger.warning(f'{type(e).__name__}: {" ".join(e.args)}')
             logger.warning(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
             logger.warning(x)
-            raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
+            # raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
+            sub_fid_y = {}
+            sub_fid_y_internal = {}
+
+        # register to history
+        df_to_opt = self.variables.get_variables(
+            format='df',
+            filter_parameter=True,
+        )
+        self.history.record(
+            df_to_opt,
+            self.objectives,
+            self.constraints,
+            y,
+            c,
+            sub_fid_y,
+            self.message,
+            state=self.history.OptTrialState.succeeded.value,
+            time_start=self.current_time_start,
+            time_end=datetime.datetime.now(),
+            postprocess_func=self.fem._postprocess_func,
+            postprocess_args=self.fem._create_postprocess_args(),
+        )
 
         return (
             np.array(y) if y is not None else y,
@@ -273,6 +279,7 @@ class AbstractOptimizer(ABC):
             self.constraints,
             y,
             c,
+            {},
             self.message,
             state,
             self.current_time_start,

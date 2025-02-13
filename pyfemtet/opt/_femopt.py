@@ -543,7 +543,7 @@ class FEMOpt:
             self,
             sub_fidelity_model: 'SubFidelity',
     ):
-        self.sub_fidelity_models.append(sub_fidelity_model)
+        self.sub_fidelity_models.add(sub_fidelity_model)
 
     def get_parameter(self, format='dict'):
         """Deprecated method.
@@ -802,6 +802,7 @@ class FEMOpt:
                 self.opt.variables.get_parameter_names(),
                 list(self.opt.objectives.keys()),
                 list(self.opt.constraints.keys()),
+                list(self.sub_fidelity_models.sub_fidelity_models_dict.keys()),
                 _client,
                 self._hv_reference
             )
@@ -1004,18 +1005,21 @@ def _start_monitor_server(
     return 'Exit monitor server process gracefully'
 
 
+Fidelity = float | int | str
+
+
 class SubFidelityModels:
 
-    sub_fidelity_models: list['SubFidelity'] = []
+    sub_fidelity_models_dict: dict[str, 'SubFidelity'] = {}
     model = 'MultiTaskGP'
 
     def __len__(self):
-        return len(self.sub_fidelity_models)
+        return len(self.sub_fidelity_models_dict)
 
     def reindex_fidelity(self):
         """Re-index fidelity to pass **MultiTaskGP** or **SingleTaskMultiFidelityGP**"""
         if self.model == 'MultiTaskGP':
-            for i, sub in enumerate(self.sub_fidelity_models):
+            for i, sub in enumerate(self.sub_fidelity_models_dict.values()):
                 sub.fidelity = f'sub-fidelity-{i}'
 
         elif self.model == 'SingleTaskMultiFidelityGP':
@@ -1024,13 +1028,15 @@ class SubFidelityModels:
         else:
             raise NotImplementedError
 
-    def append(self, sub_fidelity_model: 'SubFidelity'):
-        self.sub_fidelity_models.append(sub_fidelity_model)
+    def add(self, sub_fidelity_model: 'SubFidelity'):
+        if sub_fidelity_model.name is None:
+            sub_fidelity_model.name = f'fidelity {len(self) + 1}'
+        self.sub_fidelity_models_dict.update({sub_fidelity_model.name: sub_fidelity_model})
 
     def validate(self, main_opt: 'AbstractOptimizer'):
 
         fidelity_list = []
-        for sub in self.sub_fidelity_models:
+        for sub in self.sub_fidelity_models_dict.values():
             sub.validate(main_opt)
             fidelity_list.append(sub.fidelity)
 
@@ -1048,67 +1054,59 @@ class SubFidelityModels:
         self.reindex_fidelity()
 
     def read_problem_from_interface(self):
-        for sub in self.sub_fidelity_models:
+        for sub in self.sub_fidelity_models_dict.values():
             sub.read_problem_from_interface()
 
     def setup_before_parallel(self, *args, **kwargs):
-        for sub in self.sub_fidelity_models:
+        for sub in self.sub_fidelity_models_dict.values():
             sub.fem._setup_before_parallel(*args, **kwargs)
 
     def setup_after_parallel(self, *args, **kwargs):
-        for sub in self.sub_fidelity_models:
+        for sub in self.sub_fidelity_models_dict.values():
             sub.fem._setup_after_parallel(*args, **kwargs)
 
     def update(self, x, *should_solve_args):
-        for sub in self.sub_fidelity_models:
+        for sub in self.sub_fidelity_models_dict.values():
             if sub.opt.should_calc(*should_solve_args):
                 sub.fem.update(x)
 
-    def calc_objectives(self, *should_solve_args) -> dict[int | float | str, list[float]]:
+    def _reconstruct_fem(self, *args, **kwargs):
+        for sub in self.sub_fidelity_models_dict.values():
+            sub.opt._reconstruct_fem(*args, **kwargs)
+
+    def prepare_restoring_fem(self):
+        for sub in self.sub_fidelity_models_dict.values():
+            sub.prepare_restoring_fem()
+
+    def calc_objectives(self, *should_solve_args) -> dict[str, tuple[Fidelity, list[float]]]:
         out = dict()
-        for sub in self.sub_fidelity_models:
+        for name, sub in self.sub_fidelity_models_dict.items():
             if sub.opt.should_calc(*should_solve_args):
                 out.update(
                     {
-                        sub.fidelity: sub.calc_objectives()
+                        name: [sub.fidelity, sub.calc_objectives()]
                     }
                 )
         return out
 
-    def _reconstruct_fem(self, *args, **kwargs):
-        for sub in self.sub_fidelity_models:
-            sub.opt._reconstruct_fem(*args, **kwargs)
-
-    def prepare_restoring_fem(self):
-        for sub in self.sub_fidelity_models:
-            sub.prepare_restoring_fem()
-
-    def get_internal_objectives(self, sub_y_dict: dict[int | float | str, list[float]]) -> dict[int | float | str, list[float]]:
+    def get_internal_objectives(self, sub_y_dict: dict[str, tuple[Fidelity, list[float]]]) -> dict[str, tuple[Fidelity, list[float]]]:
         out = {}
-        for fid, sub_y_values in sub_y_dict.items():
-            for sub in self.sub_fidelity_models:
-                if sub.fidelity == fid:
-                    out.update({fid: sub.get_internal_objectives(sub_y_values)})
-                else:
-                    raise RuntimeError('Invalid fidelity index is contained in sub_y_dict.')
-        return out
+        for name, (fidelity, y_values) in sub_y_dict.items():
+            if name in self.sub_fidelity_models_dict:
+                sub = self.sub_fidelity_models_dict[name]
+                _y_values = sub.get_internal_objectives(y_values)
+                out.update({name: [fidelity, _y_values]})
 
-    # def picklablize(self):
-    #     for sub in self.sub_fidelity_models:
-    #         sub.picklablize()
+            else:
+                raise RuntimeError('Invalid fidelity name.')
+
+        return out
 
 
 class SubFidelity(FEMOpt):
 
-    def add_objective(self, fun: callable or None = None, name: str or None = None,
-                      direction: str or float = None, args: tuple or None = None, kwargs: dict or None = None):
-        if direction is not None:
-            logger.warning('Note that direction is not ignored in SubFidelity.add_objective.')
-        direction = 'minimize'
-        return super().add_objective(fun, name, direction, args, kwargs)
-
     # noinspection PyMissingConstructor
-    def __init__(self, fem: FEMInterface, fidelity: float | None = None):
+    def __init__(self, fem: FEMInterface, name: str | None = None, fidelity: float | None = None):
 
         from pyfemtet._warning import show_experimental_warning
         show_experimental_warning('SubFidelity')
@@ -1118,7 +1116,15 @@ class SubFidelity(FEMOpt):
 
         self.fem: FEMInterface = fem
         self.opt: AbstractOptimizer = AbstractOptimizer()
-        self.fidelity: float | None = fidelity
+        self.fidelity: float | str | None = fidelity
+        self.name = name
+
+    def add_objective(self, fun: callable or None = None, name: str or None = None,
+                      direction: str or float = None, args: tuple or None = None, kwargs: dict or None = None):
+        if direction is not None:
+            logger.warning('Note that direction is not ignored in SubFidelity.add_objective.')
+        direction = 'minimize'
+        return super().add_objective(fun, name, direction, args, kwargs)
 
     def validate(self, main_opt: 'AbstractOptimizer'):
 
