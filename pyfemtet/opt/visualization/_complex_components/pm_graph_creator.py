@@ -10,7 +10,7 @@ import plotly.express as px
 from pyfemtet.opt._femopt_core import History
 
 from pyfemtet.opt.prediction._base import PyFemtetPredictionModel
-from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
+from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel, SingleTaskMultiFidelityGPModel
 from pyfemtet._message import Msg
 
 
@@ -21,8 +21,13 @@ class PredictionModelCreator:
         # common
         self.history = history  # used to check fit or not
         self.df = df
+
         # method specific
-        self.pmm = PyFemtetPredictionModel(history, df, SingleTaskGPModel)
+        if len(self.history.sub_fidelity_names) == 0:
+            ModelClass = SingleTaskGPModel
+        else:
+            ModelClass = SingleTaskMultiFidelityGPModel
+        self.pmm = PyFemtetPredictionModel(history, df, ModelClass)
         self.pmm.fit()
 
     def create_figure(

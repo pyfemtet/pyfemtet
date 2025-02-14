@@ -12,11 +12,10 @@ from pyfemtet.opt.optimizer._optuna._multi_fidelity_sampler import MultiFidelity
 import pytest
 
 N_STARTUP_TRIALS = 2
-N_ADDITIONAL_TRIALS = 30
-DIM = 9
-
+N_ADDITIONAL_TRIALS = 0
+DIM = 2
 OFFSET = 0. * pi
-FIDELITY = 0.9
+FIDELITY = 0.5
 
 NEG_CON = False
 
@@ -59,7 +58,7 @@ if __name__ == '__main__':
     femopt = FEMOpt(
         fem,
         opt,
-        history_path='multi-fid-history.csv'
+        # history_path=f'multi-fid-history-{DIM}dim.csv'
     )
     for i in range(DIM):
         femopt.add_parameter(f'x{i}', 0.5 * pi, 0, 2 * pi)
@@ -79,7 +78,7 @@ if __name__ == '__main__':
     femopt.optimize(
         N_STARTUP_TRIALS + N_ADDITIONAL_TRIALS,
         confirm_before_exit=True,
-        n_parallel=2,
+        n_parallel=1,
     )
 
 

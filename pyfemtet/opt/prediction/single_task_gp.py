@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import gpytorch
 
-from botorch.models import SingleTaskGP
+from botorch.models import SingleTaskGP, SingleTaskMultiFidelityGP
 from botorch.models.transforms.input import Normalize
 from botorch.models.transforms.outcome import Standardize
 from botorch.fit import fit_gpytorch_mll
@@ -39,23 +39,7 @@ class SingleTaskGPModel(PredictionModelBase):
         self.is_noise_free = is_noise_free
         self._standardizer: Standardize = None
 
-    def set_bounds_from_history(self, history, df=None):
-        from pyfemtet.opt._femopt_core import History
-        history: History
-        meta_column: str
-
-        if df is None:
-            df = history.get_df()
-
-        columns = df.columns
-
-        target_columns = [
-            col for col, meta_column in zip(columns, history.meta_columns)
-            if meta_column == 'prm_lb' or meta_column == 'prm_ub'
-        ]
-
-        bounds_buff = df.iloc[0][target_columns].values  # 2*len(prm_names) array
-        bounds = bounds_buff.reshape(-1, 2).astype(float)
+    def _set_bounds(self, bounds: np.ndarray):
         self.bounds = tensor(bounds).T
 
     # noinspection PyAttributeOutsideInit
@@ -72,8 +56,8 @@ class SingleTaskGPModel(PredictionModelBase):
         self._standardizer = standardizer
 
         # Fit a Gaussian Process model using the extracted data
-        self.gp = SingleTaskGP(
-            train_X=X,
+        self.gp = self.get_gp()(
+            train_X=X,  # Must pass as a kwargs
             train_Y=std_Y,
             train_Yvar=YVar if self.is_noise_free else None,
             input_transform=Normalize(d=X.shape[-1], bounds=self.bounds),
@@ -83,6 +67,9 @@ class SingleTaskGPModel(PredictionModelBase):
         )
         mll = ExactMarginalLogLikelihood(self.gp.likelihood, self.gp)
         fit_gpytorch_mll(mll)
+
+    def get_gp(self):
+        return SingleTaskGP
 
     def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) >= 2
@@ -100,6 +87,51 @@ class SingleTaskGPModel(PredictionModelBase):
         std = np.sqrt(var)
 
         return mean, std
+
+
+class SingleTaskMultiFidelityGPModel(SingleTaskGPModel):
+
+    def _set_bounds(self, bounds: np.ndarray):
+        bounds = np.concatenate([[[0, 1]], bounds], axis=0)
+        SingleTaskGPModel._set_bounds(self, bounds)
+
+    def get_gp(self):
+
+        def _get_gp(**kwargs):
+
+            assert 'train_X' in kwargs
+            train_x = kwargs.pop('train_X')
+
+            kwargs['train_X'] = train_x
+
+            if 'input_transform' in kwargs:
+                kwargs.pop('input_transform')
+
+                normalizer = Normalize(
+                    d=train_x.shape[-1],
+                    indices=list(range(1, train_x.shape[-1])),
+                    bounds=self.bounds,
+                )
+
+                kwargs['input_transform'] = normalizer
+
+            gp = SingleTaskMultiFidelityGP(
+                data_fidelities=[0],
+                **kwargs,
+            )
+            return gp
+
+        return _get_gp
+
+    def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        x = np.concatenate(
+            [
+                np.ones((len(x), 1)),
+                x
+            ],
+            axis=1
+        )
+        return super().predict(x)
 
 
 if __name__ == '__main__':

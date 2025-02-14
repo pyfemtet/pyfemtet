@@ -564,6 +564,14 @@ class _HistoryColumnProcessor:
                     out.append(c)
         return out
 
+    @staticmethod
+    def extract_fidelity_column_name(columns, meta_columns, sub_fidelity_name):
+        for c, m in zip(columns, meta_columns):
+            if m.startswith('fidelity') and ('obj' not in m):
+                name = c
+                if name == sub_fidelity_name:
+                    return c
+
     def parse_csv(self, path) -> tuple[
         pd.DataFrame,
         list,  # columns
@@ -685,6 +693,14 @@ class History:
 
             # csv の読み込み
             self.load()
+
+    def get_fidelity_column_name(self, sub_fidelity_name):
+        columns, meta_columns = self.create_df_columns()
+        return self._column_mgr.extract_fidelity_column_name(
+            columns,
+            meta_columns,
+            sub_fidelity_name,
+        )
 
     def get_obj_names_of_sub_fidelity(self, sub_fidelity_name):
         columns, meta_columns = self.create_df_columns()
