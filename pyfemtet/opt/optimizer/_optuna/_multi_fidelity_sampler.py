@@ -151,6 +151,8 @@ from pyfemtet.opt.optimizer._optuna._pof_botorch import (
 
 from contextlib import nullcontext
 
+MAIN_FIDELITY = 1
+
 
 # noinspection PyIncorrectDocstring
 @experimental_func("3.3.0")
@@ -206,7 +208,7 @@ def logei_candidates_func(
 
     """
 
-    main_fedelity = 1
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
     # Validation and process arguments
     with nullcontext():
@@ -227,7 +229,6 @@ def logei_candidates_func(
             train_y = torch.cat([train_obj, train_con], dim=-1)
 
             is_feas = (train_con <= 0).all(dim=-1)
-            is_main = train_x[:, 0] == main_fedelity
             train_obj_feas = train_obj[is_feas & is_main]
 
             if train_obj_feas.numel() == 0:
@@ -240,19 +241,18 @@ def logei_candidates_func(
 
         else:
             train_y = train_obj
-            is_main = train_x[:, 0] == main_fedelity
             best_f = train_obj[is_main].max()
 
     # Select GP Model by the fidelity parameter.
     fixed_features, exclude_first_feature, model = get_gp(
         gp_model_name, train_x, train_y, bounds
     )
+    mll = ExactMarginalLogLikelihood(model.likelihood, model)
+    fit_gpytorch_mll(mll)
 
     # ACQF setup
     with nullcontext():
 
-        mll = ExactMarginalLogLikelihood(model.likelihood, model)
-        fit_gpytorch_mll(mll)
         if n_constraints > 0:
             ACQF = acqf_patch_factory(LogConstrainedExpectedImprovement, pof_config)
             acqf = ACQF(
@@ -265,7 +265,6 @@ def logei_candidates_func(
             ACQF = acqf_patch_factory(
                 LogExpectedImprovement,
                 pof_config,
-                # exclude_first_feature  # TODO: 第一引数を考慮したほうがよいかどうかは切り替えられるようにする
             )
             acqf = ACQF(
                 model=model,
@@ -373,12 +372,14 @@ def qei_candidates_func(
         if train_obj.size(-1) != 1:
             raise ValueError("Objective may only contain single values with qEI.")
 
+        is_feas = (train_con <= 0).all(dim=-1)
+        is_main = train_x[:, 0] == MAIN_FIDELITY
+
         if train_con is not None:
             _validate_botorch_version_for_constrained_opt("qei_candidates_func")
             train_y = torch.cat([train_obj, train_con], dim=-1)
 
-            is_feas = (train_con <= 0).all(dim=-1)
-            train_obj_feas = train_obj[is_feas]
+            train_obj_feas = train_obj[is_feas & is_main]
 
             if train_obj_feas.numel() == 0:
                 # TODO(hvy): Do not use 0 as the best observation.
@@ -396,8 +397,7 @@ def qei_candidates_func(
             }
         else:
             train_y = train_obj
-
-            best_f = train_obj.max()
+            best_f = train_obj[is_main].max()
 
             additonal_qei_kwargs = {}
 
@@ -405,6 +405,8 @@ def qei_candidates_func(
     fixed_features, exclude_first_feature, model = get_gp(
         gp_model_name, train_x, train_y, bounds
     )
+    mll = ExactMarginalLogLikelihood(model.likelihood, model)
+    fit_gpytorch_mll(mll)
 
     # ACQF setup
     with nullcontext():
@@ -412,7 +414,6 @@ def qei_candidates_func(
         ACQF = acqf_patch_factory(
             qExpectedImprovement,
             pof_config,
-            # exclude_first_feature,
         )
         acqf = ACQF(
             model=model,
@@ -456,8 +457,7 @@ def qei_candidates_func(
                 options={"batch_limit": 5, "maxiter": 200},
                 sequential=True,
             )
-
-        ret = candidates.detach()
+    ret = candidates.detach()
 
     # Remove fidelity feature if necessary
     if exclude_first_feature:
@@ -479,6 +479,7 @@ def qnei_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Improvement (qNEI).
 
@@ -489,84 +490,85 @@ def qnei_candidates_func(
         :func:`~optuna_integration.botorch.qei_candidates_func` for argument and return value
         descriptions.
     """
-    if train_obj.size(-1) != 1:
-        raise ValueError("Objective may only contain single values with qNEI.")
-    if train_con is not None:
-        _validate_botorch_version_for_constrained_opt("qnei_candidates_func")
-        train_y = torch.cat([train_obj, train_con], dim=-1)
 
-        n_constraints = train_con.size(1)
-        additional_qnei_kwargs = {
-            "objective": GenericMCObjective(lambda Z, X: Z[..., 0]),
-            "constraints": _get_constraint_funcs(n_constraints),
-        }
-    else:
-        train_y = train_obj
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
-        additional_qnei_kwargs = {}
+    # Validation and process arguments
+    with nullcontext():
 
-    train_x = normalize(train_x, bounds=bounds)
-    if pending_x is not None:
-        pending_x = normalize(pending_x, bounds=bounds)
+        if train_obj.size(-1) != 1:
+            raise ValueError("Objective may only contain single values with qNEI.")
+        if train_con is not None:
+            _validate_botorch_version_for_constrained_opt("qnei_candidates_func")
+            train_y = torch.cat([train_obj, train_con], dim=-1)
 
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+            n_constraints = train_con.size(1)
+            additional_qnei_kwargs = {
+                "objective": GenericMCObjective(lambda Z, X: Z[..., 0]),
+                "constraints": _get_constraint_funcs(n_constraints),
+            }
+        else:
+            train_y = train_obj
 
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+            additional_qnei_kwargs = {}
+
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qNoisyExpectedImprovement, pof_config)
-    acqf = ACQF(
-        model=model,
-        X_baseline=train_x,
-        sampler=_get_sobol_qmc_normal_sampler(256),
-        X_pending=pending_x,
-        **additional_qnei_kwargs,
-    )
-    acqf.set_model_c(model_c)
-
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
+    # ACQF setup
+    with nullcontext():
+        ACQF = acqf_patch_factory(qNoisyExpectedImprovement, pof_config)
+        acqf = ACQF(
+            model=model,
+            X_baseline=train_x[is_main],
+            sampler=_get_sobol_qmc_normal_sampler(256),
+            X_pending=pending_x,
+            **additional_qnei_kwargs,
+        )
+        acqf.set_model_c(model_c)
 
     # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+    with nullcontext():
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": batch_limit, "maxiter": 200},
-            sequential=True,
-            **kwargs
-        )
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": batch_limit, "maxiter": 200},
+                sequential=True,
+                **kwargs
+            )
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": 5, "maxiter": 200},
-            sequential=True,
-        )
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": 5, "maxiter": 200},
+                sequential=True,
+            )
+    ret = candidates.detach()
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
 
-    return candidates
+    return ret
 
 
 # noinspection PyIncorrectDocstring
@@ -582,6 +584,7 @@ def qehvi_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Expected Hypervolume Improvement (qEHVI).
 
@@ -592,103 +595,104 @@ def qehvi_candidates_func(
         :func:`~optuna_integration.botorch.qei_candidates_func` for argument and return value
         descriptions.
     """
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
-    n_objectives = train_obj.size(-1)
+    # Validation and process arguments
+    with nullcontext():
+        n_objectives = train_obj.size(-1)
 
-    if train_con is not None:
-        train_y = torch.cat([train_obj, train_con], dim=-1)
+        if train_con is not None:
+            train_y = torch.cat([train_obj, train_con], dim=-1)
 
-        is_feas = (train_con <= 0).all(dim=-1)
-        train_obj_feas = train_obj[is_feas]
+            is_feas = (train_con <= 0).all(dim=-1)
+            train_obj_feas = train_obj[is_feas & is_main]
 
-        n_constraints = train_con.size(1)
-        additional_qehvi_kwargs = {
-            "objective": IdentityMCMultiOutputObjective(outcomes=list(range(n_objectives))),
-            "constraints": _get_constraint_funcs(n_constraints),
-        }
-    else:
-        train_y = train_obj
+            n_constraints = train_con.size(1)
+            additional_qehvi_kwargs = {
+                "objective": IdentityMCMultiOutputObjective(outcomes=list(range(n_objectives))),
+                "constraints": _get_constraint_funcs(n_constraints),
+            }
+        else:
+            train_y = train_obj
 
-        train_obj_feas = train_obj
+            train_obj_feas = train_obj[is_main]
 
-        additional_qehvi_kwargs = {}
+            additional_qehvi_kwargs = {}
 
-    train_x = normalize(train_x, bounds=bounds)
-    if pending_x is not None:
-        pending_x = normalize(pending_x, bounds=bounds)
-
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
-
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    # Approximate box decomposition similar to Ax when the number of objectives is large.
-    # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
-    if n_objectives > 4:
-        alpha = 10 ** (-8 + n_objectives)
-    else:
-        alpha = 0.0
 
-    ref_point = train_obj.min(dim=0).values - 1e-8
+    # ACQF setup
+    with nullcontext():
+        # Approximate box decomposition similar to Ax when the number of objectives is large.
+        # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
+        if n_objectives > 4:
+            alpha = 10 ** (-8 + n_objectives)
+        else:
+            alpha = 0.0
 
-    partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_obj_feas, alpha=alpha)
+        ref_point = train_obj[is_main].min(dim=0).values - 1e-8
 
-    ref_point_list = ref_point.tolist()
+        partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_obj_feas, alpha=alpha)
 
-    ACQF = acqf_patch_factory(monte_carlo.qExpectedHypervolumeImprovement, pof_config)
-    acqf = ACQF(
-        model=model,
-        ref_point=ref_point_list,
-        partitioning=partitioning,
-        sampler=_get_sobol_qmc_normal_sampler(256),
-        X_pending=pending_x,
-        **additional_qehvi_kwargs,
-    )
-    acqf.set_model_c(model_c)
+        ref_point_list = ref_point.tolist()
 
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
+        ACQF = acqf_patch_factory(monte_carlo.qExpectedHypervolumeImprovement, pof_config)
+        acqf = ACQF(
+            model=model,
+            ref_point=ref_point_list,
+            partitioning=partitioning,
+            sampler=_get_sobol_qmc_normal_sampler(256),
+            X_pending=pending_x,
+            **additional_qehvi_kwargs,
+        )
+        acqf.set_model_c(model_c)
+
 
     # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+    with nullcontext():
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=20,
-            raw_samples=1024,
-            options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
-            sequential=True,
-            **kwargs
-        )
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=20,
+                raw_samples=1024,
+                options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
+                sequential=True,
+                **kwargs
+            )
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=20,
-            raw_samples=1024,
-            options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
-            sequential=True,
-        )
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=20,
+                raw_samples=1024,
+                options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
+                sequential=True,
+            )
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+        ret = candidates.detach()
 
-    return candidates
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 # noinspection PyIncorrectDocstring
@@ -704,6 +708,7 @@ def ehvi_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Expected Hypervolume Improvement (EHVI).
 
@@ -715,81 +720,85 @@ def ehvi_candidates_func(
         descriptions.
     """
 
-    n_objectives = train_obj.size(-1)
-    if train_con is not None:
-        raise ValueError("Constraints are not supported with ehvi_candidates_func.")
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
-    train_y = train_obj
-    train_x = normalize(train_x, bounds=bounds)
+    # Validation and process arguments
+    with nullcontext():
+        n_objectives = train_obj.size(-1)
+        if train_con is not None:
+            raise ValueError("Constraints are not supported with ehvi_candidates_func.")
 
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+        train_y = train_obj
 
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    # Approximate box decomposition similar to Ax when the number of objectives is large.
-    # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
-    if n_objectives > 4:
-        alpha = 10 ** (-8 + n_objectives)
-    else:
-        alpha = 0.0
+    # ACQF setup
+    with nullcontext():
+        # Approximate box decomposition similar to Ax when the number of objectives is large.
+        # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
+        if n_objectives > 4:
+            alpha = 10 ** (-8 + n_objectives)
+        else:
+            alpha = 0.0
 
-    ref_point = train_obj.min(dim=0).values - 1e-8
+        ref_point = train_obj[is_main].min(dim=0).values - 1e-8
 
-    partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_y, alpha=alpha)
+        partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_y[is_main], alpha=alpha)
 
-    ref_point_list = ref_point.tolist()
+        ref_point_list = ref_point.tolist()
 
-    ACQF = acqf_patch_factory(ExpectedHypervolumeImprovement)
-    acqf = ACQF(
-        model=model,
-        ref_point=ref_point_list,
-        partitioning=partitioning,
-    )
-    acqf.set_model_c(model_c)
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
+        ACQF = acqf_patch_factory(ExpectedHypervolumeImprovement, pof_config)
+        acqf = ACQF(
+            model=model,
+            ref_point=ref_point_list,
+            partitioning=partitioning,
+        )
+        acqf.set_model_c(model_c)
 
     # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+    with nullcontext():
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": batch_limit, "maxiter": 200},
-            sequential=True,
-            **kwargs
-        )
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": batch_limit, "maxiter": 200},
+                sequential=True,
+                **kwargs
+            )
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=20,
-            raw_samples=1024,
-            options={"batch_limit": 5, "maxiter": 200},
-            sequential=True,
-        )
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=20,
+                raw_samples=1024,
+                options={"batch_limit": 5, "maxiter": 200},
+                sequential=True,
+            )
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+        ret = candidates.detach()
 
-    return candidates
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 # noinspection PyIncorrectDocstring
@@ -805,6 +814,7 @@ def qnehvi_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Noisy Expected Hypervolume Improvement (qNEHVI).
 
@@ -817,99 +827,99 @@ def qnehvi_candidates_func(
         descriptions.
     """
 
-    n_objectives = train_obj.size(-1)
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
-    if train_con is not None:
-        train_y = torch.cat([train_obj, train_con], dim=-1)
+    # Validation and process arguments
+    with nullcontext():
+        n_objectives = train_obj.size(-1)
 
-        n_constraints = train_con.size(1)
-        additional_qnehvi_kwargs = {
-            "objective": IdentityMCMultiOutputObjective(outcomes=list(range(n_objectives))),
-            "constraints": _get_constraint_funcs(n_constraints),
-        }
-    else:
-        train_y = train_obj
+        if train_con is not None:
+            train_y = torch.cat([train_obj, train_con], dim=-1)
 
-        additional_qnehvi_kwargs = {}
+            n_constraints = train_con.size(1)
+            additional_qnehvi_kwargs = {
+                "objective": IdentityMCMultiOutputObjective(outcomes=list(range(n_objectives))),
+                "constraints": _get_constraint_funcs(n_constraints),
+            }
+        else:
+            train_y = train_obj
 
-    train_x = normalize(train_x, bounds=bounds)
-    if pending_x is not None:
-        pending_x = normalize(pending_x, bounds=bounds)
+            additional_qnehvi_kwargs = {}
 
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
-
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    # Approximate box decomposition similar to Ax when the number of objectives is large.
-    # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
-    if n_objectives > 4:
-        alpha = 10 ** (-8 + n_objectives)
-    else:
-        alpha = 0.0
+    # ACQF setup
+    with nullcontext():
+        # Approximate box decomposition similar to Ax when the number of objectives is large.
+        # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
+        if n_objectives > 4:
+            alpha = 10 ** (-8 + n_objectives)
+        else:
+            alpha = 0.0
 
-    ref_point = train_obj.min(dim=0).values - 1e-8
+        ref_point = train_obj[is_main].min(dim=0).values - 1e-8
 
-    ref_point_list = ref_point.tolist()
+        ref_point_list = ref_point.tolist()
 
-    # prune_baseline=True is generally recommended by the documentation of BoTorch.
-    # cf. https://botorch.org/api/acquisition.html (accessed on 2022/11/18)
-    ACQF = acqf_patch_factory(monte_carlo.qNoisyExpectedHypervolumeImprovement, pof_config)
-    acqf = ACQF(
-        model=model,
-        ref_point=ref_point_list,
-        X_baseline=train_x,
-        alpha=alpha,
-        prune_baseline=True,
-        sampler=_get_sobol_qmc_normal_sampler(256),
-        X_pending=pending_x,
-        **additional_qnehvi_kwargs,
-    )
-    acqf.set_model_c(model_c)
-
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
+        # prune_baseline=True is generally recommended by the documentation of BoTorch.
+        # cf. https://botorch.org/api/acquisition.html (accessed on 2022/11/18)
+        ACQF = acqf_patch_factory(monte_carlo.qNoisyExpectedHypervolumeImprovement, pof_config)
+        acqf = ACQF(
+            model=model,
+            ref_point=ref_point_list,
+            X_baseline=train_x[is_main],
+            alpha=alpha,
+            prune_baseline=True,
+            sampler=_get_sobol_qmc_normal_sampler(256),
+            X_pending=pending_x,
+            **additional_qnehvi_kwargs,
+        )
+        acqf.set_model_c(model_c)
 
     # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+    with nullcontext():
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=20,
-            raw_samples=1024,
-            options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
-            sequential=True,
-            **kwargs
-        )
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=20,
+                raw_samples=1024,
+                options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
+                sequential=True,
+                **kwargs
+            )
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=20,
-            raw_samples=1024,
-            options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
-            sequential=True,
-        )
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=20,
+                raw_samples=1024,
+                options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
+                sequential=True,
+            )
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+        ret = candidates.detach()
 
-    return candidates
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 # noinspection PyIncorrectDocstring
@@ -925,6 +935,7 @@ def qparego_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Quasi MC-based extended ParEGO (qParEGO) for constrained multi-objective optimization.
 
@@ -936,88 +947,90 @@ def qparego_candidates_func(
         descriptions.
     """
 
-    n_objectives = train_obj.size(-1)
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
-    weights = sample_simplex(n_objectives).squeeze()
-    scalarization = get_chebyshev_scalarization(weights=weights, Y=train_obj)
+    # Validation and process arguments
+    with nullcontext():
 
-    if train_con is not None:
-        _validate_botorch_version_for_constrained_opt("qparego_candidates_func")
-        train_y = torch.cat([train_obj, train_con], dim=-1)
-        n_constraints = train_con.size(1)
-        objective = GenericMCObjective(lambda Z, X: scalarization(Z[..., :n_objectives]))
-        additional_qei_kwargs = {
-            "constraints": _get_constraint_funcs(n_constraints),
-        }
-    else:
-        train_y = train_obj
+        n_objectives = train_obj.size(-1)
 
-        objective = GenericMCObjective(scalarization)
-        additional_qei_kwargs = {}
+        weights = sample_simplex(n_objectives).squeeze()
+        scalarization = get_chebyshev_scalarization(weights=weights, Y=train_obj)
 
-    train_x = normalize(train_x, bounds=bounds)
-    if pending_x is not None:
-        pending_x = normalize(pending_x, bounds=bounds)
+        if train_con is not None:
+            _validate_botorch_version_for_constrained_opt("qparego_candidates_func")
+            train_y = torch.cat([train_obj, train_con], dim=-1)
+            n_constraints = train_con.size(1)
+            objective = GenericMCObjective(lambda Z, X: scalarization(Z[..., :n_objectives]))
+            additional_qei_kwargs = {
+                "constraints": _get_constraint_funcs(n_constraints),
+            }
+        else:
+            train_y = train_obj
 
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
+            objective = GenericMCObjective(scalarization)
+            additional_qei_kwargs = {}
 
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qExpectedImprovement, pof_config)
-    acqf = ACQF(
-        model=model,
-        best_f=objective(train_y).max(),
-        sampler=_get_sobol_qmc_normal_sampler(256),
-        objective=objective,
-        X_pending=pending_x,
-        **additional_qei_kwargs,
-    )
-    acqf.set_model_c(model_c)
-
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
-
-    # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
-
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
-
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=20,
-            raw_samples=1024,
-            options={"batch_limit": batch_limit, "maxiter": 200},
-            sequential=True,
-            **kwargs
+    # ACQF setup
+    with nullcontext():
+        ACQF = acqf_patch_factory(qExpectedImprovement, pof_config)
+        acqf = ACQF(
+            model=model,
+            best_f=objective(train_y[is_main]).max(),
+            sampler=_get_sobol_qmc_normal_sampler(256),
+            objective=objective,
+            X_pending=pending_x,
+            **additional_qei_kwargs,
         )
+        acqf.set_model_c(model_c)
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=20,
-            raw_samples=1024,
-            options={"batch_limit": 5, "maxiter": 200},
-            sequential=True,
-        )
+    # Add nonlinear_constraint and run optimize_acqf
+    with nullcontext():
+        # optimize_acqf の探索に parameter constraints を追加します。
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-    return candidates
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=20,
+                raw_samples=1024,
+                options={"batch_limit": batch_limit, "maxiter": 200},
+                sequential=True,
+                **kwargs
+            )
+
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=20,
+                raw_samples=1024,
+                options={"batch_limit": 5, "maxiter": 200},
+                sequential=True,
+            )
+
+        ret = candidates.detach()
+
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 @experimental_func("4.0.0")
@@ -1032,6 +1045,7 @@ def qkg_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Knowledge Gradient (qKG).
 
@@ -1045,80 +1059,81 @@ def qkg_candidates_func(
 
     """
 
-    if train_obj.size(-1) != 1:
-        raise ValueError("Objective may only contain single values with qKG.")
-    if train_con is not None:
-        train_y = torch.cat([train_obj, train_con], dim=-1)
-        n_constraints = train_con.size(1)
-        objective = ConstrainedMCObjective(
-            objective=lambda Z, X: Z[..., 0],
-            constraints=_get_constraint_funcs(n_constraints),
-        )
-    else:
-        train_y = train_obj
-        objective = None  # Using the default identity objective.
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
-    train_x = normalize(train_x, bounds=bounds)
-    if pending_x is not None:
-        pending_x = normalize(pending_x, bounds=bounds)
+    # Validation and process arguments
+    with nullcontext():
+        if train_obj.size(-1) != 1:
+            raise ValueError("Objective may only contain single values with qKG.")
+        if train_con is not None:
+            train_y = torch.cat([train_obj, train_con], dim=-1)
+            n_constraints = train_con.size(1)
+            objective = ConstrainedMCObjective(
+                objective=lambda Z, X: Z[..., 0],
+                constraints=_get_constraint_funcs(n_constraints),
+            )
+        else:
+            train_y = train_obj
+            objective = None  # Using the default identity objective.
 
-    train_yvar, standardizer = get_minimum_YVar_and_standardizer(train_y)
 
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        train_Yvar=train_yvar,
-        outcome_transform=standardizer,
+    # Select GP Model by the fidelity parameter.
+    fixed_features, exclude_first_feature, model = get_gp(
+        gp_model_name, train_x, train_y, bounds
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    ACQF = acqf_patch_factory(qKnowledgeGradient, pof_config)
-    acqf = ACQF(
-        model=model,
-        num_fantasies=256,
-        objective=objective,
-        X_pending=pending_x,
-    )
-    acqf.set_model_c(model_c)
-
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
+    # ACQF setup
+    with nullcontext():
+        ACQF = acqf_patch_factory(qKnowledgeGradient, pof_config)
+        acqf = ACQF(
+            model=model,
+            num_fantasies=256,
+            objective=objective,
+            X_pending=pending_x,
+        )
+        acqf.set_model_c(model_c)
 
     # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+    with nullcontext():
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": batch_limit, "maxiter": 200},
-            sequential=True,
-            **kwargs
-        )
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": batch_limit, "maxiter": 200},
+                sequential=True,
+                **kwargs
+            )
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=10,
-            raw_samples=512,
-            options={"batch_limit": 8, "maxiter": 200},
-            sequential=True,
-        )
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=10,
+                raw_samples=512,
+                options={"batch_limit": 8, "maxiter": 200},
+                sequential=True,
+            )
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+        ret = candidates.detach()
 
-    return candidates
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 # noinspection PyIncorrectDocstring,SpellCheckingInspection
@@ -1134,6 +1149,7 @@ def qhvkg_candidates_func(
         _study,
         _opt,
         pof_config,
+        gp_model_name,
 ) -> "torch.Tensor":
     """Quasi MC-based batch Hypervolume Knowledge Gradient (qHVKG).
 
@@ -1146,98 +1162,101 @@ def qhvkg_candidates_func(
         descriptions.
     """
 
-    # We need botorch >=0.9.5 for qHypervolumeKnowledgeGradient.
-    if not _imports_qhvkg.is_successful():
-        raise ImportError(
-            "qhvkg_candidates_func requires botorch >=0.9.5. "
-            "Please upgrade botorch or use qehvi_candidates_func as candidates_func instead."
-        )
+    is_main = train_x[:, 0] == MAIN_FIDELITY
 
-    if train_con is not None:
-        train_y = torch.cat([train_obj, train_con], dim=-1)
-    else:
-        train_y = train_obj
+    # Validation and process arguments
+    with nullcontext():
+        # We need botorch >=0.9.5 for qHypervolumeKnowledgeGradient.
+        if not _imports_qhvkg.is_successful():
+            raise ImportError(
+                "qhvkg_candidates_func requires botorch >=0.9.5. "
+                "Please upgrade botorch or use qehvi_candidates_func as candidates_func instead."
+            )
 
-    train_x = normalize(train_x, bounds=bounds)
-    if pending_x is not None:
-        pending_x = normalize(pending_x, bounds=bounds)
+        if train_con is not None:
+            train_y = torch.cat([train_obj, train_con], dim=-1)
+        else:
+            train_y = train_obj
 
-    models = [
-        SingleTaskGP(
-            train_x,
-            train_y[..., [i]],
-            train_Yvar=get_minimum_YVar_and_standardizer(train_y[..., [i]])[0],
-            outcome_transform=Standardize(m=1)
+    rets = [
+        get_gp(
+            gp_model_name, train_x, train_y[..., [i]], bounds
         )
         for i in range(train_y.shape[-1])
     ]
+    fixed_features, exclude_first_feature = rets[0][:2]
+    models = [comp[2] for comp in rets]
     model = ModelListGP(*models)
     mll = SumMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 
-    n_constraints = train_con.size(1) if train_con is not None else 0
-    objective = FeasibilityWeightedMCMultiOutputObjective(
-        model,
-        X_baseline=train_x,
-        constraint_idcs=[-n_constraints + i for i in range(n_constraints)],
-    )
+    # ACQF setup
+    with nullcontext():
+        n_constraints = train_con.size(1) if train_con is not None else 0
+        objective = FeasibilityWeightedMCMultiOutputObjective(
+            model,
+            X_baseline=train_x[is_main],
+            constraint_idcs=[-n_constraints + i for i in range(n_constraints)],
+        )
 
-    ref_point = train_obj.min(dim=0).values - 1e-8
+        ref_point = train_obj[is_main].min(dim=0).values - 1e-8
 
-    ACQF = acqf_patch_factory(qHypervolumeKnowledgeGradient, pof_config)
-    acqf = ACQF(
-        model=model,
-        ref_point=ref_point,
-        num_fantasies=16,
-        X_pending=pending_x,
-        objective=objective,
-        sampler=ListSampler(
-            *[
-                SobolQMCNormalSampler(sample_shape=torch.Size([16]))
-                for _ in range(model.num_outputs)
-            ]
-        ),
-        inner_sampler=SobolQMCNormalSampler(sample_shape=torch.Size([32])),
-    )
-    acqf.set_model_c(model_c)
-
-    standard_bounds = torch.zeros_like(bounds)
-    standard_bounds[1] = 1
+        ACQF = acqf_patch_factory(qHypervolumeKnowledgeGradient, pof_config)
+        acqf = ACQF(
+            model=model,
+            ref_point=ref_point,
+            num_fantasies=16,
+            X_pending=pending_x,
+            objective=objective,
+            sampler=ListSampler(
+                *[
+                    SobolQMCNormalSampler(sample_shape=torch.Size([16]))
+                    for _ in range(model.num_outputs)
+                ]
+            ),
+            inner_sampler=SobolQMCNormalSampler(sample_shape=torch.Size([32])),
+        )
+        acqf.set_model_c(model_c)
 
     # optimize_acqf の探索に parameter constraints を追加します。
-    if len(_constraints) > 0:
-        nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
+    with nullcontext():
+        if len(_constraints) > 0:
+            nc = NonlinearInequalityConstraints(_study, _constraints, _opt)
 
-        # 1, batch_limit, nonlinear_..., ic_generator
-        kwargs = nc.create_kwargs()
-        q = kwargs.pop('q')
-        batch_limit = kwargs.pop('options')["batch_limit"]
+            # 1, batch_limit, nonlinear_..., ic_generator
+            kwargs = nc.create_kwargs()
+            q = kwargs.pop('q')
+            batch_limit = kwargs.pop('options')["batch_limit"]
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=q,
-            num_restarts=1,
-            raw_samples=1024,
-            options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
-            sequential=True,
-            **kwargs
-        )
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=q,
+                num_restarts=1,
+                raw_samples=1024,
+                options={"batch_limit": batch_limit, "maxiter": 200, "nonnegative": True},
+                sequential=True,
+                **kwargs
+            )
 
-    else:
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=standard_bounds,
-            q=1,
-            num_restarts=1,
-            raw_samples=1024,
-            options={"batch_limit": 4, "maxiter": 200, "nonnegative": True},
-            sequential=False,
-        )
+        else:
+            candidates, _ = optimize_acqf(
+                acq_function=acqf,
+                bounds=bounds,
+                q=1,
+                num_restarts=1,
+                raw_samples=1024,
+                options={"batch_limit": 4, "maxiter": 200, "nonnegative": True},
+                sequential=False,
+            )
 
-    candidates = unnormalize(candidates.detach(), bounds=bounds)
+        ret = candidates.detach()
 
-    return candidates
+    # Remove fidelity feature if necessary
+    if exclude_first_feature:
+        ret = ret[:, 1:]
+
+    return ret
 
 
 def _get_default_candidates_func(
@@ -1261,17 +1280,13 @@ def _get_default_candidates_func(
     "torch.Tensor",
 ]:
     if n_objectives > 3 and not has_constraint and not consider_running_trials:
-        # return ehvi_candidates_func
-        raise NotImplementedError
+        return ehvi_candidates_func
     elif n_objectives > 3:
-        # return qparego_candidates_func
-        raise NotImplementedError
+        return qparego_candidates_func
     elif n_objectives > 1:
-        # return qehvi_candidates_func
-        raise NotImplementedError
+        return qehvi_candidates_func
     elif consider_running_trials:
-        # return qei_candidates_func
-        raise NotImplementedError
+        return qei_candidates_func
     else:
         return logei_candidates_func
 

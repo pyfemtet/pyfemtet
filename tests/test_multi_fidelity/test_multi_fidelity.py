@@ -12,8 +12,9 @@ from pyfemtet.opt.optimizer._optuna._multi_fidelity_sampler import MultiFidelity
 import pytest
 
 N_STARTUP_TRIALS = 2
-N_ADDITIONAL_TRIALS = 0
-DIM = 2
+N_ADDITIONAL_TRIALS = 3
+DIM = 9
+OBJ_DIM = 3
 OFFSET = 0. * pi
 FIDELITY = 0.5
 
@@ -26,10 +27,22 @@ def main_model(opt_: OptunaOptimizer):
     return (1 + cos(x)).sum()
 
 
+def main_model2(opt_: OptunaOptimizer):
+    print('===== main2 model =====')
+    x = opt_.get_parameter('values')
+    return (1 + cos(x - pi / 2)).sum()
+
+
 def sub_model(opt_: OptunaOptimizer):
     print('===== sub model =====')
     x = opt_.get_parameter('values')
-    return ((x - pi - OFFSET) ** 2).sum()
+    return ((x - pi - OFFSET) ** 2).sum() * 10 + 10
+
+
+def sub_model2(opt_: OptunaOptimizer):
+    print('===== sub2 model =====')
+    x = opt_.get_parameter('values')
+    return ((x - pi / 2 - pi - OFFSET) ** 2).sum() * 10 + 10
 
 
 def should_solve_main(x: np.ndarray, history: History):
@@ -53,7 +66,7 @@ if __name__ == '__main__':
         )
     )
 
-    obj_name = 'sun of 1 + cos(x)'
+    obj_name = 'sum of 1 + cos(x)'
 
     femopt = FEMOpt(
         fem,
@@ -62,7 +75,13 @@ if __name__ == '__main__':
     )
     for i in range(DIM):
         femopt.add_parameter(f'x{i}', 0.5 * pi, 0, 2 * pi)
+
     femopt.add_objective(main_model, obj_name, args=(opt,), direction='minimize')
+    if OBJ_DIM >= 2:
+        femopt.add_objective(main_model2, obj_name + '2', args=(opt,), direction='minimize')
+        if OBJ_DIM >= 3:
+            femopt.add_objective(main_model, obj_name + '3', args=(opt,), direction='minimize')
+
 
     if not NEG_CON:
         femopt.opt.set_solve_condition(should_solve_main)
@@ -72,6 +91,10 @@ if __name__ == '__main__':
             fidelity=FIDELITY,
         )
         sub_fidelity.add_objective(sub_model, obj_name, args=(opt,))
+        if OBJ_DIM >= 2:
+            sub_fidelity.add_objective(sub_model2, obj_name + '2', args=(opt,))
+            if OBJ_DIM >= 3:
+                sub_fidelity.add_objective(sub_model, obj_name + '3', args=(opt,))
         femopt.add_sub_fidelity(sub_fidelity)
 
     femopt.set_random_seed(42)

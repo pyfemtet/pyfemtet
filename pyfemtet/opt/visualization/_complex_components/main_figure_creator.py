@@ -96,7 +96,7 @@ def get_default_figure(history, df):
     return fig
 
 
-def _get_single_objective_plot(history: History, df):
+def _get_single_objective_plot(history: History, df: pd.DataFrame):
 
     df = _ls.localize(df)
     obj_name = history.obj_names[0]
@@ -113,7 +113,6 @@ def _get_single_objective_plot(history: History, df):
 
     # ===== base figure =====
     fig = go.Figure()
-
 
     # ===== sub-fidelity =====
     for sub_fidelity_name, obj_names_per_sub_fidelity, color in zip(sub_fidelity_names, obj_names_per_sub_fidelity_list, px.colors.qualitative.G10[::-1]):
@@ -235,13 +234,20 @@ def _get_single_objective_plot(history: History, df):
     return fig
 
 
-def _get_multi_objective_pairplot(history, df):
+def _get_multi_objective_pairplot(history: History, df: pd.DataFrame):
     df = _ls.localize(df)
 
     obj_names = history.obj_names
 
     df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
     obj_names = [o.replace(' / ', '<BR>/ ') for o in obj_names]
+
+    sub_fidelity_names = history.sub_fidelity_names
+    obj_names_per_sub_fidelity_list: list[list[str]] = [
+        history.get_obj_names_of_sub_fidelity(
+            sub_fidelity_name
+        ) for sub_fidelity_name in sub_fidelity_names
+    ]
 
     common_kwargs = dict(
         color=_ls.non_domi['label'],
@@ -268,6 +274,25 @@ def _get_multi_objective_pairplot(history, df):
             y=obj_names[1],
             **common_kwargs,
         )
+
+        # ===== sub-fidelity =====
+        for sub_fidelity_name, obj_names_per_sub_fidelity, color \
+            in zip(sub_fidelity_names,
+                   obj_names_per_sub_fidelity_list,
+                   px.colors.qualitative.G10[::-1]
+                   ):
+
+            assert len(obj_names_per_sub_fidelity) == 2
+            name1, name2 = obj_names_per_sub_fidelity
+            trace = go.Scatter(
+                x=df[name1],
+                y=df[name2],
+                mode='markers',
+                marker=dict(color=color, symbol='square-open'),
+                name=sub_fidelity_name,
+            )
+            fig.add_trace(trace)
+
         fig.update_layout(
             dict(
                 xaxis_title=obj_names[0],
@@ -281,6 +306,35 @@ def _get_multi_objective_pairplot(history, df):
             dimensions=obj_names,
             **common_kwargs,
         )
+
+        # ===== sub-fidelity =====
+
+        for sub_fidelity_name, obj_names_per_sub_fidelity, color \
+            in zip(sub_fidelity_names,
+                   obj_names_per_sub_fidelity_list,
+                   px.colors.qualitative.G10[::-1]
+                   ):
+
+            fig.add_trace(
+                go.Splom(
+                    # dimensions=[
+                    #     dict(label='a', values=[2.5]),
+                    #     dict(label='b', values=[2.5]),
+                    #     dict(label='c', values=[2.5]),
+                    # ],
+                    dimensions=[
+                        {
+                            'label': obj_name,
+                            'values': df[sub_obj_name]
+                        } for obj_name, sub_obj_name in zip(
+                            obj_names, obj_names_per_sub_fidelity
+                        )
+                    ],
+                    marker=dict(color=color, symbol='square-open'),
+                    name=sub_fidelity_name,
+                )
+            )
+
         fig.update_traces(
             patch={'diagonal.visible': False},
             showupperhalf=False,

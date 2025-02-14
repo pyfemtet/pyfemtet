@@ -590,6 +590,8 @@ class MainGraph(AbstractPage):
 
         # create figure
         df = self.data_accessor()
+        if len(df.columns) == 0:
+            raise PreventUpdate
         kwargs = kwargs or {}
         fig = creator(self.application.history, df, **kwargs)
         if with_length:

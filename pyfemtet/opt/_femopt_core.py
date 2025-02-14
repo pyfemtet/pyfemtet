@@ -671,9 +671,7 @@ class History:
             # そうでなければ df を初期化
             else:
                 columns, meta_columns = self.create_df_columns()
-                df = pd.DataFrame()
-                for c in columns:
-                    df[c] = None
+                df = pd.DataFrame(columns=columns)
                 self.meta_columns = meta_columns
                 self.set_df(df)
 
@@ -942,7 +940,7 @@ class History:
                         return df
 
                     else:
-                        logger.debug('Access df of History before it is initialized.')
+                        logger.error('Access df of History before it is initialized.')
                         return pd.DataFrame()
             except OSError:
                 logger.error('Scheduler is already dead. Most frequent reason to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
