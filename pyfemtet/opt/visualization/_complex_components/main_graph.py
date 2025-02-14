@@ -602,5 +602,5 @@ class MainGraph(AbstractPage):
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:
-            df = self.application.history.get_df(valid_only=True)
+            df = self.application.history.get_filtered_df([self.application.history.OptTrialState.succeeded, self.application.history.OptTrialState.skipped])
         return df

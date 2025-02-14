@@ -68,7 +68,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         if self._should_get_actor_data:
             return self._df
         else:
-            return self.history.get_df(valid_only=True)
+            return self.history.get_filtered_df([self.history.OptTrialState.succeeded, self.history.OptTrialState.skipped])
 
     @local_data.setter
     def local_data(self, value: pd.DataFrame):
@@ -129,7 +129,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
                     worker_status.set(OptimizationStatus.INTERRUPTING)
 
             # status と df を actor から application に反映する
-            self._df = self.history.get_df(valid_only=True).copy()
+            self._df = self.history.get_filtered_df([self.history.OptTrialState.succeeded, self.history.OptTrialState.skipped]).copy()
             self.local_entire_status_int = self.entire_status.get()
             self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
 
