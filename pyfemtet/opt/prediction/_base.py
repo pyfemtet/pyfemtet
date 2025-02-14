@@ -43,8 +43,6 @@ class PyFemtetPredictionModel:
         self.obj_names = history.obj_names
         self.prm_names = history.prm_names
         self.df = df
-        self.x: np.ndarray = df[self.prm_names].values
-        self.y: np.ndarray = df[self.obj_names].values
 
     def get_prm_index(self, prm_name):
         return self.prm_names.index(prm_name) if prm_name in self.prm_names else None
@@ -53,7 +51,14 @@ class PyFemtetPredictionModel:
         return self.obj_names.index(obj_name) if obj_name in self.obj_names else None
 
     def fit(self) -> None:
-        self.meta_model.fit(self.x, self.y)
+        from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
+        if isinstance(self.meta_model, SingleTaskGPModel):
+            feasible = (~np.isnan(self.df[self.obj_names].values)).prod(axis=1).astype(bool)
+            y = self.df[feasible][self.obj_names].values
+            x = self.df[feasible][self.prm_names].values
+            self.meta_model.fit(x, y)
+        else:
+            raise NotImplementedError
 
     def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 2
