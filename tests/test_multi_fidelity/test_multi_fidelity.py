@@ -12,13 +12,16 @@ from pyfemtet.opt.optimizer._optuna._multi_fidelity_sampler import MultiFidelity
 import pytest
 
 N_STARTUP_TRIALS = 2
-N_ADDITIONAL_TRIALS = 3
-DIM = 9
-OBJ_DIM = 3
-OFFSET = 0. * pi
+N_ADDITIONAL_TRIALS = 0
+DIM = 2
+OBJ_DIM = 1
+OFFSET = 0.1 * pi
 FIDELITY = 0.5
+N_PARALLEL = 1
+SKIP = 5
 
 NEG_CON = False
+USE_MAIN_AS_SUB = False
 
 
 def main_model(opt_: OptunaOptimizer):
@@ -36,19 +39,19 @@ def main_model2(opt_: OptunaOptimizer):
 def sub_model(opt_: OptunaOptimizer):
     print('===== sub model =====')
     x = opt_.get_parameter('values')
-    return ((x - pi - OFFSET) ** 2).sum() * 10 + 10
+    return ((x - pi - OFFSET) ** 2).sum()
 
 
 def sub_model2(opt_: OptunaOptimizer):
     print('===== sub2 model =====')
     x = opt_.get_parameter('values')
-    return ((x - pi / 2 - pi - OFFSET) ** 2).sum() * 10 + 10
+    return ((x - pi / 2 - pi - OFFSET) ** 2).sum()
 
 
 def should_solve_main(x: np.ndarray, history: History):
     n_main_solved = len(history.get_filtered_df([history.OptTrialState.succeeded]))
     n_all_solved = len(history.get_filtered_df([history.OptTrialState.succeeded, history.OptTrialState.skipped]))
-    if (n_all_solved > N_STARTUP_TRIALS) and (n_all_solved % DIM * 2 == 0):
+    if (n_all_solved > N_STARTUP_TRIALS) and (n_all_solved % SKIP == 0):
         return True
     else:
         return False
@@ -90,18 +93,26 @@ if __name__ == '__main__':
             sub_fem,
             fidelity=FIDELITY,
         )
-        sub_fidelity.add_objective(sub_model, obj_name, args=(opt,))
-        if OBJ_DIM >= 2:
-            sub_fidelity.add_objective(sub_model2, obj_name + '2', args=(opt,))
-            if OBJ_DIM >= 3:
-                sub_fidelity.add_objective(sub_model, obj_name + '3', args=(opt,))
+        if not USE_MAIN_AS_SUB:
+            sub_fidelity.add_objective(sub_model, obj_name, args=(opt,))
+            if OBJ_DIM >= 2:
+                sub_fidelity.add_objective(sub_model2, obj_name + '2', args=(opt,))
+                if OBJ_DIM >= 3:
+                    sub_fidelity.add_objective(sub_model, obj_name + '3', args=(opt,))
+        else:
+            sub_fidelity.add_objective(main_model, obj_name, args=(opt,))
+            if OBJ_DIM >= 2:
+                sub_fidelity.add_objective(main_model2, obj_name + '2', args=(opt,))
+                if OBJ_DIM >= 3:
+                    sub_fidelity.add_objective(main_model, obj_name + '3', args=(opt,))
+
         femopt.add_sub_fidelity(sub_fidelity)
 
     femopt.set_random_seed(42)
     femopt.optimize(
         N_STARTUP_TRIALS + N_ADDITIONAL_TRIALS,
         confirm_before_exit=True,
-        n_parallel=1,
+        n_parallel=N_PARALLEL,
     )
 
 

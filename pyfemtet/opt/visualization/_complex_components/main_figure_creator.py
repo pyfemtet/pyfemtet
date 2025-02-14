@@ -439,6 +439,7 @@ def get_objective_plot(history: History, df: pd.DataFrame, obj_names: list[str])
 
         fig.update_layout(
             margin=dict(l=0, r=0, b=0, t=30),
+            scene=dict(aspectmode="cube")
         )
         fig.update_traces(
             marker=dict(

@@ -123,10 +123,10 @@ class PredictionModelCreator:
 
             for sub_fidelity_name in history.sub_fidelity_names:
                 obj_names_per_sub_fidelity = history.get_obj_names_of_sub_fidelity(sub_fidelity_name)
-                obj_name_per_sub_fidelity = [name for name in obj_names_per_sub_fidelity if sub_fidelity_name in name][0]
+                sub_obj_name = obj_names_per_sub_fidelity[history.obj_names.index(obj_name)]
                 fig.add_trace(
                     go.Scatter3d(
-                        x=df[prm_name_1], y=df[prm_name_2], z=df[obj_name_per_sub_fidelity],
+                        x=df[prm_name_1], y=df[prm_name_2], z=df[sub_obj_name],
                         mode='markers',
                         marker=dict(
                             size=3,
@@ -136,6 +136,12 @@ class PredictionModelCreator:
                         name=f'trial of {sub_fidelity_name}',
                     )
                 )
+
+            fig.update_layout(
+                dict(scene=dict(aspectmode="cube"))
+            )
+
+
 
         else:
             fig = go.Figure(data=go.Scatter(
@@ -151,7 +157,7 @@ class PredictionModelCreator:
                 obj_names_per_sub_fidelity = history.get_obj_names_of_sub_fidelity(sub_fidelity_name)
                 obj_name_per_sub_fidelity = [name for name in obj_names_per_sub_fidelity if sub_fidelity_name in name][0]
                 fig.add_trace(
-                    go.Scatter3d(
+                    go.Scatter(
                         x=df[prm_name_1], y=df[obj_name_per_sub_fidelity],
                         mode='markers',
                         marker=dict(
