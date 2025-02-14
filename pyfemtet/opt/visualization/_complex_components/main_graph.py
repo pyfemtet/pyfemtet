@@ -469,6 +469,8 @@ class MainGraph(AbstractPage):
             bbox = pt['bbox']
 
             # get relative location of point
+            if 'xaxis' not in figure['layout']:
+                raise PreventUpdate
             xrange = figure['layout']['xaxis']['range']
             # yrange = figure['layout']['yaxis']['range']
 
