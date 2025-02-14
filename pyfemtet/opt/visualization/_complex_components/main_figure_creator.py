@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -95,7 +96,7 @@ def get_default_figure(history, df):
     return fig
 
 
-def _get_single_objective_plot(history, df):
+def _get_single_objective_plot(history: History, df):
 
     df = _ls.localize(df)
     obj_name = history.obj_names[0]
@@ -103,8 +104,29 @@ def _get_single_objective_plot(history, df):
     df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
     obj_name = obj_name.replace(' / ', '<BR>/ ')
 
+    sub_fidelity_names = history.sub_fidelity_names
+    obj_names_per_sub_fidelity_list: list[list[str]] = [
+        history.get_obj_names_of_sub_fidelity(
+            sub_fidelity_name
+        ) for sub_fidelity_name in sub_fidelity_names
+    ]
+
     # ===== base figure =====
     fig = go.Figure()
+
+
+    # ===== sub-fidelity =====
+    for sub_fidelity_name, obj_names_per_sub_fidelity, color in zip(sub_fidelity_names, obj_names_per_sub_fidelity_list, px.colors.qualitative.G10[::-1]):
+        assert len(obj_names_per_sub_fidelity) == 1
+        obj_name_per_sub_fidelity = obj_names_per_sub_fidelity[0]
+        trace = go.Scatter(
+            x=df['trial'],
+            y=df[obj_name_per_sub_fidelity],
+            mode='markers',
+            marker=dict(color=color, symbol='square-open'),
+            name=sub_fidelity_name,
+        )
+        fig.add_trace(trace)
 
     # ===== i 番目が、その時点までで最適かどうか =====
     # その時点までの最適な点 index
@@ -114,20 +136,29 @@ def _get_single_objective_plot(history, df):
     objective_directions = df[f'{obj_name}_direction'].values
     for i, (obj, direction) in enumerate(zip(objectives, objective_directions)):
         # DESCRIPTION: 最適化中に direction は変化しない前提
+
+        obj_halfway = objectives[:i+1]
+        feasible_obj_halfway = obj_halfway[np.where(~np.isnan(obj_halfway))]
+        if len(feasible_obj_halfway) == 0:
+            indices.append(i)
+            continue
+
         if direction == 'maximize':
-            if obj == max(objectives[:i+1]):
+            if obj == max(feasible_obj_halfway):
                 indices.append(i)
             else:
                 anti_indices.append(i)
+
         elif direction == 'minimize':
-            if obj == min(objectives[:i+1]):
+            if obj == min(feasible_obj_halfway):
                 indices.append(i)
             else:
                 anti_indices.append(i)
+
         else:
             residuals = (objectives - objective_directions) ** 2
             residual = residuals[i]
-            if residual == min(residuals[:i+1]):
+            if residual == min(residuals[:i+1][np.where(~np.isnan(residuals[:i+1]))]):
                 indices.append(i)
             else:
                 anti_indices.append(i)

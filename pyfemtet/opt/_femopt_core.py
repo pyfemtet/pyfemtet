@@ -558,10 +558,10 @@ class _HistoryColumnProcessor:
     def extract_fidelity_obj_columns(columns, meta_columns, sub_fidelity_name):
         out = []
         for c, m in zip(columns, meta_columns):
-            if m.startswith('fidelity_') and ('_obj' in m):  # all
+            if m.startswith('fidelity') and ('_obj' in m):  # all
                 name = c.split(' of ')[-1]
                 if name == sub_fidelity_name:  # given name only
-                    out.append(name)
+                    out.append(c)
         return out
 
     def parse_csv(self, path) -> tuple[
@@ -686,7 +686,7 @@ class History:
             # csv の読み込み
             self.load()
 
-    def get_fidelity_obj_columns(self, sub_fidelity_name):
+    def get_obj_names_of_sub_fidelity(self, sub_fidelity_name):
         columns, meta_columns = self.create_df_columns()
         return self._column_mgr.extract_fidelity_obj_columns(
             columns,
@@ -784,7 +784,6 @@ class History:
         meta_columns.append('')
 
         return columns, meta_columns
-
 
     def _record(
             self,
