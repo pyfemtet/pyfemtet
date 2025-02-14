@@ -857,6 +857,10 @@ class FEMOpt:
             del self.opt.fem
 
             # FIXME: ここで sub_fidelity の中身の fem への参照を一旦消す
+            def sub_fidelity_reconstructor():
+                _s = SubFidelityModels()
+                ...  # some re-construct codes
+                return _s
 
             # クラスターでの計算開始
             self.status.set(OptimizationStatus.LAUNCHING_FEM)
@@ -866,6 +870,8 @@ class FEMOpt:
                 subprocess_indices,
                 [self.worker_status_list] * len(subprocess_indices),
                 [wait_setup] * len(subprocess_indices),
+                [False] * len(subprocess_indices),
+                [sub_fidelity_reconstructor] * len(subprocess_indices),
                 workers=worker_addresses if self.opt.is_cluster else worker_addresses[1:],
                 allow_other_workers=False,
             )

@@ -549,8 +549,8 @@ class _HistoryColumnProcessor:
     def extract_fidelity_names(columns, meta_columns):
         out = []
         for c, m in zip(columns, meta_columns):
-            if ('fidelity_' in m) and ('_obj0' in m):  # 0 only
-                name = c.split(' of ')[-1]
+            if m.startswith('fidelity') and ('obj' not in m):
+                name = c
                 out.append(name)
         return out
 
@@ -558,7 +558,7 @@ class _HistoryColumnProcessor:
     def extract_fidelity_obj_columns(columns, meta_columns, sub_fidelity_name):
         out = []
         for c, m in zip(columns, meta_columns):
-            if ('fidelity_' in m) and ('_obj' in m):  # all
+            if m.startswith('fidelity_') and ('_obj' in m):  # all
                 name = c.split(' of ')[-1]
                 if name == sub_fidelity_name:  # given name only
                     out.append(name)
@@ -723,61 +723,6 @@ class History:
 
         self.set_df(df)
 
-    def get_filtered_df(self, states: list[OptTrialState]) -> pd.DataFrame:
-        df = self.get_df()
-        indices = [s in set([state.value for state in states]) for s in df['state']]
-        return df[indices]
-
-    def filter_valid(self, df_, keep_trial_num=False, include_skip=False):
-        buff = df_[self.obj_names].notna()
-        idx = buff.prod(axis=1).astype(bool)
-        filtered_df = df_[idx]
-        if not keep_trial_num:
-            filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1
-        return filtered_df
-
-    def get_df(self, valid_only=False, include_skip=False) -> pd.DataFrame:
-        if self.__scheduler_address is None:
-            if valid_only:
-                return self.filter_valid(self._df)
-            else:
-                return self._df
-        else:
-            # scheduler がまだ存命か確認する
-            try:
-                with Lock('access-df'):
-                    client_: 'Client' = get_client(self.__scheduler_address)
-
-                    if 'df' in client_.list_datasets():
-                        df = client_.get_dataset('df')
-
-                        if valid_only:
-                            df = self.filter_valid(df, include_skip)
-
-                        return df
-
-                    else:
-                        logger.debug('Access df of History before it is initialized.')
-                        return pd.DataFrame()
-            except OSError:
-                logger.error('Scheduler is already dead. Most frequent reason to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
-                return pd.DataFrame()
-
-    def set_df(self, df: pd.DataFrame):
-        if self.__scheduler_address is None:
-            self._df = df
-        else:
-            try:
-                with Lock('access-df'):
-                    client_: 'Client' = get_client(self.__scheduler_address)
-                    if 'df' in client_.list_datasets():
-                        client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
-                    client_.publish_dataset(**dict(
-                        df=df
-                    ))
-            except OSError:
-                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
-
     def create_df_columns(self):
         """Create columns of history."""
 
@@ -817,9 +762,11 @@ class History:
         meta_columns.append('')
 
         # sub-fidelity relative
-        # add n_sub_fidelity * n_obj columns
+        # add n_sub_fidelity * (n_fidelity(1) + n_obj columns)
         if self.sub_fidelity_names is not None:
             for i, sub_fidelity_name in enumerate(self.sub_fidelity_names):
+                columns.append(sub_fidelity_name)
+                meta_columns.append(f'fidelity{i}')
                 for j, obj_name in enumerate(self.obj_names):
                     columns.append(f'{obj_name} of {sub_fidelity_name}')
                     meta_columns.append(f'fidelity{i}_obj{j}')
@@ -838,13 +785,6 @@ class History:
 
         return columns, meta_columns
 
-    def generate_hidden_infeasible_result(self):
-        y = np.full_like(np.zeros(len(self.obj_names)), np.nan)
-        c = np.full_like(np.zeros(len(self.cns_names)), np.nan)
-        return y, c
-
-    def is_hidden_infeasible_result(self, y):
-        return np.all(np.isnan(y))
 
     def _record(
             self,
@@ -908,8 +848,19 @@ class History:
         row.append(all(feasible_list) and not self.is_hidden_infeasible_result(obj_values))
 
         # sub-fidelity
-        for _, (_, values) in sub_fidelity_obj_values.items():
-            row.extend(values)
+        for sub_fidelity_name in self.sub_fidelity_names:
+
+            # dict[str, tuple['Fidelity', list[float]]]
+            if sub_fidelity_name in sub_fidelity_obj_values:
+                fidelity, sub_y = sub_fidelity_obj_values[sub_fidelity_name]
+                row.append(fidelity)
+                row.extend(sub_y)
+
+            else:
+                fidelity = np.nan
+                sub_y, _ = self.generate_hidden_infeasible_result()
+                row.append(fidelity)
+                row.extend(sub_y)
 
         # the others
         row.append(-1.)  # dummy hypervolume
@@ -941,6 +892,69 @@ class History:
                 trial = df['trial'].values[-1]
                 client = get_client()  # always returns valid client
                 client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
+
+    def get_filtered_df(self, states: list[OptTrialState]) -> pd.DataFrame:
+        df = self.get_df()
+        indices = [s in set([state.value for state in states]) for s in df['state']]
+        return df[indices]
+
+    def filter_valid(self, df_, keep_trial_num=False, include_skip=False):
+        buff = df_[self.obj_names].notna()
+        idx = buff.prod(axis=1).astype(bool)
+        filtered_df = df_[idx]
+        if not keep_trial_num:
+            filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1
+        return filtered_df
+
+    def get_df(self, valid_only=False, include_skip=False) -> pd.DataFrame:
+        if self.__scheduler_address is None:
+            if valid_only:
+                return self.filter_valid(self._df)
+            else:
+                return self._df
+        else:
+            # scheduler がまだ存命か確認する
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+
+                    if 'df' in client_.list_datasets():
+                        df = client_.get_dataset('df')
+
+                        if valid_only:
+                            df = self.filter_valid(df, include_skip)
+
+                        return df
+
+                    else:
+                        logger.debug('Access df of History before it is initialized.')
+                        return pd.DataFrame()
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reason to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
+                return pd.DataFrame()
+
+    def set_df(self, df: pd.DataFrame):
+        if self.__scheduler_address is None:
+            self._df = df
+        else:
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+                    if 'df' in client_.list_datasets():
+                        client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
+                    client_.publish_dataset(**dict(
+                        df=df
+                    ))
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
+
+    def generate_hidden_infeasible_result(self):
+        y = np.full_like(np.zeros(len(self.obj_names)), np.nan)
+        c = np.full_like(np.zeros(len(self.cns_names)), np.nan)
+        return y, c
+
+    def is_hidden_infeasible_result(self, y):
+        return np.all(np.isnan(y))
 
     def _calc_non_domi(self, objectives, df):
 

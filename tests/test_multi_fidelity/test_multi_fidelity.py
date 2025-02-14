@@ -78,7 +78,8 @@ if __name__ == '__main__':
     femopt.set_random_seed(42)
     femopt.optimize(
         N_STARTUP_TRIALS + N_ADDITIONAL_TRIALS,
-        confirm_before_exit=True
+        confirm_before_exit=True,
+        n_parallel=2,
     )
 
 

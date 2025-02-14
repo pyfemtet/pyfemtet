@@ -370,6 +370,7 @@ class AbstractOptimizer(ABC):
             worker_status_list,  # 他の worker の status オブジェクト
             wait_setup,  # 他の worker の status が ready になるまで待つか
             skip_reconstruct=False,  # reconstruct fem を行うかどうか
+            sub_fidelity_reconstructor: callable = None,
             space_dir=None,  # 特定の space_dir を使うかどうか
     ) -> Optional[Exception]:
 
@@ -384,6 +385,8 @@ class AbstractOptimizer(ABC):
         # set_fem をはじめ、終了したらそれを示す
         self._reconstruct_fem(skip_reconstruct)
         self.fem._setup_after_parallel(opt=self, space_dir=space_dir)
+        if sub_fidelity_reconstructor is not None:
+            self.sub_fidelity_models = sub_fidelity_reconstructor()
         self.sub_fidelity_models._reconstruct_fem(skip_reconstruct)
         self.sub_fidelity_models.setup_after_parallel(opt=self, space_dir=space_dir)
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
