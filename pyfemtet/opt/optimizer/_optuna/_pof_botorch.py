@@ -1774,64 +1774,7 @@ class PoFBoTorchSampler(BaseSampler):
         with manual_seed(self._seed):
 
             # ===== model_c 構築 =====
-            # ===== model_c を作成する =====
-            # ----- bounds, train_x, train_y を準備する -----
-            # train_x, train_y は元実装にあわせないと
-            # ACQF.forward(X) の引数と一致しなくなる。
-
-            # strict constraint 違反またはモデル破綻で prune された trial
-            pruned_trials = study.get_trials(deepcopy=False, states=(TrialState.PRUNED,))
-            # 元実装と違い、このモデルを基に次の点を提案するわけではないので running は考えなくてよい
-            trials = completed_trials + pruned_trials
-            n_trials = len(trials)
-
-            # ----- train_x, train_y (completed_params, completed_values) を作る -----
-            # trials から x, y(=feasibility) を収集する
-            trans = _SearchSpaceTransform(search_space)
-            bounds: numpy.ndarray | torch.Tensor = trans.bounds
-            params: numpy.ndarray | torch.Tensor = numpy.empty((n_trials, trans.bounds.shape[0]), dtype=numpy.float64)
-            values: numpy.ndarray | torch.Tensor = numpy.empty((n_trials, 1), dtype=numpy.float64)
-            for trial_idx, trial in enumerate(trials):
-                params[trial_idx] = trans.transform(trial.params)
-                if trial.state == TrialState.COMPLETE:
-                    # complete, but infeasible (in case of weak constraint)
-                    if 'constraints' in trial.user_attrs.keys():
-                        cns = trial.user_attrs['constraints']
-                        if cns is None:
-                            values[trial_idx, 0] = 1.  # feasible (or should RuntimeError)
-                        else:
-                            if numpy.array(cns).max() > 0:
-                                values[trial_idx, 0] = 1.  # feasible
-                            else:
-                                values[trial_idx, 0] = 1.  # feasible
-                    else:
-                        values[trial_idx, 0] = 1.  # feasible
-                elif trial.state == TrialState.PRUNED:
-                    values[trial_idx, 0] = 0.  # infeasible
-                else:
-                    assert False, "trial.state must be TrialState.COMPLETE or TrialState.PRUNED."
-            bounds = torch.from_numpy(bounds).to(self._device)
-            params = torch.from_numpy(params).to(self._device)  # 未正規化, n_points x n_parameters Tensor
-            values = torch.from_numpy(values).to(self._device)  # 0 or 1, n_points x 1 Tensor
-            bounds.transpose_(0, 1)  # 未正規化, 2 x n_parameters Tensor
-
-            # ----- model_c を作る -----
-            # with manual_seed(self._seed):
-            train_x_c = normalize(params, bounds=bounds)
-            train_y_c = values
-            model_c = SingleTaskGP(
-                train_x_c,  # n_data x n_prm
-                train_y_c,  # n_data x n_obj
-                # train_Yvar=1e-4 + torch.zeros_like(train_y_c),
-                outcome_transform=Standardize(
-                    m=train_y_c.shape[-1],  # The output dimension.
-                )
-            )
-            mll_c = ExactMarginalLogLikelihood(
-                model_c.likelihood,
-                model_c
-            )
-            fit_gpytorch_mll(mll_c)
+            model_c = self.process_constraint(study, search_space)
 
             # ===== NonlinearConstraints の実装に必要なクラスを渡す =====
             # PyFemtet 専用関数が前提になっているからこの実装をせざるを得ない。
@@ -1912,3 +1855,110 @@ class PoFBoTorchSampler(BaseSampler):
         if self._constraints_func is not None:
             _process_constraints_after_trial(self._constraints_func, study, trial, state)
         self._independent_sampler.after_trial(study, trial, state, values)
+
+    def process_constraint(self, study, search_space, gp_model_name=None):
+
+        # ===== argument processing =====
+        add_feature_dim = False
+        if gp_model_name is not None:
+            if gp_model_name == 'SingleTaskMultiFidelityGP':
+                add_feature_dim = True
+
+
+        # ===== trials の整理 =====
+
+        # 正常に終了した trial
+        completed_trials = study.get_trials(deepcopy=False, states=(TrialState.COMPLETE,))
+
+        # strict constraint 違反またはモデル破綻で prune された trial
+        pruned_trials = study.get_trials(deepcopy=False, states=(TrialState.PRUNED,))
+
+        # solve_condition で skip された trial or 何らかの理由で失敗した trial
+        # multi-fidelity など
+        failed_trials = study.get_trials(deepcopy=False, states=(TrialState.FAIL,))
+
+        main_trials = completed_trials + pruned_trials
+        all_trials = main_trials + failed_trials
+
+
+        # ===== bounds, train_x(=params), train_y(=feasibility) の作成 =====
+        trans = _SearchSpaceTransform(search_space)
+        bounds: numpy.ndarray = trans.bounds
+        if add_feature_dim:
+            bounds: numpy.ndarray = numpy.concatenate([[[0, 1]], bounds], axis=0)
+        params: numpy.ndarray = numpy.empty((len(main_trials), bounds.shape[0]), dtype=numpy.float64)
+        values: numpy.ndarray = numpy.empty((len(main_trials), 1), dtype=numpy.float64)
+
+        # 元実装と違い、このモデルを基に次の点を提案する
+        # わけではないので running は考えなくてよい
+        for trial_idx, trial in enumerate(main_trials):
+
+            # for train_x
+            if add_feature_dim:
+                params[trial_idx, 0] = 1.
+                params[trial_idx, 1:] = trans.transform(trial.params)
+
+            else:
+                params[trial_idx] = trans.transform(trial.params)
+
+            # If COMPLETE, check explicit constraint violation.
+            if trial.state == TrialState.COMPLETE:
+
+                # Assume containing explicit constraints
+                if 'constraints' in trial.user_attrs.keys():
+                    cns = trial.user_attrs['constraints']
+
+                    # No explicit constraints
+                    if cns is None:
+                        values[trial_idx, 0] = 1.  # feasible (or should RuntimeError)
+
+                    # Has explicit constraints
+                    else:
+
+                        # No violation
+                        if numpy.array(cns).max() <= 0:
+                            values[trial_idx, 0] = 1.  # feasible
+
+                        # Violation exists (both soft or hard constraint)
+                        else:
+                            values[trial_idx, 0] = 0.  # infeasible
+
+                # No explicit constraints
+                else:
+                    values[trial_idx, 0] = 1.  # feasible
+
+            # Hidden constraint violation
+            elif trial.state == TrialState.PRUNED:
+                values[trial_idx, 0] = 0.  # infeasible
+
+
+            else:
+                assert False, "trial.state must be TrialState.COMPLETE or TrialState.PRUNED."
+
+        bounds: torch.Tensor = torch.from_numpy(bounds).to(self._device)
+        params: torch.Tensor = torch.from_numpy(params).to(self._device)  # 未正規化, n_points x n_parameters Tensor
+        values: torch.Tensor = torch.from_numpy(values).to(self._device)  # 0 or 1, n_points x 1 Tensor
+        bounds.transpose_(0, 1)  # 未正規化, 2 x n_parameters Tensor
+
+        # ----- model_c を作る -----
+        # train_x, train_y は元実装にあわせないと
+        # ACQF.forward(X) の引数と一致しなくなる。
+
+        # with manual_seed(self._seed):
+        train_x_c = normalize(params, bounds=bounds)
+        train_y_c = values
+        model_c = SingleTaskGP(
+            train_x_c,  # n_data x n_prm
+            train_y_c,  # n_data x n_obj
+            # no train_yvar_c
+            outcome_transform=Standardize(
+                m=train_y_c.shape[-1],  # The output dimension.
+            )
+        )
+        mll_c = ExactMarginalLogLikelihood(
+            model_c.likelihood,
+            model_c
+        )
+        fit_gpytorch_mll(mll_c)
+
+        return model_c

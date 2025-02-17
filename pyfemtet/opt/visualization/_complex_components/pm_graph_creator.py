@@ -10,7 +10,7 @@ import plotly.express as px
 from pyfemtet.opt._femopt_core import History
 
 from pyfemtet.opt.prediction._base import PyFemtetPredictionModel
-from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel
+from pyfemtet.opt.prediction.single_task_gp import SingleTaskGPModel, SingleTaskMultiFidelityGPModel
 from pyfemtet._message import Msg
 
 
@@ -21,8 +21,13 @@ class PredictionModelCreator:
         # common
         self.history = history  # used to check fit or not
         self.df = df
+
         # method specific
-        self.pmm = PyFemtetPredictionModel(history, df, SingleTaskGPModel)
+        if len(self.history.sub_fidelity_names) == 0:
+            ModelClass = SingleTaskGPModel
+        else:
+            ModelClass = SingleTaskMultiFidelityGPModel
+        self.pmm = PyFemtetPredictionModel(history, df, ModelClass)
         self.pmm.fit()
 
     def create_figure(
@@ -103,15 +108,41 @@ class PredictionModelCreator:
 
         # scatter plot
         if prm_name_2:
-            fig = go.Figure(data=go.Scatter3d(
-                x=df[prm_name_1], y=df[prm_name_2], z=df[obj_name],
-                mode='markers',
-                marker=dict(
-                    size=3,
-                    color='black',
-                ),
-                name='trial',
-            ))
+            fig = go.Figure()
+            fig.add_trace(
+                go.Scatter3d(
+                    x=df[prm_name_1], y=df[prm_name_2], z=df[obj_name],
+                    mode='markers',
+                    marker=dict(
+                        size=3,
+                        color='black',
+                    ),
+                    name='trial',
+                )
+            )
+
+            for sub_fidelity_name in history.sub_fidelity_names:
+                obj_names_per_sub_fidelity = history.get_obj_names_of_sub_fidelity(sub_fidelity_name)
+                sub_obj_name = obj_names_per_sub_fidelity[history.obj_names.index(obj_name)]
+                fig.add_trace(
+                    go.Scatter3d(
+                        x=df[prm_name_1], y=df[prm_name_2], z=df[sub_obj_name],
+                        mode='markers',
+                        marker=dict(
+                            size=3,
+                            color='black',
+                            symbol='square-open',
+                        ),
+                        name=f'trial of {sub_fidelity_name}',
+                    )
+                )
+
+            fig.update_layout(
+                dict(scene=dict(aspectmode="cube"))
+            )
+
+
+
         else:
             fig = go.Figure(data=go.Scatter(
                 x=df[prm_name_1], y=df[obj_name],
@@ -121,6 +152,22 @@ class PredictionModelCreator:
                 ),
                 name='trial',
             ))
+
+            for sub_fidelity_name in history.sub_fidelity_names:
+                obj_names_per_sub_fidelity = history.get_obj_names_of_sub_fidelity(sub_fidelity_name)
+                obj_name_per_sub_fidelity = [name for name in obj_names_per_sub_fidelity if sub_fidelity_name in name][0]
+                fig.add_trace(
+                    go.Scatter(
+                        x=df[prm_name_1], y=df[obj_name_per_sub_fidelity],
+                        mode='markers',
+                        marker=dict(
+                            size=3,
+                            color='black',
+                            symbol='square-open',
+                        ),
+                        name=f'trial of {sub_fidelity_name}',
+                    )
+                )
 
         # set opacity by its distance
         def set_opacity(trace):

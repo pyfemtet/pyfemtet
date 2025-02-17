@@ -90,7 +90,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self._temporary_storage = None
         self._temporary_storage_path = '_pyfemtet_temporary_file.db'
 
-    def _objective(self, trial):
+    def _objective(self, trial: optuna.trial.Trial):
 
         logger.info('')
         logger.info(f'===== trial {1 + len(self.history.get_df())} ({len(self.history.get_df(valid_only=True))} succeeded trials) start =====')
@@ -140,12 +140,33 @@ class OptunaOptimizer(AbstractOptimizer):
                 logger.info(self.variables.get_variables('dict', filter_parameter=True))
                 self._retry_counter += 1
                 self.message = f'Failed to calculate objectives because of the constraint violation: {cns.name}'
-                self.f(x, _record_infeasible=True)
+                self.record_infeasible(x, self.history.OptTrialState.strict_constraint_violation.value)
                 raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 計算
         try:
-            _, _y, c = self.f(x)  # f の中で info は出している
+            _1, _y, c, _2, _sub_y = self.f(x)  # f の中で info は出している
+
+            if _sub_y is not None:
+                _sub_y: dict[str, tuple['Fidelity', list[float]]]
+                __sub_y = {
+                    fidelity: sub_fidelity_obj_values
+                    for fidelity, sub_fidelity_obj_values
+                    in _sub_y.values()
+                }
+                trial.set_user_attr('sub-fidelity-values', __sub_y)
+
+            if _y is None:
+                logger.info('Solving main fidelity model skipped by user set condition.')
+                self.message = 'Solve skipped by user set condition.'
+                self.record_infeasible(x, self.history.OptTrialState.skipped.value)
+                return None
+
+            if _sub_y is None and _y is None:
+                logger.warning('No models are calculated! Consider to '
+                               'avoid such combination of conditions '
+                               'to stabilize optimization.')
+
         except (ModelError, MeshError, SolveError) as e:
             # 中断の確認 (解析中に interrupt されている場合対策)
             if self.entire_status.get() == OptimizationStatus.INTERRUPTING:
@@ -163,7 +184,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
             self._retry_counter += 1
             self.message = f'Failed to calculate objectives because of the parameter broke the FEM model.'
-            self.f(x, _record_infeasible=True)
+            self.record_infeasible(x, self.history.OptTrialState.hidden_constraint_violation.value)
             raise optuna.TrialPruned()  # set TrialState PRUNED because FAIL causes similar candidate loop.
 
         # 拘束 attr の更新

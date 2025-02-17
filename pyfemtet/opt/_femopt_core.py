@@ -11,6 +11,7 @@ import csv
 import ctypes
 from packaging import version
 import platform
+import enum
 import warnings
 
 # 3rd-party
@@ -578,6 +579,81 @@ class ObjectivesFunc:
         return f
 
 
+class _HistoryColumnProcessor:
+
+    def __init__(
+            self,
+            history,
+            prm_names,
+            obj_names,
+            cns_names,
+            sub_fidelity_names,
+    ):
+        self.history: 'History' = history
+        self.prm_names: list[str] | None = prm_names
+        self.obj_names: list[str] | None = obj_names
+        self.cns_names: list[str] | None = cns_names
+        self.sub_fidelity_names: list[str] | None = sub_fidelity_names
+
+    @staticmethod
+    def extract_prm_names(columns, meta_columns):
+        return [c for c, m in zip(columns, meta_columns) if m == 'prm']
+
+    @staticmethod
+    def extract_obj_names(columns, meta_columns):
+        return [c for c, m in zip(columns, meta_columns) if m == 'obj']
+
+    @staticmethod
+    def extract_cns_names(columns, meta_columns):
+        return [c for c, m in zip(columns, meta_columns) if m == 'cns']
+
+    @staticmethod
+    def extract_fidelity_names(columns, meta_columns):
+        out = []
+        for c, m in zip(columns, meta_columns):
+            if m.startswith('fidelity') and ('obj' not in m):
+                name = c
+                out.append(name)
+        return out
+
+    @staticmethod
+    def extract_fidelity_obj_columns(columns, meta_columns, sub_fidelity_name):
+        out = []
+        for c, m in zip(columns, meta_columns):
+            if m.startswith('fidelity') and ('_obj' in m):  # all
+                name = c.split(' of ')[-1]
+                if name == sub_fidelity_name:  # given name only
+                    out.append(c)
+        return out
+
+    @staticmethod
+    def extract_fidelity_column_name(columns, meta_columns, sub_fidelity_name):
+        for c, m in zip(columns, meta_columns):
+            if m.startswith('fidelity') and ('obj' not in m):
+                name = c
+                if name == sub_fidelity_name:
+                    return c
+
+    def parse_csv(self, path) -> tuple[
+        pd.DataFrame,
+        list,  # columns
+        list,  # meta_columns
+    ]:
+
+        # df を読み込む
+        df = pd.read_csv(path, encoding=self.history.ENCODING, header=self.history.HEADER_ROW)
+
+        # meta_columns を読み込む
+        with open(path, mode='r', encoding=self.history.ENCODING, newline='\n') as f:
+            reader = csv.reader(f, delimiter=',')
+            meta_columns = reader.__next__()
+
+        # 最適化問題を読み込む
+        columns = df.columns
+
+        return df, columns, meta_columns
+
+
 class History:
     """Class for managing the history of optimization results.
 
@@ -605,12 +681,19 @@ class History:
     is_processing = False
     _df = None  # in case without client
 
+    class OptTrialState(enum.Enum):
+        succeeded = 'Succeeded'
+        hidden_constraint_violation = 'Hidden Constraint Violation'
+        strict_constraint_violation = 'Strict Constraint Violation'
+        skipped = 'Skipped'
+
     def __init__(
             self,
             history_path,
             prm_names=None,
             obj_names=None,
             cns_names=None,
+            sub_fidelity_names = None,
             client=None,
             hv_reference=None,
     ):
@@ -622,9 +705,17 @@ class History:
         self.prm_names = prm_names
         self.obj_names = obj_names
         self.cns_names = cns_names
+        self.sub_fidelity_names = sub_fidelity_names
         self.extra_data = dict()
         self.meta_columns = None
         self.__scheduler_address = client.scheduler.address if client is not None else None
+        self._column_mgr = _HistoryColumnProcessor(
+            self,
+            self.prm_names,
+            self.obj_names,
+            self.cns_names,
+            self.sub_fidelity_names,
+        )
 
         # 最適化実行中かどうか
         self.is_processing = client is not None
@@ -642,9 +733,7 @@ class History:
             # そうでなければ df を初期化
             else:
                 columns, meta_columns = self.create_df_columns()
-                df = pd.DataFrame()
-                for c in columns:
-                    df[c] = None
+                df = pd.DataFrame(columns=columns)
                 self.meta_columns = meta_columns
                 self.set_df(df)
 
@@ -665,22 +754,33 @@ class History:
             # csv の読み込み
             self.load()
 
+    def get_fidelity_column_name(self, sub_fidelity_name):
+        columns, meta_columns = self.create_df_columns()
+        return self._column_mgr.extract_fidelity_column_name(
+            columns,
+            meta_columns,
+            sub_fidelity_name,
+        )
+
+    def get_obj_names_of_sub_fidelity(self, sub_fidelity_name):
+        columns, meta_columns = self.create_df_columns()
+        return self._column_mgr.extract_fidelity_obj_columns(
+            columns,
+            meta_columns,
+            sub_fidelity_name
+        )
+
     def load(self):
         """Load existing result csv."""
 
         # df を読み込む
-        df = pd.read_csv(self.path, encoding=self.ENCODING, header=self.HEADER_ROW)
-
-        # meta_columns を読み込む
-        with open(self.path, mode='r', encoding=self.ENCODING, newline='\n') as f:
-            reader = csv.reader(f, delimiter=',')
-            self.meta_columns = reader.__next__()
+        df, old_columns, old_meta_columns = self._column_mgr.parse_csv(self.path)
 
         # 最適化問題を読み込む
-        columns = df.columns
-        prm_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'prm']
-        obj_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'obj']
-        cns_names = [column for i, column in enumerate(columns) if self.meta_columns[i] == 'cns']
+        prm_names = self._column_mgr.extract_prm_names(old_columns, old_meta_columns)
+        obj_names = self._column_mgr.extract_obj_names(old_columns, old_meta_columns)
+        cns_names = self._column_mgr.extract_cns_names(old_columns, old_meta_columns)
+        sub_fidelity_names = self._column_mgr.extract_fidelity_names(old_columns, old_meta_columns)
 
         # is_restart の場合、読み込んだ names と引数の names が一致するか確認しておく
         if self.is_restart:
@@ -693,54 +793,11 @@ class History:
             self.prm_names = prm_names
             self.obj_names = obj_names
             self.cns_names = cns_names
+            self.sub_fidelity_names = sub_fidelity_names
+
+        self.meta_columns = old_meta_columns
 
         self.set_df(df)
-
-    def filter_valid(self, df_, keep_trial_num=False):
-        buff = df_[self.obj_names].notna()
-        idx = buff.prod(axis=1).astype(bool)
-        filtered_df = df_[idx]
-        if not keep_trial_num:
-            filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1
-        return filtered_df
-
-    def get_df(self, valid_only=False) -> pd.DataFrame:
-        if self.__scheduler_address is None:
-            if valid_only:
-                return self.filter_valid(self._df)
-            else:
-                return self._df
-        else:
-            # scheduler がまだ存命か確認する
-            try:
-                with Lock('access-df'):
-                    client_: 'Client' = get_client(self.__scheduler_address)
-                    if 'df' in client_.list_datasets():
-                        if valid_only:
-                            return self.filter_valid(client_.get_dataset('df'))
-                        else:
-                            return client_.get_dataset('df')
-                    else:
-                        logger.debug('Access df of History before it is initialized.')
-                        return pd.DataFrame()
-            except OSError:
-                logger.error('Scheduler is already dead. Most frequent reason to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
-                return pd.DataFrame()
-
-    def set_df(self, df: pd.DataFrame):
-        if self.__scheduler_address is None:
-            self._df = df
-        else:
-            try:
-                with Lock('access-df'):
-                    client_: 'Client' = get_client(self.__scheduler_address)
-                    if 'df' in client_.list_datasets():
-                        client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
-                    client_.publish_dataset(**dict(
-                        df=df
-                    ))
-            except OSError:
-                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
 
     def create_df_columns(self):
         """Create columns of history."""
@@ -780,32 +837,42 @@ class History:
         columns.append('feasible')
         meta_columns.append('')
 
+        # sub-fidelity relative
+        # add n_sub_fidelity * (n_fidelity(1) + n_obj columns)
+        if self.sub_fidelity_names is not None:
+            for i, sub_fidelity_name in enumerate(self.sub_fidelity_names):
+                columns.append(sub_fidelity_name)
+                meta_columns.append(f'fidelity{i}')
+                for j, obj_name in enumerate(self.obj_names):
+                    columns.append(f'{obj_name} of {sub_fidelity_name}')
+                    meta_columns.append(f'fidelity{i}_obj{j}')
+
         # the others
         columns.append('hypervolume')
         meta_columns.append('')
         columns.append('message')
         meta_columns.append('')
-        columns.append('time')
+        columns.append('state')
+        meta_columns.append('')
+        columns.append('time_start')
+        meta_columns.append('')
+        columns.append('time_end')
         meta_columns.append('')
 
         return columns, meta_columns
 
-    def generate_hidden_infeasible_result(self):
-        y = np.full_like(np.zeros(len(self.obj_names)), np.nan)
-        c = np.full_like(np.zeros(len(self.cns_names)), np.nan)
-        return y, c
-
-    def is_hidden_infeasible_result(self, y):
-        return np.all(np.isnan(y))
-
-    def record(
+    def _record(
             self,
             parameters,
             objectives,
             constraints,
             obj_values,
             cns_values,
+            sub_fidelity_obj_values: dict[str, tuple['Fidelity', list[float]]],
             message,
+            state,
+            time_start,
+            time_end,
             postprocess_func,
             postprocess_args,
     ):
@@ -820,6 +887,9 @@ class History:
             obj_values (list): The objective values.
             cns_values (list): The constraint values.
             message (str): Additional information or messages related to the optimization results.
+            state (str): The state messages.
+            time_start (datetime.datetime | None): The time to start updating.
+            time_end (datetime.datetime | None): The time to record this.
             postprocess_func (Callable): fem method to call after solving. i.e. save result file. Must take trial(int) for 1st argument.
             postprocess_args (dict): arguments for `postprocess_func`. i.e. create binary data of result file in the worker process.
         """
@@ -852,10 +922,27 @@ class History:
         # feasibility
         row.append(all(feasible_list) and not self.is_hidden_infeasible_result(obj_values))
 
+        # sub-fidelity
+        for sub_fidelity_name in self.sub_fidelity_names:
+
+            # dict[str, tuple['Fidelity', list[float]]]
+            if sub_fidelity_name in sub_fidelity_obj_values:
+                fidelity, sub_y = sub_fidelity_obj_values[sub_fidelity_name]
+                row.append(fidelity)
+                row.extend(sub_y)
+
+            else:
+                fidelity = np.nan
+                sub_y, _ = self.generate_hidden_infeasible_result()
+                row.append(fidelity)
+                row.extend(sub_y)
+
         # the others
         row.append(-1.)  # dummy hypervolume
         row.append(message)  # message
-        row.append(datetime.datetime.now())  # time
+        row.append(state)  # state
+        row.append(time_start)  # time_start
+        row.append(time_end)  # time_complete
 
         with Lock('calc-history'):
 
@@ -880,6 +967,69 @@ class History:
                 trial = df['trial'].values[-1]
                 client = get_client()  # always returns valid client
                 client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
+
+    def get_filtered_df(self, states: list[OptTrialState]) -> pd.DataFrame:
+        df = self.get_df()
+        indices = [s in set([state.value for state in states]) for s in df['state']]
+        return df[indices]
+
+    def filter_valid(self, df_, keep_trial_num=False, include_skip=False):
+        buff = df_[self.obj_names].notna()
+        idx = buff.prod(axis=1).astype(bool)
+        filtered_df = df_[idx]
+        if not keep_trial_num:
+            filtered_df.loc[:, 'trial'] = np.arange(len(filtered_df)) + 1
+        return filtered_df
+
+    def get_df(self, valid_only=False, include_skip=False) -> pd.DataFrame:
+        if self.__scheduler_address is None:
+            if valid_only:
+                return self.filter_valid(self._df)
+            else:
+                return self._df
+        else:
+            # scheduler がまだ存命か確認する
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+
+                    if 'df' in client_.list_datasets():
+                        df = client_.get_dataset('df')
+
+                        if valid_only:
+                            df = self.filter_valid(df, include_skip)
+
+                        return df
+
+                    else:
+                        logger.error('Access df of History before it is initialized.')
+                        return pd.DataFrame()
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reason to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
+                return pd.DataFrame()
+
+    def set_df(self, df: pd.DataFrame):
+        if self.__scheduler_address is None:
+            self._df = df
+        else:
+            try:
+                with Lock('access-df'):
+                    client_: 'Client' = get_client(self.__scheduler_address)
+                    if 'df' in client_.list_datasets():
+                        client_.unpublish_dataset('df')  # 更新する場合は前もって削除が必要、本来は dask collection をここに入れる使い方をする。
+                    client_.publish_dataset(**dict(
+                        df=df
+                    ))
+            except OSError:
+                logger.error('Scheduler is already dead. Most frequent reasen to show this message is that the pyfemtet monitor UI is not refreshed even if the main optimization process is terminated.')
+
+    def generate_hidden_infeasible_result(self):
+        y = np.full_like(np.zeros(len(self.obj_names)), np.nan)
+        c = np.full_like(np.zeros(len(self.cns_names)), np.nan)
+        return y, c
+
+    def is_hidden_infeasible_result(self, y):
+        return np.all(np.isnan(y))
 
     def _calc_non_domi(self, objectives, df):
 

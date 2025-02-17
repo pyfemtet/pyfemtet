@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -95,7 +96,7 @@ def get_default_figure(history, df):
     return fig
 
 
-def _get_single_objective_plot(history, df):
+def _get_single_objective_plot(history: History, df: pd.DataFrame):
 
     df = _ls.localize(df)
     obj_name = history.obj_names[0]
@@ -103,8 +104,28 @@ def _get_single_objective_plot(history, df):
     df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
     obj_name = obj_name.replace(' / ', '<BR>/ ')
 
+    sub_fidelity_names = history.sub_fidelity_names
+    obj_names_per_sub_fidelity_list: list[list[str]] = [
+        history.get_obj_names_of_sub_fidelity(
+            sub_fidelity_name
+        ) for sub_fidelity_name in sub_fidelity_names
+    ]
+
     # ===== base figure =====
     fig = go.Figure()
+
+    # ===== sub-fidelity =====
+    for sub_fidelity_name, obj_names_per_sub_fidelity, color in zip(sub_fidelity_names, obj_names_per_sub_fidelity_list, px.colors.qualitative.G10[::-1]):
+        assert len(obj_names_per_sub_fidelity) == 1
+        obj_name_per_sub_fidelity = obj_names_per_sub_fidelity[0]
+        trace = go.Scatter(
+            x=df['trial'],
+            y=df[obj_name_per_sub_fidelity],
+            mode='markers',
+            marker=dict(color=color, symbol='square-open'),
+            name=sub_fidelity_name,
+        )
+        fig.add_trace(trace)
 
     # ===== i 番目が、その時点までで最適かどうか =====
     # その時点までの最適な点 index
@@ -114,20 +135,29 @@ def _get_single_objective_plot(history, df):
     objective_directions = df[f'{obj_name}_direction'].values
     for i, (obj, direction) in enumerate(zip(objectives, objective_directions)):
         # DESCRIPTION: 最適化中に direction は変化しない前提
+
+        obj_halfway = objectives[:i+1]
+        feasible_obj_halfway = obj_halfway[np.where(~np.isnan(obj_halfway))]
+        if len(feasible_obj_halfway) == 0:
+            indices.append(i)
+            continue
+
         if direction == 'maximize':
-            if obj == max(objectives[:i+1]):
+            if obj == max(feasible_obj_halfway):
                 indices.append(i)
             else:
                 anti_indices.append(i)
+
         elif direction == 'minimize':
-            if obj == min(objectives[:i+1]):
+            if obj == min(feasible_obj_halfway):
                 indices.append(i)
             else:
                 anti_indices.append(i)
+
         else:
             residuals = (objectives - objective_directions) ** 2
             residual = residuals[i]
-            if residual == min(residuals[:i+1]):
+            if residual == min(residuals[:i+1][np.where(~np.isnan(residuals[:i+1]))]):
                 indices.append(i)
             else:
                 anti_indices.append(i)
@@ -204,13 +234,20 @@ def _get_single_objective_plot(history, df):
     return fig
 
 
-def _get_multi_objective_pairplot(history, df):
+def _get_multi_objective_pairplot(history: History, df: pd.DataFrame):
     df = _ls.localize(df)
 
     obj_names = history.obj_names
 
     df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
     obj_names = [o.replace(' / ', '<BR>/ ') for o in obj_names]
+
+    sub_fidelity_names = history.sub_fidelity_names
+    obj_names_per_sub_fidelity_list: list[list[str]] = [
+        history.get_obj_names_of_sub_fidelity(
+            sub_fidelity_name
+        ) for sub_fidelity_name in sub_fidelity_names
+    ]
 
     common_kwargs = dict(
         color=_ls.non_domi['label'],
@@ -237,6 +274,25 @@ def _get_multi_objective_pairplot(history, df):
             y=obj_names[1],
             **common_kwargs,
         )
+
+        # ===== sub-fidelity =====
+        for sub_fidelity_name, obj_names_per_sub_fidelity, color \
+            in zip(sub_fidelity_names,
+                   obj_names_per_sub_fidelity_list,
+                   px.colors.qualitative.G10[::-1]
+                   ):
+
+            assert len(obj_names_per_sub_fidelity) == 2
+            name1, name2 = obj_names_per_sub_fidelity
+            trace = go.Scatter(
+                x=df[name1],
+                y=df[name2],
+                mode='markers',
+                marker=dict(color=color, symbol='square-open'),
+                name=sub_fidelity_name,
+            )
+            fig.add_trace(trace)
+
         fig.update_layout(
             dict(
                 xaxis_title=obj_names[0],
@@ -250,6 +306,29 @@ def _get_multi_objective_pairplot(history, df):
             dimensions=obj_names,
             **common_kwargs,
         )
+
+        # ===== sub-fidelity =====
+        for sub_fidelity_name, obj_names_per_sub_fidelity, color \
+            in zip(sub_fidelity_names,
+                   obj_names_per_sub_fidelity_list,
+                   px.colors.qualitative.G10[::-1]
+                   ):
+
+            fig.add_trace(
+                go.Splom(
+                    dimensions=[
+                        {
+                            'label': obj_name,
+                            'values': df[sub_obj_name]
+                        } for obj_name, sub_obj_name in zip(
+                            obj_names, obj_names_per_sub_fidelity
+                        )
+                    ],
+                    marker=dict(color=color, symbol='square-open'),
+                    name=sub_fidelity_name,
+                )
+            )
+
         fig.update_traces(
             patch={'diagonal.visible': False},
             showupperhalf=False,
@@ -269,6 +348,13 @@ def get_objective_plot(history: History, df: pd.DataFrame, obj_names: list[str])
     df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
     obj_names = [o.replace(' / ', '<BR>/ ') for o in obj_names]
 
+    sub_fidelity_names = history.sub_fidelity_names
+    obj_names_per_sub_fidelity_list: list[list[str]] = [
+        history.get_obj_names_of_sub_fidelity(
+            sub_fidelity_name
+        ) for sub_fidelity_name in sub_fidelity_names
+    ]
+
     common_kwargs = dict(
         color=_ls.non_domi['label'],
         color_discrete_map={
@@ -294,6 +380,26 @@ def get_objective_plot(history: History, df: pd.DataFrame, obj_names: list[str])
             y=obj_names[1],
             **common_kwargs,
         )
+
+        # ===== sub-fidelity =====
+        for sub_fidelity_name, obj_names_per_sub_fidelity, color \
+            in zip(sub_fidelity_names,
+                   obj_names_per_sub_fidelity_list,
+                   px.colors.qualitative.G10[::-1]
+                   ):
+
+            sub_name0 = obj_names_per_sub_fidelity[history.obj_names.index(obj_names[0])]
+            sub_name1 = obj_names_per_sub_fidelity[history.obj_names.index(obj_names[1])]
+
+            trace = go.Scatter(
+                x=df[sub_name0],
+                y=df[sub_name1],
+                mode='markers',
+                marker=dict(color=color, symbol='square-open'),
+                name=sub_fidelity_name,
+            )
+            fig.add_trace(trace)
+
         fig.update_layout(
             dict(
                 xaxis_title=obj_names[0],
@@ -309,8 +415,31 @@ def get_objective_plot(history: History, df: pd.DataFrame, obj_names: list[str])
             z=obj_names[2],
             **common_kwargs,
         )
+
+        # ===== sub-fidelity =====
+        for sub_fidelity_name, obj_names_per_sub_fidelity, color \
+            in zip(sub_fidelity_names,
+                   obj_names_per_sub_fidelity_list,
+                   px.colors.qualitative.G10[::-1]
+                   ):
+            sub_name0 = obj_names_per_sub_fidelity[history.obj_names.index(obj_names[0])]
+            sub_name1 = obj_names_per_sub_fidelity[history.obj_names.index(obj_names[1])]
+            sub_name2 = obj_names_per_sub_fidelity[history.obj_names.index(obj_names[2])]
+
+            fig.add_trace(
+                go.Scatter3d(
+                    x=df[sub_name0],
+                    y=df[sub_name1],
+                    z=df[sub_name2],
+                    mode='markers',
+                    marker=dict(color=color, symbol='square-open'),
+                    name=sub_fidelity_name,
+                )
+            )
+
         fig.update_layout(
             margin=dict(l=0, r=0, b=0, t=30),
+            scene=dict(aspectmode="cube")
         )
         fig.update_traces(
             marker=dict(

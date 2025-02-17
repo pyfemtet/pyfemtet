@@ -469,6 +469,8 @@ class MainGraph(AbstractPage):
             bbox = pt['bbox']
 
             # get relative location of point
+            if 'xaxis' not in figure['layout']:
+                raise PreventUpdate
             xrange = figure['layout']['xaxis']['range']
             # yrange = figure['layout']['yaxis']['range']
 
@@ -590,6 +592,8 @@ class MainGraph(AbstractPage):
 
         # create figure
         df = self.data_accessor()
+        if len(df.columns) == 0:
+            raise PreventUpdate
         kwargs = kwargs or {}
         fig = creator(self.application.history, df, **kwargs)
         if with_length:
@@ -602,5 +606,5 @@ class MainGraph(AbstractPage):
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:
-            df = self.application.history.get_df(valid_only=True)
+            df = self.application.history.get_filtered_df([self.application.history.OptTrialState.succeeded, self.application.history.OptTrialState.skipped])
         return df

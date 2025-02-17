@@ -1,6 +1,7 @@
 # typing
-from abc import ABC, abstractmethod
-from typing import Optional
+import datetime
+from abc import ABC
+from typing import Optional, TYPE_CHECKING, Callable
 
 # built-in
 import traceback
@@ -13,10 +14,15 @@ import numpy as np
 from pyfemtet.opt.interface import FEMInterface
 from pyfemtet.opt._femopt_core import OptimizationStatus, Objective, Constraint
 from pyfemtet._message import Msg
-from pyfemtet.opt.optimizer.parameter import ExpressionEvaluator, Parameter
+from pyfemtet.opt.optimizer.parameter import ExpressionEvaluator
 
 # logger
 from pyfemtet.logger import get_module_logger
+
+if TYPE_CHECKING:
+    from pyfemtet.opt._femopt import SubFidelityModels
+    from pyfemtet.opt._femopt_core import History
+
 
 logger = get_module_logger('opt.optimizer', __name__)
 
@@ -142,26 +148,32 @@ class AbstractOptimizer(ABC):
         self._exception = None
         self.method_checker: OptimizationMethodChecker = OptimizationMethodChecker(self)
         self._retry_counter = 0
+        self.sub_fidelity_models: 'SubFidelityModels' = None
+        self._should_solve: Callable[['History'], bool] = lambda *args, **kwargs: True
+        self.current_time_start = None
+
+    def should_calc(self, *args) -> bool:
+        return self._should_solve(*args)
+
+    def set_solve_condition(self, fun: Callable[['np.ndarray', 'History'], bool]):
+        self._should_solve = fun
 
     # ===== algorithm specific methods =====
-    @abstractmethod
     def run(self) -> None:
         """Start optimization."""
-        pass
+        raise NotImplementedError
 
     # ----- FEMOpt interfaces -----
-    @abstractmethod
     def _setup_before_parallel(self, *args, **kwargs):
         """Setup before parallel processes are launched."""
         pass
 
     # ===== calc =====
-    def f(self, x: np.ndarray, _record_infeasible=False) -> list[np.ndarray]:
+    def f(self, x: np.ndarray) -> tuple | None:
         """Calculate objectives and constraints.
 
         Args:
             x (np.ndarray): Optimization parameters.
-            _record_infeasible (bool): If True, skip fem.update() and record self.generate_invalid_results().
 
         Returns:
             list[np.ndarray]:
@@ -171,60 +183,110 @@ class AbstractOptimizer(ABC):
 
         """
 
-
-        if isinstance(x, np.float64):
-            x = np.array([x])
+        if isinstance(x, np.float64) or isinstance(x, float) or isinstance(x, int):
+            x = np.array([x], dtype=float)
 
         # Optimizer の x の更新
         self.set_parameter_values(x)
         logger.info(f'input: {x}')
 
-        if not _record_infeasible:
-            # FEM の更新
+        # values to df
+        df_to_fem = self.variables.get_variables(
+            format='df',
+            filter_pass_to_fem=True
+        )
+
+        # default values
+        y, c = self.history.generate_hidden_infeasible_result()
+        _y = y
+
+        # shouldn't calc であっても record_infeasible で
+        # この値を使うので if の前に時間計測開始
+        self.current_time_start = datetime.datetime.now()
+
+        # main FEM の更新
+        if self.should_calc(x, self.history):
+
+            logger.info(f'Solve FEM...')
             try:
-                logger.info(f'Solving FEM...')
-                df_to_fem = self.variables.get_variables(
-                    format='df',
-                    filter_pass_to_fem=True
-                )
                 self.fem.update(df_to_fem)
+                y = [obj.calc(self.fem) for obj in self.objectives.values()]
+                _y = [obj.convert(value) for obj, value in zip(self.objectives.values(), y)]
+                c = [cns.calc(self.fem) for cns in self.constraints.values()]
 
             except Exception as e:
-                logger.info(f'{type(e).__name__} : {e}')
-                logger.info(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
-                logger.info(x)
+                logger.warning(f'{type(e).__name__}: {" ".join(e.args)}')
+                logger.warning(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
+                logger.warning(x)
                 raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
 
-            # y, _y, c の更新
-            y = [obj.calc(self.fem) for obj in self.objectives.values()]
+            else:
+                pass
 
-            _y = [obj.convert(value) for obj, value in zip(self.objectives.values(), y)]
+        # sub-fidelity FEM の更新
+        try:
+            self.sub_fidelity_models.update(df_to_fem, x, self.history)
+            sub_fid_y: dict[str, tuple['Fidelity', list[float]]] = self.sub_fidelity_models.calc_objectives(x, self.history)
+            sub_fid_y_internal: dict[str, tuple['Fidelity', list[float]]] = self.sub_fidelity_models.get_internal_objectives(sub_fid_y)
 
-            c = [cns.calc(self.fem) for cns in self.constraints.values()]
-
-        else:
-            y, c = self.history.generate_hidden_infeasible_result()
-            _y = y
+        except Exception as e:
+            logger.warning(f'{type(e).__name__}: {" ".join(e.args)}')
+            logger.warning(Msg.INFO_EXCEPTION_DURING_FEM_ANALYSIS)
+            logger.warning(x)
+            # raise e  # may be just a ModelError, etc. Handling them in Concrete classes.
+            sub_fid_y = {}
+            sub_fid_y_internal = {}
 
         # register to history
         df_to_opt = self.variables.get_variables(
             format='df',
             filter_parameter=True,
         )
-        self.history.record(
+        self.history._record(
             df_to_opt,
             self.objectives,
             self.constraints,
             y,
             c,
+            sub_fid_y,
             self.message,
+            state=self.history.OptTrialState.succeeded.value,
+            time_start=self.current_time_start,
+            time_end=datetime.datetime.now(),
             postprocess_func=self.fem._postprocess_func,
             postprocess_args=self.fem._create_postprocess_args(),
         )
 
-        logger.info(f'output: {y}')
+        return (
+            np.array(y) if y is not None else y,
+            np.array(_y) if y is not None else _y,
+            np.array(c) if y is not None else c,
+            sub_fid_y,
+            sub_fid_y_internal,
+        )
 
-        return np.array(y), np.array(_y), np.array(c)
+    def record_infeasible(self, x, state):
+        y, c = self.history.generate_hidden_infeasible_result()
+        # register to history
+        self.set_parameter_values(x)
+        df_to_opt = self.variables.get_variables(
+            format='df',
+            filter_parameter=True,
+        )
+        self.history._record(
+            df_to_opt,
+            self.objectives,
+            self.constraints,
+            y,
+            c,
+            {},
+            self.message,
+            state,
+            self.current_time_start,
+            datetime.datetime.now(),
+            postprocess_func=self.fem._postprocess_func,
+            postprocess_args=self.fem._create_postprocess_args(),
+        )
 
     # ===== parameter processing =====
     def get_parameter(self, format='dict'):
@@ -308,6 +370,7 @@ class AbstractOptimizer(ABC):
             worker_status_list,  # 他の worker の status オブジェクト
             wait_setup,  # 他の worker の status が ready になるまで待つか
             skip_reconstruct=False,  # reconstruct fem を行うかどうか
+            sub_fidelity_reconstructor: callable = None,
             space_dir=None,  # 特定の space_dir を使うかどうか
     ) -> Optional[Exception]:
 
@@ -322,6 +385,10 @@ class AbstractOptimizer(ABC):
         # set_fem をはじめ、終了したらそれを示す
         self._reconstruct_fem(skip_reconstruct)
         self.fem._setup_after_parallel(opt=self, space_dir=space_dir)
+        if sub_fidelity_reconstructor is not None:
+            self.sub_fidelity_models = sub_fidelity_reconstructor()
+        self.sub_fidelity_models._reconstruct_fem(skip_reconstruct)
+        self.sub_fidelity_models.setup_after_parallel(opt=self, space_dir=space_dir)
         self.worker_status.set(OptimizationStatus.WAIT_OTHER_WORKERS)
 
         # wait_setup or not
@@ -367,8 +434,8 @@ if __name__ == '__main__':
         def run(self): pass
         def _setup_before_parallel(self, *args, **kwargs): pass
 
-    opt = Optimizer()
-    opt.set_parameter(
+    __opt = Optimizer()
+    __opt.set_parameter(
         dict(
             prm1=0.,
             prm2=1.,
