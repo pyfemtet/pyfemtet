@@ -205,7 +205,9 @@ class AbstractOptimizer(ABC):
         self.current_time_start = datetime.datetime.now()
 
         # main FEM の更新
+        state = self.history.OptTrialState.skipped.value
         if self.should_calc(x, self.history):
+            state = self.history.OptTrialState.succeeded.value
 
             logger.info(f'Solve FEM...')
             try:
@@ -250,7 +252,7 @@ class AbstractOptimizer(ABC):
             c,
             sub_fid_y,
             self.message,
-            state=self.history.OptTrialState.succeeded.value,
+            state=state,
             time_start=self.current_time_start,
             time_end=datetime.datetime.now(),
             postprocess_func=self.fem._postprocess_func,

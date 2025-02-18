@@ -12,13 +12,14 @@ from pyfemtet.opt.optimizer._optuna._multi_fidelity_sampler import MultiFidelity
 import pytest
 
 N_STARTUP_TRIALS = 2
-N_ADDITIONAL_TRIALS = 0
-DIM = 2
+N_ADDITIONAL_TRIALS = 1
+DIM = 1
 OBJ_DIM = 1
 OFFSET = 0.1 * pi
 FIDELITY = 0.5
 N_PARALLEL = 1
 SKIP = 5
+SEED = 47
 
 NEG_CON = False
 USE_MAIN_AS_SUB = False
@@ -51,10 +52,20 @@ def sub_model2(opt_: OptunaOptimizer):
 def should_solve_main(x: np.ndarray, history: History):
     n_main_solved = len(history.get_filtered_df([history.OptTrialState.succeeded]))
     n_all_solved = len(history.get_filtered_df([history.OptTrialState.succeeded, history.OptTrialState.skipped]))
-    if (n_all_solved > N_STARTUP_TRIALS) and (n_all_solved % SKIP == 0):
+    print(n_main_solved, n_all_solved)
+    if (n_main_solved >= N_STARTUP_TRIALS) or ((n_all_solved % SKIP) == (SKIP - 1)):
         return True
     else:
         return False
+
+
+def should_solve_sub(x: np.ndarray, history: History):
+    n_main_solved = len(history.get_filtered_df([history.OptTrialState.succeeded]))
+    n_all_solved = len(history.get_filtered_df([history.OptTrialState.succeeded, history.OptTrialState.skipped]))
+    if n_main_solved >= N_STARTUP_TRIALS:
+        return False
+    else:
+        return True
 
 
 if __name__ == '__main__':
@@ -93,6 +104,9 @@ if __name__ == '__main__':
             sub_fem,
             fidelity=FIDELITY,
         )
+
+        sub_fidelity.opt.set_solve_condition(should_solve_sub)
+
         if not USE_MAIN_AS_SUB:
             sub_fidelity.add_objective(sub_model, obj_name, args=(opt,))
             if OBJ_DIM >= 2:
@@ -108,7 +122,7 @@ if __name__ == '__main__':
 
         femopt.add_sub_fidelity(sub_fidelity)
 
-    femopt.set_random_seed(42)
+    femopt.set_random_seed(SEED)
     femopt.optimize(
         N_STARTUP_TRIALS + N_ADDITIONAL_TRIALS,
         confirm_before_exit=True,
