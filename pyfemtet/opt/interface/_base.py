@@ -24,12 +24,17 @@ class FEMInterface(ABC):
 
     """
 
+    kwargs = None
+
     def __init__(
             self,
             **kwargs
     ):
         # restore のための情報保管
-        self.kwargs = kwargs
+        if self.kwargs is None:
+            self.kwargs = kwargs
+        else:
+            self.kwargs.update(kwargs)
 
     @abstractmethod
     def update(self, parameters: pd.DataFrame) -> None:

@@ -257,7 +257,7 @@ class ExcelInterface(FEMInterface):
         self.output_sheet_name = output_sheet_name if output_sheet_name is not None else input_sheet_name
         self.constraint_xlsm_path = str(input_xlsm_path) if constraint_xlsm_path is None else str(constraint_xlsm_path)
         self.constraint_sheet_name = constraint_sheet_name or self.input_sheet_name
-        self.procedure_name = procedure_name or 'FemtetMacro.FemtetMain'
+        self.procedure_name = procedure_name
         self.procedure_args = procedure_args or []
         assert connect_method in ['new', 'auto']
         self.connect_method = connect_method
@@ -620,18 +620,19 @@ class ExcelInterface(FEMInterface):
         self.update_parameter(parameters)
 
         # マクロ実行
-        try:
-            with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
-                self.excel.Run(
-                    f'{self.procedure_name}',
-                    *self.procedure_args
-                )
+        if self.procedure_name is not None:
+            try:
+                with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
+                    self.excel.Run(
+                        f'{self.procedure_name}',
+                        *self.procedure_args
+                    )
 
-            # 再計算
-            self.excel.CalculateFull()
+                # 再計算
+                self.excel.CalculateFull()
 
-        except com_error as e:
-            raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
+            except com_error as e:
+                raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
 
     def quit(self):
         if self.terminate_excel_when_quit:
@@ -793,12 +794,16 @@ class ExcelInterface(FEMInterface):
                 )
                 opt.variables.add_expression(fixed_prm)
 
-    def load_objective(self, opt):
+    def load_objective(self, opt, raise_if_no_keyword=True):
         from pyfemtet.opt.optimizer import AbstractOptimizer
         from pyfemtet.opt._femopt_core import Objective
         opt: AbstractOptimizer
 
-        df = ParseAsObjective.parse(self.output_xlsm_path, self.output_sheet_name)
+        df = ParseAsObjective.parse(
+            self.output_xlsm_path,
+            self.output_sheet_name,
+            raise_if_no_keyword
+        )
 
         for i, row in df.iterrows():
 
@@ -830,7 +835,7 @@ class ExcelInterface(FEMInterface):
                     kwargs=dict(),
                 )
 
-    def load_constraint(self, opt):
+    def load_constraint(self, opt, raise_if_no_keyword=False):
         from pyfemtet.opt.optimizer import AbstractOptimizer
         from pyfemtet.opt._femopt_core import Constraint
         opt: AbstractOptimizer
@@ -841,12 +846,8 @@ class ExcelInterface(FEMInterface):
         df = ParseAsConstraint.parse(
             self.constraint_xlsm_path,
             self.constraint_sheet_name,
-            raise_if_no_keyword=False,
+            raise_if_no_keyword=raise_if_no_keyword,
         )
-
-        # constraint キーワードが見つからなかった
-        if len(df) == 0:
-            return
 
         for i, row in df.iterrows():
 
