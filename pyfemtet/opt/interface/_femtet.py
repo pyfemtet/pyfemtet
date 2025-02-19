@@ -192,7 +192,8 @@ class FemtetInterface(FEMInterface):
         # subprocess で restore するための情報保管
         # パスなどは connect_and_open_femtet での処理結果を反映し
         # メインで開いた解析モデルが確実に開かれるようにする
-        super().__init__(
+        FEMInterface.__init__(
+            self,
             femprj_path=self.femprj_path,
             model_name=self.model_name,
             open_result_with_gui=self.open_result_with_gui,
