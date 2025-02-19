@@ -362,8 +362,8 @@ class OptunaVisualizerPage(AbstractPage):
             )
             layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
 
-        layout.append(html.H2("ASD"))
-        layout.append(html.H4("asd - description"))
+        layout.append(html.H2(Msg.DETAIL_PAGE_IMPORTANCE_HEADER))
+        layout.append(html.H4(Msg.DETAIL_PAGE_IMPORTANCE_DESCRIPTION))
         for i, obj_name in enumerate(obj_names):
             fig = optuna.visualization.plot_param_importances(
                 study,
