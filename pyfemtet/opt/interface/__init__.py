@@ -25,7 +25,7 @@ from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
 from pyfemtet.opt.interface._surrogate._singletaskgp import PoFBoTorchInterface
 
 
-__all__ =[
+__all__ = [
     'FEMInterface',
     'NoFEM',
     'FemtetInterface',
