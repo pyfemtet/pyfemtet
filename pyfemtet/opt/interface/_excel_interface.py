@@ -55,36 +55,36 @@ class ExcelInterface(FEMInterface):
         input_xlsm_path (str or Path):
             設計変数の定義を含む Excel ファイルのパスを指定
             します。
-            
+
         input_sheet_name (str):
             設計変数の定義を含むシートの名前を指定します。
-            
+
         output_xlsm_path (str or Path, optional):
             目的関数の定義を含む Excel ファイルのパスを指定
             します。指定しない場合は ``input_xlsm_path`` と
             同じと見做します。
-            
+
         output_sheet_name (str, optional):
             目的関数の定義を含む含むシートの名前を指定します。
             指定しない場合は ``input_sheet_name`` と同じと見
             做します。
-            
+
         procedure_name (str, optional):
             Excel マクロ関数名を指定します。指定しない場合は
             ``FemtetMacro.FemtetMain`` と見做します。
-            
+
         procedure_args (list or tuple, optional):
             Excel マクロ関数に渡す引数をリストまたはタプルで
             指定します。
-            
+
         connect_method (str, optional):
             Excel との接続方法を指定します。 'auto' または
             'new' が利用可能です。デフォルトは 'auto' です。
-            
+
         procedure_timeout (float or None, optional):
             Excel マクロ関数のタイムアウト時間を秒単位で指定
             します。 None の場合はタイムアウトなしとなります。
-            
+
         setup_xlsm_path (str or Path, optional):
             セットアップ時に呼ぶ関数を含む xlsm のパスです。
             指定しない場合は ``input_xlsm_path`` と
@@ -135,7 +135,7 @@ class ExcelInterface(FEMInterface):
     Attributes:
         input_xlsm_path (Path):
             設計変数の定義を含む Excel ファイルのパス。
-            
+
         input_sheet_name (str):
             設計変数の定義を含むシートの名前。
 
@@ -271,7 +271,8 @@ class ExcelInterface(FEMInterface):
         self.setup_procedure_name = setup_procedure_name
         self.setup_procedure_args = setup_procedure_args or []
 
-        self.teardown_xlsm_path = str(input_xlsm_path) if teardown_xlsm_path is None else str(teardown_xlsm_path)  # あとで取得する
+        self.teardown_xlsm_path = str(input_xlsm_path) if teardown_xlsm_path is None else str(
+            teardown_xlsm_path)  # あとで取得する
         self.teardown_procedure_name = teardown_procedure_name
         self.teardown_procedure_args = teardown_procedure_args or []
 
@@ -516,7 +517,8 @@ class ExcelInterface(FEMInterface):
                 self.sh_constraint = sh
                 break
         else:
-            raise RuntimeError(f'Sheet {self.constraint_sheet_name} does not exist in the book {self.wb_constraint.Name}.')
+            raise RuntimeError(
+                f'Sheet {self.constraint_sheet_name} does not exist in the book {self.wb_constraint.Name}.')
 
         # ===== setup =====
         # 開く (setup)
@@ -655,7 +657,8 @@ class ExcelInterface(FEMInterface):
                         self.excel.CalculateFull()
 
                     except com_error as e:
-                        raise RuntimeError(f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
+                        raise RuntimeError(
+                            f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
 
             # 不具合の原因になる場合があるので参照設定は解除しないこと
             # self.remove_femtet_ref_xla(self.wb_input)
@@ -791,7 +794,7 @@ class ExcelInterface(FEMInterface):
                 opt.variables.add_expression(fixed_prm)
 
     def load_objective(self, opt):
-        from pyfemtet.opt.optimizer import AbstractOptimizer, logger
+        from pyfemtet.opt.optimizer import AbstractOptimizer
         from pyfemtet.opt._femopt_core import Objective
         opt: AbstractOptimizer
 
@@ -828,21 +831,22 @@ class ExcelInterface(FEMInterface):
                 )
 
     def load_constraint(self, opt):
-        from pyfemtet.opt.optimizer import AbstractOptimizer, logger
+        from pyfemtet.opt.optimizer import AbstractOptimizer
         from pyfemtet.opt._femopt_core import Constraint
         opt: AbstractOptimizer
 
-        # TODO:
-        #   constraint は optional である。
-        #   現在は実装していないが、シートから問題を取得するよりよいロジックができたら
-        #   （つまり、同じシートからパラメータと拘束を取得出来るようになったら）__init__ 内で
-        #   constraint に None が与えられたのか故意に input_sheet_name と同じシート名を
-        #   与えられたのか分別できる実装に変えてそのチェック処理をここに反映する。
-        # constraint_sheet_name が指定されていない場合何もしない
-        if (self.constraint_sheet_name == self.input_sheet_name) and is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
-            return
+        # constraint は optional であるが
+        # __init__ で input_sheet_name を入れられるので
+        # ここで constraint が実際に与えられているか判断する
+        df = ParseAsConstraint.parse(
+            self.constraint_xlsm_path,
+            self.constraint_sheet_name,
+            raise_if_no_keyword=False,
+        )
 
-        df = ParseAsConstraint.parse(self.constraint_xlsm_path, self.constraint_sheet_name)
+        # constraint キーワードが見つからなかった
+        if len(df) == 0:
+            return
 
         for i, row in df.iterrows():
 
@@ -877,7 +881,8 @@ class ExcelInterface(FEMInterface):
             calc_before_solve = True
             if ParseAsConstraint.calc_before_solve in df.columns:
                 _calc_before_solve = row[ParseAsConstraint.calc_before_solve]
-                calc_before_solve = True if is_cell_value_empty(_calc_before_solve) else bool(_calc_before_solve)  # bool or NaN
+                calc_before_solve = True if is_cell_value_empty(_calc_before_solve) else bool(
+                    _calc_before_solve)  # bool or NaN
 
             if use:
                 # constraint を作る
