@@ -62,7 +62,7 @@ def main(
 
     if yaml_path is not None:
         if os.path.isfile(yaml_path):
-            context = open(yaml_path, 'r', encoding='utf-16LE')
+            context = open(yaml_path, 'r', encoding='utf-8')
         else:
             print('debug mode')
             context = ContentContext(yaml_path)
@@ -95,15 +95,15 @@ def main(
     femopt.optimize(**optimize_kwargs_)
 
 
-if __name__ == '__main__':
-    Fire(main)
-
-
-# # for debugging file input
 # if __name__ == '__main__':
-#     os.chdir(os.path.dirname(__file__))
-#     path = 'yaml_generator.txt'
-#     main(yaml_path=path)
+#     Fire(main)
+
+
+# for debugging file input
+if __name__ == '__main__':
+    os.chdir(os.path.dirname(__file__))
+    path = 'sample.yaml'
+    main(yaml_path=path)
 
 
 # for debugging yaml input
