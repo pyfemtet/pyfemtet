@@ -48,8 +48,9 @@ def get_worker():
         return None
 
 
-In = dict[str, SupportsFloat]
-Out = dict[str, SupportsFloat]
+Inputs = dict[str, SupportsFloat]
+Outputs = dict[str, SupportsFloat]
+Fidelities = dict[str, SupportsFloat | str | None]
 
 
 class DataFrameWrapper:
@@ -103,7 +104,7 @@ class DataFrameWrapper:
 
 
 class TrialState(enum.Enum):
-    succeeded = 'Succeeded'
+    succeeded = 'Success'
     hard_constraint_violation = 'Hard constraint violation'
     soft_constraint_violation = 'Soft constraint violation'
     model_error = 'Model error'
@@ -116,12 +117,21 @@ class TrialState(enum.Enum):
 @dataclasses.dataclass
 class Record:
     """単一の試行に関する情報を定義するクラス"""
+
+    # automated
     number: int | None = None
-    input: In | None = None
-    output: Out | None = None
+
+    # required
+    input: Inputs | None = None
+    objective: Outputs | None = None
+    constraint: Outputs | None = None
     state: TrialState | None = None
     time_start: datetime.datetime | None = None
     time_end: datetime.datetime | None = None
+
+    # optional
+    sub_sampling: int | None = None
+    fidelity: Fidelities = None
 
     def to_df(self) -> pd.DataFrame:
         d = {}
@@ -154,13 +164,10 @@ class Records:
 
     @staticmethod
     def records_to_df(records: Sequence[Record]) -> pd.DataFrame:
-        df = pd.DataFrame()
-        for record in records:
-            if len(df) == 0:
-                df = record.to_df()
-            else:
-                pdf = record.to_df()
-                df = pd.concat((df, pdf))
+        df = records[0].to_df()
+        for record in records[1:]:
+            pdf = record.to_df()
+            df = pd.concat((df, pdf))
         return df
 
     def append(self, record: Record):
@@ -177,6 +184,7 @@ class History:
     def __init__(self):
         self._records = Records()
         self.path: str
+        self.current_trial_time_start: datetime.datetime = None
 
     def __str__(self):
         return self._records.__str__()
@@ -187,10 +195,33 @@ class History:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._records.df_wrapper.end_dask()
 
+    def _trial_start(self):
+        self.current_trial_time_start = datetime.datetime.now()
+
+    def _trial_end(self):
+        self.current_trial_time_start = None
+
+    def record(self):
+
+        class TrialContext:
+
+            # noinspection PyMethodParameters
+            def __enter__(_self):
+                self._trial_start()
+
+            # noinspection PyMethodParameters
+            def __exit__(_self, exc_type, exc_val, exc_tb):
+                self._trial_end()
+
+        return TrialContext()
+
+
     def register(
             self,
-            x: In,
-            y: Out,
+            x: Inputs,
+            y: Outputs,
+            state: TrialState = TrialState.unknown_error,
+
     ):
         with self._records.lock:
             record = Record(
@@ -262,7 +293,7 @@ def run_monitor(history: History):
 
 
 class AbstractFEMInterface:
-    def update(self, x: 'In'):
+    def update(self, x: 'Inputs'):
         ...
 
     def _get_worker_space(self):
@@ -290,10 +321,10 @@ class AbstractFEMInterface:
 
 
 class ConcreteInterface(AbstractFEMInterface):
+    _com_members = {'Femtet': 'FemtetMacro.Femtet'}
 
     def __init__(self):
         self.Femtet = Dispatch('FemtetMacro.Femtet')
-        self._com_members = {'Femtet': 'FemtetMacro.Femtet'}
 
     def __getstate__(self):
         """Pickle するメンバーから COM を除外する"""
@@ -310,7 +341,7 @@ class ConcreteInterface(AbstractFEMInterface):
             state.update({key: Dispatch(value)})
         self.__dict__.update(state)
 
-    def update(self, x: 'In'):
+    def update(self, x: 'Inputs'):
         print(f'{self.Femtet.Version:}')
 
     def _setup_after_parallel(self):
@@ -384,34 +415,42 @@ class AbstractOptimizer:
     def __init__(self):
         self.history = History()
 
+        self.current_trial_start: datetime.datetime = None
+
     def add_parameter(self) -> None: ...
 
     def add_objective(self) -> None: ...
 
     def add_constraint(self) -> None: ...
 
-    def suggest(self) -> 'In':
-        return In(x=1)
+    def suggest(self) -> 'Inputs':
+        return Inputs(x=1)
 
-    def probe(self, x: 'In') -> 'Out':
-        return self.f(x)
-
-    def register(self, x: 'In', y: 'Out') -> None:
-        self.history.register(x, y)
-
-    def f(self, x: 'In') -> 'Out':
+    def probe(self, x: 'Inputs') -> 'Outputs':
         self.fem.update(x)
-        out = Out()
+        out = Outputs()
         for name, obj in self.objectives.items():
             out.update({name: obj.fun()})
         return out
 
+    def register(self, x: 'Inputs', y: 'Outputs') -> None:
+        self.history.register(
+            x,
+            y,
+        )
+
+    def f(self, x: 'Inputs') -> 'Outputs':
+        return self.probe(x)
+
     def run(self) -> None:
+
         # loop this
         for i in range(5):
-            next_input = self.suggest()
-            output = self.probe(next_input)
-            self.register(next_input, output)
+            with self.history.record():
+                self.history.trial_start()
+                next_input = self.suggest()
+                output = self.probe(next_input)
+                self.register(next_input, output)
             sleep(3)
 
     def _run(self, worker_idx) -> None:
