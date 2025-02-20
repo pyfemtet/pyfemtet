@@ -3,12 +3,8 @@ from pathlib import Path
 
 from pyfemtet.opt._femopt_core import History
 from pyfemtet.opt.interface._base import FEMInterface
-from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
 from pyfemtet.opt.interface._surrogate._singletaskgp import PoFBoTorchInterface
-from pyfemtet.opt.interface._excel_interface import (
-    ExcelInterface, is_cell_value_empty, ParseAsObjective, ScapeGoatObjective,
-    ParseAsConstraint, search_c, search_r
-)
+from pyfemtet.opt.interface._excel_interface import ExcelInterface
 
 
 class PoFBoTorchInterfaceWithExcelSettingsInterface(
@@ -89,3 +85,18 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
 
     def load_constraint(self, opt, raise_if_no_keyword=False):
         ExcelInterface.load_constraint(self, opt, raise_if_no_keyword)
+
+    def _setup_before_parallel(self, client):
+        PoFBoTorchInterface._setup_before_parallel(self, client)
+        ExcelInterface._setup_before_parallel(self, client)
+
+    def _setup_after_parallel(self, *args, **kwargs):
+        PoFBoTorchInterface._setup_after_parallel(self, *args, **kwargs)
+        ExcelInterface._setup_after_parallel(self, *args, **kwargs)
+
+    def update(self, parameters) -> None:
+        PoFBoTorchInterface.update(self, parameters)
+
+    def quit(self):
+        PoFBoTorchInterface.quit(self)
+        ExcelInterface.quit(self)
