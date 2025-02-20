@@ -59,7 +59,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
         # _output_directions が与えられている場合、
         # history から objective の設定を読み込む
         if self._output_directions is not None:
-            _load_problem_from_me: bool = True
+            self._load_problem_from_me: bool = True
 
         FEMInterface.__init__(
             self,
@@ -90,7 +90,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
             obj_names = self.train_history.obj_names
             assert len(self._output_directions) == len(obj_names)
 
-            for obj_name, direction in zip(self._output_directions):
+            for obj_name, direction in zip(obj_names, self._output_directions):
                 opt.objectives[obj_name] = Objective(
                     lambda obj_name_=obj_name: self.obj[obj_name_],
                     name=obj_name,
