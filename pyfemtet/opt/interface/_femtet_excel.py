@@ -1,8 +1,21 @@
+import re
 from pathlib import Path
 
 from pyfemtet.opt.interface._base import FEMInterface
 from pyfemtet.opt.interface._femtet import FemtetInterface
-from pyfemtet.opt.interface._excel_interface import ExcelInterface
+from pyfemtet.opt.interface._excel_interface import ExcelInterface, is_cell_value_empty, ParseAsObjective, ScapeGoatObjective
+
+
+PARAMETRIC_PREFIX = 'パラメトリック'
+
+
+def get_number(name):
+    numbers = re.findall(name, r'\d+')
+    if len(numbers) == 0:
+        raise ValueError('パラメトリック結果出力の番号指定が検出できませんでした。')
+    else:
+        return int(numbers[0])
+
 
 
 class FemtetWithExcelSettingsInterface(FemtetInterface, ExcelInterface, FEMInterface):
@@ -42,8 +55,54 @@ class FemtetWithExcelSettingsInterface(FemtetInterface, ExcelInterface, FEMInter
         )
 
 
-    def load_objective(self, opt, raise_if_no_keyword=True):
-        ExcelInterface.load_objective(self, opt, raise_if_no_keyword=False)
+    def load_objective(self, opt):
+        from pyfemtet.opt.optimizer import AbstractOptimizer
+        from pyfemtet.opt._femopt_core import Objective
+        opt: AbstractOptimizer
+
+        df = ParseAsObjective.parse(
+            self.output_xlsm_path,
+            self.output_sheet_name,
+            False
+        )
+
+        for i, row in df.iterrows():
+
+            # use(optional)
+            use = True
+            if ParseAsObjective.use in df.columns:
+                _use = row[ParseAsObjective.use]
+                use = False if is_cell_value_empty(_use) else bool(_use)  # bool or NaN
+
+            # name
+            name = str(row[ParseAsObjective.name])
+
+            # direction
+            direction = row[ParseAsObjective.direction]
+            assert not is_cell_value_empty(direction), 'direction is empty.'
+            try:
+                direction = float(direction)
+            except ValueError:
+                direction = str(direction).lower()
+                assert direction in ['minimize', 'maximize']
+
+            if use:
+
+                # name が「パラメトリック」から始まっていたら
+                # パラメトリック解析の結果を目的関数にする
+                if name.startswith(PARAMETRIC_PREFIX):
+                    number = get_number(name)
+                    self.use_parametric_output_as_objective(number, direction)
+
+                # そうでなければ通常の Excel objective を作る
+                else:
+                    opt.objectives[name] = Objective(
+                        fun=ScapeGoatObjective(),
+                        name=name,
+                        direction=direction,
+                        args=(name,),
+                        kwargs=dict(),
+                    )
 
     def _setup_before_parallel(self, client):
         FemtetInterface._setup_before_parallel(self, client)

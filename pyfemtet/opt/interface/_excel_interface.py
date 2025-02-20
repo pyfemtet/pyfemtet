@@ -794,7 +794,7 @@ class ExcelInterface(FEMInterface):
                 )
                 opt.variables.add_expression(fixed_prm)
 
-    def load_objective(self, opt, raise_if_no_keyword=True):
+    def load_objective(self, opt):
         from pyfemtet.opt.optimizer import AbstractOptimizer
         from pyfemtet.opt._femopt_core import Objective
         opt: AbstractOptimizer
@@ -802,7 +802,6 @@ class ExcelInterface(FEMInterface):
         df = ParseAsObjective.parse(
             self.output_xlsm_path,
             self.output_sheet_name,
-            raise_if_no_keyword
         )
 
         for i, row in df.iterrows():
