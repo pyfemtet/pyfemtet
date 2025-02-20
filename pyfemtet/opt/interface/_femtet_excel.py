@@ -3,7 +3,10 @@ from pathlib import Path
 
 from pyfemtet.opt.interface._base import FEMInterface
 from pyfemtet.opt.interface._femtet import FemtetInterface
-from pyfemtet.opt.interface._excel_interface import ExcelInterface, is_cell_value_empty, ParseAsObjective, ScapeGoatObjective
+from pyfemtet.opt.interface._excel_interface import (
+    ExcelInterface, is_cell_value_empty, ParseAsObjective, ScapeGoatObjective,
+    ParseAsConstraint, search_c, search_r
+)
 
 
 PARAMETRIC_PREFIX = 'パラメトリック'
@@ -116,7 +119,20 @@ class FemtetWithExcelSettingsInterface(FemtetInterface, ExcelInterface, FEMInter
         FemtetInterface.update(self, parameters)
         ExcelInterface.update(self, parameters)
 
-
     def quit(self, timeout=1, force=True):
         FemtetInterface.quit(self, timeout, force)
         ExcelInterface.quit(self)
+
+    # noinspection PyMethodOverriding
+    def objective_from_excel(self, _, name: str):
+        r = 1 + search_r(self.output_xlsm_path, self.output_sheet_name, name)
+        c = 1 + search_c(self.output_xlsm_path, self.output_sheet_name, ParseAsObjective.value)
+        v = self.sh_output.Cells(r, c).value
+        return float(v)
+
+    # noinspection PyMethodOverriding
+    def constraint_from_excel(self, _, name: str):
+        r = 1 + search_r(self.constraint_xlsm_path, self.constraint_sheet_name, name)
+        c = 1 + search_c(self.constraint_xlsm_path, self.constraint_sheet_name, ParseAsConstraint.value)
+        v = self.sh_constraint.Cells(r, c).value
+        return float(v)

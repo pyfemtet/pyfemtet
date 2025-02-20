@@ -897,6 +897,7 @@ class ExcelInterface(FEMInterface):
                     using_fem=not calc_before_solve,
                 )
 
+    # TODO: femopt_core.Function の仕様を変えたらここも変える
     def objective_from_excel(self, name: str):
         r = 1 + search_r(self.output_xlsm_path, self.output_sheet_name, name)
         c = 1 + search_c(self.output_xlsm_path, self.output_sheet_name, ParseAsObjective.value)
