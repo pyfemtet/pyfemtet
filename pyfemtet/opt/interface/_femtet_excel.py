@@ -10,7 +10,7 @@ PARAMETRIC_PREFIX = 'パラメトリック'
 
 
 def get_number(name):
-    numbers = re.findall(name, r'\d+')
+    numbers = re.findall(r'\d+', name)
     if len(numbers) == 0:
         raise ValueError('パラメトリック結果出力の番号指定が検出できませんでした。')
     else:
