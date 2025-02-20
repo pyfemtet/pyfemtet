@@ -85,7 +85,7 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
         ExcelInterface.load_parameter(self, opt)
 
     def load_objective(self, opt) -> None:
-        PoFBoTorchInterfaceWithExcelSettingsInterface.load_objective(self, opt)
+        PoFBoTorchInterface.load_objective(self, opt)
 
     def load_constraint(self, opt, raise_if_no_keyword=False):
         ExcelInterface.load_constraint(self, opt, raise_if_no_keyword)
