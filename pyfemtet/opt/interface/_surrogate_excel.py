@@ -1,8 +1,9 @@
 import re
 from pathlib import Path
 
-from opt import History
+from pyfemtet.opt._femopt_core import History
 from pyfemtet.opt.interface._base import FEMInterface
+from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
 from pyfemtet.opt.interface._surrogate._singletaskgp import PoFBoTorchInterface
 from pyfemtet.opt.interface._excel_interface import (
     ExcelInterface, is_cell_value_empty, ParseAsObjective, ScapeGoatObjective,
@@ -79,3 +80,12 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
             interactive,
             use_named_range,
         )
+
+    def load_parameter(self, opt) -> None:
+        ExcelInterface.load_parameter(self, opt)
+
+    def load_objective(self, opt) -> None:
+        PoFBoTorchInterfaceWithExcelSettingsInterface.load_objective(self, opt)
+
+    def load_constraint(self, opt, raise_if_no_keyword=False):
+        ExcelInterface.load_constraint(self, opt, raise_if_no_keyword)
