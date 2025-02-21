@@ -40,5 +40,6 @@ def test_add_objective():
 
     fem.quit()
 
-    if len(femopt._opt_exceptions) > 0:
-        raise femopt._opt_exceptions[0]
+    for e in femopt._opt_exceptions:
+        if e is not None:
+            raise e

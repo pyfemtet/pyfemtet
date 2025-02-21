@@ -28,11 +28,12 @@ def test_scipy_optimizer():
 
     femopt.set_random_seed(42)
     ret = femopt.optimize(
-        confirm_before_exit=True,
+        confirm_before_exit=False,
     )
 
-    if len(femopt._opt_exceptions) > 0:
-        raise femopt._opt_exceptions[0]
+    for e in femopt._opt_exceptions:
+        if e is not None:
+            raise e
 
 
 if __name__ == "__main__":
