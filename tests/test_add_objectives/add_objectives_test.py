@@ -1,6 +1,7 @@
 import os
 from optuna.samplers import QMCSampler
 from pyfemtet.opt import FemtetInterface, FEMOpt, OptunaOptimizer
+import pytest
 
 
 def objective(Femtet):
@@ -15,7 +16,8 @@ def objectives(Femtet, opt: OptunaOptimizer, hi='good bye'):
     return d['a'], d['b']
 
 
-if __name__ == '__main__':
+@pytest.mark.fem
+def test_add_objective():
     fem = FemtetInterface(
         femprj_path=os.path.dirname(__file__) + '/dummy.femprj',
         connect_method='new',
@@ -37,3 +39,6 @@ if __name__ == '__main__':
     femopt.optimize(n_trials=10, confirm_before_exit=False)
 
     fem.quit()
+
+    if len(femopt._opt_exceptions) > 0:
+        raise femopt._opt_exceptions[0]

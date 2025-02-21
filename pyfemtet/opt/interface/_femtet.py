@@ -192,7 +192,8 @@ class FemtetInterface(FEMInterface):
         # subprocess で restore するための情報保管
         # パスなどは connect_and_open_femtet での処理結果を反映し
         # メインで開いた解析モデルが確実に開かれるようにする
-        super().__init__(
+        FEMInterface.__init__(
+            self,
             femprj_path=self.femprj_path,
             model_name=self.model_name,
             open_result_with_gui=self.open_result_with_gui,
@@ -200,6 +201,10 @@ class FemtetInterface(FEMInterface):
             save_pdt=self.save_pdt,
             **kwargs
         )
+
+    @property
+    def object_passed_to_functions(self):
+        return self.Femtet
 
     def use_parametric_output_as_objective(self, number: int, direction: str | float = 'minimize') -> None:
         """Use output setting of Femtet parametric analysis as an objective function.
@@ -232,7 +237,6 @@ class FemtetInterface(FEMInterface):
 
         # TODO: FEMInterface.__init__ の仕様を変えたらここも変える
         self.kwargs['parametric_output_indexes_use_as_objective'] = self.parametric_output_indexes_use_as_objective
-
 
 
     def __del__(self):

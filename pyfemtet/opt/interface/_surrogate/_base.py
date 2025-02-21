@@ -17,6 +17,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
             self,
             history_path: str = None,
             train_history: History = None,
+            _output_directions: dict[int, str | float] | list[str | float] = None,
     ):
 
         self.train_history: History
@@ -25,6 +26,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
         self.obj: dict[str, float] = dict()
         self.df_prm: pd.DataFrame
         self.df_obj: pd.DataFrame
+        self._output_directions = _output_directions
 
         # history_path が与えられた場合、train_history をコンストラクトする
         if history_path is not None:
@@ -54,10 +56,51 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
         self.df_prm = df_prm
         self.df_obj = df_obj
 
+        # _output_directions が与えられている場合、
+        # history から objective の設定を読み込む
+        if self._output_directions is not None:
+            self._load_problem_from_me: bool = True
+
         FEMInterface.__init__(
             self,
             train_history=train_history,  # コンストラクト済み train_history を渡せば並列計算時も何もしなくてよい
         )
+
+
+    def load_objective(self, opt) -> None:
+        from pyfemtet.opt._femopt_core import Objective
+
+        assert self._output_directions is not None
+
+        if isinstance(self._output_directions, dict):
+
+            for index, direction in self._output_directions:
+                obj_name = self.train_history.obj_names[index]
+                opt.objectives[obj_name] = Objective(
+                    lambda obj_name_=obj_name: self.obj[obj_name_],
+                    name=obj_name,
+                    direction=direction,
+                    args=(),
+                    kwargs={},
+                )
+
+        elif isinstance(self._output_directions, list) \
+                or isinstance(self._output_directions, tuple):
+
+            obj_names = self.train_history.obj_names
+            assert len(self._output_directions) == len(obj_names)
+
+            for obj_name, direction in zip(obj_names, self._output_directions):
+                opt.objectives[obj_name] = Objective(
+                    lambda obj_name_=obj_name: self.obj[obj_name_],
+                    name=obj_name,
+                    direction=direction,
+                    args=(),
+                    kwargs={},
+                )
+
+        else:
+            raise ValueError('Invalid _output_directions')
 
     def filter_feasible(self, x: np.ndarray, y: np.ndarray, return_feasibility=False):
         feasible_idx = np.where(~np.isnan(y.sum(axis=1)))

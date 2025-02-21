@@ -24,17 +24,26 @@ class FEMInterface(ABC):
 
     """
 
+    kwargs = None
+
     def __init__(
             self,
             **kwargs
     ):
         # restore のための情報保管
-        self.kwargs = kwargs
+        if self.kwargs is None:
+            self.kwargs = kwargs
+        else:
+            self.kwargs.update(kwargs)
 
     @abstractmethod
     def update(self, parameters: pd.DataFrame) -> None:
         """Updates the FEM analysis based on the proposed parameters."""
         raise NotImplementedError('update() must be implemented.')
+
+    @property
+    def object_passed_to_functions(self):
+        return self
 
     def check_param_value(self, param_name) -> float or None:
         """Checks the value of a parameter in the FEM model (if implemented in concrete class)."""
@@ -50,13 +59,13 @@ class FEMInterface(ABC):
         pass
 
     def load_parameter(self, opt) -> None:  # opt: AbstractOptimizer
-        raise NotImplementedError()
+        pass
 
     def load_objective(self, opt) -> None:  # opt: AbstractOptimizer
-        raise NotImplementedError()
+        pass
 
     def load_constraint(self, opt) -> None:  # opt: AbstractOptimizer
-        raise NotImplementedError()
+        pass
 
     def _setup_before_parallel(self, client) -> None:
         """Preprocessing before launching a dask worker (if implemented in concrete class).
