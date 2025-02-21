@@ -4,6 +4,7 @@
 
 from numpy import sin, cos, pi
 from pyfemtet.opt import FEMOpt, ScipyScalarOptimizer, NoFEM
+import pytest
 
 
 def x(opt: ScipyScalarOptimizer):
@@ -18,7 +19,8 @@ def y(opt: ScipyScalarOptimizer):
     return sin(theta)
 
 
-def main():
+@pytest.mark.nofem
+def test_scipy_scalar_optimizer():
 
     fem = NoFEM()  # Femtet を使わない設定です。
     opt = ScipyScalarOptimizer()
@@ -34,6 +36,9 @@ def main():
         confirm_before_exit=True,
     )
 
+    if len(femopt._opt_exceptions) > 0:
+        raise femopt._opt_exceptions[0]
+
 
 if __name__ == "__main__":
-    main()
+    test_scipy_scalar_optimizer()

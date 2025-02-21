@@ -6,6 +6,7 @@ from pyfemtet.opt.interface._femtet_excel import FemtetWithExcelSettingsInterfac
 import pytest
 
 
+@pytest.mark.fem
 def test_femtet_with_excel_settings():
 
     os.chdir(os.path.dirname(__file__))
@@ -20,3 +21,6 @@ def test_femtet_with_excel_settings():
     femopt = FEMOpt(fem=fem)
 
     femopt.optimize(n_trials=4, n_parallel=2, confirm_before_exit=False)
+
+    if len(femopt._opt_exceptions) > 0:
+        raise femopt._opt_exceptions[0]
