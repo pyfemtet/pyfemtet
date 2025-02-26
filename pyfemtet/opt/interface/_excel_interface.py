@@ -79,7 +79,7 @@ class ExcelInterface(FEMInterface):
 
         connect_method (str, optional):
             Excel との接続方法を指定します。 'auto' または
-            'new' が利用可能です。デフォルトは 'auto' です。
+            'new' が利用可能です。デフォルトは 'new' です。
 
         procedure_timeout (float or None, optional):
             Excel マクロ関数のタイムアウト時間を秒単位で指定
@@ -232,7 +232,7 @@ class ExcelInterface(FEMInterface):
             constraint_sheet_name: str = None,
             procedure_name: str = None,
             procedure_args: list or tuple = None,
-            connect_method: str = 'auto',  # or 'new'
+            connect_method: str = 'new',  # or 'auto'
             procedure_timeout: float or None = None,
             setup_xlsm_path: str or Path = None,
             setup_procedure_name: str = None,
