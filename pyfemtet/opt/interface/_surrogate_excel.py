@@ -29,7 +29,7 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
             constraint_sheet_name: str = None,
             procedure_name: str = None,
             procedure_args: list or tuple = None,
-            connect_method: str = 'auto',  # or 'new'
+            # connect_method: str = 'auto',  # or 'new'
             procedure_timeout: float or None = None,
             setup_xlsm_path: str or Path = None,
             setup_procedure_name: str = None,
@@ -50,6 +50,8 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
             train_history,
             _output_directions,
         )
+
+        connect_method = 'new'
 
         ExcelInterface.__init__(
             self,

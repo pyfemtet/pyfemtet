@@ -44,9 +44,12 @@ class FemtetWithExcelSettingsInterface(FemtetInterface, ExcelInterface, FEMInter
             terminate_excel_when_quit: bool = None, interactive: bool = True, use_named_range: bool = True,
 
     ):
+
+        excel_connect_method = 'new'
+
         ExcelInterface.__init__(
             self, input_xlsm_path, input_sheet_name, output_xlsm_path, output_sheet_name, constraint_xlsm_path,
-            constraint_sheet_name, procedure_name, procedure_args, connect_method, procedure_timeout,
+            constraint_sheet_name, procedure_name, procedure_args, excel_connect_method, procedure_timeout,
             setup_xlsm_path, setup_procedure_name, setup_procedure_args, teardown_xlsm_path,
             teardown_procedure_name, teardown_procedure_args, related_file_paths, visible, display_alerts,
             terminate_excel_when_quit, interactive, use_named_range)
