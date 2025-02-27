@@ -326,7 +326,7 @@ class Function:
         args = self.args
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
-            args = (fem.Femtet, *args)
+            args = (fem.object_passed_to_functions, *args)
         return float(self.fun(*args, **self.kwargs))
 
     def _restore_constants(self):

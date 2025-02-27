@@ -8,7 +8,7 @@ import pyfemtet.opt._test_utils.record_history as rh
 import pytest
 
 
-@pytest.mark.excel
+@pytest.mark.nofem
 def test_excel_interface():
     here = os.path.dirname(__file__)
     xlsm_path = f'{here}\\io_and_solve.xlsm'
@@ -34,7 +34,6 @@ def test_excel_interface():
         procedure_name='FemtetMacro.FemtetMain',
         procedure_args=(os.path.basename(femprj_path).removesuffix('.femprj'),),  # 拡張子は入れない（xlsm の実装に合わせる）
         procedure_timeout=60,
-        with_call_femtet=False,
         connect_method='new',
         setup_procedure_name='launch_femtet',
         teardown_procedure_name='terminate_femtet',

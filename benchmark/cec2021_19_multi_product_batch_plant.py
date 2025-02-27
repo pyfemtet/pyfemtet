@@ -175,7 +175,7 @@ class CEC2021_19_MultiProductBatchPlant(Problem):
         return np.array([2.4435182e5, 4.8572551e4, 6e3])
 
 
-def pof_botorch(n_trials_=100, timeout_=3600):
+def pof_botorch(n_trials_=100, timeout_=3600, forced_counter_=None):
 
     a = PoFBoTorch(
         n_startup_trials=10,
@@ -183,10 +183,10 @@ def pof_botorch(n_trials_=100, timeout_=3600):
 
     p = problem
 
-    values, result_path = main(a, p, n_trials_, timeout_)
+    values, result_path = main(a, p, n_trials_, timeout_, forced_counter_)
 
 
-def tpe(n_trials_=100, timeout_=3600):
+def tpe(n_trials_=100, timeout_=3600, forced_counter_=None):
 
     a = TPE(
         n_startup_trials=10,
@@ -194,20 +194,20 @@ def tpe(n_trials_=100, timeout_=3600):
 
     p = problem
 
-    values, result_path = main(a, p, n_trials_, timeout_)
+    values, result_path = main(a, p, n_trials_, timeout_, forced_counter_)
 
 
-def rand(n_trials_=100, timeout_=3600):
+def rand(n_trials_=100, timeout_=3600, forced_counter_=None):
 
     a = Rand(
     )
 
     p = problem
 
-    values, result_path = main(a, p, n_trials_, timeout_)
+    values, result_path = main(a, p, n_trials_, timeout_, forced_counter_)
 
 
-def nsga2(n_trials_=100, timeout_=3600):
+def nsga2(n_trials_=100, timeout_=3600, forced_counter_=None):
 
     a = NSGA2(
         population_size=10
@@ -215,10 +215,10 @@ def nsga2(n_trials_=100, timeout_=3600):
 
     p = problem
 
-    values, result_path = main(a, p, n_trials_, timeout_)
+    values, result_path = main(a, p, n_trials_, timeout_, forced_counter_)
 
 
-def nsga3(n_trials_=100, timeout_=3600):
+def nsga3(n_trials_=100, timeout_=3600, forced_counter_=None):
 
     a = NSGA3(
         population_size=10
@@ -226,23 +226,25 @@ def nsga3(n_trials_=100, timeout_=3600):
 
     p = problem
 
-    values, result_path = main(a, p, n_trials_, timeout_)
+    values, result_path = main(a, p, n_trials_, timeout_, forced_counter_)
 
 
-def gp(n_trials_=100, timeout_=3600):
+def gp(n_trials_=100, timeout_=3600, forced_counter_=None):
 
     a = GP(
     )
 
     p = problem
 
-    values, result_path = main(a, p, n_trials_, timeout_)
+    values, result_path = main(a, p, n_trials_, timeout_, forced_counter_)
 
 
 if __name__ == '__main__':
     problem = CEC2021_19_MultiProductBatchPlant()
+    
+    pof_botorch(100, 21600)
 
-    for i in range(5):
+    for i in range(1):
         # rand(50, 21600)
         nsga2(100, 21600)
         nsga3(100, 21600)

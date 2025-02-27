@@ -198,4 +198,5 @@ class Message:
     DETAIL_PAGE_CONTOUR_DESCRIPTION = _('The axes are parameters, and the color shows objective value.')
     DETAIL_PAGE_SLICE_HEADER = _('The response of an objective versus one parameter')
     DETAIL_PAGE_SLICE_DESCRIPTION = _('The vertical axis is objective, and the horizontal axis is parameter.')
-
+    DETAIL_PAGE_IMPORTANCE_HEADER = _('The importance of parameters evaluated by fANOVA')
+    DETAIL_PAGE_IMPORTANCE_DESCRIPTION = _('The normalized relative importance of parameters. Please note that the importance is calculated from the overall relationship of the input-output response, rather than from a specific solution.')

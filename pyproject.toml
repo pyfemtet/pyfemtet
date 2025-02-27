@@ -39,6 +39,7 @@ torch = [
 ]
 brepmatching = {version = "^0.1.8", optional = true}
 fire = "^0.6.0"
+pyyaml = "^6.0.2"
 
 [tool.poetry.group.dev.dependencies]
 # license

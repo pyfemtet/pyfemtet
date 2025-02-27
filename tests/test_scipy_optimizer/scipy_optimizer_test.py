@@ -4,6 +4,7 @@
 
 from numpy import sin, cos, pi
 from pyfemtet.opt import FEMOpt, ScipyOptimizer, NoFEM
+import pytest
 
 
 def x(opt: ScipyOptimizer):
@@ -12,7 +13,8 @@ def x(opt: ScipyOptimizer):
     return r * cos(theta)
 
 
-def main():
+@pytest.mark.nofem
+def test_scipy_optimizer():
 
     fem = NoFEM()  # Femtet を使わない設定です。
     opt = ScipyOptimizer()
@@ -26,9 +28,13 @@ def main():
 
     femopt.set_random_seed(42)
     ret = femopt.optimize(
-        confirm_before_exit=True,
+        confirm_before_exit=False,
     )
+
+    for e in femopt._opt_exceptions:
+        if e is not None:
+            raise e
 
 
 if __name__ == "__main__":
-    main()
+    test_scipy_optimizer()

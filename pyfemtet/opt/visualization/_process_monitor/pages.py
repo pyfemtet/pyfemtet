@@ -362,6 +362,19 @@ class OptunaVisualizerPage(AbstractPage):
             )
             layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
 
+        layout.append(html.H2(Msg.DETAIL_PAGE_IMPORTANCE_HEADER))
+        layout.append(html.H4(Msg.DETAIL_PAGE_IMPORTANCE_DESCRIPTION))
+        for i, obj_name in enumerate(obj_names):
+            fig = optuna.visualization.plot_param_importances(
+                study,
+                target=lambda t: t.values[i],
+                target_name=obj_name
+            )
+            import plotly.graph_objects as go
+            fig: go.Figure
+            fig.update_layout(title=obj_name)
+            layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
+
         return layout
 
     def setup_callback(self):

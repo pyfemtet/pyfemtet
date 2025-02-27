@@ -139,6 +139,7 @@ class FEMOpt:
         self.monitor_host_record = None
         self._hv_reference = None
         self._extra_space_dir = None
+        self._opt_exceptions = []
         self.sub_fidelity_models: 'SubFidelityModels' = SubFidelityModels()
 
     # multiprocess 時に pickle できないオブジェクト参照の削除
@@ -950,6 +951,7 @@ class FEMOpt:
             sleep(1)  # monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる
 
             # 全ての Exception を再表示
+            self._opt_exceptions = opt_exceptions
             for i, opt_exception in enumerate(opt_exceptions):
                 if opt_exception is not None:
                     print()
