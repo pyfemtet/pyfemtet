@@ -7,12 +7,15 @@ import enum
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 
-from typing import Callable, Any, SupportsFloat, Sequence
+from typing import (
+    Callable, Any, SupportsFloat,
+    Sequence,
+)
 
 import pandas as pd
 
-# noinspection PyUnresolvedReferences
 try:
+    # noinspection PyUnresolvedReferences
     from pythoncom import CoInitialize, CoUninitialize
     from win32com.client import Dispatch, Constants, constants
 except ModuleNotFoundError:
@@ -48,9 +51,9 @@ def get_worker():
         return None
 
 
-Inputs = dict[str, SupportsFloat]
-Outputs = dict[str, SupportsFloat]
-Fidelities = dict[str, SupportsFloat | str | None]
+TrialInput = dict[str, SupportsFloat]
+TrialOutput = dict[str, SupportsFloat]
+Fidelity = SupportsFloat | str | None
 
 
 class DataFrameWrapper:
@@ -114,31 +117,7 @@ class TrialState(enum.Enum):
     unknown_error = 'Unknown error'
 
 
-@dataclasses.dataclass
-class Record:
-    """単一の試行に関する情報を定義するクラス"""
-
-    # automated
-    number: int | None = None
-
-    # required
-    input: Inputs | None = None
-    objective: Outputs | None = None
-    constraint: Outputs | None = None
-    state: TrialState | None = None
-    time_start: datetime.datetime | None = None
-    time_end: datetime.datetime | None = None
-
-    # optional
-    sub_sampling: int | None = None
-    fidelity: Fidelities = None
-
-    def to_df(self) -> pd.DataFrame:
-        d = {}
-        d.update(dict(number=self.number))
-        d.update(self.input)
-        d.update(self.output)
-        return pd.DataFrame(d, index=[0])
+Record = NotImplemented
 
 
 class Records:
@@ -157,24 +136,6 @@ class Records:
     @property
     def lock(self):
         return self.df_wrapper.lock
-
-    @staticmethod
-    def df_to_records(df: pd.DataFrame) -> Sequence[Record]:
-        ...
-
-    @staticmethod
-    def records_to_df(records: Sequence[Record]) -> pd.DataFrame:
-        df = records[0].to_df()
-        for record in records[1:]:
-            pdf = record.to_df()
-            df = pd.concat((df, pdf))
-        return df
-
-    def append(self, record: Record):
-        df = self.df_wrapper.get_df()
-        pdf = self.records_to_df((record,))
-        df = pd.concat((df, pdf))
-        self.df_wrapper.set_df(df)
 
 
 class History:
@@ -201,7 +162,7 @@ class History:
     def _trial_end(self):
         self.current_trial_time_start = None
 
-    def record(self):
+    def trial_recording(self):
 
         class TrialContext:
 
@@ -214,22 +175,6 @@ class History:
                 self._trial_end()
 
         return TrialContext()
-
-
-    def register(
-            self,
-            x: Inputs,
-            y: Outputs,
-            state: TrialState = TrialState.unknown_error,
-
-    ):
-        with self._records.lock:
-            record = Record(
-                len(self._records) + 1,
-                x,
-                y
-            )
-            self._records.append(record)
 
     def get_df(self):
         return self._records.df_wrapper.get_df()
@@ -293,8 +238,8 @@ def run_monitor(history: History):
 
 
 class AbstractFEMInterface:
-    def update(self, x: 'Inputs'):
-        ...
+    def update(self, x: 'TrialInput'):
+        raise NotImplementedError
 
     def _get_worker_space(self):
         worker = get_worker()
@@ -320,7 +265,7 @@ class AbstractFEMInterface:
         pass
 
 
-class ConcreteInterface(AbstractFEMInterface):
+class FemtetInterface(AbstractFEMInterface):
     _com_members = {'Femtet': 'FemtetMacro.Femtet'}
 
     def __init__(self):
@@ -341,15 +286,18 @@ class ConcreteInterface(AbstractFEMInterface):
             state.update({key: Dispatch(value)})
         self.__dict__.update(state)
 
-    def update(self, x: 'Inputs'):
-        print(f'{self.Femtet.Version:}')
-
     def _setup_after_parallel(self):
         CoInitialize()  # Main Process sub thread では __setstate__ が呼ばれない
 
 
-class Objective:
+class NoFEM(AbstractFEMInterface):
+    ...
+
+
+class Function:
     _fun: Callable[..., SupportsFloat]
+    args: tuple
+    kwargs: dict
 
     @property
     def fun(self) -> Callable[..., SupportsFloat]:
@@ -402,45 +350,121 @@ class Objective:
                 if isinstance(var, Constants):
                     f.__globals__[name] = cls()
 
+    def eval(self) -> SupportsFloat:
+        return self.fun(*self.args, **self.kwargs)
 
-class Objectives(dict[str, Objective]):
-    pass
+
+class Functions(dict[str, Function]): ...
+
+
+class Objective(Function):
+    direction: str | SupportsFloat
+
+    def eval(self) -> tuple[SupportsFloat, SupportsFloat]:
+        value = Function.eval(self)
+
+        if self.direction == 'maximize':
+            value_as_minimize = value
+        elif self.direction == 'maximize':
+            value_as_minimize = -value
+        elif isinstance(self.direction, SupportsFloat):
+            value_as_minimize = (value - self.direction) ** 2
+        else:
+            raise NotImplementedError
+
+        return value, value_as_minimize
+
+
+class Objectives(dict[str, Objective]): ...
+
+
+class Variable:
+
+    value: SupportsFloat
+
+    def __init__(self, name: str):
+        self.name = name
+
+
+class Parameter(Variable):
+
+    lower_bound: SupportsFloat
+    upper_bound: SupportsFloat
+
+
+
+class VariableManager(dict[str, Variable]):
+    ...
 
 
 class AbstractOptimizer:
-    fem: AbstractFEMInterface
+
+    variable_manager: VariableManager
     objectives: Objectives
+
     history: History
+    fem: AbstractFEMInterface
+    current_trial_start: datetime.datetime | None
 
     def __init__(self):
+
+        # Problem
+        self.variable_manager = VariableManager()
+        self.objectives = {}
+
+        # System
+        self.fem = None
         self.history = History()
 
-        self.current_trial_start: datetime.datetime = None
+        # Util
+        self.current_trial_start = None
 
-    def add_parameter(self) -> None: ...
+    def add_parameter(
+            self,
+            name: str,
+            initial_value: SupportsFloat | None,
+            lower_bound: SupportsFloat | None,
+            upper_bound: SupportsFloat | None,
+    ) -> None:
+        parameter = Parameter(name)
+        parameter.value = initial_value
+        parameter.lower_bound = lower_bound
+        parameter.upper_bound = upper_bound
+        self.variable_manager.update({name: parameter})
 
-    def add_objective(self) -> None: ...
+    def add_objective(
+            self,
+            name: str,
+            fun: Callable[[...], SupportsFloat],
+            direction: str | SupportsFloat = 'minimize',
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ) -> None:
+        obj = Objective()
+        obj.fun = fun
+        obj.args = args or ()
+        obj.kwargs = kwargs or {}
+        obj.direction = direction
+        self.objectives.update({name: obj})
 
-    def add_constraint(self) -> None: ...
+    def f(self, x: 'TrialInput') -> 'TrialOutput':
 
-    def suggest(self) -> 'Inputs':
-        return Inputs(x=1)
-
-    def probe(self, x: 'Inputs') -> 'Outputs':
+        # Update FEM
         self.fem.update(x)
-        out = Outputs()
+
+        # Returns output
+        out = TrialOutput()
         for name, obj in self.objectives.items():
-            out.update({name: obj.fun()})
+            obj_value, obj_value_internal = obj.eval()
+            out.update({name: obj_value_internal})
+
         return out
 
-    def register(self, x: 'Inputs', y: 'Outputs') -> None:
+    def register(self, x: 'TrialInput', y: 'TrialOutput') -> None:
         self.history.register(
             x,
             y,
         )
-
-    def f(self, x: 'Inputs') -> 'Outputs':
-        return self.probe(x)
 
     def run(self) -> None:
 
@@ -541,7 +565,7 @@ if __name__ == '__main__':
 
     opt = AbstractOptimizer()
     opt.objectives = objectives
-    opt.fem = ConcreteInterface()
+    opt.fem = NoFEM()
 
     femopt = FEMOpt()
     femopt.opt = opt
