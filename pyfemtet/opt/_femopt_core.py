@@ -306,7 +306,7 @@ class Function:
                         fun.__globals__[varname] = _Scapegoat()
 
         self.fun = fun
-        self.name = name
+        self.name: str = name
         self.args = args
         self.kwargs = kwargs
 
@@ -853,7 +853,7 @@ class History:
 
         # 最小化問題に変換された objective values を取得
         raw_objective_values = df[self.obj_names].values
-        objective_values = np.full_like(raw_objective_values, np.nan)
+        objective_values = np.full_like(raw_objective_values, np.nan, dtype=float)
         for n_trial in range(len(raw_objective_values)):
             for obj_idx, (_, objective) in enumerate(objectives.items()):
                 objective_values[n_trial, obj_idx] = objective.convert(raw_objective_values[n_trial, obj_idx])
