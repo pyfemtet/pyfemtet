@@ -61,7 +61,7 @@ class FemtetWithExcelSettingsInterface(FemtetInterface, ExcelInterface, FEMInter
         )
 
 
-    def load_objective(self, opt):
+    def load_objective(self, opt, raise_if_no_keyword=True):
         from pyfemtet.opt.optimizer import AbstractOptimizer
         from pyfemtet.opt._femopt_core import Objective
         opt: AbstractOptimizer
@@ -69,7 +69,7 @@ class FemtetWithExcelSettingsInterface(FemtetInterface, ExcelInterface, FEMInter
         df = ParseAsObjective.parse(
             self.output_xlsm_path,
             self.output_sheet_name,
-            False
+            raise_if_no_keyword,
         )
 
         for i, row in df.iterrows():

@@ -443,7 +443,7 @@ class ExcelInterface(FEMInterface):
             self.excel = DispatchEx('Excel.Application')
 
         # FemtetRef を追加する
-        self.open_femtet_ref_xla()  # ここでエラーが発生しているかも？
+        self.open_femtet_ref_xla()
         sleep(0.5)
 
         # 起動した excel の pid を記憶する
@@ -730,11 +730,15 @@ class ExcelInterface(FEMInterface):
     def input_workbook(self) -> CDispatch:
         return self.wb_input
 
-    def load_parameter(self, opt) -> None:
+    def load_parameter(self, opt, raise_if_no_keyword=True) -> None:
         from pyfemtet.opt.optimizer import AbstractOptimizer, logger
         opt: AbstractOptimizer
 
-        df = ParseAsParameter.parse(self.input_xlsm_path, self.input_sheet_name)
+        df = ParseAsParameter.parse(
+            self.input_xlsm_path,
+            self.input_sheet_name,
+            raise_if_no_keyword,
+        )
 
         for i, row in df.iterrows():
 
@@ -781,6 +785,7 @@ class ExcelInterface(FEMInterface):
                 opt.variables.add_parameter(prm)
 
             else:
+                # noinspection PyTypeChecker
                 fixed_prm = Expression(
                     name=name,
                     fun=lambda: value,
@@ -794,7 +799,7 @@ class ExcelInterface(FEMInterface):
                 )
                 opt.variables.add_expression(fixed_prm)
 
-    def load_objective(self, opt):
+    def load_objective(self, opt, raise_if_no_keyword=True):
         from pyfemtet.opt.optimizer import AbstractOptimizer
         from pyfemtet.opt._femopt_core import Objective
         opt: AbstractOptimizer
@@ -802,6 +807,7 @@ class ExcelInterface(FEMInterface):
         df = ParseAsObjective.parse(
             self.output_xlsm_path,
             self.output_sheet_name,
+            raise_if_no_keyword,
         )
 
         for i, row in df.iterrows():
