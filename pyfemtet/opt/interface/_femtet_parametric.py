@@ -107,7 +107,8 @@ class ParametricResultCSVProcessor:
 
             # 与えられた output_number に関連する行だけ抜き出し
             # エラーがあるかどうかチェックする
-            pdf = df['結果出力設定番号'] == parametric_output_index + 1
+            idx = df['結果出力設定番号'] == parametric_output_index + 1
+            pdf = df[idx]
 
         # 結果出力設定番号 カラムが存在しない
         else:

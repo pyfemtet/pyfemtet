@@ -22,5 +22,10 @@ def test_femtet_with_excel_settings():
 
     femopt.optimize(n_trials=4, n_parallel=2, confirm_before_exit=False)
 
-    if len(femopt._opt_exceptions) > 0:
-        raise femopt._opt_exceptions[0]
+    for e in femopt._opt_exceptions:
+        if e is not None:
+            raise e
+
+
+if __name__ == '__main__':
+    test_femtet_with_excel_settings()

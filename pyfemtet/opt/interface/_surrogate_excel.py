@@ -18,7 +18,6 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
 
             # SurrogateModel
             history_path: str = None, train_history: History = None,
-            _output_directions: dict[int, str | float] | list[str | float] = None,
 
             # Excel
             input_xlsm_path: str or Path = None,
@@ -29,7 +28,7 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
             constraint_sheet_name: str = None,
             procedure_name: str = None,
             procedure_args: list or tuple = None,
-            connect_method: str = 'auto',  # or 'new'
+            # connect_method: str = 'auto',  # or 'new'
             procedure_timeout: float or None = None,
             setup_xlsm_path: str or Path = None,
             setup_procedure_name: str = None,
@@ -48,8 +47,9 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
             self,
             history_path,
             train_history,
-            _output_directions,
         )
+
+        connect_method = 'new'
 
         ExcelInterface.__init__(
             self,
@@ -77,11 +77,11 @@ class PoFBoTorchInterfaceWithExcelSettingsInterface(
             use_named_range,
         )
 
-    def load_parameter(self, opt) -> None:
-        ExcelInterface.load_parameter(self, opt)
+    def load_parameter(self, opt, raise_if_no_keyword=True) -> None:
+        ExcelInterface.load_parameter(self, opt, raise_if_no_keyword)
 
-    def load_objective(self, opt) -> None:
-        PoFBoTorchInterface.load_objective(self, opt)
+    def load_objective(self, opt, raise_if_no_keyword=True) -> None:
+        ExcelInterface.load_objective(self, opt, raise_if_no_keyword)
 
     def load_constraint(self, opt, raise_if_no_keyword=False):
         ExcelInterface.load_constraint(self, opt, raise_if_no_keyword)
