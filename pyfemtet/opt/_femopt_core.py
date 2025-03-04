@@ -817,7 +817,7 @@ class History:
                 df = self.get_df()
                 trial = df['trial'].values[-1]
                 client = get_client()  # always returns valid client
-                client.run_on_scheduler(postprocess_func, trial, **postprocess_args)
+                client.run_on_scheduler(postprocess_func, *(trial, df), **postprocess_args)
 
     def _calc_non_domi(self, objectives, df):
 

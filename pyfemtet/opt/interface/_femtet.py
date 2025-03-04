@@ -847,6 +847,7 @@ class FemtetInterface(FEMInterface):
     @staticmethod
     def _postprocess_func(
             trial: int,
+            df: pd.DataFrame,
             original_femprj_path: str,
             model_name: str,
             pdt_file_content=None,
