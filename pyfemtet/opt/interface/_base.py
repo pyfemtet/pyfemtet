@@ -84,7 +84,7 @@ class FEMInterface(ABC):
         """Preprocessing after launching a dask worker and before run optimization (if implemented in concrete class)."""
         pass
 
-    def _postprocess_func(self, trial: int, *args, dask_scheduler=None, **kwargs):
+    def _postprocess_func(self, trial: int, df: pd.DataFrame, *args, dask_scheduler=None, **kwargs):
         pass
 
     def _create_postprocess_args(self):

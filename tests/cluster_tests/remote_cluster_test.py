@@ -127,7 +127,7 @@ def test_local_cluster_with_femtet():
     )
     fem = FemtetInterface(
         femprj_path, connect_method='new',
-        save_pdt=True
+        save_pdt='all'
     )
 
     # femopt setup
@@ -171,7 +171,7 @@ def test_remote_cluster_with_femtet():
     )
     fem = FemtetInterface(
         femprj_path, connect_method='new',
-        save_pdt = True
+        save_pdt='all'
     )
 
     # femopt setup

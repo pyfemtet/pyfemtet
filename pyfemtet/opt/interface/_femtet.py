@@ -8,6 +8,7 @@ import winreg
 
 import pandas as pd
 import psutil
+import shutil
 from dask.distributed import get_worker
 
 # noinspection PyUnresolvedReferences
@@ -54,6 +55,9 @@ class FailedToPostProcess(Exception):
     pass
 
 
+
+
+
 class FemtetInterface(FEMInterface):
     """Control Femtet from optimizer.
 
@@ -73,7 +77,8 @@ class FemtetInterface(FEMInterface):
 
         save_pdt (str, optional):
             The type to save result file.
-            Can specify 'all' or None. Default is 'all'.
+            Valid values are 'all', 'none' or 'optimal'.
+            Default is 'all'.
 
         strictly_pid_specify (bool, optional):
             Whether to strictly specify the PID in Femtet connection.
@@ -124,7 +129,7 @@ class FemtetInterface(FEMInterface):
             femprj_path: str = None,
             model_name: str = None,
             connect_method: str = 'auto',  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
-            save_pdt: str = 'all',  # 'all' or None
+            save_pdt: str = 'all',  # 'all', 'none' or 'optimal'
             strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
             allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui: bool = True,
@@ -834,6 +839,7 @@ class FemtetInterface(FEMInterface):
             model_name=self.model_name,
             pdt_file_content=file_content,
             jpg_file_content=jpg_content,
+            save_results=self.save_pdt,  # 'all', 'optimal' or 'none'
         )
         return out
 
@@ -847,12 +853,20 @@ class FemtetInterface(FEMInterface):
     @staticmethod
     def _postprocess_func(
             trial: int,
+            df: pd.DataFrame,
             original_femprj_path: str,
+            save_results: str,
             model_name: str,
             pdt_file_content=None,
             jpg_file_content=None,
             dask_scheduler=None
     ):
+
+        # none なら何もしない
+        if save_results.lower() == 'none':
+            return
+
+        # all or optimal ならいったん保存する
         result_dir = original_femprj_path.replace('.femprj', '.Results')
         if pdt_file_content is not None:
             pdt_path = FemtetInterface._create_pdt_path(original_femprj_path, model_name, trial)
@@ -863,6 +877,15 @@ class FemtetInterface(FEMInterface):
             jpg_path = os.path.join(result_dir, model_name + f'_trial{trial}.jpg')
             with open(jpg_path, 'wb') as f:
                 f.write(jpg_file_content)
+
+        # optimal なら不要ファイルの削除を実行する
+        if save_results.lower() == 'optimal':
+            for i, row in df.iterrows():
+                if not bool(row['non_domi']):
+                    trial_to_remove = int(row['trial'])
+                    pdt_path_to_remove = FemtetInterface._create_pdt_path(original_femprj_path, model_name, trial_to_remove)
+                    if os.path.isfile(pdt_path_to_remove):
+                        os.remove(pdt_path_to_remove)
 
     def _create_result_file_content(self):
         """Called after solve"""
