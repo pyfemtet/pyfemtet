@@ -5,6 +5,7 @@ import os
 import sys
 from time import sleep, time
 import winreg
+import subprocess
 
 import pandas as pd
 import psutil
@@ -306,7 +307,7 @@ class FemtetInterface(FEMInterface):
         # ensure makepy
         if not hasattr(constants, 'STATIC_C'):
             cmd = f'{sys.executable} -m win32com.client.makepy FemtetMacro'
-            os.system(cmd)
+            subprocess.run(cmd, shell=True)
             message = Msg.ERR_NO_MAKEPY
             logger.error('================')
             logger.error(message)
