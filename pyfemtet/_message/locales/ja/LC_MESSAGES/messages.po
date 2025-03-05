@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-02-19 13:47+0900\n"
+"POT-Creation-Date: 2025-03-05 12:41+0900\n"
 "PO-Revision-Date: 2024-07-22 14:05+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -79,8 +79,8 @@ msgid "Model update failed."
 msgstr "モデル更新に失敗しました。"
 
 #: pyfemtet/_message/messages.py:60
-msgid "It was detected that the configuration of Femtet python macro constants has not been completed. The configuration was done automatically (python -m win32com.client.makepy FemtetMacro). Please restart the program."
-msgstr "Femtet マクロの定数の設定が未完了であることが検出され、設定コマンド（python -m win32com.client.makepy FemtetMacro）が自動実行されました。プログラムを再実行してください。"
+msgid "It was detected that the configuration of Femtet python macro constants has not been completed. The configuration was done automatically (python -m win32com.client.makepy FemtetMacro). Please restart the program. If the error persists, please run \"py -m win32com.client.makepy FemtetMacro\" or \"python -m win32com.client.makepy FemtetMacro\" on the command prompt."
+msgstr "Femtet マクロの定数の設定が未完了であることが検出され、設定コマンド（python -m win32com.client.makepy FemtetMacro）が自動実行されました。プログラムを再実行してください。もしエラーが解消されない場合は、コマンドプロンプトで「py -m win32com.client.makepy FemtetMacro」または「python -m win32com.client.makepy FemtetMacro」を実行してください。"
 
 #: pyfemtet/_message/messages.py:61
 msgid "Failed to connect to Femtet."
