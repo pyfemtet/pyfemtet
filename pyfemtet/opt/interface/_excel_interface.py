@@ -260,10 +260,10 @@ class ExcelInterface(FEMInterface):
         self.procedure_name = procedure_name
         self.procedure_args = procedure_args or []
         assert connect_method in ['new', 'auto']
-        self.connect_method = connect_method
+        self.excel_connect_method = connect_method
         self.procedure_timeout = procedure_timeout
         if terminate_excel_when_quit is None:
-            self.terminate_excel_when_quit = self.connect_method == 'new'
+            self.terminate_excel_when_quit = self.excel_connect_method == 'new'
         else:
             self.terminate_excel_when_quit = terminate_excel_when_quit
 
@@ -398,7 +398,7 @@ class ExcelInterface(FEMInterface):
 
         # excel に繋ぐ
         with lock_or_no_lock('connect-excel'):
-            self.connect_excel(self.connect_method)
+            self.connect_excel(self.excel_connect_method)
             sleep(1)
 
         # load_objective は 1 回目に呼ばれたのが main thread なので
