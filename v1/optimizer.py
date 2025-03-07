@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Callable
 
 import datetime
@@ -24,6 +25,9 @@ class Interrupt(Exception):
     pass
 
 
+MAIN_FIDELITY_NAME = 'main_fidelity'
+
+
 class AbstractOptimizer:
 
     # problem
@@ -31,6 +35,7 @@ class AbstractOptimizer:
     objectives: Objectives
     constraints: Constraints
     fidelity: Fidelity
+    sub_fidelity_name: str
     sub_fidelity_models: SubFidelityModels
 
     # system
@@ -49,6 +54,7 @@ class AbstractOptimizer:
 
         # multi-fidelity
         self.fidelity: Fidelity = None
+        self.sub_fidelity_name = MAIN_FIDELITY_NAME
         self.sub_fidelity_models: SubFidelityModels = None
 
         # System
@@ -163,14 +169,14 @@ class AbstractOptimizer:
     def add_sub_fidelity_model(
             self,
             name: str,
-            sub_fidelity_model: SubFidelityModel
+            sub_fidelity_model: SubFidelityModel,
+            fidelity: Fidelity,
     ):
         sub_fidelity_model.variable_manager = self.variable_manager
-        d = {name: sub_fidelity_model}
         if self.sub_fidelity_models is None:
-            self.sub_fidelity_models = d
-        else:
-            self.sub_fidelity_models.update(d)
+            self.sub_fidelity_models = SubFidelityModels()
+            self.fidelity = 1.
+        self.sub_fidelity_models.add(name, sub_fidelity_model, fidelity)
 
     def get_variables(self, format='dict'):
         return self.variable_manager.get_variables(
@@ -463,7 +469,7 @@ class AbstractOptimizer:
 
         logger.info(f'worker {worker_idx} complete!')
 
-    def _logging_output(self):
+    def _logging(self):
 
         class LoggingOutput:
 
@@ -501,7 +507,12 @@ class AbstractOptimizer:
 class SubFidelityModel(AbstractOptimizer): ...
 
 
-class SubFidelityModels(dict[str, SubFidelityModel]): ...
+class SubFidelityModels(dict[str, SubFidelityModel]):
+
+    def add(self, name, model: SubFidelityModel, fidelity: Fidelity):
+        model.sub_fidelity_name = name
+        model.fidelity = fidelity
+        self.update({name: model})
 
 
 import warnings
@@ -514,40 +525,91 @@ remove_all_output(get_optuna_logger())
 
 warnings.filterwarnings('ignore', 'set_metric_names', optuna.exceptions.ExperimentalWarning)
 
-CONSTRAINT_ATTR_KEY = 'constraint'
+
+class OptunaAttribute:
+    """Manage optuna user attribute
+
+    user attributes are:
+        sub_fidelity_name:
+            fidelity: ...
+            OBJECTIVE_ATTR_KEY: ...
+            PYFEMTET_STATE_ATTR_KEY: ...
+            CONSTRAINT_ATTR_KEY: ...
+
+    """
+
+    OBJECTIVE_KEY = 'internal_objective'
+    CONSTRAINT_KEY = 'constraint'
+    PYFEMTET_TRIAL_STATE_KEY = 'pyfemtet_trial_state'
+
+    sub_fidelity_name: str  # key
+    fidelity: Fidelity
+    v_values: tuple  # violation
+    y_values: tuple  # internal objective
+    pf_state: tuple  # PyFemtet state
+
+    def __init__(self, opt: AbstractOptimizer):
+        self.sub_fidelity_name = opt.sub_fidelity_name
+        self.fidelity = None
+        self.v_values = None
+        self.y_values = None
+        self.pf_state = None
+
+    @property
+    def key(self):
+        return self.sub_fidelity_name
+
+    @property
+    def value(self):
+        d = {
+            'fidelity': self.fidelity,
+            self.OBJECTIVE_KEY: self.y_values,
+            self.CONSTRAINT_KEY: self.v_values,
+            self.PYFEMTET_TRIAL_STATE_KEY: self.pf_state,
+        }
+        return d
+
+    @staticmethod
+    def get_fidelity(optuna_attribute: OptunaAttribute):
+        return optuna_attribute.value['fidelity']
+
+    @staticmethod
+    def get_violation(optuna_attribute: OptunaAttribute):
+        return optuna_attribute.value[OptunaAttribute.CONSTRAINT_KEY]
+
+    @staticmethod
+    def get_violation_from_value(value: dict):  # value is OptunaAttribute.value
+        return value[OptunaAttribute.CONSTRAINT_KEY]
+
+    @staticmethod
+    def get_pf_state_from_value(value: dict):  # value is OptunaAttribute.value
+        return value[OptunaAttribute.PYFEMTET_TRIAL_STATE_KEY]
 
 
 class OptunaOptimizer(AbstractOptimizer):
 
     current_trial: optuna.trial.Trial
 
-    def _create_infeasible_constraints(self) -> np.ndarray:
+    def _create_infeasible_constraints(self, opt_: AbstractOptimizer = None) -> np.ndarray:
+        opt_ = opt_ if opt_ is not None else self
         count = 0
-        for name, cns in self.constraints.items():
+        for name, cns in opt_.constraints.items():
             if cns.lower_bound is not None:
                 count += 1
             if cns.upper_bound is not None:
                 count += 1
         return np.ones(count, dtype=np.float64)
 
-    def _set_constraint(self, trial: optuna.trial.Trial, cns_values: tuple[float] | None = None):
-
-        if cns_values is None:
-            cns_values = self._create_infeasible_constraints()
-
-        trial.set_user_attr(
-            CONSTRAINT_ATTR_KEY,
-            cns_values
-        )
-
     def _get_constraint(self, trial: optuna.trial.FrozenTrial):
-        return trial.user_attrs[CONSTRAINT_ATTR_KEY]
+        key = OptunaAttribute(self).key
+        value = trial.user_attrs[key]
+        return OptunaAttribute.get_violation_from_value(value)
 
     def _objective(self, trial: optuna.trial.Trial):
 
         self.current_trial = trial
 
-        with self._logging_output():
+        with self._logging():
 
             vm = self.variable_manager
 
@@ -586,68 +648,103 @@ class OptunaOptimizer(AbstractOptimizer):
             x = vm.get_variables(filter='parameter')
             x_pass_to_fem: TrialInput = vm.get_variables(filter='pass_to_fem')
 
-            # main
-            datetime_start = datetime.datetime.now()
-            y, y_internal, c = None, None, None
-            if self._should_solve(self.history):
-                try:
-                    y, y_internal, c = self.f(x, x_pass_to_fem, self.history, datetime_start)
 
-                except (ConstraintViolation, FEMError):
-                    self._set_constraint(trial)
-                    raise optuna.TrialPruned
+            def solve(
+                    opt_: AbstractOptimizer = self
+            ) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None]:
 
-                else:
-                    # convert constraint to **sorted** violation
-                    assert len(c) == len(self.constraints)
-                    v = {}
-                    for name, cns in self.constraints.items():
-                        # This is {lower or upper: violation_value} dict
-                        violation: dict[str, float] = c[name].calc_violation()
-                        for l_or_u, violation_value in violation.items():
-                            key = name + '_' + l_or_u
-                            v.update({key: violation_value})
+                # check interruption
+                self._check_entire_interruption()
 
-                    # register constraint
-                    self._set_constraint(trial, tuple(v.values()))
+                # declare output
+                y_internal_ = None
 
-            # check interruption
-            self._check_entire_interruption()
+                # prepare attribute
+                optuna_attr = OptunaAttribute(opt_)
 
-            # sub-fidelity of f
-            for name, sub_opt in self.sub_fidelity_models.items():
+                # should solve
+                if opt_._should_solve(self.history):
 
-                if sub_opt._should_solve(self.history):
+                    logger.info(f'===== Run {opt_.sub_fidelity_name} =====')
 
-                    sub_opt.variable_manager = vm
+                    # if opt_ is not self, update variable manager
+                    opt_.variable_manager = vm
+
+                    # start solve
                     datetime_start = datetime.datetime.now()
-
                     try:
-                        sub_y, sub_y_internal, _ = sub_opt.f(x, self.history, datetime_start)
+                        _, y_internal_, c = opt_.f(x, x_pass_to_fem, self.history, datetime_start)
 
-                    except (ConstraintViolation, FEMError):
+                    # if (hidden) constraint violation, set trial attribute
+                    except (ConstraintViolation, FEMError) as e:
+                        if isinstance(e, ModelError):
+                            optuna_attr.pf_state = TrialState.model_error
+                        elif isinstance(e, MeshError):
+                            optuna_attr.pf_state = TrialState.mesh_error
+                        elif isinstance(e, SolveError):
+                            optuna_attr.pf_state = TrialState.solve_error
+                        elif isinstance(e, ConstraintViolation):
+                            optuna_attr.pf_state = TrialState.hard_constraint_violation
+                        optuna_attr.v_values = self._create_infeasible_constraints(opt_)
 
-                        # register sub-fidelity values
-                        trial.set_user_attr(
-                            'sub_fidelity_' + name,
-                            dict(
-                                fidelity=sub_opt.fidelity,
-                                y=tuple(sub_y_internal.values()),
-                            )
-                        )
+                    # if succeeded
+                    else:
+                        # convert constraint to **sorted** violation
+                        assert len(c) == len(opt_.constraints)
+                        v = {}
+                        for cns_name, cns in opt_.constraints.items():
+                            # This is {lower or upper: violation_value} dict
+                            violation: dict[str, float] = c[cns_name].calc_violation()
+                            for l_or_u, violation_value in violation.items():
+                                key_ = cns_name + '_' + l_or_u
+                                v.update({key_: violation_value})
+
+                        # register results
+                        optuna_attr.v_values = tuple(v.values())
+                        optuna_attr.y_values = tuple(y_internal_)
+
+                # skipped
+                else:
+                    optuna_attr.pf_state = TrialState.skipped
+
+                # update trial attribute
+                trial.set_user_attr(optuna_attr.key, optuna_attr.value)
+
+                # check interruption
+                self._check_entire_interruption()
+
+                return y_internal_
+
+
+            # process main fidelity model
+            y_internal = solve()
+
+            # process sub_fidelity_models
+            for sub_fidelity_name, sub_opt in self.sub_fidelity_models.items():
+                solve(sub_opt)
 
             # check interruption
             self._check_entire_interruption()
 
             self.current_trial = None
 
-            # if main skipped
-            if y is None:
-                return None  # set trial FAILED
+            # To avoid trail FAILED with hard constraint
+            # violation, check pf_state and raise TrialPruned.
+            key = OptunaAttribute(self).key
+            value = trial.user_attrs[key]
+            state = OptunaAttribute.get_pf_state_from_value(value)
+            if state in [
+                TrialState.hard_constraint_violation,
+                TrialState.model_error,
+                TrialState.mesh_error,
+                TrialState.solve_error,
+                TrialState.post_error,
+            ]:
+                raise optuna.TrialPruned
 
-            # if main solved
-            else:
-                return tuple(y_internal.values())
+            # if main solve skipped, y_internal is None
+            # and then trial is recorded as FAILED.
+            return y_internal
 
     def run(self):
 
@@ -689,22 +786,32 @@ if __name__ == '__main__':
         x = _opt.get_variables('values')
         return (x ** 2).sum()
 
+    def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
+        x = _opt.get_variables('values')
+        return (x ** 2).sum()
+
     def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
         x = _opt.get_variables('values')
         return x[0]
 
-    _opt = OptunaOptimizer()
+    __fem = NoFEM()
+    __opt = SubFidelityModel()
+    __opt.fem = __fem
+    __opt.add_objective('obj', _parabola2, args=(__fem, __opt))
 
     _fem = NoFEM()
+    _opt = OptunaOptimizer()
     _opt.fem = _fem
-
-    _args = (_fem, _opt)
-
-    _opt.add_parameter('x1', 1, -1, 1, step=0.5)
-    _opt.add_parameter('x2', 1, -1, 1, step=0.5)
-
-    _opt.add_constraint('cns', _cns, lower_bound=0, args=_args)
-
-    _opt.add_objective('obj', _parabola, args=_args)
+    _opt.add_parameter('x1', 1, -1, 1, step=0.1)
+    _opt.add_parameter('x2', 1, -1, 1, step=0.1)
+    _opt.add_constraint('cns', _cns, lower_bound=0, args=(_fem, _opt))
+    _opt.add_objective('obj', _parabola, args=(_fem, _opt))
+    _opt.add_sub_fidelity_model(name='low-fidelity', sub_fidelity_model=__opt, fidelity=0.5)
 
     _opt.run()
+
+    import plotly.express as px
+    _df = _opt.history.get_df()
+    px.scatter_3d(_df, x='x1', y='x2', z='obj', color='fidelity', opacity=0.5).show()
+
+
