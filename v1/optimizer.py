@@ -41,7 +41,6 @@ class AbstractOptimizer:
     # system
     history: History
     fem: AbstractFEMInterface
-    current_trial_start: datetime.datetime | None
     entire_status: WorkerStatus
     worker_status: WorkerStatus
 
@@ -63,9 +62,6 @@ class AbstractOptimizer:
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.entire_status: WorkerStatus = WorkerStatus(entire_process_status_key)
         self.worker_status: WorkerStatus = WorkerStatus()
-
-        # Util
-        self.current_trial_start = None
 
     def add_variable(
             self,
