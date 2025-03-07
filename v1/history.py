@@ -280,6 +280,94 @@ class Record:
         return cls._filter_columns('cns')
 
 
+class EntireDependentValuesManager:
+
+    y_internal: np.ndarray
+    feasibility: np.ndarray
+
+    def __init__(self, records: Records, equality_filters: dict):
+
+        self.records = records
+        self.equality_filters = equality_filters
+
+        assert self.records.df_wrapper.lock.locked()
+
+        # get df
+        df = self.get_df()
+
+        # get column names
+        obj_names = Record.obj_names
+        f = CorrespondingColumnNameRuler.create_direction_name
+        obj_direction_names = [f(name) for name in obj_names]
+
+        # get values
+        all_obj_values = df[obj_names].values
+        all_obj_directions = df[obj_direction_names].values
+        feasibility = df['feasibility']
+
+        # convert values as minimization problem
+        y_internal = np.empty(all_obj_values.shape)
+        for i, (obj_values, obj_directions) \
+                in enumerate(zip(all_obj_values.T, all_obj_directions.T)):
+            y_internal[:, i] = np.array(
+                list(
+                    map(
+                        lambda args: Objective._convert(*args),
+                        zip(obj_values, obj_directions)
+                    )
+                )
+            )
+
+        self.y_internal = y_internal
+        self.feasibility = feasibility
+
+    def get_df(self):
+        return self.records.df_wrapper.get_df(
+            self.equality_filters
+        )
+
+    def set_df(self, df):
+        self.records.df_wrapper.set_df(
+            df,
+            self.equality_filters
+        )
+
+    def update_optimality(self):
+
+        assert self.records.df_wrapper.lock.locked()
+
+        # get df
+        df = self.get_df()
+
+        # calc optimality
+        optimality = calc_optimality(
+            self.y_internal,
+            self.feasibility,
+        )
+
+        # update
+        df.loc[:, 'optimality'] = optimality
+        self.set_df(df)
+
+    def update_hypervolume(self):
+
+        assert self.records.df_wrapper.lock.locked()
+
+        # get df
+        df = self.get_df()
+
+        # calc hypervolume
+        hv_values = calc_hypervolume(
+            self.y_internal,
+            self.feasibility,
+            ref_point='nadir-up-to-the-point',
+        )
+
+        # update
+        df.loc[:, 'hypervolume'] = hv_values
+        self.set_df(df)
+
+
 class Records:
     """最適化の試行全体の情報を格納するモデルクラス"""
     df_wrapper: DataFrameWrapper
@@ -396,95 +484,9 @@ class Records:
 
     def update_entire_dependent_values(self):
 
-        # noinspection PyMethodParameters
-        class EntireDependentValuesManager:
-
-            y_internal: np.ndarray
-            feasibility: np.ndarray
-
-            def __init__(self_, equality_filters: dict):
-
-                self_.equality_filters = equality_filters
-
-                assert self.df_wrapper.lock.locked()
-
-                # get df
-                df = self_.get_df()
-
-                # get column names
-                obj_names = Record.obj_names
-                f = CorrespondingColumnNameRuler.create_direction_name
-                obj_direction_names = [f(name) for name in obj_names]
-
-                # get values
-                all_obj_values = df[obj_names].values
-                all_obj_directions = df[obj_direction_names].values
-                feasibility = df['feasibility']
-
-                # convert values as minimization problem
-                y_internal = np.empty(all_obj_values.shape)
-                for i, (obj_values, obj_directions) \
-                        in enumerate(zip(all_obj_values.T, all_obj_directions.T)):
-                    y_internal[:, i] = np.array(
-                        list(
-                            map(
-                                lambda args: Objective._convert(*args),
-                                zip(obj_values, obj_directions)
-                            )
-                        )
-                    )
-
-                self_.y_internal = y_internal
-                self_.feasibility = feasibility
-
-            def get_df(self_):
-                return self.df_wrapper.get_df(
-                    self_.equality_filters
-                )
-
-            def set_df(self_, df):
-                self.df_wrapper.set_df(
-                    df,
-                    self_.equality_filters
-                )
-
-            def update_optimality(self_):
-
-                assert self.df_wrapper.lock.locked()
-
-                # get df
-                df = self_.get_df()
-
-                # calc optimality
-                optimality = calc_optimality(
-                    self_.y_internal,
-                    self_.feasibility,
-                )
-
-                # update
-                df.loc[:, 'optimality'] = optimality
-                self_.set_df(df)
-
-            def update_hypervolume(self_):
-
-                assert self.df_wrapper.lock.locked()
-
-                # get df
-                df = self_.get_df()
-
-                # calc hypervolume
-                hv_values = calc_hypervolume(
-                    self_.y_internal,
-                    self_.feasibility,
-                    ref_point='nadir-up-to-the-point',
-                )
-
-                # update
-                df.loc[:, 'hypervolume'] = hv_values
-                self_.set_df(df)
-
         with self.df_wrapper.lock_if_not_locked:
             self_mgr = EntireDependentValuesManager(
+                self,
                 {'sub_fidelity_name': MAIN_FIDELITY_NAME}
             )
             self_mgr.update_optimality()
