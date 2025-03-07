@@ -30,7 +30,10 @@ __all__ = [
     'Constraints',
     'Fidelity',
     'SubSampling',
+    'MAIN_FIDELITY_NAME',
 ]
+
+MAIN_FIDELITY_NAME = 'main_fidelity'
 
 
 class Function:

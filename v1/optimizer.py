@@ -25,9 +25,6 @@ class Interrupt(Exception):
     pass
 
 
-MAIN_FIDELITY_NAME = 'main_fidelity'
-
-
 class AbstractOptimizer:
 
     # problem
@@ -283,6 +280,7 @@ class AbstractOptimizer:
                     x=parameters,
                     c=hard_c,
                     state=state,
+                    sub_fidelity_name=self.sub_fidelity_name,
                     fidelity=self.fidelity,
                     datetime_start=datetime_start,
                     message='Hidden constraint violation hard constraint evaluation: ' + create_err_msg_from_exception(e),
@@ -299,6 +297,7 @@ class AbstractOptimizer:
                     x=parameters,
                     c=hard_c,
                     state=TrialState.hard_constraint_violation,
+                    sub_fidelity_name=self.sub_fidelity_name,
                     fidelity=self.fidelity,
                     datetime_start=datetime_start,
                     message=f'Hard constraint violation during hard constraint evaluation: ' + ', '.join(violation_names),
@@ -333,6 +332,7 @@ class AbstractOptimizer:
                     x=parameters,
                     c=hard_c,
                     state=state,
+                    sub_fidelity_name=self.sub_fidelity_name,
                     fidelity=self.fidelity,
                     datetime_start=datetime_start,
                     message='Hidden constraint violation in FEM update: ' + create_err_msg_from_exception(e),
@@ -366,6 +366,7 @@ class AbstractOptimizer:
                     x=parameters,
                     c=hard_c,
                     state=state,
+                    sub_fidelity_name=self.sub_fidelity_name,
                     fidelity=self.fidelity,
                     datetime_start=datetime_start,
                     message='Hidden constraint violation during objective function evaluation: ' + create_err_msg_from_exception(e),
@@ -391,6 +392,7 @@ class AbstractOptimizer:
                     y=y,
                     c=_c,
                     state=TrialState.post_error,
+                    sub_fidelity_name=self.sub_fidelity_name,
                     fidelity=self.fidelity,
                     datetime_start=datetime_start,
                     message='Hidden constraint violation during soft constraint function evaluation: ' + create_err_msg_from_exception(e),
@@ -415,6 +417,7 @@ class AbstractOptimizer:
                 y=y,
                 c=c,
                 state=TrialState.succeeded,
+                sub_fidelity_name=self.sub_fidelity_name,
                 fidelity=self.fidelity,
                 datetime_start=datetime_start,
             )

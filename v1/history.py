@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import csv
 import datetime
 import dataclasses
@@ -10,6 +12,9 @@ from v1.problem import *
 from v1.dask_util import *
 from v1.str_enum import StrEnum
 from v1.i18n import *
+from v1.optimality import *
+from v1.hypervolume import *
+from v1.helper import *
 
 __all__ = [
     'TrialState',
@@ -61,22 +66,81 @@ class DataFrameWrapper:
         else:
             return self.lock
 
-    def get_df(self):
+    def get_df(self, equality_filters: dict = None) -> pd.DataFrame:
+        """
+
+        Args:
+            equality_filters (dict, optional):
+                {column: value} formatted dict.
+                Each condition is considered as
+                an 'and' condition.
+
+                Defaults to no filter.
+
+        Returns (pd.DataFrame):
+
+        """
+
+        # dask クラスターがある場合
         client = get_client()
         if client:
+
+            # datasets 内に存在する場合
             if self._dataset_name in client.list_datasets():
-                return client.get_dataset(self._dataset_name)
+                df = client.get_dataset(self._dataset_name)
+
+            # set の前に get されることはあってはならない
             else:
                 raise RuntimeError
-        else:
-            return self.__df
 
-    def set_df(self, df):
+        # dask クラスターがない場合
+        else:
+            df = self.__df
+
+        # filter に合致するものを取得
+        if equality_filters is not None:
+            df = get_partial_df(df, equality_filters)
+
+        return df
+
+    def set_df(self, df, equality_filters: dict = None):
+        """
+
+        Args:
+            df:
+            equality_filters (dict, optional):
+                {column: value} formatted dict.
+                Each condition is considered as
+                an 'and' condition.
+                Only the indexed rows will be updated.
+
+                Defaults to no filter.
+
+        Returns (pd.DataFrame):
+
+        """
+
+        # フィルタを適用
+        if equality_filters is not None:
+            partial_df = df
+            df = self.get_df()
+            apply_partial_df(df, partial_df, equality_filters)
+
+
+        # dask クラスター上のデータを更新
         client = get_client()
         if client:
+
+            # datasets 上に存在する場合は削除（上書きができない）
             if self._dataset_name in client.list_datasets():
+
+                # remove
                 client.unpublish_dataset(self._dataset_name)
-            client.publish_dataset(**dict(df=df))
+
+            # update
+            client.publish_dataset(**{self._dataset_name: df})
+
+        # local のデータを更新
         self.__df = df
 
     def start_dask(self):
@@ -100,6 +164,7 @@ class Record:
     trial: int = None
     trial_id: int = None
     sub_sampling: SubSampling | None = None
+    sub_fidelity_name: str = None
     fidelity: Fidelity = None
     x: TrialInput = dataclasses.field(default_factory=TrialInput)
     y: TrialOutput = dataclasses.field(default_factory=TrialOutput)
@@ -323,96 +388,107 @@ class Records:
 
             dfw.set_df(new_df)
 
-        # calc entire-dependent values
-        self._update_optimality()
+            # calc entire-dependent values
+            # must be in with block to keep
+            # the entire data compatibility
+            # during processing.
+            self.update_entire_dependent_values()
 
-    @staticmethod
-    def _calc_optimality(y_internal: np.ndarray, feasibility: np.ndarray = None) -> np.ndarray:
-        """
+    def update_entire_dependent_values(self):
 
-        Args:
-            y_internal (np.ndarray): n x m shaped 2d-array. Can contain np.nan. Minimum value is optimal.
-            feasibility (np.ndarray): n shaped 1d-array. bool.
+        # noinspection PyMethodParameters
+        class EntireDependentValuesManager:
 
-        Returns:
-            np.ndarray: Array if not optimal, dominated or Nan False, else True
+            y_internal: np.ndarray
+            feasibility: np.ndarray
 
-        """
+            def __init__(self_, equality_filters: dict):
 
-        # verification
-        feasibility = feasibility if feasibility is not None else np.ones(len(y_internal)).astype(bool)
+                self_.equality_filters = equality_filters
 
-        # 非劣解の計算
-        non_dominated = [
-            (not np.isnan(y).any())  # feasible (duplicated)
-            and
-            (not (y > y_internal).all(axis=1).any())  # not dominated
-            and
-            feas  # feasible
-            for y, feas in zip(y_internal, feasibility)
-        ]
+                assert self.df_wrapper.lock.locked()
 
-        return np.array(non_dominated).astype(bool)
+                # get df
+                df = self_.get_df()
 
-    def _update_optimality(self):
-        """
-        data = np.array([[0.6, 'minimize', 0.1, 'minimize'],
-               [0.2, '0', 0.3, 'maximize'],
-               [0.3, 'maximize', np.nan, np.nan],
-               [np.nan, np.nan, 0.1, 'minimize'],
-               [0.1, 'minimize', 0.6, 'minimize']], dtype=object)
-        df = pd.DataFrame(data).astype({0: float, 1: object})
-        all_obj_values = df.iloc[:, [0, 2]].values
-        all_obj_directions = df.iloc[:, [1, 3]].values
+                # get column names
+                obj_names = Record.obj_names
+                f = CorrespondingColumnNameRuler.create_direction_name
+                obj_direction_names = [f(name) for name in obj_names]
 
-        y_internal = np.empty(all_obj_values.shape)
-        for i, (obj_values, obj_directions) in enumerate(zip(all_obj_values.T, all_obj_directions.T)):
-            y_internal[:, i] = np.array(
-                list(
-                    map(
-                        lambda args: Objective._convert(*args),
-                        zip(obj_values, obj_directions)
-                    )
-                )
-            )
+                # get values
+                all_obj_values = df[obj_names].values
+                all_obj_directions = df[obj_direction_names].values
+                feasibility = df['feasibility']
 
-
-        """
-
-        with self.df_wrapper.lock_if_not_locked:
-
-            # get df
-            df = self.df_wrapper.get_df()
-
-            # get column names
-            obj_names = Record.obj_names
-            f = CorrespondingColumnNameRuler.create_direction_name
-            obj_direction_names = [f(name) for name in obj_names]
-
-            # get values
-            all_obj_values = df[obj_names].values
-            all_obj_directions = df[obj_direction_names].values
-            feasibility = df['feasibility']
-
-            # convert values as minimization problem
-            y_internal = np.empty(all_obj_values.shape)
-            for i, (obj_values, obj_directions) \
-                    in enumerate(zip(all_obj_values.T, all_obj_directions.T)):
-                y_internal[:, i] = np.array(
-                    list(
-                        map(
-                            lambda args: Objective._convert(*args),
-                            zip(obj_values, obj_directions)
+                # convert values as minimization problem
+                y_internal = np.empty(all_obj_values.shape)
+                for i, (obj_values, obj_directions) \
+                        in enumerate(zip(all_obj_values.T, all_obj_directions.T)):
+                    y_internal[:, i] = np.array(
+                        list(
+                            map(
+                                lambda args: Objective._convert(*args),
+                                zip(obj_values, obj_directions)
+                            )
                         )
                     )
+
+                self_.y_internal = y_internal
+                self_.feasibility = feasibility
+
+            def get_df(self_):
+                return self.df_wrapper.get_df(
+                    self_.equality_filters
                 )
 
-            # calc optimality
-            optimality = self._calc_optimality(y_internal, feasibility)
+            def set_df(self_, df):
+                self.df_wrapper.set_df(
+                    df,
+                    self_.equality_filters
+                )
 
-            # update
-            df['optimality'] = optimality
-            self.df_wrapper.set_df(df)
+            def update_optimality(self_):
+
+                assert self.df_wrapper.lock.locked()
+
+                # get df
+                df = self_.get_df()
+
+                # calc optimality
+                optimality = calc_optimality(
+                    self_.y_internal,
+                    self_.feasibility,
+                )
+
+                # update
+                df.loc[:, 'optimality'] = optimality
+                self_.set_df(df)
+
+            def update_hypervolume(self_):
+
+                assert self.df_wrapper.lock.locked()
+
+                # get df
+                df = self_.get_df()
+
+                # calc hypervolume
+                hv_values = calc_hypervolume(
+                    self_.y_internal,
+                    self_.feasibility,
+                    ref_point='nadir-up-to-the-point',
+                )
+
+                # update
+                df.loc[:, 'hypervolume'] = hv_values
+                self_.set_df(df)
+
+        with self.df_wrapper.lock_if_not_locked:
+            self_mgr = EntireDependentValuesManager(
+                {'sub_fidelity_name': MAIN_FIDELITY_NAME}
+            )
+            self_mgr.update_optimality()
+            self_mgr.update_hypervolume()
 
 
 class History:
@@ -499,6 +575,7 @@ class History:
             y: TrialOutput = None,
             c: TrialConstraintOutput = None,
             state: TrialState = TrialState.undefined,
+            sub_fidelity_name: str = None,
             fidelity: Fidelity | None = None,
             trial_id: int = None,
             sub_sampling: SubSampling | None = None,
@@ -516,6 +593,7 @@ class History:
             trial_id=trial_id,
             sub_sampling=sub_sampling,
             fidelity=fidelity,
+            sub_fidelity_name=sub_fidelity_name,
             x=x, y=y, c=c, state=state,
             datetime_start=datetime_start,
             datetime_end=datetime_end,
