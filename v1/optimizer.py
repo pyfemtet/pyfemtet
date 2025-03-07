@@ -750,6 +750,9 @@ class OptunaOptimizer(AbstractOptimizer):
             # sub fidelity
             if self.sub_fidelity_models is None:
                 self.sub_fidelity_models = SubFidelityModels()
+                for sub_fidelity_model in self.sub_fidelity_models.values():
+                    assert sub_fidelity_model.objectives.keys() == self.objectives.keys()
+                    assert sub_fidelity_model.constraints.keys() == self.constraints.keys()
 
             # finalize
             self._finalize_history()
@@ -784,7 +787,7 @@ if __name__ == '__main__':
 
     def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
         x = _opt.get_variables('values')
-        return (x ** 2).sum()
+        return ((x-0.1) ** 2).sum()
 
     def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
         x = _opt.get_variables('values')
@@ -793,7 +796,8 @@ if __name__ == '__main__':
     __fem = NoFEM()
     __opt = SubFidelityModel()
     __opt.fem = __fem
-    __opt.add_objective('obj', _parabola2, args=(__fem, __opt))
+    __opt.add_objective('obj1', _parabola, args=(__fem, __opt))
+    __opt.add_objective('obj2', _parabola2, args=(__fem, __opt))
 
     _fem = NoFEM()
     _opt = OptunaOptimizer()
@@ -801,13 +805,16 @@ if __name__ == '__main__':
     _opt.add_parameter('x1', 1, -1, 1, step=0.1)
     _opt.add_parameter('x2', 1, -1, 1, step=0.1)
     _opt.add_constraint('cns', _cns, lower_bound=0, args=(_fem, _opt))
-    _opt.add_objective('obj', _parabola, args=(_fem, _opt))
+    _opt.add_objective('obj1', _parabola, args=(_fem, _opt))
+    _opt.add_objective('obj2', _parabola2, args=(_fem, _opt))
     _opt.add_sub_fidelity_model(name='low-fidelity', sub_fidelity_model=__opt, fidelity=0.5)
 
     _opt.run()
 
-    import plotly.express as px
-    _df = _opt.history.get_df()
-    px.scatter_3d(_df, x='x1', y='x2', z='obj', color='fidelity', opacity=0.5).show()
+    # import plotly.express as px
+    # _df = _opt.history.get_df()
+    # px.scatter_3d(_df, x='x1', y='x2', z='obj', color='fidelity', opacity=0.5).show()
+
+    _opt.history.save()
 
 

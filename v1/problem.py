@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 from typing import Callable
 
 try:
@@ -15,6 +14,7 @@ except ModuleNotFoundError:
     constants = Constants()
 
 from v1.variable_manager import *
+from v1.helper import *
 
 __all__ = [
     'TrialInput',
@@ -99,16 +99,30 @@ class Functions(dict[str, Function]): ...
 class Objective(Function):
     direction: str | float
 
-    def convert(self, value) -> float:
-        if self.direction == 'minimize':
-            value_as_minimize = value
-        elif self.direction == 'maximize':
-            value_as_minimize = -value
-        elif isinstance(self.direction, float):
-            value_as_minimize = (value - self.direction) ** 2
+    @staticmethod
+    def _convert(value, direction):
+
+        direction: float | str | None = float_(direction)
+
+        if value is None or direction is None:
+            value_as_minimize = float('nan')
+
+        elif isinstance(direction, str):
+            if direction.lower() == 'minimize':
+                value_as_minimize = value
+            elif direction.lower() == 'maximize':
+                value_as_minimize = -value
+            else:
+                raise NotImplementedError
+
         else:
-            raise NotImplementedError
+            # if value is nan, return nan
+            value_as_minimize = (value - direction) ** 2
+
         return value_as_minimize
+
+    def convert(self, value) -> float:
+        return self._convert(value, self.direction)
 
 
 class ObjectiveResult:

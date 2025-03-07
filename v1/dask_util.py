@@ -1,7 +1,7 @@
 import warnings
-from contextlib import nullcontext
+from threading import Lock as _ThreadingLock
 
-from dask.distributed import LocalCluster, Client, Lock as _Lock, Nanny
+from dask.distributed import LocalCluster, Client, Lock as _DaskLock, Nanny
 from dask.distributed import get_client as _get_client, get_worker as _get_worker
 from dask import config as cfg
 
@@ -23,6 +23,8 @@ __all__ = [
     'Nanny'
 ]
 
+_threading_lock_pool = {}
+
 
 def get_client():
     try:
@@ -39,11 +41,18 @@ def get_worker():
 
 
 def Lock(name, client=None):
+    global _threading_lock_pool
 
     if client is None:
         client = get_client()
 
     if client:
-        return _Lock(name, client)
+        return _DaskLock(name, client)
+
     else:
-        return nullcontext()
+        if name in _threading_lock_pool:
+            _lock = _threading_lock_pool[name]
+        else:
+            _lock = _ThreadingLock()
+            _threading_lock_pool.update({name: _lock})
+        return _lock

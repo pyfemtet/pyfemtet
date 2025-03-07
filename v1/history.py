@@ -1,8 +1,9 @@
-import os
 import csv
 import datetime
 import dataclasses
+from contextlib import nullcontext
 
+import numpy as np
 import pandas as pd
 
 from v1.problem import *
@@ -53,6 +54,13 @@ class DataFrameWrapper:
     def lock(self):
         return Lock(self._lock_name)
 
+    @property
+    def lock_if_not_locked(self):
+        if self.lock.locked():
+            return nullcontext()
+        else:
+            return self.lock
+
     def get_df(self):
         client = get_client()
         if client:
@@ -79,6 +87,12 @@ class DataFrameWrapper:
         # Get back the df on dask to use the value outside
         # dask context.
         self.__df = self.get_df()
+
+
+class CorrespondingColumnNameRuler:
+    @staticmethod
+    def create_direction_name(obj_name):
+        return obj_name + '_direction'
 
 
 @dataclasses.dataclass
@@ -115,6 +129,29 @@ class Record:
 
         self.feasibility = feasibility
 
+    def as_df(self):
+        assert hasattr(self, 'dtypes'), 'Record is not setup.'
+
+        self._calc_feasibility()
+
+        # noinspection PyUnresolvedReferences
+        keys = self.__dataclass_fields__.copy().keys()
+        d = {key: getattr(self, key) for key in keys if getattr(self, key) is not None}
+
+        x: TrialInput = d.pop('x')
+        y: TrialOutput = d.pop('y')
+        c: TrialConstraintOutput = d.pop('c')
+
+        d.update(**{k: v.value for k, v in x.items()})
+        d.update(**{k: v.value for k, v in y.items()})
+        d.update(**{f'{k}_direction': v.direction for k, v in y.items()})
+        d.update(**{k: v.value for k, v in c.items()})
+
+        return pd.DataFrame(
+            {k: [v] for k, v in d.items()},
+            columns=tuple(self.dtypes.keys())
+        ).astype(self.dtypes)
+
     @classmethod
     def setup(cls, x_names, y_names, c_names):
         cls._set_full_sorted_column_information(x_names, y_names, c_names)
@@ -131,8 +168,11 @@ class Record:
                 dtypes.update({name: float for name in x_names})
                 meta_columns.extend(['prm'] * len(x_names))
             elif key == 'y':
-                dtypes.update({name: float for name in y_names})
-                meta_columns.extend(['obj'] * len(y_names))
+                f = CorrespondingColumnNameRuler.create_direction_name
+                for name in y_names:
+                    dtypes.update({name: float})
+                    dtypes.update({f(name): object})  # str | float
+                meta_columns.extend(['obj', f('obj')] * len(y_names))
             elif key == 'c':
                 dtypes.update({name: float for name in c_names})
                 meta_columns.extend(['cns'] * len(c_names))
@@ -142,28 +182,6 @@ class Record:
 
         cls.dtypes = dtypes
         cls.meta_columns = meta_columns
-
-    def as_df(self):
-        assert hasattr(self, 'dtypes'), 'Record is not setup.'
-
-        self._calc_feasibility()
-
-        # noinspection PyUnresolvedReferences
-        keys = self.__dataclass_fields__.copy().keys()
-        d = {key: getattr(self, key) for key in keys if getattr(self, key) is not None}
-
-        x = d.pop('x')
-        y = d.pop('y')
-        c = d.pop('c')
-
-        d.update(**{k: v.value for k, v in x.items()})
-        d.update(**{k: v.value for k, v in y.items()})
-        d.update(**{k: v.value for k, v in c.items()})
-
-        return pd.DataFrame(
-            {k: [v] for k, v in d.items()},
-            columns=tuple(self.dtypes.keys())
-        ).astype(self.dtypes)
 
     @staticmethod
     def filter_columns(meta_column, columns, meta_columns) -> list[str]:
@@ -178,16 +196,19 @@ class Record:
         columns = list(cls.dtypes.keys())
         return cls.filter_columns(meta_column, columns, cls.meta_columns)
 
+    # noinspection PyPropertyDefinition
     @classmethod
     @property
     def prm_names(cls) -> list[str]:
         return cls._filter_columns('prm')
 
+    # noinspection PyPropertyDefinition
     @classmethod
     @property
     def obj_names(cls) -> list[str]:
         return cls._filter_columns('obj')
 
+    # noinspection PyPropertyDefinition
     @classmethod
     @property
     def cns_names(cls) -> list[str]:
@@ -280,6 +301,7 @@ class Records:
         # concat
         dfw = self.df_wrapper
 
+        # append
         with dfw.lock:
 
             df = dfw.get_df()
@@ -300,6 +322,97 @@ class Records:
                 )
 
             dfw.set_df(new_df)
+
+        # calc entire-dependent values
+        self._update_optimality()
+
+    @staticmethod
+    def _calc_optimality(y_internal: np.ndarray, feasibility: np.ndarray = None) -> np.ndarray:
+        """
+
+        Args:
+            y_internal (np.ndarray): n x m shaped 2d-array. Can contain np.nan. Minimum value is optimal.
+            feasibility (np.ndarray): n shaped 1d-array. bool.
+
+        Returns:
+            np.ndarray: Array if not optimal, dominated or Nan False, else True
+
+        """
+
+        # verification
+        feasibility = feasibility if feasibility is not None else np.ones(len(y_internal)).astype(bool)
+
+        # 非劣解の計算
+        non_dominated = [
+            (not np.isnan(y).any())  # feasible (duplicated)
+            and
+            (not (y > y_internal).all(axis=1).any())  # not dominated
+            and
+            feas  # feasible
+            for y, feas in zip(y_internal, feasibility)
+        ]
+
+        return np.array(non_dominated).astype(bool)
+
+    def _update_optimality(self):
+        """
+        data = np.array([[0.6, 'minimize', 0.1, 'minimize'],
+               [0.2, '0', 0.3, 'maximize'],
+               [0.3, 'maximize', np.nan, np.nan],
+               [np.nan, np.nan, 0.1, 'minimize'],
+               [0.1, 'minimize', 0.6, 'minimize']], dtype=object)
+        df = pd.DataFrame(data).astype({0: float, 1: object})
+        all_obj_values = df.iloc[:, [0, 2]].values
+        all_obj_directions = df.iloc[:, [1, 3]].values
+
+        y_internal = np.empty(all_obj_values.shape)
+        for i, (obj_values, obj_directions) in enumerate(zip(all_obj_values.T, all_obj_directions.T)):
+            y_internal[:, i] = np.array(
+                list(
+                    map(
+                        lambda args: Objective._convert(*args),
+                        zip(obj_values, obj_directions)
+                    )
+                )
+            )
+
+
+        """
+
+        with self.df_wrapper.lock_if_not_locked:
+
+            # get df
+            df = self.df_wrapper.get_df()
+
+            # get column names
+            obj_names = Record.obj_names
+            f = CorrespondingColumnNameRuler.create_direction_name
+            obj_direction_names = [f(name) for name in obj_names]
+
+            # get values
+            all_obj_values = df[obj_names].values
+            all_obj_directions = df[obj_direction_names].values
+            feasibility = df['feasibility']
+
+            # convert values as minimization problem
+            y_internal = np.empty(all_obj_values.shape)
+            for i, (obj_values, obj_directions) \
+                    in enumerate(zip(all_obj_values.T, all_obj_directions.T)):
+                y_internal[:, i] = np.array(
+                    list(
+                        map(
+                            lambda args: Objective._convert(*args),
+                            zip(obj_values, obj_directions)
+                        )
+                    )
+                )
+
+            # calc optimality
+            optimality = self._calc_optimality(y_internal, feasibility)
+
+            # update
+            df['optimality'] = optimality
+            self.df_wrapper.set_df(df)
 
 
 class History:
