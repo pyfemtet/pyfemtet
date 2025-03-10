@@ -1,0 +1,7 @@
+This product includes <dask> and <distributed> developed by <Anaconda, Inc. and contributors>.
+This product includes <numpy> developed by <NumPy Developers>.
+This product includes <pandas> developed by <AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team>.
+This product includes <psutil> developed by <Jay Loden, Dave Daeschler, Giampaolo Rodola>.
+This product includes <scikit-learn> developed by <The scikit-learn developers>.
+This product includes <scipy> developed by <Enthought, Inc.> and <SciPy Developers>.
+This product includes <torch> developed by <Soumith Chintala, Ronan Collobert, Koray Kavukcuoglu, Clement Farabet>.
