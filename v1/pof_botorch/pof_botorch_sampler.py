@@ -147,7 +147,7 @@ CandidateFunc = Callable[
         float | str | None,  # observation noise
         'PartialOptimizeACQFInput',
     ],
-    torch.Tensor,
+    tuple[torch.Tensor, SingleTaskGP],
 ]
 
 
@@ -270,7 +270,7 @@ def logei_candidates_func(
         pof_config: 'PoFConfig',
         observation_noise: str | float | None,
         partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig,
-) -> torch.Tensor:
+) -> tuple[torch.Tensor, SingleTaskGP]:
     """Log Expected Improvement (LogEI).
 
     The default value of ``candidates_func`` in :class:`~optuna_integration.BoTorchSampler`
@@ -408,7 +408,7 @@ def logei_candidates_func(
             **kwargs,
         )
 
-    return candidates.detach()
+    return candidates.detach(), model
 
 
 def _get_default_candidates_func(
@@ -510,7 +510,7 @@ class PoFBoTorchSampler(BoTorchSampler):
     pof_config: PoFConfig
     pyfemtet_optimizer: AbstractOptimizer
     partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig
-    current_gp: SingleTaskGP
+    current_gp_model: SingleTaskGP | None
 
     _candidates_func: CandidateFunc | None
 
@@ -540,6 +540,7 @@ class PoFBoTorchSampler(BoTorchSampler):
 
         self.observation_noise = observation_noise
         self.pof_config = pof_config or PoFConfig()
+        self.current_gp_model = None
 
     def train_model_c(
             self,
@@ -814,13 +815,15 @@ class PoFBoTorchSampler(BoTorchSampler):
             else:
                 botorch_nli_cons = None
 
-            candidates = self._candidates_func(
+            candidates, model = self._candidates_func(
                 completed_params, completed_values, con, bounds, running_params,
                 model_c, botorch_nli_cons, self.pof_config, self.observation_noise,
                 self.partial_optimize_acqf_kwargs
             )
             if self._seed is not None:
                 self._seed += 1
+
+            self.current_gp_model = model
 
 
         # ===== ここから変更なし =====
