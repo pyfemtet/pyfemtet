@@ -1,0 +1,6 @@
+PyFemtet contains modified version of code that is licensed by third-party developers.
+
+
+==
+https://github.com/python/cpython/tree/main/Lib/multiprocessing
+Copyright (c) 2006-2008, R Oudkerk

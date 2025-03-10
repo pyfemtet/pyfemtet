@@ -108,7 +108,12 @@ class PredictionModelCreator:
                 mode='markers',
                 marker=dict(
                     size=3,
-                    color='black',
+                    line=dict(
+                        width=1,  # broken?
+                        color='white',
+                        # color=df['trial'],  # 見づらい？
+                        # colorscale='Viridis_r',
+                    ),
                 ),
                 name='trial',
             ))
@@ -117,7 +122,10 @@ class PredictionModelCreator:
                 x=df[prm_name_1], y=df[obj_name],
                 mode='markers',
                 marker=dict(
-                    color='black',
+                    line=dict(
+                        width=1,
+                        color='white',
+                    ),
                 ),
                 name='trial',
             ))
