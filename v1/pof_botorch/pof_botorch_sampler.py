@@ -174,7 +174,10 @@ def get_standardizer_and_no_noise_train_yvar(Y: torch.Tensor):
     return YVar, standardizer
 
 
-def setup_yvar_and_standardizer(Y_, observation_noise_):
+def setup_yvar_and_standardizer(
+        Y_: torch.Tensor,
+        observation_noise_: str | float | None,
+) -> tuple[torch.Tensor | None, Standardize]:
 
     standardizer_ = None
     train_yvar_ = None
@@ -434,7 +437,7 @@ class PoFConfig:
     consider_pof: bool = True
     states_to_consider_pof: list[PFTrialState] = None
     feasibility_threshold: float | str = 0.5  # or 'mean'
-    feasibility_noise: float | str = 'no'
+    feasibility_noise: float | str | None = None  # 'no' to fixed minimum noise
 
 
 def acqf_patch_factory(acqf_class, is_log_acqf=False):
@@ -507,6 +510,8 @@ class PoFBoTorchSampler(BoTorchSampler):
     pof_config: PoFConfig
     pyfemtet_optimizer: AbstractOptimizer
     partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig
+    current_gp: SingleTaskGP
+
     _candidates_func: CandidateFunc | None
 
     def __init__(
@@ -642,13 +647,10 @@ class PoFBoTorchSampler(BoTorchSampler):
         bounds: torch.Tensor = torch.from_numpy(bounds).to(self._device).transpose(0, 1)
         train_x_c: torch.Tensor = torch.from_numpy(params).to(self._device)
         train_y_c: torch.Tensor = torch.from_numpy(values).to(self._device)
-        train_yvar_c: torch.Tensor | None = None
-        standardizer: Standardize | None = None
-        if self.pof_config.feasibility_noise is not None:
-            if self.pof_config.feasibility_noise == 'no':
-                train_yvar_c, standardizer = get_standardizer_and_no_noise_train_yvar(train_y_c)
-            else:
-                train_yvar_c = torch.full_like(self.pof_config.feasibility_noise, train_y_c)
+        # yvar
+        train_yvar_c, standardizer = setup_yvar_and_standardizer(
+            train_y_c, self.observation_noise
+        )
 
 
         # ===== model_c を作る =====
@@ -660,7 +662,7 @@ class PoFBoTorchSampler(BoTorchSampler):
                 train_Y=train_y_c,
                 train_Yvar=train_yvar_c,
                 input_transform=Normalize(d=train_x_c.shape[-1], bounds=bounds),
-                outcome_transform=standardizer or Standardize(m=train_y_c.shape[-1])
+                outcome_transform=standardizer
             )
             mll_c = ExactMarginalLogLikelihood(
                 model_c.likelihood,
