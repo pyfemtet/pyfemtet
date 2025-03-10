@@ -2,9 +2,9 @@
 name = "pyfemtet"
 version = "0.1.0"  # ignored by versioning plugin
 description = "Design parameter optimization using Femtet."
-authors = ["kazuma.naito <kazuma.naito@murata.com>"]
+authors = ["kazuma.naito <148934231+pyfemtet@users.noreply.github.com.>"]
 readme = "README.md"
-license = "BSD-3-Clause"
+license = "MIT"
 repository = "https://github.com/pyfemtet/pyfemtet"
 
 [tool.poetry.dependencies]
