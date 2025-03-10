@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import csv
 import datetime
 import dataclasses
@@ -8,37 +9,77 @@ from contextlib import nullcontext
 import numpy as np
 import pandas as pd
 
+from v1.i18n import *
+from v1.helper import *
 from v1.problem import *
 from v1.dask_util import *
-from v1.str_enum import StrEnum
-from v1.i18n import *
+from v1.exceptions import *
 from v1.optimality import *
 from v1.hypervolume import *
-from v1.helper import *
+from v1.str_enum import StrEnum
+
 
 __all__ = [
     'TrialState',
     'History',
+    'Record',
     'create_err_msg_from_exception',
 ]
 
 
-
 def create_err_msg_from_exception(e: Exception):
-    type(e).__name__ + ' / ' + ' '.join(map(str, e.args))
+    return type(e).__name__ + ' / ' + ' '.join(map(str, e.args))
 
 
 class TrialState(StrEnum):
+
     succeeded = 'Success'
     skipped = 'Skip'
     hard_constraint_violation = 'Hard constraint violation'
     soft_constraint_violation = 'Soft constraint violation'
+
     model_error = 'Model error'
     mesh_error = 'Mesh error'
     solve_error = 'Solve error'
     post_error = 'Post-processing error'
+
     unknown_error = 'Unknown error'
     undefined = 'undefined'
+
+    @staticmethod
+    def get_corresponding_state_from_exception(e: Exception) -> TrialState:
+        if isinstance(e, ModelError):
+            state = TrialState.model_error
+        elif isinstance(e, MeshError):
+            state = TrialState.mesh_error
+        elif isinstance(e, SolveError):
+            state = TrialState.solve_error
+        elif isinstance(e, PostProcessError):
+            state = TrialState.post_error
+        else:
+            state = TrialState.unknown_error
+        return state
+
+    @staticmethod
+    def get_corresponding_exception_from_state(state: TrialState) -> Exception | None:
+        if state == TrialState.model_error:
+            e = ModelError()
+        elif state == TrialState.mesh_error:
+            e = MeshError()
+        elif state == TrialState.solve_error:
+            e = SolveError()
+        elif state == TrialState.post_error:
+            e = PostProcessError()
+        elif state == TrialState.unknown_error:
+            e = Exception()
+        else:
+            e = None
+        return e
+
+    @classmethod
+    def get_hidden_constraint_violation_states(cls):  # utility function for user
+        return [cls.get_corresponding_state_from_exception(exception_type())
+                for exception_type in HiddenConstraintViolation.__subclasses__]
 
 
 class DataFrameWrapper:
@@ -218,7 +259,7 @@ class Record:
         ).astype(self.dtypes)
 
     @classmethod
-    def setup(cls, x_names, y_names, c_names):
+    def initialize(cls, x_names, y_names, c_names):
         cls._set_full_sorted_column_information(x_names, y_names, c_names)
 
     @classmethod
@@ -229,18 +270,30 @@ class Record:
         # noinspection PyUnresolvedReferences
         keys = cls.__dataclass_fields__.copy().keys()
         for key in keys:
+            # Note:
+            #   as_df() で空欄になりうるカラムには
+            #   Nan や '' を許容する dtype を指定すること
+            #   例えば、 trial に int を指定してはいけない
+            #
+            # Note:
+            #   pandas は dtypes に str を受け付けない
+            #   (object にキャストされる模様)
+
             if key == 'x':
                 dtypes.update({name: float for name in x_names})
                 meta_columns.extend(['prm'] * len(x_names))
+
             elif key == 'y':
                 f = CorrespondingColumnNameRuler.create_direction_name
                 for name in y_names:
                     dtypes.update({name: float})
                     dtypes.update({f(name): object})  # str | float
                 meta_columns.extend(['obj', f('obj')] * len(y_names))
+
             elif key == 'c':
                 dtypes.update({name: float for name in c_names})
                 meta_columns.extend(['cns'] * len(c_names))
+
             else:
                 dtypes.update({key: object})
                 meta_columns.append('')
@@ -367,6 +420,20 @@ class EntireDependentValuesManager:
         df.loc[:, 'hypervolume'] = hv_values
         self.set_df(df)
 
+    def update_trial_number(self):
+
+        assert self.records.df_wrapper.lock.locked()
+
+        # get df
+        df = self.get_df()
+
+        # calc trial
+        trial_number = np.arange(len(df)).astype(int)
+
+        # update
+        df.loc[:, 'trial'] = trial_number
+        self.set_df(df)
+
 
 class Records:
     """最適化の試行全体の情報を格納するモデルクラス"""
@@ -383,17 +450,15 @@ class Records:
     def __len__(self):
         return len(self.df_wrapper)
 
-    def save(self, path: str):
+    def initialize(self, prm_names, obj_names, cns_names):
 
-        df = self.df_wrapper.get_df()
+        with self.df_wrapper.lock:
+            df = self.df_wrapper.get_df()
 
-        with open(path, 'w', encoding=ENCODING) as f:
-            writer = csv.writer(f, delimiter=',', lineterminator="\n")
-            # write meta_columns
-            writer.writerow(Record.meta_columns)
-            writer.writerow([''] * len(Record.meta_columns))  # empty line
-            # write df from line 3
-            df.to_csv(f, index=None, encoding=ENCODING, lineterminator='\n')
+            # 新しく始まる場合に備えカラムを設定
+            # load の場合はあとで上書きされる
+            df = pd.DataFrame([], columns=list(Record.dtypes.keys()))
+            self.df_wrapper.set_df(df)
 
     def load(self, path: str):
 
@@ -410,8 +475,14 @@ class Records:
         self.loaded_meta_columns = loaded_meta_columns
         self.loaded_df = loaded_df
 
-    def setup(self, prm_names, obj_names, cns_names):
-        Record.setup(prm_names, obj_names, cns_names)
+        # 文字列として扱いたいカラムに含まれる Nan を '' にする
+        # 型は object にする（pandas は str 型を扱えない？）
+        # 例:
+        #   pd.DataFrame(dict(a=["123"])).astype(dict(a=str)).dtypes
+        #   # dtype: object
+        self.loaded_df['sub_fidelity_name'] = \
+            self.loaded_df['sub_fidelity_name'].fillna('')
+
 
     def check_problem_compatibility(self):
 
@@ -443,8 +514,28 @@ class Records:
         if not (len(loaded_cns_names - cns_names) == len(cns_names - loaded_cns_names) == 0):
             raise RuntimeError('Incompatible constraint setting.')
 
+        # dtypes を設定
+        # 与える dtypes のほうが多い場合
+        # エラーになるので余分なものを削除
+        # 与える dtypes が少ない分には
+        # (pandas としては) 問題ない
+        dtypes = {k: v for k, v in Record.dtypes.items() if k in self.loaded_df.columns}
+        self.loaded_df = self.loaded_df.astype(dtypes)
+
         # OK なので読み込んだデータを set_df する
         self.df_wrapper.set_df(self.loaded_df)
+
+    def save(self, path: str):
+
+        df = self.df_wrapper.get_df()
+
+        with open(path, 'w', encoding=ENCODING) as f:
+            writer = csv.writer(f, delimiter=',', lineterminator="\n")
+            # write meta_columns
+            writer.writerow(Record.meta_columns)
+            writer.writerow([''] * len(Record.meta_columns))  # empty line
+            # write df from line 3
+            df.to_csv(f, index=None, encoding=ENCODING, lineterminator='\n')
 
     def append(self, record: Record):
 
@@ -485,12 +576,27 @@ class Records:
     def update_entire_dependent_values(self):
 
         with self.df_wrapper.lock_if_not_locked:
-            self_mgr = EntireDependentValuesManager(
+
+            # update main fidelity
+            mgr = EntireDependentValuesManager(
                 self,
                 {'sub_fidelity_name': MAIN_FIDELITY_NAME}
             )
-            self_mgr.update_optimality()
-            self_mgr.update_hypervolume()
+            mgr.update_optimality()
+            mgr.update_hypervolume()
+            mgr.update_trial_number()
+
+            # update sub fidelity
+            entire_df = self.df_wrapper.get_df()
+            sub_fidelity_names: list = np.unique(entire_df['sub_fidelity_name']).tolist()
+            if MAIN_FIDELITY_NAME in sub_fidelity_names:
+                sub_fidelity_names.remove(MAIN_FIDELITY_NAME)
+            for sub_fidelity_name in sub_fidelity_names:
+                mgr = EntireDependentValuesManager(
+                    self,
+                    {'sub_fidelity_name': sub_fidelity_name}
+                )
+                mgr.update_trial_number()
 
 
 class History:
@@ -538,8 +644,8 @@ class History:
     #
     #     return TrialContext()
     #
-    def get_df(self):
-        return self._records.df_wrapper.get_df()
+    def get_df(self, equality_filters: dict = None):
+        return self._records.df_wrapper.get_df(equality_filters)
 
     def load_csv(self, path):
         self.path = path
@@ -558,14 +664,23 @@ class History:
         self.cns_names = list(cns_names)
         self.sub_fidelity_model_names = sub_fidelity_model_names or []
 
-        # worker ごとに実行が必要
-        self._records.setup(prm_names, obj_names, cns_names)
+        # worker ごとに実行が必要な処理
+        # ここで dtypes が決定する
+        Record.initialize(prm_names, obj_names, cns_names)
 
         # worker で再処理されると困る処理
         if not self._finalized:
+
+            # initialize
+            self._records.initialize(prm_names, obj_names, cns_names)
+
+            # load
             if self.path is None:
                 self.path = datetime.datetime.now().strftime("pyfemtet.opt_%Y%m%d_%H%M%S.csv")
+            if os.path.isfile(self.path):
+                self.load_csv(self.path)
 
+            # check
             self._records.check_problem_compatibility()
 
             self._finalized = True
@@ -603,6 +718,28 @@ class History:
         )
 
         self._records.append(record)
+
+    def record2(self):
+
+        # noinspection PyMethodParameters
+        class RecordContext:
+
+            def __init__(self_):
+                self_.record = Record()
+
+            def __enter__(self_):
+                return self_.record
+
+            def __exit__(self_, exc_type, exc_val, exc_tb):
+
+                self_.record.datetime_end = self_.record.datetime_end \
+                    if self_.record.datetime_end is not None \
+                    else datetime.datetime.now()
+
+                self._records.append(self_.record)
+
+        return RecordContext()
+
 
     def save(self):
         self._records.save(self.path)

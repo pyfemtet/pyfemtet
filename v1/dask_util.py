@@ -23,7 +23,7 @@ __all__ = [
     'Nanny'
 ]
 
-_threading_lock_pool = {}
+_lock_pool = {}
 
 
 def get_client():
@@ -41,18 +41,19 @@ def get_worker():
 
 
 def Lock(name, client=None):
-    global _threading_lock_pool
+    global _lock_pool
 
     if client is None:
         client = get_client()
 
-    if client:
-        return _DaskLock(name, client)
+    if name in _lock_pool:
+        return _lock_pool[name]
 
     else:
-        if name in _threading_lock_pool:
-            _lock = _threading_lock_pool[name]
+        if client:
+            _lock = _DaskLock(name, client)
         else:
             _lock = _ThreadingLock()
-            _threading_lock_pool.update({name: _lock})
-        return _lock
+        _lock_pool.update({name: _lock})
+
+    return _lock

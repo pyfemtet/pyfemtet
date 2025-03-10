@@ -6,6 +6,7 @@ import pyfemtet
 from v1.dask_util import *
 from v1.optimizer import *
 from v1.monitor import *
+from v1.worker_status import *
 from v1.logger import get_module_logger
 
 logger = get_module_logger('opt.femopt', False)
@@ -15,6 +16,8 @@ class FEMOpt:
     opt: AbstractOptimizer
 
     def optimize(self, n_parallel, path=None) -> None:
+
+        self.opt.history.path = path
 
         logger.info(f'===== pyfemtet version {pyfemtet.__version__} =====')
 
@@ -41,15 +44,10 @@ class FEMOpt:
             logger.info(f'Setting up...')
 
             # finalize history
-            if path is not None:
-                if os.path.isfile(path):
-                    self.opt.history.load_csv(path)
-                else:
-                    self.opt.history.path = path
             self.opt._finalize_history()
 
             # create worker status list
-            entire_status = WorkerStatus(entire_process_status_key)
+            entire_status = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
             worker_status_list = [WorkerStatus() for _ in range(n_parallel)]
             entire_status.value = WorkerStatus.initializing
 
@@ -114,8 +112,9 @@ class FEMOpt:
 
 
 def test():
-    from time import sleep
-    from v1.optimizer import Interrupt
+    # from time import sleep
+    # from v1.optimizer import InterruptOptimization
+    from v1.interface import AbstractFEMInterface, NoFEM
 
     def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
         x = _opt.get_variables('values')
@@ -131,7 +130,7 @@ def test():
 
     _opt = OptunaOptimizer()
 
-    _fem = FemtetInterface()
+    _fem = NoFEM()
     _opt.fem = _fem
 
     _args = (_fem, _opt)
@@ -145,7 +144,9 @@ def test():
 
     _femopt = FEMOpt()
     _femopt.opt = _opt
-    _femopt.optimize(n_parallel=2, path='12345.csv')
+    _femopt.optimize(n_parallel=1, path='femopt-restart-test.csv')
+
+    print(os.path.abspath(_femopt.opt.history.path))
 
 
 if __name__ == '__main__':

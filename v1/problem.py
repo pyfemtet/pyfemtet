@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
 try:
     # noinspection PyUnresolvedReferences
@@ -15,6 +15,8 @@ except ModuleNotFoundError:
 
 from v1.variable_manager import *
 from v1.helper import *
+if TYPE_CHECKING:
+    from v1.optimizer import AbstractOptimizer
 
 __all__ = [
     'TrialInput',
@@ -33,7 +35,7 @@ __all__ = [
     'MAIN_FIDELITY_NAME',
 ]
 
-MAIN_FIDELITY_NAME = 'main_fidelity'
+MAIN_FIDELITY_NAME = ''
 
 
 class Function:
@@ -146,6 +148,19 @@ class Constraint(Function):
     lower_bound: float | None
     upper_bound: float | None
     hard: bool
+    _using_fem: bool | None = None
+    _opt: AbstractOptimizer
+
+    @property
+    def using_fem(self) -> bool:
+        if self._using_fem is None:
+            return self._opt.fem._check_using_fem(self.fun)
+        else:
+            return self._using_fem
+
+    @using_fem.setter
+    def using_fem(self, value: bool | None):
+        self._using_fem = value
 
 
 class ConstraintResult:

@@ -16,6 +16,7 @@ except ModuleNotFoundError:
 
 from v1.problem import *
 from v1.dask_util import *
+from v1.exceptions import *
 from v1.logger import get_module_logger
 
 logger = get_module_logger('opt.interface', False)
@@ -28,19 +29,8 @@ __all__ = [
     'AbstractFEMInterface',
     'FemtetInterface',
     'NoFEM',
-    'FEMError',
-    'ModelError',
-    'MeshError',
-    'SolveError',
-    'PostProcessError',
 ]
 
-
-class FEMError(Exception): ...
-class ModelError(FEMError): ...
-class MeshError(FEMError): ...
-class SolveError(FEMError): ...
-class PostProcessError(FEMError): ...
 
 
 class AbstractFEMInterface:
@@ -89,6 +79,9 @@ class AbstractFEMInterface:
 
     def close(self):  # context manager による予約語
         pass
+
+    def _check_using_fem(self, fun: callable) -> bool:
+        return False
 
 
 class COMInterface(AbstractFEMInterface):

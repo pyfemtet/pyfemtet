@@ -5,11 +5,11 @@ from v1.logger import get_module_logger
 
 __all__ = [
     'WorkerStatus',
-    'entire_process_status_key'
+    'ENTIRE_PROCESS_STATUS_KEY'
 ]
 
 logger = get_module_logger('opt.worker_status', False)
-entire_process_status_key = 'entire_process_status'
+ENTIRE_PROCESS_STATUS_KEY = 'entire_process_status'
 
 
 class _WorkerStatus(float):

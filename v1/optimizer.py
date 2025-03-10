@@ -3,26 +3,33 @@ from __future__ import annotations
 from typing import Callable
 
 import datetime
-from contextlib import suppress, closing
+from contextlib import closing
 
 import numpy as np
 
-from v1.variable_manager import *
+from v1.history import *
 from v1.problem import *
 from v1.interface import *
-from v1.history import *
+from v1.exceptions import *
 from v1.worker_status import *
+from v1.variable_manager import *
 from v1.logger import get_module_logger
+
+__all__ = [
+    'AbstractOptimizer',
+    'SubFidelityModel',
+    # -----
+    'OptunaAttribute',
+    'OptunaOptimizer'
+]
+
 
 logger = get_module_logger('opt.optimizer')
 
 
-class ConstraintViolation(Exception):
-    pass
-
-
-class Interrupt(Exception):
-    pass
+class HardConstraintViolation(Exception): ...
+class InterruptOptimization(Exception): ...
+class SkipSolve(Exception): ...
 
 
 class AbstractOptimizer:
@@ -57,7 +64,7 @@ class AbstractOptimizer:
         self._fem: AbstractFEMInterface = None
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
-        self.entire_status: WorkerStatus = WorkerStatus(entire_process_status_key)
+        self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
         self.worker_status: WorkerStatus = WorkerStatus()
 
     def add_variable(
@@ -157,6 +164,7 @@ class AbstractOptimizer:
         cns.lower_bound = lower_bound
         cns.upper_bound = upper_bound
         cns.hard = strict
+        cns._opt = self
         self.constraints.update({name: cns})
 
     def add_sub_fidelity_model(
@@ -211,12 +219,13 @@ class AbstractOptimizer:
                 out.update({name: cns_result})
         return out
 
-    def _process_hidden_constraint(self, e: Exception):
+    def _process_hidden_constraint(self, e: Exception, record: Record):
         err_msg = create_err_msg_from_exception(e)
         logger.warning('----- Hidden constraint violation! -----')
         logger.warning(f'エラー: {err_msg}')
 
-    def _process_hard_constraint(self, hard_c: TrialConstraintOutput) -> list[str]:
+
+    def _get_hard_constraint_violation_names(self, hard_c: TrialConstraintOutput) -> list[str]:
         violation_names = []
         for name, result in hard_c.items():
             cns = self.constraints[name]
@@ -235,12 +244,12 @@ class AbstractOptimizer:
                     raise NotImplementedError
         return violation_names
 
-    def _check_entire_interruption(self):
+    def _check_and_raise_interruption(self):
         # raise Interrupt
         interrupted = self.entire_status.value == WorkerStatus.interrupting
         if interrupted:
             self.worker_status.value = WorkerStatus.interrupting
-            raise Interrupt
+            raise InterruptOptimization
 
     def f(
             self,
@@ -248,183 +257,139 @@ class AbstractOptimizer:
             variables_pass_to_fem: TrialInput,
             history: History = None,
             datetime_start=None,
-    ) -> tuple[TrialOutput, dict[str, float], TrialConstraintOutput]:
+    ) -> tuple[TrialOutput, dict[str, float], TrialConstraintOutput, Record]:
 
-        logger.info('入力:')
-        logger.info(parameters)
+        # create context
+        if history is not None:
+            record_to_history = history.record2()
+        else:
+            class DummyRecordContext:
+                def __enter__(self):
+                    return Record()
 
-        # update FEM parameter
-        self.fem.update_parameter(variables_pass_to_fem)
-        self._check_entire_interruption()
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    pass
 
-        # evaluate hard constraint
-        hard_c = TrialConstraintOutput()
-        try:
-            self._hard_c(hard_c)
+            record_to_history = DummyRecordContext()
 
-        except FEMError as e:
+        # processing with recording
+        with record_to_history as record:
 
-            self._process_hidden_constraint(e)
-            if history is not None:
-                if isinstance(e, ModelError):
-                    state = TrialState.model_error
-                elif isinstance(e, MeshError):
-                    state = TrialState.mesh_error
-                elif isinstance(e, SolveError):
-                    state = TrialState.solve_error
-                elif isinstance(e, PostProcessError):
-                    state = TrialState.post_error
-                else:
-                    state = TrialState.unknown_error
-                history.record(
-                    x=parameters,
-                    c=hard_c,
-                    state=state,
-                    sub_fidelity_name=self.sub_fidelity_name,
-                    fidelity=self.fidelity,
-                    datetime_start=datetime_start,
-                    message='Hidden constraint violation hard constraint evaluation: ' + create_err_msg_from_exception(e),
-                )
+            # record common result
+            record.x = parameters
+            record.sub_fidelity_name = self.sub_fidelity_name
+            record.fidelity = self.fidelity
+            record.datetime_start = datetime_start
 
-            raise e
+            # check skip
+            if not self._should_solve(history):
+                record.state = TrialState.skipped
+                raise SkipSolve
 
-        # check hard constraint violation
-        violation_names = self._process_hard_constraint(hard_c)
-        if len(violation_names) > 0:
+            # start solve
+            logger.info(f'===== Run {self.sub_fidelity_name} =====')
+            logger.info('入力:')
+            logger.info(parameters)
 
-            if history is not None:
-                history.record(
-                    x=parameters,
-                    c=hard_c,
-                    state=TrialState.hard_constraint_violation,
-                    sub_fidelity_name=self.sub_fidelity_name,
-                    fidelity=self.fidelity,
-                    datetime_start=datetime_start,
-                    message=f'Hard constraint violation during hard constraint evaluation: ' + ', '.join(violation_names),
-                )
+            # ===== update FEM parameter =====
+            self.fem.update_parameter(variables_pass_to_fem)
+            self._check_and_raise_interruption()
 
-            raise ConstraintViolation
+            # ===== evaluate hard constraint =====
+            hard_c = TrialConstraintOutput()
+            try:
+                self._hard_c(hard_c)
 
-        # update FEM
-        try:
-            self.fem.update()
-            self._check_entire_interruption()
+            except HiddenConstraintViolation as e:
 
-        # if hidden constraint violation
-        except FEMError as e:
+                self._process_hidden_constraint(e, record)
+                record.c = hard_c
+                record.message = 'Hidden constraint violation hard constraint evaluation: ' \
+                                 + create_err_msg_from_exception(e)
 
-            self._check_entire_interruption()
+                raise e
 
-            self._process_hidden_constraint(e)
+            # check hard constraint violation
+            violation_names = self._get_hard_constraint_violation_names(hard_c)
+            if len(violation_names) > 0:
 
-            if history is not None:
-                if isinstance(e, ModelError):
-                    state = TrialState.model_error
-                elif isinstance(e, MeshError):
-                    state = TrialState.mesh_error
-                elif isinstance(e, SolveError):
-                    state = TrialState.solve_error
-                elif isinstance(e, PostProcessError):
-                    state = TrialState.post_error
-                else:
-                    state = TrialState.unknown_error
-                history.record(
-                    x=parameters,
-                    c=hard_c,
-                    state=state,
-                    sub_fidelity_name=self.sub_fidelity_name,
-                    fidelity=self.fidelity,
-                    datetime_start=datetime_start,
-                    message='Hidden constraint violation in FEM update: ' + create_err_msg_from_exception(e),
-                )
+                record.c = hard_c
+                record.state = TrialState.hard_constraint_violation
+                record.message = f'Hard constraint violation: ' \
+                                 + ', '.join(violation_names)
 
-            raise e
+                raise HardConstraintViolation
 
-        # evaluate y
-        try:
-            y: TrialOutput = self._y()
-            self._check_entire_interruption()
+            # ===== update FEM =====
+            try:
+                self.fem.update()
+                self._check_and_raise_interruption()
 
-        # if intentional error (by user)
-        except FEMError as e:
-            self._check_entire_interruption()
+            # if hidden constraint violation
+            except HiddenConstraintViolation as e:
 
-            self._process_hidden_constraint(e)
+                self._check_and_raise_interruption()
 
-            if history is not None:
-                if isinstance(e, ModelError):
-                    state = TrialState.model_error
-                elif isinstance(e, MeshError):
-                    state = TrialState.mesh_error
-                elif isinstance(e, SolveError):
-                    state = TrialState.solve_error
-                elif isinstance(e, PostProcessError):
-                    state = TrialState.post_error
-                else:
-                    state = TrialState.unknown_error
-                history.record(
-                    x=parameters,
-                    c=hard_c,
-                    state=state,
-                    sub_fidelity_name=self.sub_fidelity_name,
-                    fidelity=self.fidelity,
-                    datetime_start=datetime_start,
-                    message='Hidden constraint violation during objective function evaluation: ' + create_err_msg_from_exception(e),
-                )
+                self._process_hidden_constraint(e, record)
+                record.c = hard_c
+                record.message = 'Hidden constraint violation in FEM update: ' \
+                                 + create_err_msg_from_exception(e)
 
-            raise e
+                raise e
 
-        # evaluate soft constraint
-        soft_c = TrialConstraintOutput()
-        try:
-            self._soft_c(soft_c)
+            # ===== evaluate y =====
+            try:
+                y: TrialOutput = self._y()
+                self._check_and_raise_interruption()
 
-        # if intentional error (by user)
-        except FEMError as e:
-            self._process_hidden_constraint(e)
+            # if intentional error (by user)
+            except HiddenConstraintViolation as e:
+                self._check_and_raise_interruption()
 
-            if history is not None:
+                self._process_hidden_constraint(e, record)
+                record.c = hard_c
+                record.message = 'Hidden constraint violation during objective function evaluation: ' \
+                                 + create_err_msg_from_exception(e)
+
+                raise e
+
+            # ===== evaluate soft constraint =====
+            soft_c = TrialConstraintOutput()
+            try:
+                self._soft_c(soft_c)
+
+            # if intentional error (by user)
+            except HiddenConstraintViolation as e:
+                self._process_hidden_constraint(e, record)
+
                 _c = {}
                 _c.update(soft_c)
                 _c.update(hard_c)
-                history.record(
-                    x=parameters,
-                    y=y,
-                    c=_c,
-                    state=TrialState.post_error,
-                    sub_fidelity_name=self.sub_fidelity_name,
-                    fidelity=self.fidelity,
-                    datetime_start=datetime_start,
-                    message='Hidden constraint violation during soft constraint function evaluation: ' + create_err_msg_from_exception(e),
-                )
 
-            raise e
+                record.y = y
+                record.c = _c
+                record.message = 'Hidden constraint violation during soft constraint function evaluation: ' \
+                                 + create_err_msg_from_exception(e)
 
-        # merge and sort constraints to follow self.constraints
-        c = TrialConstraintOutput()
-        c.update(soft_c)
-        c.update(hard_c)
+                raise e
 
-        # get values as minimize
-        y_internal: TrialOutput = self._convert_y(y)
+            # ===== merge and sort constraints =====
+            c = TrialConstraintOutput()
+            c.update(soft_c)
+            c.update(hard_c)
 
-        logger.info('出力:')
-        logger.info(y)
+            # get values as minimize
+            y_internal: dict = self._convert_y(y)
 
-        if history is not None:
-            history.record(
-                x=parameters,
-                y=y,
-                c=c,
-                state=TrialState.succeeded,
-                sub_fidelity_name=self.sub_fidelity_name,
-                fidelity=self.fidelity,
-                datetime_start=datetime_start,
-            )
+            logger.info('出力:')
+            logger.info(y)
+            record.y = y
+            record.c = c
+            record.state = TrialState.succeeded
 
-        self._check_entire_interruption()
+            self._check_and_raise_interruption()
 
-        return y, y_internal, c
+        return y, y_internal, c, record
 
     def run(self) -> None:
         raise NotImplementedError
@@ -514,6 +479,7 @@ class SubFidelityModels(dict[str, SubFidelityModel]):
         self.update({name: model})
 
 
+# ===== optuna module =====
 import warnings
 
 import optuna
@@ -554,6 +520,12 @@ class OptunaAttribute:
         self.y_values = None
         self.pf_state = None
 
+    # noinspection PyPropertyDefinition
+    @classmethod
+    @property
+    def main_fidelity_key(cls):
+        return MAIN_FIDELITY_NAME
+
     @property
     def key(self):
         return self.sub_fidelity_name
@@ -577,12 +549,12 @@ class OptunaAttribute:
         return optuna_attribute.value[OptunaAttribute.CONSTRAINT_KEY]
 
     @staticmethod
-    def get_violation_from_value(value: dict):  # value is OptunaAttribute.value
-        return value[OptunaAttribute.CONSTRAINT_KEY]
+    def get_violation_from_trial_attr(trial_attr: dict):  # value is OptunaAttribute.value
+        return trial_attr[OptunaAttribute.CONSTRAINT_KEY]
 
     @staticmethod
-    def get_pf_state_from_value(value: dict):  # value is OptunaAttribute.value
-        return value[OptunaAttribute.PYFEMTET_TRIAL_STATE_KEY]
+    def get_pf_state_from_trial_attr(trial_attr: dict):  # value is OptunaAttribute.value
+        return trial_attr[OptunaAttribute.PYFEMTET_TRIAL_STATE_KEY]
 
 
 class OptunaOptimizer(AbstractOptimizer):
@@ -597,12 +569,12 @@ class OptunaOptimizer(AbstractOptimizer):
                 count += 1
             if cns.upper_bound is not None:
                 count += 1
-        return np.ones(count, dtype=np.float64)
+        return tuple(np.ones(count, dtype=np.float64))
 
-    def _get_constraint(self, trial: optuna.trial.FrozenTrial):
+    def _constraint(self, trial: optuna.trial.FrozenTrial):
         key = OptunaAttribute(self).key
         value = trial.user_attrs[key]
-        return OptunaAttribute.get_violation_from_value(value)
+        return OptunaAttribute.get_violation_from_trial_attr(value)
 
     def _objective(self, trial: optuna.trial.Trial):
 
@@ -613,7 +585,7 @@ class OptunaOptimizer(AbstractOptimizer):
             vm = self.variable_manager
 
             # check interruption
-            self._check_entire_interruption()
+            self._check_and_raise_interruption()
 
             # parameter suggestion
             params = vm.get_variables(filter='parameter')
@@ -641,7 +613,7 @@ class OptunaOptimizer(AbstractOptimizer):
             vm.evaluate()
 
             # check interruption
-            self._check_entire_interruption()
+            self._check_and_raise_interruption()
 
             # construct TrialInput
             x = vm.get_variables(filter='parameter')
@@ -650,88 +622,82 @@ class OptunaOptimizer(AbstractOptimizer):
 
             def solve(
                     opt_: AbstractOptimizer = self
-            ) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None]:
+            ) -> tuple[float] | None:
 
                 # check interruption
-                self._check_entire_interruption()
+                self._check_and_raise_interruption()
 
                 # declare output
-                y_internal_ = None
+                y_internal_: tuple[float] | None = None
 
                 # prepare attribute
                 optuna_attr = OptunaAttribute(opt_)
 
-                # should solve
-                if opt_._should_solve(self.history):
+                # if opt_ is not self, update variable manager
+                opt_.variable_manager = vm
 
-                    logger.info(f'===== Run {opt_.sub_fidelity_name} =====')
+                # start solve
+                datetime_start = datetime.datetime.now()
+                try:
+                    _, dict_or_None_y_internal, c, record = opt_.f(x, x_pass_to_fem, self.history, datetime_start)
 
-                    # if opt_ is not self, update variable manager
-                    opt_.variable_manager = vm
+                    # convert dict or None to tuple or None
+                    y_internal_ = dict_or_None_y_internal if dict_or_None_y_internal is None else tuple(dict_or_None_y_internal.values())
 
-                    # start solve
-                    datetime_start = datetime.datetime.now()
-                    try:
-                        _, y_internal_, c = opt_.f(x, x_pass_to_fem, self.history, datetime_start)
+                # if (hidden) constraint violation, set trial attribute
+                except (HardConstraintViolation, HiddenConstraintViolation) as e:
+                    optuna_attr.pf_state = TrialState.get_corresponding_state_from_exception(e)
+                    optuna_attr.v_values = self._create_infeasible_constraints(opt_)
 
-                    # if (hidden) constraint violation, set trial attribute
-                    except (ConstraintViolation, FEMError) as e:
-                        if isinstance(e, ModelError):
-                            optuna_attr.pf_state = TrialState.model_error
-                        elif isinstance(e, MeshError):
-                            optuna_attr.pf_state = TrialState.mesh_error
-                        elif isinstance(e, SolveError):
-                            optuna_attr.pf_state = TrialState.solve_error
-                        elif isinstance(e, ConstraintViolation):
-                            optuna_attr.pf_state = TrialState.hard_constraint_violation
-                        optuna_attr.v_values = self._create_infeasible_constraints(opt_)
-
-                    # if succeeded
-                    else:
-                        # convert constraint to **sorted** violation
-                        assert len(c) == len(opt_.constraints)
-                        v = {}
-                        for cns_name, cns in opt_.constraints.items():
-                            # This is {lower or upper: violation_value} dict
-                            violation: dict[str, float] = c[cns_name].calc_violation()
-                            for l_or_u, violation_value in violation.items():
-                                key_ = cns_name + '_' + l_or_u
-                                v.update({key_: violation_value})
-
-                        # register results
-                        optuna_attr.v_values = tuple(v.values())
-                        optuna_attr.y_values = tuple(y_internal_)
-
-                # skipped
-                else:
+                # if skipped
+                except SkipSolve:
                     optuna_attr.pf_state = TrialState.skipped
+
+                # if succeeded
+                else:
+
+                    # convert constraint to **sorted** violation
+                    assert len(c) == len(opt_.constraints)
+                    v = {}
+                    for cns_name, cns in opt_.constraints.items():
+                        # This is {lower or upper: violation_value} dict
+                        violation: dict[str, float] = c[cns_name].calc_violation()
+                        for l_or_u, violation_value in violation.items():
+                            key_ = cns_name + '_' + l_or_u
+                            v.update({key_: violation_value})
+
+                    # register results
+                    optuna_attr.v_values = tuple(v.values())
+                    optuna_attr.y_values = y_internal_
+                    optuna_attr.pf_state = record.state
 
                 # update trial attribute
                 trial.set_user_attr(optuna_attr.key, optuna_attr.value)
 
                 # check interruption
-                self._check_entire_interruption()
+                self._check_and_raise_interruption()
 
                 return y_internal_
 
 
             # process main fidelity model
-            y_internal = solve()
+            y_internal: tuple[float] | None = solve()
 
             # process sub_fidelity_models
             for sub_fidelity_name, sub_opt in self.sub_fidelity_models.items():
                 solve(sub_opt)
 
             # check interruption
-            self._check_entire_interruption()
+            self._check_and_raise_interruption()
 
+            # clear trial
             self.current_trial = None
 
-            # To avoid trail FAILED with hard constraint
+            # To avoid trial FAILED with hard constraint
             # violation, check pf_state and raise TrialPruned.
             key = OptunaAttribute(self).key
             value = trial.user_attrs[key]
-            state = OptunaAttribute.get_pf_state_from_value(value)
+            state = OptunaAttribute.get_pf_state_from_trial_attr(value)
             if state in [
                 TrialState.hard_constraint_violation,
                 TrialState.model_error,
@@ -741,8 +707,11 @@ class OptunaOptimizer(AbstractOptimizer):
             ]:
                 raise optuna.TrialPruned
 
-            # if main solve skipped, y_internal is None
-            # and then trial is recorded as FAILED.
+            # if main solve skipped, y_internal is empty.
+            # this should be processed as FAIL.
+            elif state == TrialState.skipped:
+                return None
+
             return y_internal
 
     def run(self):
@@ -761,22 +730,47 @@ class OptunaOptimizer(AbstractOptimizer):
             self._finalize_history()
 
             # optuna
+            from v1.pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
+            from v1.pof_botorch.pof_botorch_sampler import PoFConfig, PartialOptimizeACQFConfig
+            sampler = PoFBoTorchSampler(
+                n_startup_trials=5,
+                seed=42,
+                constraints_func=self._constraint,
+                pof_config=PoFConfig(
+                    # consider_pof=False,
+                    # feasibility_threshold='mean',
+                ),
+                partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
+                    # gen_candidates='scipy',
+                    timeout_sec=5.,
+                    # method='SLSQP'  # 'COBYLA, COBYQA, SLSQP or trust-constr
+                    tol=0.1,
+                    # scipy_minimize_kwargs=dict(),
+                ),
+            )
+            # from optuna_integration import BoTorchSampler
+            # sampler = BoTorchSampler(n_startup_trials=5)
+
+            if isinstance(sampler, PoFBoTorchSampler):
+                sampler.pyfemtet_optimizer = self  # FIXME: multi-fidelity に対応できない?
+
             study = optuna.create_study(
-                directions=['minimize'] * len(self.objectives)
+                directions=['minimize'] * len(self.objectives),
+                sampler=sampler,
             )
 
             study.set_metric_names(list(self.objectives.keys()))
 
-            with suppress(Interrupt):
-                study.optimize(
-                    self._objective,
-                    n_trials=20,
-                )
+            study.optimize(
+                self._objective,
+                n_trials=100,
+                catch=InterruptOptimization
+            )
 
-    def _check_entire_interruption(self):
+    def _check_and_raise_interruption(self):
         try:
-            AbstractOptimizer._check_entire_interruption(self)
-        except Interrupt as e:
+            AbstractOptimizer._check_and_raise_interruption(self)
+        except InterruptOptimization as e:
             if self.current_trial is not None:
                 self.current_trial.study.stop()
             raise e
@@ -784,8 +778,12 @@ class OptunaOptimizer(AbstractOptimizer):
 
 if __name__ == '__main__':
 
+    from v1.exceptions import PostProcessError
+
     def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
         x = _opt.get_variables('values')
+        # if _cns(_fem, _opt) < 0:
+        #     raise PostProcessError
         return (x ** 2).sum()
 
     def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
@@ -796,22 +794,39 @@ if __name__ == '__main__':
         x = _opt.get_variables('values')
         return x[0]
 
-    __fem = NoFEM()
-    __opt = SubFidelityModel()
-    __opt.fem = __fem
-    __opt.add_objective('obj1', _parabola, args=(__fem, __opt))
-    __opt.add_objective('obj2', _parabola2, args=(__fem, __opt))
-
     _fem = NoFEM()
     _opt = OptunaOptimizer()
     _opt.fem = _fem
     _opt.add_parameter('x1', 1, -1, 1, step=0.1)
     _opt.add_parameter('x2', 1, -1, 1, step=0.1)
-    _opt.add_constraint('cns', _cns, lower_bound=0, args=(_fem, _opt))
+    _opt.add_constraint('cns', _cns, lower_bound=0.8, args=(_fem, _opt))
     _opt.add_objective('obj1', _parabola, args=(_fem, _opt))
-    _opt.add_objective('obj2', _parabola2, args=(_fem, _opt))
-    _opt.add_sub_fidelity_model(name='low-fidelity', sub_fidelity_model=__opt, fidelity=0.5)
+    # _opt.add_objective('obj2', _parabola2, args=(_fem, _opt))
 
+
+    # # ===== sub-fidelity =====
+    # __fem = NoFEM()
+    # __opt = SubFidelityModel()
+    # __opt.fem = __fem
+    # __opt.add_objective('obj1', _parabola, args=(__fem, __opt))
+    # __opt.add_objective('obj2', _parabola2, args=(__fem, __opt))
+    #
+    # _opt.add_sub_fidelity_model(name='low-fidelity', sub_fidelity_model=__opt, fidelity=0.5)
+    #
+    # def _solve_condition(_history: History):
+    #
+    #     sub_fidelity_df = _history.get_df(
+    #         {'sub_fidelity_name': 'low-fidelity'}
+    #     )
+    #     idx = sub_fidelity_df['state'] == TrialState.succeeded
+    #     pdf = sub_fidelity_df[idx]
+    #
+    #     return len(pdf) % 5 == 0
+    #
+    # _opt.set_solve_condition(_solve_condition)
+
+
+    # _opt.history.path = 'restart-test.csv'
     _opt.run()
 
     # import plotly.express as px
@@ -819,5 +834,3 @@ if __name__ == '__main__':
     # px.scatter_3d(_df, x='x1', y='x2', z='obj', color='fidelity', opacity=0.5).show()
 
     _opt.history.save()
-
-
