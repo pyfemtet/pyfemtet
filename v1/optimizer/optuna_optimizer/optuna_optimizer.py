@@ -265,10 +265,9 @@ if __name__ == '__main__':
     _opt.fem = _fem
     _opt.add_parameter('x1', 1, -1, 1, step=0.1)
     _opt.add_parameter('x2', 1, -1, 1, step=0.1)
-    _opt.add_constraint('cns', _cns, lower_bound=0.8, args=(_fem, _opt))
+    _opt.add_constraint('cns', _cns, lower_bound=0., args=(_fem, _opt))
     _opt.add_objective('obj1', _parabola, args=(_fem, _opt))
     # _opt.add_objective('obj2', _parabola2, args=(_fem, _opt))
-
 
     # # ===== sub-fidelity =====
     # __fem = NoFEM()
@@ -290,7 +289,6 @@ if __name__ == '__main__':
     #     return len(pdf) % 5 == 0
     #
     # _opt.set_solve_condition(_solve_condition)
-
 
     # _opt.history.path = 'restart-test.csv'
     _opt.run()

@@ -109,7 +109,7 @@ class VariableManager:
         if format is None:
             return raw
 
-        elif format is 'raw':
+        elif format == 'raw':
             return raw
 
         elif format == 'dict':
