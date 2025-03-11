@@ -117,9 +117,11 @@ with try_import() as _imports_logei:
 #     )
 
 # from v1.problem import *
+
 from v1.history import TrialState as PFTrialState
 from v1.exceptions import *
-from v1.pof_botorch.enable_nonlinear_constraint import NonlinearInequalityConstraints
+from v1.optimizer.optuna_optimizer.optuna_optimizer import OptunaAttribute
+from v1.optimizer.optuna_optimizer.pof_botorch.enable_nonlinear_constraint import NonlinearInequalityConstraints
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -158,7 +160,6 @@ __all__ = [
 ]
 
 
-
 def log_sigmoid(X: torch.Tensor) -> torch.Tensor:
     return torch.log(1 - torch.sigmoid(-X))
 
@@ -194,19 +195,19 @@ def setup_yvar_and_standardizer(
     return train_yvar_, standardizer_
 
 
-def setup_gp(X_, Y_, bounds_, observation_noise_, lh_class=None):
+def setup_gp(X, Y, bounds, observation_noise, lh_class=None):
 
     lh_class = lh_class or ExactMarginalLogLikelihood
 
     train_yvar_, standardizer_ = setup_yvar_and_standardizer(
-        Y_, observation_noise_
+        Y, observation_noise
     )
 
     model_ = SingleTaskGP(
-        X_,
-        Y_,
+        X,
+        Y,
         train_Yvar=train_yvar_,
-        input_transform=Normalize(d=X_.shape[-1], bounds=bounds_),
+        input_transform=Normalize(d=X.shape[-1], bounds=bounds),
         outcome_transform=standardizer_,
     )
 
@@ -551,8 +552,6 @@ class PoFBoTorchSampler(BoTorchSampler):
     ):
 
         # ===== 準備 =====
-        from v1.optimizer import OptunaAttribute
-
         if feature_dim_bound is not None:
             assert feature_param is not None
         elif feature_param is not None:

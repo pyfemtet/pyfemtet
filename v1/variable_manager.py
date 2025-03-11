@@ -1,5 +1,7 @@
 from typing import Callable
 
+import numpy as np
+
 
 __all__ = [
     'Parameter',
@@ -13,7 +15,6 @@ __all__ = [
     'VariableManager',
 ]
 
-import numpy as np
 
 
 class Variable:

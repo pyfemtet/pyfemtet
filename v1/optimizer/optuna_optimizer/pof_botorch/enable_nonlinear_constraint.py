@@ -9,7 +9,7 @@ from botorch.optim.initializers import gen_batch_initial_conditions
 
 
 from v1.problem import *
-from v1.optimizer import *
+from v1.optimizer.optuna_optimizer import OptunaOptimizer
 
 
 __all__ = ['NonlinearInequalityConstraints']

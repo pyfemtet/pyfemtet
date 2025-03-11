@@ -17,6 +17,7 @@ from v1.exceptions import *
 from v1.optimality import *
 from v1.hypervolume import *
 from v1.str_enum import StrEnum
+from v1.variable_manager import *
 
 
 __all__ = [
@@ -24,6 +25,7 @@ __all__ = [
     'History',
     'Record',
     'create_err_msg_from_exception',
+    'CorrespondingColumnNameRuler',
 ]
 
 
@@ -195,9 +197,22 @@ class DataFrameWrapper:
 
 
 class CorrespondingColumnNameRuler:
+
     @staticmethod
-    def create_direction_name(obj_name):
+    def direction_name(obj_name):
         return obj_name + '_direction'
+
+    @staticmethod
+    def prm_lower_bound_name(prm_name):
+        return prm_name + '_lower_bound'
+
+    @staticmethod
+    def prm_upper_bound_name(prm_name):
+        return prm_name + '_upper_bound'
+
+    @staticmethod
+    def prm_choices_name(prm_name):
+        return prm_name + '_choices'
 
 
 @dataclasses.dataclass
@@ -259,11 +274,14 @@ class Record:
         ).astype(self.dtypes)
 
     @classmethod
-    def initialize(cls, x_names, y_names, c_names):
-        cls._set_full_sorted_column_information(x_names, y_names, c_names)
+    def initialize(cls, parameters: dict[Parameter], y_names, c_names):
+        cls._set_full_sorted_column_information(parameters, y_names, c_names)
 
     @classmethod
-    def _set_full_sorted_column_information(cls, x_names, y_names, c_names):
+    def _set_full_sorted_column_information(cls, parameters: dict[Parameter], y_names, c_names):
+
+        prm_names = list(parameters.keys())
+
         dtypes = {}
         meta_columns = []
 
@@ -280,11 +298,35 @@ class Record:
             #   (object にキャストされる模様)
 
             if key == 'x':
-                dtypes.update({name: float for name in x_names})
-                meta_columns.extend(['prm'] * len(x_names))
+                for prm_name in prm_names:
+
+                    param = parameters[prm_name]
+
+                    if isinstance(param, NumericParameter):
+                        dtypes.update({prm_name: float})
+                        meta_columns.append('prm')
+
+                        f = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
+                        dtypes.update({f(prm_name): object})
+                        meta_columns.append('prm_lower_bound')
+
+                        f = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
+                        dtypes.update({f(prm_name): object})
+                        meta_columns.append('prm_upper_bound')
+
+                    elif isinstance(param, CategoricalParameter):
+                        dtypes.update({prm_name: float})
+                        meta_columns.append('prm')
+
+                        f = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
+                        dtypes.update({f(prm_name): object})
+                        meta_columns.append('prm_choices')
+
+                    else:
+                        raise NotImplementedError
 
             elif key == 'y':
-                f = CorrespondingColumnNameRuler.create_direction_name
+                f = CorrespondingColumnNameRuler.direction_name
                 for name in y_names:
                     dtypes.update({name: float})
                     dtypes.update({f(name): object})  # str | float
@@ -332,8 +374,31 @@ class Record:
     def cns_names(cls) -> list[str]:
         return cls._filter_columns('cns')
 
+    @classmethod
+    def is_numerical_parameter(cls, prm_name) -> bool:
+        prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
+        return prm_lb_name in tuple(cls.dtypes.keys())
 
-class EntireDependentValuesManager:
+    @classmethod
+    def is_categorical_parameter(cls, prm_name) -> bool:
+        prm_choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
+        return prm_choices_name in tuple(cls.dtypes.keys())
+
+    @classmethod
+    def get_prm_names_and_corresponding_names(cls) -> dict[str, tuple]:
+        out = dict
+        for prm_name in cls.prm_names:
+            if cls.is_numerical_parameter(prm_name):
+                prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
+                prm_ub_name = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
+                out.update({prm_name: {'lb': prm_lb_name, 'ub': prm_ub_name}})
+            elif cls.is_categorical_parameter(prm_name):
+                prm_choices = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
+                out.update({prm_name: {'choices': prm_choices}})
+        return out
+
+
+class EntireDependentValuesCalculator:
 
     y_internal: np.ndarray
     feasibility: np.ndarray
@@ -350,7 +415,7 @@ class EntireDependentValuesManager:
 
         # get column names
         obj_names = Record.obj_names
-        f = CorrespondingColumnNameRuler.create_direction_name
+        f = CorrespondingColumnNameRuler.direction_name
         obj_direction_names = [f(name) for name in obj_names]
 
         # get values
@@ -450,11 +515,9 @@ class Records:
     def __len__(self):
         return len(self.df_wrapper)
 
-    def initialize(self, prm_names, obj_names, cns_names):
+    def initialize(self):
 
         with self.df_wrapper.lock:
-            df = self.df_wrapper.get_df()
-
             # 新しく始まる場合に備えカラムを設定
             # load の場合はあとで上書きされる
             df = pd.DataFrame([], columns=list(Record.dtypes.keys()))
@@ -482,7 +545,6 @@ class Records:
         #   # dtype: object
         self.loaded_df['sub_fidelity_name'] = \
             self.loaded_df['sub_fidelity_name'].fillna('')
-
 
     def check_problem_compatibility(self):
 
@@ -578,7 +640,7 @@ class Records:
         with self.df_wrapper.lock_if_not_locked:
 
             # update main fidelity
-            mgr = EntireDependentValuesManager(
+            mgr = EntireDependentValuesCalculator(
                 self,
                 {'sub_fidelity_name': MAIN_FIDELITY_NAME}
             )
@@ -592,11 +654,14 @@ class Records:
             if MAIN_FIDELITY_NAME in sub_fidelity_names:
                 sub_fidelity_names.remove(MAIN_FIDELITY_NAME)
             for sub_fidelity_name in sub_fidelity_names:
-                mgr = EntireDependentValuesManager(
+                mgr = EntireDependentValuesCalculator(
                     self,
                     {'sub_fidelity_name': sub_fidelity_name}
                 )
                 mgr.update_trial_number()
+
+    def get_prm_names_and_corresponding_names_as_columns(self) -> dict[tuple]:
+        return Record.get_prm_names_and_corresponding_names()
 
 
 class History:
@@ -613,7 +678,6 @@ class History:
         self._records = Records()
         self.path: str = None
         self._finalized: bool = False
-        # self.current_trial_time_start: datetime.datetime = None
 
     def __str__(self):
         return self._records.__str__()
@@ -624,55 +688,32 @@ class History:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._records.df_wrapper.end_dask()
 
-    # def _trial_start(self):
-    #     self.current_trial_time_start = datetime.datetime.now()
-    #
-    # def _trial_end(self):
-    #     self.current_trial_time_start = None
-    #
-    # def trial_recording(self):
-    #
-    #     class TrialContext:
-    #
-    #         # noinspection PyMethodParameters
-    #         def __enter__(_self):
-    #             self._trial_start()
-    #
-    #         # noinspection PyMethodParameters
-    #         def __exit__(_self, exc_type, exc_val, exc_tb):
-    #             self._trial_end()
-    #
-    #     return TrialContext()
-    #
-    def get_df(self, equality_filters: dict = None):
-        return self._records.df_wrapper.get_df(equality_filters)
-
     def load_csv(self, path):
         self.path = path
         self._records.load(self.path)
 
     def finalize(
             self,
-            prm_names,
+            parameters: dict[str, Parameter],
             obj_names,
             cns_names,
             sub_fidelity_model_names=None,
     ):
 
-        self.prm_names = list(prm_names)
+        self.prm_names = list(parameters.keys())
         self.obj_names = list(obj_names)
         self.cns_names = list(cns_names)
         self.sub_fidelity_model_names = sub_fidelity_model_names or []
 
         # worker ごとに実行が必要な処理
         # ここで dtypes が決定する
-        Record.initialize(prm_names, obj_names, cns_names)
+        Record.initialize(parameters, self.obj_names, self.cns_names)
 
         # worker で再処理されると困る処理
         if not self._finalized:
 
             # initialize
-            self._records.initialize(prm_names, obj_names, cns_names)
+            self._records.initialize()
 
             # load
             if self.path is None:
@@ -685,41 +726,10 @@ class History:
 
             self._finalized = True
 
-    def record(
-            self,
-            datetime_start: datetime.datetime,
-            x: TrialInput = None,
-            y: TrialOutput = None,
-            c: TrialConstraintOutput = None,
-            state: TrialState = TrialState.undefined,
-            sub_fidelity_name: str = None,
-            fidelity: Fidelity | None = None,
-            trial_id: int = None,
-            sub_sampling: SubSampling | None = None,
-            datetime_end: datetime.datetime | None = None,
-            message: str = '',
-    ):
+    def get_df(self, equality_filters: dict = None):
+        return self._records.df_wrapper.get_df(equality_filters)
 
-        x = x or TrialInput()
-        y = y or TrialOutput()
-        c = c or TrialConstraintOutput()
-
-        datetime_end = datetime_end if datetime_end is not None else datetime.datetime.now()
-
-        record = Record(
-            trial_id=trial_id,
-            sub_sampling=sub_sampling,
-            fidelity=fidelity,
-            sub_fidelity_name=sub_fidelity_name,
-            x=x, y=y, c=c, state=state,
-            datetime_start=datetime_start,
-            datetime_end=datetime_end,
-            message=message,
-        )
-
-        self._records.append(record)
-
-    def record2(self):
+    def recording(self):
 
         # noinspection PyMethodParameters
         class RecordContext:
@@ -739,7 +749,6 @@ class History:
                 self._records.append(self_.record)
 
         return RecordContext()
-
 
     def save(self):
         self._records.save(self.path)

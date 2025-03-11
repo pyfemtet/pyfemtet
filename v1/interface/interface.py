@@ -16,7 +16,6 @@ except ModuleNotFoundError:
 
 from v1.problem import *
 from v1.dask_util import *
-from v1.exceptions import *
 from v1.logger import get_module_logger
 
 logger = get_module_logger('opt.interface', False)
@@ -24,13 +23,10 @@ logger = get_module_logger('opt.interface', False)
 if TYPE_CHECKING:
     from v1.optimizer import AbstractOptimizer
 
-
 __all__ = [
     'AbstractFEMInterface',
-    'FemtetInterface',
     'NoFEM',
 ]
-
 
 
 class AbstractFEMInterface:
@@ -101,23 +97,6 @@ class COMInterface(AbstractFEMInterface):
         for key, value in self.com_members.items():
             state.update({key: Dispatch(value)})
         self.__dict__.update(state)
-
-
-class FemtetInterface(COMInterface):
-
-    com_members = {'Femtet': 'FemtetMacro.Femtet'}
-
-    def __init__(self):
-        self.Femtet = Dispatch('FemtetMacro.Femtet')
-
-    def update_parameter(self, x: TrialInput) -> None:
-        pass
-
-    def update(self) -> None:
-        pass
-
-    def close(self):  # context manager による予約語
-        print('Femtet を終了する')
 
 
 class NoFEM(AbstractFEMInterface):
