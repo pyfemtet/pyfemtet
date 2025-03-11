@@ -274,11 +274,11 @@ class Record:
         ).astype(self.dtypes)
 
     @classmethod
-    def initialize(cls, parameters: dict[Parameter], y_names, c_names):
+    def initialize(cls, parameters: dict[str, Parameter], y_names, c_names):
         cls._set_full_sorted_column_information(parameters, y_names, c_names)
 
     @classmethod
-    def _set_full_sorted_column_information(cls, parameters: dict[Parameter], y_names, c_names):
+    def _set_full_sorted_column_information(cls, parameters: dict[str, Parameter], y_names, c_names):
 
         prm_names = list(parameters.keys())
 
@@ -306,11 +306,11 @@ class Record:
                         dtypes.update({prm_name: float})
                         meta_columns.append('prm')
 
-                        f = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
+                        f = CorrespondingColumnNameRuler.prm_lower_bound_name
                         dtypes.update({f(prm_name): object})
                         meta_columns.append('prm_lower_bound')
 
-                        f = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
+                        f = CorrespondingColumnNameRuler.prm_upper_bound_name
                         dtypes.update({f(prm_name): object})
                         meta_columns.append('prm_upper_bound')
 
@@ -318,7 +318,7 @@ class Record:
                         dtypes.update({prm_name: float})
                         meta_columns.append('prm')
 
-                        f = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
+                        f = CorrespondingColumnNameRuler.prm_choices_name
                         dtypes.update({f(prm_name): object})
                         meta_columns.append('prm_choices')
 
@@ -356,22 +356,17 @@ class Record:
         columns = list(cls.dtypes.keys())
         return cls.filter_columns(meta_column, columns, cls.meta_columns)
 
-    # noinspection PyPropertyDefinition
+    # @property  # class property will be not supported in python 3.13
     @classmethod
-    @property
-    def prm_names(cls) -> list[str]:
+    def get_prm_names(cls) -> list[str]:
         return cls._filter_columns('prm')
 
-    # noinspection PyPropertyDefinition
     @classmethod
-    @property
-    def obj_names(cls) -> list[str]:
+    def get_obj_names(cls) -> list[str]:
         return cls._filter_columns('obj')
 
-    # noinspection PyPropertyDefinition
     @classmethod
-    @property
-    def cns_names(cls) -> list[str]:
+    def get_cns_names(cls) -> list[str]:
         return cls._filter_columns('cns')
 
     @classmethod
@@ -384,18 +379,18 @@ class Record:
         prm_choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
         return prm_choices_name in tuple(cls.dtypes.keys())
 
-    @classmethod
-    def get_prm_names_and_corresponding_names(cls) -> dict[str, tuple]:
-        out = dict
-        for prm_name in cls.prm_names:
-            if cls.is_numerical_parameter(prm_name):
-                prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
-                prm_ub_name = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
-                out.update({prm_name: {'lb': prm_lb_name, 'ub': prm_ub_name}})
-            elif cls.is_categorical_parameter(prm_name):
-                prm_choices = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
-                out.update({prm_name: {'choices': prm_choices}})
-        return out
+    # @classmethod
+    # def get_prm_names_and_corresponding_names(cls) -> dict[str, dict[str, float | tuple]]:
+    #     out = dict()
+    #     for prm_name in cls.prm_names():
+    #         if cls.is_numerical_parameter(prm_name):
+    #             prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
+    #             prm_ub_name = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
+    #             out.update({prm_name: {'lb': prm_lb_name, 'ub': prm_ub_name}})
+    #         elif cls.is_categorical_parameter(prm_name):
+    #             prm_choices = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
+    #             out.update({prm_name: {'choices': prm_choices}})
+    #     return out
 
 
 class EntireDependentValuesCalculator:
@@ -414,7 +409,7 @@ class EntireDependentValuesCalculator:
         df = self.get_df()
 
         # get column names
-        obj_names = Record.obj_names
+        obj_names = Record.get_obj_names()
         f = CorrespondingColumnNameRuler.direction_name
         obj_direction_names = [f(name) for name in obj_names]
 
@@ -559,20 +554,20 @@ class Records:
 
         # prm_names が過不足ないか
         loaded_prm_names = set(Record.filter_columns('prm', loaded_columns, loaded_meta_columns))
-        prm_names = set(Record.prm_names)
+        prm_names = set(Record.get_prm_names())
         if not (len(loaded_prm_names - prm_names) == len(prm_names - loaded_prm_names) == 0):
             raise RuntimeError('Incompatible parameter setting.')
 
         # obj_names が増えていないか
         loaded_obj_names = set(Record.filter_columns('obj', loaded_columns, loaded_meta_columns))
-        obj_names = set(Record.obj_names)
+        obj_names = set(Record.get_obj_names())
         if len(obj_names - loaded_obj_names) > 0:
             raise RuntimeError('Incompatible objective setting.')
 
         # cns_names が過不足ないか
         # TODO: cns の上下限は変更されてはならない。
         loaded_cns_names = set(Record.filter_columns('cns', loaded_columns, loaded_meta_columns))
-        cns_names = set(Record.cns_names)
+        cns_names = set(Record.get_cns_names())
         if not (len(loaded_cns_names - cns_names) == len(cns_names - loaded_cns_names) == 0):
             raise RuntimeError('Incompatible constraint setting.')
 
@@ -597,7 +592,7 @@ class Records:
             writer.writerow(Record.meta_columns)
             writer.writerow([''] * len(Record.meta_columns))  # empty line
             # write df from line 3
-            df.to_csv(f, index=None, encoding=ENCODING, lineterminator='\n')
+            df.to_csv(f, index=False, encoding=ENCODING, lineterminator='\n')
 
     def append(self, record: Record):
 
@@ -660,9 +655,6 @@ class Records:
                 )
                 mgr.update_trial_number()
 
-    def get_prm_names_and_corresponding_names_as_columns(self) -> dict[tuple]:
-        return Record.get_prm_names_and_corresponding_names()
-
 
 class History:
     """最適化の試行全体の情報を操作するルールクラス"""
@@ -676,7 +668,7 @@ class History:
 
     def __init__(self):
         self._records = Records()
-        self.path: str = None
+        self.path: str | None = None
         self._finalized: bool = False
 
     def __str__(self):

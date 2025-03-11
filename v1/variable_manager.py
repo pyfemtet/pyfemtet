@@ -55,12 +55,12 @@ class CategoricalParameter(CategoricalVariable, Parameter):
 
 class NumericExpression(NumericVariable):
     expression: str
-    fun: Callable[[...], float]
+    fun: Callable[..., float]
 
 
 class CategoricalExpression(CategoricalVariable):
     expression: str
-    fun: Callable[[...], str]
+    fun: Callable[..., str]
 
 
 class VariableManager:
@@ -77,13 +77,15 @@ class VariableManager:
     def evaluate(self):
         ...
 
+    # noinspection PyShadowingBuiltins
     def get_variables(
             self,
             *,
-            filter: tuple | None = None,  # 'pass_to_fem' and 'parameter' (or filter)
+            filter: str | tuple | None = None,  # 'pass_to_fem' and 'parameter' (OR filter)
             format: str = None,  # None, 'dict' and 'values'
     ) -> (
         dict[str, Variable]
+        | dict[str, Parameter]
         | dict[str, float]
         | np.ndarray
     ):
@@ -105,6 +107,9 @@ class VariableManager:
                 raw.update({name: var})
 
         if format is None:
+            return raw
+
+        elif format is 'raw':
             return raw
 
         elif format == 'dict':

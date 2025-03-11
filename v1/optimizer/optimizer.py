@@ -28,15 +28,21 @@ class InterruptOptimization(Exception): ...
 class SkipSolve(Exception): ...
 
 
+def _log_hidden_constraint(e: Exception):
+    err_msg = create_err_msg_from_exception(e)
+    logger.warning('----- Hidden constraint violation! -----')
+    logger.warning(f'エラー: {err_msg}')
+
+
 class AbstractOptimizer:
 
     # problem
     variable_manager: VariableManager
     objectives: Objectives
     constraints: Constraints
-    fidelity: Fidelity
+    fidelity: Fidelity | None
     sub_fidelity_name: str
-    sub_fidelity_models: SubFidelityModels
+    sub_fidelity_models: SubFidelityModels | None
 
     # system
     history: History
@@ -52,12 +58,12 @@ class AbstractOptimizer:
         self.constraints = Constraints()
 
         # multi-fidelity
-        self.fidelity: Fidelity = None
+        self.fidelity = None
         self.sub_fidelity_name = MAIN_FIDELITY_NAME
-        self.sub_fidelity_models: SubFidelityModels = None
+        self.sub_fidelity_models = None
 
         # System
-        self._fem: AbstractFEMInterface = None
+        self._fem: AbstractFEMInterface | None = None
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
@@ -76,7 +82,7 @@ class AbstractOptimizer:
         var.value = value
         var.pass_to_fem = pass_to_fem
         var.properties = properties if properties is not None else {}
-        self.variable_manager.variables.update({name, var})
+        self.variable_manager.variables.update({name: var})
 
     def add_parameter(
             self,
@@ -131,7 +137,7 @@ class AbstractOptimizer:
     def add_objective(
             self,
             name: str,
-            fun: Callable[[...], float],
+            fun: Callable[..., float],
             direction: str | float = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
@@ -146,7 +152,7 @@ class AbstractOptimizer:
     def add_constraint(
             self,
             name: str,
-            fun: Callable[[...], float],
+            fun: Callable[..., float],
             lower_bound: float | None = None,
             upper_bound: float | None = None,
             args: tuple | None = None,
@@ -214,11 +220,6 @@ class AbstractOptimizer:
                 cns_result = ConstraintResult(cns)
                 out.update({name: cns_result})
         return out
-
-    def _process_hidden_constraint(self, e: Exception, record: Record):
-        err_msg = create_err_msg_from_exception(e)
-        logger.warning('----- Hidden constraint violation! -----')
-        logger.warning(f'エラー: {err_msg}')
 
     def _get_hard_constraint_violation_names(self, hard_c: TrialConstraintOutput) -> list[str]:
         violation_names = []
@@ -297,7 +298,7 @@ class AbstractOptimizer:
 
             except HiddenConstraintViolation as e:
 
-                self._process_hidden_constraint(e, record)
+                _log_hidden_constraint(e)
                 record.c = hard_c
                 record.message = 'Hidden constraint violation hard constraint evaluation: ' \
                                  + create_err_msg_from_exception(e)
@@ -325,7 +326,7 @@ class AbstractOptimizer:
 
                 self._check_and_raise_interruption()
 
-                self._process_hidden_constraint(e, record)
+                _log_hidden_constraint(e)
                 record.c = hard_c
                 record.message = 'Hidden constraint violation in FEM update: ' \
                                  + create_err_msg_from_exception(e)
@@ -341,7 +342,7 @@ class AbstractOptimizer:
             except HiddenConstraintViolation as e:
                 self._check_and_raise_interruption()
 
-                self._process_hidden_constraint(e, record)
+                _log_hidden_constraint(e)
                 record.c = hard_c
                 record.message = 'Hidden constraint violation during objective function evaluation: ' \
                                  + create_err_msg_from_exception(e)
@@ -355,7 +356,7 @@ class AbstractOptimizer:
 
             # if intentional error (by user)
             except HiddenConstraintViolation as e:
-                self._process_hidden_constraint(e, record)
+                _log_hidden_constraint(e)
 
                 _c = {}
                 _c.update(soft_c)
@@ -456,8 +457,11 @@ class AbstractOptimizer:
         self.fem.load_constraints(self)
 
     def _finalize_history(self):
+        parameters = self.variable_manager.get_variables(
+            filter='parameter', format='raw'
+        )
         self.history.finalize(
-            list(self.variable_manager.get_variables()),
+            parameters,
             list(self.objectives.keys()),
             list(self.constraints.keys()),
         )

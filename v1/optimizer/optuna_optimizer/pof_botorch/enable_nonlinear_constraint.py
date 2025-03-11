@@ -9,7 +9,7 @@ from botorch.optim.initializers import gen_batch_initial_conditions
 
 
 from v1.problem import *
-from v1.optimizer.optuna_optimizer import OptunaOptimizer
+from v1.optimizer.optimizer import AbstractOptimizer
 
 
 __all__ = ['NonlinearInequalityConstraints']
@@ -48,7 +48,7 @@ class _GeneralFunctionWithForwardDifference(torch.autograd.Function):
 # 入力 x を受けて pyfemtet.opt.Constraint を評価する関数
 def _evaluate_pyfemtet_cns(
         cns: Constraint,
-        opt: OptunaOptimizer,
+        opt: AbstractOptimizer,
         trans: _SearchSpaceTransform,
         x: np.ndarray,
 ) -> float:
@@ -80,7 +80,7 @@ class _ConvertedConstraint:
     def __init__(
             self,
             cns: Constraint,
-            opt: OptunaOptimizer,
+            opt: AbstractOptimizer,
             trans: _SearchSpaceTransform,
             ub_or_lb: str,
     ):
@@ -116,7 +116,7 @@ class _ConvertedConstraint:
 # list[pyfemtet.opt.Constraint] について、正規化された入力に対し、 feasible or not を返す関数
 def _is_feasible(
         constraints: list[Constraint],
-        opt: OptunaOptimizer,
+        opt: AbstractOptimizer,
         trans: _SearchSpaceTransform,
         x: np.ndarray,
 ) -> bool:
@@ -137,7 +137,7 @@ class NonlinearInequalityConstraints:
     def __init__(
             self,
             constraints: list[Constraint],
-            opt: OptunaOptimizer,
+            opt: AbstractOptimizer,
             trans: _SearchSpaceTransform,
     ):
         self.trans = trans

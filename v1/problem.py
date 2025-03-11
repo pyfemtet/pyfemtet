@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING, TypeAlias
 
 try:
     # noinspection PyUnresolvedReferences
@@ -195,12 +195,12 @@ class ConstraintResult:
 class Constraints(dict[str, Constraint]): ...
 
 
-class Fidelity: ...
+Fidelity: TypeAlias = float | str | None
 
 
-SubSampling = int
+SubSampling: TypeAlias = int
 
 
-TrialInput = dict[str, Variable]
-TrialOutput = dict[str, ObjectiveResult]
-TrialConstraintOutput = dict[str, ConstraintResult]
+TrialInput: TypeAlias = dict[str, Variable]
+TrialOutput: TypeAlias = dict[str, ObjectiveResult]
+TrialConstraintOutput: TypeAlias = dict[str, ConstraintResult]

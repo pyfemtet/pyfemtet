@@ -16,6 +16,7 @@ class _WorkerStatus(float):
 
     string: str
 
+    # noinspection PyUnusedLocal
     def __init__(self, x, string):
         self.string = string
 

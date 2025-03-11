@@ -36,7 +36,7 @@ emulation. Pacific Journal of Optimization, 2011, 7.3: 467-478
 from __future__ import annotations
 
 import dataclasses
-from typing import Callable, Sequence, Any
+from typing import Callable, Sequence, Any, TypeAlias
 from packaging import version
 
 from optuna._imports import try_import
@@ -89,6 +89,7 @@ with try_import() as _imports:
         from botorch.fit import fit_gpytorch_model as fit_gpytorch_mll
 
         def _get_sobol_qmc_normal_sampler(num_samples: int) -> SobolQMCNormalSampler:
+            # noinspection PyTypeChecker
             return SobolQMCNormalSampler(num_samples)
 
     else:
@@ -188,7 +189,7 @@ def setup_yvar_and_standardizer(
         else:
             raise NotImplementedError
     elif isinstance(observation_noise_, float):
-        train_yvar_ = torch.full_like(observation_noise_, Y_)
+        train_yvar_ = torch.full_like(Y_, observation_noise_)
 
     standardizer_ = standardizer_ or Standardize(m=Y_.shape[-1])
 
@@ -394,6 +395,7 @@ def logei_candidates_func(
 
         kwargs = partial_optimize_acqf_kwargs.kwargs.copy()
 
+        # noinspection PyTypeChecker
         options = {
             "batch_limit": 5, "maxiter": 200
         }.update(kwargs.pop('options'))
@@ -574,7 +576,7 @@ class PoFBoTorchSampler(BoTorchSampler):
         hidden_v_trials: list[FrozenTrial] = []
         for trial in (completed_trials + pruned_trials):
             state: PFTrialState = OptunaAttribute.get_pf_state_from_trial_attr(
-                trial.user_attrs[OptunaAttribute.main_fidelity_key]
+                trial.user_attrs[OptunaAttribute.main_fidelity_key()]
             )
             if state == PFTrialState.succeeded:
                 succeeded_trials.append(trial)

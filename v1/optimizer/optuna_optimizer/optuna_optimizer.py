@@ -25,9 +25,9 @@ warnings.filterwarnings('ignore', 'set_metric_names', optuna.exceptions.Experime
 
 class OptunaOptimizer(AbstractOptimizer):
 
-    current_trial: optuna.trial.Trial
+    current_trial: optuna.trial.Trial | None
 
-    def _create_infeasible_constraints(self, opt_: AbstractOptimizer = None) -> np.ndarray:
+    def _create_infeasible_constraints(self, opt_: AbstractOptimizer = None) -> tuple:
         opt_ = opt_ if opt_ is not None else self
         count = 0
         for name, cns in opt_.constraints.items():
@@ -246,17 +246,17 @@ if __name__ == '__main__':
 
     from v1.exceptions import PostProcessError
 
-    def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
+    def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
         x = _opt.get_variables('values')
         # if _cns(_fem, _opt) < 0:
         #     raise PostProcessError
         return (x ** 2).sum()
 
-    def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
+    def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
         x = _opt.get_variables('values')
         return ((x-0.1) ** 2).sum()
 
-    def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
+    def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
         x = _opt.get_variables('values')
         return x[0]
 

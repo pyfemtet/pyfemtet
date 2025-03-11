@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from v1.problem import *
+from v1.history import *
 from v1.optimizer.optimizer import *
 
 
@@ -21,10 +22,10 @@ class OptunaAttribute:
     PYFEMTET_TRIAL_STATE_KEY = 'pyfemtet_trial_state'
 
     sub_fidelity_name: str  # key
-    fidelity: Fidelity
-    v_values: tuple  # violation
-    y_values: tuple  # internal objective
-    pf_state: tuple  # PyFemtet state
+    fidelity: Fidelity | None
+    v_values: tuple | None  # violation
+    y_values: tuple | None  # internal objective
+    pf_state: TrialState | None  # PyFemtet state
 
     def __init__(self, opt: AbstractOptimizer):
         self.sub_fidelity_name = opt.sub_fidelity_name
@@ -35,7 +36,6 @@ class OptunaAttribute:
 
     # noinspection PyPropertyDefinition
     @classmethod
-    @property
     def main_fidelity_key(cls):
         return MAIN_FIDELITY_NAME
 
@@ -45,12 +45,15 @@ class OptunaAttribute:
 
     @property
     def value(self):
-        d = {
-            'fidelity': self.fidelity,
-            self.OBJECTIVE_KEY: self.y_values,
-            self.CONSTRAINT_KEY: self.v_values,
-            self.PYFEMTET_TRIAL_STATE_KEY: self.pf_state,
-        }
+        d = {}
+        if self.fidelity:
+            d.update({'fidelity': self.fidelity})
+        if self.y_values:
+            d.update({self.OBJECTIVE_KEY: self.y_values})
+        if self.v_values:
+            d.update({self.CONSTRAINT_KEY: self.v_values})
+        if self.pf_state:
+            d.update({self.PYFEMTET_TRIAL_STATE_KEY: self.pf_state})
         return d
 
     @staticmethod

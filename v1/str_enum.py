@@ -10,6 +10,7 @@ class ReprEnum(Enum):
     """
 
 
+# noinspection PyMethodParameters,PySingleQuotedDocstring
 class StrEnum(str, ReprEnum):
     """
     Enum where members are also (and must be) strings
