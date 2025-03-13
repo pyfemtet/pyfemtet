@@ -1,4 +1,6 @@
 import os
+from time import sleep
+from contextlib import nullcontext
 from concurrent.futures import ThreadPoolExecutor
 
 import pyfemtet
@@ -9,7 +11,7 @@ from v1.monitor import *
 from v1.worker_status import *
 from v1.logger import get_module_logger
 
-logger = get_module_logger('opt.femopt', False)
+logger = get_module_logger('opt.femopt', True)
 
 
 class FEMOpt:
@@ -21,25 +23,30 @@ class FEMOpt:
 
         logger.info(f'===== pyfemtet version {pyfemtet.__version__} =====')
 
-        logger.info(f'Launching processes...')
-        _cluster = LocalCluster(
-            n_workers=n_parallel - 1 + 1,
-            threads_per_worker=1 if n_parallel > 1 else None,
-            processes=True if n_parallel > 1 else False,
-        )
+        if n_parallel == 1:
+            cluster = nullcontext()
+            client = DummyClient()
 
-        logger.info(f'Connecting cluster...')
-        _client = Client(
-            _cluster,
-        )
+        else:
+            logger.info(f'Launching processes...')
+            cluster = LocalCluster(
+                n_workers=n_parallel - 1,
+                threads_per_worker=1 if n_parallel > 1 else None,
+                processes=True if n_parallel > 1 else False,
+            )
+
+            logger.info(f'Connecting cluster...')
+            client = Client(
+                cluster,
+            )
 
         logger.info(f'Launching threads...')
         executor = ThreadPoolExecutor(
-            max_workers=1,
+            max_workers=4,
             thread_name_prefix='thread_worker'
         )
 
-        with _cluster, _client as client, self.opt.history:
+        with cluster, client, self.opt.history, executor:
 
             logger.info(f'Setting up...')
 
@@ -55,20 +62,15 @@ class FEMOpt:
             nannies: tuple[Nanny] = tuple(client.cluster.workers.values())
 
             # Assign roles
-            monitor_worker_address = nannies[0].worker_address
             opt_worker_addresses = [n.worker_address for n in nannies[1:]]
 
             # Setting up monitor
             logger.info(f'Launching Monitor...')
-            monitor_future = client.submit(
+            monitor_future = executor.submit(
                 run_monitor,
-                # Arguments of func
                 history=self.opt.history,
                 entire_status=entire_status,
                 worker_status_list=worker_status_list,
-                # Arguments of submit
-                workers=(monitor_worker_address,),
-                allow_other_workers=False,
             )
 
             logger.info(f'Setting up optimization problem...')
@@ -96,17 +98,43 @@ class FEMOpt:
                 allow_other_workers=False,
             )
 
+            # Saving history
+            def save_history():
+                while True:
+                    sleep(2)
+                    try:
+                        self.opt.history.save()
+                        logger.debug('History saved!')
+                    except PermissionError:
+                        logger.error("書き込みできません。")
+                    if entire_status.value >= WorkerStatus.finished:
+                        break
+                logger.debug('History save thread finished!')
+            future_saving = executor.submit(save_history, )
+
+            # Watching
+            def watch_worker_status():
+                while True:
+                    sleep(1)
+                    logger.debug([s.value for s in worker_status_list])
+                    if all([s.value >= WorkerStatus.finished for s in worker_status_list]):
+                        break
+                if entire_status.value < WorkerStatus.finished:
+                    entire_status.value = WorkerStatus.finished
+                logger.debug('All workers finished!')
+            future_watching = executor.submit(watch_worker_status, )
+
             # Wait to finish optimization
             client.gather(futures)
             future.result()
+            future_saving.result()
+            future_watching.result()
 
             # Send termination signal to monitor
             # and wait to finish
             # noinspection PyTypeChecker
             entire_status.value = WorkerStatus.terminated
             monitor_future.result()
-
-            self.opt.history.save()
 
         logger.info('All processes are terminated.')
 
@@ -144,7 +172,7 @@ def test():
 
     _femopt = FEMOpt()
     _femopt.opt = _opt
-    _femopt.optimize(n_parallel=1, path='femopt-restart-test.csv')
+    _femopt.optimize(n_parallel=1)
 
     print(os.path.abspath(_femopt.opt.history.path))
 

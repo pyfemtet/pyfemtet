@@ -20,7 +20,8 @@ __all__ = [
     'Lock',
     'LocalCluster',
     'Client',
-    'Nanny'
+    'Nanny',
+    'DummyClient',
 ]
 
 _lock_pool = {}
@@ -57,3 +58,24 @@ def Lock(name, client=None):
         _lock_pool.update({name: _lock})
 
     return _lock
+
+
+class DummyCluster:
+    def __init__(self):
+        self.workers = dict()
+
+
+class DummyClient:
+
+    @property
+    def cluster(self):
+        return DummyCluster()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def map(self, *args, **kwargs): ...
+    def gather(self, *args, **kwargs): ...

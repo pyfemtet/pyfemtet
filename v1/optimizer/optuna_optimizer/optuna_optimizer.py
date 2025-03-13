@@ -222,14 +222,13 @@ class OptunaOptimizer(AbstractOptimizer):
 
             study = optuna.create_study(
                 directions=['minimize'] * len(self.objectives),
-                sampler=sampler,
             )
 
             study.set_metric_names(list(self.objectives.keys()))
 
             study.optimize(
                 self._objective,
-                n_trials=100,
+                n_trials=3,
                 catch=InterruptOptimization
             )
 

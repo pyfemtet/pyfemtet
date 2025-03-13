@@ -54,12 +54,14 @@ class Monitor:
         def update_graph(_):
             print('===== update_graph =====')
 
-            client = get_client()
-            if client is None:
-                print('no client')
-                raise PreventUpdate
+            # client = get_client()
+            # if client is None:
+            #     print('no client')
+            #     raise PreventUpdate
 
             label = self.entire_status.value.str()
+
+            print(self.history.get_df())
 
             return no_update, label
 
@@ -69,10 +71,10 @@ def run_monitor(
         entire_status: WorkerStatus,
         worker_status_list: list[WorkerStatus],
 ):
-    """Dask process 上で terminate-able な Flask server を実行する関数"""
+    """terminate-able な Flask server を実行する関数"""
 
-    client = get_client()
-    assert client is not None
+    # client = get_client()
+    # assert client is not None
 
     monitor = Monitor(history, entire_status, worker_status_list)
     t = Thread(
