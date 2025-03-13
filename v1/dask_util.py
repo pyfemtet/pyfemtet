@@ -48,7 +48,12 @@ def Lock(name, client=None):
         client = get_client()
 
     if name in _lock_pool:
-        return _lock_pool[name]
+        _lock = _lock_pool[name]
+
+        if isinstance(_lock, _DaskLock):
+            if _lock.client.scheduler is None:
+                _lock = _DaskLock(name, client)
+                _lock_pool.update({name: _lock})
 
     else:
         if client:
