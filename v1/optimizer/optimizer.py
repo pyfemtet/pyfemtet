@@ -412,6 +412,16 @@ class AbstractOptimizer:
             def __exit__(self_, exc_type, exc_val, exc_tb):
                 if exc_type is not None:
                     self.worker_status.value = WorkerStatus.crashed
+                    # FIXME:
+                    #   worker がエラーで終了した場合、
+                    #   Exception を送出して落ちることを期待しているが
+                    #   実際にはここを通りつつ黙ってハングしてしまう
+                    #   暫定的に print だけ行っているが、
+                    #   対処法を考えること。
+                    import sys
+                    from traceback import print_tb
+                    print_tb(exc_tb)
+                    print(exc_type.__name__, exc_val, file=sys.stderr)
                 else:
                     self.worker_status.value = WorkerStatus.finished
 
