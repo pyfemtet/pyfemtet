@@ -128,13 +128,23 @@ class DataFrameWrapper:
         client = get_client()
         if client:
 
-            # datasets 内に存在する場合
-            if self._dataset_name in client.list_datasets():
-                df = client.get_dataset(self._dataset_name)
+            with Lock('access_dataset_df'):
 
-            # set の前に get されることはあってはならない
-            else:
-                raise RuntimeError
+                # mypy によるとこのスコープで
+                # 定義しないと定義漏れになる可能性がある
+                # そんなことないと思うけど将来の変更時に
+                # 警告を見落とさないようにするためここで定義
+                df = None
+
+                # datasets 内に存在する場合
+                if self._dataset_name in client.list_datasets():
+                    df = client.get_dataset(self._dataset_name)
+
+                # set の前に get されることはあってはならない
+                else:
+                    raise RuntimeError
+
+                assert df is not None
 
         # dask クラスターがない場合
         else:
@@ -169,19 +179,20 @@ class DataFrameWrapper:
             df = self.get_df()
             apply_partial_df(df, partial_df, equality_filters)
 
-
         # dask クラスター上のデータを更新
         client = get_client()
         if client:
 
-            # datasets 上に存在する場合は削除（上書きができない）
-            if self._dataset_name in client.list_datasets():
+            with Lock('access_dataset_df'):
 
-                # remove
-                client.unpublish_dataset(self._dataset_name)
+                # datasets 上に存在する場合は削除（上書きができない）
+                if self._dataset_name in client.list_datasets():
 
-            # update
-            client.publish_dataset(**{self._dataset_name: df})
+                    # remove
+                    client.unpublish_dataset(self._dataset_name)
+
+                # update
+                client.publish_dataset(**{self._dataset_name: df})
 
         # local のデータを更新
         self.__df = df
@@ -263,7 +274,20 @@ class Record:
         y: TrialOutput = d.pop('y')
         c: TrialConstraintOutput = d.pop('c')
 
-        d.update(**{k: v.value for k, v in x.items()})
+        # prm
+        for prm_name, param in x.items():
+            d.update({prm_name: param.value})
+            if isinstance(param, NumericParameter):
+                f = CorrespondingColumnNameRuler.prm_lower_bound_name
+                d.update({f(prm_name): param.lower_bound})
+                f = CorrespondingColumnNameRuler.prm_upper_bound_name
+                d.update({f(prm_name): param.upper_bound})
+            elif isinstance(param, CategoricalParameter):
+                f = CorrespondingColumnNameRuler.prm_choices_name
+                d.update({f(prm_name): param.choices})
+            else:
+                raise NotImplementedError
+
         d.update(**{k: v.value for k, v in y.items()})
         d.update(**{f'{k}_direction': v.direction for k, v in y.items()})
         d.update(**{k: v.value for k, v in c.items()})
@@ -273,14 +297,30 @@ class Record:
             columns=tuple(self.dtypes.keys())
         ).astype(self.dtypes)
 
+    @staticmethod
+    def columns_to_keep_even_if_nan():
+        return [
+            'message',
+        ]
+
     @classmethod
     def initialize(cls, parameters: dict[str, Parameter], y_names, c_names):
-        cls._set_full_sorted_column_information(parameters, y_names, c_names)
+        cls.parameters = parameters
+        cls.y_names = y_names
+        cls.c_names = c_names
+        cls._set_full_sorted_column_information()
 
     @classmethod
-    def _set_full_sorted_column_information(cls, parameters: dict[str, Parameter], y_names, c_names):
+    def _set_full_sorted_column_information(
+            cls,
+            extra_parameters: dict[str, Parameter] = None,
+            extra_y_names: list[str] = None,
+            extra_c_names: list[str] = None,
+    ):
 
-        prm_names = list(parameters.keys())
+        extra_parameters = extra_parameters or {}
+        extra_y_names = extra_y_names or []
+        extra_c_names = extra_c_names or []
 
         dtypes = {}
         meta_columns = []
@@ -298,9 +338,9 @@ class Record:
             #   (object にキャストされる模様)
 
             if key == 'x':
-                for prm_name in prm_names:
+                for prm_name in cls.parameters.keys():
 
-                    param = parameters[prm_name]
+                    param = cls.parameters[prm_name]
 
                     if isinstance(param, NumericParameter):
                         dtypes.update({prm_name: float})
@@ -315,7 +355,7 @@ class Record:
                         meta_columns.append('prm_upper_bound')
 
                     elif isinstance(param, CategoricalParameter):
-                        dtypes.update({prm_name: float})
+                        dtypes.update({prm_name: object})
                         meta_columns.append('prm')
 
                         f = CorrespondingColumnNameRuler.prm_choices_name
@@ -325,16 +365,49 @@ class Record:
                     else:
                         raise NotImplementedError
 
+                for extra_prm_name, extra_param in extra_parameters.items():
+
+                    if isinstance(extra_param, NumericParameter):
+                        dtypes.update({extra_prm_name: float})
+                        meta_columns.append('')
+
+                        f = CorrespondingColumnNameRuler.prm_lower_bound_name
+                        dtypes.update({f(extra_prm_name): object})
+                        meta_columns.append('')
+
+                        f = CorrespondingColumnNameRuler.prm_upper_bound_name
+                        dtypes.update({f(extra_prm_name): object})
+                        meta_columns.append('')
+
+                    elif isinstance(extra_param, CategoricalParameter):
+                        dtypes.update({extra_prm_name: object})
+                        meta_columns.append('')
+
+                        f = CorrespondingColumnNameRuler.prm_choices_name
+                        dtypes.update({f(extra_prm_name): object})
+                        meta_columns.append('')
+
+                    else:
+                        raise NotImplementedError
+
             elif key == 'y':
                 f = CorrespondingColumnNameRuler.direction_name
-                for name in y_names:
+                for name in cls.y_names:
                     dtypes.update({name: float})
                     dtypes.update({f(name): object})  # str | float
-                meta_columns.extend(['obj', f('obj')] * len(y_names))
+                meta_columns.extend(['obj', f('obj')] * len(cls.y_names))
+
+                for name in extra_y_names:
+                    dtypes.update({name: float})
+                    dtypes.update({f(name): object})  # str | float
+                meta_columns.extend(['', ''] * len(extra_y_names))
 
             elif key == 'c':
-                dtypes.update({name: float for name in c_names})
-                meta_columns.extend(['cns'] * len(c_names))
+                dtypes.update({name: float for name in cls.c_names})
+                meta_columns.extend(['cns'] * len(cls.c_names))
+
+                dtypes.update({name: float for name in extra_c_names})
+                meta_columns.extend([''] * len(extra_c_names))
 
             else:
                 dtypes.update({key: object})
@@ -346,9 +419,11 @@ class Record:
     @staticmethod
     def filter_columns(meta_column, columns, meta_columns) -> list[str]:
         out = []
-        for i, column in enumerate(columns):
-            if meta_columns[i] == meta_column:
-                out.append(column)
+        assert len(columns) == len(meta_columns), f'{len(columns)=} and {len(meta_columns)=}'
+
+        for i, (column_, meta_column_) in enumerate(zip(columns, meta_columns)):
+            if meta_column_ == meta_column:
+                out.append(column_)
         return out
 
     @classmethod
@@ -378,19 +453,6 @@ class Record:
     def is_categorical_parameter(cls, prm_name) -> bool:
         prm_choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
         return prm_choices_name in tuple(cls.dtypes.keys())
-
-    # @classmethod
-    # def get_prm_names_and_corresponding_names(cls) -> dict[str, dict[str, float | tuple]]:
-    #     out = dict()
-    #     for prm_name in cls.prm_names():
-    #         if cls.is_numerical_parameter(prm_name):
-    #             prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
-    #             prm_ub_name = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
-    #             out.update({prm_name: {'lb': prm_lb_name, 'ub': prm_ub_name}})
-    #         elif cls.is_categorical_parameter(prm_name):
-    #             prm_choices = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
-    #             out.update({prm_name: {'choices': prm_choices}})
-    #     return out
 
 
 class EntireDependentValuesCalculator:
@@ -533,14 +595,6 @@ class Records:
         self.loaded_meta_columns = loaded_meta_columns
         self.loaded_df = loaded_df
 
-        # 文字列として扱いたいカラムに含まれる Nan を '' にする
-        # 型は object にする（pandas は str 型を扱えない？）
-        # 例:
-        #   pd.DataFrame(dict(a=["123"])).astype(dict(a=str)).dtypes
-        #   # dtype: object
-        self.loaded_df['sub_fidelity_name'] = \
-            self.loaded_df['sub_fidelity_name'].fillna('')
-
     def check_problem_compatibility(self):
 
         # 読み込んだデータがないのであれば何もしない
@@ -571,26 +625,127 @@ class Records:
         if not (len(loaded_cns_names - cns_names) == len(cns_names - loaded_cns_names) == 0):
             raise RuntimeError('Incompatible constraint setting.')
 
+    def reinitialize_record_with_loaded_data(self):
+
+        # 読み込んだデータがないのであれば何もしない
+        if self.loaded_df is None:
+            return
+
+        loaded_columns, loaded_meta_columns = self.loaded_df.columns, self.loaded_meta_columns
+        loaded_prm_names = set(Record.filter_columns('prm', loaded_columns, loaded_meta_columns))
+        loaded_obj_names = set(Record.filter_columns('obj', loaded_columns, loaded_meta_columns))
+        loaded_cns_names = set(Record.filter_columns('cns', loaded_columns, loaded_meta_columns))
+
+        # loaded df に存在するが Record に存在しないカラムを Record に追加
+        extra_parameters = {}
+        extra_y_names = []
+        extra_c_names = []
+        for l_col, l_meta in zip(loaded_columns, loaded_meta_columns):
+
+            # 現在の Record に含まれないならば
+            if l_col not in Record.dtypes.keys():
+
+                # それが prm_name ならば
+                if l_col in loaded_prm_names:
+
+                    # それが Categorical ならば
+                    if CorrespondingColumnNameRuler.prm_choices_name(l_col) in loaded_columns:
+                        param = CategoricalParameter()
+                        param.name = l_col
+                        param.value = np.nan
+                        param.choices = []
+
+                    # それが Numeric ならば
+                    elif CorrespondingColumnNameRuler.prm_lower_bound_name(l_col) in loaded_columns:
+                        param = NumericParameter()
+                        param.name = l_col
+                        param.value = np.nan
+                        param.lower_bound = np.nan
+                        param.upper_bound = np.nan
+
+                    else:
+                        raise NotImplementedError
+
+                    extra_parameters.update({l_col: param})
+
+                # obj_name ならば
+                elif l_col in loaded_obj_names:
+                    extra_y_names.append(l_col)
+
+                # cns_name ならば
+                elif l_col in loaded_cns_names:
+                    extra_c_names.append(l_col)
+
+        Record._set_full_sorted_column_information(
+            extra_parameters=extra_parameters,
+            extra_y_names=extra_y_names,
+            extra_c_names=extra_c_names,
+        )
+
+        # worker に影響しないように loaded_df のコピーを作成
+        df = self.loaded_df.copy()
+
+        # loaded df に存在しないが Record に存在するカラムを追加
+        for col in Record.dtypes.keys():
+            if col not in df.columns:
+                # column ごとの default 値を追加
+                if col == 'sub_fidelity_name':
+                    df[col] = MAIN_FIDELITY_NAME
+                else:
+                    df[col] = np.nan
+
         # dtypes を設定
         # 与える dtypes のほうが多い場合
         # エラーになるので余分なものを削除
         # 与える dtypes が少ない分には
         # (pandas としては) 問題ない
         dtypes = {k: v for k, v in Record.dtypes.items() if k in self.loaded_df.columns}
-        self.loaded_df = self.loaded_df.astype(dtypes)
+        df = df.astype(dtypes)
+
+        # 並べ替え
+        df = df[list(Record.dtypes.keys())].astype(Record.dtypes)
 
         # OK なので読み込んだデータを set_df する
-        self.df_wrapper.set_df(self.loaded_df)
+        self.df_wrapper.set_df(df)
+
+    @staticmethod
+    def remove_nan_columns(df, meta_columns, columns_to_keep: str | list[str] = None) -> tuple[pd.DataFrame, tuple[str]]:
+        """
+
+        Args:
+            df:
+            meta_columns:
+            columns_to_keep: Allowing these columns to all NaN values.
+
+        Returns:
+            Removed DataFrame and corresponding meta_columns.
+
+        """
+
+        df = df.replace('', None)
+
+        nan_columns = df.isna().all(axis=0)
+        if columns_to_keep is None:
+            columns_to_keep = Record.columns_to_keep_even_if_nan()
+        nan_columns[columns_to_keep] = False
+
+        fdf = df.loc[:, ~nan_columns]
+        f_meta_columns = (np.array(meta_columns)[~nan_columns]).tolist()
+
+        return fdf, f_meta_columns
 
     def save(self, path: str):
 
-        df = self.df_wrapper.get_df()
+        # filter NaN columns
+        df, meta_columns = self.remove_nan_columns(
+            self.df_wrapper.get_df(), Record.meta_columns,
+        )
 
         with open(path, 'w', encoding=ENCODING) as f:
             writer = csv.writer(f, delimiter=',', lineterminator="\n")
             # write meta_columns
-            writer.writerow(Record.meta_columns)
-            writer.writerow([''] * len(Record.meta_columns))  # empty line
+            writer.writerow(meta_columns)
+            writer.writerow([''] * len(meta_columns))  # empty line
             # write df from line 3
             df.to_csv(f, index=False, encoding=ENCODING, lineterminator='\n')
 
@@ -716,7 +871,11 @@ class History:
             # check
             self._records.check_problem_compatibility()
 
-            self._finalized = True
+        # load 後だが worker ごとに実行が必要
+        # Record のクラス変数 dtypes と meta_columns を再初期化するため
+        self._records.reinitialize_record_with_loaded_data()
+
+        self._finalized = True
 
     def get_df(self, equality_filters: dict = None):
         return self._records.df_wrapper.get_df(equality_filters)
