@@ -62,11 +62,15 @@ class WorkerStatus:
     def value(self) -> _WorkerStatus:
         client = get_client()
         if client is not None:
-            key = self._dataset_name
-            if key in client.list_datasets():
-                return client.get_dataset(key)
+            if client.scheduler is not None:
+                key = self._dataset_name
+                with Lock(f'access_dataset_{key}'):
+                    if key in client.list_datasets():
+                        return client.get_dataset(key)
+                    else:
+                        raise RuntimeError
             else:
-                raise RuntimeError
+                return self.__value
         else:
             return self.__value
 
@@ -75,7 +79,8 @@ class WorkerStatus:
         client = get_client()
         if client is not None:
             key = self._dataset_name
-            if key in client.list_datasets():
-                client.unpublish_dataset(key)
-            client.publish_dataset(**{key: value})
+            with Lock(f'access_dataset_{key}'):
+                if key in client.list_datasets():
+                    client.unpublish_dataset(key)
+                client.publish_dataset(**{key: value})
         self.__value = value

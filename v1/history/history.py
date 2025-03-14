@@ -531,6 +531,12 @@ class EntireDependentValuesCalculator:
         )
 
         # update
+        if len(df) != len(optimality):
+            import sys
+            print(f'{df=}', file=sys.stderr)
+            print(f'{df.loc[:, "optimality"]=}', file=sys.stderr)
+            print(optimality, file=sys.stderr)
+            assert False
         df.loc[:, 'optimality'] = optimality
         self.set_df(df)
 
@@ -539,7 +545,7 @@ class EntireDependentValuesCalculator:
         assert self.records.df_wrapper.lock.locked()
 
         # get df
-        df = self.get_df()
+        partial_df = self.get_df()
 
         # calc hypervolume
         hv_values = calc_hypervolume(
@@ -549,8 +555,14 @@ class EntireDependentValuesCalculator:
         )
 
         # update
-        df.loc[:, 'hypervolume'] = hv_values
-        self.set_df(df)
+        if len(partial_df) != len(hv_values):
+            import sys
+            print(f'{partial_df=}', file=sys.stderr)
+            print(f'{partial_df.loc[:, "hypervolume"]=}', file=sys.stderr)
+            print(hv_values, file=sys.stderr)
+            assert False
+        partial_df.loc[:, 'hypervolume'] = hv_values
+        self.set_df(partial_df)
 
     def update_trial_number(self):
 
@@ -662,7 +674,7 @@ class Records:
                     if CorrespondingColumnNameRuler.prm_choices_name(l_col) in loaded_columns:
                         param = CategoricalParameter()
                         param.name = l_col
-                        param.value = np.nan
+                        param.value = ''
                         param.choices = []
 
                     # それが Numeric ならば

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from v1.history.history import *
+from v1.history import *
 from v1.problem import *
 from v1.interface import *
 from v1.exceptions import *

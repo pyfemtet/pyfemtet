@@ -2,12 +2,17 @@ from time import sleep
 from threading import Thread
 
 from flask import Flask
-from dash import Dash, Output, Input, no_update
+from dash import Dash, Output, Input, State, no_update
+from dash.exceptions import PreventUpdate
 from dash import html, dcc
 
-from v1.history.history import *
+from v1.utils.dask_util import *
+from v1.history import *
 from v1.worker_status import *
+from v1.problem import *
 from v1.logger import get_module_logger, get_dash_logger, remove_all_output
+
+from v1.prediction.model import *
 
 logger = get_module_logger('opt.femopt')
 remove_all_output(get_dash_logger())
@@ -30,8 +35,12 @@ class Monitor:
         self.entire_status = entire_status
         self.worker_status_list = worker_status_list
 
+        self.pyfemtet_model: PyFemtetModel = PyFemtetModel()
+
         self.setup_layout()
         self.setup_callback()
+
+
 
     def setup_layout(self):
         self.app.layout = html.Div(
@@ -46,22 +55,51 @@ class Monitor:
     def setup_callback(self):
         @self.app.callback(
             Output('graph', 'figure'),
-            Output('label', 'children'),
             Input('interval', 'n_intervals'),
         )
         def update_graph(_):
             print('===== update_graph =====')
 
-            # client = get_client()
-            # if client is None:
-            #     print('no client')
-            #     raise PreventUpdate
+            client = get_client()
+            if client is None:
+                print('no client')
+                raise PreventUpdate
 
-            label = self.entire_status.value.str()
+            # label = self.entire_status.value.str()
 
-            print(self.history.get_df())
+            # set default value
+            equality_filters = None
+            equality_filters = equality_filters or {'sub_fidelity_name': MAIN_FIDELITY_NAME}
 
-            return no_update, label
+            # get df to create figure
+            df = self.history.get_df(
+                equality_filters=equality_filters
+            )
+
+            model = SingleTaskGPModel()
+            self.pyfemtet_model.update_model(model)
+            self.pyfemtet_model.fit(
+                self.history,
+                df,
+                **{}
+            )
+
+            fig = plot3d(
+                self.history,
+                'x1',
+                'x2',
+                {},
+                'obj1',
+                df,
+                self.pyfemtet_model,
+                20,
+            )
+
+            if fig is None:
+                logger.warning('まだグラフが描けるほど結果がありません。')
+                return no_update
+
+            return fig
 
 
 def run_monitor(
@@ -69,10 +107,7 @@ def run_monitor(
         entire_status: WorkerStatus,
         worker_status_list: list[WorkerStatus],
 ):
-    """terminate-able な Flask server を実行する関数"""
-
-    # client = get_client()
-    # assert client is not None
+    """Dask process 上で terminate-able な Flask server を実行する関数"""
 
     monitor = Monitor(history, entire_status, worker_status_list)
     t = Thread(
