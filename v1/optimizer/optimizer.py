@@ -437,13 +437,14 @@ class AbstractOptimizer:
 
     def _logging(self):
 
+        # noinspection PyMethodParameters
         class LoggingOutput:
+            def __enter__(self_):
+                self_.count = len(self.history.get_df()) + 1
+                logger.info(f'===== solve {self_.count} start =====')
 
-            def __enter__(self):
-                logger.info('===== trial start =====')
-
-            def __exit__(self, exc_type, exc_val, exc_tb):
-                logger.info('===== trial end =====\n')
+            def __exit__(self_, exc_type, exc_val, exc_tb):
+                logger.info(f'===== solve {self_.count} end =====\n')
 
         return LoggingOutput()
 
