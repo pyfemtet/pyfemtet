@@ -14,7 +14,7 @@ except ModuleNotFoundError:
     constants = Constants()
 
 from v1.variable_manager import *
-from v1.helper import *
+from v1.utils.helper import *
 if TYPE_CHECKING:
     from v1.optimizer import AbstractOptimizer
 

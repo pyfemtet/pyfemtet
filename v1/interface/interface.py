@@ -15,7 +15,7 @@ except ModuleNotFoundError:
     constants = Constants()
 
 from v1.problem import *
-from v1.dask_util import *
+from v1.utils.dask_util import *
 from v1.logger import get_module_logger
 
 logger = get_module_logger('opt.interface', False)

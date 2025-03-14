@@ -12,7 +12,7 @@ from optuna._transform import _SearchSpaceTransform
 import torch
 
 from v1.problem import *
-from v1.history import *
+from v1.history.history import *
 from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import setup_gp, SingleTaskGP
 
 

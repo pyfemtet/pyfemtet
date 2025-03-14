@@ -36,7 +36,7 @@ emulation. Pacific Journal of Optimization, 2011, 7.3: 467-478
 from __future__ import annotations
 
 import dataclasses
-from typing import Callable, Sequence, Any, TypeAlias
+from typing import Callable, Sequence, Any
 from packaging import version
 
 from optuna._imports import try_import
@@ -119,7 +119,7 @@ with try_import() as _imports_logei:
 
 # from v1.problem import *
 
-from v1.history import TrialState as PFTrialState
+from v1.history.history import TrialState as PFTrialState
 from v1.exceptions import *
 from v1.optimizer.optuna_optimizer.optuna_optimizer import OptunaAttribute
 from v1.optimizer.optuna_optimizer.pof_botorch.enable_nonlinear_constraint import NonlinearInequalityConstraints

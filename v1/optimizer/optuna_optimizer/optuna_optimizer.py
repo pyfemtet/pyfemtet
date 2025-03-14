@@ -8,7 +8,7 @@ import numpy as np
 
 import optuna
 
-from v1.history import *
+from v1.history.history import *
 from v1.problem import *
 from v1.interface import *
 from v1.exceptions import *

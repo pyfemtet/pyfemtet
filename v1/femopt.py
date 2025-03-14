@@ -5,10 +5,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pyfemtet
 
-from v1.dask_util import *
+from v1.utils.dask_util import *
 from v1.optimizer import *
-from v1.monitor import *
 from v1.worker_status import *
+from v1.monitor.monitor import run_monitor
 from v1.logger import get_module_logger
 
 logger = get_module_logger('opt.femopt', True)

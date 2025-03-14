@@ -12,7 +12,7 @@ else:
     from optuna._hypervolume import wfg
     compute_hypervolume = wfg.compute_hypervolume
 
-from v1.optimality import *
+from v1.history.optimality import *
 
 
 __all__ = [

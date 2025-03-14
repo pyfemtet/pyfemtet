@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from v1.dask_util import *
+from v1.utils.dask_util import *
 from v1.logger import get_module_logger
 
 __all__ = [

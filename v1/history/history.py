@@ -10,13 +10,13 @@ import numpy as np
 import pandas as pd
 
 from v1.i18n import *
-from v1.helper import *
+from v1.utils.helper import *
 from v1.problem import *
-from v1.dask_util import *
+from v1.utils.dask_util import *
 from v1.exceptions import *
-from v1.optimality import *
-from v1.hypervolume import *
-from v1.str_enum import StrEnum
+from v1.history.optimality import *
+from v1.history.hypervolume import *
+from v1.utils.str_enum import StrEnum
 from v1.variable_manager import *
 
 
