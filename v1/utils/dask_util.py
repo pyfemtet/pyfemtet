@@ -1,17 +1,28 @@
 import warnings
+from packaging.version import Version
 from threading import Lock as _ThreadingLock
 
+import dask
 from dask.distributed import LocalCluster, Client, Lock as _DaskLock, Nanny
 from dask.distributed import get_client as _get_client, get_worker as _get_worker
 from dask import config as cfg
 
-from v1.logger import get_dask_logger, remove_all_output
+from v1.logger import get_dask_logger, remove_all_output, get_module_logger
+
+if Version(dask.__version__) < Version('2024.12.1'):
+    import pyfemtet
+    raise RuntimeError(f'pyfemtet {pyfemtet.__version__} では dask 2024.12.1 以降が'
+                       f'必要です。お使いの環境の dask は {dask.__version__} です。'
+                       f'以下のコマンドで dask のバージョンアップをお願いします。\n'
+                       f'`py -m pip install dask distributed`')
 
 remove_all_output(get_dask_logger())
 
 warnings.filterwarnings('ignore', category=RuntimeWarning, message="Couldn't detect a suitable IP address")
 
 cfg.set({'distributed.scheduler.worker-ttl': None})
+
+logger = get_module_logger('opt.dask', True)
 
 
 __all__ = [
@@ -47,20 +58,18 @@ def Lock(name, client=None):
     if client is None:
         client = get_client()
 
-    if name in _lock_pool:
-        _lock = _lock_pool[name]
-
-        if isinstance(_lock, _DaskLock):
-            if _lock.client.scheduler is None:
-                _lock = _DaskLock(name, client)
-                _lock_pool.update({name: _lock})
+    if client is not None:
+        # import inspect
+        # logger.debug(f'{name}, {[stack.function for stack in inspect.stack()[1:]]}')
+        with cfg.set({"distributed.scheduler.locks.lease-timeout": "inf"}):
+            _lock = _DaskLock(name)
 
     else:
-        if client:
-            _lock = _DaskLock(name, client)
+        if name in _lock_pool:
+            _lock = _lock_pool[name]
         else:
             _lock = _ThreadingLock()
-        _lock_pool.update({name: _lock})
+            _lock_pool.update({name: _lock})
 
     return _lock
 
