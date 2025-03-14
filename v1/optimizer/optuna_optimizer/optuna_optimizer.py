@@ -27,6 +27,74 @@ class OptunaOptimizer(AbstractOptimizer):
 
     current_trial: optuna.trial.Trial | None
 
+    def solve(
+            self,
+            x: TrialInput,
+            x_pass_to_fem_: dict[str, Variable],
+            opt_: AbstractOptimizer = None,
+    ) -> tuple[float] | None:
+
+        opt_ = opt_ or self
+        vm = self.variable_manager
+
+        # check interruption
+        self._check_and_raise_interruption()
+
+        # declare output
+        y_internal_: tuple[float] | None = None
+
+        # prepare attribute
+        optuna_attr = OptunaAttribute(opt_)
+
+        # if opt_ is not self, update variable manager
+        opt_.variable_manager = vm
+
+        # start solve
+        datetime_start = datetime.datetime.now()
+        try:
+            _, dict_or_None_y_internal, c, record = opt_.f(
+                x, x_pass_to_fem_, self.history, datetime_start
+            )
+
+            # convert dict or None to tuple or None
+            y_internal_ = dict_or_None_y_internal if dict_or_None_y_internal is None \
+                else tuple(dict_or_None_y_internal.values())
+
+        # if (hidden) constraint violation, set trial attribute
+        except (HardConstraintViolation, HiddenConstraintViolation) as e:
+            optuna_attr.pf_state = TrialState.get_corresponding_state_from_exception(e)
+            optuna_attr.v_values = self._create_infeasible_constraints(opt_)
+
+        # if skipped
+        except SkipSolve:
+            optuna_attr.pf_state = TrialState.skipped
+
+        # if succeeded
+        else:
+
+            # convert constraint to **sorted** violation
+            assert len(c) == len(opt_.constraints)
+            v = {}
+            for cns_name, cns in opt_.constraints.items():
+                # This is {lower or upper: violation_value} dict
+                violation: dict[str, float] = c[cns_name].calc_violation()
+                for l_or_u, violation_value in violation.items():
+                    key_ = cns_name + '_' + l_or_u
+                    v.update({key_: violation_value})
+
+            # register results
+            optuna_attr.v_values = tuple(v.values())
+            optuna_attr.y_values = y_internal_
+            optuna_attr.pf_state = record.state
+
+        # update trial attribute
+        self.current_trial.set_user_attr(optuna_attr.key, optuna_attr.value)
+
+        # check interruption
+        self._check_and_raise_interruption()
+
+        return y_internal_
+
     def _create_infeasible_constraints(self, opt_: AbstractOptimizer = None) -> tuple:
         opt_ = opt_ if opt_ is not None else self
         count = 0
@@ -85,73 +153,12 @@ class OptunaOptimizer(AbstractOptimizer):
             x = vm.get_variables(filter='parameter')
             x_pass_to_fem: TrialInput = vm.get_variables(filter='pass_to_fem')
 
-
-            def solve(
-                    opt_: AbstractOptimizer = self
-            ) -> tuple[float] | None:
-
-                # check interruption
-                self._check_and_raise_interruption()
-
-                # declare output
-                y_internal_: tuple[float] | None = None
-
-                # prepare attribute
-                optuna_attr = OptunaAttribute(opt_)
-
-                # if opt_ is not self, update variable manager
-                opt_.variable_manager = vm
-
-                # start solve
-                datetime_start = datetime.datetime.now()
-                try:
-                    _, dict_or_None_y_internal, c, record = opt_.f(x, x_pass_to_fem, self.history, datetime_start)
-
-                    # convert dict or None to tuple or None
-                    y_internal_ = dict_or_None_y_internal if dict_or_None_y_internal is None else tuple(dict_or_None_y_internal.values())
-
-                # if (hidden) constraint violation, set trial attribute
-                except (HardConstraintViolation, HiddenConstraintViolation) as e:
-                    optuna_attr.pf_state = TrialState.get_corresponding_state_from_exception(e)
-                    optuna_attr.v_values = self._create_infeasible_constraints(opt_)
-
-                # if skipped
-                except SkipSolve:
-                    optuna_attr.pf_state = TrialState.skipped
-
-                # if succeeded
-                else:
-
-                    # convert constraint to **sorted** violation
-                    assert len(c) == len(opt_.constraints)
-                    v = {}
-                    for cns_name, cns in opt_.constraints.items():
-                        # This is {lower or upper: violation_value} dict
-                        violation: dict[str, float] = c[cns_name].calc_violation()
-                        for l_or_u, violation_value in violation.items():
-                            key_ = cns_name + '_' + l_or_u
-                            v.update({key_: violation_value})
-
-                    # register results
-                    optuna_attr.v_values = tuple(v.values())
-                    optuna_attr.y_values = y_internal_
-                    optuna_attr.pf_state = record.state
-
-                # update trial attribute
-                trial.set_user_attr(optuna_attr.key, optuna_attr.value)
-
-                # check interruption
-                self._check_and_raise_interruption()
-
-                return y_internal_
-
-
             # process main fidelity model
-            y_internal: tuple[float] | None = solve()
+            y_internal: tuple[float] | None = self.solve(x, x_pass_to_fem)
 
             # process sub_fidelity_models
             for sub_fidelity_name, sub_opt in self.sub_fidelity_models.items():
-                solve(sub_opt)
+                self.solve(x, x_pass_to_fem, sub_opt)
 
             # check interruption
             self._check_and_raise_interruption()
@@ -228,7 +235,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
             study.optimize(
                 self._objective,
-                n_trials=3,
+                n_trials=10,
                 catch=InterruptOptimization
             )
 

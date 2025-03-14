@@ -17,16 +17,14 @@ logger = get_module_logger('opt.femopt', True)
 class FEMOpt:
     opt: AbstractOptimizer
 
-    def optimize(self, n_parallel, path=None) -> None:
-
-        self.opt.history.path = path
+    def optimize(self, n_parallel) -> None:
 
         logger.info(f'===== pyfemtet version {pyfemtet.__version__} =====')
-
+        client: Client
         if n_parallel == 1:
             cluster = nullcontext()
+            # noinspection PyTypeChecker
             client = DummyClient()
-
         else:
             logger.info(f'Launching processes...')
             cluster = LocalCluster(
@@ -124,17 +122,25 @@ class FEMOpt:
                 logger.debug('All workers finished!')
             future_watching = executor.submit(watch_worker_status, )
 
-            # Wait to finish optimization
-            client.gather(futures)
-            future.result()
-            future_saving.result()
-            future_watching.result()
+            # Terminating monitor even if exception is raised
+            class TerminatingMonitor:
 
-            # Send termination signal to monitor
-            # and wait to finish
-            # noinspection PyTypeChecker
-            entire_status.value = WorkerStatus.terminated
-            monitor_future.result()
+                def __enter__(self):
+                    pass
+
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    # Send termination signal to monitor
+                    # and wait to finish
+                    # noinspection PyTypeChecker
+                    entire_status.value = WorkerStatus.terminated
+                    monitor_future.result()
+
+            with TerminatingMonitor():
+                # Wait to finish optimization
+                client.gather(futures)
+                future.result()
+                future_saving.result()
+                future_watching.result()
 
         logger.info('All processes are terminated.')
 
@@ -147,7 +153,7 @@ def test():
     def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
         x = _opt.get_variables('values')
         # sleep(1)
-        print(os.getpid())
+        # print(os.getpid())
         # raise RuntimeError
         # raise Interrupt
         return (x ** 2).sum()
@@ -172,10 +178,12 @@ def test():
 
     _femopt = FEMOpt()
     _femopt.opt = _opt
-    _femopt.optimize(n_parallel=1)
+    _femopt.opt.history.path = 'v1test/femopt-restart-test.csv'
+    _femopt.optimize(n_parallel=2)
 
     print(os.path.abspath(_femopt.opt.history.path))
 
 
 if __name__ == '__main__':
-    test()
+    for i in range(1):
+        test()

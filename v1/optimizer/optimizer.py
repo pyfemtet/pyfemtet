@@ -14,18 +14,10 @@ __all__ = [
     'AbstractOptimizer',
     'SubFidelityModel',
     'SubFidelityModels',
-    'HardConstraintViolation',
-    'InterruptOptimization',
-    'SkipSolve',
 ]
 
 
 logger = get_module_logger('opt.optimizer')
-
-
-class HardConstraintViolation(Exception): ...
-class InterruptOptimization(Exception): ...
-class SkipSolve(Exception): ...
 
 
 def _log_hidden_constraint(e: Exception):
@@ -283,7 +275,10 @@ class AbstractOptimizer:
                 raise SkipSolve
 
             # start solve
-            logger.info(f'===== Run {self.sub_fidelity_name} =====')
+            if self.sub_fidelity_models == '':
+                logger.info(f'===== Run =====')
+            else:
+                logger.info(f'===== Run {self.sub_fidelity_name} =====')
             logger.info('入力:')
             logger.info(parameters)
 
@@ -402,42 +397,43 @@ class AbstractOptimizer:
         self.entire_status = entire_status
         self.worker_status = worker_status
 
-        class SetStatus:
+        class SettingStatusFinished:
 
             # noinspection PyMethodParameters
             def __enter__(self_):
-                self.worker_status.value = WorkerStatus.running
+                pass
 
             # noinspection PyMethodParameters
             def __exit__(self_, exc_type, exc_val, exc_tb):
                 if exc_type is not None:
                     self.worker_status.value = WorkerStatus.crashed
-                    # FIXME:
-                    #   worker がエラーで終了した場合、
-                    #   Exception を送出して落ちることを期待しているが
-                    #   実際にはここを通りつつ黙ってハングしてしまう
-                    #   暫定的に print だけ行っているが、
-                    #   対処法を考えること。
+
                     import sys
                     from traceback import print_tb
+                    print(f'===== Exception raised in worker {worker_idx} =====', file=sys.stderr)
                     print_tb(exc_tb)
-                    print(exc_type.__name__, exc_val, file=sys.stderr)
+                    print(f'{exc_type.__name__}: {exc_val}', file=sys.stderr)
+
                 else:
                     self.worker_status.value = WorkerStatus.finished
 
-        logger.info(f'worker {worker_idx}')
+        logger.info(f'worker {worker_idx} started')
 
-        self.worker_status.value = WorkerStatus.initializing
+        with SettingStatusFinished():
 
-        self.worker_status.value = WorkerStatus.launching_fem
-        self.fem._setup_after_parallel()
+            self.worker_status.value = WorkerStatus.initializing
 
-        self.worker_status.value = WorkerStatus.waiting
+            self.worker_status.value = WorkerStatus.launching_fem
+            self.fem._setup_after_parallel()
 
-        with SetStatus():
+            self.worker_status.value = WorkerStatus.waiting
+            pass
+
+            self.worker_status.value = WorkerStatus.running
+
             self.run()
 
-        logger.info(f'worker {worker_idx} complete!')
+        logger.info(f'worker {worker_idx} successfully finished!')
 
     def _logging(self):
 

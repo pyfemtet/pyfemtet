@@ -124,27 +124,34 @@ class DataFrameWrapper:
 
         """
 
-        # dask クラスターがある場合
         client = get_client()
-        if client:
 
-            with Lock('access_dataset_df'):
+        # dask クラスターがある場合
+        if client is not None:
 
-                # mypy によるとこのスコープで
-                # 定義しないと定義漏れになる可能性がある
-                # そんなことないと思うけど将来の変更時に
-                # 警告を見落とさないようにするためここで定義
-                df = None
+            # あるけど with を抜けている場合
+            if client.scheduler is None:
+                df = self.__df
 
-                # datasets 内に存在する場合
-                if self._dataset_name in client.list_datasets():
-                    df = client.get_dataset(self._dataset_name)
+            # 健在の場合
+            else:
+                with Lock('access_dataset_df'):
 
-                # set の前に get されることはあってはならない
-                else:
-                    raise RuntimeError
+                    # mypy によるとこのスコープで
+                    # 定義しないと定義漏れになる可能性がある
+                    # そんなことないと思うけど将来の変更時に
+                    # 警告を見落とさないようにするためここで定義
+                    df = None
 
-                assert df is not None
+                    # datasets 内に存在する場合
+                    if self._dataset_name in client.list_datasets():
+                        df = client.get_dataset(self._dataset_name)
+
+                    # set の前に get されることはあってはならない
+                    else:
+                        raise RuntimeError
+
+                    assert df is not None
 
         # dask クラスターがない場合
         else:
@@ -174,25 +181,28 @@ class DataFrameWrapper:
         """
 
         # フィルタを適用
+        # partial_df を get_df した時点のものから
+        # 変わっていたらエラーになる
         if equality_filters is not None:
+            assert self.lock.locked(), 'set_df() with equality_filters must be called with locking.'
             partial_df = df
             df = self.get_df()
             apply_partial_df(df, partial_df, equality_filters)
 
         # dask クラスター上のデータを更新
         client = get_client()
-        if client:
+        if client is not None:
+            if client.scheduler is not None:
+                with Lock('access_dataset_df'):
 
-            with Lock('access_dataset_df'):
+                    # datasets 上に存在する場合は削除（上書きができない）
+                    if self._dataset_name in client.list_datasets():
 
-                # datasets 上に存在する場合は削除（上書きができない）
-                if self._dataset_name in client.list_datasets():
+                        # remove
+                        client.unpublish_dataset(self._dataset_name)
 
-                    # remove
-                    client.unpublish_dataset(self._dataset_name)
-
-                # update
-                client.publish_dataset(**{self._dataset_name: df})
+                    # update
+                    client.publish_dataset(**{self._dataset_name: df})
 
         # local のデータを更新
         self.__df = df
@@ -683,7 +693,7 @@ class Records:
         )
 
         # worker に影響しないように loaded_df のコピーを作成
-        df = self.loaded_df.copy()
+        df: pd.DataFrame = self.loaded_df.copy()
 
         # loaded df に存在しないが Record に存在するカラムを追加
         for col in Record.dtypes.keys():
@@ -891,17 +901,21 @@ class History:
             def __enter__(self_):
                 return self_.record
 
-            def __exit__(self_, exc_type, exc_val, exc_tb):
-
+            def append(self_):
                 self_.record.datetime_end = self_.record.datetime_end \
                     if self_.record.datetime_end is not None \
                     else datetime.datetime.now()
-
                 self._records.append(self_.record)
+
+            def __exit__(self_, exc_type, exc_val, exc_tb):
+
+                if exc_type is None:
+                    self_.append()
+
+                elif issubclass(exc_type, ExceptionDuringOptimization):
+                    self_.append()
 
         return RecordContext()
 
     def save(self):
         self._records.save(self.path)
-
-
