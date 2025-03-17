@@ -32,12 +32,8 @@ def apply_partial_df(df: pd.DataFrame, partial_df: pd.DataFrame, equality_filter
     idx = get_index(df, equality_filters)
 
     # インデクスに対応する部分を上書き
-    if len(df[idx]) != len(partial_df):
-        import sys
-        print(f'{idx=}', file=sys.stderr)
-        print(f'{df=}', file=sys.stderr)
-        print(f'{partial_df=}', file=sys.stderr)
-        assert False
+    assert len(df[idx]) == len(partial_df), ('equality_filters の実行結果と'
+                                             '与えられた partial_df の長さが一致しません。')
     df[idx] = partial_df
 
     return df

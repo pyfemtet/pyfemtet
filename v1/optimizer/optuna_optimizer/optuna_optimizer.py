@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import tempfile
 import warnings
 import datetime
 from contextlib import closing
@@ -7,12 +9,15 @@ from contextlib import closing
 import numpy as np
 
 import optuna
+from optuna.study import MaxTrialsCallback
+from optuna_integration.dask import DaskStorage
 
 from v1.history.history import *
 from v1.problem import *
 from v1.interface import *
 from v1.exceptions import *
 from v1.variable_manager import *
+from v1.utils.dask_util import *
 from v1.logger import get_optuna_logger, remove_all_output
 
 from v1.optimizer.optimizer import *
@@ -25,7 +30,29 @@ warnings.filterwarnings('ignore', 'set_metric_names', optuna.exceptions.Experime
 
 class OptunaOptimizer(AbstractOptimizer):
 
+    # system
+    study_name = 'pyfemtet-study'
+    storage: str | optuna.storages.BaseStorage
+    storage_path: str
     current_trial: optuna.trial.Trial | None
+
+    # settings
+    # sampler: optuna.samplers.BaseSampler | None = None  # reseed_rng が seed 指定できないため
+    sampler_class: type[optuna.samplers.BaseSampler]
+    sampler_kwargs: dict
+    n_trials: int | None
+    timeout: float | None
+    seed: int | None
+    callbacks: list
+
+    def __init__(self):
+        super().__init__()
+        self.sampler_kwargs = None
+        self.sampler_class = None
+        self.n_trials: int | None = None
+        self.timeout: float | None = None
+        self.seed: int | None = None
+        self.callbacks = []
 
     def solve(
             self,
@@ -103,7 +130,7 @@ class OptunaOptimizer(AbstractOptimizer):
                 count += 1
             if cns.upper_bound is not None:
                 count += 1
-        return tuple(np.ones(count, dtype=np.float64))
+        return tuple(1e9 * np.ones(count, dtype=np.float64))
 
     def _constraint(self, trial: optuna.trial.FrozenTrial):
         key = OptunaAttribute(self).key
@@ -187,6 +214,108 @@ class OptunaOptimizer(AbstractOptimizer):
 
             return y_internal
 
+    def _get_callback(self, n_trials: int):
+
+        # restart である場合、追加 N 回と見做す
+        if self.history.is_restart:
+            n_existing_trials = len(self.history.get_df(
+                equality_filters={'sub_fidelity_name': MAIN_FIDELITY_NAME}
+            ))
+            n_trials = n_trials + n_existing_trials
+
+        return MaxTrialsCallback(n_trials, states=(optuna.trial.TrialState.COMPLETE,))
+
+    def _setup_before_parallel(self):
+
+        if self._done_setup_before_parallel:
+            return
+
+        # set default values
+        self.sampler_class = self.sampler_class or optuna.samplers.TPESampler
+        self.sampler_kwargs = self.sampler_kwargs or {}
+
+        # create storage path
+        self.storage_path = self.history.path.removesuffix('.csv') + '.db'
+
+        # file check
+        if self.history.is_restart:
+            # check db file existing
+            if not os.path.exists(self.storage_path):
+                raise FileNotFoundError(self.storage_path)
+        else:
+            # certify no db file
+            if os.path.isfile(self.storage_path):
+                os.remove(self.storage_path)
+
+        # if TPESampler and re-starting,
+        # create temporary study to avoid error
+        # with many pruned trials.
+        if issubclass(self.sampler_class, optuna.samplers.TPESampler) \
+                and self.history.is_restart:
+
+            # get unique tmp file
+            import tempfile
+            tmp_storage_path = tempfile.mktemp(suffix='.db')
+            self._existing_storage_path = self.storage_path
+            self.storage_path = tmp_storage_path
+
+            # load existing study
+            existing_study = optuna.load_study(
+                study_name=self.study_name,
+                storage=f'sqlite:///{self._existing_storage_path}',
+            )
+
+            # create new study
+            tmp_study = optuna.create_study(
+                study_name=self.study_name,
+                storage=f'sqlite:///{self.storage_path}',
+                load_if_exists=True,
+                directions=['minimize'] * len(self.objectives),
+            )
+
+            # Copy COMPLETE trials to temporary study.
+            existing_trials = existing_study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
+            tmp_study.add_trials(existing_trials)
+
+        # setup storage
+        client = get_client()
+        if client is None:
+            self.storage = f'sqlite:///{self.storage_path}'
+        else:
+            self.storage = DaskStorage(
+                f'sqlite:///{self.storage_path}'
+            )
+
+        # if new study, create it.
+        if not self.history.is_restart:
+
+            # create study
+            study = optuna.create_study(
+                study_name=self.study_name,
+                storage=self.storage,
+                load_if_exists=True,
+                directions=['minimize'] * len(self.objectives),
+            )
+
+            # set objective names
+            study.set_metric_names(list(self.objectives.keys()))
+
+            # initial trial
+            params = self.variable_manager.get_variables(format='dict', filter='parameter')
+            study.enqueue_trial(params, user_attrs={"message": "Initial values"})
+
+        self._done_setup_before_parallel = True
+
+    def _setup_after_parallel(self):
+        # reseed
+        worker = get_worker()
+        if worker is not None:
+            # self.sampler.reseed_rng()  # サブプロセスのランダム化が固定されない
+            idx = self._worker_index
+            assert isinstance(idx, int)
+            if self.seed is not None:
+                self.seed += idx
+
     def run(self):
 
         # quit FEM even if abnormal termination
@@ -202,42 +331,105 @@ class OptunaOptimizer(AbstractOptimizer):
             # finalize
             self._finalize_history()
 
-            # optuna
-            from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
-            from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import PoFConfig, PartialOptimizeACQFConfig
-            sampler = PoFBoTorchSampler(
-                n_startup_trials=5,
-                seed=42,
-                constraints_func=self._constraint,
-                pof_config=PoFConfig(
-                    # consider_pof=False,
-                    # feasibility_threshold='mean',
-                ),
-                partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
-                    # gen_candidates='scipy',
-                    timeout_sec=5.,
-                    # method='SLSQP'  # 'COBYLA, COBYQA, SLSQP or trust-constr
-                    tol=0.1,
-                    # scipy_minimize_kwargs=dict(),
-                ),
-            )
-            # from optuna_integration import BoTorchSampler
-            # sampler = BoTorchSampler(n_startup_trials=5)
+            # setup if needed
+            self._setup_before_parallel()
+            self._setup_after_parallel()
 
+            # process kwargs
+            if self.sampler_kwargs is None:
+                self.sampler_kwargs = {}
+
+            if 'seed' in self.sampler_kwargs:
+                warnings.warn('sampler_kwargs `seed` は'
+                              'Optimizer.set_random_seed() で'
+                              '与えてください。引数は無視されます。')
+                self.sampler_kwargs.pop('seed')
+            if 'constraints_func' in self.sampler_kwargs:
+                warnings.warn('sampler_kwargs `constraints_func` は'
+                              'pyfemtet.opt の内部で自動的に与えられます。'
+                              '引数は無視されます。')
+                self.sampler_kwargs.pop('constraints_func')
+
+            if len(self.constraints) > 0:
+                self.sampler_kwargs.update(
+                    constraints_func=self._constraint
+                )
+            if self.seed is not None:
+                self.sampler_kwargs.update(
+                    seed=self.seed
+                )
+
+            # noinspection PyArgumentList
+            sampler = self.sampler_class(**self.sampler_kwargs)
+
+            # sampler specific processes
+            from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
+
+            # if PoFBoTorchSampler, set opt
             if isinstance(sampler, PoFBoTorchSampler):
                 sampler.pyfemtet_optimizer = self  # FIXME: multi-fidelity に対応できない?
 
-            study = optuna.create_study(
-                directions=['minimize'] * len(self.objectives),
+            # load study creating in setup_before_parallel()
+            # located on dask scheduler
+            study = optuna.load_study(
+                study_name=self.study_name,
+                storage=self.storage,
+                sampler=sampler,
             )
 
-            study.set_metric_names(list(self.objectives.keys()))
+            # utility
+            def is_tpe_addressing():
+                out = False
+                if hasattr(self, '_existing_storage_path'):
+                    if self._existing_storage_path is not None:
+                        assert os.path.isfile(self._existing_storage_path)
+                        out = True
+                return out
 
+            # if tpe_addressing, load main study
+            if is_tpe_addressing():
+                # load it
+                existing_study = optuna.load_study(
+                    study_name=self.study_name,
+                    storage=f'sqlite:///{self._existing_storage_path}',
+                )
+
+                # and add callback to copy-back
+                # from processing study to existing one.
+                def copy_back(_, trial):
+                    existing_study.add_trial(trial)
+                self.callbacks.append(copy_back)
+
+            # run
+            if self.n_trials is not None:
+                self.callbacks.append(self._get_callback(self.n_trials))
             study.optimize(
                 self._objective,
-                n_trials=10,
-                catch=InterruptOptimization
+                timeout=self.timeout,
+                callbacks=self.callbacks,
             )
+
+            # if tpe_addressing, remove temp db
+            if is_tpe_addressing():
+                # clean up temporary file
+                if isinstance(self.storage, optuna.storages._CachedStorage):
+                    rdb_storage = self.storage._backend
+                elif isinstance(self.storage, optuna.storages.RDBStorage):
+                    rdb_storage = self.storage
+                elif isinstance(self.storage, DaskStorage):
+                    base_storage = self.storage.get_base_storage()
+                    assert isinstance(base_storage, optuna.storages._CachedStorage)
+                    rdb_storage = base_storage._backend
+                else:
+                    raise NotImplementedError
+                assert isinstance(rdb_storage, optuna.storages.RDBStorage)
+                rdb_storage.engine.dispose()
+
+                if os.path.exists(self.storage_path):
+                    os.remove(self.storage_path)
+
+                # restore
+                self.storage_path = self._existing_storage_path
 
     def _check_and_raise_interruption(self):
         try:
@@ -249,6 +441,25 @@ class OptunaOptimizer(AbstractOptimizer):
 
 
 if __name__ == '__main__':
+    # from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import
+    # sampler = PoFBoTorchSampler(
+    #     n_startup_trials=5,
+    #     seed=42,
+    #     constraints_func=self._constraint,
+    #     pof_config=PoFConfig(
+    #         # consider_pof=False,
+    #         # feasibility_threshold='mean',
+    #     ),
+    #     partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
+    #         # gen_candidates='scipy',
+    #         timeout_sec=5.,
+    #         # method='SLSQP'  # 'COBYLA, COBYQA, SLSQP or trust-constr
+    #         tol=0.1,
+    #         # scipy_minimize_kwargs=dict(),
+    #     ),
+    # )
+    # from optuna_integration import BoTorchSampler
+    # sampler = BoTorchSampler(n_startup_trials=5)
 
     from v1.exceptions import PostProcessError
 
@@ -269,6 +480,15 @@ if __name__ == '__main__':
     _fem = NoFEM()
     _opt = OptunaOptimizer()
     _opt.fem = _fem
+
+    # _opt.sampler = optuna.samplers.RandomSampler(seed=42)
+    _opt.seed = 42
+    _opt.sampler_class = optuna.samplers.TPESampler
+    _opt.sampler_kwargs = dict(
+        n_startup_trials=5,
+    )
+    _opt.n_trials = 10
+
     _opt.add_parameter('x1', 1, -1, 1, step=0.1)
     _opt.add_parameter('x2', 1, -1, 1, step=0.1)
     _opt.add_constraint('cns', _cns, lower_bound=0., args=(_fem, _opt))

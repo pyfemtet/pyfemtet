@@ -51,6 +51,9 @@ class FEMOpt:
             # finalize history
             self.opt._finalize_history()
 
+            # finalize optimizer after history finalized
+            self.opt._setup_before_parallel()
+
             # create worker status list
             entire_status = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
             worker_status_list = [WorkerStatus() for _ in range(n_parallel)]
@@ -87,7 +90,7 @@ class FEMOpt:
             futures = client.map(
                 self.opt._run,
                 # Arguments of func
-                range(n_parallel - 1),
+                range(1, n_parallel),
                 [self.opt.history] * (n_parallel - 1),
                 [entire_status] * (n_parallel - 1),
                 worker_status_list[1:],
@@ -146,16 +149,19 @@ class FEMOpt:
 
 
 def test():
-    # from time import sleep
+    # noinspection PyUnresolvedReferences
+    from time import sleep
     # from v1.optimizer import InterruptOptimization
+    import optuna
     from v1.interface import AbstractFEMInterface, NoFEM
 
     def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
         x = _opt.get_variables('values')
-        # sleep(1)
         # print(os.getpid())
         # raise RuntimeError
         # raise Interrupt
+        # if get_worker() is None:
+        #     raise RuntimeError
         return (x ** 2).sum()
 
     def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
@@ -163,16 +169,18 @@ def test():
         return x[0]
 
     _opt = OptunaOptimizer()
+    _opt.sampler = optuna.samplers.TPESampler(seed=42)
+    _opt.n_trials = 10
 
     _fem = NoFEM()
     _opt.fem = _fem
 
     _args = (_fem, _opt)
 
-    _opt.add_parameter('x1', 1, -1, 1, step=0.5)
-    _opt.add_parameter('x2', 1, -1, 1, step=0.5)
+    _opt.add_parameter('x1', 1, -1, 1, step=0.2)
+    _opt.add_parameter('x2', 1, -1, 1, step=0.2)
 
-    _opt.add_constraint('cns', _cns, lower_bound=0, args=_args)
+    _opt.add_constraint('cns', _cns, lower_bound=-0.5, args=_args)
 
     _opt.add_objective('obj', _parabola, args=_args)
 

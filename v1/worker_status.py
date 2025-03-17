@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from time import sleep
+
 from v1.utils.dask_util import *
 from v1.logger import get_module_logger
 
@@ -30,17 +32,38 @@ class _WorkerStatus(float):
         return str(self)
 
 
+def worker_status_from_float(value: float):
+    if value == float('nan'):
+        return _WorkerStatus(value, 'Undefined')
+    elif value == float(0):
+        return _WorkerStatus(value, 'Initializing')
+    elif value == float(10):
+        return _WorkerStatus(value, 'Launching FEM')
+    elif value == float(20):
+        return _WorkerStatus(value, 'Waiting for other workers')
+    elif value == float(30):
+        return _WorkerStatus(value, 'Running')
+    elif value == float(40):
+        return _WorkerStatus(value, 'Interrupting')
+    elif value == float(50):
+        return _WorkerStatus(value, 'Finished')
+    elif value == float(60):
+        return _WorkerStatus(value, 'Crashed')
+    elif value == float('inf'):
+        return _WorkerStatus(value, 'Terminated')
+
+
 class WorkerStatus:
 
-    undefined = _WorkerStatus('nan', 'Undefined')
-    initializing = _WorkerStatus('0', 'Initializing')
-    launching_fem = _WorkerStatus(10, 'Launching FEM')
-    waiting = _WorkerStatus(20, 'Waiting other workers')
-    running = _WorkerStatus(30, 'Running')
-    interrupting = _WorkerStatus(40, 'Interrupting')
-    finished = _WorkerStatus(50, 'Finished')
-    crashed = _WorkerStatus(60, 'Crashed')
-    terminated = _WorkerStatus('inf', 'Terminated')
+    undefined = worker_status_from_float(float('nan'))
+    initializing = worker_status_from_float(0)
+    launching_fem = worker_status_from_float(10)
+    waiting = worker_status_from_float(20)
+    running = worker_status_from_float(30)
+    interrupting = worker_status_from_float(40)
+    finished = worker_status_from_float(50)
+    crashed = worker_status_from_float(60)
+    terminated = worker_status_from_float(float('inf'))
 
     @property
     def _dataset_name(self):
@@ -83,4 +106,5 @@ class WorkerStatus:
                 if key in client.list_datasets():
                     client.unpublish_dataset(key)
                 client.publish_dataset(**{key: value})
+                sleep(0.1)
         self.__value = value

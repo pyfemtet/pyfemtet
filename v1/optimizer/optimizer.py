@@ -41,6 +41,7 @@ class AbstractOptimizer:
     fem: AbstractFEMInterface
     entire_status: WorkerStatus
     worker_status: WorkerStatus
+    _done_setup_before_parallel: bool
 
     def __init__(self):
 
@@ -60,6 +61,8 @@ class AbstractOptimizer:
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
         self.worker_status: WorkerStatus = WorkerStatus()
+        self._done_setup_before_parallel = False
+        self._worker_index: int | str | None = None
 
     def add_variable(
             self,
@@ -396,6 +399,7 @@ class AbstractOptimizer:
         self.history = history
         self.entire_status = entire_status
         self.worker_status = worker_status
+        self._worker_index = worker_idx
 
         class SettingStatusFinished:
 
@@ -444,7 +448,7 @@ class AbstractOptimizer:
                 logger.info(f'===== solve {self_.count} start =====')
 
             def __exit__(self_, exc_type, exc_val, exc_tb):
-                logger.info(f'===== solve {self_.count} end =====\n')
+                logger.info(f'===== solve {self_.count} end =====')
 
         return LoggingOutput()
 
@@ -472,6 +476,12 @@ class AbstractOptimizer:
             list(self.objectives.keys()),
             list(self.constraints.keys()),
         )
+
+    def _setup_before_parallel(self):
+        self._done_setup_before_parallel = True
+
+    def _setup_after_parallel(self):
+        pass
 
 
 class SubFidelityModel(AbstractOptimizer): ...

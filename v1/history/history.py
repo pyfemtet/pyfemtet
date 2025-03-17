@@ -4,6 +4,7 @@ import os
 import csv
 import datetime
 import dataclasses
+from time import sleep
 from contextlib import nullcontext
 
 import numpy as np
@@ -18,6 +19,9 @@ from v1.history.optimality import *
 from v1.history.hypervolume import *
 from v1.utils.str_enum import StrEnum
 from v1.variable_manager import *
+from v1.logger import get_module_logger
+
+logger = get_module_logger('opt.history', True)
 
 
 __all__ = [
@@ -203,6 +207,7 @@ class DataFrameWrapper:
 
                     # update
                     client.publish_dataset(**{self._dataset_name: df})
+                    sleep(0.1)
 
         # local のデータを更新
         self.__df = df
@@ -236,76 +241,13 @@ class CorrespondingColumnNameRuler:
         return prm_name + '_choices'
 
 
-@dataclasses.dataclass
-class Record:
-    trial: int = None
-    trial_id: int = None
-    sub_sampling: SubSampling | None = None
-    sub_fidelity_name: str = None
-    fidelity: Fidelity = None
-    x: TrialInput = dataclasses.field(default_factory=TrialInput)
-    y: TrialOutput = dataclasses.field(default_factory=TrialOutput)
-    c: TrialConstraintOutput = dataclasses.field(default_factory=TrialConstraintOutput)
-    state: TrialState = TrialState.undefined
-    datetime_start: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
-    datetime_end: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
-    message: str = ''
-    hypervolume: float | None = None
-    feasibility: bool | None = None
-    optimality: bool | None = None
+class ColumnManager:
 
-    def _calc_feasibility(self):
-        # skipped -> None (empty)
-        # succeeded -> calc
-
-        feasibility = True
-
-        if self.state == TrialState.skipped:
-            self.feasibility = None
-            return
-
-        for cns_result in self.c.values():
-            v_dict = cns_result.calc_violation()
-            if any([v > 0 for v in v_dict.values()]):
-                feasibility = False
-
-        self.feasibility = feasibility
-
-    def as_df(self):
-        assert hasattr(self, 'dtypes'), 'Record is not setup.'
-
-        self._calc_feasibility()
-
-        # noinspection PyUnresolvedReferences
-        keys = self.__dataclass_fields__.copy().keys()
-        d = {key: getattr(self, key) for key in keys if getattr(self, key) is not None}
-
-        x: TrialInput = d.pop('x')
-        y: TrialOutput = d.pop('y')
-        c: TrialConstraintOutput = d.pop('c')
-
-        # prm
-        for prm_name, param in x.items():
-            d.update({prm_name: param.value})
-            if isinstance(param, NumericParameter):
-                f = CorrespondingColumnNameRuler.prm_lower_bound_name
-                d.update({f(prm_name): param.lower_bound})
-                f = CorrespondingColumnNameRuler.prm_upper_bound_name
-                d.update({f(prm_name): param.upper_bound})
-            elif isinstance(param, CategoricalParameter):
-                f = CorrespondingColumnNameRuler.prm_choices_name
-                d.update({f(prm_name): param.choices})
-            else:
-                raise NotImplementedError
-
-        d.update(**{k: v.value for k, v in y.items()})
-        d.update(**{f'{k}_direction': v.direction for k, v in y.items()})
-        d.update(**{k: v.value for k, v in c.items()})
-
-        return pd.DataFrame(
-            {k: [v] for k, v in d.items()},
-            columns=tuple(self.dtypes.keys())
-        ).astype(self.dtypes)
+    parameters: TrialInput
+    y_names: list[str]
+    c_names: list[str]
+    dtypes: dict[str, type]
+    meta_columns: list[str]
 
     @staticmethod
     def columns_to_keep_even_if_nan():
@@ -313,17 +255,15 @@ class Record:
             'message',
         ]
 
-    @classmethod
-    def initialize(cls, parameters: dict[str, Parameter], y_names, c_names):
-        cls.parameters = parameters
-        cls.y_names = y_names
-        cls.c_names = c_names
-        cls._set_full_sorted_column_information()
+    def initialize(self, parameters: TrialInput, y_names, c_names):
+        self.parameters = parameters
+        self.y_names = y_names
+        self.c_names = c_names
+        self._set_full_sorted_column_information()
 
-    @classmethod
     def _set_full_sorted_column_information(
-            cls,
-            extra_parameters: dict[str, Parameter] = None,
+            self,
+            extra_parameters: TrialInput = None,
             extra_y_names: list[str] = None,
             extra_c_names: list[str] = None,
     ):
@@ -336,7 +276,7 @@ class Record:
         meta_columns = []
 
         # noinspection PyUnresolvedReferences
-        keys = cls.__dataclass_fields__.copy().keys()
+        keys = Record.__dataclass_fields__.copy().keys()
         for key in keys:
             # Note:
             #   as_df() で空欄になりうるカラムには
@@ -348,9 +288,9 @@ class Record:
             #   (object にキャストされる模様)
 
             if key == 'x':
-                for prm_name in cls.parameters.keys():
+                for prm_name in self.parameters.keys():
 
-                    param = cls.parameters[prm_name]
+                    param = self.parameters[prm_name]
 
                     if isinstance(param, NumericParameter):
                         dtypes.update({prm_name: float})
@@ -402,10 +342,10 @@ class Record:
 
             elif key == 'y':
                 f = CorrespondingColumnNameRuler.direction_name
-                for name in cls.y_names:
+                for name in self.y_names:
                     dtypes.update({name: float})
                     dtypes.update({f(name): object})  # str | float
-                meta_columns.extend(['obj', f('obj')] * len(cls.y_names))
+                meta_columns.extend(['obj', f('obj')] * len(self.y_names))
 
                 for name in extra_y_names:
                     dtypes.update({name: float})
@@ -413,8 +353,8 @@ class Record:
                 meta_columns.extend(['', ''] * len(extra_y_names))
 
             elif key == 'c':
-                dtypes.update({name: float for name in cls.c_names})
-                meta_columns.extend(['cns'] * len(cls.c_names))
+                dtypes.update({name: float for name in self.c_names})
+                meta_columns.extend(['cns'] * len(self.c_names))
 
                 dtypes.update({name: float for name in extra_c_names})
                 meta_columns.extend([''] * len(extra_c_names))
@@ -423,8 +363,8 @@ class Record:
                 dtypes.update({key: object})
                 meta_columns.append('')
 
-        cls.dtypes = dtypes
-        cls.meta_columns = meta_columns
+        self.dtypes = dtypes
+        self.meta_columns = meta_columns
 
     @staticmethod
     def filter_columns(meta_column, columns, meta_columns) -> list[str]:
@@ -436,59 +376,133 @@ class Record:
                 out.append(column_)
         return out
 
-    @classmethod
-    def _filter_columns(cls, meta_column) -> list[str]:
-        columns = list(cls.dtypes.keys())
-        return cls.filter_columns(meta_column, columns, cls.meta_columns)
+    def _filter_columns(self, meta_column) -> list[str]:
+        columns = list(self.dtypes.keys())
+        return self.filter_columns(meta_column, columns, self.meta_columns)
 
-    # @property  # class property will be not supported in python 3.13
-    @classmethod
-    def get_prm_names(cls) -> list[str]:
-        return cls._filter_columns('prm')
+    def get_prm_names(self) -> list[str]:
+        return self._filter_columns('prm')
 
-    @classmethod
-    def get_obj_names(cls) -> list[str]:
-        return cls._filter_columns('obj')
+    def get_obj_names(self) -> list[str]:
+        return self._filter_columns('obj')
 
-    @classmethod
-    def get_cns_names(cls) -> list[str]:
-        return cls._filter_columns('cns')
+    def get_cns_names(self) -> list[str]:
+        return self._filter_columns('cns')
 
-    @classmethod
-    def is_numerical_parameter(cls, prm_name) -> bool:
+    def is_numerical_parameter(self, prm_name) -> bool:
         prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
-        return prm_lb_name in tuple(cls.dtypes.keys())
+        return prm_lb_name in tuple(self.dtypes.keys())
 
-    @classmethod
-    def is_categorical_parameter(cls, prm_name) -> bool:
+    def is_categorical_parameter(self, prm_name) -> bool:
         prm_choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
-        return prm_choices_name in tuple(cls.dtypes.keys())
+        return prm_choices_name in tuple(self.dtypes.keys())
+
+
+@dataclasses.dataclass
+class Record:
+    # x, y, c のみ特殊で、データの展開や関連情報の
+    # 列への展開を必要とするが、他の field は
+    # ここに定義すればよい
+
+    trial: int = None
+    trial_id: int = None
+    sub_sampling: SubSampling | None = None
+    sub_fidelity_name: str = None
+    fidelity: Fidelity = None
+    x: TrialInput = dataclasses.field(default_factory=TrialInput)
+    y: TrialOutput = dataclasses.field(default_factory=TrialOutput)
+    c: TrialConstraintOutput = dataclasses.field(default_factory=TrialConstraintOutput)
+    state: TrialState = TrialState.undefined
+    datetime_start: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
+    datetime_end: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
+    message: str = ''
+    hypervolume: float | None = None
+    feasibility: bool | None = None
+    optimality: bool | None = None
+
+    def _calc_feasibility(self):
+        # skipped -> None (empty)
+        # succeeded -> calc
+
+        feasibility = True
+
+        if self.state == TrialState.skipped:
+            self.feasibility = None
+            return
+
+        for cns_result in self.c.values():
+            v_dict = cns_result.calc_violation()
+            if any([v > 0 for v in v_dict.values()]):
+                feasibility = False
+
+        self.feasibility = feasibility
+
+    def as_df(self, dtypes: dict = None):
+
+        self._calc_feasibility()
+
+        # noinspection PyUnresolvedReferences
+        keys = self.__dataclass_fields__.copy().keys()
+        d = {key: getattr(self, key) for key in keys if getattr(self, key) is not None}
+
+        x: TrialInput = d.pop('x')
+        y: TrialOutput = d.pop('y')
+        c: TrialConstraintOutput = d.pop('c')
+
+        # prm
+        for prm_name, param in x.items():
+            d.update({prm_name: param.value})
+            if isinstance(param, NumericParameter):
+                f = CorrespondingColumnNameRuler.prm_lower_bound_name
+                d.update({f(prm_name): param.lower_bound})
+                f = CorrespondingColumnNameRuler.prm_upper_bound_name
+                d.update({f(prm_name): param.upper_bound})
+            elif isinstance(param, CategoricalParameter):
+                f = CorrespondingColumnNameRuler.prm_choices_name
+                d.update({f(prm_name): param.choices})
+            else:
+                raise NotImplementedError
+
+        d.update(**{k: v.value for k, v in y.items()})
+        d.update(**{f'{k}_direction': v.direction for k, v in y.items()})
+        d.update(**{k: v.value for k, v in c.items()})
+
+        df = pd.DataFrame(
+            {k: [v] for k, v in d.items()},
+            columns=tuple(dtypes.keys())
+        )
+
+        if dtypes:
+            df = df.astype(dtypes)
+
+        return df
 
 
 class EntireDependentValuesCalculator:
 
-    y_internal: np.ndarray
-    feasibility: np.ndarray
-
-    def __init__(self, records: Records, equality_filters: dict):
+    def __init__(
+            self,
+            records: Records,
+            equality_filters: dict,
+            entire_df: pd.DataFrame,
+    ):
 
         self.records = records
         self.equality_filters = equality_filters
+        self.entire_df: pd.DataFrame = entire_df
+        self.partial_df: pd.DataFrame = get_partial_df(entire_df, equality_filters)
 
         assert self.records.df_wrapper.lock.locked()
 
-        # get df
-        df = self.get_df()
-
         # get column names
-        obj_names = Record.get_obj_names()
+        obj_names = self.records.column_manager.get_obj_names()
         f = CorrespondingColumnNameRuler.direction_name
         obj_direction_names = [f(name) for name in obj_names]
 
         # get values
-        all_obj_values = df[obj_names].values
-        all_obj_directions = df[obj_direction_names].values
-        feasibility = df['feasibility']
+        all_obj_values = self.partial_df[obj_names].values
+        all_obj_directions = self.partial_df[obj_direction_names].values
+        feasibility = self.partial_df['feasibility']
 
         # convert values as minimization problem
         y_internal = np.empty(all_obj_values.shape)
@@ -503,88 +517,55 @@ class EntireDependentValuesCalculator:
                 )
             )
 
-        self.y_internal = y_internal
-        self.feasibility = feasibility
-
-    def get_df(self):
-        return self.records.df_wrapper.get_df(
-            self.equality_filters
-        )
-
-    def set_df(self, df):
-        self.records.df_wrapper.set_df(
-            df,
-            self.equality_filters
-        )
+        self.partial_y_internal = y_internal
+        self.partial_feasibility = feasibility
 
     def update_optimality(self):
 
         assert self.records.df_wrapper.lock.locked()
 
-        # get df
-        df = self.get_df()
-
         # calc optimality
         optimality = calc_optimality(
-            self.y_internal,
-            self.feasibility,
+            self.partial_y_internal,
+            self.partial_feasibility,
         )
 
         # update
-        if len(df) != len(optimality):
-            import sys
-            print(f'{df=}', file=sys.stderr)
-            print(f'{df.loc[:, "optimality"]=}', file=sys.stderr)
-            print(optimality, file=sys.stderr)
-            assert False
-        df.loc[:, 'optimality'] = optimality
-        self.set_df(df)
+        self.partial_df.loc[:, 'optimality'] = optimality
 
     def update_hypervolume(self):
 
         assert self.records.df_wrapper.lock.locked()
 
-        # get df
-        partial_df = self.get_df()
-
         # calc hypervolume
         hv_values = calc_hypervolume(
-            self.y_internal,
-            self.feasibility,
+            self.partial_y_internal,
+            self.partial_feasibility,
             ref_point='nadir-up-to-the-point',
         )
 
         # update
-        if len(partial_df) != len(hv_values):
-            import sys
-            print(f'{partial_df=}', file=sys.stderr)
-            print(f'{partial_df.loc[:, "hypervolume"]=}', file=sys.stderr)
-            print(hv_values, file=sys.stderr)
-            assert False
-        partial_df.loc[:, 'hypervolume'] = hv_values
-        self.set_df(partial_df)
+        self.partial_df.loc[:, 'hypervolume'] = hv_values
 
     def update_trial_number(self):
 
         assert self.records.df_wrapper.lock.locked()
 
-        # get df
-        df = self.get_df()
-
         # calc trial
-        trial_number = np.arange(len(df)).astype(int)
+        trial_number = np.arange(len(self.partial_df)).astype(int)
 
         # update
-        df.loc[:, 'trial'] = trial_number
-        self.set_df(df)
+        self.partial_df.loc[:, 'trial'] = trial_number
 
 
 class Records:
     """最適化の試行全体の情報を格納するモデルクラス"""
     df_wrapper: DataFrameWrapper
+    column_manager: ColumnManager
 
     def __init__(self):
         self.df_wrapper = DataFrameWrapper(pd.DataFrame())
+        self.column_manager = ColumnManager()
         self.loaded_meta_columns = None
         self.loaded_df = None
 
@@ -595,11 +576,10 @@ class Records:
         return len(self.df_wrapper)
 
     def initialize(self):
-
         with self.df_wrapper.lock:
             # 新しく始まる場合に備えカラムを設定
             # load の場合はあとで上書きされる
-            df = pd.DataFrame([], columns=list(Record.dtypes.keys()))
+            df = pd.DataFrame([], columns=list(self.column_manager.dtypes.keys()))
             self.df_wrapper.set_df(df)
 
     def load(self, path: str):
@@ -629,21 +609,21 @@ class Records:
         loaded_columns, loaded_meta_columns = self.loaded_df.columns, self.loaded_meta_columns
 
         # prm_names が過不足ないか
-        loaded_prm_names = set(Record.filter_columns('prm', loaded_columns, loaded_meta_columns))
-        prm_names = set(Record.get_prm_names())
+        loaded_prm_names = set(self.column_manager.filter_columns('prm', loaded_columns, loaded_meta_columns))
+        prm_names = set(self.column_manager.get_prm_names())
         if not (len(loaded_prm_names - prm_names) == len(prm_names - loaded_prm_names) == 0):
             raise RuntimeError('Incompatible parameter setting.')
 
         # obj_names が増えていないか
-        loaded_obj_names = set(Record.filter_columns('obj', loaded_columns, loaded_meta_columns))
-        obj_names = set(Record.get_obj_names())
+        loaded_obj_names = set(self.column_manager.filter_columns('obj', loaded_columns, loaded_meta_columns))
+        obj_names = set(self.column_manager.get_obj_names())
         if len(obj_names - loaded_obj_names) > 0:
             raise RuntimeError('Incompatible objective setting.')
 
         # cns_names が過不足ないか
         # TODO: cns の上下限は変更されてはならない。
-        loaded_cns_names = set(Record.filter_columns('cns', loaded_columns, loaded_meta_columns))
-        cns_names = set(Record.get_cns_names())
+        loaded_cns_names = set(self.column_manager.filter_columns('cns', loaded_columns, loaded_meta_columns))
+        cns_names = set(self.column_manager.get_cns_names())
         if not (len(loaded_cns_names - cns_names) == len(cns_names - loaded_cns_names) == 0):
             raise RuntimeError('Incompatible constraint setting.')
 
@@ -654,9 +634,9 @@ class Records:
             return
 
         loaded_columns, loaded_meta_columns = self.loaded_df.columns, self.loaded_meta_columns
-        loaded_prm_names = set(Record.filter_columns('prm', loaded_columns, loaded_meta_columns))
-        loaded_obj_names = set(Record.filter_columns('obj', loaded_columns, loaded_meta_columns))
-        loaded_cns_names = set(Record.filter_columns('cns', loaded_columns, loaded_meta_columns))
+        loaded_prm_names = set(self.column_manager.filter_columns('prm', loaded_columns, loaded_meta_columns))
+        loaded_obj_names = set(self.column_manager.filter_columns('obj', loaded_columns, loaded_meta_columns))
+        loaded_cns_names = set(self.column_manager.filter_columns('cns', loaded_columns, loaded_meta_columns))
 
         # loaded df に存在するが Record に存在しないカラムを Record に追加
         extra_parameters = {}
@@ -665,7 +645,7 @@ class Records:
         for l_col, l_meta in zip(loaded_columns, loaded_meta_columns):
 
             # 現在の Record に含まれないならば
-            if l_col not in Record.dtypes.keys():
+            if l_col not in self.column_manager.dtypes.keys():
 
                 # それが prm_name ならば
                 if l_col in loaded_prm_names:
@@ -698,7 +678,7 @@ class Records:
                 elif l_col in loaded_cns_names:
                     extra_c_names.append(l_col)
 
-        Record._set_full_sorted_column_information(
+        self.column_manager._set_full_sorted_column_information(
             extra_parameters=extra_parameters,
             extra_y_names=extra_y_names,
             extra_c_names=extra_c_names,
@@ -708,7 +688,7 @@ class Records:
         df: pd.DataFrame = self.loaded_df.copy()
 
         # loaded df に存在しないが Record に存在するカラムを追加
-        for col in Record.dtypes.keys():
+        for col in self.column_manager.dtypes.keys():
             if col not in df.columns:
                 # column ごとの default 値を追加
                 if col == 'sub_fidelity_name':
@@ -721,17 +701,18 @@ class Records:
         # エラーになるので余分なものを削除
         # 与える dtypes が少ない分には
         # (pandas としては) 問題ない
-        dtypes = {k: v for k, v in Record.dtypes.items() if k in self.loaded_df.columns}
+        dtypes = {k: v for k, v in self.column_manager.dtypes.items() if k in self.loaded_df.columns}
         df = df.astype(dtypes)
 
         # 並べ替え
-        df = df[list(Record.dtypes.keys())].astype(Record.dtypes)
+        df = df[list(self.column_manager.dtypes.keys())].astype(self.column_manager.dtypes)
 
         # OK なので読み込んだデータを set_df する
         self.df_wrapper.set_df(df)
 
-    @staticmethod
-    def remove_nan_columns(df, meta_columns, columns_to_keep: str | list[str] = None) -> tuple[pd.DataFrame, tuple[str]]:
+    def remove_nan_columns(
+            self, df, meta_columns, columns_to_keep: str | list[str] = None
+    ) -> tuple[pd.DataFrame, tuple[str]]:
         """
 
         Args:
@@ -748,7 +729,7 @@ class Records:
 
         nan_columns = df.isna().all(axis=0)
         if columns_to_keep is None:
-            columns_to_keep = Record.columns_to_keep_even_if_nan()
+            columns_to_keep = self.column_manager.columns_to_keep_even_if_nan()
         nan_columns[columns_to_keep] = False
 
         fdf = df.loc[:, ~nan_columns]
@@ -760,7 +741,7 @@ class Records:
 
         # filter NaN columns
         df, meta_columns = self.remove_nan_columns(
-            self.df_wrapper.get_df(), Record.meta_columns,
+            self.df_wrapper.get_df(), self.column_manager.meta_columns,
         )
 
         with open(path, 'w', encoding=ENCODING) as f:
@@ -774,7 +755,7 @@ class Records:
     def append(self, record: Record):
 
         # get row
-        row = record.as_df()
+        row = record.as_df(dtypes=self.column_manager.dtypes)
 
         # concat
         dfw = self.df_wrapper
@@ -799,26 +780,30 @@ class Records:
                     ignore_index=True,
                 )
 
-            dfw.set_df(new_df)
-
             # calc entire-dependent values
             # must be in with block to keep
             # the entire data compatibility
             # during processing.
-            self.update_entire_dependent_values()
+            self.update_entire_dependent_values(new_df)
 
-    def update_entire_dependent_values(self):
+            dfw.set_df(new_df)
+
+    def update_entire_dependent_values(self, processing_df: pd.DataFrame):
 
         with self.df_wrapper.lock_if_not_locked:
 
             # update main fidelity
+            equality_filters = {'sub_fidelity_name': MAIN_FIDELITY_NAME}
             mgr = EntireDependentValuesCalculator(
                 self,
-                {'sub_fidelity_name': MAIN_FIDELITY_NAME}
+                equality_filters,
+                processing_df,
             )
             mgr.update_optimality()
             mgr.update_hypervolume()
             mgr.update_trial_number()
+            pdf = mgr.partial_df
+            apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
 
             # update sub fidelity
             entire_df = self.df_wrapper.get_df()
@@ -826,11 +811,15 @@ class Records:
             if MAIN_FIDELITY_NAME in sub_fidelity_names:
                 sub_fidelity_names.remove(MAIN_FIDELITY_NAME)
             for sub_fidelity_name in sub_fidelity_names:
+                equality_filters = {'sub_fidelity_name': sub_fidelity_name}
                 mgr = EntireDependentValuesCalculator(
                     self,
-                    {'sub_fidelity_name': sub_fidelity_name}
+                    equality_filters,
+                    processing_df
                 )
                 mgr.update_trial_number()
+            pdf = mgr.partial_df
+            apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
 
 
 class History:
@@ -840,6 +829,7 @@ class History:
     obj_names: list[str]
     cns_names: list[str]
     sub_fidelity_model_names: list[str]
+    is_restart: bool
 
     path: str
 
@@ -847,6 +837,7 @@ class History:
         self._records = Records()
         self.path: str | None = None
         self._finalized: bool = False
+        self.is_restart = False
 
     def __str__(self):
         return self._records.__str__()
@@ -858,6 +849,7 @@ class History:
         self._records.df_wrapper.end_dask()
 
     def load_csv(self, path):
+        self.is_restart = True
         self.path = path
         self._records.load(self.path)
 
@@ -875,11 +867,13 @@ class History:
         self.sub_fidelity_model_names = sub_fidelity_model_names or []
 
         # worker ごとに実行が必要な処理
-        # ここで dtypes が決定する
-        Record.initialize(parameters, self.obj_names, self.cns_names)
-
-        # worker で再処理されると困る処理
         if not self._finalized:
+            # ここで dtypes が決定する
+            self._records.column_manager.initialize(
+                parameters, self.obj_names, self.cns_names
+            )
+
+            # worker で再処理されると困る処理
 
             # initialize
             self._records.initialize()
@@ -893,9 +887,9 @@ class History:
             # check
             self._records.check_problem_compatibility()
 
-        # load 後だが worker ごとに実行が必要
-        # Record のクラス変数 dtypes と meta_columns を再初期化するため
-        self._records.reinitialize_record_with_loaded_data()
+            # load 後だが worker ごとに実行が必要
+            # Record のクラス変数 dtypes と meta_columns を再初期化するため
+            self._records.reinitialize_record_with_loaded_data()
 
         self._finalized = True
 
