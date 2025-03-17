@@ -9,10 +9,10 @@ from dash import html, dcc
 from v1.utils.dask_util import *
 from v1.history import *
 from v1.worker_status import *
-from v1.problem import *
 from v1.logger import get_module_logger, get_dash_logger, remove_all_output
 
 from v1.prediction.model import *
+from v1.monitor.plotter.plot_prediction_model import plot3d
 
 logger = get_module_logger('opt.femopt')
 remove_all_output(get_dash_logger())
@@ -59,11 +59,6 @@ class Monitor:
         )
         def update_graph(_):
             print('===== update_graph =====')
-
-            client = get_client()
-            if client is None:
-                print('no client')
-                raise PreventUpdate
 
             # label = self.entire_status.value.str()
 

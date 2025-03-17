@@ -264,9 +264,9 @@ class ColumnManager:
         self.parameters = parameters
         self.y_names = y_names
         self.c_names = c_names
-        self._set_full_sorted_column_information()
+        self.set_full_sorted_column_information()
 
-    def _set_full_sorted_column_information(
+    def set_full_sorted_column_information(
             self,
             extra_parameters: TrialInput = None,
             extra_y_names: list[str] = None,
@@ -376,7 +376,7 @@ class ColumnManager:
         self.meta_columns = meta_columns
 
     @staticmethod
-    def filter_columns(meta_column, columns, meta_columns) -> list[str]:
+    def _filter_columns(meta_column, columns, meta_columns) -> list[str]:
         out = []
         assert len(columns) == len(meta_columns), f'{len(columns)=} and {len(meta_columns)=}'
 
@@ -385,18 +385,18 @@ class ColumnManager:
                 out.append(column_)
         return out
 
-    def _filter_columns(self, meta_column) -> list[str]:
+    def filter_columns(self, meta_column) -> list[str]:
         columns = list(self.dtypes.keys())
-        return self.filter_columns(meta_column, columns, self.meta_columns)
+        return self._filter_columns(meta_column, columns, self.meta_columns)
 
     def get_prm_names(self) -> list[str]:
-        return self._filter_columns('prm')
+        return self.filter_columns('prm')
 
     def get_obj_names(self) -> list[str]:
-        return self._filter_columns('obj')
+        return self.filter_columns('obj')
 
     def get_cns_names(self) -> list[str]:
-        return self._filter_columns('cns')
+        return self.filter_columns('cns')
 
     @staticmethod
     def _is_numerical_parameter(prm_name, columns):
@@ -442,6 +442,15 @@ class ColumnManager:
             if meta_column == 'prm_choices':
                 print(df[column])
                 df[column] = [ast.literal_eval(d) for d in df[column]]
+
+    @staticmethod
+    def _get_sub_fidelity_names(df: pd.DataFrame) -> list[str]:
+
+        if 'sub_fidelity_name' not in df.columns:
+            return [MAIN_FIDELITY_NAME]
+
+        else:
+            return np.unique(df['sub_fidelity_name'].values).tolist()
 
 
 @dataclasses.dataclass
@@ -660,20 +669,20 @@ class Records:
         loaded_columns, loaded_meta_columns = self.loaded_df.columns, self.loaded_meta_columns
 
         # prm_names が過不足ないか
-        loaded_prm_names = set(self.column_manager.filter_columns('prm', loaded_columns, loaded_meta_columns))
+        loaded_prm_names = set(self.column_manager._filter_columns('prm', loaded_columns, loaded_meta_columns))
         prm_names = set(self.column_manager.get_prm_names())
         if not (len(loaded_prm_names - prm_names) == len(prm_names - loaded_prm_names) == 0):
             raise RuntimeError('Incompatible parameter setting.')
 
         # obj_names が増えていないか
-        loaded_obj_names = set(self.column_manager.filter_columns('obj', loaded_columns, loaded_meta_columns))
+        loaded_obj_names = set(self.column_manager._filter_columns('obj', loaded_columns, loaded_meta_columns))
         obj_names = set(self.column_manager.get_obj_names())
         if len(obj_names - loaded_obj_names) > 0:
             raise RuntimeError('Incompatible objective setting.')
 
         # cns_names が過不足ないか
         # TODO: cns の上下限は変更されてはならない。
-        loaded_cns_names = set(self.column_manager.filter_columns('cns', loaded_columns, loaded_meta_columns))
+        loaded_cns_names = set(self.column_manager._filter_columns('cns', loaded_columns, loaded_meta_columns))
         cns_names = set(self.column_manager.get_cns_names())
         if not (len(loaded_cns_names - cns_names) == len(cns_names - loaded_cns_names) == 0):
             raise RuntimeError('Incompatible constraint setting.')
@@ -685,9 +694,9 @@ class Records:
             return
 
         loaded_columns, loaded_meta_columns = self.loaded_df.columns, self.loaded_meta_columns
-        loaded_prm_names = set(self.column_manager.filter_columns('prm', loaded_columns, loaded_meta_columns))
-        loaded_obj_names = set(self.column_manager.filter_columns('obj', loaded_columns, loaded_meta_columns))
-        loaded_cns_names = set(self.column_manager.filter_columns('cns', loaded_columns, loaded_meta_columns))
+        loaded_prm_names = set(self.column_manager._filter_columns('prm', loaded_columns, loaded_meta_columns))
+        loaded_obj_names = set(self.column_manager._filter_columns('obj', loaded_columns, loaded_meta_columns))
+        loaded_cns_names = set(self.column_manager._filter_columns('cns', loaded_columns, loaded_meta_columns))
 
         # loaded df に存在するが Record に存在しないカラムを Record に追加
         extra_parameters = {}
@@ -729,7 +738,7 @@ class Records:
                 elif l_col in loaded_cns_names:
                     extra_c_names.append(l_col)
 
-        self.column_manager._set_full_sorted_column_information(
+        self.column_manager.set_full_sorted_column_information(
             extra_parameters=extra_parameters,
             extra_y_names=extra_y_names,
             extra_c_names=extra_c_names,
@@ -879,6 +888,7 @@ class History:
     prm_names: list[str]
     obj_names: list[str]
     cns_names: list[str]
+    sub_fidelity_names: list[str]
     is_restart: bool
 
     path: str
@@ -916,9 +926,10 @@ class History:
             df = self._records.loaded_df
             meta_columns = self._records.loaded_meta_columns
 
-            self.prm_names = ColumnManager.filter_columns('prm', df.columns, meta_columns)
-            self.obj_names = ColumnManager.filter_columns('obj', df.columns, meta_columns)
-            self.cns_names = ColumnManager.filter_columns('cns', df.columns, meta_columns)
+            self.prm_names = ColumnManager._filter_columns('prm', df.columns, meta_columns)
+            self.obj_names = ColumnManager._filter_columns('obj', df.columns, meta_columns)
+            self.cns_names = ColumnManager._filter_columns('cns', df.columns, meta_columns)
+            self.sub_fidelity_names = ColumnManager._get_sub_fidelity_names(df)
 
             parameters: TrialInput = {}
             for prm_name in self.prm_names:
@@ -929,18 +940,21 @@ class History:
                 parameters,
                 self.obj_names,
                 self.cns_names,
-                )
+                self.sub_fidelity_names,
+            )
 
     def finalize(
             self,
             parameters: TrialInput,
             obj_names,
             cns_names,
+            sub_fidelity_names,
     ):
 
         self.prm_names = list(parameters.keys())
         self.obj_names = list(obj_names)
         self.cns_names = list(cns_names)
+        self.sub_fidelity_names = list(sub_fidelity_names)
 
         if not self._finalized:
             # ここで dtypes が決定する

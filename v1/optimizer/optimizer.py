@@ -475,6 +475,7 @@ class AbstractOptimizer:
             parameters,
             list(self.objectives.keys()),
             list(self.constraints.keys()),
+            [self.sub_fidelity_name] + list(self.sub_fidelity_models.keys()),
         )
 
     def _setup_before_parallel(self):
