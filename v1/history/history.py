@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import csv
+import ast
 import datetime
 import dataclasses
 from time import sleep
@@ -240,6 +241,10 @@ class CorrespondingColumnNameRuler:
     def prm_choices_name(prm_name):
         return prm_name + '_choices'
 
+    @staticmethod
+    def prm_step_name(prm_name):
+        return prm_name + '_step'
+
 
 class ColumnManager:
 
@@ -297,12 +302,16 @@ class ColumnManager:
                         meta_columns.append('prm')
 
                         f = CorrespondingColumnNameRuler.prm_lower_bound_name
-                        dtypes.update({f(prm_name): object})
+                        dtypes.update({f(prm_name): float})
                         meta_columns.append('prm_lower_bound')
 
                         f = CorrespondingColumnNameRuler.prm_upper_bound_name
-                        dtypes.update({f(prm_name): object})
+                        dtypes.update({f(prm_name): float})
                         meta_columns.append('prm_upper_bound')
+
+                        f = CorrespondingColumnNameRuler.prm_step_name
+                        dtypes.update({f(prm_name): float})
+                        meta_columns.append('prm_step')
 
                     elif isinstance(param, CategoricalParameter):
                         dtypes.update({prm_name: object})
@@ -389,13 +398,50 @@ class ColumnManager:
     def get_cns_names(self) -> list[str]:
         return self._filter_columns('cns')
 
-    def is_numerical_parameter(self, prm_name) -> bool:
+    @staticmethod
+    def _is_numerical_parameter(prm_name, columns):
         prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
-        return prm_lb_name in tuple(self.dtypes.keys())
+        return prm_lb_name in columns
+
+    @staticmethod
+    def _is_categorical_parameter(prm_name, columns):
+        prm_choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
+        return prm_choices_name in columns
+
+    def is_numerical_parameter(self, prm_name) -> bool:
+        return self._is_numerical_parameter(prm_name, tuple(self.dtypes.keys()))
 
     def is_categorical_parameter(self, prm_name) -> bool:
-        prm_choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
-        return prm_choices_name in tuple(self.dtypes.keys())
+        return self._is_categorical_parameter(prm_name, tuple(self.dtypes.keys()))
+
+    @staticmethod
+    def get_parameter(prm_name: str, df: pd.DataFrame) -> Parameter:
+        if ColumnManager._is_numerical_parameter(prm_name, df.columns):
+            out = NumericParameter()
+            out.name = prm_name
+            out.value = float(df[prm_name].dropna().values[-1])
+            out.lower_bound = float(df[CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)].dropna().values[-1])
+            out.upper_bound = float(df[CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)].dropna().values[-1])
+            out.step = float(df[CorrespondingColumnNameRuler.prm_step_name(prm_name)].dropna().values[-1])
+
+        elif ColumnManager._is_categorical_parameter(prm_name, df.columns):
+            out = CategoricalParameter()
+            out.name = prm_name
+            out.value = str(df[prm_name].dropna().values[-1])
+            out.choices = df[CorrespondingColumnNameRuler.prm_choices_name(prm_name)].dropna().values[-1]
+
+        else:
+            raise NotImplementedError
+
+        return out
+
+    @staticmethod
+    def _reconvert_objects(df: pd.DataFrame, meta_columns: list[str]):
+        for column, meta_column in zip(df.columns, meta_columns):
+            # list は csv を経由することで str になるので restore
+            if meta_column == 'prm_choices':
+                print(df[column])
+                df[column] = [ast.literal_eval(d) for d in df[column]]
 
 
 @dataclasses.dataclass
@@ -457,6 +503,8 @@ class Record:
                 d.update({f(prm_name): param.lower_bound})
                 f = CorrespondingColumnNameRuler.prm_upper_bound_name
                 d.update({f(prm_name): param.upper_bound})
+                f = CorrespondingColumnNameRuler.prm_step_name
+                d.update({f(prm_name): param.step})
             elif isinstance(param, CategoricalParameter):
                 f = CorrespondingColumnNameRuler.prm_choices_name
                 d.update({f(prm_name): param.choices})
@@ -592,7 +640,10 @@ class Records:
             # load df from line 3
             loaded_df = pd.read_csv(f, encoding=ENCODING, header=0)
 
-        # この段階では Record が setup されていない可能性があるので
+        # choices は list だったものが str になるので型変換
+        ColumnManager._reconvert_objects(loaded_df, loaded_meta_columns)
+
+        # この段階では dtypes が setup されていない可能性があるので
         # compatibility check をしない。よって set_df しない。
         self.loaded_meta_columns = loaded_meta_columns
         self.loaded_df = loaded_df
@@ -828,7 +879,6 @@ class History:
     prm_names: list[str]
     obj_names: list[str]
     cns_names: list[str]
-    sub_fidelity_model_names: list[str]
     is_restart: bool
 
     path: str
@@ -848,32 +898,53 @@ class History:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._records.df_wrapper.end_dask()
 
-    def load_csv(self, path):
+    def load_csv(self, path, with_finalize=False):
         self.is_restart = True
         self.path = path
         self._records.load(self.path)
 
+        if with_finalize:
+            self._finalize_from_loaded_data()
+
+    def _finalize_from_loaded_data(self):
+        assert self.is_restart
+
+        if not self._finalized:
+
+            df = self._records.loaded_df
+            meta_columns = self._records.loaded_meta_columns
+
+            self.prm_names = ColumnManager.filter_columns('prm', df.columns, meta_columns)
+            self.obj_names = ColumnManager.filter_columns('obj', df.columns, meta_columns)
+            self.cns_names = ColumnManager.filter_columns('cns', df.columns, meta_columns)
+
+            parameters: TrialInput = {}
+            for prm_name in self.prm_names:
+                param = ColumnManager.get_parameter(prm_name, df)
+                parameters.update({prm_name: param})
+
+            self.finalize(
+                parameters,
+                self.obj_names,
+                self.cns_names,
+                )
+
     def finalize(
             self,
-            parameters: dict[str, Parameter],
+            parameters: TrialInput,
             obj_names,
             cns_names,
-            sub_fidelity_model_names=None,
     ):
 
         self.prm_names = list(parameters.keys())
         self.obj_names = list(obj_names)
         self.cns_names = list(cns_names)
-        self.sub_fidelity_model_names = sub_fidelity_model_names or []
 
-        # worker ごとに実行が必要な処理
         if not self._finalized:
             # ここで dtypes が決定する
             self._records.column_manager.initialize(
                 parameters, self.obj_names, self.cns_names
             )
-
-            # worker で再処理されると困る処理
 
             # initialize
             self._records.initialize()
@@ -925,3 +996,24 @@ class History:
 
     def save(self):
         self._records.save(self.path)
+
+
+def debug_standalone_history():
+    history = History()
+    history.load_csv(os.path.join(os.path.dirname(__file__), 'history_test.csv'), with_finalize=True)
+
+    print(f'{history.prm_names=}')
+    print(f'{history.obj_names=}')
+    print(f'{history.cns_names=}')
+
+    df = history.get_df()
+
+    print(df)
+
+    print(df[history.prm_names])
+
+    df.to_csv(os.path.join(os.path.dirname(__file__), 'history_loaded.csv'))
+
+
+if __name__ == '__main__':
+    debug_standalone_history()

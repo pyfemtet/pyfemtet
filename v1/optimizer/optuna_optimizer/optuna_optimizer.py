@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import inspect
 import tempfile
 import warnings
 import datetime
@@ -19,10 +20,12 @@ from v1.interface import *
 from v1.exceptions import *
 from v1.variable_manager import *
 from v1.utils.dask_util import *
-from v1.logger import get_optuna_logger, remove_all_output
+from v1.logger import get_optuna_logger, remove_all_output, get_module_logger
 
 from v1.optimizer.optimizer import *
 from v1.optimizer.optuna_optimizer.optuna_attribute import OptunaAttribute
+
+logger = get_module_logger('opt.optimizer', False)
 
 remove_all_output(get_optuna_logger())
 
@@ -235,6 +238,18 @@ class OptunaOptimizer(AbstractOptimizer):
         self.sampler_class = self.sampler_class or optuna.samplers.TPESampler
         self.sampler_kwargs = self.sampler_kwargs or {}
 
+        # remove automatically-given arguments
+        if 'seed' in self.sampler_kwargs:
+            warnings.warn('sampler_kwargs `seed` は'
+                          'Optimizer.set_random_seed() で'
+                          '与えてください。引数は無視されます。')
+            self.sampler_kwargs.pop('seed')
+        if 'constraints_func' in self.sampler_kwargs:
+            warnings.warn('sampler_kwargs `constraints_func` は'
+                          'pyfemtet.opt の内部で自動的に与えられます。'
+                          '引数は無視されます。')
+            self.sampler_kwargs.pop('constraints_func')
+
         # create storage path
         self.storage_path = self.history.path.removesuffix('.csv') + '.db'
 
@@ -376,21 +391,7 @@ class OptunaOptimizer(AbstractOptimizer):
             self._setup_before_parallel()
             self._setup_after_parallel()
 
-            # process kwargs
-            if self.sampler_kwargs is None:
-                self.sampler_kwargs = {}
-
-            if 'seed' in self.sampler_kwargs:
-                warnings.warn('sampler_kwargs `seed` は'
-                              'Optimizer.set_random_seed() で'
-                              '与えてください。引数は無視されます。')
-                self.sampler_kwargs.pop('seed')
-            if 'constraints_func' in self.sampler_kwargs:
-                warnings.warn('sampler_kwargs `constraints_func` は'
-                              'pyfemtet.opt の内部で自動的に与えられます。'
-                              '引数は無視されます。')
-                self.sampler_kwargs.pop('constraints_func')
-
+            # automatically-given arguments
             if len(self.constraints) > 0:
                 self.sampler_kwargs.update(
                     constraints_func=self._constraint
@@ -400,8 +401,28 @@ class OptunaOptimizer(AbstractOptimizer):
                     seed=self.seed
                 )
 
+            actual_sampler_kwargs = dict()
+            arguments = inspect.signature(self.sampler_class.__init__).parameters
+            for k, v in self.sampler_kwargs.items():
+
+                # the key is valid, pass to sampler
+                if k in arguments.keys():
+                    actual_sampler_kwargs.update({k: v})
+
+                # if not automatically-given arguments,
+                # show warning
+                elif k not in ('seed', 'constraints_func'):
+                    logger.warning(f'与えられた引数 {k} はサンプラー {self.sampler_class.__name__} の'
+                                   f'引数に含まれません。無視されます。')
+
+                # else, ignore it
+                else:
+                    pass
+
+
+
             # noinspection PyArgumentList
-            sampler = self.sampler_class(**self.sampler_kwargs)
+            sampler = self.sampler_class(**actual_sampler_kwargs)
 
             # sampler specific processes
             from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
@@ -471,13 +492,17 @@ if __name__ == '__main__':
     # from optuna_integration import BoTorchSampler
     # sampler = BoTorchSampler(n_startup_trials=5)
 
+    os.chdir(os.path.dirname(__file__))
+
     from v1.exceptions import PostProcessError
 
     def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
-        x = _opt.get_variables('values')
+        d = _opt.get_variables()
+        x1 = d['x1']
+        x2 = d['x2']
         # if _cns(_fem, _opt) < 0:
         #     raise PostProcessError
-        return (x ** 2).sum()
+        return x1 ** 2 + x2 ** 2
 
     def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
         x = _opt.get_variables('values')
@@ -493,7 +518,8 @@ if __name__ == '__main__':
 
     # _opt.sampler = optuna.samplers.RandomSampler(seed=42)
     _opt.seed = 42
-    _opt.sampler_class = optuna.samplers.TPESampler
+    # _opt.sampler_class = optuna.samplers.TPESampler
+    _opt.sampler_class = optuna.samplers.RandomSampler
     _opt.sampler_kwargs = dict(
         n_startup_trials=5,
     )
@@ -501,6 +527,7 @@ if __name__ == '__main__':
 
     _opt.add_parameter('x1', 1, -1, 1, step=0.1)
     _opt.add_parameter('x2', 1, -1, 1, step=0.1)
+    _opt.add_categorical_parameter('x3', 'a', choices=['a', 'b', 'c'])
     _opt.add_constraint('cns', _cns, lower_bound=0., args=(_fem, _opt))
     _opt.add_objective('obj1', _parabola, args=(_fem, _opt))
     # _opt.add_objective('obj2', _parabola2, args=(_fem, _opt))

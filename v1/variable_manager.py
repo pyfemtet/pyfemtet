@@ -116,4 +116,4 @@ class VariableManager:
             return {name: var.value for name, var in raw.items()}
 
         elif format == 'values':
-            return np.array([var.value for var in raw.values()], dtype=np.float64)
+            return np.array([var.value for var in raw.values()])
