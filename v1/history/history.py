@@ -415,7 +415,7 @@ class ColumnManager:
         return self._is_categorical_parameter(prm_name, tuple(self.dtypes.keys()))
 
     @staticmethod
-    def get_parameter(prm_name: str, df: pd.DataFrame) -> Parameter:
+    def _get_parameter(prm_name: str, df: pd.DataFrame) -> Parameter:
         if ColumnManager._is_numerical_parameter(prm_name, df.columns):
             out = NumericParameter()
             out.name = prm_name
@@ -844,7 +844,7 @@ class Records:
         with self.df_wrapper.lock_if_not_locked:
 
             # update main fidelity
-            equality_filters = {'sub_fidelity_name': MAIN_FIDELITY_NAME}
+            equality_filters = History.MAIN_FILTER
             mgr = EntireDependentValuesCalculator(
                 self,
                 equality_filters,
@@ -883,6 +883,8 @@ class History:
 
     path: str
 
+    MAIN_FILTER: dict = {'sub_fidelity_name': MAIN_FIDELITY_NAME}
+
     def __init__(self):
         self._records = Records()
         self.path: str | None = None
@@ -920,7 +922,7 @@ class History:
 
             parameters: TrialInput = {}
             for prm_name in self.prm_names:
-                param = ColumnManager.get_parameter(prm_name, df)
+                param = ColumnManager._get_parameter(prm_name, df)
                 parameters.update({prm_name: param})
 
             self.finalize(

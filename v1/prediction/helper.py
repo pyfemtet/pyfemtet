@@ -94,14 +94,14 @@ def get_search_space(df: pd.DataFrame, history: History) -> dict[str, BaseDistri
     # get search_space
     search_space = dict()
     for prm_name in history.prm_names:
-        if Record.is_numerical_parameter(prm_name):
+        if history._records.column_manager.is_numerical_parameter(prm_name):
             lb, ub = get_bounds_containing_entire_bounds(df, prm_name)
             search_space.update({
                 prm_name: FloatDistribution(
                     low=lb, high=ub,
                 )
             })
-        elif Record.is_categorical_parameter(prm_name):
+        elif history._records.column_manager.is_categorical_parameter(prm_name):
             choices: set = get_choices_containing_entire_bounds(df, prm_name)
             search_space.update({
                 prm_name: CategoricalDistribution(

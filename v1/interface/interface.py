@@ -76,6 +76,7 @@ class AbstractFEMInterface:
     def close(self):  # context manager による予約語
         pass
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def _check_using_fem(self, fun: callable) -> bool:
         return False
 

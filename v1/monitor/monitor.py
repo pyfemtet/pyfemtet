@@ -68,8 +68,7 @@ class Monitor:
             # label = self.entire_status.value.str()
 
             # set default value
-            equality_filters = None
-            equality_filters = equality_filters or {'sub_fidelity_name': MAIN_FIDELITY_NAME}
+            equality_filters = History.MAIN_FILTER
 
             # get df to create figure
             df = self.history.get_df(

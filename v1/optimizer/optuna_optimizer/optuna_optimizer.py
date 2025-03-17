@@ -223,7 +223,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # restart である場合、追加 N 回と見做す
         if self.history.is_restart:
             n_existing_trials = len(self.history.get_df(
-                equality_filters={'sub_fidelity_name': MAIN_FIDELITY_NAME}
+                equality_filters=History.MAIN_FILTER
             ))
             n_trials = n_trials + n_existing_trials
 
