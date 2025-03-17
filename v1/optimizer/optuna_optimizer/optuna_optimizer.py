@@ -4,11 +4,12 @@ import os
 import tempfile
 import warnings
 import datetime
-from contextlib import closing
+from contextlib import closing, nullcontext
 
 import numpy as np
 
 import optuna
+from optuna.samplers import TPESampler
 from optuna.study import MaxTrialsCallback
 from optuna_integration.dask import DaskStorage
 
@@ -47,8 +48,8 @@ class OptunaOptimizer(AbstractOptimizer):
 
     def __init__(self):
         super().__init__()
-        self.sampler_kwargs = None
-        self.sampler_class = None
+        self.sampler_kwargs = {}
+        self.sampler_class = TPESampler
         self.n_trials: int | None = None
         self.timeout: float | None = None
         self.seed: int | None = None
@@ -254,7 +255,6 @@ class OptunaOptimizer(AbstractOptimizer):
                 and self.history.is_restart:
 
             # get unique tmp file
-            import tempfile
             tmp_storage_path = tempfile.mktemp(suffix='.db')
             self._existing_storage_path = self.storage_path
             self.storage_path = tmp_storage_path
@@ -316,10 +316,51 @@ class OptunaOptimizer(AbstractOptimizer):
             if self.seed is not None:
                 self.seed += idx
 
+    def _is_tpe_addressing(self):
+        out = False
+        if hasattr(self, '_existing_storage_path'):
+            if self._existing_storage_path is not None:
+                assert os.path.isfile(self._existing_storage_path)
+                out = True
+        return out
+
+    def _removing_tmp_db_if_needed(self):
+
+        if not self._is_tpe_addressing():
+            return nullcontext()
+
+        # noinspection PyMethodParameters
+        class RemovingTempDB:
+            def __enter__(self_):
+                pass
+
+            def __exit__(self_, exc_type, exc_val, exc_tb):
+                # clean up temporary file
+                if isinstance(self.storage, optuna.storages._CachedStorage):
+                    rdb_storage = self.storage._backend
+                elif isinstance(self.storage, optuna.storages.RDBStorage):
+                    rdb_storage = self.storage
+                elif isinstance(self.storage, DaskStorage):
+                    base_storage = self.storage.get_base_storage()
+                    assert isinstance(base_storage, optuna.storages._CachedStorage)
+                    rdb_storage = base_storage._backend
+                else:
+                    raise NotImplementedError
+                assert isinstance(rdb_storage, optuna.storages.RDBStorage)
+                rdb_storage.engine.dispose()
+
+                if os.path.exists(self.storage_path):
+                    os.remove(self.storage_path)
+
+                # restore
+                self.storage_path = self._existing_storage_path
+
+        return RemovingTempDB()
+
     def run(self):
 
         # quit FEM even if abnormal termination
-        with closing(self.fem):
+        with closing(self.fem), self._removing_tmp_db_if_needed():
 
             # sub fidelity
             if self.sub_fidelity_models is None:
@@ -377,17 +418,8 @@ class OptunaOptimizer(AbstractOptimizer):
                 sampler=sampler,
             )
 
-            # utility
-            def is_tpe_addressing():
-                out = False
-                if hasattr(self, '_existing_storage_path'):
-                    if self._existing_storage_path is not None:
-                        assert os.path.isfile(self._existing_storage_path)
-                        out = True
-                return out
-
             # if tpe_addressing, load main study
-            if is_tpe_addressing():
+            if self._is_tpe_addressing():
                 # load it
                 existing_study = optuna.load_study(
                     study_name=self.study_name,
@@ -408,28 +440,6 @@ class OptunaOptimizer(AbstractOptimizer):
                 timeout=self.timeout,
                 callbacks=self.callbacks,
             )
-
-            # if tpe_addressing, remove temp db
-            if is_tpe_addressing():
-                # clean up temporary file
-                if isinstance(self.storage, optuna.storages._CachedStorage):
-                    rdb_storage = self.storage._backend
-                elif isinstance(self.storage, optuna.storages.RDBStorage):
-                    rdb_storage = self.storage
-                elif isinstance(self.storage, DaskStorage):
-                    base_storage = self.storage.get_base_storage()
-                    assert isinstance(base_storage, optuna.storages._CachedStorage)
-                    rdb_storage = base_storage._backend
-                else:
-                    raise NotImplementedError
-                assert isinstance(rdb_storage, optuna.storages.RDBStorage)
-                rdb_storage.engine.dispose()
-
-                if os.path.exists(self.storage_path):
-                    os.remove(self.storage_path)
-
-                # restore
-                self.storage_path = self._existing_storage_path
 
     def _check_and_raise_interruption(self):
         try:
@@ -516,7 +526,7 @@ if __name__ == '__main__':
     #
     # _opt.set_solve_condition(_solve_condition)
 
-    # _opt.history.path = 'restart-test.csv'
+    _opt.history.path = 'restart-test.csv'
     _opt.run()
 
     # import plotly.express as px
