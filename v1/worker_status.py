@@ -87,12 +87,20 @@ class WorkerStatus:
         if client is not None:
             if client.scheduler is not None:
                 key = self._dataset_name
-                with Lock(f'access_dataset_{key}'):
-                    # TODO: datasets から metadata に変えて getter で from_float で restore する
-                    if key in client.list_datasets():
-                        return client.get_dataset(key)
-                    else:
-                        raise RuntimeError
+                value: float | None = client.get_metadata(key, default=None)
+
+                # value は単なる float になるので型変換
+                if isinstance(value, float):
+                    value: _WorkerStatus = worker_status_from_float(value)
+
+                # setter の時点では client がなかった場合など
+                elif value is None:
+                    value = self.__value
+                    client.set_metadata(key, value)
+
+                return value
+
+            # client はあるが、close された後である場合
             else:
                 return self.__value
         else:
@@ -102,10 +110,8 @@ class WorkerStatus:
     def value(self, value: _WorkerStatus):
         client = get_client()
         if client is not None:
-            key = self._dataset_name
-            with Lock(f'access_dataset_{key}'):
-                if key in client.list_datasets():
-                    client.unpublish_dataset(key)
-                client.publish_dataset(**{key: value})
-                sleep(0.1)
+            if client.scheduler is not None:
+                key = self._dataset_name
+                client.set_metadata(key, value)
+                # sleep(0.1)
         self.__value = value
