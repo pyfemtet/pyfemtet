@@ -1,5 +1,5 @@
 from pyfemtet.opt.visualization._base import PyFemtetApplicationBase
-from pyfemtet.opt.visualization.result_viewer.pages import HomePage, PredictionModelPage
+from pyfemtet.opt.visualization._result_viewer.pages import HomePage, PredictionModelPage
 from pyfemtet.opt.visualization._process_monitor.pages import OptunaVisualizerPage
 
 from pyfemtet._message import Msg

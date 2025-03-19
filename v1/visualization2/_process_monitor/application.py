@@ -2,13 +2,16 @@ from typing import List
 from time import sleep
 from threading import Thread
 
-import pandas as pd
 from flask import jsonify
 
-from pyfemtet.opt.visualization._base import PyFemtetApplicationBase, logger
-from pyfemtet.opt.visualization._process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
-from pyfemtet._message import Msg
+# from pyfemtet.opt.visualization._base import PyFemtetApplicationBase, logger
+# from pyfemtet.opt.visualization._process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
+# from pyfemtet._message import Msg
+
+from v1.visualization2._base import PyFemtetApplicationBase
+from v1.visualization2._process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
 from v1.worker_status import WorkerStatus
+from pyfemtet._message import Msg
 
 
 class ProcessMonitorApplication(PyFemtetApplicationBase):
@@ -48,35 +51,15 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
             history=history,
         )
 
-        self._should_get_actor_data = False
         self.is_debug = is_debug
 
         # type hint (avoid circular import)
-        from pyfemtet.opt._femopt_core import OptimizationStatus
 
         # register arguments
+        self.local_data = history.get_df()  # scheduler への負荷を避けるためアクセスは while loop の中で行う
         self.worker_addresses: List[str] = worker_addresses
-        self.entire_status: OptimizationStatus = status  # include actor
-        self.worker_status_list: List[OptimizationStatus] = worker_status_list  # include actor
-
-        # initialize local members (from actors)
-        self._df: pd.DataFrame = self.local_data
-        self.local_entire_status_int: int = self.entire_status.get()
-        self.local_worker_status_int_list: List[int] = [s.get() for s in self.worker_status_list]
-
-    @property
-    def local_data(self) -> pd.DataFrame:
-        if self._should_get_actor_data:
-            return self._df
-        else:
-            return self.history.get_filtered_df([self.history.OptTrialState.succeeded, self.history.OptTrialState.skipped])
-
-    @local_data.setter
-    def local_data(self, value: pd.DataFrame):
-        if self._should_get_actor_data:
-            raise NotImplementedError('If should_get_actor_data, ProcessMonitorApplication.local_df is read_only.')
-        else:
-            self.history.set_df(value)
+        self.entire_status: WorkerStatus = status  # include actor
+        self.worker_status_list: List[WorkerStatus] = worker_status_list  # include actor
 
     def setup_callback(self, debug=False):
         if not debug:
@@ -88,8 +71,8 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         def some_command():
 
             # If the entire_state < INTERRUPTING, set INTERRUPTING
-            if self.local_entire_status_int < OptimizationStatus.INTERRUPTING:
-                self.local_entire_status_int = OptimizationStatus.INTERRUPTING
+            if self.entire_status.value < WorkerStatus.interrupting:
+                self.entire_status.value = WorkerStatus.interrupting
                 result = {"message": "Interrupting signal emitted successfully."}
 
             else:
@@ -99,11 +82,6 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
 
     def start_server(self, host=None, port=None, host_record=None):
         """Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"""
-
-        self._should_get_actor_data = True
-
-        # avoid circular import
-        from pyfemtet.opt._femopt_core import OptimizationStatus
 
         host = host or 'localhost'
         port = port or self.DEFAULT_PORT
@@ -117,46 +95,36 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         )
         server_thread.start()
 
-        # dash app (=flask server) の callback で dask の actor にアクセスすると
-        # おかしくなることがあるので、ここで必要な情報のみやり取りする
         while True:
-            # running 以前に monitor で current status を interrupting にしていれば actor に反映
-            if (
-                    (self.entire_status.get() <= OptimizationStatus.RUNNING)  # メインプロセスが RUNNING 以前である
-                    and (self.local_entire_status_int == OptimizationStatus.INTERRUPTING)  # Application で status を INTERRUPT にした
-            ):
-                self.entire_status.set(OptimizationStatus.INTERRUPTING)
-                for worker_status in self.worker_status_list:
-                    worker_status.set(OptimizationStatus.INTERRUPTING)
+            # df を actor から application に反映する
+            self.local_data = self.history.get_df()
 
-            # status と df を actor から application に反映する
-            self._df = self.history.get_filtered_df([self.history.OptTrialState.succeeded, self.history.OptTrialState.skipped]).copy()
-            self.local_entire_status_int = self.entire_status.get()
-            self.local_worker_status_int_list = [s.get() for s in self.worker_status_list]
+            # 一時的な実装
 
             # terminate_all 指令があれば flask server をホストするプロセスごと終了する
-            if self.entire_status.get() >= OptimizationStatus.TERMINATE_ALL:
+            if self.entire_status.value >= self.entire_status.terminated:
                 return 0  # take server down with me
 
             # interval
             sleep(1)
 
     @staticmethod
-    def get_status_color(status_int):
-        from pyfemtet.opt._femopt_core import OptimizationStatus
+    def get_status_color(status: WorkerStatus):
         # set color
-        if status_int <= OptimizationStatus.SETTING_UP:
+        if status.value <= WorkerStatus.initializing:
             color = 'secondary'
-        elif status_int <= OptimizationStatus.WAIT_OTHER_WORKERS:
+        elif status.value <= WorkerStatus.waiting:
             color = 'primary'
-        elif status_int <= OptimizationStatus.RUNNING:
+        elif status.value <= WorkerStatus.running:
             color = 'primary'
-        elif status_int <= OptimizationStatus.INTERRUPTING:
+        elif status.value <= WorkerStatus.interrupting:
             color = 'warning'
-        elif status_int <= OptimizationStatus.TERMINATE_ALL:
+        elif status.value <= WorkerStatus.finished:
             color = 'dark'
-        elif status_int <= OptimizationStatus.CRASHED:
+        elif status.value <= WorkerStatus.crashed:
             color = 'danger'
+        elif status.value <= WorkerStatus.terminated:
+            color = 'dark'
         else:
             color = 'danger'
         return color

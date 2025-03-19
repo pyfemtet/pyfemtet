@@ -4,6 +4,13 @@ import plotly.graph_objects as go
 from v1.history import *
 from v1.prediction.model import *
 from v1.prediction.helper import *
+from v1.problem import MAIN_FIDELITY_NAME
+
+
+__all__ = [
+    'plot2d',
+    'plot3d',
+]
 
 
 def get_grid_values(history: History, df, prm_name_, N) -> np.ndarray:
@@ -21,7 +28,7 @@ def get_grid_values(history: History, df, prm_name_, N) -> np.ndarray:
 def plot2d(
         history: History,
         prm_name1,
-        remaining_values: dict[str, float],
+        params: dict[str, float],
         obj_name: str,
         df,
         pyfemtet_model: PyFemtetModel,
@@ -36,7 +43,7 @@ def plot2d(
         if prm_name == prm_name1:
             x[:, i] = x1
         else:
-            x[:, i] = remaining_values[prm_name]
+            x[:, i] = params[prm_name]
 
     # predict
     z_mean_, z_std_ = pyfemtet_model.predict(x)
@@ -54,7 +61,8 @@ def plot2d(
             x=list(x1) + list(x1)[::-1],
             y=list(z_mean + z_std) + list(z_mean - z_std)[::-1],
             fill='toself',
-            opacity=0.3
+            opacity=0.3,
+            name='予測の信頼性（標準偏差）',
         )
     )
 
@@ -67,7 +75,37 @@ def plot2d(
         )
     )
 
-    # sample
+    # scatter
+    fig.add_trace(
+        go.Scatter(
+            x=df[prm_name1], y=df[obj_name],
+            mode='markers',
+            marker=dict(
+                size=3,
+                color='black',
+            ),
+            name='trial',
+        )
+    )
+
+    # set opacity by its distance
+    params_ = params.copy()
+    params_.pop(prm_name1)
+    if len(params_) == 0:
+        opacity = np.ones(len(df))
+    else:
+        print(df.columns)
+        print(df.columns)
+        target_points = df[list(params_.keys())]
+        hyper_plane = np.array(tuple(params_.values()))
+        distances_to_hyper_plane = np.linalg.norm(target_points - hyper_plane, axis=1, keepdims=False)
+        opacity = 1 - (distances_to_hyper_plane / distances_to_hyper_plane.max())
+
+    def set_opacity(trace):
+        if isinstance(trace, go.Scatter):
+            trace.marker.color = [f'rgba(0, 0, 0, {o: .2f})' for o in opacity]
+
+    fig.for_each_trace(set_opacity)
 
     return fig
 
@@ -76,7 +114,7 @@ def plot3d(
         history: History,
         prm_name1,
         prm_name2,
-        remaining_values: dict[str, float],
+        params: dict[str, float],
         obj_name: str,
         df,
         pyfemtet_model: PyFemtetModel,
@@ -99,7 +137,7 @@ def plot3d(
         elif prm_name == prm_name2:
             x[:, i] = x2
         else:
-            x[:, i] = remaining_values[prm_name]
+            x[:, i] = params[prm_name]
 
     # predict
     z_mean_, z_std_ = pyfemtet_model.predict(x)
@@ -138,5 +176,36 @@ def plot3d(
             )
         )
     )
+
+    # scatter
+    fig.add_trace(
+        go.Scatter3d(
+            x=df[prm_name1], y=df[prm_name2], z=df[obj_name],
+            mode='markers',
+            marker=dict(
+                size=3,
+                color='black',
+            ),
+            name='trial',
+        )
+    )
+
+    # set opacity by its distance
+    params_ = params.copy()
+    params_.pop(prm_name1)
+    params_.pop(prm_name2)
+    if len(params_) == 0:
+        opacity = np.ones(len(df))
+    else:
+        target_points = df[tuple(params_.keys())]
+        hyper_plane = np.array(tuple(params_.values()))
+        distances_to_hyper_plane = np.linalg.norm(target_points - hyper_plane, axis=1, keepdims=False)
+        opacity = 1 - (distances_to_hyper_plane / distances_to_hyper_plane.max())
+
+    def set_opacity(trace):
+        if isinstance(trace, go.Scatter3d):
+            trace.marker.color = [f'rgba(0, 0, 0, {o: .2f})' for o in opacity]
+
+    fig.for_each_trace(set_opacity)
 
     return fig

@@ -37,7 +37,7 @@ class SingleTaskGPModel(AbstractModel):
         self.gp = setup_gp(X, Y, B, observation_noise, likelihood_class)
 
     def predict(self, x: np.ndarray):
-        assert hasattr(self, 'model')
+        assert hasattr(self, 'gp')
         X = torch.tensor(x, **self.KWARGS)
         post = self.gp.posterior(X)
         with torch.no_grad():

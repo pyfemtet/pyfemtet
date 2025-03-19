@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 
 from v1.history import History
+from v1.problem import MAIN_FIDELITY_NAME
 from pyfemtet._message import Msg
 
 
@@ -128,6 +129,10 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
             obj_names_per_sub_fidelity_list,
             px.colors.qualitative.G10[::-1]
     ):
+
+        if sub_fidelity_name == MAIN_FIDELITY_NAME:
+            continue
+
         assert len(obj_names_per_sub_fidelity) == 1
         obj_name_per_sub_fidelity = obj_names_per_sub_fidelity[0]
         trace = go.Scatter(
@@ -140,16 +145,17 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
         fig.add_trace(trace)
 
     # ===== i 番目が、その時点までで最適かどうか =====
+    # NOTE: 最後の direction をその最適化全体の direction と見做す
     # その時点までの最適な点 index
     indices = []
     anti_indices = []
     objectives = df[obj_name].values
-    objective_directions = df[f'{obj_name}_direction'].values
-    for i, (obj, direction) in enumerate(zip(objectives, objective_directions)):
-        # DESCRIPTION: 最適化中に direction は変化しない前提
+    direction = df[f'{obj_name}_direction'].values[-1]
+    for i, obj in enumerate(objectives):
 
         obj_halfway = objectives[:i+1]
         feasible_obj_halfway = obj_halfway[np.where(~np.isnan(obj_halfway))]
+
         if len(feasible_obj_halfway) == 0:
             indices.append(i)
             continue
@@ -167,9 +173,8 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
                 anti_indices.append(i)
 
         else:
-            residuals = (objectives - objective_directions) ** 2
-            residual = residuals[i]
-            if residual == min(residuals[:i+1][np.where(~np.isnan(residuals[:i+1]))]):
+            residuals_halfway = (feasible_obj_halfway - direction) ** 2
+            if ((obj - direction) ** 2) == min(residuals_halfway):
                 indices.append(i)
             else:
                 anti_indices.append(i)
@@ -220,9 +225,9 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
 
     # ===== direction が float の場合、目標値を描く =====
     if len(df) > 1:
-        if isinstance(objective_directions[0], float):
+        if isinstance(direction, float):
             x = [df['trial'].iloc[0], df['trial'].iloc[-1]]
-            y = [objective_directions[0]] * 2
+            y = [direction] * 2
             fig.add_trace(
                 go.Scatter(
                     x=x,
@@ -232,7 +237,6 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
                     name=Msg.LEGEND_LABEL_OBJECTIVE_TARGET,
                 )
             )
-
 
     # ===== layout =====
     fig.update_layout(

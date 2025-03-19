@@ -8,8 +8,9 @@ import pyfemtet
 from v1.utils.dask_util import *
 from v1.optimizer import *
 from v1.worker_status import *
-from v1.monitor.monitor import run_monitor
 from v1.logger import get_module_logger
+from v1.visualization2._process_monitor.application import main
+
 
 logger = get_module_logger('opt.femopt', True)
 
@@ -68,9 +69,10 @@ class FEMOpt:
             # Setting up monitor
             logger.info(f'Launching Monitor...')
             monitor_future = executor.submit(
-                run_monitor,
+                main,
                 history=self.opt.history,
-                entire_status=entire_status,
+                status=entire_status,
+                worker_addresses=['main'] + opt_worker_addresses,
                 worker_status_list=worker_status_list,
             )
 

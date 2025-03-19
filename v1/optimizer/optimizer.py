@@ -53,7 +53,7 @@ class AbstractOptimizer:
         # multi-fidelity
         self.fidelity = None
         self.sub_fidelity_name = MAIN_FIDELITY_NAME
-        self.sub_fidelity_models = None
+        self.sub_fidelity_models = SubFidelityModels()
 
         # System
         self._fem: AbstractFEMInterface | None = None

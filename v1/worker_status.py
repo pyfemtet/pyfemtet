@@ -88,6 +88,7 @@ class WorkerStatus:
             if client.scheduler is not None:
                 key = self._dataset_name
                 with Lock(f'access_dataset_{key}'):
+                    # TODO: datasets から metadata に変えて getter で from_float で restore する
                     if key in client.list_datasets():
                         return client.get_dataset(key)
                     else:

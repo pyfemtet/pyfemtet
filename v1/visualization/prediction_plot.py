@@ -6,6 +6,12 @@ from v1.prediction.model import *
 from v1.prediction.helper import *
 
 
+__all__ = [
+    'plot2d',
+    'plot3d',
+]
+
+
 def get_grid_values(history: History, df, prm_name_, N) -> np.ndarray:
     if history._records.column_manager.is_numerical_parameter(prm_name_):
         lb_, ub_ = get_bounds_containing_entire_bounds(df, prm_name_)
