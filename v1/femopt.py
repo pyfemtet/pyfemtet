@@ -68,6 +68,8 @@ class FEMOpt:
 
             # Setting up monitor
             logger.info(f'Launching Monitor...')
+
+            # noinspection PyTypeChecker,PyUnusedLocal
             monitor_future = executor.submit(
                 main,
                 history=self.opt.history,
