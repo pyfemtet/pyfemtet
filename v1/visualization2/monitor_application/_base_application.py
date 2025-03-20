@@ -17,13 +17,13 @@ import dash_bootstrap_components
 # from pyfemtet.opt._femopt_core import History
 # from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
 from v1.history import History
-from v1.visualization2._wrapped_components import html, dcc, dbc
+from v1.visualization2.monitor_application._wrapped_components import html
+from v1.visualization2.monitor_application._wrapped_components import dcc, dbc
 
 # the others
 from abc import ABC, abstractmethod
 import logging
 import psutil
-import json
 from v1.logger import get_module_logger, get_dash_logger
 
 logger = get_module_logger('opt.monitor', __name__)
@@ -51,7 +51,7 @@ title -->home| |      | |
 
     """
     def __init__(self, title='base-page', rel_url='/', application=None):
-        self.layout: Component = None
+        self.layout: Component = html.Div('This is a abstract page before setup.')
         self.rel_url = rel_url
         self.title = title
         self.application: PyFemtetApplicationBase = application
@@ -136,6 +136,7 @@ class SidebarApplicationBase:
         self.title = title if title is not None else 'App'
         self.subtitle = subtitle if title is not None else ''
         self.server = Flask(__name__)
+        # noinspection PyTypeChecker
         self.app = Dash(
             __name__,
             external_stylesheets=[dash_bootstrap_components.themes.BOOTSTRAP],
@@ -242,6 +243,9 @@ class PyFemtetApplicationBase(SidebarApplicationBase):
         # register arguments
         self.history = history  # include actor
         super().__init__(title, subtitle)
+
+    def get_df(self, equality_filters: dict = None):
+        self.history.get_df(equality_filters=equality_filters)
 
 
 def check_page_layout(page_cls: type):

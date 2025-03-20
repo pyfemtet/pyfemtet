@@ -143,14 +143,10 @@ class DataFrameWrapper:
 
             # 健在の場合
             else:
+
+                df = None
+
                 with Lock('access_dataset_df'):
-
-                    # mypy によるとこのスコープで
-                    # 定義しないと定義漏れになる可能性がある
-                    # そんなことないと思うけど将来の変更時に
-                    # 警告を見落とさないようにするためここで定義
-                    df = None
-
                     # datasets 内に存在する場合
                     if self._dataset_name in client.list_datasets():
                         df = client.get_dataset(self._dataset_name)
@@ -159,7 +155,7 @@ class DataFrameWrapper:
                     else:
                         raise RuntimeError
 
-                    assert df is not None
+                assert df is not None
 
         # dask クラスターがない場合
         else:

@@ -4,17 +4,21 @@ from threading import Thread
 
 from flask import jsonify
 
-from v1.visualization2.monitor_application._base import PyFemtetApplicationBase
-from v1.visualization2.monitor_application._process_monitor.pages import (
-    HomePage,
-    WorkerPage,
-    PredictionModelPage,
-    OptunaVisualizerPage
-)
 from v1.worker_status import WorkerStatus
 from _pyfemtet._message import Msg
-
 from v1.logger import get_module_logger
+from v1.utils.helper import *
+
+from v1.visualization2.monitor_application._base_application import PyFemtetApplicationBase
+from v1.visualization2.monitor_application.process_monitor.pages import (
+    HomePage,
+    WorkerPage,
+)
+from v1.visualization2.monitor_application._common_pages import (
+    PredictionModelPage,
+    OptunaVisualizerPage,
+)
+
 
 logger = get_module_logger('opt.femopt', False)
 
@@ -59,7 +63,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         self.is_debug = is_debug
 
         # register arguments
-        self.local_data = history.get_df()  # scheduler への負荷を避けるためアクセスは while loop の中で行う
+        self._local_data = history.get_df()  # scheduler への負荷を避けるためアクセスは while loop の中で行う
         self.worker_addresses: List[str] = worker_addresses
         self.entire_status: WorkerStatus = status  # include actor
         self.worker_status_list: List[WorkerStatus] = worker_status_list  # include actor
@@ -82,7 +86,6 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
             return jsonify(result)
 
     def start_server(self, host=None, port=None, host_record=None):
-        """Callback の中で使いたい Actor のデータを Application クラスのメンバーとやり取りしつつ、server を落とす関数"""
 
         host = host or 'localhost'
         port = port or self.DEFAULT_PORT
@@ -98,7 +101,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
 
         while True:
             # df を actor から application に反映する
-            self.local_data = self.history.get_df()
+            self._local_data = self.history.get_df()
 
             # terminate_all 指令があれば flask server をホストするプロセスごと終了する
             if self.entire_status.value >= self.entire_status.terminated:
@@ -131,6 +134,14 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         else:
             color = 'danger'
         return color
+
+    def get_df(self, equality_filters: dict = None):
+        df = self._local_data
+
+        if equality_filters is not None:
+            df = get_partial_df(df, equality_filters)
+
+        return df
 
 
 def main(history, status, worker_addresses, worker_status_list, host=None, port=None, host_record=None):

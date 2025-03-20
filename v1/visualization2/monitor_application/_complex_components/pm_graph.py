@@ -7,7 +7,8 @@ from dash.exceptions import PreventUpdate
 
 # components
 from dash import dash_table
-from v1.visualization2._wrapped_components import html, dcc, dbc
+from v1.visualization2.monitor_application._wrapped_components import html
+from v1.visualization2.monitor_application._wrapped_components import dcc, dbc
 
 # graph
 import pandas as pd
@@ -23,7 +24,7 @@ import numpy as np
 
 from v1.prediction.model import PyFemtetModel, SingleTaskGPModel
 from v1.visualization2.plotter.pm_graph_creator import plot2d, plot3d
-from v1.visualization2.monitor_application._base import AbstractPage, logger
+from v1.visualization2.monitor_application._base_application import AbstractPage, logger
 from _pyfemtet._message import Msg
 
 
@@ -321,7 +322,7 @@ class PredictionModelGraph(AbstractPage):
         )
         def redraw_graph(
                 command,
-                active_tab_id,
+                _1,
                 axis1_label,
                 axis2_label,
                 axis3_label,
@@ -342,7 +343,7 @@ class PredictionModelGraph(AbstractPage):
             if self.application.history is None:
                 logger.error(Msg.ERR_NO_HISTORY_SELECTED)
                 return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
-            prm_names = self.application.history.prm_names
+            # prm_names = self.application.history.prm_names
 
             # check history
             if len(self.data_accessor()) == 0:
@@ -527,7 +528,8 @@ class PredictionModelGraph(AbstractPage):
                 (ax1_label_key := 1): no_update,
                 (ax2_label_key := 2): no_update,
                 (ax3_label_key := 3): no_update,
-                (slider_style_list_key := 4): [(style.update({'display': 'inline'}), style)[1] for style in current_styles],
+                (slider_style_list_key := 4): [(style.update({'display': 'inline'}), style)[1]
+                                               for style in current_styles],
                 (ax2_hidden := 5): False,
             }
 

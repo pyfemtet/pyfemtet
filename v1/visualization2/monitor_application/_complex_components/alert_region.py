@@ -6,9 +6,9 @@ from dash.development.base_component import Component
 from dash import Output, Input
 
 # components
-from v1.visualization2._wrapped_components import dbc
+from v1.visualization2.monitor_application._wrapped_components import dbc
 
-from v1.visualization2.monitor_application._base import AbstractPage
+from v1.visualization2.monitor_application._base_application import AbstractPage
 
 
 class AlertRegion(AbstractPage):
@@ -52,7 +52,8 @@ class AlertRegion(AbstractPage):
         def clear_alerts(_):
             return []
 
-    def create_alerts(self, msg, color='secondary', current_alerts=None) -> List[Component]:
+    @staticmethod
+    def create_alerts(msg, color='secondary', current_alerts=None) -> List[Component]:
 
         if current_alerts is None:
             current_alerts = []

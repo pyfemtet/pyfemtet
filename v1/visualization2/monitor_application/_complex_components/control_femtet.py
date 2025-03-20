@@ -3,7 +3,8 @@ from dash import Output, Input, no_update, callback_context
 from dash.exceptions import PreventUpdate
 
 # components
-from v1.visualization2._wrapped_components import html, dbc
+from v1.visualization2.monitor_application._wrapped_components import html
+from v1.visualization2.monitor_application._wrapped_components import dbc
 
 # the others
 import os
@@ -12,7 +13,7 @@ import json
 # noinspection PyUnresolvedReferences
 from pythoncom import com_error
 
-from v1.visualization2.monitor_application._base import AbstractPage
+from v1.visualization2.monitor_application._base_application import AbstractPage
 from v1.interface import FemtetInterface
 from _pyfemtet._message import Msg
 

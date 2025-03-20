@@ -1,15 +1,19 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import numpy as np
 import pandas as pd
-
-import optuna
 
 from dash import Output, Input, State, callback_context, no_update, ALL
 from dash.exceptions import PreventUpdate
 
-from v1.visualization2._wrapped_components import dcc, dbc, html
-from v1.visualization2.monitor_application._base import AbstractPage, logger
-from v1.visualization2._complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
-from v1.visualization2._complex_components.pm_graph import PredictionModelGraph
+from v1.visualization2.monitor_application._wrapped_components import html, dcc, dbc
+from v1.visualization2.monitor_application._base_application import AbstractPage, logger
+from v1.visualization2.monitor_application._complex_components.main_graph import MainGraph
+
+if TYPE_CHECKING:
+    from v1.visualization2.monitor_application.process_monitor.application import ProcessMonitorApplication
+
 from v1.worker_status import *
 from _pyfemtet._message import Msg
 
@@ -32,6 +36,7 @@ def is_iterable(component):
 
 
 class HomePage(AbstractPage):
+    application: ProcessMonitorApplication
 
     def __init__(self, title, rel_url='/'):
         super().__init__(title, rel_url)
@@ -113,9 +118,6 @@ class HomePage(AbstractPage):
         # setup callback of subpages
         super().setup_callback()
 
-        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
-        self.application: ProcessMonitorApplication = self.application
-
         app = self.application.app
 
         # ===== Delete Loading Animation =====
@@ -145,7 +147,7 @@ class HomePage(AbstractPage):
                 raise PreventUpdate
 
             # If new data does not exist, do nothing
-            if len(self.application.local_data) <= current_graph_data_length:
+            if len(self.application.get_df()) <= current_graph_data_length:
                 raise PreventUpdate
 
             # fire callback
@@ -208,7 +210,7 @@ class HomePage(AbstractPage):
                           Input('debug-button-2', 'n_clicks'),
                           prevent_initial_call=True)
             def add_data(*_):
-                meta_columns = self.application.history.meta_columns
+                meta_columns = self.application.history._records.column_manager.meta_columns
                 df = self.application.local_data
 
                 new_row = df.iloc[-2:]
@@ -226,10 +228,9 @@ class HomePage(AbstractPage):
 
 
 class WorkerPage(AbstractPage):
+    application: ProcessMonitorApplication
 
     def __init__(self, title, rel_url, application):
-        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
-        self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
     def setup_component(self):
@@ -280,118 +281,3 @@ class WorkerPage(AbstractPage):
                  for _ in range(len(self.worker_status_alerts))])
 
             return tuple(ret)
-
-
-class PredictionModelPage(AbstractPage):
-    """"""
-
-    def __init__(self, title, rel_url, application):
-        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
-        self.application: ProcessMonitorApplication = None
-        super().__init__(title, rel_url, application)
-
-    def setup_component(self):
-        self.rsm_graph: PredictionModelGraph = PredictionModelGraph()
-        self.add_subpage(self.rsm_graph)
-
-    def setup_layout(self):
-        self.layout = self.rsm_graph.layout
-
-
-class OptunaVisualizerPage(AbstractPage):
-
-    def __init__(self, title, rel_url, application):
-        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
-        self.application: ProcessMonitorApplication = None
-        super().__init__(title, rel_url, application)
-
-    def setup_component(self):
-        self.location = dcc.Location(id='optuna-page-location', refresh=True)
-        self._layout = html.Div(children=[Msg.DETAIL_PAGE_TEXT_BEFORE_LOADING])
-        self.layout = [self.location, self._layout]
-
-    def _setup_layout(self):
-
-        study = self.application.history._create_optuna_study_for_visualization()
-        prm_names = self.application.history.prm_names
-        obj_names = self.application.history.obj_names
-
-        layout = []
-
-        layout.append(html.H2(Msg.DETAIL_PAGE_HISTORY_HEADER))
-        layout.append(html.H4(Msg.DETAIL_PAGE_HISTORY_DESCRIPTION))
-        for i, obj_name in enumerate(obj_names):
-            fig = optuna.visualization.plot_optimization_history(
-                study,
-                target=lambda t: t.values[i],
-                target_name=obj_name
-            )
-            layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
-
-        layout.append(html.H2(Msg.DETAIL_PAGE_PARALLEL_COOR_HEADER))
-        layout.append(html.H4(Msg.DETAIL_PAGE_PARALLEL_COOR_DESCRIPTION))
-        for i, obj_name in enumerate(obj_names):
-            fig = optuna.visualization.plot_parallel_coordinate(
-                study,
-                target=lambda t: t.values[i],
-                target_name=obj_name
-            )
-            layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
-
-        layout.append(html.H2(Msg.DETAIL_PAGE_CONTOUR_HEADER))
-        layout.append(html.H4(Msg.DETAIL_PAGE_CONTOUR_DESCRIPTION))
-        for i, obj_name in enumerate(obj_names):
-            fig = optuna.visualization.plot_contour(
-                study,
-                target=lambda t: t.values[i],
-                target_name=obj_name
-            )
-            layout.append(dcc.Graph(figure=fig, style={'height': '90vh'}))
-
-        # import itertools
-        # for (i, j) in itertools.combinations(range(len(obj_names)), 2):
-        #     fig = optuna.visualization.plot_pareto_front(
-        #         study,
-        #         targets=lambda t: (t.values[i], t.values[j]),
-        #         target_names=[obj_names[i], obj_names[j]],
-        #     )
-        #     self.graphs.append(dcc.Graph(figure=fig, style={'height': '50vh'}))
-
-        layout.append(html.H2(Msg.DETAIL_PAGE_SLICE_HEADER))
-        layout.append(html.H4(Msg.DETAIL_PAGE_SLICE_DESCRIPTION))
-        for i, obj_name in enumerate(obj_names):
-            fig = optuna.visualization.plot_slice(
-                study,
-                target=lambda t: t.values[i],
-                target_name=obj_name
-            )
-            layout.append(dcc.Graph(figure=fig, style={'height': '70vh'}))
-
-        return layout
-
-    def setup_callback(self):
-        app = self.application.app
-
-        @app.callback(
-            Output(self._layout, 'children'),
-            Input(self.location, 'pathname'),  # on page load
-        )
-        def update_page(_):
-            if self.application.history is None:
-                return Msg.ERR_NO_HISTORY_SELECTED
-
-            if len(self.data_accessor()) == 0:
-                return Msg.ERR_NO_FEM_RESULT
-
-            return self._setup_layout()
-
-    def setup_layout(self):
-        pass
-
-    def data_accessor(self) -> pd.DataFrame:
-        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
-        if isinstance(self.application, ProcessMonitorApplication):
-            df = self.application.local_data
-        else:
-            df = self.application.history.get_df()
-        return df

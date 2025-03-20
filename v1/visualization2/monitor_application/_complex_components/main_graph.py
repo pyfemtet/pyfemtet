@@ -7,7 +7,8 @@ from dash.exceptions import PreventUpdate
 
 # components
 from dash import dash_table
-from v1.visualization2._wrapped_components import html, dcc, dbc
+from v1.visualization2.monitor_application._wrapped_components import html
+from v1.visualization2.monitor_application._wrapped_components import dcc, dbc
 
 # graph
 import pandas as pd
@@ -21,7 +22,7 @@ import json
 import numpy as np
 
 from v1.visualization2.plotter import main_figure_creator
-from v1.visualization2.monitor_application._base import AbstractPage, logger
+from v1.visualization2.monitor_application._base_application import AbstractPage, logger
 from _pyfemtet._message import Msg
 
 
@@ -88,7 +89,8 @@ class MainGraph(AbstractPage):
         # setup header
         tab_list = []
         for d in self.figure_creators:
-            is_objective_plot = d['tab_id'] == self.TAB_ID_OBJECTIVE_PLOT  # Objective plot tab is only shown in obj_names > 3. Set this via callback.
+            # Objective plot tab is only shown in obj_names > 3. Set this via callback.
+            is_objective_plot = d['tab_id'] == self.TAB_ID_OBJECTIVE_PLOT
             is_hypervolume_plot = d['tab_id'] == self.TAB_ID_HYPERVOLUME_PLOT  # same above
 
             if is_objective_plot or is_hypervolume_plot:
@@ -204,7 +206,9 @@ class MainGraph(AbstractPage):
         app = self.application.app
 
         # ===== Change visibility of plot tab =====
+        # noinspection PyUnresolvedReferences
         objective_plot_tab = [t for t in self.tab_list if t.tab_id == self.TAB_ID_OBJECTIVE_PLOT][0]
+        # noinspection PyUnresolvedReferences
         hypervolume_plot_tab = [t for t in self.tab_list if t.tab_id == self.TAB_ID_HYPERVOLUME_PLOT][0]
 
         @app.callback(
@@ -444,6 +448,7 @@ class MainGraph(AbstractPage):
             return data
 
         # ===== Show Image and Parameter on Hover =====
+        # noinspection PyPep8Naming
         @app.callback(
             Output(self.tooltip.id, "show"),
             Output(self.tooltip.id, "bbox"),
@@ -458,10 +463,6 @@ class MainGraph(AbstractPage):
 
             if self.application.history is None:
                 raise PreventUpdate
-
-            # pt = {'curveNumber': 1, 'pointNumber': 0, 'pointIndex': 0, 'x': 1, 'y': 2369132.929996869, 'bbox': {'x0': 341.5, 'x1': 350.5, 'y0': 235, 'y1': 244}, 'customdata': [1]}
-            # bbox = {'x0': 341.5, 'x1': 350.5, 'y0': 235, 'y1': 244}  # point の大きさ？
-            # figure = {'data': [{'customdata': [[1], [2], [3], [4], [5]], 'marker': {'color': '#6c757d', 'size': 6}, 'mode': 'markers', 'name': 'すべての解', 'x': [1, 2, 3, 4, 5], 'y': [2369132.929996866, 5797829.746579617, 1977631.590419346, 2083867.2403273676, 1539203.6452652698], 'type': 'scatter', 'hoverinfo': 'none'}, {'customdata': [[1], [3], [5]], 'legendgroup': 'optimality', 'line': {'color': '#6c757d', 'width': 1}, 'marker': {'color': '#007bff', 'size': 9}, 'mode': 'markers+lines', 'name': '最適解の推移', 'x': [1, 3, 5], 'y': [2369132.929996866, 1977631.590419346, 1539203.6452652698], 'type': 'scatter', 'hoverinfo': 'none'}, {'legendgroup': 'optimality', 'line': {'color': '#6c757d', 'dash': 'dash', 'width': 0.5}, 'mode': 'lines', 'showlegend': False, 'x': [5, 5], 'y': [1539203.6452652698, 1539203.6452652698], 'type': 'scatter', 'hoverinfo': 'none'}], 'layout': {'template': {'data': {'histogram2dcontour': [{'type': 'histogram2dcontour', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'choropleth': [{'type': 'choropleth', 'colorbar': {'outlinewidth': 0, 'ticks': ''}}], 'histogram2d': [{'type': 'histogram2d', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'heatmap': [{'type': 'heatmap', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'heatmapgl': [{'type': 'heatmapgl', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'contourcarpet': [{'type': 'contourcarpet', 'colorbar': {'outlinewidth': 0, 'ticks': ''}}], 'contour': [{'type': 'contour', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'surface': [{'type': 'surface', 'colorbar': {'outlinewidth': 0, 'ticks': ''}, 'colorscale': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']]}], 'mesh3d': [{'type': 'mesh3d', 'colorbar': {'outlinewidth': 0, 'ticks': ''}}], 'scatter': [{'fillpattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}, 'type': 'scatter'}], 'parcoords': [{'type': 'parcoords', 'line': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatterpolargl': [{'type': 'scatterpolargl', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'bar': [{'error_x': {'color': '#2a3f5f'}, 'error_y': {'color': '#2a3f5f'}, 'marker': {'line': {'color': '#E5ECF6', 'width': 0.5}, 'pattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}}, 'type': 'bar'}], 'scattergeo': [{'type': 'scattergeo', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatterpolar': [{'type': 'scatterpolar', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'histogram': [{'marker': {'pattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}}, 'type': 'histogram'}], 'scattergl': [{'type': 'scattergl', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatter3d': [{'type': 'scatter3d', 'line': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}, 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scattermapbox': [{'type': 'scattermapbox', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scatterternary': [{'type': 'scatterternary', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'scattercarpet': [{'type': 'scattercarpet', 'marker': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}}], 'carpet': [{'aaxis': {'endlinecolor': '#2a3f5f', 'gridcolor': 'white', 'linecolor': 'white', 'minorgridcolor': 'white', 'startlinecolor': '#2a3f5f'}, 'baxis': {'endlinecolor': '#2a3f5f', 'gridcolor': 'white', 'linecolor': 'white', 'minorgridcolor': 'white', 'startlinecolor': '#2a3f5f'}, 'type': 'carpet'}], 'table': [{'cells': {'fill': {'color': '#EBF0F8'}, 'line': {'color': 'white'}}, 'header': {'fill': {'color': '#C8D4E3'}, 'line': {'color': 'white'}}, 'type': 'table'}], 'barpolar': [{'marker': {'line': {'color': '#E5ECF6', 'width': 0.5}, 'pattern': {'fillmode': 'overlay', 'size': 10, 'solidity': 0.2}}, 'type': 'barpolar'}], 'pie': [{'automargin': True, 'type': 'pie'}]}, 'layout': {'autotypenumbers': 'strict', 'colorway': ['#636efa', '#EF553B', '#00cc96', '#ab63fa', '#FFA15A', '#19d3f3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'], 'font': {'color': '#2a3f5f'}, 'hovermode': 'closest', 'hoverlabel': {'align': 'left'}, 'paper_bgcolor': 'white', 'plot_bgcolor': '#E5ECF6', 'polar': {'bgcolor': '#E5ECF6', 'angularaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}, 'radialaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}}, 'ternary': {'bgcolor': '#E5ECF6', 'aaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}, 'baxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}, 'caxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': ''}}, 'coloraxis': {'colorbar': {'outlinewidth': 0, 'ticks': ''}}, 'colorscale': {'sequential': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']], 'sequentialminus': [[0, '#0d0887'], [0.1111111111111111, '#46039f'], [0.2222222222222222, '#7201a8'], [0.3333333333333333, '#9c179e'], [0.4444444444444444, '#bd3786'], [0.5555555555555556, '#d8576b'], [0.6666666666666666, '#ed7953'], [0.7777777777777778, '#fb9f3a'], [0.8888888888888888, '#fdca26'], [1, '#f0f921']], 'diverging': [[0, '#8e0152'], [0.1, '#c51b7d'], [0.2, '#de77ae'], [0.3, '#f1b6da'], [0.4, '#fde0ef'], [0.5, '#f7f7f7'], [0.6, '#e6f5d0'], [0.7, '#b8e186'], [0.8, '#7fbc41'], [0.9, '#4d9221'], [1, '#276419']]}, 'xaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': '', 'title': {'standoff': 15}, 'zerolinecolor': 'white', 'automargin': True, 'zerolinewidth': 2}, 'yaxis': {'gridcolor': 'white', 'linecolor': 'white', 'ticks': '', 'title': {'standoff': 15}, 'zerolinecolor': 'white', 'automargin': True, 'zerolinewidth': 2}, 'scene': {'xaxis': {'backgroundcolor': '#E5ECF6', 'gridcolor': 'white', 'linecolor': 'white', 'showbackground': True, 'ticks': '', 'zerolinecolor': 'white', 'gridwidth': 2}, 'yaxis': {'backgroundcolor': '#E5ECF6', 'gridcolor': 'white', 'linecolor': 'white', 'showbackground': True, 'ticks': '', 'zerolinecolor': 'white', 'gridwidth': 2}, 'zaxis': {'backgroundcolor': '#E5ECF6', 'gridcolor': 'white', 'linecolor': 'white', 'showbackground': True, 'ticks': '', 'zerolinecolor': 'white', 'gridwidth': 2}}, 'shapedefaults': {'line': {'color': '#2a3f5f'}}, 'annotationdefaults': {'arrowcolor': '#2a3f5f', 'arrowhead': 0, 'arrowwidth': 1}, 'geo': {'bgcolor': 'white', 'landcolor': '#E5ECF6', 'subunitcolor': 'white', 'showland': True, 'showlakes': True, 'lakecolor': 'white'}, 'title': {'x': 0.05}, 'mapbox': {'style': 'light'}}}, 'title': {'text': '目的関数プロット'}, 'xaxis': {'title': {'text': '成功した解析数'}, 'type': 'linear', 'range': [0.7173255954539959, 5.282674404546004], 'autorange': False}, 'yaxis': {'title': {'text': 'Mises Stress'}, 'type': 'linear', 'range': [1194338.1744483153, 6109662.126322151], 'autorange': False}, 'transition': {'duration': 1000}, 'clickmode': 'event+select'}}
 
             # get point location
             pt = hoverData["points"][0]
@@ -494,7 +495,6 @@ class MainGraph(AbstractPage):
             bbox['y0'] = bbox['y0'] + 80
             bbox['y1'] = bbox['y1'] + 80
 
-
             # get row of the history from customdata defined in main_figure
             if 'customdata' not in pt.keys():
                 raise PreventUpdate
@@ -504,7 +504,7 @@ class MainGraph(AbstractPage):
 
             trial = pt['customdata'][0]
 
-            df = self.data_accessor()
+            df = self.application.get_df()
             row = df[df['trial'] == trial]
 
             # create component
@@ -592,7 +592,7 @@ class MainGraph(AbstractPage):
             creator = creators[0]
 
         # create figure
-        df = self.data_accessor()
+        df = self.application.get_df()
         if len(df.columns) == 0:
             raise PreventUpdate
         kwargs = kwargs or {}
@@ -601,11 +601,3 @@ class MainGraph(AbstractPage):
             return fig, len(df)
         else:
             return fig
-
-    def data_accessor(self) -> pd.DataFrame:
-        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
-        if isinstance(self.application, ProcessMonitorApplication):
-            df = self.application.local_data
-        else:
-            df = self.application.history.get_df()
-        return df

@@ -9,7 +9,7 @@ from v1.utils.dask_util import *
 from v1.optimizer import *
 from v1.worker_status import *
 from v1.logger import get_module_logger
-from v1.visualization2.monitor_application._process_monitor.application import main
+from v1.visualization2.monitor_application.process_monitor.application import main
 
 
 logger = get_module_logger('opt.femopt', True)
