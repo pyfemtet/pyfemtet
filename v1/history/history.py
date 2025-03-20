@@ -1090,6 +1090,12 @@ class History:
 
         return study
 
+    def is_numerical_parameter(self, prm_name):
+        return self._records.column_manager.is_numerical_parameter(prm_name)
+
+    def is_categorical_parameter(self, prm_name):
+        return self._records.column_manager.is_categorical_parameter(prm_name)
+
 
 def debug_standalone_history():
     history = History()

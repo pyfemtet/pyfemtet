@@ -10,16 +10,20 @@ import shutil
 from dash import Output, Input, State, callback_context, no_update
 from dash.exceptions import PreventUpdate
 
-from pyfemtet.opt.visualization._wrapped_components import dcc, dbc, html
-from pyfemtet.opt.visualization._base import AbstractPage  # , logger
-from pyfemtet.opt.visualization._complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
-from pyfemtet.opt.visualization._complex_components.control_femtet import FemtetControl, FemtetState
-from pyfemtet.opt.visualization._complex_components.alert_region import AlertRegion
-from pyfemtet.opt.visualization._complex_components.pm_graph import PredictionModelGraph
+from v1.history import History
 
-from pyfemtet.opt._femopt_core import History
+from v1.visualization2.monitor_application._wrapped_components import dcc, dbc, html
+from v1.visualization2.monitor_application._base_application import *
+from v1.visualization2.monitor_application._complex_components.main_graph import *
+from v1.visualization2.monitor_application._complex_components.control_femtet import *
+from v1.visualization2.monitor_application._complex_components.alert_region import *
 
-from pyfemtet._message import Msg
+from _pyfemtet._message import Msg
+
+
+__all__ = [
+    'HomePage'
+]
 
 
 class HomePage(AbstractPage):
@@ -127,7 +131,6 @@ class HomePage(AbstractPage):
         @app.callback(
             Output(self.file_picker_button.id, self.file_picker_button.Prop.children),
             Output(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab, allow_duplicate=False),
-            # Output(self.femtet_control.connect_femtet_button.id, self.femtet_control.connect_femtet_button.Prop.n_clicks),  # automatically connect to femtet is now deprecated because use view-only without femtet license
             Input(self.file_picker.id, self.file_picker.Prop.contents),
             State(self.file_picker.id, self.file_picker.Prop.filename),
             State(self.main_graph.tabs.id, self.main_graph.tabs.Prop.active_tab),
@@ -154,7 +157,9 @@ class HomePage(AbstractPage):
                 csv_path = os.path.join(tmp_dir_path, file_name)
                 with open(csv_path, 'wb') as f:
                     f.write(file_content)
-                self.application.history = History(csv_path)
+                self.application.history = History()
+                self.application.history.load_csv(csv_path, with_finalize=True)
+                print(self.application.history.get_df())
 
             return f'current file: {file_name}', active_tab_id
 
@@ -216,6 +221,7 @@ class HomePage(AbstractPage):
                 return alerts
 
             # OpenPDT(PDTFile As String, bOpenWithGUI As Boolean)
+            # noinspection PyPep8Naming
             Femtet = self.femtet_control.fem.Femtet
             succeed = Femtet.OpenPDT(pdt_path, True)
 
@@ -250,6 +256,7 @@ class HomePage(AbstractPage):
                 return alerts
 
             try:
+                # noinspection PyPep8Naming
                 Femtet = self.femtet_control.fem.Femtet
 
                 # check model to open is included in current project
@@ -281,9 +288,9 @@ class HomePage(AbstractPage):
                 trial = pt['customdata'][0]
 
                 # get parameter and update model
-                df = self.application.history.get_filtered_df([self.application.history.OptTrialState.succeeded, self.application.history.OptTrialState.skipped])
+                df = self.application.get_df()
                 row = df[df['trial'] == trial]
-                meta_columns = np.array(self.application.history.meta_columns)
+                meta_columns = np.array(self.application.history._records.column_manager.meta_columns)
                 idx = np.where(meta_columns == 'prm')[0]
 
                 names = np.array(row.columns)[idx]
@@ -350,11 +357,15 @@ class HomePage(AbstractPage):
             femprj_path_history_on_history: str or None = kwargs['femprj_path']
             model_name_on_history: str or None = kwargs['model_name']
             # ├ Femtet-side
+            # noinspection PyPep8Naming
             Femtet = self.femtet_control.fem.Femtet
             femprj_path: str = Femtet.Project  # it can be '解析結果単体.femprj'
             model_name: str = Femtet.AnalysisModelName
             # └ check
-            is_same_femprj = (femprj_path == femprj_path_history_on_history) if femprj_path_history_on_history is not None else True
+            if femprj_path_history_on_history is not None:
+                is_same_femprj = (femprj_path == femprj_path_history_on_history)
+            else:
+                is_same_femprj = True
             is_same_model = (model_name == model_name_on_history) if model_name is not None else True
 
             # alert
@@ -631,7 +642,6 @@ class Tutorial(AbstractPage):
         @app.callback(
             Output(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab, allow_duplicate=True),
             Output(self.control_visibility_input_dummy, 'children'),
-            # Output(self.femtet_control.connect_femtet_button, 'n_clicks', allow_duplicate=True),  # automatically open femtet is now deprecated because enable to use analytical functions without using license.
             Output(alert_region, 'children', allow_duplicate=True),
             Input(self.load_sample_csv_button, 'n_clicks'),
             State(self.main_graph.tabs, self.main_graph.tabs.Prop.active_tab),
@@ -644,8 +654,8 @@ class Tutorial(AbstractPage):
                 raise PreventUpdate
 
             # get sample file
-            import pyfemtet
-            package_root = os.path.dirname(pyfemtet.__file__)
+            import _pyfemtet
+            package_root = os.path.dirname(_pyfemtet.__file__)
             sample_dir = os.path.join(package_root, 'opt', 'samples', 'femprj_sample')  # FIXME: locale によってパスを変える
             path = os.path.join(sample_dir, 'wat_ex14_parametric_test_result.reccsv')
 
@@ -655,7 +665,8 @@ class Tutorial(AbstractPage):
                 return no_update, no_update, alerts
             destination_file = path.replace('wat_ex14_parametric_test_result.reccsv', 'tutorial.csv')
             shutil.copyfile(path, destination_file)
-            self.application.history = History(destination_file)
+            self.application.history = History()
+            self.application.history.load_csv(destination_file, with_finalize=True)
 
             source_file = path.replace('_test_result.reccsv', '.femprj')
             if not os.path.exists(source_file):
@@ -673,7 +684,7 @@ class Tutorial(AbstractPage):
             destination_folder = source_folder.replace('wat_ex14_parametric', 'tutorial')
             shutil.copytree(source_folder, destination_folder, dirs_exist_ok=True)
 
-            self.application.history.meta_columns[0] = json.dumps(
+            self.application.history._records.column_manager.meta_columns[0] = json.dumps(
                 dict(
                     femprj_path=destination_file,
                     model_name='Ex14',
@@ -715,19 +726,3 @@ class Tutorial(AbstractPage):
         else:
             current_style.update(part)
             return current_style
-
-
-class PredictionModelPage(AbstractPage):
-    """"""
-
-    def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
-        self.application: ProcessMonitorApplication = None
-        super().__init__(title, rel_url, application)
-
-    def setup_component(self):
-        self.rsm_graph: PredictionModelGraph = PredictionModelGraph()
-        self.add_subpage(self.rsm_graph)
-
-    def setup_layout(self):
-        self.layout = self.rsm_graph.layout

@@ -8,6 +8,13 @@ from v1.logger._impl import (
     remove_all_output,
 )
 
+__all__ = [
+    'get_module_logger',
+    'get_dask_logger',
+    'get_optuna_logger',
+    'get_dash_logger',
+]
+
 
 def get_dask_logger():
     return logging.getLogger('distributed')

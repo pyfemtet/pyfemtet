@@ -26,7 +26,14 @@ import logging
 import psutil
 from v1.logger import get_module_logger, get_dash_logger
 
-logger = get_module_logger('opt.monitor', __name__)
+__all__ = [
+    'logger',
+    'AbstractPage',
+    'PyFemtetApplicationBase',
+]
+
+
+logger = get_module_logger('opt.monitor', False)
 logger.setLevel(logging.ERROR)
 
 dash_logger = get_dash_logger()
@@ -241,18 +248,11 @@ class PyFemtetApplicationBase(SidebarApplicationBase):
             history: History = None,
     ):
         # register arguments
-        self.history = history  # include actor
+        self.history: History = history  # include actor
         super().__init__(title, subtitle)
 
     def get_df(self, equality_filters: dict = None):
-        self.history.get_df(equality_filters=equality_filters)
-
-
-def check_page_layout(page_cls: type):
-    home_page = page_cls()  # required
-    application = PyFemtetApplicationBase(title='test-app')
-    application.add_page(home_page, 0)
-    application.run(debug=True)
+        return self.history.get_df(equality_filters=equality_filters)
 
 
 if __name__ == '__main__':

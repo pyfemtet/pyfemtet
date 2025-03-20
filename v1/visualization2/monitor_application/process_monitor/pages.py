@@ -8,14 +8,20 @@ from dash import Output, Input, State, callback_context, no_update, ALL
 from dash.exceptions import PreventUpdate
 
 from v1.visualization2.monitor_application._wrapped_components import html, dcc, dbc
-from v1.visualization2.monitor_application._base_application import AbstractPage, logger
-from v1.visualization2.monitor_application._complex_components import *
+from v1.visualization2.monitor_application._base_application import *
+from v1.visualization2.monitor_application._complex_components.main_graph import *
+
+from v1.worker_status import *
+from _pyfemtet._message import Msg
 
 if TYPE_CHECKING:
     from v1.visualization2.monitor_application.process_monitor.application import ProcessMonitorApplication
 
-from v1.worker_status import *
-from _pyfemtet._message import Msg
+
+__all__ = [
+    'HomePage',
+    'WorkerPage',
+]
 
 
 DBC_COLUMN_STYLE_CENTER = {
@@ -29,10 +35,6 @@ DBC_COLUMN_STYLE_RIGHT = {
     'justify-content': 'right',
     'align-items': 'right',
 }
-
-
-def is_iterable(component):
-    return hasattr(component, '__len__')
 
 
 class HomePage(AbstractPage):

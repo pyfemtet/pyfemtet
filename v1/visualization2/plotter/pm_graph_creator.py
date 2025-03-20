@@ -81,7 +81,6 @@ def plot2d(
             x=df[prm_name1], y=df[obj_name],
             mode='markers',
             marker=dict(
-                size=3,
                 color='black',
             ),
             name='trial',
@@ -94,12 +93,36 @@ def plot2d(
     if len(params_) == 0:
         opacity = np.ones(len(df))
     else:
-        print(df.columns)
-        print(df.columns)
-        target_points = df[list(params_.keys())]
-        hyper_plane = np.array(tuple(params_.values()))
+        # distance を計算する用のデータを分割
+        prm_names_for_distances = []
+        prm_values_for_distances = []
+        prm_names_for_categorical = []
+        prm_values_for_categorical = []
+        for prm_name in params_.keys():
+            if history.is_numerical_parameter(prm_name):
+                prm_names_for_distances.append(prm_name)
+                prm_values_for_distances.append(params_[prm_name])
+            elif history.is_categorical_parameter(prm_name):
+                prm_names_for_categorical.append(prm_name)
+                prm_values_for_categorical.append(params_[prm_name])
+            else:
+                raise NotImplementedError
+
+        # distance が大きい程 opacity を小さくする
+        target_points = df[prm_names_for_distances]
+        hyper_plane = np.array(prm_values_for_distances)
         distances_to_hyper_plane = np.linalg.norm(target_points - hyper_plane, axis=1, keepdims=False)
+
+        # categorical データが一致しないぶんだけ opacity を 1/N する
+        target_points = df[prm_names_for_categorical].values
+        hyper_plane = np.array(prm_values_for_categorical)
+        # noinspection PyUnresolvedReferences
+        count = (target_points == hyper_plane).astype(float).sum(axis=1)
+        count = count + 1  # 0 になると困る
+
+        # opacity を計算する
         opacity = 1 - (distances_to_hyper_plane / distances_to_hyper_plane.max())
+        opacity = opacity * (count / count.max())
 
     def set_opacity(trace):
         if isinstance(trace, go.Scatter):
@@ -197,10 +220,36 @@ def plot3d(
     if len(params_) == 0:
         opacity = np.ones(len(df))
     else:
-        target_points = df[tuple(params_.keys())]
-        hyper_plane = np.array(tuple(params_.values()))
+        # distance を計算する用のデータを分割
+        prm_names_for_distances = []
+        prm_values_for_distances = []
+        prm_names_for_categorical = []
+        prm_values_for_categorical = []
+        for prm_name in params_.keys():
+            if history.is_numerical_parameter(prm_name):
+                prm_names_for_distances.append(prm_name)
+                prm_values_for_distances.append(params_[prm_name])
+            elif history.is_categorical_parameter(prm_name):
+                prm_names_for_categorical.append(prm_name)
+                prm_values_for_categorical.append(params_[prm_name])
+            else:
+                raise NotImplementedError
+
+        # distance が大きい程 opacity を小さくする
+        target_points = df[prm_names_for_distances]
+        hyper_plane = np.array(prm_values_for_distances)
         distances_to_hyper_plane = np.linalg.norm(target_points - hyper_plane, axis=1, keepdims=False)
+
+        # categorical データが一致しないぶんだけ opacity を 1/N する
+        target_points = df[prm_names_for_categorical].values
+        hyper_plane = np.array(prm_values_for_categorical)
+        # noinspection PyUnresolvedReferences
+        count = (target_points == hyper_plane).astype(float).sum(axis=1)
+        count = count + 1  # 0 になると困る
+
+        # opacity を計算する
         opacity = 1 - (distances_to_hyper_plane / distances_to_hyper_plane.max())
+        opacity = opacity * (count / count.max())
 
     def set_opacity(trace):
         if isinstance(trace, go.Scatter3d):

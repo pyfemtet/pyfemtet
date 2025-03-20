@@ -22,7 +22,8 @@ import base64
 import json
 import numpy as np
 
-from v1.prediction.model import PyFemtetModel, SingleTaskGPModel
+from v1.prediction.model import *
+from v1.prediction.helper import *
 from v1.visualization2.plotter.pm_graph_creator import plot2d, plot3d
 from v1.visualization2.monitor_application._base_application import AbstractPage, logger
 from _pyfemtet._message import Msg
@@ -292,7 +293,7 @@ class PredictionModelGraph(AbstractPage):
                 return self.CommandState.redraw.value, no_update  # error handling in the next `redraw_graph()` callback
 
             # check df
-            if len(self.data_accessor()) == 0:
+            if len(self.application.get_df()) == 0:
                 return self.CommandState.redraw.value, no_update  # error handling in the next `redraw_graph()` callback
 
             # create model
@@ -300,7 +301,7 @@ class PredictionModelGraph(AbstractPage):
             self.pyfemtet_model.update_model(model)
             self.pyfemtet_model.fit(
                 self.application.history,
-                self.data_accessor(),
+                self.application.get_df(),
                 **{}
             )
 
@@ -322,6 +323,7 @@ class PredictionModelGraph(AbstractPage):
             State(self.slider_container, 'children'),  # for callback chain
             State({'type': 'prm-slider', 'index': ALL}, 'id'),
             State({'type': 'prm-slider', 'index': ALL}, 'value'),
+            State({'type': 'prm-slider', 'index': ALL}, 'marks'),
             State(self.switch_3d, 'value'),
             prevent_initial_call=True,
         )
@@ -334,6 +336,7 @@ class PredictionModelGraph(AbstractPage):
                 _2,
                 prm_ids,
                 prm_values,
+                prm_slider_marks,
                 is_3d
         ):
             # just in case
@@ -351,7 +354,7 @@ class PredictionModelGraph(AbstractPage):
             # prm_names = self.application.history.prm_names
 
             # check history
-            if len(self.data_accessor()) == 0:
+            if len(self.application.get_df()) == 0:
                 logger.error(Msg.ERR_NO_FEM_RESULT)
                 return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
 
@@ -361,7 +364,22 @@ class PredictionModelGraph(AbstractPage):
                 return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
 
             # create params
-            params = {prm_id['index']: value for prm_id, value in zip(prm_ids, prm_values)}
+            params = dict()
+            for prm_id, slider_value, slider_marks in zip(prm_ids, prm_values, prm_slider_marks):
+
+                prm_name = prm_id['index']
+
+                if self.application.history.is_numerical_parameter(prm_name):
+                    value = slider_value
+
+                # categorical parameters are encoded as an integer, so restore them here.
+                elif self.application.history.is_categorical_parameter(prm_name):
+                    value = slider_marks[str(slider_value)]
+
+                else:
+                    raise NotImplementedError
+
+                params.update({prm_name: value})
 
             if is_3d:
                 fig = plot3d(
@@ -370,7 +388,7 @@ class PredictionModelGraph(AbstractPage):
                     prm_name2=axis2_label,
                     params=params,
                     obj_name=axis3_label,
-                    df=self.data_accessor(),
+                    df=self.application.get_df(),
                     pyfemtet_model=self.pyfemtet_model,
                     n=20,
                 )
@@ -381,7 +399,7 @@ class PredictionModelGraph(AbstractPage):
                     prm_name1=axis1_label,
                     params=params,
                     obj_name=axis3_label,
-                    df=self.data_accessor(),
+                    df=self.application.get_df(),
                     pyfemtet_model=self.pyfemtet_model,
                     n=200,
                 )
@@ -460,32 +478,54 @@ class PredictionModelGraph(AbstractPage):
             sliders = []
             slider_values = {}
             for prm_name in self.application.history.prm_names:
-                # get ub and lb
-                lb_column = prm_name + '_lower_bound'
-                ub_column = prm_name + '_upper_bound'
-                # get minimum lb and maximum ub
-                df = self.data_accessor()
-                lb = df[lb_column].min()
-                ub = df[ub_column].max()
-                # if lb or ub is not specified, use value instead
-                lb = df[prm_name].min() if np.isnan(lb) else lb
-                ub = df[prm_name].max() if np.isnan(ub) else ub
-                # create slider
-                value = (lb + ub) / 2
+
+                if self.application.history.is_numerical_parameter(prm_name):
+                    lb, ub = get_bounds_containing_entire_bounds(
+                        self.application.get_df(),
+                        prm_name,
+                    )
+
+                    # create slider
+                    value = (lb + ub) / 2
+                    slider = dcc.Slider(
+                        lb,
+                        ub,
+                        marks=None,
+                        value=value,
+                        id={'type': 'prm-slider', 'index': prm_name},
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    )
+
+                elif self.application.history.is_categorical_parameter(prm_name):
+                    choices: set = get_choices_containing_entire_bounds(
+                        self.application.get_df(),
+                        prm_name,
+                    )
+
+                    choices: tuple = tuple(choices)
+
+                    value = choices[0]
+                    slider = dcc.Slider(
+                        0,
+                        len(choices),
+                        step=None,
+                        marks={i: choice for i, choice in enumerate(choices)},
+                        value=0,
+                        id={'type': 'prm-slider', 'index': prm_name},
+                        tooltip={"placement": "bottom", "always_visible": True},
+                        included=False,
+                    )
+
+                else:
+                    raise NotImplementedError
+
                 slider_values.update({prm_name: value})
                 stack = dbc.Stack(
                     id={'type': 'prm-slider-stack', 'index': prm_name},
                     style={'display': 'inline'},
                     children=[
                         html.Div(f'{prm_name}: '),
-                        dcc.Slider(
-                            lb,
-                            ub,
-                            marks=None,
-                            value=value,
-                            id={'type': 'prm-slider', 'index': prm_name},
-                            tooltip={"placement": "bottom", "always_visible": True},
-                        )
+                        slider
                     ]
                 )
                 sliders.append(stack)
@@ -656,9 +696,3 @@ class PredictionModelGraph(AbstractPage):
     #         return fig, len(df)
     #     else:
     #         return fig
-
-    def data_accessor(self) -> pd.DataFrame:
-        if hasattr(self.application, 'local_data'):
-            return self.application.local_data
-        else:
-            return self.application.history.get_df()
