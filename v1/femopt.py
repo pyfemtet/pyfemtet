@@ -64,11 +64,10 @@ class FEMOpt:
             nannies: tuple[Nanny] = tuple(client.cluster.workers.values())
 
             # Assign roles
-            opt_worker_addresses = [n.worker_address for n in nannies[1:]]
+            opt_worker_addresses = [n.worker_address for n in nannies]
 
             # Setting up monitor
             logger.info(f'Launching Monitor...')
-
             # noinspection PyTypeChecker,PyUnusedLocal
             monitor_future = executor.submit(
                 main,

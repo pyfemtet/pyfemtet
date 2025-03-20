@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from time import sleep
+import math
 
 from v1.utils.dask_util import *
 from v1.logger import get_module_logger
@@ -33,7 +33,7 @@ class _WorkerStatus(float):
 
 
 def worker_status_from_float(value: float):
-    if value == float('nan'):
+    if math.isnan(value):
         return _WorkerStatus(value, 'Undefined')
     elif value == float(0):
         return _WorkerStatus(value, 'Initializing')
@@ -51,6 +51,8 @@ def worker_status_from_float(value: float):
         return _WorkerStatus(value, 'Crashed')
     elif value == float('inf'):
         return _WorkerStatus(value, 'Terminated')
+    else:
+        raise NotImplementedError(f'worker_status_from_float: {value=}')
 
 
 class WorkerStatus:
@@ -83,6 +85,9 @@ class WorkerStatus:
 
     @property
     def value(self) -> _WorkerStatus:
+
+        out = None
+
         client = get_client()
         if client is not None:
             if client.scheduler is not None:
@@ -98,13 +103,19 @@ class WorkerStatus:
                     value = self.__value
                     client.set_metadata(key, value)
 
-                return value
+                out = value
 
             # client はあるが、close された後である場合
             else:
-                return self.__value
+                self.__value = WorkerStatus.terminated
+                out = self.__value
         else:
-            return self.__value
+            out = self.__value
+
+        assert out is not None
+
+        self.__value = out
+        return out
 
     @value.setter
     def value(self, value: _WorkerStatus):

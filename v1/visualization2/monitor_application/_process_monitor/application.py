@@ -100,10 +100,10 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
             # df を actor から application に反映する
             self.local_data = self.history.get_df()
 
-            # 一時的な実装
-
             # terminate_all 指令があれば flask server をホストするプロセスごと終了する
             if self.entire_status.value >= self.entire_status.terminated:
+                # monitor の worker status 更新を行う時間を待つ
+                sleep(1)
                 break
 
             # interval
