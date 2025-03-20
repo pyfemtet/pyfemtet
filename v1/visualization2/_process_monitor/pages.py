@@ -160,7 +160,7 @@ class HomePage(AbstractPage):
             prevent_initial_call=False,)
         def update_entire_status(*_):
             # get status message
-            msg = str(self.application.entire_status)
+            msg = str(self.application.entire_status.value)
             color = self.application.get_status_color(self.application.entire_status)
             return color, msg
 

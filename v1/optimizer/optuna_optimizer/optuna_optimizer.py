@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gc
 import os
 import inspect
 import tempfile
@@ -295,7 +296,7 @@ class OptunaOptimizer(AbstractOptimizer):
         # setup storage
         client = get_client()
         if client is None:
-            self.storage = f'sqlite:///{self.storage_path}'
+            self.storage = optuna.storages.get_storage(f'sqlite:///{self.storage_path}')
         else:
             self.storage = DaskStorage(
                 f'sqlite:///{self.storage_path}'
@@ -360,76 +361,102 @@ class OptunaOptimizer(AbstractOptimizer):
                     assert isinstance(base_storage, optuna.storages._CachedStorage)
                     rdb_storage = base_storage._backend
                 else:
-                    raise NotImplementedError
+                    raise NotImplementedError(f'{type(self.storage)=}')
+
                 assert isinstance(rdb_storage, optuna.storages.RDBStorage)
+
+                client = get_client()
+
+                # 最後のプロセスにしか消せないので、
+                # 各 worker は dispose だけは行い、
+                # 削除は失敗しても気にしないことにする
+
+                # 通常 dispose
                 rdb_storage.engine.dispose()
 
-                if os.path.exists(self.storage_path):
-                    os.remove(self.storage_path)
+                # run_on_scheduler での dispose
+                if client is not None:
 
-                # restore
+                    def dispose_(dask_scheduler):
+                        assert isinstance(self.storage, DaskStorage)
+                        name_ = self.storage.name
+                        ext = dask_scheduler.extensions["optuna"]
+                        base_storage_ = ext.storages[name_]
+                        rdb_storage_ = base_storage_._backend
+                        rdb_storage_.engine.dispose()
+
+                    client.run_on_scheduler(dispose_)
+                    gc.collect()
+
+                # try remove
+                if os.path.exists(self.storage_path):
+                    try:
+                        os.remove(self.storage_path)
+                    except PermissionError:
+                        logger.debug(f'パーミッションエラー。{self.storage_path} の削除処理をスキップします。')
+                    else:
+                        logger.debug(f'{self.storage_path} の削除に成功しました。')
+
                 self.storage_path = self._existing_storage_path
 
         return RemovingTempDB()
 
     def run(self):
 
+        # sub fidelity
+        if self.sub_fidelity_models is None:
+            self.sub_fidelity_models = SubFidelityModels()
+            for sub_fidelity_model in self.sub_fidelity_models.values():
+                assert sub_fidelity_model.objectives.keys() == self.objectives.keys()
+                assert sub_fidelity_model.constraints.keys() == self.constraints.keys()
+
+        # finalize
+        self._finalize_history()
+
+        # setup if needed
+        self._setup_before_parallel()
+        self._setup_after_parallel()
+
+        # automatically-given arguments
+        if len(self.constraints) > 0:
+            self.sampler_kwargs.update(
+                constraints_func=self._constraint
+            )
+        if self.seed is not None:
+            self.sampler_kwargs.update(
+                seed=self.seed
+            )
+
+        actual_sampler_kwargs = dict()
+        arguments = inspect.signature(self.sampler_class.__init__).parameters
+        for k, v in self.sampler_kwargs.items():
+
+            # the key is valid, pass to sampler
+            if k in arguments.keys():
+                actual_sampler_kwargs.update({k: v})
+
+            # if not automatically-given arguments,
+            # show warning
+            elif k not in ('seed', 'constraints_func'):
+                logger.warning(f'与えられた引数 {k} はサンプラー {self.sampler_class.__name__} の'
+                               f'引数に含まれません。無視されます。')
+
+            # else, ignore it
+            else:
+                pass
+
+        # noinspection PyArgumentList
+        sampler = self.sampler_class(**actual_sampler_kwargs)
+
+        # sampler specific processes
+        from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
+
+        # if PoFBoTorchSampler, set opt
+        if isinstance(sampler, PoFBoTorchSampler):
+            sampler.pyfemtet_optimizer = self  # FIXME: multi-fidelity に対応できない?
+
         # quit FEM even if abnormal termination
         with closing(self.fem), self._removing_tmp_db_if_needed():
-
-            # sub fidelity
-            if self.sub_fidelity_models is None:
-                self.sub_fidelity_models = SubFidelityModels()
-                for sub_fidelity_model in self.sub_fidelity_models.values():
-                    assert sub_fidelity_model.objectives.keys() == self.objectives.keys()
-                    assert sub_fidelity_model.constraints.keys() == self.constraints.keys()
-
-            # finalize
-            self._finalize_history()
-
-            # setup if needed
-            self._setup_before_parallel()
-            self._setup_after_parallel()
-
-            # automatically-given arguments
-            if len(self.constraints) > 0:
-                self.sampler_kwargs.update(
-                    constraints_func=self._constraint
-                )
-            if self.seed is not None:
-                self.sampler_kwargs.update(
-                    seed=self.seed
-                )
-
-            actual_sampler_kwargs = dict()
-            arguments = inspect.signature(self.sampler_class.__init__).parameters
-            for k, v in self.sampler_kwargs.items():
-
-                # the key is valid, pass to sampler
-                if k in arguments.keys():
-                    actual_sampler_kwargs.update({k: v})
-
-                # if not automatically-given arguments,
-                # show warning
-                elif k not in ('seed', 'constraints_func'):
-                    logger.warning(f'与えられた引数 {k} はサンプラー {self.sampler_class.__name__} の'
-                                   f'引数に含まれません。無視されます。')
-
-                # else, ignore it
-                else:
-                    pass
-
-
-
-            # noinspection PyArgumentList
-            sampler = self.sampler_class(**actual_sampler_kwargs)
-
-            # sampler specific processes
-            from v1.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
-
-            # if PoFBoTorchSampler, set opt
-            if isinstance(sampler, PoFBoTorchSampler):
-                sampler.pyfemtet_optimizer = self  # FIXME: multi-fidelity に対応できない?
 
             # load study creating in setup_before_parallel()
             # located on dask scheduler
@@ -460,6 +487,7 @@ class OptunaOptimizer(AbstractOptimizer):
                 self._objective,
                 timeout=self.timeout,
                 callbacks=self.callbacks,
+                catch=[InterruptOptimization]
             )
 
     def _check_and_raise_interruption(self):
@@ -518,8 +546,8 @@ if __name__ == '__main__':
 
     # _opt.sampler = optuna.samplers.RandomSampler(seed=42)
     _opt.seed = 42
-    # _opt.sampler_class = optuna.samplers.TPESampler
-    _opt.sampler_class = optuna.samplers.RandomSampler
+    _opt.sampler_class = optuna.samplers.TPESampler
+    # _opt.sampler_class = optuna.samplers.RandomSampler
     _opt.sampler_kwargs = dict(
         n_startup_trials=5,
     )
@@ -528,7 +556,7 @@ if __name__ == '__main__':
     _opt.add_parameter('x1', 1, -1, 1, step=0.1)
     _opt.add_parameter('x2', 1, -1, 1, step=0.1)
     _opt.add_categorical_parameter('x3', 'a', choices=['a', 'b', 'c'])
-    _opt.add_constraint('cns', _cns, lower_bound=0., args=(_fem, _opt))
+    _opt.add_constraint('cns', _cns, lower_bound=-0.9, args=(_fem, _opt))
     _opt.add_objective('obj1', _parabola, args=(_fem, _opt))
     # _opt.add_objective('obj2', _parabola2, args=(_fem, _opt))
 
