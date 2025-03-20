@@ -70,7 +70,8 @@ class OptunaOptimizer(AbstractOptimizer):
         vm = self.variable_manager
 
         # check interruption
-        self._check_and_raise_interruption()
+        if self._check_and_raise_interruption():
+            return None
 
         # declare output
         y_internal_: tuple[float] | None = None
@@ -84,13 +85,13 @@ class OptunaOptimizer(AbstractOptimizer):
         # start solve
         datetime_start = datetime.datetime.now()
         try:
-            _, dict_or_None_y_internal, c, record = opt_.f(
+            _, dict_or_none_y_internal, c, record = opt_.f(
                 x, x_pass_to_fem_, self.history, datetime_start
             )
 
             # convert dict or None to tuple or None
-            y_internal_ = dict_or_None_y_internal if dict_or_None_y_internal is None \
-                else tuple(dict_or_None_y_internal.values())
+            y_internal_ = dict_or_none_y_internal if dict_or_none_y_internal is None \
+                else tuple(dict_or_none_y_internal.values())
 
         # if (hidden) constraint violation, set trial attribute
         except (HardConstraintViolation, HiddenConstraintViolation) as e:
@@ -123,7 +124,8 @@ class OptunaOptimizer(AbstractOptimizer):
         self.current_trial.set_user_attr(optuna_attr.key, optuna_attr.value)
 
         # check interruption
-        self._check_and_raise_interruption()
+        if self._check_and_raise_interruption():
+            return None
 
         return y_internal_
 
@@ -151,7 +153,8 @@ class OptunaOptimizer(AbstractOptimizer):
             vm = self.variable_manager
 
             # check interruption
-            self._check_and_raise_interruption()
+            if self._check_and_raise_interruption():
+                return None
 
             # parameter suggestion
             params = vm.get_variables(filter='parameter')
@@ -179,7 +182,8 @@ class OptunaOptimizer(AbstractOptimizer):
             vm.evaluate()
 
             # check interruption
-            self._check_and_raise_interruption()
+            if self._check_and_raise_interruption():
+                return None
 
             # construct TrialInput
             x = vm.get_variables(filter='parameter')
@@ -193,7 +197,8 @@ class OptunaOptimizer(AbstractOptimizer):
                 self.solve(x, x_pass_to_fem, sub_opt)
 
             # check interruption
-            self._check_and_raise_interruption()
+            if self._check_and_raise_interruption():
+                return None
 
             # clear trial
             self.current_trial = None
@@ -487,16 +492,17 @@ class OptunaOptimizer(AbstractOptimizer):
                 self._objective,
                 timeout=self.timeout,
                 callbacks=self.callbacks,
-                catch=[InterruptOptimization]
+                # catch=[InterruptOptimization]  # parallel の場合、FrozenTrial が Unbound になりうる
             )
 
-    def _check_and_raise_interruption(self):
+    def _check_and_raise_interruption(self) -> bool:
         try:
             AbstractOptimizer._check_and_raise_interruption(self)
         except InterruptOptimization as e:
             if self.current_trial is not None:
                 self.current_trial.study.stop()
-            raise e
+                return True
+        return False
 
 
 if __name__ == '__main__':

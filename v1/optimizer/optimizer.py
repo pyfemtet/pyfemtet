@@ -235,7 +235,7 @@ class AbstractOptimizer:
                     raise NotImplementedError
         return violation_names
 
-    def _check_and_raise_interruption(self):
+    def _check_and_raise_interruption(self) -> ...:
         # raise Interrupt
         interrupted = self.entire_status.value == WorkerStatus.interrupting
         if interrupted:
