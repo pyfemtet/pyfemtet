@@ -4,10 +4,15 @@ from threading import Thread
 
 from flask import jsonify
 
-from v1.visualization2._base import PyFemtetApplicationBase
-from v1.visualization2._process_monitor.pages import HomePage, WorkerPage, PredictionModelPage, OptunaVisualizerPage
+from v1.visualization2.monitor_application._base import PyFemtetApplicationBase
+from v1.visualization2.monitor_application._process_monitor.pages import (
+    HomePage,
+    WorkerPage,
+    PredictionModelPage,
+    OptunaVisualizerPage
+)
 from v1.worker_status import WorkerStatus
-from pyfemtet._message import Msg
+from _pyfemtet._message import Msg
 
 from v1.logger import get_module_logger
 

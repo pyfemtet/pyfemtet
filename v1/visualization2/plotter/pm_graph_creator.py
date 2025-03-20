@@ -13,10 +13,10 @@ __all__ = [
 ]
 
 
-def get_grid_values(history: History, df, prm_name_, N) -> np.ndarray:
+def get_grid_values(history: History, df, prm_name_, n) -> np.ndarray:
     if history._records.column_manager.is_numerical_parameter(prm_name_):
         lb_, ub_ = get_bounds_containing_entire_bounds(df, prm_name_)
-        out = np.linspace(lb_, ub_, N)
+        out = np.linspace(lb_, ub_, n)
     elif history._records.column_manager.is_categorical_parameter(prm_name_):
         choices = get_choices_containing_entire_bounds(df, prm_name_)
         out = np.array(list(choices))
@@ -32,10 +32,10 @@ def plot2d(
         obj_name: str,
         df,
         pyfemtet_model: PyFemtetModel,
-        N=200,
+        n=200,
 ) -> go.Figure:
     # prm_name1, prm_name2 であれば Sequence を作成する
-    x1 = get_grid_values(history, df, prm_name1, N)
+    x1 = get_grid_values(history, df, prm_name1, n)
 
     # predict 用の入力を作成
     x = np.empty((len(x1), len(history.prm_names))).astype(object)
@@ -118,12 +118,12 @@ def plot3d(
         obj_name: str,
         df,
         pyfemtet_model: PyFemtetModel,
-        N=20,
+        n=20,
 ) -> go.Figure:
 
     # prm_name1, prm_name2 であれば Sequence を作成する
-    prm_values1 = get_grid_values(history, df, prm_name1, N)
-    prm_values2 = get_grid_values(history, df, prm_name2, N)
+    prm_values1 = get_grid_values(history, df, prm_name1, n)
+    prm_values2 = get_grid_values(history, df, prm_name2, n)
 
     # plot 用の格子点を作成
     xx1, xx2 = np.meshgrid(prm_values1, prm_values2)
@@ -159,7 +159,7 @@ def plot3d(
             lb, ub = prm_values1.min(), prm_values1.max()
             contours.update({key: dict(
                 highlight=True, show=True, color='blue',
-                start=lb, end=ub, size=(ub - lb) / N,
+                start=lb, end=ub, size=(ub - lb) / n,
             )})
         elif history._records.column_manager.is_categorical_parameter(prm_name):
             contours.update({key: dict(

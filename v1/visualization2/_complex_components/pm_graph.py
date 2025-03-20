@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 
 # components
 from dash import dash_table
-from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
+from v1.visualization2._wrapped_components import html, dcc, dbc
 
 # graph
 import pandas as pd
@@ -22,9 +22,9 @@ import json
 import numpy as np
 
 from v1.prediction.model import PyFemtetModel, SingleTaskGPModel
-from v1.visualization2._complex_components.pm_graph_creator import plot2d, plot3d
-from v1.visualization2._base import AbstractPage, logger
-from pyfemtet._message import Msg
+from v1.visualization2.plotter.pm_graph_creator import plot2d, plot3d
+from v1.visualization2.monitor_application._base import AbstractPage, logger
+from _pyfemtet._message import Msg
 
 
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
@@ -366,7 +366,7 @@ class PredictionModelGraph(AbstractPage):
                     obj_name=axis3_label,
                     df=self.data_accessor(),
                     pyfemtet_model=self.pyfemtet_model,
-                    N=20,
+                    n=20,
                 )
 
             else:
@@ -377,7 +377,7 @@ class PredictionModelGraph(AbstractPage):
                     obj_name=axis3_label,
                     df=self.data_accessor(),
                     pyfemtet_model=self.pyfemtet_model,
-                    N=200,
+                    n=200,
                 )
 
             return fig, self.CommandState.ready.value
@@ -558,13 +558,11 @@ class PredictionModelGraph(AbstractPage):
                     if new_label == current_ax2_label:
                         ret[ax2_label_key] = current_ax1_label
 
-
                 # ax2
                 elif callback_context.triggered_id['type'] == 'axis2-dropdown-menu-item':
                     ret[ax2_label_key] = new_label
                     if new_label == current_ax1_label:
                         ret[ax1_label_key] = current_ax2_label
-
 
                 # ax3
                 elif callback_context.triggered_id['type'] == 'axis3-dropdown-menu-item':

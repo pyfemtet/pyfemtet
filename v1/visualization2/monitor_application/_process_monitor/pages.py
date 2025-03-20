@@ -7,11 +7,11 @@ from dash import Output, Input, State, callback_context, no_update, ALL
 from dash.exceptions import PreventUpdate
 
 from v1.visualization2._wrapped_components import dcc, dbc, html
-from v1.visualization2._base import AbstractPage, logger
+from v1.visualization2.monitor_application._base import AbstractPage, logger
 from v1.visualization2._complex_components.main_graph import MainGraph  # , FLEXBOX_STYLE_ALLOW_VERTICAL_FILL
 from v1.visualization2._complex_components.pm_graph import PredictionModelGraph
 from v1.worker_status import *
-from pyfemtet._message import Msg
+from _pyfemtet._message import Msg
 
 
 DBC_COLUMN_STYLE_CENTER = {
@@ -113,8 +113,7 @@ class HomePage(AbstractPage):
         # setup callback of subpages
         super().setup_callback()
 
-        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
-        from pyfemtet.opt._femopt_core import OptimizationStatus
+        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = self.application
 
         app = self.application.app
@@ -229,7 +228,7 @@ class HomePage(AbstractPage):
 class WorkerPage(AbstractPage):
 
     def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
+        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
@@ -246,7 +245,9 @@ class WorkerPage(AbstractPage):
 
     def setup_layout(self):
         rows = [self.interval]
-        rows.extend([dbc.Row([dbc.Col(html.Div(dcc.Loading(alert, id={"type": "loading", "index": i})))]) for i, alert in enumerate(self.worker_status_alerts)])
+        rows.extend(
+            [dbc.Row([dbc.Col(html.Div(dcc.Loading(alert, id={"type": "loading", "index": i})))])
+             for i, alert in enumerate(self.worker_status_alerts)])
 
         self.layout = dbc.Container(
             children=rows,
@@ -266,12 +267,17 @@ class WorkerPage(AbstractPage):
 
             ret = []
 
-            for worker_address, worker_status in zip(self.application.worker_addresses, self.application.worker_status_list):
+            for worker_address, worker_status in (
+                    zip(self.application.worker_addresses, self.application.worker_status_list)):
                 worker_status_message = worker_status.value.str()
                 ret.append(f'{worker_address} is {worker_status_message}')
 
-            ret.extend([self.application.get_status_color(worker_status) for worker_status in self.application.worker_status_list])
-            ret.append([({} if callback_context.triggered_id is None else no_update) for _ in range(len(self.worker_status_alerts))])
+            ret.extend(
+                [self.application.get_status_color(worker_status)
+                 for worker_status in self.application.worker_status_list])
+            ret.append(
+                [({} if callback_context.triggered_id is None else no_update)
+                 for _ in range(len(self.worker_status_alerts))])
 
             return tuple(ret)
 
@@ -280,7 +286,7 @@ class PredictionModelPage(AbstractPage):
     """"""
 
     def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
+        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
@@ -295,7 +301,7 @@ class PredictionModelPage(AbstractPage):
 class OptunaVisualizerPage(AbstractPage):
 
     def __init__(self, title, rel_url, application):
-        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
+        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
         self.application: ProcessMonitorApplication = None
         super().__init__(title, rel_url, application)
 
@@ -306,7 +312,7 @@ class OptunaVisualizerPage(AbstractPage):
 
     def _setup_layout(self):
 
-        study = self.application.history.create_optuna_study()
+        study = self.application.history._create_optuna_study_for_visualization()
         prm_names = self.application.history.prm_names
         obj_names = self.application.history.obj_names
 
@@ -379,14 +385,13 @@ class OptunaVisualizerPage(AbstractPage):
 
             return self._setup_layout()
 
-
     def setup_layout(self):
         pass
 
     def data_accessor(self) -> pd.DataFrame:
-        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
+        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:
-            df = self.application.history.get_filtered_df([self.application.history.OptTrialState.succeeded, self.application.history.OptTrialState.skipped])
+            df = self.application.history.get_df()
         return df

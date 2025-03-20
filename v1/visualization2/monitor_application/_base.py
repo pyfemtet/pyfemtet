@@ -33,7 +33,6 @@ dash_logger = get_dash_logger()
 dash_logger.setLevel(logging.ERROR)
 
 
-
 class AbstractPage(ABC):
     """Define content."""
     """

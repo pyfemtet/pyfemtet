@@ -20,9 +20,9 @@ import base64
 import json
 import numpy as np
 
-from v1.visualization2._complex_components import main_figure_creator
-from v1.visualization2._base import AbstractPage, logger
-from pyfemtet._message import Msg
+from v1.visualization2.plotter import main_figure_creator
+from v1.visualization2.monitor_application._base import AbstractPage, logger
+from _pyfemtet._message import Msg
 
 
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
@@ -603,7 +603,7 @@ class MainGraph(AbstractPage):
             return fig
 
     def data_accessor(self) -> pd.DataFrame:
-        from pyfemtet.opt.visualization._process_monitor.application import ProcessMonitorApplication
+        from v1.visualization2.monitor_application._process_monitor.application import ProcessMonitorApplication
         if isinstance(self.application, ProcessMonitorApplication):
             df = self.application.local_data
         else:

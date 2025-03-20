@@ -31,7 +31,10 @@ __all__ = [
     'Record',
     'create_err_msg_from_exception',
     'CorrespondingColumnNameRuler',
+    'MAIN_FILTER',
 ]
+
+MAIN_FILTER: dict = {'sub_fidelity_name': MAIN_FIDELITY_NAME}
 
 
 def create_err_msg_from_exception(e: Exception):
@@ -534,6 +537,13 @@ class Record:
 
         return df
 
+    @staticmethod
+    def get_state_str_from_series(row: pd.Series):
+        state: TrialState = TrialState.undefined
+        if 'state' in row:
+            state = row['state']
+        return state
+
 
 class EntireDependentValuesCalculator:
 
@@ -853,7 +863,7 @@ class Records:
         with self.df_wrapper.lock_if_not_locked:
 
             # update main fidelity
-            equality_filters = History.MAIN_FILTER
+            equality_filters = MAIN_FILTER
             mgr = EntireDependentValuesCalculator(
                 self,
                 equality_filters,
@@ -892,8 +902,6 @@ class History:
     is_restart: bool
 
     path: str
-
-    MAIN_FILTER: dict = {'sub_fidelity_name': MAIN_FIDELITY_NAME}
 
     def __init__(self):
         self._records = Records()
@@ -1012,6 +1020,79 @@ class History:
 
     def save(self):
         self._records.save(self.path)
+
+    def _create_optuna_study_for_visualization(self):
+        import optuna
+
+        # create study
+        kwargs: dict[str, ...] = dict(
+            # storage='sqlite:///' + os.path.basename(self.path) + '_dummy.db',
+            sampler=None, pruner=None, study_name='dummy',
+        )
+        if len(self.obj_names) == 1:
+            kwargs.update(dict(direction='minimize'))
+        else:
+            kwargs.update(dict(directions=['minimize']*len(self.obj_names)))
+        study = optuna.create_study(**kwargs)
+
+        # add trial to study
+        df = self.get_df(equality_filters=MAIN_FILTER)
+
+        for i, row in df.iterrows():
+
+            # trial
+            trial_kwargs: dict = dict()
+
+            # state
+            state_str = Record.get_state_str_from_series(row)
+            if state_str != TrialState.succeeded:
+                continue
+            state = optuna.trial.TrialState.COMPLETE
+            trial_kwargs.update(dict(state=state))
+
+            # params
+            params = {prm_name: row[prm_name] for prm_name in self.prm_names}
+            trial_kwargs.update(dict(params=params))
+
+            # distribution
+            distributions: dict[str, optuna.distributions.BaseDistribution] = dict()
+            for prm_name in params.keys():
+
+                # float
+                if self._records.column_manager.is_numerical_parameter(prm_name):
+                    lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
+                    ub_name = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
+                    dist = optuna.distributions.FloatDistribution(
+                        low=row[lb_name],
+                        high=row[ub_name],
+                    )
+
+                # categorical
+                elif self._records.column_manager.is_categorical_parameter(prm_name):
+                    choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
+                    dist = optuna.distributions.CategoricalDistribution(
+                        choices=row[choices_name]
+                    )
+
+                else:
+                    raise NotImplementedError
+
+                distributions.update(
+                    {prm_name: dist}
+                )
+            trial_kwargs.update(dict(distributions=distributions))
+
+            # objective
+            if len(self.obj_names) == 1:
+                trial_kwargs.update(dict(value=row[self.obj_names].values[0]))
+            else:
+                trial_kwargs.update(dict(values=row[self.obj_names].values))
+
+            # add to study
+            trial = optuna.create_trial(**trial_kwargs)
+            study.add_trial(trial)
+
+        return study
 
 
 def debug_standalone_history():

@@ -5,7 +5,7 @@ import plotly.express as px
 
 from v1.history import History
 from v1.problem import MAIN_FIDELITY_NAME
-from pyfemtet._message import Msg
+from _pyfemtet._message import Msg
 
 
 __all__ = [

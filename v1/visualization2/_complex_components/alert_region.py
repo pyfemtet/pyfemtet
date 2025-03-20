@@ -3,13 +3,12 @@ from typing import List
 from dash.development.base_component import Component
 
 # callback
-from dash import Output, Input, State, no_update, callback_context
-from dash.exceptions import PreventUpdate
+from dash import Output, Input
 
 # components
-from v1.visualization2._wrapped_components import html, dcc, dbc
+from v1.visualization2._wrapped_components import dbc
 
-from v1.visualization2._base import AbstractPage, logger
+from v1.visualization2.monitor_application._base import AbstractPage
 
 
 class AlertRegion(AbstractPage):

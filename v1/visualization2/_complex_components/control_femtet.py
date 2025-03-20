@@ -1,24 +1,20 @@
-# type hint
-from dash.development.base_component import Component
-
 # callback
-from dash import Output, Input, State, no_update, callback_context
+from dash import Output, Input, no_update, callback_context
 from dash.exceptions import PreventUpdate
 
 # components
-from pyfemtet.opt.visualization._wrapped_components import html, dcc, dbc
+from v1.visualization2._wrapped_components import html, dbc
 
 # the others
-import logging
 import os
 from enum import Enum
 import json
 # noinspection PyUnresolvedReferences
 from pythoncom import com_error
 
-from v1.visualization2._base import PyFemtetApplicationBase, AbstractPage, logger
+from v1.visualization2.monitor_application._base import AbstractPage
 from v1.interface import FemtetInterface
-from pyfemtet._message import Msg
+from _pyfemtet._message import Msg
 
 
 class FemtetState(Enum):
@@ -32,7 +28,7 @@ class FemtetControl(AbstractPage):
 
     def __init__(self):
         super().__init__()
-        self.fem: FemtetInterface = None
+        self.fem: FemtetInterface | None = None
 
     def setup_component(self):
 
