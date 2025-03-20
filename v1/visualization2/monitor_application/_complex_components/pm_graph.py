@@ -28,6 +28,11 @@ from v1.visualization2.monitor_application._base_application import AbstractPage
 from _pyfemtet._message import Msg
 
 
+__all__ = [
+    'PredictionModelGraph'
+]
+
+
 FLEXBOX_STYLE_ALLOW_VERTICAL_FILL = {
     'display': 'flex',
     'flex-direction': 'column',

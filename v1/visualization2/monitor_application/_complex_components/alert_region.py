@@ -11,6 +11,11 @@ from v1.visualization2.monitor_application._wrapped_components import dbc
 from v1.visualization2.monitor_application._base_application import AbstractPage
 
 
+__all__ = [
+    'AlertRegion'
+]
+
+
 class AlertRegion(AbstractPage):
 
     def setup_component(self):

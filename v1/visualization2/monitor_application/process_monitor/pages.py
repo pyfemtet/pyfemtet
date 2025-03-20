@@ -9,7 +9,7 @@ from dash.exceptions import PreventUpdate
 
 from v1.visualization2.monitor_application._wrapped_components import html, dcc, dbc
 from v1.visualization2.monitor_application._base_application import AbstractPage, logger
-from v1.visualization2.monitor_application._complex_components.main_graph import MainGraph
+from v1.visualization2.monitor_application._complex_components import *
 
 if TYPE_CHECKING:
     from v1.visualization2.monitor_application.process_monitor.application import ProcessMonitorApplication

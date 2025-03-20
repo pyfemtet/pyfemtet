@@ -18,6 +18,12 @@ from v1.interface import FemtetInterface
 from _pyfemtet._message import Msg
 
 
+__all__ = [
+    'FemtetState',
+    'FemtetControl',
+]
+
+
 class FemtetState(Enum):
     unconnected = -1
     missing = 0
