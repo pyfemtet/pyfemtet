@@ -121,18 +121,29 @@ def _plot(
     if is_3d:
         zz_mean, zz_std = z_mean.reshape(xx1.shape), z_std.reshape(xx1.shape)
     else:
-        zz_mean = None
+        zz_mean, zz_std = None, None
 
     # plot
     fig = go.Figure()
 
-    # mean surface
+    # rsm
     if is_3d:
         assert prm_name2 is not None
         assert prm_values2 is not None
         assert xx2 is not None
         assert zz_mean is not None
+        assert zz_std is not None
 
+        zz_upper = zz_mean + zz_std
+        zz_lower = zz_mean - zz_std
+
+        # std
+        fig.add_trace(go.Surface(z=zz_upper, x=xx1, y=xx2, showscale=False, opacity=0.3, showlegend=True,
+                                 name='予測の誤差（標準偏差）'))
+        fig.add_trace(go.Surface(z=zz_lower, x=xx1, y=xx2, showscale=False, opacity=0.3, showlegend=True,
+                                 name='予測の誤差（標準偏差）'))
+
+        # mean
         contours = {}
         for key, prm_name, prm_values in zip(('x', 'y'), (prm_name1, prm_name2), (prm_values1, prm_values2)):
             if history._records.column_manager.is_numerical_parameter(prm_name):
@@ -149,6 +160,7 @@ def _plot(
             go.Surface(
                 x=xx1, y=xx2, z=zz_mean,
                 name='予測',
+                showlegend=True,
                 contours=contours,
                 colorbar=dict(
                     x=0.2,
@@ -156,9 +168,19 @@ def _plot(
                 ),
             )
         )
-
-    # mean line
     else:
+        # std
+        fig.add_trace(
+            go.Scatter(
+                x=list(x1) + list(x1)[::-1],
+                y=list(z_mean + z_std) + list(z_mean - z_std)[::-1],
+                name='予測の誤差（標準偏差）',
+                fill='toself',
+                opacity=0.3,
+            )
+        )
+
+        # mean
         fig.add_trace(
             go.Scatter(
                 x=x1, y=z_mean,
@@ -172,8 +194,11 @@ def _plot(
             x=df[prm_name1], y=df[prm_name2], z=df[obj_name],
             mode='markers',
             marker=dict(
-                color='black',
                 size=3,
+                line=dict(
+                    width=1,
+                    color='white',
+                ),
             ),
             name='trial',
         ))
@@ -182,7 +207,10 @@ def _plot(
             x=df[prm_name1], y=df[obj_name],
             mode='markers',
             marker=dict(
-                color='black',
+                line=dict(
+                    width=1,
+                    color='white',
+                ),
             ),
             name='trial',
         ))
@@ -233,5 +261,25 @@ def _plot(
             trace.marker.color = [f'rgba(0, 0, 0, {o: .2f})' for o in opacity]
 
     fig.for_each_trace(set_opacity)
+
+    # axis name
+    if is_3d:
+        # layout
+        fig.update_layout(
+            title="予測モデル",
+            xaxis_title=prm_name1,
+            yaxis_title=obj_name,
+        )
+
+    else:
+        fig.update_layout(
+            title='予測モデル',
+            scene=dict(
+                xaxis_title=prm_name1,
+                yaxis_title=prm_name2,
+                zaxis_title=obj_name
+            ),
+            margin=dict(l=0, r=0, b=0, t=30),
+        )
 
     return fig
