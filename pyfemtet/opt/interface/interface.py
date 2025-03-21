@@ -8,20 +8,22 @@ try:
     from pythoncom import CoInitialize, CoUninitialize
     from win32com.client import Dispatch, Constants, constants
 except ModuleNotFoundError:
-    CoInitialize = lambda: None
-    CoUninitialize = lambda: None
+    # noinspection PyPep8Naming
+    def CoInitialize(): ...
+    # noinspection PyPep8Naming
+    def CoUninitialize(): ...
     Dispatch = type('NoDispatch', (object,), {})
     Constants = type('NoConstants', (object,), {})
     constants = Constants()
 
-from v1.problem import *
-from v1.utils.dask_util import *
-from v1.logger import get_module_logger
+from pyfemtet._util.dask_util import *
+from pyfemtet.logger import get_module_logger
+from pyfemtet.opt.problem import *
 
 logger = get_module_logger('opt.interface', False)
 
 if TYPE_CHECKING:
-    from v1.optimizer import AbstractOptimizer
+    from pyfemtet.opt.optimizer import AbstractOptimizer
 
 __all__ = [
     'AbstractFEMInterface',
@@ -31,6 +33,7 @@ __all__ = [
 
 class AbstractFEMInterface:
 
+    kwargs: dict = {}
     _load_problem_from_fem: bool = False
 
     def update_parameter(self, x: TrialInput) -> None:
@@ -40,7 +43,7 @@ class AbstractFEMInterface:
         raise NotImplementedError
 
     @property
-    def _obj_pass_to_function(self):
+    def _object_pass_to_fun(self):
         return self
 
     @staticmethod
@@ -65,6 +68,9 @@ class AbstractFEMInterface:
 
             client.upload_file(path, load=False)
 
+    def _setup_before_parallel(self) -> None:
+        pass
+
     def _setup_after_parallel(self) -> None:
         pass
 
@@ -77,7 +83,7 @@ class AbstractFEMInterface:
     def load_constraints(self, opt: AbstractOptimizer):
         pass
 
-    def close(self):  # context manager による予約語
+    def close(self, *args, **kwargs):  # context manager による予約語
         pass
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal

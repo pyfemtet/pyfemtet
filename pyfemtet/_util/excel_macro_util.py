@@ -9,7 +9,7 @@ import win32process
 
 from pyfemtet.logger import get_module_logger
 
-logger = get_module_logger('util.excel', __name__)
+logger = get_module_logger('util.excel', False)
 
 
 def _get_pid(hwnd):
