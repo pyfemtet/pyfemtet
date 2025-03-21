@@ -6,6 +6,7 @@ import inspect
 import tempfile
 import warnings
 import datetime
+from time import sleep
 from contextlib import closing, nullcontext
 
 import numpy as np
@@ -26,6 +27,7 @@ from pyfemtet.logger import get_optuna_logger, remove_all_output, get_module_log
 from pyfemtet.opt.optimizer.optimizer import *
 from pyfemtet.opt.optimizer.optuna_optimizer.optuna_attribute import OptunaAttribute
 from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
+from pyfemtet.opt.worker_status import WorkerStatus
 
 logger = get_module_logger('opt.optimizer', False)
 
@@ -61,6 +63,14 @@ class OptunaOptimizer(AbstractOptimizer):
         self.seed: int | None = None
         self.callbacks = []
 
+    def _check_and_raise_interruption(self) -> None:
+        try:
+            AbstractOptimizer._check_and_raise_interruption(self)
+        except InterruptOptimization as e:
+            if self.current_trial is not None:
+                self.current_trial.study.stop()
+            raise e
+
     def solve(
             self,
             x: TrialInput,
@@ -72,8 +82,7 @@ class OptunaOptimizer(AbstractOptimizer):
         vm = self.variable_manager
 
         # check interruption
-        if self._check_and_raise_interruption():
-            return None
+        self._check_and_raise_interruption()
 
         # declare output
         y_internal_: tuple[float] | None = None
@@ -126,8 +135,7 @@ class OptunaOptimizer(AbstractOptimizer):
         self.current_trial.set_user_attr(optuna_attr.key, optuna_attr.value)
 
         # check interruption
-        if self._check_and_raise_interruption():
-            return None
+        self._check_and_raise_interruption()
 
         return y_internal_
 
@@ -155,8 +163,7 @@ class OptunaOptimizer(AbstractOptimizer):
             vm = self.variable_manager
 
             # check interruption
-            if self._check_and_raise_interruption():
-                return None
+            self._check_and_raise_interruption()
 
             # parameter suggestion
             params = vm.get_variables(filter='parameter')
@@ -184,8 +191,7 @@ class OptunaOptimizer(AbstractOptimizer):
             vm.evaluate()
 
             # check interruption
-            if self._check_and_raise_interruption():
-                return None
+            self._check_and_raise_interruption()
 
             # construct TrialInput
             x = vm.get_variables(filter='parameter')
@@ -199,8 +205,7 @@ class OptunaOptimizer(AbstractOptimizer):
                 self.solve(x, x_pass_to_fem, sub_opt)
 
             # check interruption
-            if self._check_and_raise_interruption():
-                return None
+            self._check_and_raise_interruption()
 
             # clear trial
             self.current_trial = None
@@ -378,11 +383,21 @@ class OptunaOptimizer(AbstractOptimizer):
                 # 各 worker は dispose だけは行い、
                 # 削除は失敗しても気にしないことにする
 
-                # 通常 dispose
-                rdb_storage.engine.dispose()
+                if client is None:
+                    # 通常 dispose
+                    rdb_storage.engine.dispose()
 
                 # run_on_scheduler での dispose
-                if client is not None:
+                else:
+
+                    # 他の worker を待つ
+                    while True:
+                        if all([ws.value >= WorkerStatus.finishing for ws in self.worker_status_list]):
+                            break
+                        sleep(1)
+
+                    # 通常 dispose
+                    rdb_storage.engine.dispose()
 
                     def dispose_(dask_scheduler):
                         assert isinstance(self.storage, DaskStorage)
@@ -405,10 +420,6 @@ class OptunaOptimizer(AbstractOptimizer):
                         logger.debug(f'{self.storage_path} の削除に成功しました。')
 
                 self.storage_path = self._existing_storage_path
-
-                if isinstance(exc_type, optuna.exceptions.StorageInternalError):
-                    # ignore exception
-                    return True
 
         return RemovingTempDB()
 
@@ -470,51 +481,53 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # ===== load study and run =====
 
-        # quit FEM even if abnormal termination
-        with closing(self.fem), self._removing_tmp_db_if_needed():
+        # after quit FEM, try to remove tmp db
+        with self._removing_tmp_db_if_needed():
 
-            # load study creating in setup_before_parallel()
-            # located on dask scheduler
-            study = optuna.load_study(
-                study_name=self.study_name,
-                storage=self.storage,
-                sampler=sampler,
-            )
+            # quit FEM even if abnormal termination
+            with closing(self.fem):
 
-            # if tpe_addressing, load main study
-            if self._is_tpe_addressing():
-                # load it
-                existing_study = optuna.load_study(
+                # load study creating in setup_before_parallel()
+                # located on dask scheduler
+                study = optuna.load_study(
                     study_name=self.study_name,
-                    storage=f'sqlite:///{self._existing_storage_path}',
+                    storage=self.storage,
+                    sampler=sampler,
                 )
 
-                # and add callback to copy-back
-                # from processing study to existing one.
-                def copy_back(_, trial):
-                    existing_study.add_trial(trial)
-                self.callbacks.append(copy_back)
+                # if tpe_addressing, load main study
+                if self._is_tpe_addressing():
+                    # load it
+                    existing_study = optuna.load_study(
+                        study_name=self.study_name,
+                        storage=f'sqlite:///{self._existing_storage_path}',
+                    )
 
-            # callback
-            if self.n_trials is not None:
-                self.callbacks.append(self._get_callback(self.n_trials))
+                    # and add callback to copy-back
+                    # from processing study to existing one.
+                    def copy_back(_, trial):
+                        existing_study.add_trial(trial)
+                    self.callbacks.append(copy_back)
 
-            # run
-            study.optimize(
-                self._objective,
-                timeout=self.timeout,
-                callbacks=self.callbacks,
-                # catch=[InterruptOptimization]  # parallel の場合、FrozenTrial が Unbound になりうる？
-            )
+                # callback
+                if self.n_trials is not None:
+                    self.callbacks.append(self._get_callback(self.n_trials))
 
-    def _check_and_raise_interruption(self) -> bool:
-        try:
-            AbstractOptimizer._check_and_raise_interruption(self)
-        except InterruptOptimization:
-            if self.current_trial is not None:
-                self.current_trial.study.stop()
-                return True
-        return False
+                # run
+                try:
+                    study.optimize(
+                        self._objective,
+                        timeout=self.timeout,
+                        callbacks=self.callbacks,
+                        catch=[InterruptOptimization],
+                    )
+                except Exception as e:
+                    if self.worker_status.value < WorkerStatus.crashed:
+                        self.worker_status.value = WorkerStatus.crashed
+                    raise e
+                else:
+                    if self.worker_status.value < WorkerStatus.finishing:
+                        self.worker_status.value = WorkerStatus.finishing
 
 
 def debug_1():

@@ -43,6 +43,7 @@ class AbstractOptimizer:
     fem: AbstractFEMInterface
     entire_status: WorkerStatus
     worker_status: WorkerStatus
+    worker_status_list: list[WorkerStatus]
     _done_setup_before_parallel: bool
     _done_load_problem_from_fem: bool
 
@@ -64,6 +65,7 @@ class AbstractOptimizer:
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
         self.worker_status: WorkerStatus = WorkerStatus('worker-status')
+        self.worker_status_list: list[WorkerStatus] = [self.worker_status]
         self._done_setup_before_parallel = False
         self._worker_index: int | str | None = None
 
@@ -418,6 +420,7 @@ class AbstractOptimizer:
         self.entire_status = entire_status
         self.worker_status = worker_status
         self._worker_index = worker_idx
+        self.worker_status_list = worker_status_list
 
         class SettingStatusFinished:
 

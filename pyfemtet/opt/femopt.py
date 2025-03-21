@@ -208,6 +208,9 @@ def substrate_size(Femtet):
     """基板のXY平面上での専有面積を計算します。"""
     substrate_w = Femtet.GetVariableValue('substrate_w')
     substrate_d = Femtet.GetVariableValue('substrate_d')
+
+    assert get_worker() is not None
+
     return substrate_w * substrate_d  # 単位: mm2
 
 
@@ -227,7 +230,7 @@ def debug_2():
     opt.add_parameter(name="substrate_d", initial_value=60, lower_bound=34, upper_bound=60)
     opt.add_objective(name='基板サイズ(mm2)', fun=substrate_size)
 
-    opt.n_trials = 10
+    opt.n_trials = 5
     opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test.csv')
 
     femopt = FEMOpt()

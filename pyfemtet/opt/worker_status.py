@@ -45,6 +45,8 @@ def worker_status_from_float(value: float):
         return _WorkerStatus(value, 'Running')
     elif value == float(40):
         return _WorkerStatus(value, 'Interrupting')
+    elif value == float(45):
+        return _WorkerStatus(value, 'Finishing')
     elif value == float(50):
         return _WorkerStatus(value, 'Finished')
     elif value == float(60):
@@ -63,6 +65,7 @@ class WorkerStatus:
     waiting = worker_status_from_float(20)
     running = worker_status_from_float(30)
     interrupting = worker_status_from_float(40)
+    finishing = worker_status_from_float(45)
     finished = worker_status_from_float(50)
     crashed = worker_status_from_float(60)
     terminated = worker_status_from_float(float('inf'))
