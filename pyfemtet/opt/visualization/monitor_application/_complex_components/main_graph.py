@@ -601,6 +601,8 @@ class MainGraph(AbstractPage):
         df = self.application.get_df()
         if len(df.columns) == 0:
             raise PreventUpdate
+        if len(df) == 0:
+            raise PreventUpdate
         kwargs = kwargs or {}
         fig = creator(self.application.history, df, **kwargs)
         if with_length:

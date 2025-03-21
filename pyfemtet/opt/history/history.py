@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import os
 import csv
 import ast
+import math
 import datetime
 import dataclasses
 from time import sleep
@@ -22,6 +25,9 @@ from pyfemtet.logger import get_module_logger
 
 from .optimality import *
 from .hypervolume import *
+
+if TYPE_CHECKING:
+    from pyfemtet.opt.interface import AbstractFEMInterface
 
 
 __all__ = [
@@ -820,7 +826,7 @@ class Records:
             # write df from line 3
             df.to_csv(f, index=False, encoding=ENCODING, lineterminator='\n')
 
-    def append(self, record: Record):
+    def append(self, record: Record) -> pd.Series:
 
         # get row
         row = record.as_df(dtypes=self.column_manager.dtypes)
@@ -855,6 +861,10 @@ class Records:
             self.update_entire_dependent_values(new_df)
 
             dfw.set_df(new_df)
+
+            # postprocess after recording で使うために
+            # 計算済み最終行を返す
+            return new_df.iloc[-1]
 
     def update_entire_dependent_values(self, processing_df: pd.DataFrame):
 
@@ -989,13 +999,14 @@ class History:
     def get_df(self, equality_filters: dict = None):
         return self._records.df_wrapper.get_df(equality_filters)
 
-    def recording(self):
+    def recording(self, fem: AbstractFEMInterface):
 
         # noinspection PyMethodParameters
         class RecordContext:
 
             def __init__(self_):
                 self_.record = Record()
+                self_.record_as_df = None
 
             def __enter__(self_):
                 return self_.record
@@ -1004,15 +1015,50 @@ class History:
                 self_.record.datetime_end = self_.record.datetime_end \
                     if self_.record.datetime_end is not None \
                     else datetime.datetime.now()
-                self._records.append(self_.record)
+                return self._records.append(self_.record)
 
             def __exit__(self_, exc_type, exc_val, exc_tb):
 
+                row: pd.Series | None = None
+
                 if exc_type is None:
-                    self_.append()
+                    row = self_.append()
 
                 elif issubclass(exc_type, ExceptionDuringOptimization):
-                    self_.append()
+                    row = self_.append()
+
+                if row is None:
+                    return
+
+                client = get_client()
+
+                name_parts = ['trial']
+                if not math.isnan(row['fidelity']):
+                    fid = str(row['fidelity'])
+                    if fid != MAIN_FIDELITY_NAME:
+                        name_parts.append(fid)
+
+                assert not math.isnan(row['trial'])
+                name_parts.append(str(row['trial']))
+
+                if not math.isnan(row['sub_sampling']):
+                    name_parts.append(str(row['sub_sampling']))
+
+                trial_name = '_'.join(name_parts)
+
+                if client is not None:
+                    client.run_on_scheduler(
+                        fem._postprocess_after_recording,
+                        trial_name=trial_name,
+                        **(fem._create_postprocess_args()),
+                    )
+
+                else:
+                    fem._postprocess_after_recording(
+                        dask_scheduler=None,
+                        trial_name=trial_name,
+                        **(fem._create_postprocess_args())
+                    )
 
         return RecordContext()
 

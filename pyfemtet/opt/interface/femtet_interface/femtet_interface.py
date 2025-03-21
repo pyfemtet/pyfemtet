@@ -868,31 +868,32 @@ class FemtetInterface(COMInterface):
         return out
 
     @staticmethod
-    def _create_pdt_path(femprj_path, model_name, trial):
+    def _create_path(femprj_path, model_name, trial_name, ext):
         result_dir = femprj_path.replace(".femprj", ".Results")
-        pdt_path = os.path.join(result_dir, model_name + f"_trial{trial}.pdt")
+        pdt_path = os.path.join(result_dir, model_name + f"_{trial_name}.{ext}")
         return pdt_path
 
-    # noinspection PyUnusedLocal
+    # noinspection PyMethodOverriding
     @staticmethod
-    def _postprocess_func(
-        trial: int,
+    def _postprocess_after_recording(
+        dask_scheduler,  # must for run_on_scheduler
+        trial_name: str,
+        *,
         original_femprj_path: str,
         model_name: str,
         pdt_file_content=None,
         jpg_file_content=None,
-        dask_scheduler=None,  # must for run_on_scheduler
     ):
-        result_dir = original_femprj_path.replace(".femprj", ".Results")
+
         if pdt_file_content is not None:
-            pdt_path = FemtetInterface._create_pdt_path(
-                original_femprj_path, model_name, trial
-            )
+            pdt_path = FemtetInterface._create_path(
+                original_femprj_path, model_name, trial_name, ext='pdt')
             with open(pdt_path, "wb") as f:
                 f.write(pdt_file_content)
 
         if jpg_file_content is not None:
-            jpg_path = os.path.join(result_dir, model_name + f"_trial{trial}.jpg")
+            jpg_path = FemtetInterface._create_path(
+                original_femprj_path, model_name, trial_name, ext='jpg')
             with open(jpg_path, "wb") as f:
                 f.write(jpg_file_content)
 

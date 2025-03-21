@@ -261,7 +261,7 @@ class AbstractOptimizer:
 
         # create context
         if history is not None:
-            record_to_history = history.recording()
+            record_to_history = history.recording(self.fem)
         else:
             class DummyRecordContext:
                 def __enter__(self):

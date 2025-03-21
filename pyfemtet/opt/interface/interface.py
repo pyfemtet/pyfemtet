@@ -36,15 +36,21 @@ class AbstractFEMInterface:
     kwargs: dict = {}
     _load_problem_from_fem: bool = False
 
+    # ===== update =====
+
     def update_parameter(self, x: TrialInput) -> None:
         raise NotImplementedError
 
     def update(self) -> None:
         raise NotImplementedError
 
+    # ===== Function =====
+
     @property
     def _object_pass_to_fun(self):
         return self
+
+    # ===== dask util =====
 
     @staticmethod
     def _get_worker_space() -> str:
@@ -67,6 +73,8 @@ class AbstractFEMInterface:
                 raise FileNotFoundError
 
             client.upload_file(path, load=False)
+
+    # ===== setup =====
 
     def _setup_before_parallel(self) -> None:
         pass
@@ -92,6 +100,19 @@ class AbstractFEMInterface:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def _check_using_fem(self, fun: callable) -> bool:
         return False
+
+    # ===== postprocessing after recording =====
+
+    def _create_postprocess_args(self) -> dict[str, ...]:
+        return {}
+
+    @staticmethod
+    def _postprocess_after_recording(
+            dask_scheduler,
+            trial_name: str,
+            **kwargs
+    ) -> ...:  # _postprocess_after_recording
+        pass
 
 
 class COMInterface(AbstractFEMInterface):

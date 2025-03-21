@@ -253,7 +253,7 @@ class AbstractOptimizer(ABC):
             state=self.history.OptTrialState.succeeded.value,
             time_start=self.current_time_start,
             time_end=datetime.datetime.now(),
-            postprocess_func=self.fem._postprocess_func,
+            postprocess_func=self.fem._postprocess_after_recording,
             postprocess_args=self.fem._create_postprocess_args(),
         )
 
@@ -284,7 +284,7 @@ class AbstractOptimizer(ABC):
             state,
             self.current_time_start,
             datetime.datetime.now(),
-            postprocess_func=self.fem._postprocess_func,
+            postprocess_func=self.fem._postprocess_after_recording,
             postprocess_args=self.fem._create_postprocess_args(),
         )
 
