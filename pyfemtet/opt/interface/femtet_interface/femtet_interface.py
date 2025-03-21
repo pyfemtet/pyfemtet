@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import os
 import sys
 import warnings
@@ -28,9 +30,11 @@ from pyfemtet.dispatch_extensions import *
 from pyfemtet.opt.interface.interface import COMInterface
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.optimizer import AbstractOptimizer
 
 from ._femtet_parametric import *
+
+if TYPE_CHECKING:
+    from pyfemtet.opt.optimizer import AbstractOptimizer
 
 logger = get_module_logger('opt.interface', False)
 
@@ -172,11 +176,15 @@ class FemtetInterface(COMInterface):
         worker = get_worker()
 
         if worker is not None:
+
+            CoInitialize()
+
             self.femprj_path = os.path.join(
                 worker.local_directory,
                 os.path.basename(self.original_femprj_path)
             )
             self.connect_femtet(connect_method='new')
+            self.open(self.femprj_path, self.model_name)
             self.quit_when_destruct = True
 
     def close(self, timeout=1, force=True):

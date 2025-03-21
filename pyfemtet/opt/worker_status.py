@@ -67,19 +67,8 @@ class WorkerStatus:
     crashed = worker_status_from_float(60)
     terminated = worker_status_from_float(float('inf'))
 
-    @property
-    def _dataset_name(self):
-        if self.__dataset_name is None:
-            worker = get_worker()
-            if worker is not None:
-                return worker.address + '_worker_status'
-            else:
-                return 'main_worker_status'
-        else:
-            return self.__dataset_name
-
-    def __init__(self, dataset_name: str = None):
-        self.__dataset_name = dataset_name
+    def __init__(self, dataset_name: str):
+        self._dataset_name = dataset_name
         self.__value: _WorkerStatus
         self.value = WorkerStatus.undefined
 

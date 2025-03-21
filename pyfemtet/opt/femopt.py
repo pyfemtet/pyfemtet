@@ -12,7 +12,7 @@ from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.visualization.monitor_application.process_monitor.application import main
 
 
-logger = get_module_logger('opt.femopt', True)
+logger = get_module_logger('opt.femopt', False)
 
 
 class FEMOpt:
@@ -56,9 +56,12 @@ class FEMOpt:
             # optimizer-specific setup after history finalized
             self.opt._setup_before_parallel()
 
+            # setup FEM (mainly for distributing files)
+            self.opt.fem._setup_before_parallel()
+
             # create worker status list
             entire_status = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
-            worker_status_list = [WorkerStatus() for _ in range(n_parallel)]
+            worker_status_list = [WorkerStatus(f'worker-status-{i}') for i in range(n_parallel)]
             entire_status.value = WorkerStatus.initializing
 
             # Get workers
@@ -89,6 +92,7 @@ class FEMOpt:
                 self.opt.history,
                 entire_status,
                 worker_status_list[0],
+                worker_status_list,
                 False,
             )
 
@@ -100,6 +104,7 @@ class FEMOpt:
                 [self.opt.history] * (n_parallel - 1),
                 [entire_status] * (n_parallel - 1),
                 worker_status_list[1:],
+                [worker_status_list] * (n_parallel - 1),
                 [True] * (n_parallel - 1),
                 # Arguments of map
                 workers=opt_worker_addresses,
@@ -155,7 +160,7 @@ class FEMOpt:
         logger.info('All processes are terminated.')
 
 
-def test():
+def debug_1():
     # noinspection PyUnresolvedReferences
     from time import sleep
     # from pyfemtet.opt.optimizer import InterruptOptimization
@@ -199,6 +204,40 @@ def test():
     print(os.path.abspath(_femopt.opt.history.path))
 
 
+def substrate_size(Femtet):
+    """基板のXY平面上での専有面積を計算します。"""
+    substrate_w = Femtet.GetVariableValue('substrate_w')
+    substrate_d = Femtet.GetVariableValue('substrate_d')
+    return substrate_w * substrate_d  # 単位: mm2
+
+
+def debug_2():
+    from pyfemtet.opt.interface import FemtetInterface
+    from pyfemtet.opt.optimizer import OptunaOptimizer
+
+    fem = FemtetInterface(
+        femprj_path=os.path.join(os.path.dirname(__file__), 'wat_ex14_parametric_jp.femprj'),
+    )
+
+    opt = OptunaOptimizer()
+
+    opt.fem = fem
+
+    opt.add_parameter(name="substrate_w", initial_value=40, lower_bound=22, upper_bound=60)
+    opt.add_parameter(name="substrate_d", initial_value=60, lower_bound=34, upper_bound=60)
+    opt.add_objective(name='基板サイズ(mm2)', fun=substrate_size)
+
+    opt.n_trials = 10
+    opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test.csv')
+
+    femopt = FEMOpt()
+
+    femopt.opt = opt
+
+    femopt.optimize(n_parallel=2)
+
+
 if __name__ == '__main__':
-    for i in range(1):
-        test()
+    # for i in range(1):
+    #     debug_1()
+    debug_2()

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Callable
 
+from time import sleep
+
 from pyfemtet.opt.history import *
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.interface import *
@@ -17,7 +19,7 @@ __all__ = [
 ]
 
 
-logger = get_module_logger('opt.optimizer')
+logger = get_module_logger('opt.optimizer', True)
 
 
 def _log_hidden_constraint(e: Exception):
@@ -61,7 +63,7 @@ class AbstractOptimizer:
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
-        self.worker_status: WorkerStatus = WorkerStatus()
+        self.worker_status: WorkerStatus = WorkerStatus('worker-status')
         self._done_setup_before_parallel = False
         self._worker_index: int | str | None = None
 
@@ -408,6 +410,7 @@ class AbstractOptimizer:
             history: History,
             entire_status: WorkerStatus,
             worker_status: WorkerStatus,
+            worker_status_list: list[WorkerStatus],
             _should_fem_setup_after_parallel: bool,
     ) -> None:
 
@@ -443,9 +446,28 @@ class AbstractOptimizer:
             self.worker_status.value = WorkerStatus.initializing
 
             self.worker_status.value = WorkerStatus.launching_fem
+            if _should_fem_setup_after_parallel:
+                self.fem._setup_after_parallel()
 
             self.worker_status.value = WorkerStatus.waiting
-            pass
+            while True:
+                self._check_and_raise_interruption()
+
+                # 他のすべての worker_status が wait 以上になったら break
+                logger.debug([ws.value for ws in worker_status_list])
+                if all([ws.value >= WorkerStatus.waiting
+                        for ws in worker_status_list]):
+
+                    # リソースの競合等を避けるため
+                    # break する前に index 秒待つ
+                    if isinstance(worker_idx, str):
+                        wait_second = 0.
+                    else:
+                        wait_second = int(worker_idx + 1)
+                    sleep(wait_second)
+                    break
+
+                sleep(1)
 
             self.worker_status.value = WorkerStatus.running
 

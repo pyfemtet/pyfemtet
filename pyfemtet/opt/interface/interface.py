@@ -103,7 +103,11 @@ class COMInterface(AbstractFEMInterface):
         return state
 
     def __setstate__(self, state):
-        """UnPickle 時に COM を再構築する"""
+        """UnPickle 時に COM を再構築する
+
+        ただしメインプロセスでしか呼ばれない模様
+        dask のバージョン依存？
+        """
         CoInitialize()
         for key, value in self.com_members.items():
             state.update({key: Dispatch(value)})

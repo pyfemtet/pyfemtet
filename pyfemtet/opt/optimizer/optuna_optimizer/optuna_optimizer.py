@@ -358,6 +358,7 @@ class OptunaOptimizer(AbstractOptimizer):
                 pass
 
             def __exit__(self_, exc_type, exc_val, exc_tb):
+
                 # clean up temporary file
                 if isinstance(self.storage, optuna.storages._CachedStorage):
                     rdb_storage = self.storage._backend
@@ -405,6 +406,10 @@ class OptunaOptimizer(AbstractOptimizer):
                         logger.debug(f'{self.storage_path} の削除に成功しました。')
 
                 self.storage_path = self._existing_storage_path
+
+                if isinstance(exc_type, optuna.exceptions.StorageInternalError):
+                    # ignore exception
+                    return True
 
         return RemovingTempDB()
 
