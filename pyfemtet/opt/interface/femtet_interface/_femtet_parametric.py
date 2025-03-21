@@ -195,7 +195,7 @@ def add_parametric_results_as_objectives(opt, Femtet, indexes, directions) -> bo
         result = dll.GetPrmResultName(i)
         name = result.decode('mbcs')
         # objective value function
-        opt.add_objective(_parametric_objective, name, direction=direction, args=(i,))
+        opt.add_objective(name=name, fun=_parametric_objective, direction=direction, args=(i,))
     return True  # ここまで来たら成功
 
 

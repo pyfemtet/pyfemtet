@@ -231,6 +231,9 @@ class OptunaOptimizer(AbstractOptimizer):
 
             return y_internal
 
+        if get_client() is None:
+            self.history.save()
+
     def _get_callback(self, n_trials: int):
 
         # restart である場合、追加 N 回と見做す
@@ -650,5 +653,29 @@ def debug_2():
     opt.run()
 
 
+def debug_3():
+    from pyfemtet.opt.interface.femtet_interface.femtet_interface import FemtetInterface
+
+    fem = FemtetInterface(
+        femprj_path=os.path.join(os.path.dirname(__file__), 'wat_ex14_parametric_jp.femprj'),
+    )
+
+    fem.use_parametric_output_as_objective(
+        number=1, direction='minimize',
+    )
+
+    opt = OptunaOptimizer()
+
+    opt.fem = fem
+
+    opt.add_parameter(name="substrate_w", initial_value=40, lower_bound=22, upper_bound=60)
+    opt.add_parameter(name="substrate_d", initial_value=60, lower_bound=34, upper_bound=60)
+
+    opt.n_trials = 5
+    opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test.csv')
+
+    opt.run()
+
+
 if __name__ == '__main__':
-    debug_2()
+    debug_3()

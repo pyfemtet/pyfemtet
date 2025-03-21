@@ -123,7 +123,7 @@ class FemtetInterface(COMInterface):
         strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
         allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
         open_result_with_gui: bool = True,
-        parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
+        parametric_output_indexes_use_as_objective: dict[int, str or float] = None,  # TODO: Remove this
     ):
         # warning
         if parametric_output_indexes_use_as_objective is not None:
@@ -152,6 +152,7 @@ class FemtetInterface(COMInterface):
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
         self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
+        self._load_problem_from_fem = self.parametric_output_indexes_use_as_objective is not None
         self._original_autosave_enabled = _get_autosave_enabled()
         _set_autosave_enabled(False)
 
@@ -231,6 +232,8 @@ class FemtetInterface(COMInterface):
 
         else:
             self.parametric_output_indexes_use_as_objective.update(index)
+
+        self._load_problem_from_fem = True
 
     def load_objectives(self, opt: AbstractOptimizer):
         indexes = list(self.parametric_output_indexes_use_as_objective.keys())

@@ -67,6 +67,7 @@ class AbstractOptimizer:
         self.worker_status: WorkerStatus = WorkerStatus('worker-status')
         self.worker_status_list: list[WorkerStatus] = [self.worker_status]
         self._done_setup_before_parallel = False
+        self._done_load_problem_from_fem = False
         self._worker_index: int | str | None = None
 
     # ===== public =====
