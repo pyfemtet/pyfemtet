@@ -242,6 +242,8 @@ class OptunaOptimizer(AbstractOptimizer):
         if self._done_setup_before_parallel:
             return
 
+        AbstractOptimizer._setup_before_parallel(self)  # set flag inside this
+
         # set default values
         self.sampler_class = self.sampler_class or optuna.samplers.TPESampler
         self.sampler_kwargs = self.sampler_kwargs or {}
@@ -326,8 +328,6 @@ class OptunaOptimizer(AbstractOptimizer):
             # initial trial
             params = self.variable_manager.get_variables(format='dict', filter='parameter')
             study.enqueue_trial(params, user_attrs={"message": "Initial values"})
-
-        self._done_setup_before_parallel = True
 
     def _setup_after_parallel(self):
         # reseed

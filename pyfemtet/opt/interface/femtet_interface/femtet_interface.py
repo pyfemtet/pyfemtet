@@ -609,7 +609,7 @@ class FemtetInterface(COMInterface):
 
     # ===== model check and solve =====
 
-    def check_param_value(self, param_name) -> None:
+    def _check_param_and_raise(self, param_name) -> None:
         """Check param_name is set in femprj file or not.
 
         Note:

@@ -74,6 +74,9 @@ class AbstractFEMInterface:
     def _setup_after_parallel(self) -> None:
         pass
 
+    def _check_param_and_raise(self, prm_name) -> None:
+        pass
+
     def load_variables(self, opt: AbstractOptimizer):
         pass
 
