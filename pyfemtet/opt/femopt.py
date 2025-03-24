@@ -93,7 +93,6 @@ class FEMOpt:
                 entire_status,
                 worker_status_list[0],
                 worker_status_list,
-                False,
             )
 
             # Run on cluster
@@ -105,7 +104,6 @@ class FEMOpt:
                 [entire_status] * (n_parallel - 1),
                 worker_status_list[1:],
                 [worker_status_list] * (n_parallel - 1),
-                [True] * (n_parallel - 1),
                 # Arguments of map
                 workers=opt_worker_addresses,
                 allow_other_workers=False,

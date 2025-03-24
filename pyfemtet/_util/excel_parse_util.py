@@ -13,7 +13,7 @@ __all__ = [
 ]
 
 
-def parse_excel(book_path, sheet_name, keyword, required, optional) -> pd.DataFrame:
+def parse_excel(book_path, sheet_name, keyword, required, optional, raise_if_no_keyword) -> pd.DataFrame:
     """Excel シートからパラメータを取得します。
 
     シートのパースプロセスは以下の通りです。
@@ -29,6 +29,7 @@ def parse_excel(book_path, sheet_name, keyword, required, optional) -> pd.DataFr
         keyword (str): 必ず含まれるべき、表データの最初の列名として使う文字列。
         required (list[str]): 必ず含まれるべき、表データの列名として使う文字列のリスト。
         optional (list[str]): 表データの列名として使ってよい文字列のリスト。
+        raise_if_no_keyword: キーワードがなかった場合エラーとするか。
 
     Returns:
 
@@ -41,20 +42,30 @@ def parse_excel(book_path, sheet_name, keyword, required, optional) -> pd.DataFr
     # 読み込み
     df = pd.read_excel(book_path, sheet_name, header=None)
 
-    # NaN のみからなる列を削除する
-    valid_columns = [col for col in df.columns if df[col].notna().sum()]
-    df = df[valid_columns]
-
-    # NaN のみからなる行を削除する
-    valid_rows = [row for row in df.index if df.loc[row].notna().sum()]
-    df = df.loc[valid_rows]
-
     # 「変数名」を左上とする表にする
-    df: pd.DataFrame
     idx = np.where(df.values == keyword)
+    if len(idx[0]) == 0:
+        if raise_if_no_keyword:
+            raise RuntimeError(f'keyword "{keyword}" is lacked in {sheet_name}. ')
+        else:
+            return pd.DataFrame()
+
     r = idx[0][0]
     c = idx[1][0]
     df = pd.DataFrame(df.iloc[1+r:, c:].values, columns=df.iloc[r, c:].values)
+
+    # NaN のみからなる行を最初に見つけるまでデータに追加する
+    valid_rows = []
+    for row in df.index:
+        if df.loc[row].notna().sum():
+            valid_rows.append(row)
+        else:
+            break
+    df = df.loc[valid_rows]
+
+    # NaN のみからなる列を削除する
+    valid_columns = [col for i, col in enumerate(df.columns) if df.iloc[:, i].notna().sum()]
+    df = df[valid_columns]
 
     # パースが成功しているかチェックする
     lack = True
@@ -76,8 +87,8 @@ class ParseBase:
     OPTIONAL_COLUMNS = []
 
     @classmethod
-    def parse(cls, book_path, sheet_name) -> pd.DataFrame:
-        return parse_excel(book_path, sheet_name, cls.KEYWORD, cls.REQUIRED_COLUMNS, cls.OPTIONAL_COLUMNS)
+    def parse(cls, book_path, sheet_name, raise_if_no_keyword) -> pd.DataFrame:
+        return parse_excel(book_path, sheet_name, cls.KEYWORD, cls.REQUIRED_COLUMNS, cls.OPTIONAL_COLUMNS, raise_if_no_keyword)
 
 
 class ParseAsParameter(ParseBase):

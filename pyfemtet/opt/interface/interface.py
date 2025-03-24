@@ -2,6 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import os
+import tempfile
+
+import shutil
 
 try:
     # noinspection PyUnresolvedReferences
@@ -53,10 +56,10 @@ class AbstractFEMInterface:
     # ===== dask util =====
 
     @staticmethod
-    def _get_worker_space() -> str:
+    def _get_worker_space() -> str | None:
         worker = get_worker()
         if worker is None:
-            return os.getcwd()
+            return None
         else:
             return worker.local_directory
 
@@ -76,10 +79,23 @@ class AbstractFEMInterface:
 
     # ===== setup =====
 
+    @staticmethod
+    def _copy_to_temp_space(paths: list[str]) -> tempfile.TemporaryDirectory:
+        # dask worker space のように使える一時フォルダを作成する
+        # Python プロセス終了時に（使用中のプロセスがなければ）
+        # 削除されるので、重大なものでなければ後処理は不要
+        tmp_dir = tempfile.TemporaryDirectory()
+
+        # client.upload_file 相当の処理を行う
+        for path in paths:
+            shutil.copy(path, tmp_dir.name)
+
+        return tmp_dir
+
     def _setup_before_parallel(self) -> None:
         pass
 
-    def _setup_after_parallel(self) -> None:
+    def _setup_after_parallel(self, opt: AbstractOptimizer) -> None:
         pass
 
     def _check_param_and_raise(self, prm_name) -> None:

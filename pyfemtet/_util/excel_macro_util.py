@@ -9,6 +9,12 @@ import win32process
 
 from pyfemtet.logger import get_module_logger
 
+
+__all__ = [
+    'watch_excel_macro_error'
+]
+
+
 logger = get_module_logger('util.excel', False)
 
 

@@ -6,6 +6,7 @@ import numpy as np
 __all__ = [
     'Parameter',
     'Variable',
+    'Expression',
     'NumericVariable',
     'NumericParameter',
     'NumericExpression',
@@ -14,7 +15,6 @@ __all__ = [
     'CategoricalExpression',
     'VariableManager',
 ]
-
 
 
 class Variable:
@@ -31,7 +31,8 @@ class Variable:
         return str(self.value)
 
 
-class Parameter(Variable): ...
+class Parameter(Variable):
+    ...
 
 
 class NumericVariable(Variable):
@@ -53,13 +54,15 @@ class CategoricalParameter(CategoricalVariable, Parameter):
     choices: list[str]
 
 
-class NumericExpression(NumericVariable):
-    expression: str
+class Expression(Variable):
+    fun: Callable
+
+
+class NumericExpression(Expression):
     fun: Callable[..., float]
 
 
-class CategoricalExpression(CategoricalVariable):
-    expression: str
+class CategoricalExpression(Expression):
     fun: Callable[..., str]
 
 

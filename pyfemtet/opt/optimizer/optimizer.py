@@ -161,6 +161,7 @@ class AbstractOptimizer:
             args: tuple | None = None,
             kwargs: dict | None = None,
             strict: bool = True,
+            using_fem: bool | None = None,
     ):
         cns = Constraint()
         cns.fun = fun
@@ -170,6 +171,7 @@ class AbstractOptimizer:
         cns.upper_bound = upper_bound
         cns.hard = strict
         cns._opt = self
+        cns.using_fem = using_fem
         self.constraints.update({name: cns})
 
     def add_sub_fidelity_model(
@@ -414,7 +416,6 @@ class AbstractOptimizer:
             entire_status: WorkerStatus,
             worker_status: WorkerStatus,
             worker_status_list: list[WorkerStatus],
-            _should_fem_setup_after_parallel: bool,
     ) -> None:
 
         self.history = history
@@ -450,8 +451,7 @@ class AbstractOptimizer:
             self.worker_status.value = WorkerStatus.initializing
 
             self.worker_status.value = WorkerStatus.launching_fem
-            if _should_fem_setup_after_parallel:
-                self.fem._setup_after_parallel()
+            self.fem._setup_after_parallel(self)
 
             self.worker_status.value = WorkerStatus.waiting
             while True:

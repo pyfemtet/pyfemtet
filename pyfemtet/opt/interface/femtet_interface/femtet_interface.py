@@ -171,7 +171,7 @@ class FemtetInterface(COMInterface):
     def _setup_before_parallel(self):
         self._distribute_files([self.femprj_path])
 
-    def _setup_after_parallel(self):
+    def _setup_after_parallel(self, _: AbstractOptimizer = None):
         # worker space の femprj を開く
 
         worker = get_worker()
