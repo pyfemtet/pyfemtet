@@ -65,7 +65,7 @@ from torch.distributions import Normal
 
 with try_import() as _imports:
     from botorch.models import SingleTaskGP
-    from botorch.models.transforms import Standardize, Normalize
+    from botorch.models.transforms import Normalize
 
     # from botorch.acquisition.knowledge_gradient import qKnowledgeGradient
     # from botorch.acquisition.monte_carlo import qExpectedImprovement
@@ -124,6 +124,8 @@ from pyfemtet.opt.optimizer.optuna_optimizer.optuna_attribute import OptunaAttri
 from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.enable_nonlinear_constraint import (
     NonlinearInequalityConstraints
 )
+from pyfemtet.opt.prediction.botorch_utils import *
+
 
 # warnings to filter
 from botorch.exceptions.warnings import InputDataWarning
@@ -164,59 +166,6 @@ __all__ = [
 
 def log_sigmoid(X: torch.Tensor) -> torch.Tensor:
     return torch.log(1 - torch.sigmoid(-X))
-
-
-def get_standardizer_and_no_noise_train_yvar(Y: torch.Tensor):
-    import gpytorch
-
-    standardizer = Standardize(m=Y.shape[-1])
-    min_noise = gpytorch.settings.min_fixed_noise.value(Y.dtype)
-    standardizer.forward(Y)  # require to un-transform
-    _, YVar = standardizer.untransform(Y, min_noise * torch.ones_like(Y))
-
-    return YVar, standardizer
-
-
-def setup_yvar_and_standardizer(
-        Y_: torch.Tensor,
-        observation_noise_: str | float | None,
-) -> tuple[torch.Tensor | None, Standardize]:
-
-    standardizer_ = None
-    train_yvar_ = None
-    if isinstance(observation_noise_, str):
-        if observation_noise_.lower() == 'no':
-            train_yvar_, standardizer_ = get_standardizer_and_no_noise_train_yvar(Y_)
-        else:
-            raise NotImplementedError
-    elif isinstance(observation_noise_, float):
-        train_yvar_ = torch.full_like(Y_, observation_noise_)
-
-    standardizer_ = standardizer_ or Standardize(m=Y_.shape[-1])
-
-    return train_yvar_, standardizer_
-
-
-def setup_gp(X, Y, bounds, observation_noise, lh_class=None):
-
-    lh_class = lh_class or ExactMarginalLogLikelihood
-
-    train_yvar_, standardizer_ = setup_yvar_and_standardizer(
-        Y, observation_noise
-    )
-
-    model_ = SingleTaskGP(
-        X,
-        Y,
-        train_Yvar=train_yvar_,
-        input_transform=Normalize(d=X.shape[-1], bounds=bounds),
-        outcome_transform=standardizer_,
-    )
-
-    mll_ = lh_class(model_.likelihood, model_)
-    fit_gpytorch_mll(mll_)
-
-    return model_
 
 
 class PartialOptimizeACQFConfig:
@@ -562,7 +511,6 @@ class PoFBoTorchSampler(BoTorchSampler):
 
         trans = _SearchSpaceTransform(search_space, transform_0_1=False)
 
-
         # ===== trials の整理 =====
         # 正常に終了した trial
         completed_trials: list[FrozenTrial] = study.get_trials(deepcopy=False, states=(TrialState.COMPLETE,))
@@ -641,7 +589,6 @@ class PoFBoTorchSampler(BoTorchSampler):
             # train_y
             values[trial_idx, 0] = feasibility
 
-
         # ===== Tensor の作成 =====
         # bounds: (2, d(+1)) shaped Tensor
         # train_x: (n, d) shaped Tensor
@@ -654,7 +601,6 @@ class PoFBoTorchSampler(BoTorchSampler):
         train_yvar_c, standardizer = setup_yvar_and_standardizer(
             train_y_c, self.observation_noise
         )
-
 
         # ===== model_c を作る =====
         # train_x, train_y は元実装にあわせないと
@@ -826,7 +772,6 @@ class PoFBoTorchSampler(BoTorchSampler):
                 self._seed += 1
 
             self.current_gp_model = model
-
 
         # ===== ここから変更なし =====
 

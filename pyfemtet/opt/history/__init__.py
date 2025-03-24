@@ -6,4 +6,5 @@ __all__ = [
     'Record',
     'create_err_msg_from_exception',
     'CorrespondingColumnNameRuler',
+    'MAIN_FILTER',
 ]

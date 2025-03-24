@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 
 from optuna._transform import _SearchSpaceTransform
-
 import torch
+from botorch.models import SingleTaskGP
 
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.helper import *
-from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import setup_gp, SingleTaskGP
+from pyfemtet.opt.prediction.botorch_utils import *
 
 
 __all__ = [
@@ -29,12 +29,33 @@ class SingleTaskGPModel(AbstractModel):
     KWARGS = dict(dtype=torch.float64, device='cpu')
     gp: SingleTaskGP
 
-    def fit(self, x: np.ndarray, y: np.ndarray, bounds: np.ndarray = None,
-            observation_noise=None, likelihood_class=None):
+    def fit(
+            self,
+            x: np.ndarray,
+            y: np.ndarray,
+            bounds: np.ndarray = None,
+            observation_noise=None,
+            likelihood_class=None,
+            covar_module_settings: dict = None,
+    ):
+
+        covar_module = None
+
         X = torch.tensor(x, **self.KWARGS)
         Y = torch.tensor(y, **self.KWARGS)
-        B = torch.tensor(bounds, **self.KWARGS).transpose(1, 0)
-        self.gp = setup_gp(X, Y, B, observation_noise, likelihood_class)
+        B = torch.tensor(bounds, **self.KWARGS).transpose(1, 0) if bounds is not None else None
+
+        if covar_module_settings is not None:
+            if covar_module_settings['name'] == 'matern_kernel_with_gamma_prior':
+                covar_module_settings.pop('name')
+                covar_module = get_matern_kernel_with_gamma_prior_as_covar_module(
+                    X, Y,
+                    **covar_module_settings,
+                )
+            else:
+                raise NotImplementedError(f'{covar_module_settings["name"]=}')
+
+        self.gp = setup_gp(X, Y, B, observation_noise, likelihood_class, covar_module)
 
     def predict(self, x: np.ndarray):
         assert hasattr(self, 'gp')
@@ -57,6 +78,9 @@ class PyFemtetModel:
 
     def fit(self, history: History, df: pd.DataFrame, **kwargs):
         assert hasattr(self, 'current_model')
+        assert 'x' not in kwargs
+        assert 'y' not in kwargs
+        assert 'bounds' not in kwargs
 
         self.history = history
 
