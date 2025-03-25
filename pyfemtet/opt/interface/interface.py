@@ -38,11 +38,12 @@ class AbstractFEMInterface:
 
     kwargs: dict = {}
     _load_problem_from_fem: bool = False
+    current_params: dict[str, float]
 
     # ===== update =====
 
     def update_parameter(self, x: TrialInput) -> None:
-        raise NotImplementedError
+        self.current_params = {p.name: p.value for p in x.values()}
 
     def update(self) -> None:
         raise NotImplementedError
@@ -182,9 +183,6 @@ class COMInterface(AbstractFEMInterface):
 
 
 class NoFEM(AbstractFEMInterface):
-
-    def update_parameter(self, x: TrialInput) -> None:
-        return None
 
     def update(self) -> None:
         return None

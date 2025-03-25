@@ -538,6 +538,9 @@ class ExcelInterface(AbstractFEMInterface):
                     wb.VBProject.References.Remove(ref)
 
     def update_parameter(self, x: TrialInput) -> None:
+
+        AbstractFEMInterface.update_parameter(self, x)
+
         # params を作成
         params = {name: param.value for name, param in x.items()}
 

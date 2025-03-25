@@ -11,7 +11,7 @@ from pythoncom import CoInitialize, CoUninitialize, com_error
 
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.interface.interface import AbstractFEMInterface
+from pyfemtet.opt.interface.interface import COMInterface
 from pyfemtet._i18n import Msg
 from pyfemtet.opt.problem import TrialInput
 
@@ -34,10 +34,10 @@ class FileNotOpenedError(Exception):
     pass
 
 
-class SolidworksInterface(AbstractFEMInterface):
+class SolidworksInterface(COMInterface):
 
     swApp: CDispatch
-    current_params: dict[str, float]
+    com_members = {'swApp': 'SLDWORKS.Application'}
 
     def __init__(
             self,
@@ -142,7 +142,8 @@ class SolidworksInterface(AbstractFEMInterface):
         raise NotImplementedError
 
     def update_parameter(self, x: TrialInput) -> None:
-        self.current_params = {prm_name: param.value for prm_name, param in x.items()}
+
+        COMInterface.update_parameter(self, x)
 
         # sw はプロセスが一つなので Lock
         with Lock('update-sw-model'):

@@ -28,6 +28,7 @@ from pyfemtet._util.femtet_access_inspection import *
 
 from pyfemtet.dispatch_extensions import *
 from pyfemtet.opt.interface.interface import COMInterface
+from pyfemtet.opt.variable_manager import *
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.exceptions import *
 
@@ -148,7 +149,6 @@ class FemtetInterface(COMInterface):
         self.femtet_pid = 0
         self.quit_when_destruct = False
         self.connected_method = "unconnected"
-        self.parameters: TrialInput | None = None
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
         self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
@@ -578,7 +578,14 @@ class FemtetInterface(COMInterface):
 
                 # 状態を復元するために一度変数を渡して解析を行う（fun.__name__がSolveなら2度手間だが）
                 logger.info(" " * print_indent + Msg.INFO_FEMTET_CRASHED_AND_RESTARTED)
-                self.update_parameter(self.parameters)
+
+                x = {}
+                for prm_name, prm_value in self.current_params.items():
+                    v = Variable()
+                    v.name = prm_name
+                    v.value = prm_value
+                    x.update({v.name: v})
+                self.update_parameter(x)
                 self.update()
 
                 # 与えられた API の再帰的再試行
@@ -643,9 +650,9 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
-    def update_parameter(self, parameters: TrialInput, with_warning=False) -> None | list[str]:
+    def update_parameter(self, x: TrialInput, with_warning=False) -> None | list[str]:
         """Update parameter of femprj."""
-        self.parameters = parameters.copy()
+        COMInterface.update_parameter(self, x)
 
         # Gaudi.Activate()
         sleep(0.1)  # Gaudi がおかしくなる時がある対策
@@ -684,8 +691,7 @@ class FemtetInterface(COMInterface):
 
             # 変数を更新
             warning_messages = []
-            for name, param in parameters.items():
-                value = param.value
+            for name, value in self.current_params.items():
 
                 # 渡された変数がちゃんと Femtet に定義されている
                 if name in existing_variable_names:
@@ -715,8 +721,7 @@ class FemtetInterface(COMInterface):
 
             # update without parameter check
             warning_messages = []
-            for name, param in parameters.items():
-                value = param.value
+            for name, value in self.current_params.items():
                 self._call_femtet_api(
                     fun=self.Femtet.UpdateVariable,
                     return_value_if_failed=False,
