@@ -56,28 +56,53 @@ class AbstractFEMInterface:
     # ===== dask util =====
 
     @staticmethod
-    def _get_worker_space() -> str | None:
+    def _get_worker_index_from_optimizer(opt: AbstractOptimizer | None) -> str:
+        if opt is None:
+            worker_index = 'main'
+        else:
+            worker_index = opt._worker_index or 'main'
+        return worker_index
+
+    def _rename_and_get_path_on_worker_space(self, orig_path, suffix, ignore_no_exist=False) -> str:
+        # 与えられた path と同名のファイルを
+        # worker_space から探し
+        # suffix を付与して rename し
+        # その renamed path を返す関数
+
+        worker_space = self._get_worker_space()
+
+        src_path = os.path.join(worker_space, os.path.basename(orig_path))
+        p1_, p2_ = os.path.splitext(src_path)
+        dst_path_ = p1_ + '_' + suffix + p2_
+
+        if os.path.isfile(src_path):
+            os.rename(src_path, dst_path_)
+
+        elif not ignore_no_exist:
+            raise FileNotFoundError(f'{src_path} is not found.')
+
+        return dst_path_
+
+    def _get_worker_space(self) -> str | None:
         worker = get_worker()
         if worker is None:
-            return None
+            assert hasattr(self, '_tmp_dir'), 'Internal Error! Run _distribute_files() first!'
+            return self._tmp_dir.name
         else:
             return worker.local_directory
 
-    @staticmethod
-    def _distribute_files(paths: list[str]) -> None:
+    def _distribute_files(self, paths: list[str]) -> None:
 
+        # executor 向け
+        self._tmp_dir = self._copy_to_temp_space(paths)
+
+        # dask worker 向け
         client = get_client()
-        if client is None:
-            return
-
-        for path in paths:
-
-            if not os.path.exists(path):
-                raise FileNotFoundError
-
-            client.upload_file(path, load=False)
-
-    # ===== setup =====
+        if client is not None:
+            for path in paths:
+                if not os.path.exists(path):
+                    raise FileNotFoundError
+                client.upload_file(path, load=False)
 
     @staticmethod
     def _copy_to_temp_space(paths: list[str]) -> tempfile.TemporaryDirectory:
@@ -91,6 +116,8 @@ class AbstractFEMInterface:
             shutil.copy(path, tmp_dir.name)
 
         return tmp_dir
+
+    # ===== setup =====
 
     def _setup_before_parallel(self) -> None:
         pass

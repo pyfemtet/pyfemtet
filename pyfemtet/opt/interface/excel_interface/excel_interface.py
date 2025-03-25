@@ -316,46 +316,17 @@ class ExcelInterface(AbstractFEMInterface):
     def _re_register_paths(self, suffix):
         # self.hoge_path を dask worker space のファイルに変える
 
-        worker = get_worker()
-
-        # dask worker の場合
-        if worker is not None:
-            worker_space = self._get_worker_space()
-
-        # dask worker でない場合
-        else:
-            worker_space = self._tmp_dir.name
-
-        # 与えられた path と同名のファイルを
-        # worker_space から探し
-        # suffix を付与して rename し
-        # その renamed path を返す関数
-        # suffix の付与は connect_method が auto の場合
-        # 同名ファイルを開かないようにするための配慮
-        def process_path(path_, ignore_no_exist_):
-            src_path_ = os.path.join(worker_space, os.path.basename(path_))
-            p1_, p2_ = os.path.splitext(src_path_)
-            dst_path_ = p1_ + '_' + suffix + p2_
-
-            if os.path.isfile(src_path_):
-                os.rename(src_path_, dst_path_)
-
-            elif not ignore_no_exist_:
-                raise FileNotFoundError(f'{src_path_} is not found.')
-
-            else:
-                # output 等 == inputの場合、
-                # 最初に input を rename しているので
-                # すでに rename されている
-                pass
-            return dst_path_
-
         # paths を更新
-        self.input_xlsm_path = process_path(self.input_xlsm_path, False)
-        self.output_xlsm_path = process_path(self.output_xlsm_path, True)
-        self.constraint_xlsm_path = process_path(self.constraint_xlsm_path, True)
-        self.setup_xlsm_path = process_path(self.setup_xlsm_path, True)
-        self.teardown_xlsm_path = process_path(self.teardown_xlsm_path, True)
+        #   suffix の付与は connect_method が auto の場合
+        #   同名ファイルを開かないようにするための配慮
+        #   output 等 == inputの場合、
+        #   最初に input を rename しているので
+        #   すでに rename されている
+        self.input_xlsm_path = self._rename_and_get_path_on_worker_space(self.input_xlsm_path, suffix, False)
+        self.output_xlsm_path = self._rename_and_get_path_on_worker_space(self.output_xlsm_path, suffix, True)
+        self.constraint_xlsm_path = self._rename_and_get_path_on_worker_space(self.constraint_xlsm_path, suffix, True)
+        self.setup_xlsm_path = self._rename_and_get_path_on_worker_space(self.setup_xlsm_path, suffix, True)
+        self.teardown_xlsm_path = self._rename_and_get_path_on_worker_space(self.teardown_xlsm_path, suffix, True)
 
     def _setup_after_parallel(self, opt: AbstractOptimizer):
         """サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理"""
@@ -369,7 +340,7 @@ class ExcelInterface(AbstractFEMInterface):
         CoInitialize()
 
         # 元のファイルを保護するため space のファイルを使用
-        suffix = opt._worker_index or 'main'
+        suffix = self._get_worker_index_from_optimizer(opt)
         self._re_register_paths(suffix)
 
         # excel に繋ぐ
@@ -627,7 +598,7 @@ class ExcelInterface(AbstractFEMInterface):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_teardown.Close(_SaveChanges := False)
 
-    def quit(self):
+    def close(self):
 
         # 無駄に不具合に遭う可能性があるので
         # 参照設定は解除しない
@@ -928,7 +899,7 @@ def _debug_1():
 
     print(fem__._tmp_dir.name)
 
-    fem__.quit()
+    fem__.close()
 
 
 if __name__ == '__main__':

@@ -46,6 +46,7 @@ class AbstractOptimizer:
     worker_status_list: list[WorkerStatus]
     _done_setup_before_parallel: bool
     _done_load_problem_from_fem: bool
+    _worker_index: int | str | None
 
     def __init__(self):
 
