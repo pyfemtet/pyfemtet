@@ -218,7 +218,8 @@ def debug_1():
             'debug-pof-botorch.reccsv'
         )
     )
-    fem.update_parameter(dict(x1=70, x2='A'))
+    # fem.update_parameter(dict(x1=70, x2='A'))
+    fem.update_parameter(dict(x1=100, x2='B'))
     fem.update()
     print(fem.current_obj_values)
 

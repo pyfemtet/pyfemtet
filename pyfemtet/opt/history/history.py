@@ -427,9 +427,27 @@ class ColumnManager:
             out = NumericParameter()
             out.name = prm_name
             out.value = float(df[prm_name].dropna().values[-1])
-            out.lower_bound = float(df[CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)].dropna().values[-1])
-            out.upper_bound = float(df[CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)].dropna().values[-1])
-            out.step = float(df[CorrespondingColumnNameRuler.prm_step_name(prm_name)].dropna().values[-1])
+
+            # lower_bound
+            key = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
+            if key in df.columns:
+                out.lower_bound = float(df[key].dropna().values[-1])
+            else:
+                out.lower_bound = None
+
+            # upper bound
+            key = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
+            if key in df.columns:
+                out.upper_bound = float(df[key].dropna().values[-1])
+            else:
+                out.upper_bound = None
+
+            # step
+            key = CorrespondingColumnNameRuler.prm_step_name(prm_name)
+            if key in df.columns:
+                out.step = float(df[key].dropna().values[-1])
+            else:
+                out.step = None
 
         elif ColumnManager._is_categorical_parameter(prm_name, df.columns):
             out = CategoricalParameter()
@@ -447,7 +465,6 @@ class ColumnManager:
         for column, meta_column in zip(df.columns, meta_columns):
             # list は csv を経由することで str になるので restore
             if meta_column == 'prm_choices':
-                print(df[column])
                 df[column] = [ast.literal_eval(d) for d in df[column]]
 
     @staticmethod
