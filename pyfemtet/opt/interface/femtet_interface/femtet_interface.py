@@ -154,6 +154,7 @@ class FemtetInterface(COMInterface):
         self._load_problem_from_fem = self.parametric_output_indexes_use_as_objective is not None
         self._original_autosave_enabled = _get_autosave_enabled()
         _set_autosave_enabled(False)
+        self._warn_if_undefined_variable = True
 
         # connect to Femtet
         self._connect_and_open_femtet()
@@ -702,12 +703,13 @@ class FemtetInterface(COMInterface):
 
                 # 渡された変数が Femtet で定義されていない
                 else:
-                    msg = (
-                        f"{name} not in {self.model_name}: "
-                        + Msg.WARN_IGNORE_PARAMETER_NOT_CONTAINED
-                    )
-                    warning_messages.append(msg)
-                    logger.warning(msg)
+                    if self._warn_if_undefined_variable:
+                        msg = (
+                            f"{name} not in {self.model_name}: "
+                            + Msg.WARN_IGNORE_PARAMETER_NOT_CONTAINED
+                        )
+                        warning_messages.append(msg)
+                        logger.warning(msg)
 
         # 変数一覧を取得する関数がない（チェックしない）
         else:
@@ -731,7 +733,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
-    def reconstruct_model(self) -> None:
+    def update_model(self) -> None:
         """Updates the analysis model only."""
 
         # 設計変数に従ってモデルを再構築
@@ -842,7 +844,7 @@ class FemtetInterface(COMInterface):
 
     def update(self) -> None:
         """See :func:`FEMInterface.update`"""
-        self.reconstruct_model()
+        self.update_model()
         self.preprocess(self.Femtet)
         self.solve()
         self.postprocess(self.Femtet)

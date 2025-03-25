@@ -43,9 +43,16 @@ class AbstractFEMInterface:
     # ===== update =====
 
     def update_parameter(self, x: dict[str, SupportedVariableTypes]) -> None:
+        # FEM オブジェクトに与えられた変数を設定する。
+        #   目的は Function 内でユーザーが FEM オブジェクト経由で
+        #   変数を取得できるようにするためなので、各具象クラスでは
+        #   FEM オブジェクトから新しい変数を取得できるように
+        #   することが望ましい
         self.current_prm_values = x
 
     def update(self) -> None:
+        # 現在の設計変数に基づいて solve を行い、
+        # Objective が正しく値を計算できるようにする
         raise NotImplementedError
 
     # ===== Function =====

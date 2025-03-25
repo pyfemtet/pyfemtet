@@ -42,11 +42,11 @@ class SolidworksInterface(COMInterface):
     def __init__(
             self,
             sldprt_path,
-            quit_solidworks_on_terminate=False,
+            close_solidworks_on_terminate=False,
             visible=True,
     ):
         self.sldprt_path = os.path.abspath(sldprt_path)
-        self.quit_solidworks_on_terminate = quit_solidworks_on_terminate
+        self.quit_solidworks_on_terminate = close_solidworks_on_terminate
         self.solidworks_visible = visible
 
         assert os.path.isfile(self.sldprt_path)
@@ -138,10 +138,14 @@ class SolidworksInterface(COMInterface):
     #     # femprj モデルの変数も更新
     #     super().update_model(parameters)
 
+    @property
+    def swModel(self) -> CDispatch:
+        return _get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
+
     def update(self) -> None:
         raise NotImplementedError
 
-    def update_parameter(self, x: SupportedVariableTypes) -> None:
+    def update_parameter(self, x: dict[str, SupportedVariableTypes]) -> None:
 
         COMInterface.update_parameter(self, x)
 
@@ -149,7 +153,7 @@ class SolidworksInterface(COMInterface):
         with Lock('update-sw-model'):
 
             # ===== model を取得 =====
-            swModel = _get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
+            swModel = self.swModel
 
             # ===== equation manager を取得 =====
             swEqnMgr = swModel.GetEquationMgr
@@ -186,26 +190,12 @@ class SolidworksInterface(COMInterface):
         with Lock('update-sw-model'):
 
             # ===== model を取得 =====
-            swModel = _get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
+            swModel = self.swModel
 
             # モデル再構築
             result = swModel.EditRebuild3  # モデル再構築
             if not result:
                 raise ModelError(Msg.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED)
-
-            # FIXME: MIXIN ではこれを使う
-            # # export as x_t
-            # swModel.SaveAs(x_t_path)
-
-            # # 30 秒待っても x_t ができてなければエラー(COM なのでありうる)
-            # timeout = 30
-            # start = time()
-            # while True:
-            #     if os.path.isfile(x_t_path):
-            #         break
-            #     if time() - start > timeout:
-            #         raise ModelError(Msg.ERR_MODEL_UPDATE_FAILED)
-            #     sleep(1)
 
     def close(self):
         # TODO: 他の worker の終了を待つ手段がないので実施保留
@@ -252,7 +242,7 @@ def _debug_1():
 
     fem = SolidworksInterface(
         sldprt_path=os.path.join(os.path.dirname(__file__), 'debug-sw.sldprt'),
-        quit_solidworks_on_terminate=True,
+        close_solidworks_on_terminate=True,
     )
     fem._setup_before_parallel()
     fem._setup_after_parallel()
