@@ -13,7 +13,7 @@ from pyfemtet._util.dask_util import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.interface.interface import COMInterface
 from pyfemtet._i18n import Msg
-from pyfemtet.opt.problem import TrialInput
+from pyfemtet.opt.variable_manager import SupportedVariableTypes
 
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
@@ -141,7 +141,7 @@ class SolidworksInterface(COMInterface):
     def update(self) -> None:
         raise NotImplementedError
 
-    def update_parameter(self, x: TrialInput) -> None:
+    def update_parameter(self, x: SupportedVariableTypes) -> None:
 
         COMInterface.update_parameter(self, x)
 
@@ -167,8 +167,8 @@ class SolidworksInterface(COMInterface):
                 eq = swEqnMgr.Equation(i)
                 prm_name = _get_name_from_equation(eq)
                 # 対象なら処理
-                if prm_name in self.current_params:
-                    new_equation = f'"{prm_name}" = {self.current_params[prm_name]}'
+                if prm_name in self.current_prm_values:
+                    new_equation = f'"{prm_name}" = {self.current_prm_values[prm_name]}'
                     swEqnMgr.Equation(i, new_equation)
 
             # 式の計算
@@ -250,19 +250,13 @@ def _get_name_from_equation(equation: str):
 
 def _debug_1():
 
-    from pyfemtet.opt.variable_manager import NumericParameter
-    x = NumericParameter()
-    x.name = 'x'
-    x.value = 20
-    input_params = {x.name: x}
-
     fem = SolidworksInterface(
         sldprt_path=os.path.join(os.path.dirname(__file__), 'debug-sw.sldprt'),
         quit_solidworks_on_terminate=True,
     )
     fem._setup_before_parallel()
     fem._setup_after_parallel()
-    fem.update_parameter(input_params)
+    fem.update_parameter({'x': 20})
     fem.update_model()
 
 

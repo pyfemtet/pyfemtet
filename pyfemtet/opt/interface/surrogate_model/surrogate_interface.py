@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyfemtet.opt.problem import *
 from pyfemtet.opt.history import *
 
 from pyfemtet.opt.interface import AbstractFEMInterface
@@ -12,7 +11,6 @@ if TYPE_CHECKING:
 
 
 class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
-    current_prm_values: dict[str, float]
     current_obj_values: dict[str, float]
     train_history: History
 
@@ -31,7 +29,6 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
 
         self.train_history = train_history
 
-        self.current_prm_values = {}
         self.current_obj_values = {}
 
     @property
@@ -51,9 +48,6 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
         # opt の変数が充分であるかのチェック
         parameters = opt.variable_manager.get_variables()
         assert len(set(self.train_history.prm_names) - set(parameters.keys())) == 0
-
-    def update_parameter(self, x: TrialInput) -> None:
-        self.current_prm_values = {prm_name: param.value for prm_name, param in x.items()}
 
     def _check_using_fem(self, fun: callable) -> bool:
         return False

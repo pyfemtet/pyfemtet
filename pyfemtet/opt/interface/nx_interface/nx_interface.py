@@ -9,7 +9,6 @@ import subprocess
 from pyfemtet._i18n import Msg
 
 from pyfemtet.opt.interface.interface import AbstractFEMInterface
-from pyfemtet.opt.problem import TrialInput
 from pyfemtet.opt.exceptions import *
 
 if TYPE_CHECKING:
@@ -97,7 +96,7 @@ class NXInterface(AbstractFEMInterface):
             os.remove(x_t_path)
 
         # 変数の json 文字列を作る
-        str_json = json.dumps(self.current_params)
+        str_json = json.dumps(self.current_prm_values)
 
         # create dumped json of export settings
         tmp_dict = dict(
@@ -134,11 +133,6 @@ class NXInterface(AbstractFEMInterface):
 
 
 def _debug_1():
-    from pyfemtet.opt.variable_manager import NumericParameter
-    x = NumericParameter()
-    x.name = 'x'
-    x.value = 20
-    input_params = {x.name: x}
 
     fem = NXInterface(
         prt_path=os.path.join(os.path.dirname(__file__), 'model1.prt'),
@@ -146,7 +140,7 @@ def _debug_1():
     )
     fem._setup_before_parallel()
     fem._setup_after_parallel()
-    fem.update_parameter(input_params)
+    fem.update_parameter({'x': 20})
     fem._export_updated_xt(os.path.join(os.path.dirname(__file__), 'model1.x_t'))
 
 

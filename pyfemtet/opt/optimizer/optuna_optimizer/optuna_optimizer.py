@@ -74,7 +74,7 @@ class OptunaOptimizer(AbstractOptimizer):
     def solve(
             self,
             x: TrialInput,
-            x_pass_to_fem_: dict[str, Variable],
+            x_pass_to_fem_: dict[str, SupportedVariableTypes],
             opt_: AbstractOptimizer = None,
     ) -> tuple[float] | None:
 
@@ -195,7 +195,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
             # construct TrialInput
             x = vm.get_variables(filter='parameter')
-            x_pass_to_fem: TrialInput = vm.get_variables(filter='pass_to_fem')
+            x_pass_to_fem: dict[str, SupportedVariableTypes] = vm.get_variables(filter='pass_to_fem', format=dict)
 
             # process main fidelity model
             y_internal: tuple[float] | None = self.solve(x, x_pass_to_fem)

@@ -4,6 +4,7 @@ import numpy as np
 
 
 __all__ = [
+    'SupportedVariableTypes',
     'Parameter',
     'Variable',
     'Expression',
@@ -15,6 +16,9 @@ __all__ = [
     'CategoricalExpression',
     'VariableManager',
 ]
+
+
+SupportedVariableTypes = str | float
 
 
 class Variable:
@@ -89,7 +93,7 @@ class VariableManager:
     ) -> (
         dict[str, Variable]
         | dict[str, Parameter]
-        | dict[str, float]
+        | dict[str, SupportedVariableTypes]
         | np.ndarray
     ):
 

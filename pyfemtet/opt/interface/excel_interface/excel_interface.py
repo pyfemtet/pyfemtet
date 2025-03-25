@@ -26,7 +26,7 @@ from pyfemtet._util.femtet_autosave import *
 from pyfemtet._i18n import Msg
 
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.problem import *
+from pyfemtet.opt.variable_manager import SupportedVariableTypes
 from pyfemtet.opt.interface.interface import AbstractFEMInterface
 
 from pyfemtet.logger import get_module_logger
@@ -537,16 +537,13 @@ class ExcelInterface(AbstractFEMInterface):
                 if ref.Description == 'FemtetMacro':  # FemtetMacro
                     wb.VBProject.References.Remove(ref)
 
-    def update_parameter(self, x: TrialInput) -> None:
+    def update_parameter(self, x: SupportedVariableTypes) -> None:
 
         AbstractFEMInterface.update_parameter(self, x)
 
-        # params を作成
-        params = {name: param.value for name, param in x.items()}
-
         # excel シートの変数更新
         if self.use_named_range:
-            for key, value in params.items():
+            for key, value in self.current_prm_values.items():
                 try:
                     self.sh_input.Range(key).value = value
                 except com_error:
@@ -556,7 +553,7 @@ class ExcelInterface(AbstractFEMInterface):
                     break
 
         if not self.use_named_range:  # else にしないこと
-            for name, value in params.items():
+            for name, value in self.current_prm_values.items():
                 r = 1 + search_r(self.input_xlsm_path, self.input_sheet_name, name)
                 c = 1 + search_c(self.input_xlsm_path, self.input_sheet_name, ParseAsParameter.value)
                 self.sh_input.Cells(r, c).value = value
@@ -881,7 +878,6 @@ def _is_cell_value_empty(cell_value):
 def _debug_1():
 
     from pyfemtet.opt.optimizer import AbstractOptimizer
-    from pyfemtet.opt.variable_manager import NumericParameter
 
     fem__ = ExcelInterface(
         input_xlsm_path=os.path.join(os.path.dirname(__file__), 'debug-excel-interface.xlsm'),
@@ -896,9 +892,7 @@ def _debug_1():
     fem__._setup_before_parallel()
     fem__._setup_after_parallel(AbstractOptimizer())
 
-    param = NumericParameter()
-    param.value = 1
-    fem__.update_parameter({'section_radius': param})
+    fem__.update_parameter({'section_radius': 1.})
 
     print(fem__._tmp_dir.name)
 

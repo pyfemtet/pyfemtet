@@ -260,7 +260,7 @@ class AbstractOptimizer:
     def f(
             self,
             parameters: TrialInput,
-            variables_pass_to_fem: TrialInput,
+            variables_pass_to_fem: dict[str, SupportedVariableTypes],
             history: History = None,
             datetime_start=None,
     ) -> tuple[TrialOutput, dict[str, float], TrialConstraintOutput, Record]:

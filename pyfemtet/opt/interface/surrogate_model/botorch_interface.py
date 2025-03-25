@@ -3,7 +3,6 @@ from scipy.stats.distributions import norm
 
 from gpytorch.priors.torch_priors import GammaPrior
 
-from pyfemtet.opt.problem import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.model import PyFemtetModel, SingleTaskGPModel
 from pyfemtet.opt.exceptions import *  # should import after dask importing
@@ -106,9 +105,7 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         if debug:
             self._debug_df_c = df_c
 
-    def update_parameter(self, x: TrialInput) -> None:
-        super().update_parameter(x)
-
+    def calc_pof(self):
         if debug:
             import plotly.graph_objects as go
 
@@ -203,24 +200,25 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
                         f'拘束違反エラーとして扱います。')
             raise HiddenConstraintViolation(f'PoF < {self.pof_threshold}')
 
+    def update(self) -> None:
+
+        # BoTorchInterface.update() の前に PoF を計算する
+        self.calc_pof()
+
+        BoTorchInterface.update(self)
+
 
 def debug_1():
 
-    from pyfemtet.opt.variable_manager import Variable
+    import os
 
-    x1 = Variable()
-    x1.name = 'x1'
-    x1.value = -0.4  # feasible
-    # x1.value = -0.6  # infeasible
-
-    x2 = Variable()
-    x2.name = 'x2'
-    # x2.value = 0  # feasible
-    x2.value = 0.6  # feasible
-
-    # fem = BoTorchInterface(r"C:\Users\mm11592\Documents\myFiles2\working\1_PyFemtetOpt\PyFemtetDev3\pyfemtet\v1test\femopt-restart-test.csv")
-    fem = PoFBoTorchInterface(r"C:\Users\mm11592\Documents\myFiles2\working\1_PyFemtetOpt\PyFemtetDev3\pyfemtet\v1test\femopt-restart-test.csv")
-    fem.update_parameter(dict(x1=x1, x2=x2))
+    fem = PoFBoTorchInterface(
+        history_path=os.path.join(
+            os.path.dirname(__file__),
+            'debug-pof-botorch.reccsv'
+        )
+    )
+    fem.update_parameter(dict(x1=70, x2='A'))
     fem.update()
     print(fem.current_obj_values)
 

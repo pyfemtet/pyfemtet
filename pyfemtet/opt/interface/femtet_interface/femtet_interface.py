@@ -28,9 +28,8 @@ from pyfemtet._util.femtet_access_inspection import *
 
 from pyfemtet.dispatch_extensions import *
 from pyfemtet.opt.interface.interface import COMInterface
-from pyfemtet.opt.variable_manager import *
-from pyfemtet.opt.problem import *
 from pyfemtet.opt.exceptions import *
+from pyfemtet.opt.variable_manager import SupportedVariableTypes
 
 from ._femtet_parametric import *
 
@@ -579,13 +578,7 @@ class FemtetInterface(COMInterface):
                 # 状態を復元するために一度変数を渡して解析を行う（fun.__name__がSolveなら2度手間だが）
                 logger.info(" " * print_indent + Msg.INFO_FEMTET_CRASHED_AND_RESTARTED)
 
-                x = {}
-                for prm_name, prm_value in self.current_params.items():
-                    v = Variable()
-                    v.name = prm_name
-                    v.value = prm_value
-                    x.update({v.name: v})
-                self.update_parameter(x)
+                self.update_parameter(self.current_prm_values)
                 self.update()
 
                 # 与えられた API の再帰的再試行
@@ -650,7 +643,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
-    def update_parameter(self, x: TrialInput, with_warning=False) -> None | list[str]:
+    def update_parameter(self, x: dict[str, SupportedVariableTypes], with_warning=False) -> None | list[str]:
         """Update parameter of femprj."""
         COMInterface.update_parameter(self, x)
 
@@ -691,7 +684,7 @@ class FemtetInterface(COMInterface):
 
             # 変数を更新
             warning_messages = []
-            for name, value in self.current_params.items():
+            for name, value in self.current_prm_values.items():
 
                 # 渡された変数がちゃんと Femtet に定義されている
                 if name in existing_variable_names:
@@ -721,7 +714,7 @@ class FemtetInterface(COMInterface):
 
             # update without parameter check
             warning_messages = []
-            for name, value in self.current_params.items():
+            for name, value in self.current_prm_values.items():
                 self._call_femtet_api(
                     fun=self.Femtet.UpdateVariable,
                     return_value_if_failed=False,

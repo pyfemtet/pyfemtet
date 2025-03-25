@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 
 from pyfemtet._util.dask_util import *
 from pyfemtet.logger import get_module_logger
-from pyfemtet.opt.problem import *
+from pyfemtet.opt.variable_manager import SupportedVariableTypes
 
 logger = get_module_logger('opt.interface', False)
 
@@ -38,12 +38,12 @@ class AbstractFEMInterface:
 
     kwargs: dict = {}
     _load_problem_from_fem: bool = False
-    current_params: dict[str, float]
+    current_prm_values: dict[str, SupportedVariableTypes]
 
     # ===== update =====
 
-    def update_parameter(self, x: TrialInput) -> None:
-        self.current_params = {p.name: p.value for p in x.values()}
+    def update_parameter(self, x: dict[str, SupportedVariableTypes]) -> None:
+        self.current_prm_values = x
 
     def update(self) -> None:
         raise NotImplementedError
