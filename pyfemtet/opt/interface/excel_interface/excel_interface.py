@@ -71,6 +71,12 @@ class ExcelInterface(AbstractFEMInterface):
                 指定しない場合は ``input_sheet_name`` と同じと見
                 做します。
 
+            procedure_xlsm_path (str, optional):
+                最適化ループ中に呼ぶ Excel マクロ関数を
+                含む xlsm のパスです。
+                指定しない場合は ``input_xlsm_path`` と
+                同じと見做します。
+
             procedure_name (str, optional):
                 Excel マクロ関数名を指定します。指定しない場合は
                 ``FemtetMacro.FemtetMain`` と見做します。
@@ -201,6 +207,7 @@ class ExcelInterface(AbstractFEMInterface):
     sh_output: CDispatch  # 計算結果の定義された WorkSheet (sh_input と同じでもよい)
     wb_constraint: CDispatch  # システムを構成する Workbook
     sh_constraint: CDispatch  # 計算結果の定義された WorkSheet (sh_input と同じでもよい)
+    wb_procedure: CDispatch  # システムを構成する Workbook
     wb_setup: CDispatch  # システムを構成する Workbook
     wb_teardown: CDispatch  # システムを構成する Workbook
 
@@ -234,6 +241,7 @@ class ExcelInterface(AbstractFEMInterface):
             output_sheet_name: str = None,
             constraint_xlsm_path: str or Path = None,
             constraint_sheet_name: str = None,
+            procedure_xlsm_path: str or Path = None,
             procedure_name: str = None,
             procedure_args: list or tuple = None,
             connect_method: str = 'new',  # or 'auto'
@@ -262,6 +270,7 @@ class ExcelInterface(AbstractFEMInterface):
         self.output_sheet_name = output_sheet_name if output_sheet_name is not None else input_sheet_name
         self.constraint_xlsm_path = str(input_xlsm_path) if constraint_xlsm_path is None else str(constraint_xlsm_path)
         self.constraint_sheet_name = constraint_sheet_name or self.input_sheet_name
+        self.procedure_xlsm_path = str(input_xlsm_path) if procedure_xlsm_path is None else str(procedure_xlsm_path)
         self.procedure_name = procedure_name or 'FemtetMacro.FemtetMain'
         self.procedure_args = procedure_args or []
         assert connect_method in ['new', 'auto']
@@ -299,6 +308,9 @@ class ExcelInterface(AbstractFEMInterface):
         if not _is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
             related_files.append(self.constraint_xlsm_path)
 
+        if not _is_same_path(self.input_xlsm_path, self.procedure_xlsm_path):
+            related_files.append(self.procedure_xlsm_path)
+
         if not _is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
             related_files.append(self.setup_xlsm_path)
 
@@ -309,9 +321,6 @@ class ExcelInterface(AbstractFEMInterface):
 
         # dask worker 向け
         self._distribute_files(related_files)
-
-        # executor 向け
-        self._tmp_dir = self._copy_to_temp_space(related_files)
 
     def _re_register_paths(self, suffix):
         # self.hoge_path を dask worker space のファイルに変える
@@ -325,6 +334,7 @@ class ExcelInterface(AbstractFEMInterface):
         self.input_xlsm_path = self._rename_and_get_path_on_worker_space(self.input_xlsm_path, suffix, False)
         self.output_xlsm_path = self._rename_and_get_path_on_worker_space(self.output_xlsm_path, suffix, True)
         self.constraint_xlsm_path = self._rename_and_get_path_on_worker_space(self.constraint_xlsm_path, suffix, True)
+        self.procedure_xlsm_path = self._rename_and_get_path_on_worker_space(self.procedure_xlsm_path, suffix, True)
         self.setup_xlsm_path = self._rename_and_get_path_on_worker_space(self.setup_xlsm_path, suffix, True)
         self.teardown_xlsm_path = self._rename_and_get_path_on_worker_space(self.teardown_xlsm_path, suffix, True)
 
@@ -465,6 +475,19 @@ class ExcelInterface(AbstractFEMInterface):
             raise RuntimeError(
                 f'Sheet {self.constraint_sheet_name} does not exist in the book {self.wb_constraint.Name}.')
 
+        # ===== procedure =====
+        # 開く (procedure)
+        if _is_same_path(self.input_xlsm_path, self.procedure_xlsm_path):
+            self.wb_procedure = self.wb_input
+        else:
+            self.excel.Workbooks.Open(self.procedure_xlsm_path)
+            for wb in self.excel.Workbooks:
+                if wb.Name == os.path.basename(self.procedure_xlsm_path):
+                    self.wb_procedure = wb
+                    break
+            else:
+                raise RuntimeError(f'Cannot open {self.setup_xlsm_path}')
+
         # ===== setup =====
         # 開く (setup)
         if _is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
@@ -590,6 +613,10 @@ class ExcelInterface(AbstractFEMInterface):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_constraint.Close(_SaveChanges := False)
 
+        if not _is_same_path(self.input_xlsm_path, self.procedure_xlsm_path):
+            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
+                self.wb_procedure.Close(_SaveChanges := False)
+
         if not _is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_setup.Close(_SaveChanges := False)
@@ -642,6 +669,7 @@ class ExcelInterface(AbstractFEMInterface):
             del self.wb_input
             del self.wb_output
             del self.wb_constraint
+            del self.wb_procedure
             del self.wb_setup
             del self.wb_teardown
 
