@@ -23,7 +23,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyfemtet.opt.optimizer package" href="pyfemtet.opt.optimizer.html" />
+    <link rel="next" title="pyfemtet.opt.meta_script package" href="pyfemtet.opt.meta_script.html" />
     <link rel="prev" title="pyfemtet.opt package" href="pyfemtet.opt.html" /> 
 </head>
 
@@ -103,7 +103,7 @@
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.opt.interface" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">ExcelInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_xlsm_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_sheet_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_sheet_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_sheet_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure_timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_procedure_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_procedure_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardown_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardown_procedure_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardown_procedure_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">related_file_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_alerts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminate_excel_when_quit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_named_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">ExcelInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_xlsm_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_sheet_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_sheet_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_sheet_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'new'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure_timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_procedure_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_procedure_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardown_xlsm_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardown_procedure_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardown_procedure_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">related_file_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_alerts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminate_excel_when_quit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_named_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfemtet.opt.interface.FEMInterface" title="pyfemtet.opt.interface._base.FEMInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEMInterface</span></code></a></p>
 <p>Excel を計算コアとして利用するためのクラス。</p>
 <p>通常の有限要素法を Excel に
@@ -131,7 +131,7 @@ PyFemtet を用いた最適化を
 <li><p><strong>procedure_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><em>optional</em>) – Excel マクロ関数に渡す引数をリストまたはタプルで
 指定します。</p></li>
 <li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Excel との接続方法を指定します。 ‘auto’ または
-‘new’ が利用可能です。デフォルトは ‘auto’ です。</p></li>
+‘new’ が利用可能です。デフォルトは ‘new’ です。</p></li>
 <li><p><strong>procedure_timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Excel マクロ関数のタイムアウト時間を秒単位で指定
 します。 None の場合はタイムアウトなしとなります。</p></li>
 <li><p><strong>setup_xlsm_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em><em>, </em><em>optional</em>) – セットアップ時に呼ぶ関数を含む xlsm のパスです。
@@ -401,25 +401,35 @@ connect_method が ‘new’ の場合 True,
 <span class="sig-name descname"><span class="pre">interactive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.interactive" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.load_constraint">
-<span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface.load_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.load_constraint" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_if_no_keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface.load_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.load_constraint" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.load_objective">
-<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface.load_objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.load_objective" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_if_no_keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface.load_objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.load_objective" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.load_parameter">
-<span class="sig-name descname"><span class="pre">load_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface.load_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.load_parameter" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_if_no_keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface.html#ExcelInterface.load_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.load_parameter" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.objective_from_excel">
@@ -621,6 +631,11 @@ it is able to get parameter via FEMInterface.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FEMInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base.html#FEMInterface.load_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FEMInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -650,6 +665,11 @@ it is able to get parameter via FEMInterface.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.FEMInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FEMInterface.quit">
@@ -704,7 +724,8 @@ first model when Femtet open the project file.</p></li>
 <li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The connection method.
 Default is ‘auto’. Other valid values are ‘new’ or ‘existing’.</p></li>
 <li><p><strong>save_pdt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The type to save result file.
-Can specify ‘all’ or None. Default is ‘all’.</p></li>
+Valid values are ‘all’, ‘none’ or ‘optimal’.
+Default is ‘all’.</p></li>
 <li><p><strong>strictly_pid_specify</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to strictly specify the PID in Femtet connection.
 Default is True.</p></li>
 <li><p><strong>allow_without_project</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to allow without a project. Default is False.</p></li>
@@ -798,6 +819,11 @@ it will not try existing another Femtet process.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -827,6 +853,11 @@ it will not try existing another Femtet process.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.open">
@@ -1028,6 +1059,11 @@ it will not try existing another Femtet process.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -1057,6 +1093,11 @@ it will not try existing another Femtet process.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.open">
@@ -1251,6 +1292,11 @@ it will not try existing another Femtet process.</p>
 <span class="sig-name descname"><span class="pre">initialize_sldworks_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_sldworks.html#FemtetWithSolidworksInterface.initialize_sldworks_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.initialize_sldworks_connection" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -1280,6 +1326,11 @@ it will not try existing another Femtet process.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.open">
@@ -1462,6 +1513,11 @@ the model update and before solving.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.NoFEM.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.NoFEM.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.NoFEM.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.NoFEM.load_constraint" title="Link to this definition"></a></dt>
@@ -1491,6 +1547,11 @@ the model update and before solving.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.NoFEM.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.NoFEM.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.NoFEM.quit">
@@ -1531,13 +1592,14 @@ it is able to get parameter via FEMInterface.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.PoFBoTorchInterface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">PoFBoTorchInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_singletaskgp.html#PoFBoTorchInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.PoFBoTorchInterface" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">PoFBoTorchInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_output_directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_singletaskgp.html#PoFBoTorchInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.PoFBoTorchInterface" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase" title="pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SurrogateModelInterfaceBase</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
 <li><p><strong>train_history</strong> (<a class="reference internal" href="pyfemtet.opt.html#pyfemtet.opt.History" title="pyfemtet.opt._femopt_core.History"><em>History</em></a>) – </p></li>
+<li><p><strong>_output_directions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -1564,6 +1626,11 @@ it is able to get parameter via FEMInterface.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.PoFBoTorchInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.PoFBoTorchInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.PoFBoTorchInterface.load_constraint">
@@ -1603,6 +1670,11 @@ it is able to get parameter via FEMInterface.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.PoFBoTorchInterface.model_f">
 <span class="sig-name descname"><span class="pre">model_f</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyfemtet.opt.prediction.single_task_gp.html#pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel" title="pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel"><span class="pre">SingleTaskGPModel</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.PoFBoTorchInterface.model_f" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.PoFBoTorchInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.PoFBoTorchInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1659,13 +1731,14 @@ it is able to get parameter via FEMInterface.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.SurrogateModelInterfaceBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">SurrogateModelInterfaceBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_base.html#SurrogateModelInterfaceBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">SurrogateModelInterfaceBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_output_directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_base.html#SurrogateModelInterfaceBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfemtet.opt.interface.FEMInterface" title="pyfemtet.opt.interface._base.FEMInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEMInterface</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
 <li><p><strong>train_history</strong> (<a class="reference internal" href="pyfemtet.opt.html#pyfemtet.opt.History" title="pyfemtet.opt._femopt_core.History"><em>History</em></a>) – </p></li>
+<li><p><strong>_output_directions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -1693,6 +1766,11 @@ it is able to get parameter via FEMInterface.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.SurrogateModelInterfaceBase.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.SurrogateModelInterfaceBase.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase.load_constraint" title="Link to this definition"></a></dt>
@@ -1705,7 +1783,7 @@ it is able to get parameter via FEMInterface.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.SurrogateModelInterfaceBase.load_objective">
-<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase.load_objective" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate/_base.html#SurrogateModelInterfaceBase.load_objective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase.load_objective" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -1722,6 +1800,11 @@ it is able to get parameter via FEMInterface.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.SurrogateModelInterfaceBase.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.interface.SurrogateModelInterfaceBase.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.SurrogateModelInterfaceBase.quit">
@@ -1768,7 +1851,7 @@ it is able to get parameter via FEMInterface.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="pyfemtet.opt.html" class="btn btn-neutral float-left" title="pyfemtet.opt package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pyfemtet.opt.optimizer.html" class="btn btn-neutral float-right" title="pyfemtet.opt.optimizer package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pyfemtet.opt.meta_script.html" class="btn btn-neutral float-right" title="pyfemtet.opt.meta_script package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -241,14 +241,6 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup before parallel processes are launched.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="AbstractOptimizer.generate_infeasible_result">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.AbstractOptimizer.generate_infeasible_result">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">generate_infeasible_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span></div>
-
-
     <span class="c1"># ===== calc =====</span>
 <div class="viewcode-block" id="AbstractOptimizer.f">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.AbstractOptimizer.f">[docs]</a>
@@ -299,7 +291,8 @@
             <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="n">cns</span><span class="o">.</span><span class="n">calc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span> <span class="k">for</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_infeasible_result</span><span class="p">()</span>
+            <span class="n">y</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">generate_hidden_infeasible_result</span><span class="p">()</span>
+            <span class="n">_y</span> <span class="o">=</span> <span class="n">y</span>
 
         <span class="c1"># register to history</span>
         <span class="n">df_to_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
