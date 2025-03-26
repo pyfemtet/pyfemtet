@@ -7,7 +7,7 @@ from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.model import PyFemtetModel, SingleTaskGPModel
 from pyfemtet.opt.exceptions import *  # should import after dask importing
 
-from pyfemtet.opt.interface.surrogate_model.surrogate_interface import AbstractSurrogateModelInterfaceBase
+from pyfemtet.opt.interface.surrogate_model_interface.surrogate_interface import AbstractSurrogateModelInterfaceBase
 
 from pyfemtet.logger import get_module_logger
 

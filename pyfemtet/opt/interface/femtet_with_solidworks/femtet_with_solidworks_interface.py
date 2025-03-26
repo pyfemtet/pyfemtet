@@ -65,6 +65,10 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
 
     def _export_xt(self, xt_path):
 
+        # 前のが存在するならば消しておく
+        if os.path.isfile(xt_path):
+            os.remove(xt_path)
+
         # export as x_t
         self.swModel.SaveAs(xt_path)
 
@@ -80,16 +84,12 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
 
     def update_model(self):
 
+        # solidworks のモデルの更新
+        SolidworksInterface.update_model(self)
+
         # 競合しないよう保存先を temp にしておく
         worker_space = self._get_worker_space()
         xt_path = os.path.join(worker_space, 'temp.x_t')
-
-        # 前のが存在するならば消しておく
-        if os.path.isfile(xt_path):
-            os.remove(xt_path)
-
-        # solidworks のモデルの更新
-        SolidworksInterface.update_model(self)
 
         # export parasolid
         self._export_xt(xt_path)
@@ -102,25 +102,4 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
 
         # update_parameter で変数は更新されているので
         # ここでモデルを完全に再構築できる
-        self._call_femtet_api(
-            self.Femtet.Gaudi.ReExecute,
-            False,
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=Msg.ERR_RE_EXECUTE_MODEL_FAILED,
-            is_Gaudi_method=True,
-        )
-
-        # 処理を確定
-        self._call_femtet_api(
-            self.Femtet.Redraw,
-            False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=Msg.ERR_MODEL_REDRAW_FAILED,
-            is_Gaudi_method=True,
-        )
-
-    def update(self) -> None:
-        self.update_model()
-        self.preprocess(self.Femtet)
-        self.solve()
-        self.postprocess(self.Femtet)
+        FemtetInterface.update_model(self)

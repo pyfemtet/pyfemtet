@@ -66,9 +66,9 @@ class AbstractFEMInterface:
     @staticmethod
     def _get_worker_index_from_optimizer(opt: AbstractOptimizer | None) -> str:
         if opt is None:
-            worker_index = 'main'
+            worker_index = 'copy'
         else:
-            worker_index = opt._worker_index or 'main'
+            worker_index = f'copy{opt._worker_index}' or 'copy'
         return worker_index
 
     def _rename_and_get_path_on_worker_space(self, orig_path, suffix, ignore_no_exist=False) -> str:

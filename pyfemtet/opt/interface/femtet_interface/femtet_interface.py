@@ -171,22 +171,21 @@ class FemtetInterface(COMInterface):
     def _setup_before_parallel(self):
         self._distribute_files([self.femprj_path])
 
-    def _setup_after_parallel(self, _: AbstractOptimizer = None):
-        # worker space の femprj を開く
+    def _setup_after_parallel(self, opt: AbstractOptimizer = None):
 
+        # worker space の femprj に切り替える
+        suffix = self._get_worker_index_from_optimizer(opt)
+        self.femprj_path = self._rename_and_get_path_on_worker_space(self.femprj_path, suffix)
+
+        # dask process ならば Femtet を起動
         worker = get_worker()
-
         if worker is not None:
-
             CoInitialize()
-
-            self.femprj_path = os.path.join(
-                worker.local_directory,
-                os.path.basename(self.original_femprj_path)
-            )
             self.connect_femtet(connect_method='new')
-            self.open(self.femprj_path, self.model_name)
             self.quit_when_destruct = True
+
+        # femprj を開く
+        self.open(self.femprj_path, self.model_name)
 
     def close(self, timeout=1, force=True):
         """Force to terminate connected Femtet."""

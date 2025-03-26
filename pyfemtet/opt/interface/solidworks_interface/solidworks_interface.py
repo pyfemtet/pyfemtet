@@ -77,67 +77,6 @@ class SolidworksInterface(COMInterface):
         # open it
         self.swApp.OpenDoc(self.sldprt_path, swDocPART)
 
-    # def update_model(self):
-    #     """Update .x_t"""
-    #
-    #     # # Femtet が参照している x_t パスを取得する
-    #     # x_t_path = self.Femtet.Gaudi.LastXTPath
-    #     #
-    #     # # dask サブプロセスならば競合しないよう保存先を scratch 直下にしておく
-    #     # try:
-    #     #     get_worker()
-    #     #     x_t_path = os.path.splitext(self.sldprt_path)[0] + '.x_t'
-    #     #
-    #     # except ValueError:  # No worker found
-    #     #     pass
-    #     #
-    #     # # 前のが存在するならば消しておく
-    #     # if os.path.isfile(x_t_path):
-    #     #     os.remove(x_t_path)
-    #
-    #     # solidworks のモデルの更新
-    #     try:
-    #         with Lock('update-model-sldworks'):
-    #             sleep(0.5)  # 並列処理でクラッシュすることが多かったため試験的に導入
-    #             self.update_sw_model(parameters, x_t_path)
-    #
-    #     # femopt を使わない場合
-    #     except RuntimeError:  # <class 'distributed.lock.Lock'> object not properly initialized. ...
-    #         self.update_sw_model(parameters, x_t_path)
-    #
-    #     # dask サブプロセスならば LastXTPath を更新する
-    #     try:
-    #         get_worker()
-    #         try:
-    #             self.Femtet.Gaudi.LastXTPath = x_t_path
-    #         except (KeyError, AttributeError, com_error):
-    #             raise RuntimeError('This feature is available from Femtet version 2023.2. Please update Femtet.')
-    #
-    #     # dask を使わない場合
-    #     except ValueError:  # No worker found
-    #         pass
-    #
-    #     # モデルの再インポート
-    #     self._call_femtet_api(
-    #         self.Femtet.Gaudi.ReExecute,
-    #         False,
-    #         ModelError,  # 生きてるのに失敗した場合
-    #         error_message=Msg.ERR_RE_EXECUTE_MODEL_FAILED,
-    #         is_Gaudi_method=True,
-    #     )
-    #
-    #     # 処理を確定
-    #     self._call_femtet_api(
-    #         self.Femtet.Redraw,
-    #         False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
-    #         ModelError,  # 生きてるのに失敗した場合
-    #         error_message=Msg.ERR_MODEL_REDRAW_FAILED,
-    #         is_Gaudi_method=True,
-    #     )
-    #
-    #     # femprj モデルの変数も更新
-    #     super().update_model(parameters)
-
     @property
     def swModel(self) -> CDispatch:
         return _get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
