@@ -75,15 +75,14 @@ def parse_excel(book_path, sheet_name, keyword, required, optional, raise_if_no_
     df = df[valid_columns]
 
     # choices は list に変換する
-    if '選択肢' in df.columns:
-
-        def convert_to_listable_string(df_, key_):
-
+    key = ParseAsParameter.choices
+    if key in df.columns:
+        if key in df.columns:
             choices = []
-            for v in df_[key_]:
+            for v in df[key]:
                 v = str(v)
                 if v == 'nan':
-                    choices.append(_EMPTY_CHOICE)
+                    choices.append('[]')  # _reconvert_objects の中で SyntaxError になるため。後で置換する。
                 else:
                     if not v.startswith('['):
                         v = f'[{v}'
@@ -91,19 +90,15 @@ def parse_excel(book_path, sheet_name, keyword, required, optional, raise_if_no_
                         v = f'{v}]'
                     choices.append(v)
 
-            df_[key_] = choices
+            df[key] = choices
 
-        if '選択肢' in df.columns:
-            convert_to_listable_string(df, '選択肢')
-
-        # if 'choices' in df.columns:
-        #     convert_to_listable_string(df, 'choices')
-
-        dummy_meta_columns = ['prm_choice' if (column == '選択肢')
+        dummy_meta_columns = ['prm_choices' if (column == key)
                               else ''
                               for column in df.columns]
 
         ColumnManager._reconvert_objects(df, dummy_meta_columns)
+
+        df[key] = [_EMPTY_CHOICE if len(v) == 0 else v for v in df[key]]
 
     # パースが成功しているかチェックする
     lack = True

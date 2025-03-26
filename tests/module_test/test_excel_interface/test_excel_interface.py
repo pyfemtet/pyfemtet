@@ -1,4 +1,6 @@
 import os
+
+from pyfemtet.opt.variable_manager import *
 from pyfemtet.opt.interface.excel_interface import ExcelInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
@@ -26,6 +28,30 @@ def test_load_single_excel():
         for attr in dir(var):
             if not attr.startswith('_'):
                 print(attr, getattr(var, attr))
+
+        if var.name == 'x':
+            assert isinstance(var, NumericParameter)
+            assert var.value == 0.5
+            assert var.lower_bound == 0
+            assert var.upper_bound == 10
+            assert var.step == 1
+
+        elif var.name == 'y':
+            assert isinstance(var, NumericParameter)
+            assert var.value == 6
+            assert var.lower_bound == 1
+            assert var.upper_bound == 10
+            assert var.step is None
+
+        elif var.name == 'z':
+            assert isinstance(var, CategoricalParameter)
+            assert var.value == 'A'
+            assert var.choices == ['A', 'B', 'C']
+
+        elif var.name == 'no_use_1':
+            assert isinstance(var, NumericParameter)
+            assert var.value == 3
+            assert var.properties['fix'] is True
 
 
 if __name__ == '__main__':
