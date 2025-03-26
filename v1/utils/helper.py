@@ -9,6 +9,10 @@ __all__ = [
 
 
 def float_(value: str | None | float) -> str | float | None:
+    # str -> str or float
+    # None -> None
+    # float -> float
+
     if value is None:
         return value
     try:

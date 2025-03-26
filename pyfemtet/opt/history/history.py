@@ -23,8 +23,8 @@ from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.variable_manager import *
 from pyfemtet.logger import get_module_logger
 
-from .optimality import *
-from .hypervolume import *
+from pyfemtet.opt.history.optimality import *
+from pyfemtet.opt.history.hypervolume import *
 
 if TYPE_CHECKING:
     from pyfemtet.opt.interface import AbstractFEMInterface
@@ -1160,24 +1160,3 @@ class History:
 
     def is_categorical_parameter(self, prm_name):
         return self._records.column_manager.is_categorical_parameter(prm_name)
-
-
-def debug_standalone_history():
-    history = History()
-    history.load_csv(os.path.join(os.path.dirname(__file__), 'history_test.csv'), with_finalize=True)
-
-    print(f'{history.prm_names=}')
-    print(f'{history.obj_names=}')
-    print(f'{history.cns_names=}')
-
-    df = history.get_df()
-
-    print(df)
-
-    print(df[history.prm_names])
-
-    df.to_csv(os.path.join(os.path.dirname(__file__), 'history_loaded.csv'))
-
-
-if __name__ == '__main__':
-    debug_standalone_history()

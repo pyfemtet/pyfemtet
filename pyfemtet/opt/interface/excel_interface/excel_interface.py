@@ -30,7 +30,7 @@ from pyfemtet.opt.variable_manager import SupportedVariableTypes
 from pyfemtet.opt.interface.interface import AbstractFEMInterface
 
 from pyfemtet.logger import get_module_logger
-
+from v1.utils.helper import float_
 
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
@@ -730,34 +730,57 @@ class ExcelInterface(AbstractFEMInterface):
             name = str(row[ParseAsParameter.name])
 
             # value
-            value = float(row[ParseAsParameter.value])
+            value = float_(row[ParseAsParameter.value])
 
-            # lb (optional)
-            lb = None
-            if ParseAsParameter.lb in df.columns:
-                lb = row[ParseAsParameter.lb]
-                lb = None if _is_cell_value_empty(lb) else float(lb)
+            # if 'choices' column exists and is not empty, use as Categorical.
+            kind = 'Numerical'
+            if ParseAsParameter.choices in df.columns:
+                if row[ParseAsParameter.choices] != _EMPTY_CHOICE:
+                    kind = 'Categorical'
 
-            # ub (optional)
-            ub = None
-            if ParseAsParameter.ub in df.columns:
-                ub = row[ParseAsParameter.ub]
-                ub = None if _is_cell_value_empty(ub) else float(ub)
+            if kind == 'Numerical':
 
-            # step (optional)
-            step = None
-            if ParseAsParameter.step in df.columns:
-                step = row[ParseAsParameter.step]
-                step = None if _is_cell_value_empty(step) else float(step)
+                # lb (optional)
+                lb = None
+                if ParseAsParameter.lb in df.columns:
+                    lb = row[ParseAsParameter.lb]
+                    lb = None if _is_cell_value_empty(lb) else float(lb)
 
-            opt.add_parameter(
-                name=name,
-                initial_value=value,
-                lower_bound=lb,
-                upper_bound=ub,
-                step=step,
-                fix=not use,
-            )
+                # ub (optional)
+                ub = None
+                if ParseAsParameter.ub in df.columns:
+                    ub = row[ParseAsParameter.ub]
+                    ub = None if _is_cell_value_empty(ub) else float(ub)
+
+                # step (optional)
+                step = None
+                if ParseAsParameter.step in df.columns:
+                    step = row[ParseAsParameter.step]
+                    step = None if _is_cell_value_empty(step) else float(step)
+
+                opt.add_parameter(
+                    name=name,
+                    initial_value=value,
+                    lower_bound=lb,
+                    upper_bound=ub,
+                    step=step,
+                    fix=not use,
+                )
+
+            elif kind == 'Categorical':
+
+                # choices
+                choices = row[ParseAsParameter.choices]
+                assert choices != _EMPTY_CHOICE
+                opt.add_categorical_parameter(
+                    name=name,
+                    initial_value=value,
+                    choices=choices,
+                    fix=not use,
+                )
+
+            else:
+                raise NotImplementedError
 
     def load_objectives(self, opt: AbstractOptimizer, raise_if_no_keyword=True):
 
@@ -904,31 +927,3 @@ def _is_cell_value_empty(cell_value):
         return True
     else:
         return False
-
-
-def _debug_1():
-
-    from pyfemtet.opt.optimizer import AbstractOptimizer
-
-    fem__ = ExcelInterface(
-        input_xlsm_path=os.path.join(os.path.dirname(__file__), 'debug-excel-interface.xlsm'),
-        input_sheet_name='設計変数',
-        output_sheet_name='目的関数',
-        constraint_sheet_name='拘束関数',
-        visible=True,
-        interactive=True,
-        display_alerts=True,
-    )
-
-    fem__._setup_before_parallel()
-    fem__._setup_after_parallel(AbstractOptimizer())
-
-    fem__.update_parameter({'section_radius': 1.})
-
-    print(fem__._tmp_dir.name)
-
-    fem__.close()
-
-
-if __name__ == '__main__':
-    _debug_1()

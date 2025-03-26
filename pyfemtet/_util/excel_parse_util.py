@@ -2,8 +2,11 @@ import os
 import numpy as np
 import pandas as pd
 
+from pyfemtet.opt.history.history import ColumnManager  # to use _reconvert
+
 
 __all__ = [
+    '_EMPTY_CHOICE',
     'ParseAsParameter',
     'ParseAsConstraint',
     'ParseAsObjective',
@@ -11,6 +14,9 @@ __all__ = [
     'search_r',
     'search_c',
 ]
+
+
+_EMPTY_CHOICE = ''
 
 
 def parse_excel(book_path, sheet_name, keyword, required, optional, raise_if_no_keyword) -> pd.DataFrame:
@@ -55,6 +61,7 @@ def parse_excel(book_path, sheet_name, keyword, required, optional, raise_if_no_
     df = pd.DataFrame(df.iloc[1+r:, c:].values, columns=df.iloc[r, c:].values)
 
     # NaN のみからなる行を最初に見つけるまでデータに追加する
+    # <=> 表の下限を決める
     valid_rows = []
     for row in df.index:
         if df.loc[row].notna().sum():
@@ -63,9 +70,40 @@ def parse_excel(book_path, sheet_name, keyword, required, optional, raise_if_no_
             break
     df = df.loc[valid_rows]
 
-    # NaN のみからなる列を削除する
+    # NaN のみからなる列を削除する <=> 表の右限を決める
     valid_columns = [col for i, col in enumerate(df.columns) if df.iloc[:, i].notna().sum()]
     df = df[valid_columns]
+
+    # choices は list に変換する
+    if '選択肢' in df.columns:
+
+        def convert_to_listable_string(df_, key_):
+
+            choices = []
+            for v in df_[key_]:
+                v = str(v)
+                if v == 'nan':
+                    choices.append(_EMPTY_CHOICE)
+                else:
+                    if not v.startswith('['):
+                        v = f'[{v}'
+                    if not v.endswith(']'):
+                        v = f'{v}]'
+                    choices.append(v)
+
+            df_[key_] = choices
+
+        if '選択肢' in df.columns:
+            convert_to_listable_string(df, '選択肢')
+
+        # if 'choices' in df.columns:
+        #     convert_to_listable_string(df, 'choices')
+
+        dummy_meta_columns = ['prm_choice' if (column == '選択肢')
+                              else ''
+                              for column in df.columns]
+
+        ColumnManager._reconvert_objects(df, dummy_meta_columns)
 
     # パースが成功しているかチェックする
     lack = True
@@ -97,10 +135,11 @@ class ParseAsParameter(ParseBase):
     lb = '下限'
     ub = '上限'
     step = 'ステップ'
+    choices = '選択肢'
     use = '使用'
     KEYWORD = name
     REQUIRED_COLUMNS = [value, lb, ub]
-    OPTIONAL_COLUMNS = [step, use]
+    OPTIONAL_COLUMNS = [step, choices, use]
 
 
 class ParseAsObjective(ParseBase):
