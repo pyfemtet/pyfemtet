@@ -271,7 +271,7 @@ class ExcelInterface(AbstractFEMInterface):
         self.constraint_xlsm_path = str(input_xlsm_path) if constraint_xlsm_path is None else str(constraint_xlsm_path)
         self.constraint_sheet_name = constraint_sheet_name or self.input_sheet_name
         self.procedure_xlsm_path = str(input_xlsm_path) if procedure_xlsm_path is None else str(procedure_xlsm_path)
-        self.procedure_name = procedure_name or 'FemtetMacro.FemtetMain'
+        self.procedure_name = procedure_name
         self.procedure_args = procedure_args or []
         assert connect_method in ['new', 'auto']
         self.excel_connect_method = connect_method
@@ -586,6 +586,9 @@ class ExcelInterface(AbstractFEMInterface):
 
     def update(self) -> None:
 
+        if self.procedure_name is None:
+            return
+
         # マクロ実行
         try:
             with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
@@ -707,7 +710,7 @@ class ExcelInterface(AbstractFEMInterface):
     def input_workbook(self) -> CDispatch:
         return self.wb_input
 
-    def load_parameter(self, opt: AbstractOptimizer, raise_if_no_keyword=True) -> None:
+    def load_variables(self, opt: AbstractOptimizer, raise_if_no_keyword=True) -> None:
 
         df = ParseAsParameter.parse(
             self.input_xlsm_path,
@@ -756,7 +759,7 @@ class ExcelInterface(AbstractFEMInterface):
                 fix=not use,
             )
 
-    def load_objective(self, opt: AbstractOptimizer, raise_if_no_keyword=True):
+    def load_objectives(self, opt: AbstractOptimizer, raise_if_no_keyword=True):
 
         df = ParseAsObjective.parse(
             self.output_xlsm_path,
@@ -793,7 +796,7 @@ class ExcelInterface(AbstractFEMInterface):
                     kwargs=dict(name=name),
                 )
 
-    def load_constraint(self, opt: AbstractOptimizer, raise_if_no_keyword=False):
+    def load_constraints(self, opt: AbstractOptimizer, raise_if_no_keyword=False):
 
         df = ParseAsConstraint.parse(
             self.constraint_xlsm_path,
