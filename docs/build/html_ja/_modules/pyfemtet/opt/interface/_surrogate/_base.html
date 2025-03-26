@@ -100,6 +100,7 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">history_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">train_history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">_output_directions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="p">:</span> <span class="n">History</span>
@@ -108,6 +109,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df_prm</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df_obj</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span> <span class="o">=</span> <span class="n">_output_directions</span>
 
         <span class="c1"># history_path が与えられた場合、train_history をコンストラクトする</span>
         <span class="k">if</span> <span class="n">history_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -137,10 +139,54 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">df_prm</span> <span class="o">=</span> <span class="n">df_prm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df_obj</span> <span class="o">=</span> <span class="n">df_obj</span>
 
+        <span class="c1"># _output_directions が与えられている場合、</span>
+        <span class="c1"># history から objective の設定を読み込む</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_problem_from_me</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="n">FEMInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">train_history</span><span class="o">=</span><span class="n">train_history</span><span class="p">,</span>  <span class="c1"># コンストラクト済み train_history を渡せば並列計算時も何もしなくてよい</span>
         <span class="p">)</span>
+
+
+<div class="viewcode-block" id="SurrogateModelInterfaceBase.load_objective">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.SurrogateModelInterfaceBase.load_objective">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt._femopt_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Objective</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">:</span>
+                <span class="n">obj_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="p">[</span><span class="n">obj_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Objective</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">],</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                    <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
+                <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> \
+                <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+
+            <span class="n">obj_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_names</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">obj_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">):</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="p">[</span><span class="n">obj_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Objective</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">],</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                    <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
+                <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid _output_directions&#39;</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="SurrogateModelInterfaceBase.filter_feasible">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.SurrogateModelInterfaceBase.filter_feasible">[ドキュメント]</a>

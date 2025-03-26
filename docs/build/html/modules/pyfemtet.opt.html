@@ -103,6 +103,7 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pyfemtet.opt.interface.html">pyfemtet.opt.interface package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfemtet.opt.meta_script.html">pyfemtet.opt.meta_script package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfemtet.opt.optimizer.html">pyfemtet.opt.optimizer package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfemtet.opt.prediction.html">pyfemtet.opt.prediction package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfemtet.opt.visualization.html">pyfemtet.opt.visualization package</a></li>
@@ -227,11 +228,6 @@ constraint values.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.AbstractOptimizer.generate_infeasible_result">
-<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.generate_infeasible_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.AbstractOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.AbstractOptimizer.get_parameter">
 <span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dict'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base.html#AbstractOptimizer.get_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.AbstractOptimizer.get_parameter" title="Link to this definition"></a></dt>
 <dd><p>Returns the parameters in the specified format.</p>
@@ -319,6 +315,11 @@ The partial set is available.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.FEMInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base.html#FEMInterface.load_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FEMInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -348,6 +349,11 @@ The partial set is available.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.FEMInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FEMInterface.quit">
@@ -777,7 +783,8 @@ first model when Femtet open the project file.</p></li>
 <li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The connection method.
 Default is ‘auto’. Other valid values are ‘new’ or ‘existing’.</p></li>
 <li><p><strong>save_pdt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The type to save result file.
-Can specify ‘all’ or None. Default is ‘all’.</p></li>
+Valid values are ‘all’, ‘none’ or ‘optimal’.
+Default is ‘all’.</p></li>
 <li><p><strong>strictly_pid_specify</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to strictly specify the PID in Femtet connection.
 Default is True.</p></li>
 <li><p><strong>allow_without_project</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to allow without a project. Default is False.</p></li>
@@ -871,6 +878,11 @@ it will not try existing another Femtet process.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -900,6 +912,11 @@ it will not try existing another Femtet process.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.FemtetInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetInterface.open">
@@ -1101,6 +1118,11 @@ it will not try existing another Femtet process.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -1130,6 +1152,11 @@ it will not try existing another Femtet process.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.FemtetWithNXInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithNXInterface.open">
@@ -1324,6 +1351,11 @@ it will not try existing another Femtet process.</p>
 <span class="sig-name descname"><span class="pre">initialize_sldworks_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_sldworks.html#FemtetWithSolidworksInterface.initialize_sldworks_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.initialize_sldworks_connection" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.load_constraint" title="Link to this definition"></a></dt>
@@ -1353,6 +1385,11 @@ it will not try existing another Femtet process.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.FemtetWithSolidworksInterface.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.FemtetWithSolidworksInterface.open">
@@ -1572,6 +1609,11 @@ or fixed point (in objective function space).</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.generate_hidden_infeasible_result">
+<span class="sig-name descname"><span class="pre">generate_hidden_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.generate_hidden_infeasible_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.generate_hidden_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.History.get_df">
 <span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">valid_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.get_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.get_df" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -1580,6 +1622,11 @@ or fixed point (in objective function space).</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.History.is_hidden_infeasible_result">
+<span class="sig-name descname"><span class="pre">is_hidden_infeasible_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/_femopt_core.html#History.is_hidden_infeasible_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.History.is_hidden_infeasible_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.History.is_processing">
@@ -1662,6 +1709,11 @@ or fixed point (in objective function space).</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.NoFEM.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.load_constraint">
 <span class="sig-name descname"><span class="pre">load_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.NoFEM.load_constraint" title="Link to this definition"></a></dt>
@@ -1691,6 +1743,11 @@ or fixed point (in objective function space).</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.object_passed_to_functions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_passed_to_functions</span></span><a class="headerlink" href="#pyfemtet.opt.NoFEM.object_passed_to_functions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.NoFEM.quit">
@@ -1801,11 +1858,6 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer.generate_infeasible_result">
-<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.OptunaOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.OptunaOptimizer.get_parameter">
@@ -1919,11 +1971,6 @@ constraint values.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.ScipyOptimizer.generate_infeasible_result">
-<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.ScipyOptimizer.get_parameter">
 <span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyOptimizer.get_parameter" title="Link to this definition"></a></dt>
 <dd><p>Returns the parameters in the specified format.</p>
@@ -2033,11 +2080,6 @@ constraint values.</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.ScipyScalarOptimizer.generate_infeasible_result">
-<span class="sig-name descname"><span class="pre">generate_infeasible_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.ScipyScalarOptimizer.generate_infeasible_result" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.ScipyScalarOptimizer.get_parameter">

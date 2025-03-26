@@ -409,7 +409,7 @@ msgstr "サンプルファイル"
 
 #: ../source/examples/parametric_output_objective/parametric_output_objective.rst:24
 msgid "Keep the :download:`sample project<../_temporary_sample_files/gau_ex12_parametric.femprj>` open in Femtet and double-click on the :download:`sample code<../_temporary_sample_files/gau_ex12_parametric.py>` to execute it."
-msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/gau_ex08_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/gau_ex08_parametric.py>` をダブルクリックして実行してください。"
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/gau_ex12_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/gau_ex12_parametric.py>` をダブルクリックして実行してください。"
 
 #: ../source/examples/parametric_output_objective/parametric_output_objective.rst:30
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Magnetic Analysis / Example 12."

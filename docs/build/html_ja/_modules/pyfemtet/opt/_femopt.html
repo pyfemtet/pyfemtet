@@ -214,7 +214,7 @@
         <span class="c1"># メンバーの宣言</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># actor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># actor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [actor]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor_process_future</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor_server_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -222,6 +222,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor_host_record</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hv_reference</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extra_space_dir</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_opt_exceptions</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># multiprocess 時に pickle できないオブジェクト参照の削除</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1034,6 +1035,7 @@
             <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># monitor が terminated 状態で少なくとも一度更新されなければ running のまま固まる</span>
 
             <span class="c1"># 全ての Exception を再表示</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_opt_exceptions</span> <span class="o">=</span> <span class="n">opt_exceptions</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">opt_exception</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">opt_exceptions</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">opt_exception</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">()</span>
