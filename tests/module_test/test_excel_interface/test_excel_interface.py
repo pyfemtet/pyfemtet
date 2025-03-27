@@ -1,8 +1,13 @@
 import os
+from contextlib import closing
+
+import numpy as np
 
 from pyfemtet.opt.variable_manager import *
 from pyfemtet.opt.interface.excel_interface import ExcelInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
+
+from tests import get
 
 
 def test_load_single_excel():
@@ -10,7 +15,7 @@ def test_load_single_excel():
     opt = AbstractOptimizer()
 
     fem = ExcelInterface(
-        input_xlsm_path=os.path.join(os.path.dirname(__file__), 'test_excel_interface.xlsm'),
+        input_xlsm_path=get(__file__, 'test_excel_interface.xlsm'),
         input_sheet_name='設計変数',
         output_sheet_name='目的関数',
         constraint_sheet_name='拘束関数',
@@ -54,5 +59,46 @@ def test_load_single_excel():
             assert var.properties['fix'] is True
 
 
+def test_run_multiple_excel():
+    opt = AbstractOptimizer()
+
+    fem = ExcelInterface(
+        input_xlsm_path=get(__file__, 'test_excel_interface.xlsm'),
+        input_sheet_name='input',
+        output_sheet_name='output',
+
+        procedure_xlsm_path=get(__file__, 'test_excel_interface.xlsm'),
+        procedure_name='update_output_macro',
+
+        setup_xlsm_path=get(__file__, 'test_excel_control_femtet.xlsm'),
+        setup_procedure_name='PrePostProcessing.setup',
+
+        teardown_xlsm_path=get(__file__, 'test_excel_control_femtet.xlsm'),
+        teardown_procedure_name='PrePostProcessing.teardown',
+    )
+
+    with closing(fem):
+
+        opt.fem = fem
+
+        print('loading problems...')
+        opt._load_problem_from_fem()
+        print('setting up before parallel...')
+        fem._setup_before_parallel()
+        print('setting up after parallel...')
+        fem._setup_after_parallel(opt)
+
+        print('updating...')
+        fem.update_parameter(dict(x=.7, y=.7, z=.7))
+        fem.update()
+
+        assert np.allclose(
+            [obj.eval(fem) for obj in opt.objectives.values()],
+            [2.1, 2.1],
+            rtol=0.01,
+        )
+
+
 if __name__ == '__main__':
-    test_load_single_excel()
+    # test_load_single_excel()
+    test_run_multiple_excel()

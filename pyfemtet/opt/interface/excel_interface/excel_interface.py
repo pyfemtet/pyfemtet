@@ -375,6 +375,7 @@ class ExcelInterface(AbstractFEMInterface):
         if self.setup_procedure_name is not None:
             with Lock('excel_setup_procedure'):
                 try:
+                    self.wb_setup.Activate()
                     with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
                         self.excel.Run(
                             f'{self.setup_procedure_name}',
@@ -397,7 +398,7 @@ class ExcelInterface(AbstractFEMInterface):
         else:
             self.excel = DispatchEx('Excel.Application')
 
-        # FemtetRef を追加する
+        # FemtetRef.xla を開く
         self.open_femtet_ref_xla()
         sleep(0.5)
 
@@ -591,6 +592,7 @@ class ExcelInterface(AbstractFEMInterface):
 
         # マクロ実行
         try:
+            self.wb_procedure.Activate()
             with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
                 self.excel.Run(
                     f'{self.procedure_name}',
@@ -608,23 +610,32 @@ class ExcelInterface(AbstractFEMInterface):
         with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
             self.wb_input.Close(_SaveChanges := False)
 
-        if not _is_same_path(self.input_xlsm_path, self.output_xlsm_path):
+        # 閉じられていれば Attribute にアクセスできない
+        def is_open(wb_):
+            try:
+                getattr(wb_, 'Name')
+            except com_error:
+                return False
+            else:
+                return True
+
+        if is_open(self.wb_output):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_output.Close(_SaveChanges := False)
 
-        if not _is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
+        if is_open(self.wb_constraint):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_constraint.Close(_SaveChanges := False)
 
-        if not _is_same_path(self.input_xlsm_path, self.procedure_xlsm_path):
+        if is_open(self.wb_procedure):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_procedure.Close(_SaveChanges := False)
 
-        if not _is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
+        if is_open(self.wb_setup):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_setup.Close(_SaveChanges := False)
 
-        if not _is_same_path(self.input_xlsm_path, self.teardown_xlsm_path):
+        if is_open(self.wb_teardown):
             with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
                 self.wb_teardown.Close(_SaveChanges := False)
 
@@ -635,8 +646,12 @@ class ExcelInterface(AbstractFEMInterface):
 
         # 終了処理を必要なら実施する
         if self.teardown_procedure_name is not None:
+
+            logger.info(f'teardown プロシージャ {self.teardown_procedure_name} を実行中...')
+
             with Lock('excel_teardown_procedure'):
                 try:
+                    self.wb_teardown.Activate()
                     with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
                         self.excel.Run(
                             f'{self.teardown_procedure_name}',
@@ -653,11 +668,11 @@ class ExcelInterface(AbstractFEMInterface):
         # excel プロセスを終了する
         if self.terminate_excel_when_quit:
 
+            logger.info(Msg.INFO_TERMINATING_EXCEL)
+
             already_terminated = not hasattr(self, 'excel')
             if already_terminated:
                 return
-
-            logger.info(Msg.INFO_TERMINATING_EXCEL)
 
             # ワークブックを閉じる前に
             # シートの COM オブジェクト変数を削除する
@@ -885,13 +900,13 @@ class ExcelInterface(AbstractFEMInterface):
                     using_fem=not calc_before_solve,
                 )
 
-    def objective_from_excel(self, name: str):
+    def objective_from_excel(self, _, name: str):
         r = 1 + search_r(self.output_xlsm_path, self.output_sheet_name, name)
         c = 1 + search_c(self.output_xlsm_path, self.output_sheet_name, ParseAsObjective.value)
         v = self.sh_output.Cells(r, c).value
         return float(v)
 
-    def constraint_from_excel(self, name: str):
+    def constraint_from_excel(self, _, name: str):
         r = 1 + search_r(self.constraint_xlsm_path, self.constraint_sheet_name, name)
         c = 1 + search_c(self.constraint_xlsm_path, self.constraint_sheet_name, ParseAsConstraint.value)
         v = self.sh_constraint.Cells(r, c).value
@@ -908,7 +923,7 @@ class _ScapeGoatObjective:
 
     @property
     def __globals__(self):
-        return tuple()
+        return dict()
 
 
 def _is_same_path(p1, p2):
