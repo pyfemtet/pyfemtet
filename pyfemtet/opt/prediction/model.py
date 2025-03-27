@@ -8,6 +8,8 @@ from botorch.models import SingleTaskGP
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.helper import *
 from pyfemtet.opt.prediction.botorch_utils import *
+from pyfemtet.opt.prediction.gpytorch_modules_extension import get_covar_module_with_dim_scaled_prior_extension
+
 
 
 __all__ = [
@@ -50,6 +52,17 @@ class SingleTaskGPModel(AbstractModel):
                 covar_module_settings.pop('name')
                 covar_module = get_matern_kernel_with_gamma_prior_as_covar_module(
                     X, Y,
+                    **covar_module_settings,
+                )
+            elif covar_module_settings['name'] == 'get_covar_module_with_dim_scaled_prior_extension':
+                covar_module_settings.pop('name')
+
+                _input_batch_shape, _aug_batch_shape = SingleTaskGP.get_batch_dimensions(X, Y)
+                batch_shape = _aug_batch_shape
+
+                covar_module = get_covar_module_with_dim_scaled_prior_extension(
+                    ard_num_dims=X.shape[-1],
+                    batch_shape=batch_shape,
                     **covar_module_settings,
                 )
             else:

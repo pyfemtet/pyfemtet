@@ -31,10 +31,6 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
 
         self.current_obj_values = {}
 
-    @property
-    def _object_pass_to_fun(self):  # lambda に渡される
-        return self
-
     def load_objectives(self, opt: AbstractOptimizer):
         # add_objective された目的のうち、
         # training data に含まれる名前ならば
@@ -45,7 +41,7 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
                 obj.fun = lambda obj_name_=obj_name: self.current_obj_values[obj_name_]
 
     def load_variables(self, opt: AbstractOptimizer):
-        # opt の変数が充分であるかのチェック
+        # opt の変数が充分であるかのチェックのみ
         parameters = opt.variable_manager.get_variables()
         assert len(set(self.train_history.prm_names) - set(parameters.keys())) == 0
 

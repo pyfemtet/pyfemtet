@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats.distributions import norm
 
-from gpytorch.priors.torch_priors import GammaPrior
+# from gpytorch.priors.torch_priors import GammaPrior
 
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.model import PyFemtetModel, SingleTaskGPModel
@@ -12,8 +12,6 @@ from pyfemtet.opt.interface.surrogate_model_interface.surrogate_interface import
 from pyfemtet.logger import get_module_logger
 
 logger = get_module_logger('opt.interface', False)
-
-debug = False
 
 
 class BoTorchInterface(AbstractSurrogateModelInterfaceBase):
@@ -51,6 +49,8 @@ class BoTorchInterface(AbstractSurrogateModelInterfaceBase):
 
 class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase):
 
+    _debug: bool = False
+
     def __init__(self, history_path: str):
         AbstractSurrogateModelInterfaceBase.__init__(self, history_path, None)
 
@@ -61,7 +61,7 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         self.train_history_c = History()
         self.train_history_c.load_csv(history_path, with_finalize=True)
         self.pof_threshold = 0.5
-        self.cdf_threshold = 0.25  # float or 'sample_mean'
+        self.cdf_threshold = 0.5  # float or 'sample_mean'
 
         # use feasibility as a single objective
         self.train_history_c.obj_names = ['feasibility']
@@ -90,91 +90,125 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
             history=self.train_history_c,
             df=df_c,
             observation_noise=None,
-            covar_module_settings=dict(
-                name='matern_kernel_with_gamma_prior',
-                nu=2.5,
-                lengthscale_prior=GammaPrior(1.0, 9.0),  # default: 3, 6
-                outputscale_prior=GammaPrior(1.0, 0.15),  # default: 2, 0.15
-            )
+            # observation_noise='no',
+            # covar_module_settings=dict(
+            #     name='matern_kernel_with_gamma_prior',
+            #     nu=2.5,
+            #     lengthscale_prior=GammaPrior(1.0, 9.0),  # default: 3, 6
+            #     outputscale_prior=GammaPrior(1.0, 0.15),  # default: 2, 0.15
+            # )
+            # covar_module_settings=dict(
+            #     name='get_covar_module_with_dim_scaled_prior_extension',
+            #     loc_coef=0.33,
+            #     scale_coef=0.33,
+            # )
         )
 
         # set auto cdf_threshold
         if self.cdf_threshold == 'sample_mean':
             self.cdf_threshold = df_c['feasibility'].mean()
 
-        if debug:
+        if self._debug:
             self._debug_df_c = df_c
 
     def calc_pof(self):
-        if debug:
+
+        if self._debug:
             import plotly.graph_objects as go
 
-            x1 = np.linspace(-1, 1, 21)
-            x2 = np.linspace(-1, 1, 21)
-            xx1, xx2 = np.meshgrid(x1, x2)
-            x_plot = np.array([xx1.ravel(), xx2.ravel()]).T
-            y_mean, y_std = self.pyfemtet_model_c.predict(x_plot)
-            # cdf_threshold = self.cdf_threshold
-            # cdf_threshold = 0.5
-            cdf_threshold = 0.25  # 不明なところは pof が 1 近くにすればあとは ACQF がうまいことやってくれる
-            # cdf_threshold = self.cdf_threshold * 0.5
-            pof = 1 - norm.cdf(cdf_threshold, y_mean, y_std)
+            df = self._debug_df_c
 
-            fig = go.Figure()
-            fig.add_trace(
-                go.Contour(
-                    x0=x1[0],
-                    y0=x2[0],
-                    dx=np.diff(x1)[0],
-                    dy=np.diff(x2)[0],
-                    z=pof.reshape(xx1.shape),
-                )
-            )
-            fig.add_trace(
-                go.Scatter(
-                    x=self._debug_df_c['x1'],
-                    y=self._debug_df_c['x2'],
-                    mode='markers',
-                    marker=dict(
-                        color=self._debug_df_c['feasibility'],
-                        colorscale='greens',
-                    ),
-                )
-            )
-            fig.show()
+            x_list = []
+            prm_names = self.train_history_c.prm_names
+            for prm_name in prm_names:
+                x_list.append(np.linspace(
+                    df[prm_name + '_lower_bound'].values[0],
+                    df[prm_name + '_upper_bound'].values[0],
+                    20
+                ))
 
-            fig = go.Figure()
-            fig.add_trace(
-                go.Surface(
-                    x=xx1,
-                    y=xx2,
-                    z=y_mean.reshape(xx1.shape),
-                )
-            )
-            fig.add_trace(
-                go.Surface(
-                    x=xx1,
-                    y=xx2,
-                    z=(y_mean + y_std).reshape(xx1.shape),
-                    opacity=0.3,
-                )
-            )
-            fig.add_trace(
-                go.Surface(
-                    x=xx1,
-                    y=xx2,
-                    z=(y_mean - y_std).reshape(xx1.shape),
-                    opacity=0.3,
-                )
-            )
-            fig.add_trace(
-                go.Scatter3d(
-                    x=self._debug_df_c['x1'],
-                    y=self._debug_df_c['x2'],
-                    z=self._debug_df_c['feasibility'],
-                )
-            )
-            fig.show()
+            for i in range(len(x_list)):
+                for j in range(i, len(x_list)):
+                    if i == j:
+                        continue
+
+                    # i=0
+                    # j=1
+
+                    xx = np.meshgrid(x_list[i], x_list[j])
+
+                    x_plot = np.array([[x[0]] * 400 for x in x_list]).T
+                    x_plot[:, i] = xx[0].ravel()
+                    x_plot[:, j] = xx[1].ravel()
+
+                    y_mean, y_std = self.pyfemtet_model_c.predict(x_plot)
+                    # cdf_threshold = self.cdf_threshold
+                    # cdf_threshold = 0.5
+                    cdf_threshold = 0.25  # 不明なところは pof が 1 近くにすればあとは ACQF がうまいことやってくれる
+                    # cdf_threshold = self.cdf_threshold * 0.5
+                    pof = 1 - norm.cdf(cdf_threshold, y_mean, y_std)
+
+                    x1 = x_list[i]
+                    x2 = x_list[j]
+                    xx1 = xx[0]
+                    xx2 = xx[1]
+
+                    fig = go.Figure()
+                    fig.add_trace(
+                        go.Contour(
+                            x0=x1[0],
+                            y0=x2[0],
+                            dx=np.diff(x1)[0],
+                            dy=np.diff(x2)[0],
+                            z=pof.reshape(xx1.shape),
+                        )
+                    )
+                    fig.add_trace(
+                        go.Scatter(
+                            x=self._debug_df_c[prm_names[i]],
+                            y=self._debug_df_c[prm_names[j]],
+                            mode='markers',
+                            marker=dict(
+                                color=self._debug_df_c['feasibility'],
+                                colorscale='greens',
+                            ),
+                        )
+                    )
+                    fig.show()
+
+                    fig = go.Figure()
+                    fig.add_trace(
+                        go.Surface(
+                            x=xx1,
+                            y=xx2,
+                            z=y_mean.reshape(xx1.shape),
+                        )
+                    )
+                    fig.add_trace(
+                        go.Surface(
+                            x=xx1,
+                            y=xx2,
+                            z=(y_mean + y_std).reshape(xx1.shape),
+                            opacity=0.3,
+                        )
+                    )
+                    fig.add_trace(
+                        go.Surface(
+                            x=xx1,
+                            y=xx2,
+                            z=(y_mean - y_std).reshape(xx1.shape),
+                            opacity=0.3,
+                        )
+                    )
+                    fig.add_trace(
+                        go.Scatter3d(
+                            x=self._debug_df_c[prm_names[i]],
+                            y=self._debug_df_c[prm_names[j]],
+                            z=self._debug_df_c['feasibility'],
+                            mode='markers',
+                        )
+                    )
+                    fig.show()
 
             return
 
@@ -193,6 +227,12 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
 
         pof = 1 - norm.cdf(cdf_threshold, f_mean, f_std)
 
+        return pof
+
+    def update(self) -> None:
+
+        # BoTorchInterface.update() の前に PoF を計算する
+        pof = self.calc_pof()
         if pof < self.pof_threshold:
             logger.info(f'サロゲートモデルによって、入力変数 {self.current_prm_values} '
                         f'に対して実モデルが成立する確率が {pof:.2f} だと推定されました。'
@@ -200,29 +240,4 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
                         f'拘束違反エラーとして扱います。')
             raise HiddenConstraintViolation(f'PoF < {self.pof_threshold}')
 
-    def update(self) -> None:
-
-        # BoTorchInterface.update() の前に PoF を計算する
-        self.calc_pof()
-
         BoTorchInterface.update(self)
-
-
-def debug_1():
-
-    import os
-
-    fem = PoFBoTorchInterface(
-        history_path=os.path.join(
-            os.path.dirname(__file__),
-            'debug-pof-botorch.reccsv'
-        )
-    )
-    # fem.update_parameter(dict(x1=70, x2='A'))
-    fem.update_parameter(dict(x1=100, x2='B'))
-    fem.update()
-    print(fem.current_obj_values)
-
-
-if __name__ == '__main__':
-    debug_1()

@@ -1,0 +1,15 @@
+,prm,prm_lower_bound,prm_upper_bound,prm,prm_lower_bound,prm_upper_bound,obj,obj_direction,,,
+,,,,,,,,,,,
+trial,x,x_lower_bound,x_upper_bound,y,y_lower_bound,y_upper_bound,out,out_direction,state,feasibility,optimality
+1,0,0,1,0,0,100,0,minimize,Success,TRUE,TRUE
+2,0.33,0,1,0,0,100,0,minimize,Success,TRUE,FALSE
+3,0.67,0,1,0,0,100,0,minimize,Success,TRUE,FALSE
+4,1,0,1,0,0,100,0,minimize,Success,TRUE,FALSE
+5,0,0,1,33,0,100,0,minimize,Success,TRUE,FALSE
+6,0.33,0,1,33,0,100,0,minimize,Success,TRUE,FALSE
+7,0.67,0,1,33,0,100,0,minimize,Success,TRUE,FALSE
+8,1,0,1,33,0,100,0,minimize,Success,TRUE,FALSE
+11,0.67,0,1,67,0,100,,,Hidden constraint violation,FALSE,FALSE
+12,1,0,1,67,0,100,,,Hidden constraint violation,FALSE,FALSE
+15,0.67,0,1,100,0,100,,,Hidden constraint violation,FALSE,FALSE
+16,1,0,1,100,0,100,,,Hidden constraint violation,FALSE,FALSE

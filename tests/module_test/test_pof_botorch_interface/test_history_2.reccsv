@@ -1,0 +1,21 @@
+,prm,prm_lower_bound,prm_upper_bound,prm_step,prm,prm_lower_bound,prm_upper_bound,prm,prm_lower_bound,prm_upper_bound,prm,prm_lower_bound,prm_upper_bound,prm,prm_lower_bound,prm_upper_bound,obj,obj_direction,cns,cns_upper_bound,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+trial,x,x_lower_bound,x_upper_bound,step,y,y_lower_bound,y_upper_bound,zA,zA_lower_bound,zA_upper_bound,zB,zB_lower_bound,zB_upper_bound,zC,zC_lower_bound,zC_upper_bound,out,out2,cons,cons_upper_bound,state,feasibility,optimality
+1,56,50,100,1,0.316503562,0,1,1,0,1,0,0,1,0,0,1,71.82517808,maximize,0.316503562,0.8,Success,TRUE,FALSE
+2,98,50,100,1,0.175178766,0,1,0,0,1,1,0,1,0,0,1,,,,,Hidden constraint violation,FALSE,FALSE
+3,89,50,100,1,0.713597901,0,1,0,0,1,0,0,1,1,0,1,124.6798951,maximize,0.713597901,0.8,Success,TRUE,TRUE
+4,95,50,100,1,0.307247395,0,1,1,0,1,0,0,1,0,0,1,110.3623698,maximize,0.307247395,0.8,Success,TRUE,FALSE
+5,70,50,100,1,0.294554534,0,1,0,0,1,1,0,1,0,0,1,84.7277267,maximize,0.294554534,0.8,Success,TRUE,FALSE
+6,60,50,100,1,0.216069164,0,1,0,0,1,0,0,1,1,0,1,70.80345819,maximize,0.216069164,0.8,Success,TRUE,FALSE
+7,96,50,100,1,0.033774627,0,1,1,0,1,0,0,1,0,0,1,,,,,Hidden constraint violation,FALSE,FALSE
+8,78,50,100,1,0.080667068,0,1,0,0,1,1,0,1,0,0,1,,,,,Hidden constraint violation,FALSE,FALSE
+9,97,50,100,1,0.04062796,0,1,0,0,1,0,0,1,1,0,1,,,,,Hidden constraint violation,FALSE,FALSE
+10,51,50,100,1,0.961497879,0,1,1,0,1,0,0,1,0,0,1,99.07489395,maximize,0.961497879,0.8,Hard constraint violation,FALSE,FALSE
+11,87,50,100,1,0.697262137,0,1,0,0,1,1,0,1,0,0,1,121.8631068,maximize,0.697262137,0.8,Success,TRUE,FALSE
+12,70,50,100,1,0.863485926,0,1,0,0,1,0,0,1,1,0,1,113.1742963,maximize,0.863485926,0.8,Hard constraint violation,FALSE,FALSE
+13,94,50,100,1,0.838649887,0,1,1,0,1,0,0,1,0,0,1,135.9324943,maximize,0.838649887,0.8,Hard constraint violation,FALSE,FALSE
+14,66,50,100,1,0.560931702,0,1,0,0,1,1,0,1,0,0,1,94.0465851,maximize,0.560931702,0.8,Success,TRUE,FALSE
+15,70,50,100,1,0.690168747,0,1,0,0,1,0,0,1,1,0,1,104.5084374,maximize,0.690168747,0.8,Success,TRUE,FALSE
+16,56,50,100,1,0.344351441,0,1,1,0,1,0,0,1,0,0,1,73.21757205,maximize,0.344351441,0.8,Success,TRUE,FALSE
+17,81,50,100,1,0.017383463,0,1,0,0,1,1,0,1,0,0,1,,,,,Hidden constraint violation,FALSE,FALSE
+18,86,50,100,1,0.865612548,0,1,0,0,1,0,0,1,1,0,1,129.2806274,maximize,0.865612548,0.8,Hard constraint violation,FALSE,FALSE
