@@ -160,7 +160,15 @@ class FemtetInterface(COMInterface):
         self._connect_and_open_femtet()
 
         # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
-        self.quit_when_destruct = self.connected_method == "new"
+        # self.quit_when_destruct = self.connected_method == "new"
+
+        # Femtet に model を close する機能がない
+        #   + executor でも CAD 連携等でモデルに
+        #   わかりにくい変更が入らないように
+        #   _tmp_dir のファイルを開くようにしたため
+        #   _tmp_dir 削除時の permission error を
+        #   避けるために Femtet を強制 close する
+        self.quit_when_destruct = True
 
     # ===== system =====
 
