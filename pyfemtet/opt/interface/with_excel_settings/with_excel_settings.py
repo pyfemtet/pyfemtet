@@ -34,7 +34,7 @@ def _get_parametric_output_number(obj_name: str) -> int:
 
     if matches:
         last_match = matches[-1]
-        return last_match
+        return int(last_match)
 
     else:
         raise ParametricNumberNotFoundError(
@@ -51,11 +51,14 @@ def _class_factory(FEMClass: type[AbstractFEMInterface]) -> type[AbstractFEMInte
 
         __name__ = _get_name(FEMClass=FEMClass)
 
+        # 構造が複雑で型ヒントが働かないため
         _excel_initialized: bool
+        _load_problem_from_fem: bool
 
         def init_excel(self, *args, **kwargs):
             ExcelInterface.__init__(self, *args, **kwargs)
             self._excel_initialized = True
+            self._load_problem_from_fem = True
 
         def _setup_before_parallel(self):
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'

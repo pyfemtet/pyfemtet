@@ -39,6 +39,7 @@ class AbstractFEMInterface:
     kwargs: dict = {}
     _load_problem_from_fem: bool = False
     current_prm_values: dict[str, SupportedVariableTypes]
+    _tmp_dir: tempfile.TemporaryDirectory
 
     # ===== update =====
 
@@ -68,7 +69,7 @@ class AbstractFEMInterface:
         if opt is None:
             worker_index = 'copy'
         else:
-            worker_index = f'copy{opt._worker_index}' or 'copy'
+            worker_index = f'copy_{opt._worker_index}' if opt._worker_index is not None else 'copy'
         return worker_index
 
     def _rename_and_get_path_on_worker_space(self, orig_path, suffix, ignore_no_exist=False) -> str:
@@ -102,7 +103,7 @@ class AbstractFEMInterface:
     def _distribute_files(self, paths: list[str]) -> None:
 
         # executor 向け
-        self._tmp_dir = self._copy_to_temp_space(paths)
+        self._copy_to_temp_space(paths)
 
         # dask worker 向け
         client = get_client()
@@ -112,18 +113,31 @@ class AbstractFEMInterface:
                     raise FileNotFoundError
                 client.upload_file(path, load=False)
 
-    @staticmethod
-    def _copy_to_temp_space(paths: list[str]) -> tempfile.TemporaryDirectory:
+    def _verify_tmp_dir(self):
+        should_process = False
+
+        if not hasattr(self, '_tmp_dir'):
+            should_process = True
+
+        elif self._tmp_dir is None:
+            should_process = True
+
+        if not should_process:
+            return
+
         # dask worker space のように使える一時フォルダを作成する
         # Python プロセス終了時に（使用中のプロセスがなければ）
         # 削除されるので、重大なものでなければ後処理は不要
         tmp_dir = tempfile.TemporaryDirectory()
+        self._tmp_dir = tmp_dir
+
+    def _copy_to_temp_space(self, paths: list[str]) -> None:
+
+        self._verify_tmp_dir()
 
         # client.upload_file 相当の処理を行う
         for path in paths:
-            shutil.copy(path, tmp_dir.name)
-
-        return tmp_dir
+            shutil.copy(path, self._tmp_dir.name)
 
     # ===== setup =====
 
