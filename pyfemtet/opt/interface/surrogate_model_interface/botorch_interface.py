@@ -89,19 +89,20 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         self.pyfemtet_model_c.fit(
             history=self.train_history_c,
             df=df_c,
-            observation_noise=None,
+            # observation_noise=None,
             # observation_noise='no',
+            observation_noise=0.001,
             # covar_module_settings=dict(
             #     name='matern_kernel_with_gamma_prior',
             #     nu=2.5,
             #     lengthscale_prior=GammaPrior(1.0, 9.0),  # default: 3, 6
             #     outputscale_prior=GammaPrior(1.0, 0.15),  # default: 2, 0.15
             # )
-            # covar_module_settings=dict(
-            #     name='get_covar_module_with_dim_scaled_prior_extension',
-            #     loc_coef=0.33,
-            #     scale_coef=0.33,
-            # )
+            covar_module_settings=dict(
+                name='get_covar_module_with_dim_scaled_prior_extension',
+                loc_coef=0.01,
+                scale_coef=0.01,
+            )
         )
 
         # set auto cdf_threshold
