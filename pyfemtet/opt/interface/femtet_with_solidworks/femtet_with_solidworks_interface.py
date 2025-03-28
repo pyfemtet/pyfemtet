@@ -51,6 +51,9 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
 
         self._warn_if_undefined_variable = False
 
+    def _check_param_and_raise(self, param_name) -> None:
+        pass
+
     def _setup_before_parallel(self):
         SolidworksInterface._setup_before_parallel(self)
         FemtetInterface._setup_before_parallel(self)

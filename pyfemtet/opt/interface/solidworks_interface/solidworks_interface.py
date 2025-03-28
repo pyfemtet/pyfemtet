@@ -43,6 +43,7 @@ class SolidworksInterface(COMInterface):
 
     swApp: CDispatch
     com_members = {'swApp': 'SLDWORKS.Application'}
+    _access_sw_lock_name = 'access_sw'
 
     def __init__(
             self,
@@ -78,10 +79,11 @@ class SolidworksInterface(COMInterface):
 
         # connect solidworks
         CoInitialize()
-        self.connect_sw()
+        with Lock(self._access_sw_lock_name):
+            self.connect_sw()
 
-        # open it
-        self.swApp.OpenDoc(self.sldprt_path, swDocPART)
+            # open it
+            self.swApp.OpenDoc(self.sldprt_path, swDocPART)
 
     @property
     def swModel(self) -> CDispatch:
@@ -95,7 +97,7 @@ class SolidworksInterface(COMInterface):
         COMInterface.update_parameter(self, x)
 
         # sw はプロセスが一つなので Lock
-        with Lock('update-sw-model'):
+        with Lock(self._access_sw_lock_name):
 
             # ===== model を取得 =====
             swModel = self.swModel
@@ -132,7 +134,7 @@ class SolidworksInterface(COMInterface):
         """Update .sldprt"""
 
         # sw はプロセスが一つなので Lock
-        with Lock('update-sw-model'):
+        with Lock(self._access_sw_lock_name):
 
             # ===== model を取得 =====
             swModel = self.swModel
@@ -143,28 +145,12 @@ class SolidworksInterface(COMInterface):
                 raise ModelError(Msg.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED)
 
     def close(self):
-        # TODO: 他の worker の終了を待つ手段がないので実施保留
-        # if self.quit_solidworks_on_terminate:
-        #
-        #     # メインプロセスでのみ終了する
-        #     if get_worker() is None:
-        #
-        #         # 他の worker の終了を待つ
-        #
-        #         self.swApp.ExitApp()
-        logger.info('Solidworks モデルを閉じています...')
-        self.swApp.CloseDoc(os.path.basename(self.sldprt_path))
-        # self.swApp.QuitDoc(os.path.basename(self.sldprt_path))  # COM の動作が変になる
-        logger.info('Solidworks モデルを閉じました。')
-
-    def __del__(self):
-        # FIXME: テスト実装
-        if self.quit_solidworks_on_terminate:
-            logger.info('Solidworks を終了しています...')
-            self.swApp.CloseAllDocuments(True)
-            self.swApp.ExitApp()
+        with Lock(self._access_sw_lock_name):
+            logger.info('Solidworks モデルを閉じています...')
+            # 最後の Doc ならばプロセスを落とす仕様？
+            self.swApp.QuitDoc(os.path.basename(self.sldprt_path))
+            logger.info('Solidworks モデルを閉じました。')
             sleep(3)
-            logger.info('Solidworks を終了しました。')
 
 
 def _get_model_by_basename(swApp, basename):
