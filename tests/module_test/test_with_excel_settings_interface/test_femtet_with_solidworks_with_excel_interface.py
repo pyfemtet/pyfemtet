@@ -30,15 +30,15 @@ def test_load_femtet_with_excel_settings():
         fem._setup_before_parallel()
         fem._setup_after_parallel(opt)
 
-        fem.update_parameter(dict(x=2))
+        fem.update_parameter(dict(x=20))
         fem.update()
 
         for obj_name, obj in opt.objectives.items():
             print(obj_name, obj.eval(fem))
             if obj_name == 'output_formula':
-                assert obj.eval(fem) == 2
+                assert obj.eval(fem) == 20
             elif obj_name == '0: 定常解析 / 温度[deg] / 最大値 / 全てのボディ属性':
-                assert obj.eval(fem) == 100
+                assert obj.eval(fem) == 0
             else:
                 assert False, '予期しない目的変数名'
 
