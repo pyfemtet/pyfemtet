@@ -634,7 +634,7 @@ class History:
 
         self.set_df(df)
 
-    def filter_valid(self, df_, keep_trial_num=False):
+    def filter_valid(self, df_, keep_trial_num=True):
         buff = df_[self.obj_names].notna()
         idx = buff.prod(axis=1).astype(bool)
         filtered_df = df_[idx]

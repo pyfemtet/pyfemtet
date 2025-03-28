@@ -218,8 +218,8 @@ class AbstractOptimizer(ABC):
             y,
             c,
             self.message,
-            postprocess_func=self.fem._postprocess_func,
-            postprocess_args=self.fem._create_postprocess_args(),
+            postprocess_func=self.fem._postprocess_func if not _record_infeasible else None,
+            postprocess_args=self.fem._create_postprocess_args() if not _record_infeasible else None,
         )
 
         logger.info(f'output: {y}')
