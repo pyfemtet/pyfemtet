@@ -201,7 +201,9 @@ class FemtetInterface(COMInterface):
         _set_autosave_enabled(self._original_autosave_enabled)
 
         if self.quit_when_destruct:
+            logger.info('Femtet を閉じています...')
             _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
+            logger.info('Femtet を閉じました。')
 
     def use_parametric_output_as_objective(
             self, number: int, direction: str | float = "minimize"

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from time import sleep
 from typing import TYPE_CHECKING
 
 import os
@@ -14,9 +15,13 @@ from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.interface.interface import COMInterface
 from pyfemtet._i18n import Msg
 from pyfemtet.opt.variable_manager import SupportedVariableTypes
+from pyfemtet.logger import get_module_logger
 
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
+
+
+logger = get_module_logger('opt.interface', False)
 
 
 # 定数の宣言
@@ -53,6 +58,7 @@ class SolidworksInterface(COMInterface):
         self._original_sldprt_path = self.sldprt_path
 
     def connect_sw(self):
+        logger.info('Solidworks を起動、または接続しています...')
         self.swApp = DispatchEx('SLDWORKS.Application')
         self.swApp.Visible = self.solidworks_visible
 
@@ -146,13 +152,19 @@ class SolidworksInterface(COMInterface):
         #         # 他の worker の終了を待つ
         #
         #         self.swApp.ExitApp()
-        pass
+        logger.info('Solidworks モデルを閉じています...')
+        self.swApp.CloseDoc(os.path.basename(self.sldprt_path))
+        # self.swApp.QuitDoc(os.path.basename(self.sldprt_path))  # COM の動作が変になる
+        logger.info('Solidworks モデルを閉じました。')
 
     def __del__(self):
         # FIXME: テスト実装
         if self.quit_solidworks_on_terminate:
+            logger.info('Solidworks を終了しています...')
             self.swApp.CloseAllDocuments(True)
             self.swApp.ExitApp()
+            sleep(3)
+            logger.info('Solidworks を終了しました。')
 
 
 def _get_model_by_basename(swApp, basename):
@@ -175,19 +187,3 @@ def _get_name_from_equation(equation: str):
         return matched.group(1)
     else:
         return None
-
-
-def _debug_1():
-
-    fem = SolidworksInterface(
-        sldprt_path=os.path.join(os.path.dirname(__file__), 'debug-sw.sldprt'),
-        close_solidworks_on_terminate=True,
-    )
-    fem._setup_before_parallel()
-    fem._setup_after_parallel()
-    fem.update_parameter({'x': 20})
-    fem.update_model()
-
-
-if __name__ == '__main__':
-    _debug_1()
