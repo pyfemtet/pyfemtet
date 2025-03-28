@@ -124,3 +124,6 @@ class VariableManager:
 
         elif format == 'values':
             return np.array([var.value for var in raw.values()])
+
+        else:
+            raise NotImplementedError(f'invalid format {format} is passed to VariableManager.get_variables()')
