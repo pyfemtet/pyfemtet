@@ -128,7 +128,7 @@ class AbstractFEMInterface:
         # dask worker space のように使える一時フォルダを作成する
         # Python プロセス終了時に（使用中のプロセスがなければ）
         # 削除されるので、重大なものでなければ後処理は不要
-        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_dir = tempfile.TemporaryDirectory(prefix='pyfemtet-')
         self._tmp_dir = tmp_dir
 
     def _copy_to_temp_space(self, paths: list[str]) -> None:
