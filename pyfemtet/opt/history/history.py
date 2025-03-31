@@ -6,6 +6,7 @@ import os
 import csv
 import ast
 import math
+import json
 import datetime
 import dataclasses
 from time import sleep
@@ -267,17 +268,20 @@ class ColumnManager:
             'message',
         ]
 
-    def initialize(self, parameters: TrialInput, y_names, c_names):
+    def initialize(self, parameters: TrialInput, y_names, c_names, additional_data: dict):
         self.parameters = parameters
         self.y_names = y_names
         self.c_names = c_names
-        self.set_full_sorted_column_information()
+        self.set_full_sorted_column_information(
+            additional_data=additional_data,
+        )
 
     def set_full_sorted_column_information(
             self,
             extra_parameters: TrialInput = None,
             extra_y_names: list[str] = None,
             extra_c_names: list[str] = None,
+            additional_data: dict = None,
     ):
 
         extra_parameters = extra_parameters or {}
@@ -375,12 +379,35 @@ class ColumnManager:
                 dtypes.update({name: float for name in extra_c_names})
                 meta_columns.extend([''] * len(extra_c_names))
 
+            # additional_data を入れる
+            elif key == self._get_additional_data_column():
+                dtypes.update({key: object})
+                if additional_data is not None:
+                    meta_columns.append(json.dumps(additional_data))
+                else:
+                    meta_columns.append(json.dumps(dict()))
+
             else:
                 dtypes.update({key: object})
                 meta_columns.append('')
 
         self.dtypes = dtypes
         self.meta_columns = meta_columns
+
+    @staticmethod
+    def _get_additional_data_column():
+        return 'trial'
+
+    @classmethod
+    def _get_additional_data(cls, columns, meta_columns) -> dict:
+        for column, meta_column in zip(columns, meta_columns):
+            if column == cls._get_additional_data_column():
+                if meta_column:
+                    return json.loads(meta_column)
+                else:
+                    return json.loads('{}')
+        else:
+            raise RuntimeError(f'"{cls._get_additional_data_column()}" is not found in given columns.')
 
     @staticmethod
     def _filter_columns(meta_column, columns, meta_columns) -> list[str]:
@@ -769,10 +796,14 @@ class Records:
                 elif l_col in loaded_cns_names:
                     extra_c_names.append(l_col)
 
+        # additional data を取得
+        a_data = self.column_manager._get_additional_data(loaded_columns, loaded_meta_columns)
+
         self.column_manager.set_full_sorted_column_information(
             extra_parameters=extra_parameters,
             extra_y_names=extra_y_names,
             extra_c_names=extra_c_names,
+            additional_data=a_data,
         )
 
         # worker に影響しないように loaded_df のコピーを作成
@@ -925,6 +956,7 @@ class History:
     cns_names: list[str]
     sub_fidelity_names: list[str]
     is_restart: bool
+    additional_data: dict
 
     path: str
 
@@ -933,6 +965,7 @@ class History:
         self.path: str | None = None
         self._finalized: bool = False
         self.is_restart = False
+        self.additional_data = dict()
 
     def __str__(self):
         return self._records.__str__()
@@ -963,6 +996,7 @@ class History:
             self.obj_names = ColumnManager._filter_columns('obj', df.columns, meta_columns)
             self.cns_names = ColumnManager._filter_columns('cns', df.columns, meta_columns)
             self.sub_fidelity_names = ColumnManager._get_sub_fidelity_names(df)
+            self.additional_data = ColumnManager._get_additional_data(df.columns, meta_columns)
 
             parameters: TrialInput = {}
             for prm_name in self.prm_names:
@@ -974,6 +1008,7 @@ class History:
                 self.obj_names,
                 self.cns_names,
                 self.sub_fidelity_names,
+                self.additional_data,
             )
 
     def finalize(
@@ -982,34 +1017,32 @@ class History:
             obj_names,
             cns_names,
             sub_fidelity_names,
+            additional_data,
     ):
 
         self.prm_names = list(parameters.keys())
         self.obj_names = list(obj_names)
         self.cns_names = list(cns_names)
         self.sub_fidelity_names = list(sub_fidelity_names)
+        self.additional_data = additional_data
 
         if not self._finalized:
             # ここで dtypes が決定する
             self._records.column_manager.initialize(
-                parameters, self.obj_names, self.cns_names
+                parameters, self.obj_names, self.cns_names, additional_data
             )
 
             # initialize
             self._records.initialize()
 
-            # load
             if self.path is None:
                 self.path = datetime.datetime.now().strftime("pyfemtet.opt_%Y%m%d_%H%M%S.csv")
+
+            # load
             if os.path.isfile(self.path):
                 self.load_csv(self.path)
-
-            # check
-            self._records.check_problem_compatibility()
-
-            # load 後だが worker ごとに実行が必要
-            # Record のクラス変数 dtypes と meta_columns を再初期化するため
-            self._records.reinitialize_record_with_loaded_data()
+                self._records.check_problem_compatibility()
+                self._records.reinitialize_record_with_loaded_data()
 
         self._finalized = True
 

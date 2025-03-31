@@ -500,6 +500,16 @@ class AbstractOptimizer:
             self.fem.load_constraints(self)
         self._done_load_problem_from_fem = True
 
+    # noinspection PyMethodMayBeStatic
+    def _get_additional_data(self) -> dict:
+        return dict()
+
+    def _collect_additional_data(self) -> dict:
+        additional_data = {}
+        additional_data.update(self._get_additional_data())
+        additional_data.update(self.fem._get_additional_data())
+        return additional_data
+
     def _finalize_history(self):
         if not self.history._finalized:
             parameters = self.variable_manager.get_variables(
@@ -510,6 +520,7 @@ class AbstractOptimizer:
                 list(self.objectives.keys()),
                 list(self.constraints.keys()),
                 [self.sub_fidelity_name] + list(self.sub_fidelity_models.keys()),
+                additional_data=self._collect_additional_data()
             )
 
     def _setup_before_parallel(self):

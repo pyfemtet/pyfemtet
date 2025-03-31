@@ -179,6 +179,12 @@ class AbstractFEMInterface:
     ) -> ...:  # _postprocess_after_recording
         pass
 
+    # ===== others =====
+
+    # noinspection PyMethodMayBeStatic
+    def _get_additional_data(self) -> dict:
+        return dict()
+
 
 class COMInterface(AbstractFEMInterface):
 

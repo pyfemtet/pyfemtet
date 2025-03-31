@@ -566,15 +566,14 @@ class MainGraph(AbstractPage):
 
     def create_image_content_if_femtet(self, trial) -> Component:
         img_url = None
-        meta_columns = self.application.history._records.column_manager.meta_columns
-        if meta_columns[0] != '':
-            extra_data = json.loads(meta_columns[0])
+        extra_data = self.application.history.additional_data
+        if extra_data:
             if 'femprj_path' in extra_data.keys():
                 # get img path
                 femprj_path = extra_data['femprj_path']
                 model_name = extra_data['model_name']
                 femprj_result_dir = femprj_path.replace('.femprj', '.Results')
-                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
+                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial_{trial}.jpg')  # FIXME: FemtetInterface のメソッドを使う
                 if os.path.exists(img_path):
                     # create encoded image
                     with open(img_path, 'rb') as f:

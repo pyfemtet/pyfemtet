@@ -1,6 +1,7 @@
 import numpy as np
 import plotly.graph_objects as go
 
+from pyfemtet._util.df_util import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.model import *
 from pyfemtet.opt.prediction.helper import *
@@ -189,9 +190,18 @@ def _plot(
         )
 
     # scatter
+
+    sub_fidelity_names = history.sub_fidelity_names
+    obj_names_per_sub_fidelity_list: list[list[str]] = [
+        history.obj_names for _ in sub_fidelity_names
+    ]
+
     if is_3d:
+
+        # main
+        df_main = get_partial_df(df, MAIN_FILTER)
         fig.add_trace(go.Scatter3d(
-            x=df[prm_name1], y=df[prm_name2], z=df[obj_name],
+            x=df_main[prm_name1], y=df_main[prm_name2], z=df_main[obj_name],
             mode='markers',
             marker=dict(
                 size=3,
@@ -202,9 +212,41 @@ def _plot(
             ),
             name='trial',
         ))
+
+        # sub fidelity
+        for (
+                sub_fidelity_name,
+                obj_names_per_sub_fidelity,
+                # color
+        ) in zip(
+            sub_fidelity_names,
+            obj_names_per_sub_fidelity_list,
+            # px.colors.qualitative.G10[::-1]
+        ):
+
+            if sub_fidelity_name == MAIN_FILTER:
+                continue
+            df_sub = get_partial_df(df, equality_filters=dict(sub_fidelity_name=sub_fidelity_name))
+
+            fig.add_trace(go.Scatter3d(
+                x=df_sub[prm_name1], y=df_sub[prm_name2], z=df_sub[obj_name],
+                mode='markers',
+                marker=dict(
+                    size=3,
+                    line=dict(
+                        width=1,
+                        color='white',
+                    ),
+                    symbol='square-open',  # TODO: sequence 化
+                ),
+                name=f'trial of {sub_fidelity_name}',
+            ))
+
     else:
+        # main
+        df_main = get_partial_df(df, MAIN_FILTER)
         fig.add_trace(go.Scatter(
-            x=df[prm_name1], y=df[obj_name],
+            x=df_main[prm_name1], y=df_main[obj_name],
             mode='markers',
             marker=dict(
                 line=dict(
@@ -214,6 +256,34 @@ def _plot(
             ),
             name='trial',
         ))
+
+        # sub fidelity
+        for (
+                sub_fidelity_name,
+                obj_names_per_sub_fidelity,
+                # color
+        ) in zip(
+            sub_fidelity_names,
+            obj_names_per_sub_fidelity_list,
+            # px.colors.qualitative.G10[::-1]
+        ):
+
+            if sub_fidelity_name == MAIN_FILTER:
+                continue
+            df_sub = get_partial_df(df, equality_filters=dict(sub_fidelity_name=sub_fidelity_name))
+
+            fig.add_trace(go.Scatter(
+                x=df_sub[prm_name1], y=df_sub[obj_name],
+                mode='markers',
+                marker=dict(
+                    line=dict(
+                        width=1,
+                        color='white',
+                    ),
+                    symbol='square-open',  # TODO: sequence 化
+                ),
+                name=f'trial of {sub_fidelity_name}',
+            ))
 
     # set opacity by its distance
     params_ = params.copy()
