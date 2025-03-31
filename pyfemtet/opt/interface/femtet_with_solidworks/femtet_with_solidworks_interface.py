@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import os
 from time import sleep, time
 
@@ -7,11 +10,13 @@ from pywintypes import com_error
 from pyfemtet._i18n import Msg
 
 from pyfemtet.opt.variable_manager import SupportedVariableTypes
-from pyfemtet.opt.optimizer import AbstractOptimizer
 from pyfemtet.opt.interface.interface import AbstractFEMInterface
 from pyfemtet.opt.interface.femtet_interface import FemtetInterface
 from pyfemtet.opt.interface.solidworks_interface import SolidworksInterface
 from pyfemtet.opt.exceptions import *
+
+if TYPE_CHECKING:
+    from pyfemtet.opt.optimizer import AbstractOptimizer
 
 
 class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, AbstractFEMInterface):
