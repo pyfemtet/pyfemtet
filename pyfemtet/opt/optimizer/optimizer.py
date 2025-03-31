@@ -4,6 +4,8 @@ from typing import Callable
 
 from time import sleep
 
+import sympy
+
 from pyfemtet.opt.history import *
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.interface import *
@@ -114,6 +116,46 @@ class AbstractOptimizer:
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
         self.variable_manager.variables.update({name: prm})
+
+    def add_expression_string(
+            self,
+            name: str,
+            expression_string: str,
+            properties: dict[str, ...] | None = None,
+    ):
+        var = ExpressionFromString()
+        var.name = name
+        var._expr = ExpressionFromString.InternalClass(expression_string)
+        var.properties = properties or dict()
+        self.variable_manager.variables.update({name: var})
+
+    def add_expression_sympy(
+            self,
+            name: str,
+            sympy_expr: sympy.Expr,
+            properties: dict[str, ...] | None = None,
+    ):
+        var = ExpressionFromString()
+        var.name = name
+        var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
+        var.properties = properties or dict()
+        self.variable_manager.variables.update({name: var})
+
+    def add_expression(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            properties: dict[str, ...] | None = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+        var = ExpressionFromFunction()
+        var.name = name
+        var.fun = fun
+        var.args = args or tuple()
+        var.kwargs = kwargs or dict()
+        var.properties = properties or dict()
+        self.variable_manager.variables.update({name: var})
 
     def add_categorical_parameter(
             self,
@@ -525,10 +567,14 @@ class AbstractOptimizer:
 
     def _setup_before_parallel(self):
 
+        # check compatibility with fem if needed
         variables = self.variable_manager.get_variables()
         for var_name, variable in variables.items():
             if variable.pass_to_fem:
                 self.fem._check_param_and_raise(var_name)
+
+        # resolve evaluation order
+        self.variable_manager.resolve()
 
         self._done_setup_before_parallel = True
 

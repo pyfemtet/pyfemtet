@@ -61,7 +61,7 @@ def _evaluate_pyfemtet_cns(
     for prm_name, prm in params.items():
         if prm_name in new_params:
             prm.value = new_params[prm_name]
-    opt.variable_manager.evaluate()
+    opt.variable_manager.eval_expressions()
 
     # update fem (very slow!)
     if cns.using_fem:

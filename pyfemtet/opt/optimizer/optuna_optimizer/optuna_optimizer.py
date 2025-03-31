@@ -190,7 +190,7 @@ class OptunaOptimizer(AbstractOptimizer):
                     raise NotImplementedError
 
             # evaluate expressions
-            vm.evaluate()
+            vm.eval_expressions()
 
             # check interruption
             self._check_and_raise_interruption()
