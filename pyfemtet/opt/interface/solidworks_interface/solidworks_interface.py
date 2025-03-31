@@ -154,16 +154,10 @@ class SolidworksInterface(COMInterface):
 
 
 def _get_model_by_basename(swApp, basename):
-    swModel = swApp.GetFirstDocument
-    while swModel is not None:
-        pathname = swModel.GetPathName
-        if os.path.basename(pathname) == basename:
-            swApp.OpenDoc(pathname, 1)
-            swModel_ = swApp.ActiveDoc
-            return swModel_
-        else:
-            swModel = swModel.GetNext
-    raise FileNotOpenedError(f'Model {basename} is not opened.')
+    swModel = swApp.ActivateDoc(basename)
+    if swModel is None:
+        raise FileNotOpenedError(f'Model {basename} is not opened.')
+    return swModel
 
 
 def _get_name_from_equation(equation: str):
