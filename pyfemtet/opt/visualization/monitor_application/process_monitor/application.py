@@ -115,9 +115,9 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         if status.value <= WorkerStatus.initializing:
             color = 'secondary'
         elif status.value <= WorkerStatus.launching_fem:
-            color = 'primary'
-        elif status.value <= WorkerStatus.waiting:
             color = 'info'
+        elif status.value <= WorkerStatus.waiting:
+            color = 'success'
         elif status.value <= WorkerStatus.running:
             color = 'primary'
         elif status.value <= WorkerStatus.interrupting:
