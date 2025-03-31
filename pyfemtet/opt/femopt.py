@@ -18,7 +18,11 @@ logger = get_module_logger('opt.femopt', False)
 class FEMOpt:
     opt: AbstractOptimizer
 
-    def optimize(self, n_parallel) -> None:
+    def optimize(
+            self,
+            n_parallel: int = 1,
+            with_monitor: bool = True,
+    ) -> None:
 
         logger.info(f'===== pyfemtet version {_pyfemtet.__version__} =====')
         client: Client
@@ -40,8 +44,11 @@ class FEMOpt:
             )
 
         logger.info(f'Launching threads...')
+        executor_workers = 3  # main, save_history, watch_status
+        if with_monitor:
+            executor_workers += 1
         executor = ThreadPoolExecutor(
-            max_workers=4,
+            max_workers=executor_workers,
             thread_name_prefix='thread_worker'
         )
 
@@ -71,15 +78,18 @@ class FEMOpt:
             opt_worker_addresses = [n.worker_address for n in nannies]
 
             # Setting up monitor
-            logger.info(f'Launching Monitor...')
-            # noinspection PyTypeChecker,PyUnusedLocal
-            monitor_future = executor.submit(
-                main,
-                history=self.opt.history,
-                status=entire_status,
-                worker_addresses=['main'] + opt_worker_addresses,
-                worker_status_list=worker_status_list,
-            )
+            if with_monitor:
+                logger.info(f'Launching Monitor...')
+                # noinspection PyTypeChecker,PyUnusedLocal
+                monitor_future = executor.submit(
+                    main,
+                    history=self.opt.history,
+                    status=entire_status,
+                    worker_addresses=['main'] + opt_worker_addresses,
+                    worker_status_list=worker_status_list,
+                )
+            else:
+                monitor_future = None
 
             logger.info(f'Setting up optimization problem...')
             entire_status.value = WorkerStatus.running
@@ -138,6 +148,9 @@ class FEMOpt:
             # Terminating monitor even if exception is raised
             class TerminatingMonitor:
 
+                def __init__(self, monitor_future_):
+                    self.monitor_future_ = monitor_future_
+
                 def __enter__(self):
                     pass
 
@@ -146,9 +159,10 @@ class FEMOpt:
                     # and wait to finish
                     # noinspection PyTypeChecker
                     entire_status.value = WorkerStatus.terminated
-                    monitor_future.result()
+                    if self.monitor_future_ is not None:
+                        self.monitor_future_.result()
 
-            with TerminatingMonitor():
+            with TerminatingMonitor(monitor_future):
                 # Wait to finish optimization
                 client.gather(futures)
                 future.result()
