@@ -84,17 +84,6 @@ class FEMOpt:
             logger.info(f'Setting up optimization problem...')
             entire_status.value = WorkerStatus.running
 
-            # Run on main process
-            # noinspection PyTypeChecker
-            future = executor.submit(
-                self.opt._run,
-                'Main',
-                self.opt.history,
-                entire_status,
-                worker_status_list[0],
-                worker_status_list,
-            )
-
             # Run on cluster
             futures = client.map(
                 self.opt._run,
@@ -107,6 +96,17 @@ class FEMOpt:
                 # Arguments of map
                 workers=opt_worker_addresses,
                 allow_other_workers=False,
+            )
+
+            # Run on main process
+            # noinspection PyTypeChecker
+            future = executor.submit(
+                self.opt._run,
+                'Main',
+                self.opt.history,
+                entire_status,
+                worker_status_list[0],
+                worker_status_list,
             )
 
             # Saving history
