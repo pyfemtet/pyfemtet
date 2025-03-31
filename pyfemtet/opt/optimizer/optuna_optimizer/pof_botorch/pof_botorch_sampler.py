@@ -67,21 +67,21 @@ with try_import() as _imports:
     from botorch.models import SingleTaskGP
     from botorch.models.transforms import Normalize
 
-    # from botorch.acquisition.knowledge_gradient import qKnowledgeGradient
-    # from botorch.acquisition.monte_carlo import qExpectedImprovement
-    # from botorch.acquisition.monte_carlo import qNoisyExpectedImprovement
-    # from botorch.acquisition.multi_objective import monte_carlo
-    # from botorch.acquisition.multi_objective.analytic import ExpectedHypervolumeImprovement
-    # from botorch.acquisition.multi_objective.objective import (
-    #     FeasibilityWeightedMCMultiOutputObjective,
-    # )
-    # from botorch.acquisition.multi_objective.objective import IdentityMCMultiOutputObjective
-    # from botorch.acquisition.objective import ConstrainedMCObjective
-    # from botorch.acquisition.objective import GenericMCObjective
-    # from botorch.models import ModelListGP
+    from botorch.acquisition.knowledge_gradient import qKnowledgeGradient
+    from botorch.acquisition.monte_carlo import qExpectedImprovement
+    from botorch.acquisition.monte_carlo import qNoisyExpectedImprovement
+    from botorch.acquisition.multi_objective import monte_carlo
+    from botorch.acquisition.multi_objective.analytic import ExpectedHypervolumeImprovement
+    from botorch.acquisition.multi_objective.objective import (
+        FeasibilityWeightedMCMultiOutputObjective,
+    )
+    from botorch.acquisition.multi_objective.objective import IdentityMCMultiOutputObjective
+    from botorch.acquisition.objective import ConstrainedMCObjective
+    from botorch.acquisition.objective import GenericMCObjective
+    from botorch.models import ModelListGP
     from botorch.optim import optimize_acqf
     from botorch.sampling import SobolQMCNormalSampler
-    # from botorch.sampling.list_sampler import ListSampler
+    from botorch.sampling.list_sampler import ListSampler
     import botorch.version
 
     if version.parse(botorch.version.version) < version.parse("0.8.0"):
@@ -99,25 +99,22 @@ with try_import() as _imports:
             return SobolQMCNormalSampler(torch.Size((num_samples,)))
 
     from gpytorch.mlls import ExactMarginalLogLikelihood
-    # from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
-    #
-    # from botorch.utils.multi_objective.box_decompositions import NondominatedPartitioning
-    # from botorch.utils.multi_objective.scalarization import get_chebyshev_scalarization
+    from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
+
+    from botorch.utils.multi_objective.box_decompositions import NondominatedPartitioning
+    from botorch.utils.multi_objective.scalarization import get_chebyshev_scalarization
     from botorch.utils.sampling import manual_seed
-    # from botorch.utils.sampling import sample_simplex
-    # from botorch.utils.transforms import normalize
-    # from botorch.utils.transforms import unnormalize
+    from botorch.utils.sampling import sample_simplex
 
 with try_import() as _imports_logei:
     from botorch.acquisition.analytic import LogConstrainedExpectedImprovement
     from botorch.acquisition.analytic import LogExpectedImprovement
 
-# with try_import() as _imports_qhvkg:
-#     from botorch.acquisition.multi_objective.hypervolume_knowledge_gradient import (
-#         qHypervolumeKnowledgeGradient,
-#     )
+with try_import() as _imports_qhvkg:
+    from botorch.acquisition.multi_objective.hypervolume_knowledge_gradient import (
+        qHypervolumeKnowledgeGradient,
+    )
 
-# import pyfemtet
 from pyfemtet.opt.history.history import TrialState as PFTrialState
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.optimizer.optuna_optimizer.optuna_attribute import OptunaAttribute
@@ -164,6 +161,19 @@ __all__ = [
 ]
 
 
+def _validate_botorch_version_for_constrained_opt(func_name: str) -> None:
+    if version.parse(botorch.version.version) < version.parse("0.9.0"):
+        raise ImportError(
+            f"{func_name} requires botorch>=0.9.0 for constrained problems, but got "
+            f"botorch={botorch.version.version}.\n"
+            "Please run ``pip install botorch --upgrade``."
+        )
+
+
+def _get_constraint_funcs(n_constraints: int) -> list[Callable[[torch.Tensor], torch.Tensor]]:
+    return [lambda Z: Z[..., -n_constraints + i] for i in range(n_constraints)]
+
+
 def log_sigmoid(X: torch.Tensor) -> torch.Tensor:
     return torch.log(1 - torch.sigmoid(-X))
 
@@ -207,6 +217,64 @@ class PartialOptimizeACQFConfig:
             ),
             timeout_sec=timeout_sec,  # ?
         )
+
+
+def _optimize_acqf_util(
+        partial_optimize_acqf_kwargs,
+        botorch_nlc,
+        acqf,
+        bounds,
+        original_options,
+        original_q,
+        original_num_restarts,
+        original_raw_samples,
+):
+    # optimize_acqf の探索に parameter constraints を追加します。
+    # 挙動を調整するための引数を取得
+    kwargs = partial_optimize_acqf_kwargs.kwargs.copy()
+    if botorch_nlc is not None:
+
+        # parameter constraint を適用するための kwargs
+        nlc_kwargs = botorch_nlc.create_kwargs()
+        q = nlc_kwargs.pop('q')
+        batch_limit = nlc_kwargs.pop('options_batch_limit')
+
+        # 元実装の引数を上書き
+        options = original_options
+        options.update({"batch_limit": batch_limit})
+        options.update(kwargs.pop('options'))
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=bounds,
+            q=q,
+            num_restarts=20,
+            raw_samples=1024,
+            options=options,
+            sequential=True,
+            **nlc_kwargs,
+            **kwargs,
+        )
+
+    else:
+
+        # noinspection PyTypeChecker
+        options = {
+            "batch_limit": 5, "maxiter": 200, "nonnegative": True
+        }.update(kwargs.pop('options'))
+
+        candidates, _ = optimize_acqf(
+            acq_function=acqf,
+            bounds=bounds,
+            q=original_q,
+            num_restarts=original_num_restarts,
+            raw_samples=original_raw_samples,
+            options=options,
+            sequential=True,
+            **kwargs,
+        )
+
+    return candidates
 
 
 # noinspection PyUnusedLocal,PyIncorrectDocstring
@@ -316,50 +384,373 @@ def logei_candidates_func(
         )
     acqf.set(model_c, pof_config)
 
-    # optimize_acqf の探索に parameter constraints を追加します。
-    if botorch_nlc is not None:
+    candidates = _optimize_acqf_util(
+        partial_optimize_acqf_kwargs,
+        botorch_nlc,
+        acqf,
+        bounds,
+        original_options={"batch_limit": 5, "maxiter": 200},
+        original_q=1,
+        original_num_restarts=10,
+        original_raw_samples=512,
+    )
 
-        nlc_kwargs = botorch_nlc.create_kwargs()
-        q = nlc_kwargs.pop('q')
-        batch_limit = nlc_kwargs.pop('options_batch_limit')
+    return candidates.detach(), model
 
-        kwargs = partial_optimize_acqf_kwargs.kwargs.copy()
 
-        options = {
-            "batch_limit": batch_limit, "maxiter": 200
-        }.update(kwargs.pop('options'))
+# noinspection PyUnusedLocal,PyIncorrectDocstring
+@experimental_func("2.4.0")
+def qei_candidates_func(
+    train_x: torch.Tensor,
+    train_obj: torch.Tensor,
+    train_con: torch.Tensor | None,
+    bounds: torch.Tensor,
+    pending_x: torch.Tensor | None,
+    model_c: SingleTaskGP,
+    botorch_nlc: NonlinearInequalityConstraints | None,
+    pof_config: 'PoFConfig',
+    observation_noise: str | float | None,
+    partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig,
+) -> tuple[torch.Tensor, SingleTaskGP]:
+    """Quasi MC-based batch Expected Improvement (qEI).
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=bounds,
-            q=q,
-            num_restarts=10,
-            raw_samples=512,
-            options=options,
-            sequential=True,
-            **nlc_kwargs,
-            **kwargs,
-        )
+    Args:
+        train_x:
+            Previous parameter configurations. A ``torch.Tensor`` of shape
+            ``(n_trials, n_params)``. ``n_trials`` is the number of already observed trials
+            and ``n_params`` is the number of parameters. ``n_params`` may be larger than the
+            actual number of parameters if categorical parameters are included in the search
+            space, since these parameters are one-hot encoded.
+            Values are not normalized.
+        train_obj:
+            Previously observed objectives. A ``torch.Tensor`` of shape
+            ``(n_trials, n_objectives)``. ``n_trials`` is identical to that of ``train_x``.
+            ``n_objectives`` is the number of objectives. Observations are not normalized.
+        train_con:
+            Objective constraints. A ``torch.Tensor`` of shape ``(n_trials, n_constraints)``.
+            ``n_trials`` is identical to that of ``train_x``. ``n_constraints`` is the number of
+            constraints. A constraint is violated if strictly larger than 0. If no constraints are
+            involved in the optimization, this argument will be :obj:`None`.
+        bounds:
+            Search space bounds. A ``torch.Tensor`` of shape ``(2, n_params)``. ``n_params`` is
+            identical to that of ``train_x``. The first and the second rows correspond to the
+            lower and upper bounds for each parameter respectively.
+        pending_x:
+            Pending parameter configurations. A ``torch.Tensor`` of shape
+            ``(n_pending, n_params)``. ``n_pending`` is the number of the trials which are already
+            suggested all their parameters but have not completed their evaluation, and
+            ``n_params`` is identical to that of ``train_x``.
+    Returns:
+        Next set of candidates. Usually the return value of BoTorch's ``optimize_acqf``.
 
+    """
+
+    # ===== ここから変更なし =====
+
+    if train_obj.size(-1) != 1:
+        raise ValueError("Objective may only contain single values with qEI.")
+    if train_con is not None:
+        _validate_botorch_version_for_constrained_opt("qei_candidates_func")
+        train_y = torch.cat([train_obj, train_con], dim=-1)
+
+        is_feas = (train_con <= 0).all(dim=-1)
+        train_obj_feas = train_obj[is_feas]
+
+        if train_obj_feas.numel() == 0:
+            # TODO(hvy): Do not use 0 as the best observation.
+            _logger.warning(
+                "No objective values are feasible. Using 0 as the best objective in qEI."
+            )
+            best_f = torch.zeros(())
+        else:
+            best_f = train_obj_feas.max()
+
+        n_constraints = train_con.size(1)
+        additonal_qei_kwargs = {
+            "objective": GenericMCObjective(lambda Z, X: Z[..., 0]),
+            "constraints": _get_constraint_funcs(n_constraints),
+        }
     else:
+        train_y = train_obj
 
-        kwargs = partial_optimize_acqf_kwargs.kwargs.copy()
+        best_f = train_obj.max()
 
-        # noinspection PyTypeChecker
-        options = {
-            "batch_limit": 5, "maxiter": 200
-        }.update(kwargs.pop('options'))
+        additonal_qei_kwargs = {}
 
-        candidates, _ = optimize_acqf(
-            acq_function=acqf,
-            bounds=bounds,
-            q=1,
-            num_restarts=10,
-            raw_samples=512,
-            options=options,
-            sequential=True,
-            **kwargs,
+    # ===== ここまで変更なし =====
+
+    # train_x = normalize(train_x, bounds=bounds)
+    # if pending_x is not None:
+    #     pending_x = normalize(pending_x, bounds=bounds)
+    #
+    # model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=train_y.size(-1)))
+    # mll = ExactMarginalLogLikelihood(model.likelihood, model)
+    # fit_gpytorch_mll(mll)
+
+    model = setup_gp(train_x, train_y, bounds, observation_noise)
+
+    ACQF = acqf_patch_factory(
+            qExpectedImprovement,
+            is_log_acqf=False,
         )
+    acqf = ACQF(
+        model=model,
+        best_f=best_f,
+        sampler=_get_sobol_qmc_normal_sampler(256),
+        X_pending=pending_x,
+        **additonal_qei_kwargs,
+    )
+    acqf.set(model_c, pof_config)
+
+    candidates = _optimize_acqf_util(
+        partial_optimize_acqf_kwargs,
+        botorch_nlc,
+        acqf,
+        bounds,
+        original_options={"batch_limit": 5, "maxiter": 200},
+        original_q=1,
+        original_num_restarts=10,
+        original_raw_samples=512,
+    )
+
+    return candidates.detach(), model
+
+
+@experimental_func("2.4.0")
+def qehvi_candidates_func(
+    train_x: torch.Tensor,
+    train_obj: torch.Tensor,
+    train_con: torch.Tensor | None,
+    bounds: torch.Tensor,
+    pending_x: torch.Tensor | None,
+    model_c: SingleTaskGP,
+    botorch_nlc: NonlinearInequalityConstraints | None,
+    pof_config: 'PoFConfig',
+    observation_noise: str | float | None,
+    partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig,
+) -> tuple[torch.Tensor, SingleTaskGP]:
+    """Quasi MC-based batch Expected Hypervolume Improvement (qEHVI).
+
+    The default value of ``candidates_func`` in :class:`~optuna_integration.BoTorchSampler`
+    with multi-objective optimization when the number of objectives is three or less.
+
+    .. seealso::
+        :func:`~optuna_integration.botorch.qei_candidates_func` for argument and return value
+        descriptions.
+    """
+
+    # ===== ここから変更なし =====
+    n_objectives = train_obj.size(-1)
+
+    if train_con is not None:
+        train_y = torch.cat([train_obj, train_con], dim=-1)
+
+        is_feas = (train_con <= 0).all(dim=-1)
+        train_obj_feas = train_obj[is_feas]
+
+        n_constraints = train_con.size(1)
+        additional_qehvi_kwargs = {
+            "objective": IdentityMCMultiOutputObjective(outcomes=list(range(n_objectives))),
+            "constraints": _get_constraint_funcs(n_constraints),
+        }
+    else:
+        train_y = train_obj
+
+        train_obj_feas = train_obj
+
+        additional_qehvi_kwargs = {}
+    # ===== ここまで変更なし =====
+
+    model = setup_gp(train_x, train_y, bounds, observation_noise)
+
+    # Approximate box decomposition similar to Ax when the number of objectives is large.
+    # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
+    if n_objectives > 4:
+        alpha = 10 ** (-8 + n_objectives)
+    else:
+        alpha = 0.0
+
+    ref_point = train_obj.min(dim=0).values - 1e-8
+
+    partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_obj_feas, alpha=alpha)
+
+    ref_point_list = ref_point.tolist()
+
+    ACQF = acqf_patch_factory(
+        monte_carlo.qExpectedHypervolumeImprovement,
+        is_log_acqf=False,
+    )
+    acqf = ACQF(
+        model=model,
+        ref_point=ref_point_list,
+        partitioning=partitioning,
+        sampler=_get_sobol_qmc_normal_sampler(256),
+        X_pending=pending_x,
+        **additional_qehvi_kwargs,
+    )
+    acqf.set(model_c, pof_config)
+
+    candidates = _optimize_acqf_util(
+        partial_optimize_acqf_kwargs,
+        botorch_nlc,
+        acqf,
+        bounds,
+        original_options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
+        original_q=1,
+        original_num_restarts=20,
+        original_raw_samples=1024,
+    )
+
+    return candidates.detach(), model
+
+
+@experimental_func("3.5.0")
+def ehvi_candidates_func(
+    train_x: torch.Tensor,
+    train_obj: torch.Tensor,
+    train_con: torch.Tensor | None,
+    bounds: torch.Tensor,
+    pending_x: torch.Tensor | None,
+    model_c: SingleTaskGP,
+    botorch_nlc: NonlinearInequalityConstraints | None,
+    pof_config: 'PoFConfig',
+    observation_noise: str | float | None,
+    partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig,
+) -> tuple[torch.Tensor, SingleTaskGP]:
+    """Expected Hypervolume Improvement (EHVI).
+
+    The default value of ``candidates_func`` in :class:`~optuna_integration.BoTorchSampler`
+    with multi-objective optimization without constraints.
+
+    .. seealso::
+        :func:`~optuna_integration.botorch.qei_candidates_func` for argument and return value
+        descriptions.
+    """
+
+    # ===== ここから変更なし =====
+    n_objectives = train_obj.size(-1)
+    if train_con is not None:
+        raise ValueError("Constraints are not supported with ehvi_candidates_func.")
+
+    train_y = train_obj
+    # ===== ここまで変更なし =====
+
+    # インスペクション避け
+    # noinspection PyUnusedLocal
+    pending_x = pending_x
+
+    model = setup_gp(train_x, train_y, bounds, observation_noise)
+
+    # Approximate box decomposition similar to Ax when the number of objectives is large.
+    # https://github.com/pytorch/botorch/blob/36d09a4297c2a0ff385077b7fcdd5a9d308e40cc/botorch/acquisition/multi_objective/utils.py#L46-L63
+    if n_objectives > 4:
+        alpha = 10 ** (-8 + n_objectives)
+    else:
+        alpha = 0.0
+
+    ref_point = train_obj.min(dim=0).values - 1e-8
+
+    partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_y, alpha=alpha)
+
+    ref_point_list = ref_point.tolist()
+
+    ACQF = acqf_patch_factory(
+        ExpectedHypervolumeImprovement,
+        is_log_acqf=False,
+    )
+    acqf = ACQF(
+        model=model,
+        ref_point=ref_point_list,
+        partitioning=partitioning,
+    )
+    acqf.set(model_c, pof_config)
+
+    candidates = _optimize_acqf_util(
+        partial_optimize_acqf_kwargs,
+        botorch_nlc,
+        acqf,
+        bounds,
+        original_options={"batch_limit": 5, "maxiter": 200},
+        original_q=1,
+        original_num_restarts=20,
+        original_raw_samples=1024,
+    )
+
+    return candidates.detach(), model
+
+
+@experimental_func("2.4.0")
+def qparego_candidates_func(
+    train_x: torch.Tensor,
+    train_obj: torch.Tensor,
+    train_con: torch.Tensor | None,
+    bounds: torch.Tensor,
+    pending_x: torch.Tensor | None,
+    model_c: SingleTaskGP,
+    botorch_nlc: NonlinearInequalityConstraints | None,
+    pof_config: 'PoFConfig',
+    observation_noise: str | float | None,
+    partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig,
+) -> tuple[torch.Tensor, SingleTaskGP]:
+    """Quasi MC-based extended ParEGO (qParEGO) for constrained multi-objective optimization.
+
+    The default value of ``candidates_func`` in :class:`~optuna_integration.BoTorchSampler`
+    with multi-objective optimization when the number of objectives is larger than three.
+
+    .. seealso::
+        :func:`~optuna_integration.botorch.qei_candidates_func` for argument and return value
+        descriptions.
+    """
+
+    # ===== ここから変更なし =====
+    n_objectives = train_obj.size(-1)
+
+    weights = sample_simplex(n_objectives).squeeze()
+    scalarization = get_chebyshev_scalarization(weights=weights, Y=train_obj)
+
+    if train_con is not None:
+        _validate_botorch_version_for_constrained_opt("qparego_candidates_func")
+        train_y = torch.cat([train_obj, train_con], dim=-1)
+        n_constraints = train_con.size(1)
+        # なぜかここの lambda がちゃんと文法解析できないので inspection を無視
+        # noinspection PyArgumentList
+        objective = GenericMCObjective(lambda Z, X: scalarization(Z[..., :n_objectives]))
+        additional_qei_kwargs = {
+            "constraints": _get_constraint_funcs(n_constraints),
+        }
+    else:
+        train_y = train_obj
+
+        objective = GenericMCObjective(scalarization)
+        additional_qei_kwargs = {}
+    # ===== ここまで変更なし =====
+
+    model = setup_gp(train_x, train_y, bounds, observation_noise)
+
+    ACQF = acqf_patch_factory(
+        qExpectedImprovement,
+        is_log_acqf=False,
+    )
+    acqf = ACQF(
+        model=model,
+        best_f=objective(train_y).max(),
+        sampler=_get_sobol_qmc_normal_sampler(256),
+        objective=objective,
+        X_pending=pending_x,
+        **additional_qei_kwargs,
+    )
+    acqf.set(model_c, pof_config)
+
+    candidates = _optimize_acqf_util(
+        partial_optimize_acqf_kwargs,
+        botorch_nlc,
+        acqf,
+        bounds,
+        original_options={"batch_limit": 5, "maxiter": 200},
+        original_q=1,
+        original_num_restarts=20,
+        original_raw_samples=1024,
+    )
 
     return candidates.detach(), model
 
@@ -370,17 +761,13 @@ def _get_default_candidates_func(
         consider_running_trials: bool,
 ) -> CandidateFunc:
     if n_objectives > 3 and not has_constraint and not consider_running_trials:
-        raise NotImplementedError
-        # return ehvi_candidates_func
+        return ehvi_candidates_func
     elif n_objectives > 3:
-        raise NotImplementedError
-        # return qparego_candidates_func
+        return qparego_candidates_func
     elif n_objectives > 1:
-        raise NotImplementedError
-        # return qehvi_candidates_func
+        return qehvi_candidates_func
     elif consider_running_trials:
-        raise NotImplementedError
-        # return qei_candidates_func
+        return qei_candidates_func
     else:
         return logei_candidates_func
 
@@ -627,9 +1014,9 @@ class PoFBoTorchSampler(BoTorchSampler):
         trial: FrozenTrial,
         search_space: dict[str, BaseDistribution],
     ) -> dict[str, Any]:
-        
+
         assert hasattr(self, 'pyfemtet_optimizer')
-        
+
         # ===== ここから変更なし =====
 
         assert isinstance(search_space, dict)
