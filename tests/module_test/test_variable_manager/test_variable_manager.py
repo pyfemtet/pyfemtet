@@ -50,7 +50,7 @@ def test_VariableManager():
     b = NumericVariable(); b.name = 'b'; b.value = 2.
     c = CategoricalVariable(); c.name = 'c'; c.value = 'cat'
 
-    d = NumericExpressionFromFunction()
+    d = ExpressionFromFunction()
     d.name = 'd'
     d.fun = d_fun
     d.args = (3, 4, 5)
