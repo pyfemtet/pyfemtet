@@ -99,6 +99,8 @@ class SolidworksInterface(COMInterface):
         # sw はプロセスが一つなので Lock
         with Lock(self._access_sw_lock_name):
 
+            sleep(0.2)
+
             # ===== model を取得 =====
             swModel = self.swModel
 
@@ -135,6 +137,8 @@ class SolidworksInterface(COMInterface):
 
         # sw はプロセスが一つなので Lock
         with Lock(self._access_sw_lock_name):
+
+            sleep(0.2)
 
             # ===== model を取得 =====
             swModel = self.swModel
