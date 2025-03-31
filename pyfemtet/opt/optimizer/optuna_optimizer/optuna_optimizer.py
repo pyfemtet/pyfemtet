@@ -68,8 +68,9 @@ class OptunaOptimizer(AbstractOptimizer):
         try:
             AbstractOptimizer._check_and_raise_interruption(self)
         except InterruptOptimization as e:
-            if self.current_trial is not None:
-                self.current_trial.study.stop()
+            if hasattr(self, 'current_trial'):
+                if self.current_trial is not None:
+                    self.current_trial.study.stop()
             raise e
 
     def solve(

@@ -250,7 +250,7 @@ class AbstractOptimizer:
 
     def _check_and_raise_interruption(self) -> ...:
         # raise Interrupt
-        interrupted = self.entire_status.value == WorkerStatus.interrupting
+        interrupted = self.entire_status.value >= WorkerStatus.interrupting
         if interrupted:
             self.worker_status.value = WorkerStatus.interrupting
             raise InterruptOptimization
