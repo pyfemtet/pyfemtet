@@ -1,4 +1,3 @@
-import os
 from contextlib import closing
 
 import numpy as np
@@ -92,6 +91,7 @@ def test_run_multiple_excel():
         fem.update_parameter(dict(x=.7, y=.7, z=.7))
         fem.update()
 
+        print([obj.eval(fem) for obj in opt.objectives.values()])
         assert np.allclose(
             [obj.eval(fem) for obj in opt.objectives.values()],
             [2.1, 2.1],
@@ -100,5 +100,5 @@ def test_run_multiple_excel():
 
 
 if __name__ == '__main__':
-    # test_load_single_excel()
+    test_load_single_excel()
     test_run_multiple_excel()

@@ -73,7 +73,7 @@ class SolidworksInterface(COMInterface):
 
         # rename and get worker path
         self.sldprt_path = self._rename_and_get_path_on_worker_space(
-            self.sldprt_path,
+            self._original_sldprt_path,
             suffix,
         )
 

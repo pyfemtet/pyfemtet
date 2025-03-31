@@ -40,6 +40,7 @@ class _NXInterface(AbstractFEMInterface):
 
         self.prt_path = os.path.abspath(prt_path)
         assert os.path.isfile(self.prt_path)
+        self._prt_path = self.prt_path
         self.export_curves = export_curves
         self.export_surfaces = export_surfaces
         self.export_solids = export_solids
@@ -54,7 +55,7 @@ class _NXInterface(AbstractFEMInterface):
 
         # rename and get worker path
         self.prt_path = self._rename_and_get_path_on_worker_space(
-            self.prt_path,
+            self._prt_path,
             suffix,
         )
 

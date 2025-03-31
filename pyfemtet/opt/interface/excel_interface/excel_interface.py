@@ -27,7 +27,7 @@ from pyfemtet._i18n import Msg
 
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.variable_manager import SupportedVariableTypes
-from pyfemtet.opt.interface.interface import AbstractFEMInterface
+from pyfemtet.opt.interface.interface import COMInterface
 
 from pyfemtet.logger import get_module_logger
 from v1.utils.helper import float_
@@ -39,8 +39,15 @@ if TYPE_CHECKING:
 logger = get_module_logger('opt.interface')
 
 
-class ExcelInterface(AbstractFEMInterface):
-    # noinspection PyUnresolvedReferences
+class WorkbookNotOpenedError(Exception):
+    pass
+
+
+class WorkSheetNotFoundError(Exception):
+    pass
+
+
+class ExcelInterface(COMInterface):
     """Excel を計算コアとして利用するためのクラス。
 
         通常の有限要素法を Excel に
@@ -174,18 +181,6 @@ class ExcelInterface(AbstractFEMInterface):
             excel (CDispatch):
                 Excel の COM オブジェクト。
 
-            input_sheet (CDispatch):
-                設計変数を含むシートの COM オブジェクト。
-
-            output_sheet (CDispatch):
-                目的関数を含むシートの COM オブジェクト。
-
-            input_workbook (CDispatch):
-                設計変数を含む xlsm ファイルの COM オブジェクト。
-
-            output_workbook (CDispatch):
-                設計変数を含む xlsm ファイルの COM オブジェクト。
-
         """
 
     input_xlsm_path: str  # 操作対象の xlsm パス
@@ -221,6 +216,7 @@ class ExcelInterface(AbstractFEMInterface):
     _excel_hwnd: int
     _with_femtet_autosave_setting: bool = True  # Femtet の自動保存機能の自動設定を行うかどうか。Femtet がインストールされていない場合はオフにする。クラス変数なので、インスタンス化前に設定する。
     _femtet_autosave_buffer: bool  # Femtet の自動保存機能の一時退避場所。最適化中はオフにする。
+    com_members = {'excel': 'Excel.Application'}
 
     setup_xlsm_path: str
     setup_procedure_name: str
@@ -262,15 +258,37 @@ class ExcelInterface(AbstractFEMInterface):
 
         show_experimental_warning("ExcelInterface")
 
+        def proc_path(path_):
+            if path_ is None:
+                return self._original_input_xlsm_path
+            else:
+                ret_ = os.path.abspath(path_)
+                assert os.path.isfile(ret_), f'{ret_} が見つかりません。'
+                return os.path.abspath(path_)
+
         # 初期化
-        self.input_xlsm_path = str(input_xlsm_path)
-        assert os.path.isfile(self.input_xlsm_path)
+        self._original_input_xlsm_path = os.path.abspath(str(input_xlsm_path))
+        assert os.path.isfile(self._original_input_xlsm_path), f'{self._original_input_xlsm_path} が見つかりません。'
+        self._original_output_xlsm_path = proc_path(output_xlsm_path)
+        self._original_constraint_xlsm_path = proc_path(constraint_xlsm_path)
+        self._original_procedure_xlsm_path = proc_path(procedure_xlsm_path)
+        self._original_setup_xlsm_path = proc_path(setup_xlsm_path)
+        self._original_teardown_xlsm_path = proc_path(teardown_xlsm_path)
+        self._original_related_file_paths = \
+            [proc_path(p) for p in related_file_paths] \
+            if related_file_paths is not None else []
+
+        self.input_xlsm_path = self._original_input_xlsm_path
+        self.output_xlsm_path = self._original_output_xlsm_path
+        self.constraint_xlsm_path = self._original_constraint_xlsm_path
+        self.procedure_xlsm_path = self._original_procedure_xlsm_path
+        self.setup_xlsm_path = self._original_setup_xlsm_path
+        self.teardown_xlsm_path = self._original_teardown_xlsm_path
+        self.related_file_paths = self._original_related_file_paths
+
         self.input_sheet_name = input_sheet_name
-        self.output_xlsm_path = str(input_xlsm_path) if output_xlsm_path is None else str(output_xlsm_path)
         self.output_sheet_name = output_sheet_name if output_sheet_name is not None else input_sheet_name
-        self.constraint_xlsm_path = str(input_xlsm_path) if constraint_xlsm_path is None else str(constraint_xlsm_path)
         self.constraint_sheet_name = constraint_sheet_name or self.input_sheet_name
-        self.procedure_xlsm_path = str(input_xlsm_path) if procedure_xlsm_path is None else str(procedure_xlsm_path)
         self.procedure_name = procedure_name
         self.procedure_args = procedure_args or []
         assert connect_method in ['new', 'auto']
@@ -281,15 +299,11 @@ class ExcelInterface(AbstractFEMInterface):
         else:
             self.terminate_excel_when_quit = terminate_excel_when_quit
 
-        self.setup_xlsm_path = str(input_xlsm_path) if setup_xlsm_path is None else str(setup_xlsm_path)
         self.setup_procedure_name = setup_procedure_name
         self.setup_procedure_args = setup_procedure_args or []
 
-        self.teardown_xlsm_path = str(input_xlsm_path) if teardown_xlsm_path is None else str(teardown_xlsm_path)
         self.teardown_procedure_name = teardown_procedure_name
         self.teardown_procedure_args = teardown_procedure_args or []
-
-        self.related_file_paths = [str(p) for p in related_file_paths] if related_file_paths is not None else []
 
         self.visible = visible
         self.interactive = interactive
@@ -297,27 +311,28 @@ class ExcelInterface(AbstractFEMInterface):
 
         self.use_named_range = use_named_range
 
+    # ===== setup =====
     def _setup_before_parallel(self) -> None:
         # メインプロセスで、並列プロセスを開始する前に行う前処理
 
-        related_files = [self.input_xlsm_path]
+        related_files = [self._original_input_xlsm_path]
 
-        if not _is_same_path(self.input_xlsm_path, self.output_xlsm_path):
-            related_files.append(self.output_xlsm_path)
+        if not _is_same_path(self._original_input_xlsm_path, self._original_output_xlsm_path):
+            related_files.append(self._original_output_xlsm_path)
 
-        if not _is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
-            related_files.append(self.constraint_xlsm_path)
+        if not _is_same_path(self._original_input_xlsm_path, self._original_constraint_xlsm_path):
+            related_files.append(self._original_constraint_xlsm_path)
 
-        if not _is_same_path(self.input_xlsm_path, self.procedure_xlsm_path):
-            related_files.append(self.procedure_xlsm_path)
+        if not _is_same_path(self._original_input_xlsm_path, self._original_procedure_xlsm_path):
+            related_files.append(self._original_procedure_xlsm_path)
 
-        if not _is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
-            related_files.append(self.setup_xlsm_path)
+        if not _is_same_path(self._original_input_xlsm_path, self._original_setup_xlsm_path):
+            related_files.append(self._original_setup_xlsm_path)
 
-        if not _is_same_path(self.input_xlsm_path, self.teardown_xlsm_path):
-            related_files.append(self.teardown_xlsm_path)
+        if not _is_same_path(self._original_input_xlsm_path, self._original_teardown_xlsm_path):
+            related_files.append(self._original_teardown_xlsm_path)
 
-        related_files.extend(self.related_file_paths)
+        related_files.extend(self._original_related_file_paths)
 
         # dask worker 向け
         self._distribute_files(related_files)
@@ -331,12 +346,18 @@ class ExcelInterface(AbstractFEMInterface):
         #   output 等 == inputの場合、
         #   最初に input を rename しているので
         #   すでに rename されている
-        self.input_xlsm_path = self._rename_and_get_path_on_worker_space(self.input_xlsm_path, suffix, False)
-        self.output_xlsm_path = self._rename_and_get_path_on_worker_space(self.output_xlsm_path, suffix, True)
-        self.constraint_xlsm_path = self._rename_and_get_path_on_worker_space(self.constraint_xlsm_path, suffix, True)
-        self.procedure_xlsm_path = self._rename_and_get_path_on_worker_space(self.procedure_xlsm_path, suffix, True)
-        self.setup_xlsm_path = self._rename_and_get_path_on_worker_space(self.setup_xlsm_path, suffix, True)
-        self.teardown_xlsm_path = self._rename_and_get_path_on_worker_space(self.teardown_xlsm_path, suffix, True)
+        self.input_xlsm_path = self._rename_and_get_path_on_worker_space(
+            self._original_input_xlsm_path, suffix)
+        self.output_xlsm_path = self._rename_and_get_path_on_worker_space(
+            self._original_output_xlsm_path, suffix, True)
+        self.constraint_xlsm_path = self._rename_and_get_path_on_worker_space(
+            self._original_constraint_xlsm_path, suffix, True)
+        self.procedure_xlsm_path = self._rename_and_get_path_on_worker_space(
+            self._original_procedure_xlsm_path, suffix, True)
+        self.setup_xlsm_path = self._rename_and_get_path_on_worker_space(
+            self._original_setup_xlsm_path, suffix, True)
+        self.teardown_xlsm_path = self._rename_and_get_path_on_worker_space(
+            self._original_teardown_xlsm_path, suffix, True)
 
     def _setup_after_parallel(self, opt: AbstractOptimizer):
         """サブプロセス又はメインプロセスのサブスレッドで、最適化を開始する前の前処理"""
@@ -373,9 +394,13 @@ class ExcelInterface(AbstractFEMInterface):
 
         # excel の setup 関数を必要なら実行する
         if self.setup_procedure_name is not None:
+
+            logger.info(f'setup プロシージャ {self.setup_procedure_name} を実行中...')
+
             with Lock('excel_setup_procedure'):
                 try:
                     self.wb_setup.Activate()
+                    sleep(0.1)
                     with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
                         self.excel.Run(
                             f'{self.setup_procedure_name}',
@@ -393,10 +418,12 @@ class ExcelInterface(AbstractFEMInterface):
 
         # ===== 新しい excel instance を起動 =====
         # 起動
+        logger.info('Excel を起動・接続しています...')
         if connect_method == 'auto':
             self.excel = Dispatch('Excel.Application')
         else:
             self.excel = DispatchEx('Excel.Application')
+        logger.info('Excel を起動・接続しました。')
 
         # FemtetRef.xla を開く
         self.open_femtet_ref_xla()
@@ -415,105 +442,19 @@ class ExcelInterface(AbstractFEMInterface):
         self.excel.Interactive = self.interactive
         sleep(0.5)
 
-        # ===== input =====
-        # 開く
-        self.excel.Workbooks.Open(str(self.input_xlsm_path))
-        for wb in self.excel.Workbooks:
-            if wb.Name == os.path.basename(self.input_xlsm_path):
-                self.wb_input = wb
-                break
-        else:
-            raise RuntimeError(f'Cannot open {self.input_xlsm_path}')
-
-        # シートを特定する
-        for sh in self.wb_input.WorkSheets:
-            if sh.Name == self.input_sheet_name:
-                self.sh_input = sh
-                break
-        else:
-            raise RuntimeError(f'Sheet {self.input_sheet_name} does not exist in the book {self.wb_input.Name}.')
-
-        # ===== output =====
-        # 開く (output)
-        if _is_same_path(self.input_xlsm_path, self.output_xlsm_path):
-            self.wb_output = self.wb_input
-        else:
-            self.excel.Workbooks.Open(str(self.output_xlsm_path))
-            for wb in self.excel.Workbooks:
-                if wb.Name == os.path.basename(self.output_xlsm_path):
-                    self.wb_output = wb
-                    break
-            else:
-                raise RuntimeError(f'Cannot open {self.output_xlsm_path}')
-
-        # シートを特定する (output)
-        for sh in self.wb_output.WorkSheets:
-            if sh.Name == self.output_sheet_name:
-                self.sh_output = sh
-                break
-        else:
-            raise RuntimeError(f'Sheet {self.output_sheet_name} does not exist in the book {self.wb_output.Name}.')
-
-        # ===== constraint =====
-        # 開く (constraint)
-        if _is_same_path(self.input_xlsm_path, self.constraint_xlsm_path):
-            self.wb_constraint = self.wb_input
-        else:
-            self.excel.Workbooks.Open(str(self.constraint_xlsm_path))
-            for wb in self.excel.Workbooks:
-                if wb.Name == os.path.basename(self.constraint_xlsm_path):
-                    self.wb_constraint = wb
-                    break
-            else:
-                raise RuntimeError(f'Cannot open {self.constraint_xlsm_path}')
-
-        # シートを特定する (constraint)
-        for sh in self.wb_constraint.WorkSheets:
-            if sh.Name == self.constraint_sheet_name:
-                self.sh_constraint = sh
-                break
-        else:
-            raise RuntimeError(
-                f'Sheet {self.constraint_sheet_name} does not exist in the book {self.wb_constraint.Name}.')
-
-        # ===== procedure =====
-        # 開く (procedure)
-        if _is_same_path(self.input_xlsm_path, self.procedure_xlsm_path):
-            self.wb_procedure = self.wb_input
-        else:
-            self.excel.Workbooks.Open(self.procedure_xlsm_path)
-            for wb in self.excel.Workbooks:
-                if wb.Name == os.path.basename(self.procedure_xlsm_path):
-                    self.wb_procedure = wb
-                    break
-            else:
-                raise RuntimeError(f'Cannot open {self.setup_xlsm_path}')
-
-        # ===== setup =====
-        # 開く (setup)
-        if _is_same_path(self.input_xlsm_path, self.setup_xlsm_path):
-            self.wb_setup = self.wb_input
-        else:
-            self.excel.Workbooks.Open(self.setup_xlsm_path)
-            for wb in self.excel.Workbooks:
-                if wb.Name == os.path.basename(self.setup_xlsm_path):
-                    self.wb_setup = wb
-                    break
-            else:
-                raise RuntimeError(f'Cannot open {self.setup_xlsm_path}')
-
-        # ===== teardown =====
-        # 開く (teardown)
-        if _is_same_path(self.input_xlsm_path, self.teardown_xlsm_path):
-            self.wb_teardown = self.wb_input
-        else:
-            self.excel.Workbooks.Open(self.teardown_xlsm_path)
-            for wb in self.excel.Workbooks:
-                if wb.Name == os.path.basename(self.teardown_xlsm_path):
-                    self.wb_teardown = wb
-                    break
-            else:
-                raise RuntimeError(f'Cannot open {self.teardown_xlsm_path}')
+        # open
+        self.excel.Workbooks.Open(self.input_xlsm_path)
+        sleep(0.1)
+        self.excel.Workbooks.Open(self.output_xlsm_path)
+        sleep(0.1)
+        self.excel.Workbooks.Open(self.constraint_xlsm_path)
+        sleep(0.1)
+        self.excel.Workbooks.Open(self.procedure_xlsm_path)
+        sleep(0.1)
+        self.excel.Workbooks.Open(self.setup_xlsm_path)
+        sleep(0.1)
+        self.excel.Workbooks.Open(self.teardown_xlsm_path)
+        sleep(0.1)
 
         # book に参照設定を追加する
         self.add_femtet_macro_reference(self.wb_input)
@@ -561,170 +502,7 @@ class ExcelInterface(AbstractFEMInterface):
                 if ref.Description == 'FemtetMacro':  # FemtetMacro
                     wb.VBProject.References.Remove(ref)
 
-    def update_parameter(self, x: SupportedVariableTypes) -> None:
-
-        AbstractFEMInterface.update_parameter(self, x)
-
-        # excel シートの変数更新
-        if self.use_named_range:
-            for key, value in self.current_prm_values.items():
-                try:
-                    self.sh_input.Range(key).value = value
-                except com_error:
-                    logger.warning('The cell address specification by named range is failed. '
-                                   'The process changes the specification way to table based method.')
-                    self.use_named_range = False
-                    break
-
-        if not self.use_named_range:  # else にしないこと
-            for name, value in self.current_prm_values.items():
-                r = 1 + search_r(self.input_xlsm_path, self.input_sheet_name, name)
-                c = 1 + search_c(self.input_xlsm_path, self.input_sheet_name, ParseAsParameter.value)
-                self.sh_input.Cells(r, c).value = value
-
-        # 再計算
-        self.excel.CalculateFull()
-
-    def update(self) -> None:
-
-        if self.procedure_name is None:
-            return
-
-        # マクロ実行
-        try:
-            self.wb_procedure.Activate()
-            with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
-                self.excel.Run(
-                    f'{self.procedure_name}',
-                    *self.procedure_args
-                )
-
-            # 再計算
-            self.excel.CalculateFull()
-
-        except com_error as e:
-            raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
-
-    def _close_workbooks(self):
-        # workbook を閉じる
-        with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
-            self.wb_input.Close(_SaveChanges := False)
-
-        # 閉じられていれば Attribute にアクセスできない
-        def is_open(wb_):
-            try:
-                getattr(wb_, 'Name')
-            except com_error:
-                return False
-            else:
-                return True
-
-        if is_open(self.wb_output):
-            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
-                self.wb_output.Close(_SaveChanges := False)
-
-        if is_open(self.wb_constraint):
-            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
-                self.wb_constraint.Close(_SaveChanges := False)
-
-        if is_open(self.wb_procedure):
-            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
-                self.wb_procedure.Close(_SaveChanges := False)
-
-        if is_open(self.wb_setup):
-            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
-                self.wb_setup.Close(_SaveChanges := False)
-
-        if is_open(self.wb_teardown):
-            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
-                self.wb_teardown.Close(_SaveChanges := False)
-
-    def close(self):
-
-        # 無駄に不具合に遭う可能性があるので
-        # 参照設定は解除しない
-
-        # 終了処理を必要なら実施する
-        if self.teardown_procedure_name is not None:
-
-            logger.info(f'teardown プロシージャ {self.teardown_procedure_name} を実行中...')
-
-            with Lock('excel_teardown_procedure'):
-                try:
-                    self.wb_teardown.Activate()
-                    with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
-                        self.excel.Run(
-                            f'{self.teardown_procedure_name}',
-                            *self.teardown_procedure_args
-                        )
-
-                    # 再計算
-                    self.excel.CalculateFull()
-
-                except com_error as e:
-                    raise RuntimeError(
-                        f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
-
-        # excel プロセスを終了する
-        if self.terminate_excel_when_quit:
-
-            logger.info(Msg.INFO_TERMINATING_EXCEL)
-
-            already_terminated = not hasattr(self, 'excel')
-            if already_terminated:
-                return
-
-            # ワークブックを閉じる前に
-            # シートの COM オブジェクト変数を削除する
-            del self.sh_input
-            del self.sh_output
-            del self.sh_constraint
-
-            # ワークブックを閉じる
-            self._close_workbooks()
-
-            # 参照を削除
-            del self.wb_input
-            del self.wb_output
-            del self.wb_constraint
-            del self.wb_procedure
-            del self.wb_setup
-            del self.wb_teardown
-
-            # excel の終了
-            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
-                self.excel.Quit()
-            del self.excel
-
-            # ここで Excel のプロセスが残らず落ちる
-            gc.collect()
-            logger.info(Msg.INFO_TERMINATED_EXCEL)
-
-            if self._with_femtet_autosave_setting:
-                logger.info(Msg.INFO_RESTORING_FEMTET_AUTOSAVE)
-                _set_autosave_enabled(self._femtet_autosave_buffer)
-
-        # そうでない場合でもブックは閉じる
-        else:
-            self._close_workbooks()
-
-    # 直接アクセスしてもよいが、ユーザーに易しい名前にするためだけのプロパティ
-    @property
-    def output_sheet(self) -> CDispatch:
-        return self.sh_output
-
-    @property
-    def input_sheet(self) -> CDispatch:
-        return self.sh_input
-
-    @property
-    def output_workbook(self) -> CDispatch:
-        return self.wb_output
-
-    @property
-    def input_workbook(self) -> CDispatch:
-        return self.wb_input
-
+    # ===== load =====
     def load_variables(self, opt: AbstractOptimizer, raise_if_no_keyword=True) -> None:
 
         df = ParseAsParameter.parse(
@@ -911,6 +689,185 @@ class ExcelInterface(AbstractFEMInterface):
         c = 1 + search_c(self.constraint_xlsm_path, self.constraint_sheet_name, ParseAsConstraint.value)
         v = self.sh_constraint.Cells(r, c).value
         return float(v)
+
+    # ===== Workbook and WorkSheet =====
+    # unpicklable object を excel だけにするため
+    # これらのオブジェクトは動的に取得
+    def _get_wb(self, path) -> CDispatch:
+        for wb in self.excel.Workbooks:
+            if wb.Name == os.path.basename(path):
+                return wb
+        else:
+            raise WorkbookNotOpenedError(f'{path} is not opened.')
+
+    @staticmethod
+    def _get_sh(wb: CDispatch, name) -> CDispatch:
+        for sh in wb.WorkSheets:
+            if sh.Name == name:
+                return sh
+        else:
+            raise WorkSheetNotFoundError(f'Sheet {name} does not exist in the book {wb.Name}.')
+
+    @property
+    def wb_input(self) -> CDispatch:
+        return self._get_wb(self.input_xlsm_path)
+
+    @property
+    def sh_input(self) -> CDispatch:
+        return self._get_sh(self.wb_input, self.input_sheet_name)
+
+    @property
+    def wb_output(self) -> CDispatch:
+        return self._get_wb(self.output_xlsm_path)
+
+    @property
+    def sh_output(self) -> CDispatch:
+        return self._get_sh(self.wb_output, self.output_sheet_name)
+
+    @property
+    def wb_constraint(self) -> CDispatch:
+        return self._get_wb(self.constraint_xlsm_path)
+
+    @property
+    def sh_constraint(self) -> CDispatch:
+        return self._get_sh(self.wb_constraint, self.constraint_sheet_name)
+
+    @property
+    def wb_procedure(self) -> CDispatch:
+        return self._get_wb(self.procedure_xlsm_path)
+
+    @property
+    def wb_setup(self) -> CDispatch:
+        return self._get_wb(self.setup_xlsm_path)
+
+    @property
+    def wb_teardown(self) -> CDispatch:
+        return self._get_wb(self.teardown_xlsm_path)
+
+    # ===== update =====
+    def update_parameter(self, x: SupportedVariableTypes) -> None:
+
+        COMInterface.update_parameter(self, x)
+
+        # excel シートの変数更新
+        if self.use_named_range:
+            for key, value in self.current_prm_values.items():
+                try:
+                    self.sh_input.Range(key).value = value
+                except com_error:
+                    logger.warning('The cell address specification by named range is failed. '
+                                   'The process changes the specification way to table based method.')
+                    self.use_named_range = False
+                    break
+
+        if not self.use_named_range:  # else にしないこと
+            for name, value in self.current_prm_values.items():
+                r = 1 + search_r(self.input_xlsm_path, self.input_sheet_name, name)
+                c = 1 + search_c(self.input_xlsm_path, self.input_sheet_name, ParseAsParameter.value)
+                self.sh_input.Cells(r, c).value = value
+
+        # 再計算
+        self.excel.CalculateFull()
+
+    def update(self) -> None:
+
+        if self.procedure_name is None:
+            return
+
+        # マクロ実行
+        try:
+            self.wb_procedure.Activate()
+            sleep(0.1)
+            with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout):
+                self.excel.Run(
+                    f'{self.procedure_name}',
+                    *self.procedure_args
+                )
+
+            # 再計算
+            self.excel.CalculateFull()
+
+        except com_error as e:
+            raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
+
+    # ===== close =====
+    def _close_workbooks(self):
+        # workbook を閉じる
+        with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
+            self.wb_input.Close(_SaveChanges := False)
+
+        def close_wb_if_needed(attrib_name_):
+            try:
+                # self.wb_output などとすると
+                # 関数呼び出しの時点でエラーになる
+                wb = getattr(self, attrib_name_)
+            except WorkbookNotOpenedError:
+                pass
+            else:
+                with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
+                    wb.Close(False)
+
+        close_wb_if_needed('wb_output')
+        close_wb_if_needed('wb_constraint')
+        close_wb_if_needed('wb_procedure')
+        close_wb_if_needed('wb_setup')
+        close_wb_if_needed('wb_teardown')
+
+    def close(self):
+
+        # 無駄に不具合に遭う可能性があるので
+        # 参照設定は解除しない
+
+        # 終了処理を必要なら実施する
+        if self.teardown_procedure_name is not None:
+
+            logger.info(f'teardown プロシージャ {self.teardown_procedure_name} を実行中...')
+
+            with Lock('excel_teardown_procedure'):
+                try:
+                    self.wb_teardown.Activate()
+                    sleep(0.1)
+                    with watch_excel_macro_error(self.excel, timeout=self.procedure_timeout, restore_book=False):
+                        self.excel.Run(
+                            f'{self.teardown_procedure_name}',
+                            *self.teardown_procedure_args
+                        )
+
+                    # 再計算
+                    self.excel.CalculateFull()
+
+                except com_error as e:
+                    raise RuntimeError(
+                        f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
+
+        # excel プロセスを終了する
+        if self.terminate_excel_when_quit:
+
+            logger.info(Msg.INFO_TERMINATING_EXCEL)
+
+            already_terminated = not hasattr(self, 'excel')
+            if already_terminated:
+                return
+
+            # ワークブックを閉じる
+            self._close_workbooks()
+
+            # excel の終了
+            with watch_excel_macro_error(self.excel, timeout=10, restore_book=False):
+                self.excel.Quit()
+            del self.excel
+
+            # ここで Excel のプロセスが残らず落ちる
+            gc.collect()
+            logger.info(Msg.INFO_TERMINATED_EXCEL)
+
+            if self._with_femtet_autosave_setting:
+                logger.info(Msg.INFO_RESTORING_FEMTET_AUTOSAVE)
+                _set_autosave_enabled(self._femtet_autosave_buffer)
+
+        # そうでない場合でもブックは閉じる
+        else:
+            self._close_workbooks()
 
 
 # main thread で作成した excel への参照を含む関数を

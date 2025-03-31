@@ -139,7 +139,7 @@ class FemtetInterface(COMInterface):
         self.model_name = model_name
         self.connect_method = connect_method
         self.allow_without_project = allow_without_project
-        self.original_femprj_path = self.femprj_path
+        self._original_femprj_path = self.femprj_path
         self.open_result_with_gui = open_result_with_gui
         self.save_pdt = save_pdt
 
@@ -183,7 +183,7 @@ class FemtetInterface(COMInterface):
 
         # worker space の femprj に切り替える
         suffix = self._get_worker_index_from_optimizer(opt)
-        self.femprj_path = self._rename_and_get_path_on_worker_space(self.femprj_path, suffix)
+        self.femprj_path = self._rename_and_get_path_on_worker_space(self._original_femprj_path, suffix)
 
         # dask process ならば Femtet を起動
         worker = get_worker()
@@ -872,7 +872,7 @@ class FemtetInterface(COMInterface):
             jpg_content = None
 
         out = dict(
-            original_femprj_path=self.original_femprj_path,
+            original_femprj_path=self._original_femprj_path,
             model_name=self.model_name,
             pdt_file_content=file_content,
             jpg_file_content=jpg_content,
@@ -957,6 +957,14 @@ class FemtetInterface(COMInterface):
             content = f.read()
 
         return content
+
+    # ===== others =====
+
+    def _get_additional_data(self) -> dict:
+        return dict(
+            femprj_path=self._original_femprj_path,
+            model_name=self.model_name,
+        )
 
     def _version(self):
         return _version(Femtet=self.Femtet)

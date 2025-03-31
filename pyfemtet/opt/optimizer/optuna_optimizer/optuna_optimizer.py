@@ -7,7 +7,7 @@ import tempfile
 import warnings
 import datetime
 from time import sleep
-from contextlib import closing, nullcontext
+from contextlib import nullcontext
 
 import numpy as np
 
@@ -22,6 +22,7 @@ from pyfemtet.opt.interface import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.variable_manager import *
 from pyfemtet._util.dask_util import *
+from pyfemtet._util.closing import closing
 from pyfemtet.logger import get_optuna_logger, remove_all_output, get_module_logger
 
 from pyfemtet.opt.optimizer.optimizer import *
