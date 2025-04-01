@@ -971,6 +971,8 @@ class History:
 
     path: str
 
+    MAIN_FILTER = MAIN_FILTER
+
     def __init__(self):
         self._records = Records()
         self.path: str | None = None

@@ -14,9 +14,10 @@ from pyfemtet.opt.exceptions import SolveError
 from tests import HyperSphere
 
 feasible_in_barrier = False
+explicit_constraint = False
 
 
-def objective(_, opt: OptunaOptimizer, hs: HyperSphere, b, explicit_constraint):
+def objective(_, opt: OptunaOptimizer, hs: HyperSphere, b):
     x: np.array = opt.get_variables('values')
     y = hs.calc(x)
 
@@ -25,7 +26,9 @@ def objective(_, opt: OptunaOptimizer, hs: HyperSphere, b, explicit_constraint):
         print('理論的な最小値: ', 1 - 1 / np.sqrt(hs.n))
     else:
         print('理論的な最小値: ', 0)
-    print('今の値: ', obj)
+    df = opt.history.get_df(equality_filters=opt.history.MAIN_FILTER)
+    obj_name = opt.history.obj_names[0]
+    print('今の最小値: ', min(obj, df[obj_name].dropna().min()))
 
     if not explicit_constraint:
         if feasible_in_barrier:
@@ -44,25 +47,34 @@ def barrier(_, opt: OptunaOptimizer, hs: HyperSphere):
     return np.sum(np.abs(y))
 
 
-def main(d=5, explicit_constraint=True):
+def core(
+        d=5,
+        seed=None,
+        observation_noise=None,
+        feasibility_noise=None,
+):
 
     hs = HyperSphere(d)
     b = np.array([1/np.sqrt(hs.n)] * hs.n)
 
     opt = OptunaOptimizer()
+    opt.history.path = f'{observation_noise=}_{feasibility_noise=}_{seed=}.csv'
     opt.sampler_class = PoFBoTorchSampler
     opt.sampler_kwargs = dict(
 
-        observation_noise='no',  # 'no' or None or specific value
+        # observation_noise='no',  # 'no' or None or specific value
         # observation_noise=None,  # 'no' or None or specific value
+        observation_noise=observation_noise,
 
         pof_config=PoFConfig(
             # feasibility_noise='no',
-            feasibility_noise=None,
+            # feasibility_noise=None,
+            feasibility_noise=feasibility_noise,
         ),
 
         partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
-
+            method='SLSQP',
+            # scipy_minimize_kwargs=dict(ftol=0.01, disp=False),
         ),
     )
 
@@ -71,7 +83,7 @@ def main(d=5, explicit_constraint=True):
         opt.add_parameter(f'x{i}', 0, 0, np.pi)
     opt.add_parameter(f'x{d-1}', 0, 0, 2*np.pi)
 
-    opt.add_objective('distance', objective, args=(opt, hs, b, explicit_constraint))
+    opt.add_objective('distance', objective, args=(opt, hs, b))
 
     if explicit_constraint:
         if feasible_in_barrier:
@@ -81,9 +93,21 @@ def main(d=5, explicit_constraint=True):
 
     opt.fem = NoFEM()
     opt.n_trials = 50
-    opt.seed = 42
+    opt.seed = seed
     opt.run()
 
 
+def main(o_noise, f_noise):
+    d = 5
+    core(d, 1, o_noise, f_noise, )
+    core(d, 2, o_noise, f_noise, )
+    core(d, 3, o_noise, f_noise, )
+    core(d, 4, o_noise, f_noise, )
+    core(d, 5, o_noise, f_noise, )
+
+
 if __name__ == '__main__':
-    main(5, False)
+    main(None, None)
+    main(None, 'no')
+    main('no', None)
+    main('no', 'no')
