@@ -1021,7 +1021,7 @@ class PoFBoTorchSampler(BoTorchSampler):
         train_y_c: torch.Tensor = torch.from_numpy(values).to(self._device)
         # yvar
         train_yvar_c, standardizer = setup_yvar_and_standardizer(
-            train_y_c, self.observation_noise
+            train_y_c, self.pof_config.feasibility_noise
         )
 
         # ===== model_c を作る =====
