@@ -171,7 +171,7 @@ class NonlinearInequalityConstraints:
             feasible_q_list = []
             for each_q in each_num_restarts:
                 x: np.ndarray = each_q.detach().numpy()  # normalized parameters
-                if _is_feasible(self.constraints, self.opt, self.trans, x, self.tol):
+                if _is_feasible(self.constraints, self.opt, self.trans, x, self.ce):
                     feasible_q_list.append(each_q)  # Keep only feasible rows
 
             if feasible_q_list:  # Only add if there are feasible rows
