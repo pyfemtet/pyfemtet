@@ -170,12 +170,13 @@ class Constraint(Function):
 
 class ConstraintResult:
 
-    def __init__(self, cns: Constraint, fem: AbstractFEMInterface, cns_value: float = None):
+    def __init__(self, cns: Constraint, fem: AbstractFEMInterface, cns_value: float = None, constraint_enhancement: float = None):
 
         self.value: float = cns_value if cns_value is not None else cns.eval(fem)
         self.lower_bound: float | None = cns.lower_bound
         self.upper_bound: float | None = cns.upper_bound
         self.hard: bool = cns.hard
+        self.ce = constraint_enhancement or 0.
 
     def __repr__(self):
         return str(self.value)
@@ -184,9 +185,9 @@ class ConstraintResult:
         value = self.value
         out = {}
         if self.lower_bound is not None:
-            out.update({'lower_bound': self.lower_bound - value})
+            out.update({'lower_bound': self.lower_bound - value + self.ce})
         if self.upper_bound is not None:
-            out.update({'upper_bound': value - self.upper_bound})
+            out.update({'upper_bound': value - self.upper_bound + self.ce})
         return out
 
     def check_violation(self) -> str | None:

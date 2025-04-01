@@ -83,11 +83,13 @@ class _ConvertedConstraint:
             opt: AbstractOptimizer,
             trans: _SearchSpaceTransform,
             ub_or_lb: str,
+            constraint_enhancement: float = None,
     ):
         self.cns: Constraint = cns
         self.ub_or_lb = ub_or_lb
         self.opt = opt
         self.trans = trans
+        self.ce = constraint_enhancement or 0.
 
     def __call__(self, X: Tensor) -> Tensor:  # BotorchConstraint
         """optimize_acqf() に渡される非線形拘束関数の処理です。
@@ -108,9 +110,9 @@ class _ConvertedConstraint:
             x,
         )
         if self.ub_or_lb == 'lb':
-            return Tensor([cns_value - self.cns.lower_bound])
+            return Tensor([cns_value - self.cns.lower_bound - self.ce])
         elif self.ub_or_lb == 'ub':
-            return Tensor([self.cns.upper_bound - cns_value])
+            return Tensor([self.cns.upper_bound - cns_value - self.ce])
 
 
 # list[pyfemtet.opt.Constraint] について、正規化された入力に対し、 feasible or not を返す関数
@@ -119,10 +121,11 @@ def _is_feasible(
         opt: AbstractOptimizer,
         trans: _SearchSpaceTransform,
         x: np.ndarray,
+        constraint_enhancement: float = None,
 ) -> bool:
     for cns in constraints:
         cns_value = _evaluate_pyfemtet_cns(cns, opt, trans, x)
-        cns_result = ConstraintResult(cns, opt.fem, cns_value)
+        cns_result = ConstraintResult(cns, opt.fem, cns_value, constraint_enhancement)
         if cns_result.check_violation() is not None:
             return False
     return True
@@ -139,22 +142,24 @@ class NonlinearInequalityConstraints:
             constraints: list[Constraint],
             opt: AbstractOptimizer,
             trans: _SearchSpaceTransform,
+            constraint_enhancement: float = None,
     ):
         self.trans = trans
         self.constraints = constraints
         self.opt = opt
+        self.ce = constraint_enhancement or 0.
 
         self.nonlinear_inequality_constraints = []
         cns: Constraint
         for cns in self.constraints:
 
             if cns.lower_bound is not None:
-                cns_botorch = _ConvertedConstraint(cns, self.opt, self.trans, 'lb')
+                cns_botorch = _ConvertedConstraint(cns, self.opt, self.trans, 'lb', self.ce)
                 item = (lambda x: _GeneralFunctionWithForwardDifference.apply(cns_botorch, x), True)
                 self.nonlinear_inequality_constraints.append(item)
 
             if cns.upper_bound is not None:
-                cns_botorch = _ConvertedConstraint(cns, self.opt, self.trans, 'ub')
+                cns_botorch = _ConvertedConstraint(cns, self.opt, self.trans, 'ub', self.ce)
                 item = (lambda x: _GeneralFunctionWithForwardDifference.apply(cns_botorch, x), True)
                 self.nonlinear_inequality_constraints.append(item)
 
@@ -166,7 +171,7 @@ class NonlinearInequalityConstraints:
             feasible_q_list = []
             for each_q in each_num_restarts:
                 x: np.ndarray = each_q.detach().numpy()  # normalized parameters
-                if _is_feasible(self.constraints, self.opt, self.trans, x):
+                if _is_feasible(self.constraints, self.opt, self.trans, x, self.tol):
                     feasible_q_list.append(each_q)  # Keep only feasible rows
 
             if feasible_q_list:  # Only add if there are feasible rows

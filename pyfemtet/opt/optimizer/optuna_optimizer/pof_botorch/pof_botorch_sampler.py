@@ -106,6 +106,9 @@ with try_import() as _imports:
     from botorch.utils.sampling import manual_seed
     from botorch.utils.sampling import sample_simplex
 
+    from botorch.generation.gen import gen_candidates_scipy
+    from botorch.generation.gen import gen_candidates_torch
+
 with try_import() as _imports_logei:
     from botorch.acquisition.analytic import LogConstrainedExpectedImprovement
     from botorch.acquisition.analytic import LogExpectedImprovement
@@ -180,25 +183,59 @@ def log_sigmoid(X: torch.Tensor) -> torch.Tensor:
 
 class PartialOptimizeACQFConfig:
 
+    default_method = 'SLSQP'
+
     def __init__(
             self,
             *,
-            gen_candidates: str = None,  # 'scipy' or 'torch'
+            gen_candidates: str = 'scipy',  # 'scipy' or 'torch'
             timeout_sec: float = None,
             # scipy
             method: str = None,  # 'COBYLA, COBYQA, SLSQP or trust-constr
-            tol: float = None,
             scipy_minimize_kwargs: dict = None,
             # torch
+            # pyfemtet
+            constraint_enhancement: float = 0.001,
+
     ):
+
+        # gen_candidate_scipy が scipy.optimize.minimize の
+        # トレランスの範囲内で拘束違反を起こす場合があるため
+        # 拘束を微小量強化
+        self.constraint_enhancement = constraint_enhancement or 0.
+
+        # method = 'COBYLA'
+        # scipy_minimize_kwargs = dict(
+        #   tol=0.01,  # 獲得関数のトレンランス
+        #   catol=constraint_enhancement / 10.,  # 拘束のトレランス
+        # )
+
+        # method = 'SLSQP'
+        # scipy_minimize_kwargs = dict(
+        #   ftol=0.1,  # 獲得関数のトレランス
+        # )
+
+        # method = 'COBYQA'
+        # scipy_minimize_kwargs = dict(
+        #   final_tr_radius=0.1,
+        #   feasibility_tol=constraint_enhancement / 10.,
+        # )
+
+        # method = 'trust-constr'
+        # scipy_minimize_kwargs = dict(
+        #   xtol=0.1,
+        #   barrier_tol=constraint_enhancement / 10.,
+        # )
+
+        method = method or self.default_method
+        scipy_minimize_kwargs = scipy_minimize_kwargs or {}
 
         if gen_candidates:
             if gen_candidates == 'scipy':
-                from botorch.generation.gen import gen_candidates_scipy
                 gen_candidates = gen_candidates_scipy
+
             elif gen_candidates == 'torch':
-                # from botorch.generation.gen import gen_candidates_torch
-                # gen_candidates = gen_candidates_torch
+                gen_candidates = gen_candidates_torch
                 raise NotImplementedError('`gen_candidates_torch` cannot handle '
                                           'nonlinear inequality constraint.')
             else:
@@ -209,8 +246,7 @@ class PartialOptimizeACQFConfig:
             options=dict(
                 # scipy
                 method=method,
-                tol=tol,
-                options=scipy_minimize_kwargs,  # For method-specific options, see :func:`show_options()`.
+                **scipy_minimize_kwargs,  # For method-specific options, see :func:`show_options()`.
                 # torch
                 #   ExpMAStoppingCriterion
                 #   lr
@@ -934,8 +970,8 @@ class PoFBoTorchSampler(BoTorchSampler):
         if self.pof_config.states_to_consider_pof is None:
             trials.extend(hard_v_trials)
             corresponding_feas.extend([0 for _ in range(len(hard_v_trials))])
-            trials.extend(soft_v_trials)
-            corresponding_feas.extend([0 for _ in range(len(soft_v_trials))])
+            # trials.extend(soft_v_trials)
+            # corresponding_feas.extend([0 for _ in range(len(soft_v_trials))])
             trials.extend(hidden_v_trials)
             corresponding_feas.extend([0 for _ in range(len(hidden_v_trials))])
         else:
@@ -1142,10 +1178,13 @@ class PoFBoTorchSampler(BoTorchSampler):
                 if cns.hard
             ]
             if len(hard_constraints) > 0:
+
+                ce = self.partial_optimize_acqf_kwargs.constraint_enhancement
                 botorch_nli_cons = NonlinearInequalityConstraints(
                     hard_constraints,
                     self.pyfemtet_optimizer,
-                    trans
+                    trans,
+                    ce,
                 )
             else:
                 botorch_nli_cons = None
