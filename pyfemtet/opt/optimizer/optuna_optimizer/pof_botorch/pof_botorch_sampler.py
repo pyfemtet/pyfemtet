@@ -816,6 +816,7 @@ def _get_default_candidates_func(
 @dataclasses.dataclass
 class PoFConfig:
     consider_pof: bool = True
+    consider_explicit_hard_constraint: bool = True
     states_to_consider_pof: list[PFTrialState] = None
     feasibility_threshold: float | str = 0.5  # or 'mean'
     feasibility_noise: float | str | None = None  # 'no' to fixed minimum noise
@@ -1171,10 +1172,14 @@ class PoFBoTorchSampler(BoTorchSampler):
             model_c = self.train_model_c(study, search_space)
 
             # hard constraints
-            hard_constraints = [
-                cns for cns in self.pyfemtet_optimizer.constraints.values()
-                if cns.hard
-            ]
+            if self.pof_config.consider_explicit_hard_constraint:
+                hard_constraints = [
+                    cns for cns in self.pyfemtet_optimizer.constraints.values()
+                    if cns.hard
+                ]
+            else:
+                hard_constraints = []
+
             if len(hard_constraints) > 0:
 
                 ce = self.partial_optimize_acqf_kwargs.constraint_enhancement
