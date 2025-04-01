@@ -112,6 +112,8 @@ with try_import() as _imports:
 with try_import() as _imports_logei:
     from botorch.acquisition.analytic import LogConstrainedExpectedImprovement
     from botorch.acquisition.analytic import LogExpectedImprovement
+    from botorch.acquisition.analytic import _compute_log_prob_feas
+
 
 with try_import() as _imports_qhvkg:
     from botorch.acquisition.multi_objective.hypervolume_knowledge_gradient import (
@@ -125,7 +127,7 @@ from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.enable_nonlinear_constr
     NonlinearInequalityConstraints
 )
 from pyfemtet.opt.prediction.botorch_utils import *
-
+from pyfemtet.logger import get_module_logger
 
 # warnings to filter
 from botorch.exceptions.warnings import InputDataWarning
@@ -136,6 +138,9 @@ if TYPE_CHECKING:
 
 # noinspection PyTypeChecker
 _logger = get_logger(False)
+
+DEBUG = True
+logger = get_module_logger('opt.PoFBoTorchSampler', DEBUG)
 
 warnings.filterwarnings('ignore', category=InputDataWarning)
 warnings.filterwarnings('ignore', category=ExperimentalWarning)
@@ -841,9 +846,8 @@ def acqf_patch_factory(acqf_class, is_log_acqf=False):
                 threshold = self.config.feasibility_threshold
             elif isinstance(self.config.feasibility_threshold, str):
                 if self.config.feasibility_threshold == 'mean':
-                    # train_y: torch.Tensor = self.model_c.train_targets
-                    # train_y.mean()
-                    threshold = self.model_c.mean_module.constant
+                    train_y: torch.Tensor = self.model_c.train_targets
+                    threshold = train_y.mean()
                 else:
                     raise ValueError
             else:
@@ -866,15 +870,9 @@ def acqf_patch_factory(acqf_class, is_log_acqf=False):
             base_acqf: torch.Tensor = super().forward(X)
 
             # ===== pof =====
-            pof = self.pof(X)\
-                if self.config.consider_pof \
-                else (0. if is_log_acqf else 1.)
+            pof = self.pof(X) if self.config.consider_pof else 1.
 
-            if is_log_acqf:
-                return base_acqf + pof
-
-            else:
-                return -log_sigmoid(-base_acqf) * pof
+            return -log_sigmoid(-base_acqf) * pof
 
     return ACQFWithPoF
 
@@ -1198,6 +1196,16 @@ class PoFBoTorchSampler(BoTorchSampler):
                 self._seed += 1
 
             self.current_gp_model = model
+
+            if DEBUG:
+                post = model_c.posterior(candidates)
+                mean = post.mean.detach()
+                sigma = post.variance.sqrt().detach()
+                normal = Normal(mean, sigma)
+                threshold = self.pof_config.feasibility_threshold
+                threshold = torch.tensor(threshold)
+                cdf = 1. - normal.cdf(threshold)
+                logger.debug(f'PoF is {cdf}')
 
         # ===== ここから変更なし =====
 
