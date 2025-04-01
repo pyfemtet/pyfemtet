@@ -59,6 +59,11 @@ def core(
 
     opt = OptunaOptimizer()
     opt.history.path = f'{observation_noise=}_{feasibility_noise=}_{seed=}.csv'
+
+    import os
+    if os.path.isfile(opt.history.path):
+        return
+
     opt.sampler_class = PoFBoTorchSampler
     opt.sampler_kwargs = dict(
 
