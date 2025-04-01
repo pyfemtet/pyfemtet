@@ -352,10 +352,10 @@ class AbstractOptimizer:
             try:
                 self._hard_c(hard_c)
 
-            except HiddenConstraintViolation as e:
-
+            except _HiddenConstraintViolation as e:
                 _log_hidden_constraint(e)
                 record.c = hard_c
+                record.state = TrialState.get_corresponding_state_from_exception(e)
                 record.message = 'Hidden constraint violation hard constraint evaluation: ' \
                                  + create_err_msg_from_exception(e)
 
@@ -380,12 +380,13 @@ class AbstractOptimizer:
                 self._check_and_raise_interruption()
 
             # if hidden constraint violation
-            except HiddenConstraintViolation as e:
+            except _HiddenConstraintViolation as e:
 
                 self._check_and_raise_interruption()
 
                 _log_hidden_constraint(e)
                 record.c = hard_c
+                record.state = TrialState.get_corresponding_state_from_exception(e)
                 record.message = 'Hidden constraint violation in FEM update: ' \
                                  + create_err_msg_from_exception(e)
 
@@ -399,11 +400,12 @@ class AbstractOptimizer:
                 self._check_and_raise_interruption()
 
             # if intentional error (by user)
-            except HiddenConstraintViolation as e:
+            except _HiddenConstraintViolation as e:
                 self._check_and_raise_interruption()
 
                 _log_hidden_constraint(e)
                 record.c = hard_c
+                record.state = TrialState.get_corresponding_state_from_exception(e)
                 record.message = 'Hidden constraint violation during objective function evaluation: ' \
                                  + create_err_msg_from_exception(e)
 
@@ -417,7 +419,7 @@ class AbstractOptimizer:
                 self._soft_c(soft_c)
 
             # if intentional error (by user)
-            except HiddenConstraintViolation as e:
+            except _HiddenConstraintViolation as e:
                 _log_hidden_constraint(e)
 
                 _c = {}
@@ -426,6 +428,7 @@ class AbstractOptimizer:
 
                 record.y = y
                 record.c = _c
+                record.state = TrialState.get_corresponding_state_from_exception(e)
                 record.message = 'Hidden constraint violation during soft constraint function evaluation: ' \
                                  + create_err_msg_from_exception(e)
 

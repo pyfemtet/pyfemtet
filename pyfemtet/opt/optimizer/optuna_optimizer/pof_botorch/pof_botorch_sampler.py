@@ -958,7 +958,7 @@ class PoFBoTorchSampler(BoTorchSampler):
                 soft_v_trials.append(trial)
             elif isinstance(
                     PFTrialState.get_corresponding_exception_from_state(state),
-                    HiddenConstraintViolation):
+                    _HiddenConstraintViolation):
                 hidden_v_trials.append(trial)
             else:
                 warnings.warn(f'Unknown trial state {state} is detected and ignored in {self.__class__.__name__}.')

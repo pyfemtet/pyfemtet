@@ -107,7 +107,7 @@ class OptunaOptimizer(AbstractOptimizer):
                 else tuple(dict_or_none_y_internal.values())
 
         # if (hidden) constraint violation, set trial attribute
-        except (HardConstraintViolation, HiddenConstraintViolation) as e:
+        except (HardConstraintViolation, _HiddenConstraintViolation) as e:
             optuna_attr.pf_state = TrialState.get_corresponding_state_from_exception(e)
             optuna_attr.v_values = self._create_infeasible_constraints(opt_)
 

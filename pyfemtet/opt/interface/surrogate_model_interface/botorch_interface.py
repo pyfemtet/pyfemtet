@@ -239,6 +239,6 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
                         f'に対して実モデルが成立する確率が {pof:.2f} だと推定されました。'
                         f'この値が PoF 閾値 {self.pof_threshold} を下回っているので、'
                         f'拘束違反エラーとして扱います。')
-            raise HiddenConstraintViolation(f'PoF < {self.pof_threshold}')
+            raise _HiddenConstraintViolation(f'PoF < {self.pof_threshold}')
 
         BoTorchInterface.update(self)

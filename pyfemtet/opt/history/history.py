@@ -106,7 +106,7 @@ class TrialState(StrEnum):
     @classmethod
     def get_hidden_constraint_violation_states(cls):  # utility function for user
         return [cls.get_corresponding_state_from_exception(exception_type())
-                for exception_type in HiddenConstraintViolation.__subclasses__]
+                for exception_type in _HiddenConstraintViolation.__subclasses__]
 
 
 class DataFrameWrapper:
@@ -874,13 +874,16 @@ class Records:
             self.df_wrapper.get_df(), self.column_manager.meta_columns,
         )
 
-        with open(path, 'w', encoding=ENCODING) as f:
-            writer = csv.writer(f, delimiter=',', lineterminator="\n")
-            # write meta_columns
-            writer.writerow(meta_columns)
-            writer.writerow([''] * len(meta_columns))  # empty line
-            # write df from line 3
-            df.to_csv(f, index=False, encoding=ENCODING, lineterminator='\n')
+        try:
+            with open(path, 'w', encoding=ENCODING) as f:
+                writer = csv.writer(f, delimiter=',', lineterminator="\n")
+                # write meta_columns
+                writer.writerow(meta_columns)
+                writer.writerow([''] * len(meta_columns))  # empty line
+                # write df from line 3
+                df.to_csv(f, index=False, encoding=ENCODING, lineterminator='\n')
+        except PermissionError:
+            logger.error('csv に書き込みできません！')
 
     def append(self, record: Record) -> pd.Series:
 
