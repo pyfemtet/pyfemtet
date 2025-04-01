@@ -75,6 +75,10 @@ class TrialState(StrEnum):
             state = TrialState.solve_error
         elif isinstance(e, PostProcessError):
             state = TrialState.post_error
+        elif isinstance(e, HardConstraintViolation):
+            state = TrialState.hard_constraint_violation
+        elif isinstance(e, SkipSolve):
+            state = TrialState.skipped
         else:
             state = TrialState.unknown_error
         return state
@@ -91,6 +95,10 @@ class TrialState(StrEnum):
             e = PostProcessError()
         elif state == TrialState.unknown_error:
             e = Exception()
+        elif state == TrialState.hard_constraint_violation:
+            e = HardConstraintViolation
+        elif state == TrialState.skipped:
+            e = SkipSolve
         else:
             e = None
         return e
@@ -1067,18 +1075,8 @@ class History:
                     else datetime.datetime.now()
                 return self._records.append(self_.record)
 
-            def __exit__(self_, exc_type, exc_val, exc_tb):
-
-                row: pd.Series | None = None
-
-                if exc_type is None:
-                    row = self_.append()
-
-                elif issubclass(exc_type, ExceptionDuringOptimization):
-                    row = self_.append()
-
-                if row is None:
-                    return
+            @staticmethod
+            def postprocess_after_recording(row):
 
                 client = get_client()
 
@@ -1109,6 +1107,27 @@ class History:
                         trial_name=trial_name,
                         **(fem._create_postprocess_args())
                     )
+
+            def __exit__(self_, exc_type, exc_val, exc_tb):
+
+                row: pd.Series | None = None
+
+                # append
+                if exc_type is None:
+                    row = self_.append()
+
+                elif issubclass(exc_type, ExceptionDuringOptimization):
+                    row = self_.append()
+
+                # if append is succeeded,
+                # do fem.post_processing
+                if row is not None:
+                    self_.postprocess_after_recording(row)
+
+                # save history
+                client = get_client()
+                if client is None:
+                    self.save()
 
         return RecordContext()
 
