@@ -14,6 +14,7 @@ from pyfemtet.opt.worker_status import *
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.variable_manager import *
 from pyfemtet.opt.exceptions import *
+from pyfemtet.logger import get_module_logger
 
 from pyfemtet.opt.optimizer.optimizer import AbstractOptimizer, SubFidelityModels
 
@@ -21,6 +22,9 @@ from pyfemtet.opt.optimizer.optimizer import AbstractOptimizer, SubFidelityModel
 __all__ = [
     'ScipyOptimizer',
 ]
+
+
+logger = get_module_logger('opt.optimizer', False)
 
 
 class _ScipyCallback:
@@ -42,7 +46,46 @@ class ScipyOptimizer(AbstractOptimizer):
         self.options = {}
         self.constraint_enhancement = 0.001
 
-    def _get_scipy_bounds(self) -> list[list[float | None]]:
+    def _get_x0(self) -> np.ndarray:
+
+        # params を取得
+        params: dict[str, Parameter] = self.variable_manager.get_variables(
+            filter='parameter', format='raw'
+        )
+
+        # params のうち fix == True のものを除く
+        x0 = np.array([p.value for p in params.values() if not p.properties.get('fix', False)])
+
+        return x0
+
+    def _warn_bounds_for_nelder_mead(self) -> None:
+        # https://github.com/scipy/scipy/issues/19991
+
+        if self.method.lower() != 'nelder-mead':
+            return
+
+        bounds = self._get_scipy_bounds()
+        if bounds is None:
+            return
+
+        x0 = self._get_x0()
+        if (np.allclose(x0, bounds[:, 0])
+                or np.allclose(x0, bounds[:, 1])):
+            logger.warning(
+                'Nelder-Mead で初期値が境界上端または下端と'
+                '一致していると最適化が進まない場合があります。')
+
+    def _setup_before_parallel(self):
+
+        if not self._done_setup_before_parallel:
+
+            super()._setup_before_parallel()  # flag inside
+
+            self._warn_bounds_for_nelder_mead()
+
+    def _get_scipy_bounds(self) -> np.ndarray | None:
+
+        has_any_bound = False
 
         params: dict[str, Parameter] = self.variable_manager.get_variables(filter='parameter')
         bounds = []
@@ -52,6 +95,14 @@ class ScipyOptimizer(AbstractOptimizer):
                 param.lower_bound or -np.inf,
                 param.upper_bound or np.inf,
             ])
+            has_any_bound += (
+                    (param.lower_bound is not None)
+                    or (param.upper_bound is not None))
+
+        if has_any_bound:
+            bounds = np.array(bounds)
+        else:
+            bounds = None
 
         return bounds
 
@@ -92,8 +143,10 @@ class ScipyOptimizer(AbstractOptimizer):
 
         # update fem (very slow!)
         if cns.using_fem:
-            print(
-                'hard constraint で FEM の API にアクセスするのはとても遅くなります。許容する場合のみ実行してください。')
+            logger.warning(
+                'constraint で FEM の API に'
+                'アクセスするのはとても遅くなります。'
+                '許容する場合のみ実行してください。')
             pass_to_fem = self.variable_manager.get_variables(filter='pass_to_fem')
             self.fem.update_parameter(pass_to_fem)
 
@@ -136,11 +189,15 @@ class ScipyOptimizer(AbstractOptimizer):
             else:
 
                 if method.lower() == 'slsqp' and not cns.hard:
-                    print('SLSQP 法では soft constraint を扱えません。'
-                          'hard constraint として扱います。')
+                    logger.warning(
+                        'SLSQP 法では soft constraint を扱えません。'
+                        'hard constraint として扱います。')
 
                 if method.lower() == 'cobyla' and cns.hard:
-                    print(f'{method} では hard constraint を扱えません。')
+                    logger.error(
+                        f'{method} では hard constraint を扱えません。')
+                    raise NotImplementedError(
+                        f'{method} では hard constraint を扱えません。')
 
                 if cns.lower_bound is not None:
 
@@ -258,13 +315,7 @@ class ScipyOptimizer(AbstractOptimizer):
         self._setup_after_parallel()
 
         # ===== construct x0 =====
-        # params を取得
-        params: dict[str, Parameter] = self.variable_manager.get_variables(
-            filter='parameter', format='raw'
-        )
-
-        # params のうち fix == True のものを除く
-        x0 = np.array([p.value for p in params.values() if not p.properties.get('fix', False)])
+        x0 = self._get_x0()
 
         # ===== run =====
         with closing(self.fem):

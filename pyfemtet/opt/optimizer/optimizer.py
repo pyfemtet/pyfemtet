@@ -570,16 +570,18 @@ class AbstractOptimizer:
 
     def _setup_before_parallel(self):
 
-        # check compatibility with fem if needed
-        variables = self.variable_manager.get_variables()
-        for var_name, variable in variables.items():
-            if variable.pass_to_fem:
-                self.fem._check_param_and_raise(var_name)
+        if not self._done_setup_before_parallel:
 
-        # resolve evaluation order
-        self.variable_manager.resolve()
+            # check compatibility with fem if needed
+            variables = self.variable_manager.get_variables()
+            for var_name, variable in variables.items():
+                if variable.pass_to_fem:
+                    self.fem._check_param_and_raise(var_name)
 
-        self._done_setup_before_parallel = True
+            # resolve evaluation order
+            self.variable_manager.resolve()
+
+            self._done_setup_before_parallel = True
 
     def _setup_after_parallel(self):
         pass
