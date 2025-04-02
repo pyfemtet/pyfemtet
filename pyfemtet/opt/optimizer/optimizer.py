@@ -586,6 +586,24 @@ class AbstractOptimizer:
     def _setup_after_parallel(self):
         pass
 
+    def _finalize(self):
+
+        # check sub fidelity models
+        if self.sub_fidelity_models is None:
+            self.sub_fidelity_models = SubFidelityModels()
+        for sub_fidelity_model in self.sub_fidelity_models.values():
+            assert sub_fidelity_model.objectives.keys() == self.objectives.keys()
+            assert sub_fidelity_model.constraints.keys() == self.constraints.keys()
+
+        # finalize
+        self._load_problem_from_fem()
+        self._finalize_history()
+
+        # setup if needed
+        self._setup_before_parallel()
+        self._setup_after_parallel()
+
+
 
 class SubFidelityModel(AbstractOptimizer):
     pass
