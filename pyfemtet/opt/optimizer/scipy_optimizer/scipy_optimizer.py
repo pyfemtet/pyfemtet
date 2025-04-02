@@ -235,7 +235,9 @@ class ScipyOptimizer(AbstractOptimizer):
                 'hard constraint を扱うには'
                 'method に SLSQP を使用してください。'
                 'SLSQP を使用しているのにこのメッセージが表示される場合、'
-                'options からトレランスを小さくするか、'
+                'options から eps を小さくするか、'
+                'eps の値の範囲内で x が変動したときの'
+                '拘束関数の変動量を上回るように'
                 'constraint_enhancement を大きくしてみてください。'
             ) from e
 
