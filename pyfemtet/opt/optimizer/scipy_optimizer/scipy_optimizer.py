@@ -306,26 +306,16 @@ class ScipyOptimizer(AbstractOptimizer):
         # ===== run =====
         with closing(self.fem):
 
-            try:
+            with self._setting_status(), suppress(InterruptOptimization):
 
-                with suppress(InterruptOptimization):
-
-                    minimize(
-                        self._objective,
-                        x0,
-                        args=(),
-                        method=self.method,
-                        bounds=self._get_scipy_bounds(),
-                        constraints=self._get_scipy_constraints(),
-                        tol=self.tol,
-                        callback=self._get_scipy_callback(),
-                        options=self.options,
-                    )
-
-            except Exception as e:
-                if self.worker_status.value < WorkerStatus.crashed:
-                    self.worker_status.value = WorkerStatus.crashed
-                raise e
-            else:
-                if self.worker_status.value < WorkerStatus.finishing:
-                    self.worker_status.value = WorkerStatus.finishing
+                minimize(
+                    self._objective,
+                    x0,
+                    args=(),
+                    method=self.method,
+                    bounds=self._get_scipy_bounds(),
+                    constraints=self._get_scipy_constraints(),
+                    tol=self.tol,
+                    callback=self._get_scipy_callback(),
+                    options=self.options,
+                )

@@ -512,20 +512,13 @@ class OptunaOptimizer(AbstractOptimizer):
                     self.callbacks.append(self._get_callback(self.n_trials))
 
                 # run
-                try:
+                with self._setting_status():
                     study.optimize(
                         self._objective,
                         timeout=self.timeout,
                         callbacks=self.callbacks,
                         catch=[InterruptOptimization],
                     )
-                except Exception as e:
-                    if self.worker_status.value < WorkerStatus.crashed:
-                        self.worker_status.value = WorkerStatus.crashed
-                    raise e
-                else:
-                    if self.worker_status.value < WorkerStatus.finishing:
-                        self.worker_status.value = WorkerStatus.finishing
 
 
 def debug_1():

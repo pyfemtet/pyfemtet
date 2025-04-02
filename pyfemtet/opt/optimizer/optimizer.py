@@ -299,6 +299,24 @@ class AbstractOptimizer:
 
     # ===== run and setup =====
 
+    def _setting_status(self):
+
+        # noinspection PyMethodParameters
+        class _SettingStatus:
+
+            def __enter__(self_):
+                pass
+
+            def __exit__(self_, exc_type, exc_val, exc_tb):
+                if exc_type is not None:
+                    if self.worker_status.value < WorkerStatus.crashed:
+                        self.worker_status.value = WorkerStatus.crashed
+                else:
+                    if self.worker_status.value < WorkerStatus.finishing:
+                        self.worker_status.value = WorkerStatus.finishing
+
+        return _SettingStatus()
+
     def f(
             self,
             parameters: TrialInput,
@@ -602,7 +620,6 @@ class AbstractOptimizer:
         # setup if needed
         self._setup_before_parallel()
         self._setup_after_parallel()
-
 
 
 class SubFidelityModel(AbstractOptimizer):
