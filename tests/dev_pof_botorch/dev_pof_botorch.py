@@ -104,11 +104,11 @@ def core(
 
 def main(o_noise, f_noise):
     d = 5
-    core(d, 1, o_noise, f_noise, )
-    core(d, 2, o_noise, f_noise, )
-    core(d, 3, o_noise, f_noise, )
-    core(d, 4, o_noise, f_noise, )
-    core(d, 5, o_noise, f_noise, )
+    core(d, 6, o_noise, f_noise, )
+    core(d, 7, o_noise, f_noise, )
+    core(d, 8, o_noise, f_noise, )
+    core(d, 9, o_noise, f_noise, )
+    core(d, 10, o_noise, f_noise, )
 
 
 if __name__ == '__main__':
