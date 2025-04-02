@@ -39,7 +39,7 @@ def main(can_fun, d, m, explicit_constraint):
         opt.add_parameter(f'x{i}', -1, -1, 1)
 
     for i in range(m):
-        opt.add_objective(name=f'y{i}', fun=objective, args=(opt, m,))
+        opt.add_objective(name=f'y{i}', fun=objective, args=(opt, i,))
 
     if explicit_constraint:
         opt.add_constraint(name=f'cns', fun=constraint, args=(opt,), lower_bound=0.25)

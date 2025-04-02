@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Callable
+import datetime
+from typing import Callable, TypeAlias
 
 from time import sleep
 
@@ -18,6 +19,7 @@ __all__ = [
     'AbstractOptimizer',
     'SubFidelityModel',
     'SubFidelityModels',
+    '_FReturnValue',
 ]
 
 
@@ -28,6 +30,9 @@ def _log_hidden_constraint(e: Exception):
     err_msg = create_err_msg_from_exception(e)
     logger.warning('----- Hidden constraint violation! -----')
     logger.warning(f'エラー: {err_msg}')
+
+
+_FReturnValue: TypeAlias = tuple[TrialOutput, dict[str, float], TrialConstraintOutput, Record]
 
 
 class AbstractOptimizer:
@@ -297,6 +302,241 @@ class AbstractOptimizer:
             self.worker_status.value = WorkerStatus.interrupting
             raise InterruptOptimization
 
+    # ===== solve =====
+
+    class _SolveSet:
+
+        opt: AbstractOptimizer
+        opt_: AbstractOptimizer
+
+        def __init__(self, opt: AbstractOptimizer):
+            self.opt: AbstractOptimizer = opt
+
+        def _preprocess(self):
+            pass
+
+        def _hard_constraint_handling(self, e: HardConstraintViolation):
+            pass
+
+        def _hidden_constraint_handling(self, e: _HiddenConstraintViolation):
+            pass
+
+        def _skip_handling(self, e: SkipSolve):
+            pass
+
+        def _if_succeeded(self, f_return: _FReturnValue):
+            pass
+
+        def _postprocess(self):
+            pass
+
+        @staticmethod
+        def _solve_or_raise(
+                opt_: AbstractOptimizer,
+                parameters: TrialInput,
+                variables_pass_to_fem: dict[str, SupportedVariableTypes],
+                history: History = None,
+                datetime_start=None,
+        ) -> _FReturnValue:
+
+            # create context
+            if history is not None:
+                record_to_history = history.recording(opt_.fem)
+            else:
+                class DummyRecordContext:
+                    def __enter__(self):
+                        return Record()
+
+                    def __exit__(self, exc_type, exc_val, exc_tb):
+                        pass
+
+                record_to_history = DummyRecordContext()
+
+            # processing with recording
+            with record_to_history as record:
+
+                # record common result
+                record.x = parameters
+                record.sub_fidelity_name = opt_.sub_fidelity_name
+                record.fidelity = opt_.fidelity
+                record.datetime_start = datetime_start
+
+                # check skip
+                if not opt_._should_solve(history):
+                    record.state = TrialState.skipped
+                    raise SkipSolve
+
+                # start solve
+                if opt_.sub_fidelity_models != MAIN_FIDELITY_NAME:
+                    logger.info(f'fidelity: ({opt_.sub_fidelity_name})')
+                logger.info('入力:')
+                logger.info(parameters)
+
+                # ===== update FEM parameter =====
+                logger.info(f'変数を更新...')
+                opt_.fem.update_parameter(variables_pass_to_fem)
+                opt_._check_and_raise_interruption()
+
+                # ===== evaluate hard constraint =====
+                logger.info(f'拘束関数を計算...')
+
+                hard_c = TrialConstraintOutput()
+                try:
+                    opt_._hard_c(hard_c)
+
+                except _HiddenConstraintViolation as e:
+                    _log_hidden_constraint(e)
+                    record.c = hard_c
+                    record.state = TrialState.get_corresponding_state_from_exception(e)
+                    record.message = 'Hidden constraint violation hard constraint evaluation: ' \
+                                     + create_err_msg_from_exception(e)
+
+                    raise e
+
+                # check hard constraint violation
+                violation_names = opt_._get_hard_constraint_violation_names(hard_c)
+                if len(violation_names) > 0:
+                    record.c = hard_c
+                    record.state = TrialState.hard_constraint_violation
+                    record.message = f'Hard constraint violation: ' \
+                                     + ', '.join(violation_names)
+
+                    raise HardConstraintViolation
+
+                # ===== update FEM =====
+                logger.info(f'解析...')
+
+                try:
+                    opt_.fem.update()
+                    opt_._check_and_raise_interruption()
+
+                # if hidden constraint violation
+                except _HiddenConstraintViolation as e:
+
+                    opt_._check_and_raise_interruption()
+
+                    _log_hidden_constraint(e)
+                    record.c = hard_c
+                    record.state = TrialState.get_corresponding_state_from_exception(e)
+                    record.message = 'Hidden constraint violation in FEM update: ' \
+                                     + create_err_msg_from_exception(e)
+
+                    raise e
+
+                # ===== evaluate y =====
+                logger.info(f'目的関数を計算...')
+
+                try:
+                    y: TrialOutput = opt_._y()
+                    opt_._check_and_raise_interruption()
+
+                # if intentional error (by user)
+                except _HiddenConstraintViolation as e:
+                    opt_._check_and_raise_interruption()
+
+                    _log_hidden_constraint(e)
+                    record.c = hard_c
+                    record.state = TrialState.get_corresponding_state_from_exception(e)
+                    record.message = 'Hidden constraint violation during objective function evaluation: ' \
+                                     + create_err_msg_from_exception(e)
+
+                    raise e
+
+                # ===== evaluate soft constraint =====
+                logger.info(f'残りの拘束関数を計算...')
+
+                soft_c = TrialConstraintOutput()
+                try:
+                    opt_._soft_c(soft_c)
+
+                # if intentional error (by user)
+                except _HiddenConstraintViolation as e:
+                    _log_hidden_constraint(e)
+
+                    _c = {}
+                    _c.update(soft_c)
+                    _c.update(hard_c)
+
+                    record.y = y
+                    record.c = _c
+                    record.state = TrialState.get_corresponding_state_from_exception(e)
+                    record.message = 'Hidden constraint violation during soft constraint function evaluation: ' \
+                                     + create_err_msg_from_exception(e)
+
+                    raise e
+
+                # ===== merge and sort constraints =====
+                c = TrialConstraintOutput()
+                c.update(soft_c)
+                c.update(hard_c)
+
+                # get values as minimize
+                y_internal: dict = opt_._convert_y(y)
+
+                logger.info('出力:')
+                logger.info(y)
+                record.y = y
+                record.c = c
+                record.state = TrialState.succeeded
+
+                opt_._check_and_raise_interruption()
+
+            return y, y_internal, c, record
+
+        def solve(
+                self,
+                x: TrialInput,
+                x_pass_to_fem_: dict[str, SupportedVariableTypes],
+                opt_: AbstractOptimizer | None = None,
+        ) -> _FReturnValue | None:
+
+            vm = self.opt.variable_manager
+
+            # opt_ はメインの opt 又は sub_fidelity
+            opt_ = opt_ or self.opt
+            self.opt_ = opt_
+
+            # check interruption
+            self.opt._check_and_raise_interruption()
+
+            # if opt_ is not self, update variable manager
+            opt_.variable_manager = vm
+
+            # preprocess
+            self._preprocess()
+
+            # declare output
+            f_return = None
+
+            # start solve
+            datetime_start = datetime.datetime.now()
+            try:
+                f_return = self._solve_or_raise(
+                    opt_, x, x_pass_to_fem_, self.opt.history, datetime_start
+                )
+
+            except HardConstraintViolation as e:
+                self._hard_constraint_handling(e)
+
+            except _HiddenConstraintViolation as e:
+                self._hidden_constraint_handling(e)
+
+            except SkipSolve as e:
+                self._skip_handling(e)
+
+            else:
+                self._if_succeeded(f_return)
+
+            self._postprocess()
+
+            # check interruption
+            self.opt._check_and_raise_interruption()
+
+            return f_return
+
+    def _get_solve_set(self):
+        return self._SolveSet(self)
+
     # ===== run and setup =====
 
     def _setting_status(self):
@@ -316,159 +556,6 @@ class AbstractOptimizer:
                         self.worker_status.value = WorkerStatus.finishing
 
         return _SettingStatus()
-
-    def f(
-            self,
-            parameters: TrialInput,
-            variables_pass_to_fem: dict[str, SupportedVariableTypes],
-            history: History = None,
-            datetime_start=None,
-    ) -> tuple[TrialOutput, dict[str, float], TrialConstraintOutput, Record]:
-
-        # create context
-        if history is not None:
-            record_to_history = history.recording(self.fem)
-        else:
-            class DummyRecordContext:
-                def __enter__(self):
-                    return Record()
-
-                def __exit__(self, exc_type, exc_val, exc_tb):
-                    pass
-
-            record_to_history = DummyRecordContext()
-
-        # processing with recording
-        with record_to_history as record:
-
-            # record common result
-            record.x = parameters
-            record.sub_fidelity_name = self.sub_fidelity_name
-            record.fidelity = self.fidelity
-            record.datetime_start = datetime_start
-
-            # check skip
-            if not self._should_solve(history):
-                record.state = TrialState.skipped
-                raise SkipSolve
-
-            # start solve
-            if self.sub_fidelity_models != MAIN_FIDELITY_NAME:
-                logger.info(f'fidelity: ({self.sub_fidelity_name})')
-            logger.info('入力:')
-            logger.info(parameters)
-
-            # ===== update FEM parameter =====
-            logger.info(f'変数を更新...')
-            self.fem.update_parameter(variables_pass_to_fem)
-            self._check_and_raise_interruption()
-
-            # ===== evaluate hard constraint =====
-            logger.info(f'拘束関数を計算...')
-
-            hard_c = TrialConstraintOutput()
-            try:
-                self._hard_c(hard_c)
-
-            except _HiddenConstraintViolation as e:
-                _log_hidden_constraint(e)
-                record.c = hard_c
-                record.state = TrialState.get_corresponding_state_from_exception(e)
-                record.message = 'Hidden constraint violation hard constraint evaluation: ' \
-                                 + create_err_msg_from_exception(e)
-
-                raise e
-
-            # check hard constraint violation
-            violation_names = self._get_hard_constraint_violation_names(hard_c)
-            if len(violation_names) > 0:
-
-                record.c = hard_c
-                record.state = TrialState.hard_constraint_violation
-                record.message = f'Hard constraint violation: ' \
-                                 + ', '.join(violation_names)
-
-                raise HardConstraintViolation
-
-            # ===== update FEM =====
-            logger.info(f'解析...')
-
-            try:
-                self.fem.update()
-                self._check_and_raise_interruption()
-
-            # if hidden constraint violation
-            except _HiddenConstraintViolation as e:
-
-                self._check_and_raise_interruption()
-
-                _log_hidden_constraint(e)
-                record.c = hard_c
-                record.state = TrialState.get_corresponding_state_from_exception(e)
-                record.message = 'Hidden constraint violation in FEM update: ' \
-                                 + create_err_msg_from_exception(e)
-
-                raise e
-
-            # ===== evaluate y =====
-            logger.info(f'目的関数を計算...')
-
-            try:
-                y: TrialOutput = self._y()
-                self._check_and_raise_interruption()
-
-            # if intentional error (by user)
-            except _HiddenConstraintViolation as e:
-                self._check_and_raise_interruption()
-
-                _log_hidden_constraint(e)
-                record.c = hard_c
-                record.state = TrialState.get_corresponding_state_from_exception(e)
-                record.message = 'Hidden constraint violation during objective function evaluation: ' \
-                                 + create_err_msg_from_exception(e)
-
-                raise e
-
-            # ===== evaluate soft constraint =====
-            logger.info(f'残りの拘束関数を計算...')
-
-            soft_c = TrialConstraintOutput()
-            try:
-                self._soft_c(soft_c)
-
-            # if intentional error (by user)
-            except _HiddenConstraintViolation as e:
-                _log_hidden_constraint(e)
-
-                _c = {}
-                _c.update(soft_c)
-                _c.update(hard_c)
-
-                record.y = y
-                record.c = _c
-                record.state = TrialState.get_corresponding_state_from_exception(e)
-                record.message = 'Hidden constraint violation during soft constraint function evaluation: ' \
-                                 + create_err_msg_from_exception(e)
-
-                raise e
-
-            # ===== merge and sort constraints =====
-            c = TrialConstraintOutput()
-            c.update(soft_c)
-            c.update(hard_c)
-
-            # get values as minimize
-            y_internal: dict = self._convert_y(y)
-
-            logger.info('出力:')
-            logger.info(y)
-            record.y = y
-            record.c = c
-            record.state = TrialState.succeeded
-
-            self._check_and_raise_interruption()
-
-        return y, y_internal, c, record
 
     def run(self) -> None:
         raise NotImplementedError

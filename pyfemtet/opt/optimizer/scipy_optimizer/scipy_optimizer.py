@@ -16,7 +16,7 @@ from pyfemtet.opt.variable_manager import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.logger import get_module_logger
 
-from pyfemtet.opt.optimizer.optimizer import AbstractOptimizer, SubFidelityModels
+from pyfemtet.opt.optimizer.optimizer import *
 
 
 __all__ = [
@@ -228,54 +228,27 @@ class ScipyOptimizer(AbstractOptimizer):
     ):
         return _ScipyCallback(self)
 
-    def _solve(
-            self,
-            x: TrialInput,
-            x_pass_to_fem_: dict[str, SupportedVariableTypes],
-            opt_: AbstractOptimizer = None,
-    ) -> float:
+    class _SolveSet(AbstractOptimizer._SolveSet):
 
-        opt_ = opt_ or self
-        vm = self.variable_manager
+        def _hard_constraint_handling(self, e: HardConstraintViolation):
+            raise NotImplementedError(
+                'hard constraint を扱うには'
+                'method に SLSQP を使用してください。'
+                'SLSQP を使用しているのにこのメッセージが表示される場合、'
+                'options からトレランスを小さくするか、'
+                'constraint_enhancement を大きくしてみてください。'
+            ) from e
 
-        # check interruption
-        self._check_and_raise_interruption()
-
-        # declare output
-        y_internal_: float
-
-        # if opt_ is not self, update variable manager
-        opt_.variable_manager = vm
-
-        # start solve
-        datetime_start = datetime.datetime.now()
-        try:
-            y, dict_y_internal, c, record = opt_.f(
-                x, x_pass_to_fem_, self.history, datetime_start
-            )
-
-        # if hidden constraint violation, raise it
-        except _HiddenConstraintViolation as e:
+        def _hidden_constraint_handling(self, e: _HiddenConstraintViolation):
             raise NotImplementedError(
                 'ScipyOptimizer では解析ができない'
                 '設計変数の組合せをスキップできません。'
             ) from e
 
-        # if skipped
-        except SkipSolve as e:
+        def _skip_handling(self, e: SkipSolve):
             raise NotImplementedError(
                 'ScipyOptimizer では Skip はできません。'
             ) from e
-
-        # if succeeded
-        else:
-
-            y_internal_ = tuple(dict_y_internal.values())[0]  # type: ignore
-
-        # check interruption
-        self._check_and_raise_interruption()
-
-        return y_internal_
 
     def _objective(self, xk: np.ndarray) -> float:
 
@@ -291,7 +264,11 @@ class ScipyOptimizer(AbstractOptimizer):
             x_pass_to_fem: dict[str, SupportedVariableTypes] = vm.get_variables(filter='pass_to_fem', format='dict')
 
             # process main fidelity model
-            y_internal: float = self._solve(x, x_pass_to_fem)
+            solve_set = self._get_solve_set()
+            f_return = solve_set.solve(x, x_pass_to_fem)
+            assert f_return is not None
+            dict_y_internal = f_return[1]
+            y_internal: float = tuple(dict_y_internal.values())[0]  # type: ignore
 
             return y_internal
 

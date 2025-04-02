@@ -76,8 +76,9 @@ def scipy_optimizer_var(
 
 def test_scipy_optimizer_1():
     scipy_optimizer_var('Nelder-Mead')
-    # scipy_optimizer_var('BFGS')
+    scipy_optimizer_var('BFGS')
 
 
 if __name__ == '__main__':
+    test_scipy_optimizer()
     test_scipy_optimizer_1()
