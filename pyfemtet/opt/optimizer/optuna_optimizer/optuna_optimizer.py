@@ -98,13 +98,18 @@ class OptunaOptimizer(AbstractOptimizer):
         # start solve
         datetime_start = datetime.datetime.now()
         try:
-            _, dict_or_none_y_internal, c, record = opt_.f(
+            _, dict_y_internal, c, record = opt_.f(
                 x, x_pass_to_fem_, self.history, datetime_start
             )
 
-            # convert dict or None to tuple or None
-            y_internal_ = dict_or_none_y_internal if dict_or_none_y_internal is None \
-                else tuple(dict_or_none_y_internal.values())
+            # 下記は間違いでは？
+            # _, dict_or_none_y_internal, c, record = opt_.f(
+            #     x, x_pass_to_fem_, self.history, datetime_start
+            # )
+            #
+            # # convert dict or None to tuple or None
+            # y_internal_ = dict_or_none_y_internal if dict_or_none_y_internal is None \
+            #     else tuple(dict_or_none_y_internal.values())
 
         # if (hidden) constraint violation, set trial attribute
         except (HardConstraintViolation, _HiddenConstraintViolation) as e:
@@ -117,6 +122,8 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # if succeeded
         else:
+
+            y_internal_ = tuple(dict_y_internal.values())  # type: ignore
 
             # convert constraint to **sorted** violation
             assert len(c) == len(opt_.constraints)
