@@ -834,15 +834,37 @@ class History:
 
         # 非劣解の計算
         non_domi: list[bool] = []
+        non_domi_row: list[pd.Series] = []
         for i, row in solution_set.iterrows():
             non_domi.append((row > solution_set).product(axis=1).sum(axis=0) == 0)
+            non_domi_row.append(row)
+        print(solution_set)
+
+        # パレートフロントから裾解（他と同等というだけで残っている非劣解）を除く
+        true_non_domi = []
+        for i, row in enumerate(non_domi_row):
+            print('=====')
+            print(row)  # その非劣解について
+            print('-----')
+            is_true_non_domi = []
+            for j, other_row in enumerate(non_domi_row):
+                if i == j:
+                    continue
+                print(row < other_row)  # 他の非劣解よりも優れている
+                print('-----')
+                print((row < other_row).sum())  # そのような目的がひとつでもある
+                is_true_non_domi.append((row < other_row).sum())  # ような解が
+
+            true_non_domi.append(all(is_true_non_domi))  # 全ての解に対し、ひとつの目的でも優れている
+
+        # non_domi に true_non_domi を反映する
 
         # feasible も infeasible も一旦劣解にする
         df['non_domi'] = False
 
         # feasible のものに non_domi の評価結果を代入する
         if len(non_domi) > 0:
-            df.loc[idx, 'non_domi'] = non_domi
+            df.loc[idx, 'non_domi'] = true_non_domi
 
     def _calc_hypervolume(self, objectives, df):
 
