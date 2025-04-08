@@ -5,6 +5,7 @@ from win32com.client import CDispatch
 from femtetutils import util
 import psutil
 
+from pyfemtet._util.helper import *
 from pyfemtet._util.process_util import _get_pid
 from pyfemtet._util.femtet_version import _version
 
@@ -37,7 +38,16 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
     if current_version >= minimum_version:
         # gracefully termination method without save project available from 2024.0.1
         try:
-            Femtet.Exit(force)
+            with time_counting(
+                name='Femtet.Exit()',
+                warning_time_sec=timeout,
+                warning_fun=lambda: logger.warning(
+                    f'Femtet.Exit() が {timeout} 以内に終了していません。'
+                    f'Femtet で予期せずダイアログ等が開いている場合、'
+                    f'入力待ちのため処理が終了しない場合があります。'
+                    f'確認してください。')
+            ):
+                succeeded = Femtet.Exit(force)
 
         except AttributeError:
             raise AttributeError('Macro version is not consistent to the one of Femtet.exe. '
@@ -49,11 +59,13 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
         util.close_femtet(Femtet.hWnd, timeout, force)
 
         try:
+            succeeded = True
             pid = _get_pid(hwnd)
             start = time()
             while psutil.pid_exists(pid):
                 if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
                     # logger.error(Msg.ERR_CLOSE_FEMTET_FAILED)
+                    succeeded = False
                     break
                 sleep(1)
             sleep(1)
@@ -61,3 +73,5 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
         # dead
         except (AttributeError, OSError):
             pass
+
+    return succeeded

@@ -6,6 +6,7 @@ import os
 import sys
 import warnings
 from time import sleep
+from contextlib import nullcontext
 
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error, error
@@ -19,6 +20,7 @@ import win32gui
 from pyfemtet.logger import get_module_logger
 
 from pyfemtet._i18n import Msg
+from pyfemtet._util.helper import *
 from pyfemtet._util.dask_util import *
 from pyfemtet._util.femtet_exit import *
 from pyfemtet._util.process_util import *
@@ -155,6 +157,7 @@ class FemtetInterface(COMInterface):
         self._original_autosave_enabled = _get_autosave_enabled()
         _set_autosave_enabled(False)
         self._warn_if_undefined_variable = True
+        self.api_response_warning_time = 10  # mesh, solve, re-execute を除くマクロ実行警告時間
 
         # connect to Femtet
         self._connect_and_open_femtet()
@@ -195,15 +198,18 @@ class FemtetInterface(COMInterface):
         # femprj を開く
         self.open(self.femprj_path, self.model_name)
 
-    def close(self, timeout=1, force=True):
+    def close(self, timeout=3, force=True):
         """Force to terminate connected Femtet."""
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
         if self.quit_when_destruct:
             logger.info('Femtet を閉じています...')
-            _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=True)
-            logger.info('Femtet を閉じました。')
+            succeeded = _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=force)
+            if succeeded:
+                logger.info('Femtet を閉じました。')
+            else:
+                logger.warning('Femtet の終了に失敗しました。')
 
     def use_parametric_output_as_objective(
             self, number: int, direction: str | float = "minimize"
@@ -420,6 +426,49 @@ class FemtetInterface(COMInterface):
             return string  # Callable
 
     def _call_femtet_api(
+            self,
+            fun,
+            return_value_if_failed,
+            if_error,
+            error_message,
+            is_Gaudi_method=False,
+            ret_for_check_idx=None,
+            args=None,
+            kwargs=None,
+            recourse_depth=0,
+            print_indent=0,
+    ):
+        if fun.__name__ not in ('Solve', 'Mesh', 'ReExecute'):
+            warning_time_sec = self.api_response_warning_time
+            context = time_counting(
+                name=fun.__name__,
+                warning_time_sec=warning_time_sec,
+                warning_fun=lambda: logger.warning(
+                    f'{fun.__name__} が {warning_time_sec} 以内に終了していません。'
+                    f'Femtet で予期せずダイアログ等が開いている場合、'
+                    f'入力待ちのため処理が終了しない場合があります。'
+                    f'確認してください。'
+                ),
+            )
+
+        else:
+            context = nullcontext()
+
+        with context:
+            self._call_femtet_api_core(
+                fun,
+                return_value_if_failed,
+                if_error,
+                error_message,
+                is_Gaudi_method,
+                ret_for_check_idx,
+                args,
+                kwargs,
+                recourse_depth,
+                print_indent,
+            )
+
+    def _call_femtet_api_core(
         self,
         fun,
         return_value_if_failed,

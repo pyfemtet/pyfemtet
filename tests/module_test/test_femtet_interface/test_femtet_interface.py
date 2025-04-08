@@ -1,10 +1,13 @@
-from contextlib import closing
+from pyfemtet._util.closing import closing
 
 import numpy as np
+from win32com.client import Dispatch
 
 from tests import get
 from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
+
+import pytest
 
 
 def test_femtet_interface():
@@ -40,5 +43,22 @@ def test_run_femtet_interface():
         )
 
 
+@pytest.mark.exclude
+def test_femtet_interface_api_calling():
+
+    fem = FemtetInterface(allow_without_project=True)
+
+    # Femtet で新しいプロジェクトを開き、
+    # ダイアログが出るようなマクロ実行を行う
+    fem.Femtet.OpenNewProject()
+    point = Dispatch('FemtetMacro.GaudiPoint')
+    point.X = 0.
+    point.Y = 0.
+    point.Z = 0.
+    fem.Femtet.Gaudi.CreateVertex(point)
+    fem.close(force=False, timeout=3)
+
+
 if __name__ == '__main__':
-    test_run_femtet_interface()
+    # test_run_femtet_interface()
+    test_femtet_interface_api_calling()
