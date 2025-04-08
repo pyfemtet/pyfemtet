@@ -9,7 +9,7 @@ def expression1(prm1, prm2, arg1, *args, kwarg2=None, **kwargs):
     return prm1 + 1
 
 
-if __name__ == '__main__':
+def test_add_expression():
     opt = AbstractOptimizer()
 
     x = sympy.Symbol('x')
@@ -50,3 +50,7 @@ if __name__ == '__main__':
 
     print(variables)
     assert variables == {'exp3': 0.25, 'prm1': 0, 'prm2': 'a', 'exp2': 1.0, 'exp1': 1}
+
+
+if __name__ == '__main__':
+    test_add_expression()
