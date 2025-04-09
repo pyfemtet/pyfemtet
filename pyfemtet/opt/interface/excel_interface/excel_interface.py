@@ -30,7 +30,7 @@ from pyfemtet.opt.variable_manager import SupportedVariableTypes
 from pyfemtet.opt.interface.interface import COMInterface
 
 from pyfemtet.logger import get_module_logger
-from v1.utils.helper import float_
+from pyfemtet._util.helper import float_
 
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
