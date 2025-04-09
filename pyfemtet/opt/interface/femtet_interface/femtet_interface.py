@@ -451,11 +451,14 @@ class FemtetInterface(COMInterface):
         # Solve, Mesh, ReExecute は時間計測しない
         if callable(fun):
             name = fun.__name__
-            if fun.__name__ in ('Solve', 'Mesh', 'ReExecute'):
+            if fun.__name__ == 'Solve':
                 context = nullcontext()
 
         elif isinstance(fun, str):
-            name = fun
+
+            if fun in ('self.Femtet.Gaudi.ReExecute', 'self.Femtet.Gaudi.Mesh'):
+                context = nullcontext()
+            name = fun.split('.')[-1]
 
         else:
             raise NotImplementedError
