@@ -7,6 +7,7 @@ import numpy as np
 
 from .string_as_expression import _ExpressionFromString
 
+from pyfemtet._i18n import _
 
 __all__ = [
     'SupportedVariableTypes',
@@ -180,17 +181,22 @@ class VariableManager:
                                         msg.append(p_.name)
                                 raise type(e)(
                                     *e.args,
-                                    f'引数が不足しています。 '
-                                    f'args 引数で指定された引数: {var.args} / '
-                                    f'kwargs 引数で指定された引数: {var.kwargs} / '
-                                    f'必要な引数: {msg}'
+                                    _(
+                                        'Missing arguments! '
+                                        'The arguments specified by `args`: {var_args} / '
+                                        'The arguments specified by `kwargs`: {var_kwargs} / '
+                                        'Required arguments: {msg}',
+                                        var_args=var.args,
+                                        var_kwargs=var.kwargs,
+                                        msg=msg
+                                    ),
                                 ) from None
 
                     # *args である
                     elif p.kind == inspect.Parameter.VAR_POSITIONAL:
 
                         # ユーザー定義位置引数でないとおかしい
-                        assert p.name not in self.variables, '仮引数に変数名は使用できません。'
+                        assert p.name not in self.variables, _('Extra positional argument name cannot be duplicated with a variable name.')
 
                         # *args なので残り全部を pos_args に入れる
                         pos_args.extend(user_def_args)
@@ -207,7 +213,7 @@ class VariableManager:
                     else:
 
                         # kw_args にユーザー定義キーワード引数を入れているので何もしなくてよい
-                        assert p.name not in self.variables, 'キーワード仮引数に変数名は使用できません。'
+                        assert p.name not in self.variables, _('Extra keyword argument name cannot be duplicated with a variable name.')
 
                 # fun を実行する
                 var.value = var.fun(*pos_args, **kw_args)
@@ -275,4 +281,11 @@ class VariableManager:
             return np.array([var.value for var in raw.values()])
 
         else:
-            raise NotImplementedError(f'invalid format {format} is passed to VariableManager.get_variables()')
+            raise NotImplementedError(
+                _(
+                    'invalid format {format} is passed to '
+                    'VariableManager.get_variables(). '
+                    'Valid formats are one of (`raw`, `dict`, `values`).',
+                    format=format,
+                )
+            )

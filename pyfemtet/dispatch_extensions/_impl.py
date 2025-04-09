@@ -7,6 +7,7 @@ from win32com.client import Dispatch, CDispatch
 
 from femtetutils import util
 
+from pyfemtet._i18n import Msg
 from pyfemtet._util.dask_util import *
 from pyfemtet._util.process_util import *
 from pyfemtet.logger import get_module_logger
@@ -67,7 +68,7 @@ def launch_and_dispatch_femtet(
     util.execute_femtet()
     pid = util.get_last_executed_femtet_process_id()
     logger.debug(f'Target pid is {pid}.')
-    for _ in tqdm(range(5), 'wait for launch femtet...'):
+    for _ in tqdm(range(5), Msg.WAIT_FOR_LAUNCH_FEMTET):
         sleep(1)
 
     # dispatch femtet
@@ -101,7 +102,7 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> tuple
     if subprocess_log_prefix:
         logger.debug('%s'+'Try to connect Femtet.', subprocess_log_prefix)
     else:
-        logger.info('Try to connect Femtet.')
+        logger.info(Msg.TRY_TO_CONNECT_FEMTET)
     Femtet = Dispatch('FemtetMacro.Femtet')
     logger.debug('%s'+'Dispatch finished.', subprocess_log_prefix)
 
@@ -131,7 +132,7 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> tuple
     if subprocess_log_prefix:
         logger.debug('%s'+f'Successfully connected. The pid of Femtet is {pid}.', subprocess_log_prefix)
     else:
-        logger.info(f'Successfully connected. The pid of Femtet is {pid}.')
+        logger.info(Msg.F_FEMTET_CONNECTED(pid))
 
     return Femtet, pid
 
@@ -231,7 +232,7 @@ def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> tuple[CDisp
     if not (pid in pids):
         raise FemtetNotFoundException(f"Femtet (pid = {pid}) doesn't exist.")
 
-    logger.info('Searching specific Femtet...')
+    logger.info(Msg.F_SEARCHING_FEMTET_WITH_SPECIFIC_PID(pid))
 
     # 子プロセスの準備
     with _NestableSyncManager() as manager:
@@ -275,8 +276,10 @@ def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> tuple[CDisp
                 except RuntimeError:
                     pass
                 raise FemtetConnectionTimeoutError(
-                    f'Connect trial with specific Femtet (pid = {pid}) is'
-                    f'timed out in {timeout} sec'
+                    Msg.F_ERR_FEMTET_CONNECTION_TIMEOUT(
+                        pid=pid,
+                        timeout=timeout,
+                    )
                 )
             sleep(1)
 

@@ -395,7 +395,12 @@ class ExcelInterface(COMInterface):
         # excel の setup 関数を必要なら実行する
         if self.setup_procedure_name is not None:
 
-            logger.info(f'setup プロシージャ {self.setup_procedure_name} を実行中...')
+            logger.info(
+                Msg.F_MACRO_RUNNING(
+                    procedure_kind='Setup',
+                    procedure_name=self.setup_procedure_name
+                )
+            )
 
             with Lock('excel_setup_procedure'):
                 try:
@@ -412,18 +417,23 @@ class ExcelInterface(COMInterface):
                     sleep(1)
 
                 except com_error as e:
-                    raise RuntimeError(f'Failed to run macro {self.setup_procedure_name}. The original message is: {e}')
+                    raise RuntimeError(
+                        Msg.F_RUN_EXCEL_MACRO_FAILED(
+                            procedure_name=self.setup_procedure_name,
+                            exception=e
+                        )
+                    )
 
     def connect_excel(self, connect_method):
 
         # ===== 新しい excel instance を起動 =====
         # 起動
-        logger.info('Excel を起動・接続しています...')
+        logger.info(Msg.LAUNCH_EXCEL)
         if connect_method == 'auto':
             self.excel = Dispatch('Excel.Application')
         else:
             self.excel = DispatchEx('Excel.Application')
-        logger.info('Excel を起動・接続しました。')
+        logger.info(Msg.EXCEL_CONNECTED)
 
         # FemtetRef.xla を開く
         self.open_femtet_ref_xla()
@@ -474,7 +484,9 @@ class ExcelInterface(COMInterface):
 
         # certify
         if not os.path.exists(xla_file_path):
-            raise FileNotFoundError(f'{xla_file_path} not found. Please check the "Enable Macros" command was fired.')
+            raise FileNotFoundError(
+                Msg.F_FEMTET_XLA_IS_NOT_FOUND(xla_file_path)
+            )
 
         # self.excel.Workbooks.Add(xla_file_path)
         self.excel.Workbooks.Open(xla_file_path, ReadOnly=True)
@@ -657,17 +669,6 @@ class ExcelInterface(COMInterface):
                     _calc_before_solve)  # bool or NaN
 
             if use:
-                # constraint を作る
-                # opt.constraints[name] = Constraint(
-                #     fun=ScapeGoatObjective(),
-                #     name=name,
-                #     lb=lb,
-                #     ub=ub,
-                #     strict=strict,
-                #     args=(name,),
-                #     kwargs=dict(),
-                #     using_fem=not calc_before_solve,
-                # )
                 opt.add_constraint(
                     name=name,
                     lower_bound=lb,
@@ -706,7 +707,12 @@ class ExcelInterface(COMInterface):
             if sh.Name == name:
                 return sh
         else:
-            raise WorkSheetNotFoundError(f'Sheet {name} does not exist in the book {wb.Name}.')
+            raise WorkSheetNotFoundError(
+                Msg.F_SHEET_NOT_FOUND(
+                    sh_name=name,
+                    wb_name=wb.Name
+                )
+            )
 
     @property
     def wb_input(self) -> CDispatch:
@@ -755,8 +761,9 @@ class ExcelInterface(COMInterface):
                 try:
                     self.sh_input.Range(key).value = value
                 except com_error:
-                    logger.warning('The cell address specification by named range is failed. '
-                                   'The process changes the specification way to table based method.')
+                    logger.warning(
+                        Msg.EXCEL_CHANGE_PARSE_METHOD
+                    )
                     self.use_named_range = False
                     break
 
@@ -788,7 +795,12 @@ class ExcelInterface(COMInterface):
             self.excel.CalculateFull()
 
         except com_error as e:
-            raise SolveError(f'Failed to run macro {self.procedure_name}. The original message is: {e}')
+            raise SolveError(
+                Msg.F_RUN_EXCEL_MACRO_FAILED(
+                    procedure_name=self.procedure_name,
+                    exception=e
+                )
+            )
 
     # ===== close =====
     def _close_workbooks(self):
@@ -818,10 +830,21 @@ class ExcelInterface(COMInterface):
         # 無駄に不具合に遭う可能性があるので
         # 参照設定は解除しない
 
+        if not hasattr(self, 'excel'):
+            return
+
+        if self.excel is None:
+            return
+
         # 終了処理を必要なら実施する
         if self.teardown_procedure_name is not None:
 
-            logger.info(f'teardown プロシージャ {self.teardown_procedure_name} を実行中...')
+            logger.info(
+                Msg.F_MACRO_RUNNING(
+                    procedure_kind='Teardown',
+                    procedure_name=self.teardown_procedure_name
+                )
+            )
 
             with Lock('excel_teardown_procedure'):
                 try:
@@ -838,7 +861,11 @@ class ExcelInterface(COMInterface):
 
                 except com_error as e:
                     raise RuntimeError(
-                        f'Failed to run macro {self.teardown_procedure_args}. The original message is: {e}')
+                        Msg.F_RUN_EXCEL_MACRO_FAILED(
+                            procedure_name=self.teardown_procedure_name,
+                            exception=e
+                        )
+                    )
 
         # excel プロセスを終了する
         if self.terminate_excel_when_quit:

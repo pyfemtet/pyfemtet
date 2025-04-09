@@ -1,3 +1,4 @@
-from .i18n import ENCODING, Message as Msg
+from .i18n import ENCODING
+from .messages import Message as Msg, _
 
-__all__ = ['ENCODING', 'Msg']
+__all__ = ['ENCODING', 'Msg', '_']

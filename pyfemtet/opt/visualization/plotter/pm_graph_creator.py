@@ -1,6 +1,7 @@
 import numpy as np
 import plotly.graph_objects as go
 
+from pyfemtet._i18n import _
 from pyfemtet._util.df_util import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.model import *
@@ -139,10 +140,14 @@ def _plot(
         zz_lower = zz_mean - zz_std
 
         # std
-        fig.add_trace(go.Surface(z=zz_upper, x=xx1, y=xx2, showscale=False, opacity=0.3, showlegend=True,
-                                 name='予測の誤差（標準偏差）'))
-        fig.add_trace(go.Surface(z=zz_lower, x=xx1, y=xx2, showscale=False, opacity=0.3, showlegend=True,
-                                 name='予測の誤差（標準偏差）'))
+        fig.add_trace(go.Surface(
+            z=zz_upper, x=xx1, y=xx2,
+            showscale=False, opacity=0.3, showlegend=True,
+            name=_('Upper of pred. std-dev')))
+        fig.add_trace(go.Surface(
+            z=zz_lower, x=xx1, y=xx2,
+            showscale=False, opacity=0.3, showlegend=True,
+            name=_('Lower of pred. std-dev')))
 
         # mean
         contours = {}
@@ -160,7 +165,7 @@ def _plot(
         fig.add_trace(
             go.Surface(
                 x=xx1, y=xx2, z=zz_mean,
-                name='予測',
+                name=_('Prediction'),
                 showlegend=True,
                 contours=contours,
                 colorbar=dict(
@@ -175,7 +180,7 @@ def _plot(
             go.Scatter(
                 x=list(x1) + list(x1)[::-1],
                 y=list(z_mean + z_std) + list(z_mean - z_std)[::-1],
-                name='予測の誤差（標準偏差）',
+                name=_('Std-dev of pred.'),
                 fill='toself',
                 opacity=0.3,
             )
@@ -185,15 +190,14 @@ def _plot(
         fig.add_trace(
             go.Scatter(
                 x=x1, y=z_mean,
-                name='予測',
+                name=_('Prediction'),
             )
         )
 
     # scatter
-
     sub_fidelity_names = history.sub_fidelity_names
     obj_names_per_sub_fidelity_list: list[list[str]] = [
-        history.obj_names for _ in sub_fidelity_names
+        history.obj_names for __ in sub_fidelity_names
     ]
 
     if is_3d:
@@ -336,14 +340,14 @@ def _plot(
     if is_3d:
         # layout
         fig.update_layout(
-            title="予測モデル",
+            title=_('Prediction Model'),
             xaxis_title=prm_name1,
             yaxis_title=obj_name,
         )
 
     else:
         fig.update_layout(
-            title='予測モデル',
+            title=_('Prediction Model'),
             scene=dict(
                 xaxis_title=prm_name1,
                 yaxis_title=prm_name2,

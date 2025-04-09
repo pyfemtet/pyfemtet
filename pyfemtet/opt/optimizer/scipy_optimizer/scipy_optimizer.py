@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from typing import Callable
 
-import datetime
 from contextlib import suppress
 
 import numpy as np
 from scipy.optimize import minimize, OptimizeResult
 from scipy.optimize import NonlinearConstraint
 
+from pyfemtet._i18n import Msg
 from pyfemtet._util.closing import closing
-from pyfemtet.opt.worker_status import *
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.variable_manager import *
 from pyfemtet.opt.exceptions import *
@@ -71,9 +70,7 @@ class ScipyOptimizer(AbstractOptimizer):
         x0 = self._get_x0()
         if (np.allclose(x0, bounds[:, 0])
                 or np.allclose(x0, bounds[:, 1])):
-            logger.warning(
-                'Nelder-Mead で初期値が境界上端または下端と'
-                '一致していると最適化が進まない場合があります。')
+            logger.warning(Msg.WARN_SCIPY_NELDER_MEAD_BOUND)
 
     def _setup_before_parallel(self):
 
@@ -125,7 +122,7 @@ class ScipyOptimizer(AbstractOptimizer):
                 prm.value = xk_list.pop(0)
 
             elif isinstance(prm, CategoricalParameter):
-                raise NotImplementedError('ScipyOptimizer は CategoricalParameter 未対応です。')
+                raise NotImplementedError(Msg.ERR_SCIPY_NOT_IMPLEMENT_CATEGORICAL)
 
             else:
                 raise NotImplementedError
@@ -143,10 +140,7 @@ class ScipyOptimizer(AbstractOptimizer):
 
         # update fem (very slow!)
         if cns.using_fem:
-            logger.warning(
-                'constraint で FEM の API に'
-                'アクセスするのはとても遅くなります。'
-                '許容する場合のみ実行してください。')
+            logger.warning(Msg.WARN_USING_FEM_IN_NLC)
             pass_to_fem = self.variable_manager.get_variables(filter='pass_to_fem')
             self.fem.update_parameter(pass_to_fem)
 
@@ -173,7 +167,9 @@ class ScipyOptimizer(AbstractOptimizer):
 
                 if cns.hard:
                     raise NotImplementedError(
-                        f'{method} では hard constraint を扱えません。'
+                        Msg.F_ERR_SCIPY_METHOD_NOT_IMPLEMENT_HARD_CONSTRAINT(
+                            method
+                        )
                     )
 
                 scipy_cns = NonlinearConstraint(
@@ -189,15 +185,15 @@ class ScipyOptimizer(AbstractOptimizer):
             else:
 
                 if method.lower() == 'slsqp' and not cns.hard:
-                    logger.warning(
-                        'SLSQP 法では soft constraint を扱えません。'
-                        'hard constraint として扱います。')
+                    logger.warning(Msg.WARN_SCIPY_SLSQP_CANNOT_PROCESS_SOFT_CONSTRAINT)
 
                 if method.lower() == 'cobyla' and cns.hard:
                     logger.error(
-                        f'{method} では hard constraint を扱えません。')
+                        Msg.F_ERR_SCIPY_METHOD_NOT_IMPLEMENT_HARD_CONSTRAINT(
+                            method))
                     raise NotImplementedError(
-                        f'{method} では hard constraint を扱えません。')
+                        Msg.F_ERR_SCIPY_METHOD_NOT_IMPLEMENT_HARD_CONSTRAINT(
+                            method))
 
                 if cns.lower_bound is not None:
 
@@ -232,24 +228,17 @@ class ScipyOptimizer(AbstractOptimizer):
 
         def _hard_constraint_handling(self, e: HardConstraintViolation):
             raise NotImplementedError(
-                'hard constraint を扱うには'
-                'method に SLSQP を使用してください。'
-                'SLSQP を使用しているのにこのメッセージが表示される場合、'
-                'options から eps を小さくするか、'
-                'eps の値の範囲内で x が変動したときの'
-                '拘束関数の変動量を上回るように'
-                'constraint_enhancement を大きくしてみてください。'
+                Msg.ERR_SCIPY_HARD_CONSTRAINT_VIOLATION
             ) from e
 
         def _hidden_constraint_handling(self, e: _HiddenConstraintViolation):
             raise NotImplementedError(
-                'ScipyOptimizer では解析ができない'
-                '設計変数の組合せをスキップできません。'
+                Msg.ERR_SCIPY_HIDDEN_CONSTRAINT
             ) from e
 
         def _skip_handling(self, e: SkipSolve):
             raise NotImplementedError(
-                'ScipyOptimizer では Skip はできません。'
+                Msg.ERR_SCIPY_NOT_IMPLEMENT_SKIP
             ) from e
 
     def _objective(self, xk: np.ndarray) -> float:
@@ -263,7 +252,8 @@ class ScipyOptimizer(AbstractOptimizer):
 
             # construct TrialInput
             x = vm.get_variables(filter='parameter')
-            x_pass_to_fem: dict[str, SupportedVariableTypes] = vm.get_variables(filter='pass_to_fem', format='dict')
+            x_pass_to_fem: dict[str, SupportedVariableTypes] = vm.get_variables(
+                filter='pass_to_fem', format='dict')
 
             # process main fidelity model
             solve_set = self._get_solve_set()

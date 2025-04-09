@@ -3,6 +3,7 @@ from scipy.stats.distributions import norm
 
 # from gpytorch.priors.torch_priors import GammaPrior
 
+from pyfemtet._i18n import Msg
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction.model import PyFemtetModel, SingleTaskGPModel
 from pyfemtet.opt.exceptions import *  # should import after dask importing
@@ -235,10 +236,9 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         # BoTorchInterface.update() の前に PoF を計算する
         pof = self.calc_pof()
         if pof < self.pof_threshold:
-            logger.info(f'サロゲートモデルによって、入力変数 {self.current_prm_values} '
-                        f'に対して実モデルが成立する確率が {pof:.2f} だと推定されました。'
-                        f'この値が PoF 閾値 {self.pof_threshold} を下回っているので、'
-                        f'拘束違反エラーとして扱います。')
+            logger.info(
+                Msg.F_POF_UNDER_THRESH(pof=pof, thresh=self.pof_threshold)
+            )
             raise _HiddenConstraintViolation(f'PoF < {self.pof_threshold}')
 
         BoTorchInterface.update(self)

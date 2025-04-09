@@ -7,9 +7,12 @@ from optuna._transform import _SearchSpaceTransform
 
 from botorch.optim.initializers import gen_batch_initial_conditions
 
-
+from pyfemtet._i18n import Msg
+from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.optimizer import AbstractOptimizer
+
+logger = get_module_logger('opt.optimizer')
 
 
 __all__ = ['NonlinearInequalityConstraints']
@@ -65,7 +68,7 @@ def _evaluate_pyfemtet_cns(
 
     # update fem (very slow!)
     if cns.using_fem:
-        print('hard constraint で FEM の API にアクセスするのはとても遅くなります。許容する場合のみ実行してください。')
+        logger.warning(Msg.WARN_USING_FEM_IN_NLC)
         pass_to_fem = opt.variable_manager.get_variables(filter='pass_to_fem')
         opt.fem.update_parameter(pass_to_fem)
 
@@ -195,8 +198,9 @@ class NonlinearInequalityConstraints:
 
         while feasible_ic_batch is None:
             # Generate new random ic_batch with the same shape
-            print('警告: gen_batch_initial_conditions() は feasible な初期値を提案しませんでした。'
-                  'パラメータ提案を探索するための初期値をランダムに選定します。')
+            logger.warning(
+                Msg.WARN_NO_FEASIBLE_BATCH_INITIAL_CONDITION
+            )
             random_ic_batch = self._generate_random_initial_conditions(ic_batch)
             feasible_ic_batch = self._filter_feasible_conditions(random_ic_batch)
 

@@ -19,7 +19,7 @@ import win32gui
 
 from pyfemtet.logger import get_module_logger
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import Msg, _
 from pyfemtet._util.helper import *
 from pyfemtet._util.dask_util import *
 from pyfemtet._util.femtet_exit import *
@@ -198,18 +198,25 @@ class FemtetInterface(COMInterface):
         # femprj を開く
         self.open(self.femprj_path, self.model_name)
 
-    def close(self, timeout=3, force=True):
+    def close(self, timeout=15, force=True):  # 12 秒程度
         """Force to terminate connected Femtet."""
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
+        if not hasattr(self, 'Femtet'):
+            return
+
+        if self.Femtet is None:
+            return
+
         if self.quit_when_destruct:
-            logger.info('Femtet を閉じています...')
-            succeeded = _exit_or_force_terminate(timeout=timeout, Femtet=self.Femtet, force=force)
+            logger.info(_('Closing Femtet (pid = {pid}) ...', pid=self.femtet_pid))
+            succeeded = _exit_or_force_terminate(
+                timeout=timeout, Femtet=self.Femtet, force=force)
             if succeeded:
-                logger.info('Femtet を閉じました。')
+                logger.info(_('Femtet is closed.'))
             else:
-                logger.warning('Femtet の終了に失敗しました。')
+                logger.warning(_('Failed to close Femtet.'))
 
     def use_parametric_output_as_objective(
             self, number: int, direction: str | float = "minimize"
@@ -416,7 +423,7 @@ class FemtetInterface(COMInterface):
         return True
 
     # noinspection PyMethodMayBeStatic
-    def _construct_femtet_api(self, string):  # static にしてはいけない
+    def _construct_femtet_api(self, string: str | callable):  # static にしてはいけない
         if isinstance(string, str):
             if string.startswith("self."):
                 return eval(string)
@@ -438,24 +445,44 @@ class FemtetInterface(COMInterface):
             recourse_depth=0,
             print_indent=0,
     ):
-        if fun.__name__ not in ('Solve', 'Mesh', 'ReExecute'):
+
+        context = None
+
+        # Solve, Mesh, ReExecute は時間計測しない
+        if callable(fun):
+            name = fun.__name__
+            if fun.__name__ in ('Solve', 'Mesh', 'ReExecute'):
+                context = nullcontext()
+
+        elif isinstance(fun, str):
+            name = fun
+
+        else:
+            raise NotImplementedError
+
+        if context is None:
             warning_time_sec = self.api_response_warning_time
             context = time_counting(
-                name=fun.__name__,
+                name=name,
                 warning_time_sec=warning_time_sec,
                 warning_fun=lambda: logger.warning(
-                    f'{fun.__name__} が {warning_time_sec} 以内に終了していません。'
-                    f'Femtet で予期せずダイアログ等が開いている場合、'
-                    f'入力待ちのため処理が終了しない場合があります。'
-                    f'確認してください。'
+                    _(
+                        '{name} does not finish in {warning_time_sec} seconds. '
+                        'If the optimization is hanging, the most reason is '
+                        'a dialog is opening in Femtet and it waits for your '
+                        'input. Please confirm there is no dialog in Femtet.',
+                        name=name,
+                        warning_time_sec=warning_time_sec,
+                    )
+                    # f'{name} が {warning_time_sec} 以内に終了していません。'
+                    # f'Femtet で予期せずダイアログ等が開いている場合、'
+                    # f'入力待ちのため処理が終了しない場合があります。'
+                    # f'確認してください。'
                 ),
             )
 
-        else:
-            context = nullcontext()
-
         with context:
-            self._call_femtet_api_core(
+            return self._call_femtet_api_core(
                 fun,
                 return_value_if_failed,
                 if_error,
@@ -541,14 +568,14 @@ class FemtetInterface(COMInterface):
                 gaudi_accessible = self._check_gaudi_accessible()
                 if gaudi_accessible:
                     # Gaudi にアクセスできるなら Gaudi を Activate する
-                    fun = self._construct_femtet_api(fun)  # (str) -> Callable
+                    fun = self._construct_femtet_api(fun)  # str | callable -> callable
                     if fun.__name__ != "Activate":
                         # 再帰ループにならないように
                         self._call_femtet_api(
                             self.Femtet.Gaudi.Activate,
                             False,  # None 以外なら何でもいい
                             Exception,
-                            "Gaudi のオープンに失敗しました",
+                            _('Failed to Femtet.Gaudi.Activate()'),
                             print_indent=print_indent + 1,
                         )
 
@@ -567,7 +594,7 @@ class FemtetInterface(COMInterface):
 
             # gaudi_accessible なので関数が何であろうが安全にアクセスはできる
             if isinstance(fun, str):
-                fun = self._construct_femtet_api(fun)  # (str) -> Callable
+                fun = self._construct_femtet_api(fun)  # str | callable -> callable
 
             # 解析結果を開いた状態で Gaudi.Activate して ReExecute する場合、ReExecute の前後にアクティブ化イベントが必要
             # さらに、プロジェクトツリーが開いていないとアクティブ化イベントも意味がないらしい。
@@ -624,11 +651,17 @@ class FemtetInterface(COMInterface):
                     " " * print_indent + f"現在の Femtet 再起動回数: {recourse_depth}"
                 )
                 if recourse_depth >= self.max_api_retry:
-                    raise Exception(Msg.ERR_FEMTET_CRASHED_AND_RESTART_FAILED)
+                    raise Exception(
+                        Msg.F_ERR_FEMTET_CRASHED_AND_RESTART_FAILED(
+                            fun.__name__
+                        )
+                    )
 
                 # 再起動
                 logger.warning(
-                    " " * print_indent + Msg.WARN_FEMTET_CRASHED_AND_TRY_RESTART
+                    " " * print_indent + Msg.F_WARN_FEMTET_CRASHED_AND_TRY_RESTART(
+                        fun.__name__
+                    )
                 )
                 CoInitialize()
                 self.connect_femtet(connect_method="new")

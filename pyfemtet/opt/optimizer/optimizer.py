@@ -7,6 +7,7 @@ from time import sleep
 
 import sympy
 
+from pyfemtet._i18n.messages import _
 from pyfemtet.opt.history import *
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.interface import *
@@ -28,8 +29,8 @@ logger = get_module_logger('opt.optimizer', True)
 
 def _log_hidden_constraint(e: Exception):
     err_msg = create_err_msg_from_exception(e)
-    logger.warning('----- Hidden constraint violation! -----')
-    logger.warning(f'エラー: {err_msg}')
+    logger.warning(_('----- Hidden constraint violation! -----'))
+    logger.warning(_('error: {err_msg}', err_msg=err_msg))
 
 
 _FReturnValue: TypeAlias = tuple[TrialOutput, dict[str, float], TrialConstraintOutput, Record]
@@ -282,14 +283,14 @@ class AbstractOptimizer:
             cns = self.constraints[name]
             l_or_u = result.check_violation()
             if l_or_u is not None:
-                logger.warning('----- Hard constraint violation! -----')
-                logger.warning(f'拘束名: {name}')
-                logger.warning(f'計算値: {result.value}')
+                logger.warning(_('----- Hard constraint violation! -----'))
+                logger.warning(_('constraint: {name}', name=name))
+                logger.warning(_('evaluated value: {value}', value=result.value))
                 if l_or_u == 'lower_bound':
-                    logger.info(f'下限値: {cns.lower_bound}')
+                    logger.info(_('lower bound: {lb}', lb=cns.lower_bound))
                     violation_names.append(name + '_' + l_or_u)
                 elif l_or_u == 'upper_bound':
-                    logger.info(f'上限値: {cns.upper_bound}')
+                    logger.info(_('upper bound: {ub}', ub=cns.upper_bound))
                     violation_names.append(name + '_' + l_or_u)
                 else:
                     raise NotImplementedError
@@ -368,17 +369,17 @@ class AbstractOptimizer:
 
                 # start solve
                 if opt_.sub_fidelity_models != MAIN_FIDELITY_NAME:
-                    logger.info(f'fidelity: ({opt_.sub_fidelity_name})')
-                logger.info('入力:')
+                    logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
+                logger.info(_('input variables:'))
                 logger.info(parameters)
 
                 # ===== update FEM parameter =====
-                logger.info(f'変数を更新...')
+                logger.info(_('updating variables...'))
                 opt_.fem.update_parameter(variables_pass_to_fem)
                 opt_._check_and_raise_interruption()
 
                 # ===== evaluate hard constraint =====
-                logger.info(f'拘束関数を計算...')
+                logger.info(_('evaluating constraint functions...'))
 
                 hard_c = TrialConstraintOutput()
                 try:
@@ -388,8 +389,12 @@ class AbstractOptimizer:
                     _log_hidden_constraint(e)
                     record.c = hard_c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = 'Hidden constraint violation hard constraint evaluation: ' \
-                                     + create_err_msg_from_exception(e)
+                    record.message = (
+                            _('Hidden constraint violation '
+                              'during hard constraint function '
+                              'evaluation: ')
+                            + create_err_msg_from_exception(e)
+                    )
 
                     raise e
 
@@ -398,13 +403,14 @@ class AbstractOptimizer:
                 if len(violation_names) > 0:
                     record.c = hard_c
                     record.state = TrialState.hard_constraint_violation
-                    record.message = f'Hard constraint violation: ' \
-                                     + ', '.join(violation_names)
+                    record.message = (
+                            _('Hard constraint violation: ')
+                            + ', '.join(violation_names))
 
                     raise HardConstraintViolation
 
                 # ===== update FEM =====
-                logger.info(f'解析...')
+                logger.info(_('Solving FEM...'))
 
                 try:
                     opt_.fem.update()
@@ -418,13 +424,14 @@ class AbstractOptimizer:
                     _log_hidden_constraint(e)
                     record.c = hard_c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = 'Hidden constraint violation in FEM update: ' \
-                                     + create_err_msg_from_exception(e)
+                    record.message = (
+                            _('Hidden constraint violation in FEM update: ')
+                            + create_err_msg_from_exception(e))
 
                     raise e
 
                 # ===== evaluate y =====
-                logger.info(f'目的関数を計算...')
+                logger.info(_('evaluating objective functions...'))
 
                 try:
                     y: TrialOutput = opt_._y()
@@ -437,13 +444,15 @@ class AbstractOptimizer:
                     _log_hidden_constraint(e)
                     record.c = hard_c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = 'Hidden constraint violation during objective function evaluation: ' \
-                                     + create_err_msg_from_exception(e)
+                    record.message = (
+                            _('Hidden constraint violation during '
+                              'objective function evaluation: ')
+                            + create_err_msg_from_exception(e))
 
                     raise e
 
                 # ===== evaluate soft constraint =====
-                logger.info(f'残りの拘束関数を計算...')
+                logger.info(_('evaluating remaining constraints...'))
 
                 soft_c = TrialConstraintOutput()
                 try:
@@ -460,8 +469,10 @@ class AbstractOptimizer:
                     record.y = y
                     record.c = _c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = 'Hidden constraint violation during soft constraint function evaluation: ' \
-                                     + create_err_msg_from_exception(e)
+                    record.message = (
+                            _('Hidden constraint violation during '
+                              'soft constraint function evaluation: ')
+                            + create_err_msg_from_exception(e))
 
                     raise e
 
@@ -473,7 +484,7 @@ class AbstractOptimizer:
                 # get values as minimize
                 y_internal: dict = opt_._convert_y(y)
 
-                logger.info('出力:')
+                logger.info(_('output:'))
                 logger.info(y)
                 record.y = y
                 record.c = c
@@ -588,14 +599,27 @@ class AbstractOptimizer:
 
                     import sys
                     from traceback import print_tb
-                    print(f'===== Exception raised in worker {worker_idx} =====', file=sys.stderr)
+                    print(
+                        _(
+                            '===== Exception raised in worker {worker_idx} =====',
+                            worker_idx=worker_idx
+                        ),
+                        file=sys.stderr
+                    )
                     print_tb(exc_tb)
-                    print(f'{exc_type.__name__}: {exc_val}', file=sys.stderr)
+                    print(
+                        _(
+                            '{name}: {exc_val}',
+                            name=exc_type.__name__,
+                            exc_val=exc_val
+                        ),
+                        file=sys.stderr
+                    )
 
                 else:
                     self.worker_status.value = WorkerStatus.finished
 
-        logger.info(f'worker {worker_idx} started')
+        logger.info(_('worker {worker_idx} started', worker_idx=worker_idx))
 
         with SettingStatusFinished():
 
@@ -628,7 +652,7 @@ class AbstractOptimizer:
 
             self.run()
 
-        logger.info(f'worker {worker_idx} successfully finished!')
+        logger.info(_('worker {worker_idx} successfully finished!', worker_idx=worker_idx))
 
     def _logging(self):
 

@@ -5,7 +5,6 @@ import os
 import inspect
 import tempfile
 import warnings
-import datetime
 from time import sleep
 from contextlib import nullcontext
 
@@ -16,8 +15,8 @@ from optuna.samplers import TPESampler
 from optuna.study import MaxTrialsCallback
 from optuna_integration.dask import DaskStorage
 
+from pyfemtet._i18n import Msg
 from pyfemtet.opt.history.history import *
-from pyfemtet.opt.problem import *
 from pyfemtet.opt.interface import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.variable_manager import *
@@ -445,8 +444,11 @@ class OptunaOptimizer(AbstractOptimizer):
             # if not automatically-given arguments,
             # show warning
             elif k not in ('seed', 'constraints_func'):
-                logger.warning(f'与えられた引数 {k} はサンプラー {self.sampler_class.__name__} の'
-                               f'引数に含まれません。無視されます。')
+                logger.warning(
+                    Msg.F_WARN_INVALID_ARG_FOR_SAMPLER(
+                        k, self.sampler_class.__name__
+                    )
+                )
 
             # else, ignore it
             else:

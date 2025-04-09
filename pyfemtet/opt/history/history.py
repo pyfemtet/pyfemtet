@@ -883,7 +883,9 @@ class Records:
                 # write df from line 3
                 df.to_csv(f, index=False, encoding=ENCODING, lineterminator='\n')
         except PermissionError:
-            logger.error('csv に書き込みできません！')
+            logger.warning(
+                Msg.F_WARN_HISTORY_CSV_NOT_ACCESSIBLE(path)
+            )
 
     def append(self, record: Record) -> pd.Series:
 

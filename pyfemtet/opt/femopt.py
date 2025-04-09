@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import _pyfemtet
 
+from pyfemtet._i18n import _
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.optimizer import *
 from pyfemtet.opt.worker_status import *
@@ -24,26 +25,31 @@ class FEMOpt:
             with_monitor: bool = True,
     ) -> None:
 
-        logger.info(f'===== pyfemtet version {_pyfemtet.__version__} =====')
+        logger.info(
+            _(
+                '===== pyfemtet version {ver} =====',
+                ver=_pyfemtet.__version__,
+            )
+        )
         client: Client
         if n_parallel == 1:
             cluster = nullcontext()
             # noinspection PyTypeChecker
             client = DummyClient()
         else:
-            logger.info(f'Launching processes...')
+            logger.info(_('Launching processes...'))
             cluster = LocalCluster(
                 n_workers=n_parallel - 1,
                 threads_per_worker=1 if n_parallel > 1 else None,
                 processes=True if n_parallel > 1 else False,
             )
 
-            logger.info(f'Connecting cluster...')
+            logger.info(_('Connecting cluster...'))
             client = Client(
                 cluster,
             )
 
-        logger.info(f'Launching threads...')
+        logger.info(_('Launching threads...'))
         executor_workers = 3  # main, save_history, watch_status
         if with_monitor:
             executor_workers += 1
@@ -54,7 +60,7 @@ class FEMOpt:
 
         with cluster, client, self.opt.history, executor:
 
-            logger.info(f'Setting up...')
+            logger.info(_('Setting up...'))
 
             # finalize history
             self.opt._load_problem_from_fem()
@@ -79,7 +85,7 @@ class FEMOpt:
 
             # Setting up monitor
             if with_monitor:
-                logger.info(f'Launching Monitor...')
+                logger.info(_('Launching Monitor...'))
                 # noinspection PyTypeChecker,PyUnusedLocal
                 monitor_future = executor.submit(
                     main,
@@ -91,7 +97,7 @@ class FEMOpt:
             else:
                 monitor_future = None
 
-            logger.info(f'Setting up optimization problem...')
+            logger.info(_('Setting up optimization problem...'))
             entire_status.value = WorkerStatus.running
 
             # Run on cluster
@@ -127,7 +133,15 @@ class FEMOpt:
                         self.opt.history.save()
                         logger.debug('History saved!')
                     except PermissionError:
-                        logger.error("書き込みできません。")
+                        logger.error(
+                            _('Cannot save history. '
+                              'The most common reason is '
+                              'that the csv is opened by '
+                              'another program (such as Excel). '
+                              'Please free {path} or lost the '
+                              'optimization history.',
+                              path=self.opt.history.path)
+                        )
                     if entire_status.value >= WorkerStatus.finished:
                         break
                 logger.debug('History save thread finished!')
@@ -169,7 +183,7 @@ class FEMOpt:
                 future_saving.result()
                 future_watching.result()
 
-        logger.info('All processes are terminated.')
+        logger.info(_('All processes are terminated.'))
 
 
 def debug_1():
@@ -221,7 +235,7 @@ def substrate_size(Femtet):
     substrate_w = Femtet.GetVariableValue('substrate_w')
     substrate_d = Femtet.GetVariableValue('substrate_d')
 
-    assert get_worker() is not None
+    # assert get_worker() is not None
 
     return substrate_w * substrate_d  # 単位: mm2
 
@@ -242,14 +256,14 @@ def debug_2():
     opt.add_parameter(name="substrate_d", initial_value=60, lower_bound=34, upper_bound=60)
     opt.add_objective(name='基板サイズ(mm2)', fun=substrate_size)
 
-    opt.n_trials = 5
-    opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test.csv')
+    opt.n_trials = 1
+    # opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test.csv')
 
     femopt = FEMOpt()
 
     femopt.opt = opt
 
-    femopt.optimize(n_parallel=2)
+    femopt.optimize(n_parallel=1)
 
 
 if __name__ == '__main__':

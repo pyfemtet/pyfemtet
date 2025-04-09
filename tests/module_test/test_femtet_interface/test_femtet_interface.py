@@ -43,7 +43,7 @@ def test_run_femtet_interface():
         )
 
 
-@pytest.mark.exclude
+@pytest.mark.skip(reason='requires manual control')
 def test_femtet_interface_api_calling():
 
     fem = FemtetInterface(allow_without_project=True)

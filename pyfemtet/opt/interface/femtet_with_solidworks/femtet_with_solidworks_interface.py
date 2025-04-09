@@ -112,6 +112,6 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
         # ここでモデルを完全に再構築できる
         FemtetInterface.update_model(self)
 
-    def close(self, timeout=1, force=True):
+    def close(self, timeout=15, force=True):
         SolidworksInterface.close(self)
         FemtetInterface.close(self, timeout, force)

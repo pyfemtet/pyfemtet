@@ -59,7 +59,7 @@ class SolidworksInterface(COMInterface):
         self._original_sldprt_path = self.sldprt_path
 
     def connect_sw(self):
-        logger.info('Solidworks を起動、または接続しています...')
+        logger.info(Msg.SW_CONNECTING)
         self.swApp = DispatchEx('SLDWORKS.Application')
         self.swApp.Visible = self.solidworks_visible
 
@@ -149,11 +149,18 @@ class SolidworksInterface(COMInterface):
                 raise ModelError(Msg.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED)
 
     def close(self):
+        if not hasattr(self, 'swApp'):
+            return
+
+        if self.swApp is None:
+            return
+
         with Lock(self._access_sw_lock_name):
-            logger.info('Solidworks モデルを閉じています...')
+            model_name = os.path.basename(self.sldprt_path)
+            logger.info(Msg.F_SW_CLOSING_MODEL(model_name))
             # 最後の Doc ならばプロセスを落とす仕様？
             self.swApp.QuitDoc(os.path.basename(self.sldprt_path))
-            logger.info('Solidworks モデルを閉じました。')
+            logger.info(Msg.F_SW_MODEL_CLOSED(model_name))
             sleep(3)
 
 

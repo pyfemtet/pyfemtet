@@ -5,6 +5,8 @@ from win32com.client import CDispatch
 from femtetutils import util
 import psutil
 
+from pyfemtet._i18n import _
+
 from pyfemtet._util.helper import *
 from pyfemtet._util.process_util import _get_pid
 from pyfemtet._util.femtet_version import _version
@@ -42,16 +44,28 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
                 name='Femtet.Exit()',
                 warning_time_sec=timeout,
                 warning_fun=lambda: logger.warning(
-                    f'Femtet.Exit() が {timeout} 以内に終了していません。'
-                    f'Femtet で予期せずダイアログ等が開いている場合、'
-                    f'入力待ちのため処理が終了しない場合があります。'
-                    f'確認してください。')
+                    _(
+                        'Femtet.Exit() does not finished in '
+                        '{timeout} sec. Most common reason is '
+                        'that a dialog is opening in Femtet '
+                        'and waiting user input. Please close '
+                        'the dialog if it exists.',
+                        timeout=timeout
+                    ),
+                    # f'Femtet.Exit() が {timeout} 以内に終了していません。'
+                    # f'Femtet で予期せずダイアログ等が開いている場合、'
+                    # f'入力待ちのため処理が終了しない場合があります。'
+                    # f'確認してください。'
+                )
             ):
                 succeeded = Femtet.Exit(force)
 
         except AttributeError:
-            raise AttributeError('Macro version is not consistent to the one of Femtet.exe. '
-                                 'Please consider ``Enable Macros`` to fix it.')
+            raise AttributeError(
+                _('Macro version is not consistent to '
+                  'the one of Femtet.exe. Please consider to'
+                  'execute ``Enable Macros`` of current Femtet '
+                  'version to fix it.'))
 
     # そうでなければ強制終了する
     else:
@@ -64,7 +78,8 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
             start = time()
             while psutil.pid_exists(pid):
                 if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
-                    # logger.error(Msg.ERR_CLOSE_FEMTET_FAILED)
+                    logger.error(_('Failed to close Femtet in '
+                                   '30 seconds.'))
                     succeeded = False
                     break
                 sleep(1)

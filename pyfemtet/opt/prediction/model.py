@@ -11,7 +11,6 @@ from pyfemtet.opt.prediction.botorch_utils import *
 from pyfemtet.opt.prediction.gpytorch_modules_extension import get_covar_module_with_dim_scaled_prior_extension
 
 
-
 __all__ = [
     'PyFemtetModel',
     'AbstractModel',

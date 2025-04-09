@@ -3,6 +3,8 @@ import warnings
 from time import time, sleep
 from threading import Thread
 
+from pyfemtet._i18n import _
+
 __all__ = [
     'float_',
     'time_counting',
@@ -40,7 +42,11 @@ class _TimeCounting:
         self.warning_fun = warning_fun
         if self.warning_time_sec is not None:
             if warning_message is None and warning_fun is None:
-                self.warning_message = f'{self.name} が {self.warning_time_sec} 秒以内に終わっていません。'
+                self.warning_message = _(
+                    '{name} does not finished in {timeout} seconds.',
+                    name=self.name,
+                    timeout=self.warning_time_sec
+                )
 
         self._thread = Thread(target=self._time_count, daemon=True)
         self._should_exit = False
