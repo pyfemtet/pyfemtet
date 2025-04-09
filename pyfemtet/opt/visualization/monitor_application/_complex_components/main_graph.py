@@ -445,9 +445,7 @@ class MainGraph(AbstractPage):
                 obj_names: tuple[str],
                 current_figure: dict | None,
         ):
-            from pprint import pprint
-            pprint(current_figure)
-
+            # noinspection PyBroadException
             try:
                 kwargs = {}
                 if active_tab_id == self.TAB_ID_OBJECTIVE_PLOT:
@@ -468,8 +466,7 @@ class MainGraph(AbstractPage):
                         current_figure['layout'],
                     )
 
-            except Exception as e:
-                print(e)
+            except Exception:
                 figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
 
             return figure, length
