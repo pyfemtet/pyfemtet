@@ -445,22 +445,32 @@ class MainGraph(AbstractPage):
                 obj_names: tuple[str],
                 current_figure: dict | None,
         ):
-            kwargs = {}
-            if active_tab_id == self.TAB_ID_OBJECTIVE_PLOT:
-                if not is_3d:
-                    obj_names = obj_names[:-1]
-                kwargs = dict(
-                    obj_names=obj_names
-                )
-            figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
+            from pprint import pprint
+            pprint(current_figure)
 
-            if current_figure is not None:
-                if len(self.application.history.obj_names) == 1:
-                    if 'xaxis' in current_figure['layout']:
-                        current_figure['layout'].pop('xaxis')
-                figure.update_layout(
-                    current_figure['layout'],
-                )
+            try:
+                kwargs = {}
+                if active_tab_id == self.TAB_ID_OBJECTIVE_PLOT:
+                    if not is_3d:
+                        obj_names = obj_names[:-1]
+                    kwargs = dict(
+                        obj_names=obj_names
+                    )
+                figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
+
+                if current_figure is not None:
+                    if len(self.application.history.obj_names) == 1:
+                        if 'xaxis' in current_figure['layout']:
+                            current_figure['layout'].pop('xaxis')
+                    if 'selections' in current_figure['layout']:
+                        current_figure['layout'].pop('selections')
+                    figure.update_layout(
+                        current_figure['layout'],
+                    )
+
+            except Exception as e:
+                print(e)
+                figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
 
             return figure, length
 

@@ -255,7 +255,7 @@ def debug_2():
     opt.add_parameter(name="substrate_w", initial_value=40, lower_bound=22, upper_bound=60)
     opt.add_parameter(name="substrate_d", initial_value=60, lower_bound=34, upper_bound=60)
     opt.add_objective(name='基板サイズ(mm2)', fun=substrate_size)
-    # opt.add_objective(name='obj2', fun=substrate_size)
+    opt.add_objective(name='obj2', fun=substrate_size)
     # opt.add_objective(name='obj3', fun=substrate_size)
 
     opt.n_trials = 10
