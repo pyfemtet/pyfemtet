@@ -15,7 +15,7 @@ from pythoncom import com_error
 
 from pyfemtet.opt.visualization.monitor_application._base_application import AbstractPage
 from pyfemtet.opt.interface import FemtetInterface
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 
 __all__ = [

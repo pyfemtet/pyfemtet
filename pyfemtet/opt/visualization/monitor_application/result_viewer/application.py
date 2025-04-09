@@ -2,7 +2,7 @@ from pyfemtet.opt.visualization.monitor_application._base_application import *
 from pyfemtet.opt.visualization.monitor_application._common_pages import *
 from pyfemtet.opt.visualization.monitor_application.result_viewer.pages import *
 
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 
 class ResultViewerApplication(PyFemtetApplicationBase):

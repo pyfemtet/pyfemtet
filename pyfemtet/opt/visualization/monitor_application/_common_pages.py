@@ -7,7 +7,7 @@ from pyfemtet.opt.visualization.monitor_application._wrapped_components import d
 from pyfemtet.opt.visualization.monitor_application._base_application import AbstractPage
 from pyfemtet.opt.visualization.monitor_application._complex_components.pm_graph import *
 
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 __all__ = [
     'PredictionModelPage',

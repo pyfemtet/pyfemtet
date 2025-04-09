@@ -26,7 +26,7 @@ from pyfemtet.opt.prediction.model import *
 from pyfemtet.opt.prediction.helper import *
 from pyfemtet.opt.visualization.plotter.pm_graph_creator import plot2d, plot3d
 from pyfemtet.opt.visualization.monitor_application._base_application import AbstractPage, logger
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 
 __all__ = [

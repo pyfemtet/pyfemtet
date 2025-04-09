@@ -18,7 +18,7 @@ from pyfemtet.opt.visualization.monitor_application._complex_components.main_gra
 from pyfemtet.opt.visualization.monitor_application._complex_components.control_femtet import *
 from pyfemtet.opt.visualization.monitor_application._complex_components.alert_region import *
 
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 
 __all__ = [

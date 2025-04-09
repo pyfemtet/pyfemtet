@@ -23,7 +23,7 @@ import numpy as np
 
 from pyfemtet.opt.visualization.plotter import main_figure_creator
 from pyfemtet.opt.visualization.monitor_application._base_application import AbstractPage, logger
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 
 __all__ = [

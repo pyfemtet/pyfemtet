@@ -6,7 +6,7 @@ import plotly.express as px
 from pyfemtet._util.df_util import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.problem import MAIN_FIDELITY_NAME
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 
 __all__ = [

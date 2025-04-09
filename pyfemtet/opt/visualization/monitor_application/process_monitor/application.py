@@ -12,7 +12,7 @@ from pyfemtet.opt.visualization.monitor_application._base_application import *
 from pyfemtet.opt.visualization.monitor_application._common_pages import *
 from pyfemtet.opt.visualization.monitor_application.process_monitor.pages import *
 
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 
 logger = get_module_logger('opt.femopt', False)

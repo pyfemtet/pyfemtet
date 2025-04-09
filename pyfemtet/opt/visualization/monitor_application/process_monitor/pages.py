@@ -12,7 +12,7 @@ from pyfemtet.opt.visualization.monitor_application._base_application import *
 from pyfemtet.opt.visualization.monitor_application._complex_components.main_graph import *
 
 from pyfemtet.opt.worker_status import *
-from _pyfemtet._message import Msg
+from pyfemtet._i18n import Msg
 
 if TYPE_CHECKING:
     from pyfemtet.opt.visualization.monitor_application.process_monitor.application import ProcessMonitorApplication
