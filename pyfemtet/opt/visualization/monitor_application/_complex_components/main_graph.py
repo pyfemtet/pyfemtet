@@ -425,7 +425,7 @@ class MainGraph(AbstractPage):
             Output(self.data_length.id, self.data_length_prop),  # To determine whether Process Monitor should update the graph, the main graph remembers the current amount of data.
             inputs=dict(
                 active_tab_id=Input(self.tabs.id, 'active_tab'),
-                _=Input(self.dummy, 'children'),
+                _dummy=Input(self.dummy, 'children'),
                 is_3d=Input(self.switch_3d, 'value'),
                 obj_names=(
                     Input(self.axis1_dropdown, 'label'),
@@ -433,9 +433,18 @@ class MainGraph(AbstractPage):
                     Input(self.axis3_dropdown, 'label'),
                 ),
             ),
+            state=dict(
+                current_figure=State(self.graph.id, 'figure'),
+            ),
             prevent_initial_call=False,
         )
-        def redraw_main_graph(active_tab_id, _, is_3d, obj_names):
+        def redraw_main_graph(
+                active_tab_id: str,
+                _dummy,
+                is_3d: bool,
+                obj_names: tuple[str],
+                current_figure: dict | None,
+        ):
             kwargs = {}
             if active_tab_id == self.TAB_ID_OBJECTIVE_PLOT:
                 if not is_3d:
@@ -444,6 +453,15 @@ class MainGraph(AbstractPage):
                     obj_names=obj_names
                 )
             figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
+
+            if current_figure is not None:
+                if len(self.application.history.obj_names) == 1:
+                    if 'xaxis' in current_figure['layout']:
+                        current_figure['layout'].pop('xaxis')
+                figure.update_layout(
+                    current_figure['layout'],
+                )
+
             return figure, length
 
         # ===== Save Selection =====
@@ -582,7 +600,9 @@ class MainGraph(AbstractPage):
                     img_url = 'data:image/jpeg;base64, ' + encoded_image
         return html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
 
-    def get_fig_by_tab_id(self, tab_id, with_length=False, kwargs: dict = None):
+    def get_fig_by_tab_id(self, tab_id, with_length=False, kwargs: dict = None) -> (
+        go.Figure | tuple[go.Figure, int]
+    ):
         # If the history is not loaded, do nothing
         if self.application.history is None:
             raise PreventUpdate
