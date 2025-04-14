@@ -10,6 +10,7 @@ from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler imp
     qparego_candidates_func,
     ehvi_candidates_func,
 )
+from pyfemtet.opt.exceptions import SolveError
 
 
 def constraint(_: NoFEM, opt_: OptunaOptimizer):
@@ -17,8 +18,14 @@ def constraint(_: NoFEM, opt_: OptunaOptimizer):
     return np.abs(x).sum()
 
 
+def eval_hidden_constraint(x: np.ndarray):
+    if np.all(x > 0):
+        raise SolveError
+
+
 def objective(_, opt_: OptunaOptimizer, i_: int):
     x: np.array = opt_.get_variables('values')
+    eval_hidden_constraint(x)
     return x[i_] ** 2
 
 
@@ -30,9 +37,10 @@ def main(can_fun, d, m, explicit_constraint):
     opt.fem = fem
     opt.sampler_class = PoFBoTorchSampler
     opt.sampler_kwargs = dict(
-        candidates_func=can_fun
+        candidates_func=can_fun,
+        n_startup_trials=3,
     )
-    opt.n_trials = 11
+    opt.n_trials = 6
     opt.seed = 42
 
     for i in range(d):
@@ -73,8 +81,8 @@ def test_ehvi_candidates_func():
 
 
 if __name__ == '__main__':
-    # test_logei_candidates_func()
-    # test_qehvi_candidates_func()
-    # test_qehvi_candidates_func()
-    # test_qparego_candidates_func()
+    test_logei_candidates_func()
+    test_qehvi_candidates_func()
+    test_qehvi_candidates_func()
+    test_qparego_candidates_func()
     test_ehvi_candidates_func()

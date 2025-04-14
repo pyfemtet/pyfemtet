@@ -513,7 +513,7 @@ def debug_1():
     #     constraints_func=self._constraint,
     #     pof_config=PoFConfig(
     #         # consider_pof=False,
-    #         # feasibility_threshold='mean',
+    #         # feasibility_cdf_threshold='mean',
     #     ),
     #     partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
     #         # gen_candidates='scipy',

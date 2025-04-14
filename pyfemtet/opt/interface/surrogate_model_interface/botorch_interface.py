@@ -5,8 +5,9 @@ from scipy.stats.distributions import norm
 
 from pyfemtet._i18n import Msg
 from pyfemtet.opt.history import *
+from pyfemtet.opt.exceptions import *
+
 from pyfemtet.opt.prediction.model import PyFemtetModel, SingleTaskGPModel
-from pyfemtet.opt.exceptions import *  # should import after dask importing
 
 from pyfemtet.opt.interface.surrogate_model_interface.surrogate_interface import AbstractSurrogateModelInterfaceBase
 
@@ -52,7 +53,13 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
 
     _debug: bool = False
 
-    def __init__(self, history_path: str):
+    def __init__(
+            self,
+            history_path: str,
+            observation_noise: float | str | None = None,
+            feasibility_noise: float | str | None = None,
+            feasibility_cdf_threshold: float | str = 0.5,  # or 'sample_mean'
+    ):
         AbstractSurrogateModelInterfaceBase.__init__(self, history_path, None)
 
         self.model = SingleTaskGPModel()
@@ -62,7 +69,7 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         self.train_history_c = History()
         self.train_history_c.load_csv(history_path, with_finalize=True)
         self.pof_threshold = 0.5
-        self.cdf_threshold = 0.5  # float or 'sample_mean'
+        self.feasibility_cdf_threshold = feasibility_cdf_threshold
 
         # use feasibility as a single objective
         self.train_history_c.obj_names = ['feasibility']
@@ -82,7 +89,7 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         self.pyfemtet_model.fit(
             history=self.train_history,
             df=df,
-            observation_noise='no',
+            observation_noise=observation_noise,
         )
 
         # training model_c
@@ -92,7 +99,8 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
             df=df_c,
             # observation_noise=None,
             # observation_noise='no',
-            observation_noise=0.001,
+            # observation_noise=0.001,
+            observation_noise=feasibility_noise,
             # covar_module_settings=dict(
             #     name='matern_kernel_with_gamma_prior',
             #     nu=2.5,
@@ -106,9 +114,9 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
             )
         )
 
-        # set auto cdf_threshold
-        if self.cdf_threshold == 'sample_mean':
-            self.cdf_threshold = df_c['feasibility'].mean()
+        # set auto feasibility_cdf_threshold
+        if self.feasibility_cdf_threshold == 'sample_mean':
+            self.feasibility_cdf_threshold = df_c['feasibility'].mean()
 
         if self._debug:
             self._debug_df_c = df_c
@@ -144,10 +152,10 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
                     x_plot[:, j] = xx[1].ravel()
 
                     y_mean, y_std = self.pyfemtet_model_c.predict(x_plot)
-                    # cdf_threshold = self.cdf_threshold
-                    # cdf_threshold = 0.5
+                    # feasibility_cdf_threshold = self.feasibility_cdf_threshold
+                    # feasibility_cdf_threshold = 0.5
                     cdf_threshold = 0.25  # 不明なところは pof が 1 近くにすればあとは ACQF がうまいことやってくれる
-                    # cdf_threshold = self.cdf_threshold * 0.5
+                    # feasibility_cdf_threshold = self.feasibility_cdf_threshold * 0.5
                     pof = 1 - norm.cdf(cdf_threshold, y_mean, y_std)
 
                     x1 = x_list[i]
@@ -219,12 +227,12 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         f_mean, f_std = self.pyfemtet_model_c.predict(x)
         f_mean, f_std = f_mean[0][0], f_std[0][0]
 
-        if isinstance(self.cdf_threshold, float):
-            cdf_threshold = self.cdf_threshold
+        if isinstance(self.feasibility_cdf_threshold, float):
+            cdf_threshold = self.feasibility_cdf_threshold
         else:
             raise NotImplementedError(
                 f'self.cdf_threshold must be float, '
-                f'passed {self.cdf_threshold}'
+                f'passed {self.feasibility_cdf_threshold}'
             )
 
         pof = 1 - norm.cdf(cdf_threshold, f_mean, f_std)

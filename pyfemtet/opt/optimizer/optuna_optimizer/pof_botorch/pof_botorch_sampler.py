@@ -240,7 +240,7 @@ class PartialOptimizeACQFConfig:
                 gen_candidates = gen_candidates_scipy
 
             elif gen_candidates == 'torch':
-                gen_candidates = gen_candidates_torch
+                # gen_candidates = gen_candidates_torch
                 raise NotImplementedError('`gen_candidates_torch` cannot handle '
                                           'nonlinear inequality constraint.')
             else:
@@ -817,11 +817,22 @@ def _get_default_candidates_func(
 class PoFConfig:
     consider_pof: bool = True
     consider_explicit_hard_constraint: bool = True
-    states_to_consider_pof: list[PFTrialState] = None
-    feasibility_threshold: float | str = 0.5  # or 'mean'
+    _states_to_consider_pof: list[PFTrialState] = \
+        dataclasses.field(
+            default_factory=lambda: [
+                PFTrialState.hard_constraint_violation,
+                *PFTrialState.get_hidden_constraint_violation_states()
+            ]
+        )
+    feasibility_cdf_threshold: float | str = 0.5  # or 'sample_mean'
     feasibility_noise: float | str | None = None  # 'no' to fixed minimum noise
 
 
+# TODO:
+#  log の場合は base acqf との足し算にしていたが、
+#  pof が小さすぎる場合に -inf になるので一旦取りやめ
+#  clamp_min で勾配の問題が起きなければそっちのほうが健全
+# noinspection PyUnusedLocal
 def acqf_patch_factory(acqf_class, is_log_acqf=False):
 
     class ACQFWithPoF(acqf_class):
@@ -843,10 +854,10 @@ def acqf_patch_factory(acqf_class, is_log_acqf=False):
             normal = Normal(mean, sigma)
 
             # threshold を決める
-            if isinstance(self.config.feasibility_threshold, float):
-                threshold = self.config.feasibility_threshold
-            elif isinstance(self.config.feasibility_threshold, str):
-                if self.config.feasibility_threshold == 'mean':
+            if isinstance(self.config.feasibility_cdf_threshold, float):
+                threshold = self.config.feasibility_cdf_threshold
+            elif isinstance(self.config.feasibility_cdf_threshold, str):
+                if self.config.feasibility_cdf_threshold == 'sample_mean':
                     train_y: torch.Tensor = self.model_c.train_targets
                     threshold = train_y.mean()
                 else:
@@ -940,50 +951,34 @@ class PoFBoTorchSampler(BoTorchSampler):
         # hard constraint 違反またはモデル破綻で prune された trial
         pruned_trials: list[FrozenTrial] = study.get_trials(deepcopy=False, states=(TrialState.PRUNED,))
 
-        # 分割
-        succeeded_trials: list[FrozenTrial] = []
-        hard_v_trials: list[FrozenTrial] = []
-        soft_v_trials: list[FrozenTrial] = []
-        hidden_v_trials: list[FrozenTrial] = []
+        # PoF の考慮に soft constraint は選べるが、デフォルトとしては選ぶべきではないので警告
+        if self.pof_config._states_to_consider_pof != PoFConfig()._states_to_consider_pof:
+            warnings.warn('非推奨のパラメータを変更しています。')
+
+        # 分別
+        feasible_trials: list[FrozenTrial] = []
+        infeasible_trials: list[FrozenTrial] = []
         for trial in (completed_trials + pruned_trials):
             state: PFTrialState = OptunaAttribute.get_pf_state_from_trial_attr(
                 trial.user_attrs[OptunaAttribute.main_fidelity_key()]
             )
-            if state == PFTrialState.succeeded:
-                succeeded_trials.append(trial)
-            elif state == PFTrialState.hard_constraint_violation:
-                hard_v_trials.append(trial)
-            elif state == PFTrialState.soft_constraint_violation:
-                soft_v_trials.append(trial)
-            elif isinstance(
-                    PFTrialState.get_corresponding_exception_from_state(state),
-                    _HiddenConstraintViolation):
-                hidden_v_trials.append(trial)
+
+            if state in self.pof_config._states_to_consider_pof:
+                infeasible_trials.append(trial)
+
             else:
-                warnings.warn(f'Unknown trial state {state} is detected and ignored in {self.__class__.__name__}.')
+                # TODO: 意図としてはこうあるべきだが、テスト時以外はこの確認を行わない
+                assert state in (PFTrialState.succeeded, PFTrialState.soft_constraint_violation), \
+                    (state, self.pof_config._states_to_consider_pof)
+
+                feasible_trials.append(trial)
 
         # 統合
+        trials: list[FrozenTrial] = feasible_trials + infeasible_trials
+
+        # 対応する Feasibility を作成
         Feasibility = int
-        trials: list[FrozenTrial] = succeeded_trials
-        corresponding_feas: list[Feasibility] = [1 for _ in range(len(succeeded_trials))]
-        if self.pof_config.states_to_consider_pof is None:
-            trials.extend(hard_v_trials)
-            corresponding_feas.extend([0 for _ in range(len(hard_v_trials))])
-            # trials.extend(soft_v_trials)
-            # corresponding_feas.extend([0 for _ in range(len(soft_v_trials))])
-            trials.extend(hidden_v_trials)
-            corresponding_feas.extend([0 for _ in range(len(hidden_v_trials))])
-        else:
-            if PFTrialState.hard_constraint_violation in self.pof_config.states_to_consider_pof:
-                trials.extend(hard_v_trials)
-                corresponding_feas.extend([0 for _ in range(len(hard_v_trials))])
-            if PFTrialState.soft_constraint_violation in self.pof_config.states_to_consider_pof:
-                trials.extend(soft_v_trials)
-                corresponding_feas.extend([0 for _ in range(len(soft_v_trials))])
-            if any([state_ in self.pof_config.states_to_consider_pof
-                    for state_ in PFTrialState.get_hidden_constraint_violation_states()]):
-                trials.extend(hidden_v_trials)
-                corresponding_feas.extend([0 for _ in range(len(hidden_v_trials))])
+        corresponding_feas: list[Feasibility] = [1 for __ in feasible_trials] + [0 for __ in infeasible_trials]
 
         # ===== bounds, params, feasibility の作成 =====
         # bounds: (d(+1), 2) shaped array
@@ -1207,7 +1202,7 @@ class PoFBoTorchSampler(BoTorchSampler):
                 mean = post.mean.detach()
                 sigma = post.variance.sqrt().detach()
                 normal = Normal(mean, sigma)
-                threshold = self.pof_config.feasibility_threshold
+                threshold = self.pof_config.feasibility_cdf_threshold
                 threshold = torch.tensor(threshold)
                 cdf = 1. - normal.cdf(threshold)
                 logger.debug(f'PoF is {cdf}')
