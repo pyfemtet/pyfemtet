@@ -174,10 +174,3 @@ def search_r(book_path, sheet_name, value):
 
 def search_c(book_path, sheet_name, value):
     return search_index(book_path, sheet_name, value)[1]
-
-
-if __name__ == '__main__':
-    os.chdir(os.path.dirname(__file__))
-    print(ParseAsParameter.parse('sample.xlsx', 'Sheet1'))
-    print(search_r('sample.xlsx', 'Sheet1', 'X2'))
-    print(search_c('sample.xlsx', 'Sheet1', '値'))

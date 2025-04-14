@@ -25,7 +25,6 @@ class _HiddenConstraintViolation(ExceptionDuringOptimization):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        print(cls)
         _HiddenConstraintViolation.__pyfemtet_subclasses__.append(cls)
 
 
