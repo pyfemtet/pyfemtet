@@ -104,9 +104,9 @@ class TrialState(StrEnum):
         return e
 
     @classmethod
-    def get_hidden_constraint_violation_states(cls):  # utility function for user
+    def get_hidden_constraint_violation_states(cls):
         return [cls.get_corresponding_state_from_exception(exception_type())
-                for exception_type in _HiddenConstraintViolation.__subclasses__]
+                for exception_type in _HiddenConstraintViolation.__pyfemtet_subclasses__]
 
 
 class DataFrameWrapper:

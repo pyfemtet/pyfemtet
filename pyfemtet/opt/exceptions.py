@@ -21,12 +21,12 @@ class FEMError(Exception): ...
 
 class _HiddenConstraintViolation(ExceptionDuringOptimization):
 
-    __subclasses__ = []
+    __pyfemtet_subclasses__ = []
 
-    @classmethod
-    def __subclasshook__(cls, __subclass):
-        cls.__subclasses__.append(__subclass)
-        return super().__subclasshook__(__subclass)
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        print(cls)
+        _HiddenConstraintViolation.__pyfemtet_subclasses__.append(cls)
 
 
 class ModelError(FEMError, _HiddenConstraintViolation): ...
