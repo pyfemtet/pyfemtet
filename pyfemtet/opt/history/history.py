@@ -318,27 +318,27 @@ class ColumnManager:
 
                     if isinstance(param, NumericParameter):
                         dtypes.update({prm_name: float})
-                        meta_columns.append('prm')
+                        meta_columns.append('prm.num.value')
 
                         f = CorrespondingColumnNameRuler.prm_lower_bound_name
                         dtypes.update({f(prm_name): float})
-                        meta_columns.append('prm_lower_bound')
+                        meta_columns.append('prm.num.lower_bound')
 
                         f = CorrespondingColumnNameRuler.prm_upper_bound_name
                         dtypes.update({f(prm_name): float})
-                        meta_columns.append('prm_upper_bound')
+                        meta_columns.append('prm.num.upper_bound')
 
                         f = CorrespondingColumnNameRuler.prm_step_name
                         dtypes.update({f(prm_name): float})
-                        meta_columns.append('prm_step')
+                        meta_columns.append('prm.num.step')
 
                     elif isinstance(param, CategoricalParameter):
                         dtypes.update({prm_name: object})
-                        meta_columns.append('prm')
+                        meta_columns.append('prm.cat.value')
 
                         f = CorrespondingColumnNameRuler.prm_choices_name
                         dtypes.update({f(prm_name): object})
-                        meta_columns.append('prm_choices')
+                        meta_columns.append('prm.cat.choices')
 
                     else:
                         raise NotImplementedError
@@ -427,12 +427,22 @@ class ColumnManager:
                 out.append(column_)
         return out
 
+    @classmethod
+    def _filter_prm_names(cls, columns, meta_columns) -> list[str]:
+        return (
+                cls._filter_columns('prm.num.value', columns, meta_columns)
+                + cls._filter_columns('prm.cat.value', columns, meta_columns)
+            )
+
     def filter_columns(self, meta_column) -> list[str]:
         columns = list(self.dtypes.keys())
         return self._filter_columns(meta_column, columns, self.meta_columns)
 
     def get_prm_names(self) -> list[str]:
-        return self.filter_columns('prm')
+        return (
+            self.filter_columns('prm.num.value')
+            + self.filter_columns('prm.cat.value')
+        )
 
     def get_obj_names(self) -> list[str]:
         return self.filter_columns('obj')
@@ -499,7 +509,7 @@ class ColumnManager:
     def _reconvert_objects(df: pd.DataFrame, meta_columns: list[str]):
         for column, meta_column in zip(df.columns, meta_columns):
             # list は csv を経由することで str になるので restore
-            if meta_column == 'prm_choices':
+            if meta_column == 'prm.cat.choices':
                 df[column] = [ast.literal_eval(d) for d in df[column]]
 
     @staticmethod
@@ -735,7 +745,11 @@ class Records:
         loaded_columns, loaded_meta_columns = self.loaded_df.columns, self.loaded_meta_columns
 
         # prm_names が過不足ないか
-        loaded_prm_names = set(self.column_manager._filter_columns('prm', loaded_columns, loaded_meta_columns))
+        loaded_prm_names = set(
+            self.column_manager._filter_prm_names(
+                loaded_columns, loaded_meta_columns
+            )
+        )
         prm_names = set(self.column_manager.get_prm_names())
         if not (len(loaded_prm_names - prm_names) == len(prm_names - loaded_prm_names) == 0):
             raise RuntimeError('Incompatible parameter setting.')
@@ -760,7 +774,7 @@ class Records:
             return
 
         loaded_columns, loaded_meta_columns = self.loaded_df.columns, self.loaded_meta_columns
-        loaded_prm_names = set(self.column_manager._filter_columns('prm', loaded_columns, loaded_meta_columns))
+        loaded_prm_names = set(self.column_manager._filter_prm_names(loaded_columns, loaded_meta_columns))
         loaded_obj_names = set(self.column_manager._filter_columns('obj', loaded_columns, loaded_meta_columns))
         loaded_cns_names = set(self.column_manager._filter_columns('cns', loaded_columns, loaded_meta_columns))
 
@@ -1007,7 +1021,7 @@ class History:
             df = self._records.loaded_df
             meta_columns = self._records.loaded_meta_columns
 
-            self.prm_names = ColumnManager._filter_columns('prm', df.columns, meta_columns)
+            self.prm_names = ColumnManager._filter_prm_names(df.columns, meta_columns)
             self.obj_names = ColumnManager._filter_columns('obj', df.columns, meta_columns)
             self.cns_names = ColumnManager._filter_columns('cns', df.columns, meta_columns)
             self.sub_fidelity_names = ColumnManager._get_sub_fidelity_names(df)

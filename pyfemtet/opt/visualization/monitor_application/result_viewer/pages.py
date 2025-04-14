@@ -26,6 +26,8 @@ __all__ = [
 ]
 
 
+# TODO: テスト
+
 class HomePage(AbstractPage):
 
     def __init__(self, title, rel_url='/'):
@@ -290,20 +292,12 @@ class HomePage(AbstractPage):
                 # get parameter and update model
                 df = self.application.get_df()
                 row = df[df['trial'] == trial]
-                meta_columns = np.array(self.application.history._records.column_manager.meta_columns)
-                idx = np.where(meta_columns == 'prm')[0]
+                prm_names = self.application.history.prm_names
+                prm_values = row[prm_names].values
+                x = {name: value for name, value in zip(prm_names, prm_values)}
 
-                names = np.array(row.columns)[idx]
-                values = np.array(row.iloc[:, idx]).ravel()
-
-                parameter = pd.DataFrame(
-                    dict(
-                        name=names,
-                        value=values,
-                    )
-                )
-
-                self.femtet_control.fem.update_model(parameter)
+                self.femtet_control.fem.update_parameter(x)
+                self.femtet_control.fem.update_model()
 
                 Femtet.SaveProject(Femtet.Project, True)
 

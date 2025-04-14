@@ -92,7 +92,7 @@ def parse_excel(book_path, sheet_name, keyword, required, optional, raise_if_no_
 
             df[key] = choices
 
-        dummy_meta_columns = ['prm_choices' if (column == key)
+        dummy_meta_columns = ['prm.cat.choices' if (column == key)
                               else ''
                               for column in df.columns]
 

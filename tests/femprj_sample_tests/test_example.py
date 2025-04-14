@@ -218,7 +218,7 @@ def _get_simplified_df_values(csv_path):
 
     prm_names = []
     for meta_data, col in zip(meta_header, df.columns):
-        if meta_data == 'prm':
+        if meta_data in ('prm.num.value', 'prm.cat.value'):
             prm_names.append(col)
 
     obj_names = []

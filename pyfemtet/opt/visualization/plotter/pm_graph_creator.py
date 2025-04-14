@@ -328,7 +328,7 @@ def _plot(
         count = (target_points == hyper_plane).astype(float).sum(axis=1)
         count = count + 1  # 0 になると困る
         # noinspection PyUnusedLocal
-        opacity = opacity * (count / count.max())
+        opacity = opacity * (count / count.max())  # FIXME: 0 除算エラーが取り切れていない場合がある
 
     def set_opacity(trace):
         if isinstance(trace, go.Scatter3d) or isinstance(trace, go.Scatter):

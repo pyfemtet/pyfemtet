@@ -1,26 +1,16 @@
-# type hint
-from dash.development.base_component import Component
-
 # callback
 from dash import Output, Input, State, no_update, callback_context, ALL
 from dash.exceptions import PreventUpdate
 
 # components
-from dash import dash_table
 from pyfemtet.opt.visualization.monitor_application._wrapped_components import html
 from pyfemtet.opt.visualization.monitor_application._wrapped_components import dcc, dbc
 
 # graph
-import pandas as pd
-# import plotly.express as px
 import plotly.graph_objs as go
 
 # the others
 from enum import Enum, auto
-import os
-import base64
-import json
-import numpy as np
 
 from pyfemtet.opt.prediction.model import *
 from pyfemtet.opt.prediction.helper import *
@@ -640,59 +630,3 @@ class PredictionModelGraph(AbstractPage):
                     ret[slider_style_list_key][idx] = current_styles[idx]
 
             return tuple(ret.values())
-
-    def create_formatted_parameter(self, row) -> Component:
-        meta_columns = self.application.history._records.column_manager.meta_columns
-        pd.options.display.float_format = '{:.4e}'.format
-        parameters = row.iloc[:, np.where(np.array(meta_columns) == 'prm')[0]]
-        names = parameters.columns
-        values = [f'{value:.3e}' for value in parameters.values.ravel()]
-        data = pd.DataFrame(dict(
-            name=names, value=values
-        ))
-        table = dash_table.DataTable(
-            columns=[{'name': col, 'id': col} for col in data.columns],
-            data=data.to_dict('records')
-        )
-        return table
-
-    def create_image_content_if_femtet(self, trial) -> Component:
-        img_url = None
-        meta_columns = self.application.history._records.column_manager.meta_columns
-        if meta_columns[0] != '':
-            extra_data = json.loads(meta_columns[0])
-            if 'femprj_path' in extra_data:
-                # get img path
-                femprj_path = extra_data['femprj_path']
-                model_name = extra_data['model_name']
-                femprj_result_dir = femprj_path.replace('.femprj', '.Results')
-                img_path = os.path.join(femprj_result_dir, f'{model_name}_trial{trial}.jpg')
-                if os.path.exists(img_path):
-                    # create encoded image
-                    with open(img_path, 'rb') as f:
-                        content = f.read()
-                    encoded_image = base64.b64encode(content).decode('utf-8')
-                    img_url = 'data:image/jpeg;base64, ' + encoded_image
-        return html.Img(src=img_url, style={"width": "200px"}) if img_url is not None else html.Div()
-
-    # def get_fig_by_tab_id(self, tab_id, with_length=False):
-    #     # If the history is not loaded, do nothing
-    #     if self.application.history is None:
-    #         raise PreventUpdate
-    #
-    #     # else, get creator by tab_id
-    #     if tab_id == 'default':
-    #         creator = self.figure_creators[0]['creator']
-    #     else:
-    #         creators = [d['creator'] for d in self.figure_creators if d['tab_id'] == tab_id]
-    #         if len(creators) == 0:
-    #             raise PreventUpdate
-    #         creator = creators[0]
-    #
-    #     # create figure
-    #     df = self.data_accessor()
-    #     fig = creator(self.application.history, df)
-    #     if with_length:
-    #         return fig, len(df)
-    #     else:
-    #         return fig

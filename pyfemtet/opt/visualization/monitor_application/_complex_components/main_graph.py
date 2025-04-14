@@ -560,13 +560,12 @@ class MainGraph(AbstractPage):
             return True, bbox, tooltip_layout, direction
 
     def create_formatted_parameter(self, row) -> Component:
-        meta_columns = self.application.history._records.column_manager.meta_columns
-        pd.options.display.float_format = '{:.4e}'.format
-        parameters = row.iloc[:, np.where(np.array(meta_columns) == 'prm')[0]]
-        names = parameters.columns
-        values = [f'{value:.3e}' for value in parameters.values.ravel()]
+
+        prm_names = self.application.history.prm_names
+        prm_values = row[prm_names].values.ravel()
+
         data = pd.DataFrame(dict(
-            parameter=names, value=values
+            parameter=prm_names, value=prm_values
         ))
         table = dash_table.DataTable(
             columns=[{'name': col, 'id': col} for col in data.columns],
