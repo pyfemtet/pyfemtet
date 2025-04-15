@@ -19,7 +19,7 @@ else:
     FemtetInterface = type('FemtetInterface', (NotAvailableForWindows,), {})
     FemtetWithSolidworksInterface = type('FemtetWithSolidworksInterface', (FemtetInterface,), {})
     FemtetWithNXInterface = type('FemtetWithNXInterface', (FemtetInterface,), {})
-    ExcelInterface = type('FemtetInterface', (NotAvailableForWindows,), {})
+    ExcelInterface = type('ExcelInterface', (NotAvailableForWindows,), {})
 
 from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
 from pyfemtet.opt.interface._surrogate._singletaskgp import PoFBoTorchInterface
