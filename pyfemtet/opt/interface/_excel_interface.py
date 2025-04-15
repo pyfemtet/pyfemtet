@@ -222,6 +222,8 @@ class ExcelInterface(FEMInterface):
 
     use_named_range: bool  # input を定義したシートにおいて input の値を名前付き範囲で指定するかどうか。
 
+    force_override_when_load: bool = False  # .py で add_... されている変数などを Excel の内容で上書きするかどうか。
+
     def __init__(
             self,
             input_xlsm_path: str or Path,
@@ -751,6 +753,13 @@ class ExcelInterface(FEMInterface):
             # name
             name = str(row[ParseAsParameter.name])
 
+            # if the variable is already added by
+            # add_parameter or add_expression,
+            # use it.
+            if not self.force_override_when_load:
+                if name in opt.variables.get_variables():
+                    continue
+
             # value
             value = float(row[ParseAsParameter.value])
 
@@ -821,6 +830,12 @@ class ExcelInterface(FEMInterface):
             # name
             name = str(row[ParseAsObjective.name])
 
+            # if the objective is already added by
+            # add_objective, use it.
+            if not self.force_override_when_load:
+                if name in opt.objectives.keys():
+                    continue
+
             # direction
             direction = row[ParseAsObjective.direction]
             assert not is_cell_value_empty(direction), 'direction is empty.'
@@ -864,6 +879,12 @@ class ExcelInterface(FEMInterface):
 
             # name
             name = str(row[ParseAsConstraint.name])
+
+            # if the constraint is already added by
+            # add_constraint, use it.
+            if not self.force_override_when_load:
+                if name in opt.constraints.keys():
+                    continue
 
             # lb (optional)
             lb = None
