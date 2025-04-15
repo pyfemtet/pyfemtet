@@ -15,6 +15,7 @@ except ModuleNotFoundError:
     Constants = type('NoConstants', (object,), {})
     constants = Constants()
 
+from pyfemtet._i18n import _
 from pyfemtet.opt.variable_manager import *
 from pyfemtet._util.helper import *
 if TYPE_CHECKING:
@@ -30,6 +31,7 @@ __all__ = [
     'Objective',
     'ObjectiveResult',
     'Objectives',
+    'ObjectivesFunc',
     'Constraint',
     'ConstraintResult',
     'Constraints',
@@ -143,6 +145,71 @@ class ObjectiveResult:
 
     def __repr__(self):
         return str(self.value)
+
+
+class ObjectivesFunc:
+    """複数の値を返す関数を単一の float を返す関数に分割する。"""
+
+    def __init__(self, fun, n_return):
+        self._called: list[bool] | None = None
+        self._values: list[bool] | None = None
+        self.fun = fun
+        self.n_return = n_return
+
+    def get_fun_that_returns_ith_value(self, i):
+
+        assert i in range(self.n_return)
+
+        # iter として提供する callable オブジェクト
+        # self の情報にもアクセスする必要があり
+        # それぞれが iter された時点での i 番目という
+        # 情報も必要なのでこのスコープで定義する必要がある
+        # noinspection PyMethodParameters
+        class NthFunc:
+
+            def __init__(self_, i_):
+                # 何番目の要素であるかを保持
+                self_.i = i_
+
+            def __call__(self_, *args, **kwargs):
+                # 何番目の要素であるか
+                i_ = self_.i
+
+                # 一度も呼ばれていなければ評価する
+                if self._called is None:
+                    self._values = self.fun(*args, **kwargs)
+                    self._called = [False for __ in self._values]
+
+                    assert len(self._values) == self.n_return, _(
+                        'The number of return values of {fun_name} is {n_values}. '
+                        'This is inconsistent with the specified n_return; {n_return}.',
+                        fun_name=self.fun.__name__,
+                        n_values=len(self._values),
+                        n_return=self.n_return,
+                    )
+
+                # i_ が呼ばれたのでフラグを立てる
+                self._called[i_] = True
+                value = self._values[i_]
+
+                # すべてのフラグが立ったならクリアする
+                if all(self._called):
+                    self._called = None
+                    self._values = None
+
+                # 値を返す
+                return value
+
+            # noinspection PyPropertyDefinition
+            @property
+            def __globals__(self_):
+                # ScapeGoat 実装への対処
+                return self.fun.__globals__
+
+        # N 番目の値を返す関数を返す
+        f = NthFunc(i)
+
+        return f
 
 
 class Objectives(dict[str, Objective]):

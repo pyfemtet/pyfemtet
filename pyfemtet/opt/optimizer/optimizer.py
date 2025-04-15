@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from typing import Callable, TypeAlias
-
+from typing import Callable, TypeAlias, Sequence
+from numbers import Real
 from time import sleep
 
 import sympy
@@ -128,7 +128,7 @@ class AbstractOptimizer:
             name: str,
             expression_string: str,
             properties: dict[str, ...] | None = None,
-    ):
+    ) -> None:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(expression_string)
@@ -140,7 +140,7 @@ class AbstractOptimizer:
             name: str,
             sympy_expr: sympy.Expr,
             properties: dict[str, ...] | None = None,
-    ):
+    ) -> None:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
@@ -154,7 +154,7 @@ class AbstractOptimizer:
             properties: dict[str, ...] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
-    ):
+    ) -> None:
         var = ExpressionFromFunction()
         var.name = name
         var.fun = fun
@@ -172,7 +172,7 @@ class AbstractOptimizer:
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
-    ):
+    ) -> None:
         properties = properties if properties is not None else {}
 
         if fix:
@@ -189,8 +189,8 @@ class AbstractOptimizer:
     def add_objective(
             self,
             name: str,
-            fun: Callable[..., float],
-            direction: str | float = 'minimize',
+            fun: Callable[..., Real],
+            direction: str | Real = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
     ) -> None:
@@ -200,6 +200,47 @@ class AbstractOptimizer:
         obj.kwargs = kwargs or {}
         obj.direction = direction
         self.objectives.update({name: obj})
+
+    def add_objectives(
+            self,
+            names: str | list[str],
+            fun: Callable[..., Sequence[Real]],
+            n_return: int,
+            directions: str | Sequence[str | Real] = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+        # argument processing
+        if names is None:
+            names = [None for __ in range(n_return)]
+        else:
+            if isinstance(names, str):
+                names = [f'{names}_{i}' for i in range(n_return)]
+            else:
+                # names = names
+                pass
+
+        if directions is None:
+            directions = ['minimize' for __ in range(n_return)]
+        else:
+            if isinstance(directions, str) or isinstance(directions, Real):
+                directions = [directions for __ in range(n_return)]
+            else:
+                # directions = directions
+                pass
+
+        assert len(names) == len(directions) == n_return
+
+        function_factory = ObjectivesFunc(fun, n_return)
+        for i, (name, direction) in enumerate(zip(names, directions)):
+            fun_i = function_factory.get_fun_that_returns_ith_value(i)
+            self.add_objective(
+                fun=fun_i,
+                name=name,
+                direction=direction,
+                args=args,
+                kwargs=kwargs,
+            )
 
     def add_constraint(
             self,
