@@ -1,4 +1,4 @@
-,prm,prm_lower_bound,prm_upper_bound,prm_step,prm,prm_lower_bound,prm,prm_choices,obj,obj_direction,cns,cns_upper_bound,,,,,
+,prm.num.value,prm.num.lower_bound,prm.num.upper_bound,prm_step,prm.num.value,prm.num.lower_bound,prm.cat.value,prm.cat.choices,obj,obj_direction,cns,cns_upper_bound,,,,,
 ,,,,,,,,,,,,,,,,,
 trial,x,x_lower_bound,x_upper_bound,x_step,y,y_lower_bound,z,z_choices,output,output_direction,constraint,constraint_upper_bound,state,datetime_start,datetime_end,feasibility,optimality
 1,10,0,100,10,6,0,A,"['A', 'B', 'C']",101,minimize,8,10,Succeeded,2025/3/26 14:40,2025/3/26 14:40,TRUE,TRUE

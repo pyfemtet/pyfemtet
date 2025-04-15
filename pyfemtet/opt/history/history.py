@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 __all__ = [
     'TrialState',
     'History',
+    'ColumnOrderMode',
     'Record',
     'create_err_msg_from_exception',
     'CorrespondingColumnNameRuler',
@@ -262,12 +263,17 @@ class CorrespondingColumnNameRuler:
         return prm_name + '_step'
 
 
+class ColumnOrderMode(StrEnum):
+    per_category = 'per_category'
+    important_first = 'important_first'
+
+
 class ColumnManager:
 
     parameters: TrialInput
     y_names: list[str]
     c_names: list[str]
-    dtypes: dict[str, type]
+    column_dtypes: dict[str, type]
     meta_columns: list[str]
 
     @staticmethod
@@ -276,12 +282,20 @@ class ColumnManager:
             'message',
         ]
 
-    def initialize(self, parameters: TrialInput, y_names, c_names, additional_data: dict):
+    def initialize(
+            self,
+            parameters: TrialInput,
+            y_names,
+            c_names,
+            additional_data: dict,
+            column_order_mode: str = ColumnOrderMode.per_category,
+    ):
         self.parameters = parameters
         self.y_names = y_names
         self.c_names = c_names
         self.set_full_sorted_column_information(
             additional_data=additional_data,
+            column_order_mode=column_order_mode,
         )
 
     def set_full_sorted_column_information(
@@ -290,14 +304,25 @@ class ColumnManager:
             extra_y_names: list[str] = None,
             extra_c_names: list[str] = None,
             additional_data: dict = None,
+            column_order_mode: str = ColumnOrderMode.per_category,
     ):
-
         extra_parameters = extra_parameters or {}
         extra_y_names = extra_y_names or []
         extra_c_names = extra_c_names or []
 
-        dtypes = {}
-        meta_columns = []
+        column_dtypes: dict = {}
+        meta_columns: list = []
+        column_dtypes_later: dict = {}
+        meta_columns_later: list = []
+
+        if column_order_mode == ColumnOrderMode.per_category:
+            target_cds: dict = column_dtypes
+            target_mcs: list = meta_columns
+        elif column_order_mode == ColumnOrderMode.important_first:
+            target_cds: dict = column_dtypes_later
+            target_mcs: list = meta_columns_later
+        else:
+            assert False, f'Unknown {column_order_mode=}'
 
         # noinspection PyUnresolvedReferences
         keys = Record.__dataclass_fields__.copy().keys()
@@ -308,7 +333,7 @@ class ColumnManager:
             #   例えば、 trial に int を指定してはいけない
             #
             # Note:
-            #   pandas は dtypes に str を受け付けない
+            #   pandas は column_dtypes に str を受け付けない
             #   (object にキャストされる模様)
 
             if key == 'x':
@@ -317,28 +342,32 @@ class ColumnManager:
                     param = self.parameters[prm_name]
 
                     if isinstance(param, NumericParameter):
-                        dtypes.update({prm_name: float})
+                        # important
+                        column_dtypes.update({prm_name: float})
                         meta_columns.append('prm.num.value')
 
+                        # later
                         f = CorrespondingColumnNameRuler.prm_lower_bound_name
-                        dtypes.update({f(prm_name): float})
-                        meta_columns.append('prm.num.lower_bound')
+                        target_cds.update({f(prm_name): float})
+                        target_mcs.append('prm.num.lower_bound')
 
                         f = CorrespondingColumnNameRuler.prm_upper_bound_name
-                        dtypes.update({f(prm_name): float})
-                        meta_columns.append('prm.num.upper_bound')
+                        target_cds.update({f(prm_name): float})
+                        target_mcs.append('prm.num.upper_bound')
 
                         f = CorrespondingColumnNameRuler.prm_step_name
-                        dtypes.update({f(prm_name): float})
-                        meta_columns.append('prm.num.step')
+                        target_cds.update({f(prm_name): float})
+                        target_mcs.append('prm.num.step')
 
                     elif isinstance(param, CategoricalParameter):
-                        dtypes.update({prm_name: object})
+                        # important
+                        column_dtypes.update({prm_name: object})
                         meta_columns.append('prm.cat.value')
 
+                        # later
                         f = CorrespondingColumnNameRuler.prm_choices_name
-                        dtypes.update({f(prm_name): object})
-                        meta_columns.append('prm.cat.choices')
+                        target_cds.update({f(prm_name): object})
+                        target_mcs.append('prm.cat.choices')
 
                     else:
                         raise NotImplementedError
@@ -346,24 +375,25 @@ class ColumnManager:
                 for extra_prm_name, extra_param in extra_parameters.items():
 
                     if isinstance(extra_param, NumericParameter):
-                        dtypes.update({extra_prm_name: float})
-                        meta_columns.append('')
+                        # later
+                        target_cds.update({extra_prm_name: float})
+                        target_mcs.append('')
 
                         f = CorrespondingColumnNameRuler.prm_lower_bound_name
-                        dtypes.update({f(extra_prm_name): object})
-                        meta_columns.append('')
+                        target_cds.update({f(extra_prm_name): object})
+                        target_mcs.append('')
 
                         f = CorrespondingColumnNameRuler.prm_upper_bound_name
-                        dtypes.update({f(extra_prm_name): object})
-                        meta_columns.append('')
+                        target_cds.update({f(extra_prm_name): object})
+                        target_mcs.append('')
 
                     elif isinstance(extra_param, CategoricalParameter):
-                        dtypes.update({extra_prm_name: object})
-                        meta_columns.append('')
+                        target_cds.update({extra_prm_name: object})
+                        target_mcs.append('')
 
                         f = CorrespondingColumnNameRuler.prm_choices_name
-                        dtypes.update({f(extra_prm_name): object})
-                        meta_columns.append('')
+                        target_cds.update({f(extra_prm_name): object})
+                        target_mcs.append('')
 
                     else:
                         raise NotImplementedError
@@ -371,35 +401,60 @@ class ColumnManager:
             elif key == 'y':
                 f = CorrespondingColumnNameRuler.direction_name
                 for name in self.y_names:
-                    dtypes.update({name: float})
-                    dtypes.update({f(name): object})  # str | float
-                meta_columns.extend(['obj', f('obj')] * len(self.y_names))
+                    # important
+                    column_dtypes.update({name: float})
+                    meta_columns.append('obj')
+
+                    # later
+                    target_cds.update({f(name): object})  # str | float
+                    target_mcs.append(f('obj'))
 
                 for name in extra_y_names:
-                    dtypes.update({name: float})
-                    dtypes.update({f(name): object})  # str | float
-                meta_columns.extend(['', ''] * len(extra_y_names))
+                    # later
+                    target_cds.update({name: float})
+                    target_mcs.append('')
+
+                    # later
+                    target_cds.update({f(name): object})  # str | float
+                    target_mcs.append('')
 
             elif key == 'c':
-                dtypes.update({name: float for name in self.c_names})
-                meta_columns.extend(['cns'] * len(self.c_names))
 
-                dtypes.update({name: float for name in extra_c_names})
-                meta_columns.extend([''] * len(extra_c_names))
+                for name in self.c_names:
+                    # important
+                    column_dtypes.update({name: float})
+                    meta_columns.append('cns')
+
+                for name in extra_c_names:
+                    # later
+                    target_cds.update({name: float})
+                    target_mcs.append('')
 
             # additional_data を入れる
             elif key == self._get_additional_data_column():
-                dtypes.update({key: object})
-                if additional_data is not None:
-                    meta_columns.append(json.dumps(additional_data))
-                else:
-                    meta_columns.append(json.dumps(dict()))
+                # important
+                column_dtypes.update({key: object})
+                meta_columns.append(json.dumps(additional_data or dict()))
 
-            else:
-                dtypes.update({key: object})
+            elif key in (
+                'feasibility',
+                'optimality',
+                'sub_sampling',
+                'sub_fidelity_name',
+            ):
+                # important
+                column_dtypes.update({key: object})
                 meta_columns.append('')
 
-        self.dtypes = dtypes
+            else:
+                # later
+                target_cds.update({key: object})
+                target_mcs.append('')
+
+        column_dtypes.update(column_dtypes_later)
+        meta_columns.extend(meta_columns_later)
+
+        self.column_dtypes = column_dtypes
         self.meta_columns = meta_columns
 
     @staticmethod
@@ -435,7 +490,7 @@ class ColumnManager:
             )
 
     def filter_columns(self, meta_column) -> list[str]:
-        columns = list(self.dtypes.keys())
+        columns = list(self.column_dtypes.keys())
         return self._filter_columns(meta_column, columns, self.meta_columns)
 
     def get_prm_names(self) -> list[str]:
@@ -461,10 +516,10 @@ class ColumnManager:
         return prm_choices_name in columns
 
     def is_numerical_parameter(self, prm_name) -> bool:
-        return self._is_numerical_parameter(prm_name, tuple(self.dtypes.keys()))
+        return self._is_numerical_parameter(prm_name, tuple(self.column_dtypes.keys()))
 
     def is_categorical_parameter(self, prm_name) -> bool:
-        return self._is_categorical_parameter(prm_name, tuple(self.dtypes.keys()))
+        return self._is_categorical_parameter(prm_name, tuple(self.column_dtypes.keys()))
 
     @staticmethod
     def _get_parameter(prm_name: str, df: pd.DataFrame) -> Parameter:
@@ -712,7 +767,7 @@ class Records:
         with self.df_wrapper.lock:
             # 新しく始まる場合に備えカラムを設定
             # load の場合はあとで上書きされる
-            df = pd.DataFrame([], columns=list(self.column_manager.dtypes.keys()))
+            df = pd.DataFrame([], columns=list(self.column_manager.column_dtypes.keys()))
             self.df_wrapper.set_df(df)
 
     def load(self, path: str):
@@ -728,7 +783,7 @@ class Records:
         # choices は list だったものが str になるので型変換
         ColumnManager._reconvert_objects(loaded_df, loaded_meta_columns)
 
-        # この段階では dtypes が setup されていない可能性があるので
+        # この段階では column_dtypes が setup されていない可能性があるので
         # compatibility check をしない。よって set_df しない。
         self.loaded_meta_columns = loaded_meta_columns
         self.loaded_df = loaded_df
@@ -767,7 +822,7 @@ class Records:
         if not (len(loaded_cns_names - cns_names) == len(cns_names - loaded_cns_names) == 0):
             raise RuntimeError('Incompatible constraint setting.')
 
-    def reinitialize_record_with_loaded_data(self):
+    def reinitialize_record_with_loaded_data(self, column_order_mode: str = ColumnOrderMode.per_category):
 
         # 読み込んだデータがないのであれば何もしない
         if self.loaded_df is None:
@@ -785,7 +840,7 @@ class Records:
         for l_col, l_meta in zip(loaded_columns, loaded_meta_columns):
 
             # 現在の Record に含まれないならば
-            if l_col not in self.column_manager.dtypes.keys():
+            if l_col not in self.column_manager.column_dtypes.keys():
 
                 # それが prm_name ならば
                 if l_col in loaded_prm_names:
@@ -826,13 +881,14 @@ class Records:
             extra_y_names=extra_y_names,
             extra_c_names=extra_c_names,
             additional_data=a_data,
+            column_order_mode=column_order_mode,
         )
 
         # worker に影響しないように loaded_df のコピーを作成
         df: pd.DataFrame = self.loaded_df.copy()
 
         # loaded df に存在しないが Record に存在するカラムを追加
-        for col in self.column_manager.dtypes.keys():
+        for col in self.column_manager.column_dtypes.keys():
             if col not in df.columns:
                 # column ごとの default 値を追加
                 if col == 'sub_fidelity_name':
@@ -840,16 +896,16 @@ class Records:
                 else:
                     df[col] = np.nan
 
-        # dtypes を設定
-        # 与える dtypes のほうが多い場合
+        # column_dtypes を設定
+        # 与える column_dtypes のほうが多い場合
         # エラーになるので余分なものを削除
-        # 与える dtypes が少ない分には
+        # 与える column_dtypes が少ない分には
         # (pandas としては) 問題ない
-        dtypes = {k: v for k, v in self.column_manager.dtypes.items() if k in self.loaded_df.columns}
+        dtypes = {k: v for k, v in self.column_manager.column_dtypes.items() if k in self.loaded_df.columns}
         df = df.astype(dtypes)
 
         # 並べ替え
-        df = df[list(self.column_manager.dtypes.keys())].astype(self.column_manager.dtypes)
+        df = df[list(self.column_manager.column_dtypes.keys())].astype(self.column_manager.column_dtypes)
 
         # OK なので読み込んだデータを set_df する
         self.df_wrapper.set_df(df)
@@ -904,7 +960,7 @@ class Records:
     def append(self, record: Record) -> pd.Series:
 
         # get row
-        row = record.as_df(dtypes=self.column_manager.dtypes)
+        row = record.as_df(dtypes=self.column_manager.column_dtypes)
 
         # concat
         dfw = self.df_wrapper
@@ -995,6 +1051,7 @@ class History:
         self._finalized: bool = False
         self.is_restart = False
         self.additional_data = dict()
+        self.column_order_mode: ColumnOrderMode = ColumnOrderMode.per_category
 
     def __str__(self):
         return self._records.__str__()
@@ -1056,9 +1113,9 @@ class History:
         self.additional_data = additional_data
 
         if not self._finalized:
-            # ここで dtypes が決定する
+            # ここで column_dtypes が決定する
             self._records.column_manager.initialize(
-                parameters, self.obj_names, self.cns_names, additional_data
+                parameters, self.obj_names, self.cns_names, additional_data, self.column_order_mode
             )
 
             # initialize
@@ -1071,7 +1128,7 @@ class History:
             if os.path.isfile(self.path):
                 self.load_csv(self.path)
                 self._records.check_problem_compatibility()
-                self._records.reinitialize_record_with_loaded_data()
+                self._records.reinitialize_record_with_loaded_data(self.column_order_mode)
 
         self._finalized = True
 
