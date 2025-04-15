@@ -226,6 +226,7 @@ class ExcelInterface(COMInterface):
     teardown_procedure_args: list or tuple
 
     use_named_range: bool  # input を定義したシートにおいて input の値を名前付き範囲で指定するかどうか。
+    force_override_when_load: bool  # すでに指定されている parameter 等を excel の load 時に上書きするかどうか。
 
     _tmp_dir: tempfile.TemporaryDirectory
 
@@ -254,6 +255,7 @@ class ExcelInterface(COMInterface):
             terminate_excel_when_quit: bool = None,
             interactive: bool = True,
             use_named_range: bool = True,
+            force_override_when_load: bool = False,
     ):
 
         show_experimental_warning("ExcelInterface")
@@ -310,6 +312,7 @@ class ExcelInterface(COMInterface):
         self.display_alerts = display_alerts
 
         self.use_named_range = use_named_range
+        self.force_override_when_load = force_override_when_load
 
     # ===== setup =====
     def _setup_before_parallel(self) -> None:
@@ -534,6 +537,13 @@ class ExcelInterface(COMInterface):
             # name
             name = str(row[ParseAsParameter.name])
 
+            # if the variable is already added by
+            # add_parameter or add_expression,
+            # use it.
+            if not self.force_override_when_load:
+                if name in opt.variable_manager.get_variables():
+                    continue
+
             # value
             value = float_(row[ParseAsParameter.value])
 
@@ -606,6 +616,12 @@ class ExcelInterface(COMInterface):
             # name
             name = str(row[ParseAsObjective.name])
 
+            # if the objective is already added by
+            # add_objective, use it.
+            if not self.force_override_when_load:
+                if name in opt.objectives.keys():
+                    continue
+
             # direction
             direction = row[ParseAsObjective.direction]
             assert not _is_cell_value_empty(direction), 'direction is empty.'
@@ -642,6 +658,12 @@ class ExcelInterface(COMInterface):
 
             # name
             name = str(row[ParseAsConstraint.name])
+
+            # if the constraint is already added by
+            # add_constraint, use it.
+            if not self.force_override_when_load:
+                if name in opt.constraints.keys():
+                    continue
 
             # lb (optional)
             lb = None
