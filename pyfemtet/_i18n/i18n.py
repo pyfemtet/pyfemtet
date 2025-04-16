@@ -29,5 +29,9 @@ else:
             return x
 
 
-def _(message: str, **kwargs):
-    return gettext(message).format(**kwargs)
+def _(en_message: str, jp_message=None, **kwargs):
+    if (jp_message is not None) and ('japanese' in LOC.lower()):
+        return jp_message.format(**kwargs)
+
+    else:
+        return gettext(en_message).format(**kwargs)

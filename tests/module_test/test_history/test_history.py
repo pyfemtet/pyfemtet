@@ -1,6 +1,7 @@
 import os
 import csv
 from pyfemtet.opt.history import *
+from pyfemtet.opt.history._history import DuplicatedColumnNameError
 from pyfemtet.opt.optimizer import AbstractOptimizer
 from pyfemtet.opt.interface import NoFEM
 from pyfemtet._i18n import ENCODING
@@ -106,8 +107,25 @@ def test_history_column_order():
     assert third_line == ['trial', 'x', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y', 'y_lower_bound', 'z', 'z_choices', 'output', 'output_direction', 'constraint', 'state', 'datetime_start', 'datetime_end', 'message', 'feasibility', 'optimality']
 
 
+def test_history_duplicated_name():
+    opt = AbstractOptimizer()
+    opt.fem = NoFEM()
+    opt.add_parameter('a', 0, 0, 1)
+    opt.add_parameter('a', 0, 0, 1)
+    opt.add_objective('a', lambda: 1)
+    print('Please check console output to certify logger.warning is successfully output.')
+    try:
+        opt._finalize()
+    except DuplicatedColumnNameError:
+        print('DuplicatedColumnNameError Successfully raised.')
+    else:
+        print('DuplicatedColumnNameError should be raised but not be raised!')
+        assert False
+
+
 if __name__ == '__main__':
     test_standalone_history()
     test_new_additional_data()
     test_restart_additional_data()
     test_history_column_order()
+    test_history_duplicated_name()

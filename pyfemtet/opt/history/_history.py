@@ -276,6 +276,27 @@ class ColumnOrderMode(StrEnum):
     important_first = 'important_first'  #: The values of parameters and objectives first.
 
 
+class DuplicatedColumnNameError(Exception):
+    """:meta private:"""
+
+
+class NoDuplicateDict(dict):
+    def update(self, m: dict, /, **kwargs):
+        for key_ in m.keys():
+            if key_ in self.keys():
+                raise DuplicatedColumnNameError(
+                    _(
+                        en_message='The name `{name}` is duplicated. '
+                                   'Please use another name.',
+                        jp_message='名前 「{name}」 が重複しています。'
+                                   '別の名前を使ってください。',
+                        name=key_,
+                    )
+                )
+
+        super().update(m, **kwargs)
+
+
 class ColumnManager:
     """:meta private:"""
 
@@ -315,13 +336,14 @@ class ColumnManager:
             additional_data: dict = None,
             column_order_mode: str = ColumnOrderMode.per_category,
     ):
-        extra_parameters = extra_parameters or {}
+        extra_parameters = extra_parameters or TrialInput()
         extra_y_names = extra_y_names or []
         extra_c_names = extra_c_names or []
 
-        column_dtypes: dict = {}
+        # column name になるので重複は許されない
+        column_dtypes: dict = NoDuplicateDict()
         meta_columns: list = []
-        column_dtypes_later: dict = {}
+        column_dtypes_later: dict = NoDuplicateDict()
         meta_columns_later: list = []
 
         if column_order_mode == ColumnOrderMode.per_category:
@@ -463,7 +485,7 @@ class ColumnManager:
         column_dtypes.update(column_dtypes_later)
         meta_columns.extend(meta_columns_later)
 
-        self.column_dtypes = column_dtypes
+        self.column_dtypes = dict(**column_dtypes)
         self.meta_columns = meta_columns
 
     @staticmethod
@@ -1057,9 +1079,9 @@ class History:
     additional_data: dict
 
     path: str
-    """The existing or 保存先の csv path.
+    """The existing or destination CSV path.
 
-    If 指定されなければ, The csv file is saved with format
+    If not specified, the CSV file is saved in the format
     "pyfemtet.opt_%Y%m%d_%H%M%S.csv"
     when the optimization process starts.
     """

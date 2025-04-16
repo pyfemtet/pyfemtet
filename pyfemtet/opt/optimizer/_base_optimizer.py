@@ -36,6 +36,24 @@ def _log_hidden_constraint(e: Exception):
 _FReturnValue: TypeAlias = tuple[TrialOutput, dict[str, float], TrialConstraintOutput, Record]
 
 
+def _duplicated_name_check(name, names):
+    if name in names:
+        logger.warning(
+            _(
+                en_message='There are duplicated name {name}. If there are '
+                           'duplicate names for parameters or objective '
+                           'functions, the later defined ones will overwrite '
+                           'the earlier ones. Please be careful to ensure '
+                           'that this overwriting is intentional.',
+                jp_message='名前 {name} が重複しています。パラメータや目的関数'
+                           'などの名前が重複すると、後から定義したものが上書き'
+                           'されます。この上書きが意図したものであるかどうか、'
+                           '十分に注意してください。',
+                name=name,
+            )
+        )
+
+
 class AbstractOptimizer:
 
     # problem
@@ -94,6 +112,7 @@ class AbstractOptimizer:
         var.value = value
         var.pass_to_fem = pass_to_fem
         var.properties = properties if properties is not None else {}
+        _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
     def add_parameter(
@@ -121,6 +140,7 @@ class AbstractOptimizer:
         prm.step = step
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
+        _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: prm})
 
     def add_expression_string(
@@ -131,8 +151,9 @@ class AbstractOptimizer:
     ) -> None:
         var = ExpressionFromString()
         var.name = name
-        var._expr = ExpressionFromString.InternalClass(expression_string)
+        var._expr = ExpressionFromString.InternalClass(expression_string=expression_string)
         var.properties = properties or dict()
+        _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
     def add_expression_sympy(
@@ -145,6 +166,7 @@ class AbstractOptimizer:
         var.name = name
         var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
         var.properties = properties or dict()
+        _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
     def add_expression(
@@ -161,6 +183,7 @@ class AbstractOptimizer:
         var.args = args or tuple()
         var.kwargs = kwargs or dict()
         var.properties = properties or dict()
+        _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
     def add_categorical_parameter(
@@ -184,6 +207,7 @@ class AbstractOptimizer:
         prm.choices = choices
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
+        _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: prm})
 
     def add_objective(
@@ -199,6 +223,7 @@ class AbstractOptimizer:
         obj.args = args or ()
         obj.kwargs = kwargs or {}
         obj.direction = direction
+        _duplicated_name_check(name, self.objectives.keys())
         self.objectives.update({name: obj})
 
     def add_objectives(
@@ -211,14 +236,16 @@ class AbstractOptimizer:
             kwargs: dict | None = None,
     ):
         # argument processing
-        if names is None:
-            names = [None for __ in range(n_return)]
+        if isinstance(names, str):
+            names = [f'{names}_{i}' for i in range(n_return)]
+        elif isinstance(names, Sequence):
+            # names = names
+            pass
         else:
-            if isinstance(names, str):
-                names = [f'{names}_{i}' for i in range(n_return)]
-            else:
-                # names = names
-                pass
+            raise ValueError(
+                _(en_message='`names` must be a string or an array of strings.',
+                  jp_message='`names` は文字列か文字列の配列でなければなりません。',)
+            )
 
         if directions is None:
             directions = ['minimize' for __ in range(n_return)]
@@ -262,6 +289,7 @@ class AbstractOptimizer:
         cns.hard = strict
         cns._opt = self
         cns.using_fem = using_fem
+        _duplicated_name_check(name, self.constraints.keys())
         self.constraints.update({name: cns})
 
     def add_sub_fidelity_model(
@@ -274,7 +302,8 @@ class AbstractOptimizer:
         if self.sub_fidelity_models is None:
             self.sub_fidelity_models = SubFidelityModels()
             self.fidelity = 1.
-        self.sub_fidelity_models.add(name, sub_fidelity_model, fidelity)
+        _duplicated_name_check(name, self.sub_fidelity_models.keys())
+        self.sub_fidelity_models._update(name, sub_fidelity_model, fidelity)
 
     def get_variables(self, format='dict'):
         return self.variable_manager.get_variables(
@@ -780,7 +809,7 @@ class SubFidelityModel(AbstractOptimizer):
 
 class SubFidelityModels(dict[str, SubFidelityModel]):
 
-    def add(self, name, model: SubFidelityModel, fidelity: Fidelity):
+    def _update(self, name, model: SubFidelityModel, fidelity: Fidelity):
         model.sub_fidelity_name = name
         model.fidelity = fidelity
         self.update({name: model})
