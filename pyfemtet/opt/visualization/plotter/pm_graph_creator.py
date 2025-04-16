@@ -4,8 +4,8 @@ import plotly.graph_objects as go
 from pyfemtet._i18n import _
 from pyfemtet._util.df_util import *
 from pyfemtet.opt.history import *
-from pyfemtet.opt.prediction.model import *
-from pyfemtet.opt.prediction.helper import *
+from pyfemtet.opt.prediction._model import *
+from pyfemtet.opt.prediction._helper import *
 
 
 __all__ = [

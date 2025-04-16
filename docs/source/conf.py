@@ -14,8 +14,24 @@ import os
 import sys
 import subprocess
 import shutil
+import logging
 project_root_path = os.path.abspath('..')
 sys.path.insert(0, project_root_path)
+
+# -- Supress duplicate object warning --
+
+# Get sphinx logger
+logger = logging.getLogger('sphinx')
+
+
+# Add filter to supress specific message
+class FilterDuplicateWarning(logging.Filter):
+    def filter(self, record):
+        return "duplicate object description of" not in record.getMessage()
+
+
+# Add it to logger (In sphinx, no handler is used.)
+logger.addFilter(FilterDuplicateWarning())
 
 
 # -- Project information -----------------------------------------------------
@@ -52,12 +68,12 @@ intersphinx_disabled_domains = ["std"]
 templates_path = ["_templates"]
 
 
-# -- extention settings --------------
+# -- extension settings --------------
 autosummary_generate = True
 autodoc_typehints = "description"
 autodoc_default_options = {
     "members": True,
-    "inherited-members": True,
+    "inherited-members": False,
     "exclude-members": "with_traceback",
 }
 

@@ -1,1 +1,1 @@
-from .scipy_optimizer import ScipyOptimizer
+from ._scipy_optimizer import ScipyOptimizer

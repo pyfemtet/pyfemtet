@@ -1,7 +1,7 @@
 from time import sleep
 import numpy as np
 from pyfemtet.opt.interface import NoFEM
-from pyfemtet.opt.optimizer.scipy_optimizer.scipy_optimizer import ScipyOptimizer
+from pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer import ScipyOptimizer
 
 
 def objective(_, opt: ScipyOptimizer):

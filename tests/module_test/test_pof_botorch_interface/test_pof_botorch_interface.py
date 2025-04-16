@@ -1,4 +1,4 @@
-from pyfemtet.opt.interface.surrogate_model_interface.botorch_interface import PoFBoTorchInterface
+from pyfemtet.opt.interface._surrogate_model_interface.botorch_interface import PoFBoTorchInterface
 
 from tests import get
 

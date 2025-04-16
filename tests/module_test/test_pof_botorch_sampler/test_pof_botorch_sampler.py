@@ -2,7 +2,7 @@ import numpy as np
 
 from pyfemtet.opt.interface import NoFEM
 from pyfemtet.opt.optimizer import OptunaOptimizer
-from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import (
+from pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler import (
     PoFBoTorchSampler,
     logei_candidates_func,
     qei_candidates_func,

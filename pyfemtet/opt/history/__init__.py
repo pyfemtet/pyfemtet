@@ -1,4 +1,4 @@
-from .history import *
+from ._history import *
 
 __all__ = [
     'TrialState',

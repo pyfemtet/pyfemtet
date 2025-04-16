@@ -1,5 +1,5 @@
-from .variable_manager import *
-from .string_as_expression import *
+from ._variable_manager import *
+from ._string_as_expression import *
 
 __all__ = [
     'SupportedVariableTypes',

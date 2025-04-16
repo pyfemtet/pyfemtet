@@ -4,7 +4,7 @@ from optuna.samplers import TPESampler, RandomSampler, NSGAIISampler
 
 from pyfemtet.opt.interface import NoFEM
 from pyfemtet.opt.optimizer import OptunaOptimizer
-from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import (
+from pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler import (
     PoFBoTorchSampler,
     PoFConfig,
     PartialOptimizeACQFConfig,

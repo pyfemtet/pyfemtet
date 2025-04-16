@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from pyfemtet.opt.history.history import ColumnManager  # to use _reconvert
+from pyfemtet.opt.history._history import ColumnManager  # to use _reconvert
 
 
 __all__ = [

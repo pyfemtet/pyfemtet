@@ -1,6 +1,6 @@
 from contextlib import closing
 
-from pyfemtet.opt.interface.solidworks_interface import SolidworksInterface
+from pyfemtet.opt.interface._solidworks_interface import SolidworksInterface
 from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 from pyfemtet.opt.optimizer import OptunaOptimizer
 from pyfemtet.opt.femopt import FEMOpt

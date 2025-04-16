@@ -10,7 +10,7 @@ from pyfemtet._util.dask_util import *
 from pyfemtet.opt.optimizer import *
 from pyfemtet.opt.worker_status import *
 from pyfemtet.logger import get_module_logger
-from pyfemtet.opt.visualization.monitor_application.process_monitor.application import main
+from pyfemtet.opt.visualization.history_viewer._process_monitor._application import process_monitor_main
 
 
 logger = get_module_logger('opt.femopt', False)
@@ -88,7 +88,7 @@ class FEMOpt:
                 logger.info(_('Launching Monitor...'))
                 # noinspection PyTypeChecker,PyUnusedLocal
                 monitor_future = executor.submit(
-                    main,
+                    process_monitor_main,
                     history=self.opt.history,
                     status=entire_status,
                     worker_addresses=['main'] + opt_worker_addresses,

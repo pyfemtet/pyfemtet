@@ -70,7 +70,7 @@ priority = "explicit"
 brep = ["brepmatching"]  # pip install pyfemtet[brep]
 
 [tool.poetry.scripts]
-pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.result_viewer.application:main'
+pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.history_viewer.result_viewer._application:result_viewer_main'
 
 [tool.pytest.ini_options]
 filterwarnings = [
