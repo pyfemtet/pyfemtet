@@ -12,3 +12,17 @@ if platform.system() == 'Windows':
 from ._surrogate_model_interface import AbstractSurrogateModelInterfaceBase
 from ._surrogate_model_interface import BoTorchInterface
 from ._surrogate_model_interface import PoFBoTorchInterface
+
+
+__all__ = [
+    'AbstractFEMInterface',
+    'NoFEM',
+    'FemtetInterface',
+    'FemtetWithNXInterface',
+    'FemtetWithSolidworksInterface',
+    'ExcelInterface',
+    'FemtetWithExcelSettingsInterface',
+    'AbstractSurrogateModelInterfaceBase',
+    'BoTorchInterface',
+    'PoFBoTorchInterface',
+]
