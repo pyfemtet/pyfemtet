@@ -7,7 +7,7 @@ from optuna._transform import _SearchSpaceTransform
 
 from botorch.optim.initializers import gen_batch_initial_conditions
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import _
 from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.problem import *
 from pyfemtet.opt.optimizer import AbstractOptimizer
@@ -68,7 +68,13 @@ def _evaluate_pyfemtet_cns(
 
     # update fem (very slow!)
     if cns.using_fem:
-        logger.warning(Msg.WARN_USING_FEM_IN_NLC)
+        logger.warning(_(
+            en_message='Accessing FEM API inside hard constraint '
+                       'function may be very slow.',
+            jp_message='hard constraint 関数の評価中の FEM への'
+                       'アクセスは著しく時間がかかりますので'
+                       'ご注意ください。'
+        ))
         pass_to_fem = opt.variable_manager.get_variables(filter='pass_to_fem')
         opt.fem.update_parameter(pass_to_fem)
 
@@ -198,9 +204,19 @@ class NonlinearInequalityConstraints:
 
         while feasible_ic_batch is None:
             # Generate new random ic_batch with the same shape
-            logger.warning(
-                Msg.WARN_NO_FEASIBLE_BATCH_INITIAL_CONDITION
-            )
+            logger.warning(_(
+                en_message='gen_batch_initial_conditions() failed to generate '
+                           'feasible initial conditions for acquisition '
+                           'function optimization sub-problem, '
+                           'so trying to use random feasible parameters '
+                           'as initial conditions.'
+                           'The constraint functions or solutions spaces '
+                           'may be too complicated.',
+                jp_message='gen_batch_initial_conditions() は獲得関数を最適化する'
+                           'サブ最適化問題で実行可能な初期値を生成できませんでした。'
+                           'サブ最適化問題の初期値としてランダムなパラメータを設定します。'
+                           '拘束が厳しすぎるか、目的関数が複雑すぎるかもしれません。'
+            ))
             random_ic_batch = self._generate_random_initial_conditions(ic_batch)
             feasible_ic_batch = self._filter_feasible_conditions(random_ic_batch)
 

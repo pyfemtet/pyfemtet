@@ -44,6 +44,7 @@ class _TimeCounting:
             if warning_message is None and warning_fun is None:
                 self.warning_message = _(
                     '{name} does not finished in {timeout} seconds.',
+                    '{name} が {timeout} 秒以内に終了しませんでした。',
                     name=self.name,
                     timeout=self.warning_time_sec
                 )

@@ -15,7 +15,7 @@ from optuna.samplers import TPESampler
 from optuna.study import MaxTrialsCallback
 from optuna_integration.dask import DaskStorage
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import _
 from pyfemtet.opt.history import *
 from pyfemtet.opt.interface import *
 from pyfemtet.opt.exceptions import *
@@ -444,11 +444,16 @@ class OptunaOptimizer(AbstractOptimizer):
             # if not automatically-given arguments,
             # show warning
             elif k not in ('seed', 'constraints_func'):
-                logger.warning(
-                    Msg.F_WARN_INVALID_ARG_FOR_SAMPLER(
-                        k, self.sampler_class.__name__
-                    )
-                )
+                logger.warning(_(
+                    en_message='The given argument {key} is not '
+                               'included in ones of {sampler_name}. '
+                               '{key} is ignored.',
+                    jp_message='{key} は {sampler_name} の'
+                               '有効な引数ではないので'
+                               '無視されます。',
+                    key=k,
+                    sampler_name=self.sampler_class.__name__,
+                ))
 
             # else, ignore it
             else:

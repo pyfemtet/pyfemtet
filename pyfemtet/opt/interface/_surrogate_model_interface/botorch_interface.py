@@ -3,7 +3,7 @@ from scipy.stats.distributions import norm
 
 # from gpytorch.priors.torch_priors import GammaPrior
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import _
 from pyfemtet.opt.history import *
 from pyfemtet.opt.exceptions import *
 
@@ -251,7 +251,20 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         pof = self.calc_pof()
         if pof < self.pof_threshold:
             logger.info(
-                Msg.F_POF_UNDER_THRESH(pof=pof, thresh=self.pof_threshold)
+                _(
+                    en_message='The surrogate model estimated '
+                               'that the probability of '
+                               'feasibility (PoF) is {pof}. '
+                               'This is under {thresh}. '
+                               'So this trial is processed as '
+                               'a constraint violation.',
+                    jp_message='サロゲートモデルは解の実行可能確率（PoF）が'
+                               '{pof} であると予測しました。'
+                               'これは閾値 {thresh} を下回っているので、'
+                               '最適化試行においては拘束違反であると扱います。',
+                    pof=pof,
+                    thresh=self.pof_threshold,
+                )
             )
             raise _HiddenConstraintViolation(f'PoF < {self.pof_threshold}')
 

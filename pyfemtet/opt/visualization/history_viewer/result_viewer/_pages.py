@@ -3,8 +3,6 @@ import os
 import tempfile
 import base64
 
-import numpy as np
-import pandas as pd
 import shutil
 
 from dash import Output, Input, State, callback_context, no_update
@@ -182,6 +180,7 @@ class HomePage(AbstractPage):
                 msg = Msg.ERR_NO_CONNECTION_ESTABLISHED
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return alerts
+            assert self.femtet_control.fem is not None
 
             # check selection
             if selection_data is None:
@@ -210,7 +209,9 @@ class HomePage(AbstractPage):
             trial = pt['customdata'][0]
 
             # get pdt path
-            pdt_path = self.femtet_control.fem._create_pdt_path(femprj_path, model_name, trial)
+            pdt_path = self.femtet_control.fem._create_path(
+                femprj_path, model_name, trial, '.pdt',
+            )
 
             # check pdt exists
             if not os.path.exists(pdt_path):

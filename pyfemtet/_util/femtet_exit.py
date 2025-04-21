@@ -45,11 +45,15 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
                 warning_time_sec=timeout,
                 warning_fun=lambda: logger.warning(
                     _(
-                        'Femtet.Exit() does not finished in '
-                        '{timeout} sec. Most common reason is '
-                        'that a dialog is opening in Femtet '
-                        'and waiting user input. Please close '
-                        'the dialog if it exists.',
+                        en_message='Femtet.Exit() does not finished in '
+                                   '{timeout} sec. Most common reason is '
+                                   'that a dialog is opening in Femtet '
+                                   'and waiting user input. Please close '
+                                   'the dialog if it exists.',
+                        jp_message='Femtet.Exit() は {timeout} 秒以内に終了できませんでした。'
+                                   '考えられる理由として、Femtet で予期せずダイアログが開いており'
+                                   'ユーザーの入力を待っている場合があります。'
+                                   'もしダイアログが存在すれば閉じてください。',
                         timeout=timeout
                     ),
                     # f'Femtet.Exit() が {timeout} 以内に終了していません。'
@@ -62,10 +66,16 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
 
         except AttributeError:
             raise AttributeError(
-                _('Macro version is not consistent to '
-                  'the one of Femtet.exe. Please consider to'
-                  'execute ``Enable Macros`` of current Femtet '
-                  'version to fix it.'))
+                _(
+                    en_message='Macro version is not consistent to '
+                               'the one of Femtet.exe. Please consider to'
+                               'execute ``Enable Macros`` of current Femtet '
+                               'version to fix it.',
+                    jp_message='Femtet.exe のバージョンとマクロのバージョンが一致していません。'
+                               '使用中の Femtet.exe と同じバージョンの「マクロ機能を有効化する」'
+                               'コマンドを実行してください。',
+                )
+            )
 
     # そうでなければ強制終了する
     else:
@@ -79,7 +89,10 @@ def _exit_or_force_terminate(timeout, Femtet: CDispatch, force=True):
             while psutil.pid_exists(pid):
                 if time() - start > 30:  # 30 秒経っても存在するのは何かおかしい
                     logger.error(_('Failed to close Femtet in '
-                                   '30 seconds.'))
+                                   '30 seconds.',
+                                   '30 秒以内に Femtet を終了することが'
+                                   'できませんでした。'
+                                   ))
                     succeeded = False
                     break
                 sleep(1)

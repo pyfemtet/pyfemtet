@@ -144,15 +144,15 @@ class FemtetControl(AbstractPage):
             return kwargs, Msg.WARN_HISTORY_CSV_NOT_READ
 
         # get extra_data
-        extra_data = self.application.history.meta_columns[0]
+        extra_data = self.application.history.additional_data
 
         # check extra_data exists
-        if extra_data == '':
+        if not extra_data:
             return kwargs, Msg.WARN_INVALID_METADATA
 
         # check the extra_data is valid json
         try:
-            d = json.loads(extra_data)
+            d = extra_data
             femprj_path = os.path.abspath(d['femprj_path'])
         except (TypeError, json.decoder.JSONDecodeError, KeyError):
             return kwargs, Msg.WARN_INVALID_METADATA

@@ -474,13 +474,13 @@ class FemtetInterface(COMInterface):
                         'If the optimization is hanging, the most reason is '
                         'a dialog is opening in Femtet and it waits for your '
                         'input. Please confirm there is no dialog in Femtet.',
+                        '{name} の実行に {warning_time_sec} 以上かかっています。'
+                        'もし最適化がハングしているならば、考えられる理由として、'
+                        'Femtet で予期せずダイアログが開いてユーザーの入力待ちをしている場合があります。'
+                        'もし Femtet でダイアログが開いていれば、閉じてください。',
                         name=name,
                         warning_time_sec=warning_time_sec,
                     )
-                    # f'{name} が {warning_time_sec} 以内に終了していません。'
-                    # f'Femtet で予期せずダイアログ等が開いている場合、'
-                    # f'入力待ちのため処理が終了しない場合があります。'
-                    # f'確認してください。'
                 ),
             )
 
@@ -578,7 +578,7 @@ class FemtetInterface(COMInterface):
                             self.Femtet.Gaudi.Activate,
                             False,  # None 以外なら何でもいい
                             Exception,
-                            _('Failed to Femtet.Gaudi.Activate()'),
+                            'Failed to Femtet.Gaudi.Activate()',
                             print_indent=print_indent + 1,
                         )
 

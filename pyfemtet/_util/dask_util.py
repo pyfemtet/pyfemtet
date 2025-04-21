@@ -11,10 +11,12 @@ from pyfemtet.logger import get_dask_logger, remove_all_output, get_module_logge
 
 if Version(dask.__version__) < Version('2024.12.1'):
     import pyfemtet
-    raise RuntimeError(f'pyfemtet {pyfemtet.__version__} では dask 2024.12.1 以降が'
-                       f'必要です。お使いの環境の dask は {dask.__version__} です。'
-                       f'以下のコマンドで dask のバージョンアップをお願いします。\n'
-                       f'`py -m pip install dask distributed`')
+    raise RuntimeError(
+        f'pyfemtet {pyfemtet.__version__} requires dask >= 2024.12.1, '
+        f'but the existing dask == {dask.__version__}. '
+        f'Please consider to update dask.\n'
+        f'ex: `py -m pip install dask distributed`'
+    )
 
 remove_all_output(get_dask_logger())
 

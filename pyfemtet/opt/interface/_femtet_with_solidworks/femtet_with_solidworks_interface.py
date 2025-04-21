@@ -7,7 +7,7 @@ from time import sleep, time
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import _
 
 from pyfemtet.opt.variable_manager import SupportedVariableTypes
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
@@ -87,7 +87,10 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
             if os.path.isfile(xt_path):
                 break
             if time() - start > timeout:
-                raise ModelError(Msg.ERR_MODEL_UPDATE_FAILED)
+                raise ModelError(_(
+                    en_message='Failed to update Solidworks model.',
+                    jp_message='Solidworks モデルの更新に失敗しました。',
+                ))
             sleep(1)
 
     def update_model(self):

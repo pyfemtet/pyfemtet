@@ -9,7 +9,7 @@ import subprocess
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import Msg, _
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface
 from pyfemtet.opt.exceptions import *
@@ -36,7 +36,18 @@ class _NXInterface(AbstractFEMInterface):
         # check NX installation
         self.run_journal_path = os.path.join(os.environ.get('UGII_BASE_DIR'), 'NXBIN', 'run_journal.exe')
         if not os.path.isfile(self.run_journal_path):
-            raise FileNotFoundError(Msg.ERR_RUN_JOURNAL_NOT_FOUND)
+            raise FileNotFoundError(_(
+                en_message='`run_journal.exe` is not found. '
+                           'Please check:\n'
+                           '- NX is installed.\n'
+                           '- The environment variable `UGII_BASE_DIR` is set.\n'
+                           '- `<UGII_BASE_DIR>\\NXBIN\\run_journal.exe` exists.\n',
+                jp_message='「run_journal.exe」 が見つかりませんでした。'
+                           '以下のことを確認してください。\n'
+                           '- NX がインストールされている\n'
+                           '- 環境変数 UGII_BASE_DIR が設定されている\n'
+                           '- <UGII_BASE_DIR>\\NXBIN\\run_journal.exe が存在する'
+            ))
 
         self.prt_path = os.path.abspath(prt_path)
         assert os.path.isfile(self.prt_path)

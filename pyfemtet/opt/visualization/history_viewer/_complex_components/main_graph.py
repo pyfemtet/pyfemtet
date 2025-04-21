@@ -18,7 +18,6 @@ import plotly.graph_objs as go
 # the others
 import os
 import base64
-import json
 import numpy as np
 
 from pyfemtet.opt.visualization.plotter import main_figure_creator
