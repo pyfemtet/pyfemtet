@@ -10,8 +10,8 @@ from scipy.optimize import NonlinearConstraint
 
 from pyfemtet._i18n import Msg
 from pyfemtet._util.closing import closing
-from pyfemtet.opt.problem import *
-from pyfemtet.opt.variable_manager import *
+from pyfemtet.opt.problem.variable_manager import *
+from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.logger import get_module_logger
 

@@ -2,18 +2,18 @@ from __future__ import annotations
 
 import datetime
 from typing import Callable, TypeAlias, Sequence
-from numbers import Real
+from numbers import Real  # マイナーなので型ヒントでは使わず、isinstance で使う
 from time import sleep
 
 import sympy
 
 from pyfemtet._i18n.messages import _
 from pyfemtet.opt.history import *
-from pyfemtet.opt.problem import *
 from pyfemtet.opt.interface import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.worker_status import *
-from pyfemtet.opt.variable_manager import *
+from pyfemtet.opt.problem.problem import *
+from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.logger import get_module_logger
 
 __all__ = [
@@ -213,8 +213,8 @@ class AbstractOptimizer:
     def add_objective(
             self,
             name: str,
-            fun: Callable[..., Real],
-            direction: str | Real = 'minimize',
+            fun: Callable[..., float],
+            direction: str | float = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
     ) -> None:
@@ -229,9 +229,9 @@ class AbstractOptimizer:
     def add_objectives(
             self,
             names: str | list[str],
-            fun: Callable[..., Sequence[Real]],
+            fun: Callable[..., Sequence[float]],
             n_return: int,
-            directions: str | Sequence[str | Real] = None,
+            directions: str | Sequence[str | float] = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
     ):

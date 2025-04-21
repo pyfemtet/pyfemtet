@@ -13,8 +13,8 @@ from pythoncom import CoInitialize, CoUninitialize, com_error
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.interface._base_interface import COMInterface
-from pyfemtet._i18n import Msg
-from pyfemtet.opt.variable_manager import SupportedVariableTypes
+from pyfemtet._i18n import Msg, _
+from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
 from pyfemtet.logger import get_module_logger
 
 if TYPE_CHECKING:
@@ -60,7 +60,15 @@ class SolidworksInterface(COMInterface):
 
     def connect_sw(self):
         logger.info(Msg.SW_CONNECTING)
-        self.swApp = DispatchEx('SLDWORKS.Application')
+        try:
+            self.swApp = DispatchEx('SLDWORKS.Application')
+        except com_error:
+            raise Exception(_(
+                en_message='Failed to instantiate Solidworks. '
+                           'Please check installation and enabling macro.',
+                jp_message='Solidworks のインスタンス化に失敗しました。'
+                           'Solidworks がインストールされており、'
+                           'Solidworks マクロが有効であることを確認してください。'))
         self.swApp.Visible = self.solidworks_visible
 
     def _setup_before_parallel(self):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pyfemtet.opt.problem import *
+from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.optimizer._base_optimizer import *
 

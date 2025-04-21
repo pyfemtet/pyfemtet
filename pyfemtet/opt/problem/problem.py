@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, TYPE_CHECKING, TypeAlias
+from typing import Callable, TYPE_CHECKING, TypeAlias, Sequence
 
 try:
     # noinspection PyUnresolvedReferences
@@ -16,8 +16,10 @@ except ModuleNotFoundError:
     constants = Constants()
 
 from pyfemtet._i18n import _
-from pyfemtet.opt.variable_manager import *
 from pyfemtet._util.helper import *
+
+from .variable_manager import *
+
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
     from pyfemtet.opt.interface import AbstractFEMInterface
@@ -111,7 +113,7 @@ class Objective(Function):
     direction: str | float
 
     @staticmethod
-    def _convert(value, direction):
+    def _convert(value, direction) -> float:
 
         direction: float | str | None = float_(direction)
 
@@ -150,15 +152,24 @@ class ObjectiveResult:
 class ObjectivesFunc:
     """複数の値を返す関数を単一の float を返す関数に分割する。"""
 
-    def __init__(self, fun, n_return):
+    def __init__(self, fun: Callable[..., Sequence[float]], n_return: int):  # TODO: np.array の型ヒントが通るか
+        # Optimizer に追加される数と一致することを保証したいので
+        # n_returns が必要
         self._called: list[bool] | None = None
         self._values: list[bool] | None = None
-        self.fun = fun
-        self.n_return = n_return
+        self.fun: Callable[..., Sequence[float]] = fun
+        self.n_return: int = n_return
 
     def get_fun_that_returns_ith_value(self, i):
 
-        assert i in range(self.n_return)
+        if i not in range(self.n_return):
+            raise IndexError(
+                _(
+                    en_message='Index {i} is over n_return={n_return}.',
+                    jp_message='インデックス {i} は n_return={n_return} を超えています。',
+                    i=i, n_return=self.n_return
+                )
+            )
 
         # iter として提供する callable オブジェクト
         # self の情報にもアクセスする必要があり
@@ -171,7 +182,7 @@ class ObjectivesFunc:
                 # 何番目の要素であるかを保持
                 self_.i = i_
 
-            def __call__(self_, *args, **kwargs):
+            def __call__(self_, *args, **kwargs) -> float:
                 # 何番目の要素であるか
                 i_ = self_.i
 
@@ -181,8 +192,10 @@ class ObjectivesFunc:
                     self._called = [False for __ in self._values]
 
                     assert len(self._values) == self.n_return, _(
-                        'The number of return values of {fun_name} is {n_values}. '
-                        'This is inconsistent with the specified n_return; {n_return}.',
+                        en_message='The number of return values of {fun_name} is {n_values}. '
+                                   'This is inconsistent with the specified n_return; {n_return}.',
+                        jp_message='{fun_name} の実行結果の値の数は {n_values} でした。'
+                                   'これは指定された n_return={n_return} と一致しません。',
                         fun_name=self.fun.__name__,
                         n_values=len(self._values),
                         n_return=self.n_return,
@@ -204,7 +217,10 @@ class ObjectivesFunc:
             @property
             def __globals__(self_):
                 # ScapeGoat 実装への対処
-                return self.fun.__globals__
+                if hasattr(self.fun, '__globals__'):
+                    return self.fun.__globals__
+                else:
+                    return {}
 
         # N 番目の値を返す関数を返す
         f = NthFunc(i)

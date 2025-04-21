@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import re
 
-from pyfemtet.opt.problem import SupportedVariableTypes
+from pyfemtet.opt.problem.problem import SupportedVariableTypes
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
 from pyfemtet.opt.interface._excel_interface import ExcelInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface

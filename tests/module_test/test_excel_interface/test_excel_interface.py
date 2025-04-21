@@ -2,7 +2,7 @@ from contextlib import closing
 
 import numpy as np
 
-from pyfemtet.opt.variable_manager import *
+from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.interface._excel_interface import ExcelInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
 

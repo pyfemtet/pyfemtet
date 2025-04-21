@@ -1,4 +1,4 @@
-,prm,prm_lower_bound,prm_upper_bound,prm_step,prm,prm_lower_bound,prm_upper_bound,prm,prm_choices,obj,obj_direction,cns,cns_upper_bound,,,
+,prm.num.value,prm.num.lower_bound,prm.num.upper_bound,prm.num.step,prm.num.value,prm.num.lower_bound,prm.num.upper_bound,prm.cat.value,prm.cat.choices,obj,obj_direction,cns,cns_upper_bound,,,
 ,,,,,,,,,,,,,,,,
 trial,x,x_lower_bound,x_upper_bound,step,y,y_lower_bound,y_upper_bound,z,z_choices,out,out2,cons,cons_upper_bound,state,feasibility,optimality
 1,56,50,100,1,0.316503562,0,1,A,"[""A"",""B"",""C""]",71.82517808,maximize,0.316503562,0.8,Success,TRUE,FALSE

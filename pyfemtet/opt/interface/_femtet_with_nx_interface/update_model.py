@@ -1,8 +1,8 @@
 import os
 import sys
 import json
-from xml.etree.ElementInclude import include
 
+# noinspection PyUnresolvedReferences
 import NXOpen
 
 
@@ -93,7 +93,6 @@ def main(
 
 if __name__ == "__main__":
     print('---NX started---')
-    # print('current directory: ', os.getcwd())
     print('arguments: ')
     for arg in sys.argv[1:]:
         print('│ ', arg)

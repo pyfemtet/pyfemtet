@@ -31,7 +31,7 @@ from pyfemtet._util.femtet_access_inspection import *
 from pyfemtet.dispatch_extensions import *
 from pyfemtet.opt.interface._base_interface import COMInterface
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
 
 from ._femtet_parametric import *
 

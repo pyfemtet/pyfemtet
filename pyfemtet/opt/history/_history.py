@@ -19,9 +19,9 @@ from pyfemtet._i18n import *
 from pyfemtet._util.df_util import *
 from pyfemtet._util.dask_util import *
 from pyfemtet._util.str_enum import StrEnum
-from pyfemtet.opt.problem import *
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.variable_manager import *
+from pyfemtet.opt.problem.problem import *
+from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.logger import get_module_logger
 
 from pyfemtet.opt.history._optimality import *

@@ -9,7 +9,7 @@ from botorch.optim.initializers import gen_batch_initial_conditions
 
 from pyfemtet._i18n import _
 from pyfemtet.logger import get_module_logger
-from pyfemtet.opt.problem import *
+from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
 logger = get_module_logger('opt.optimizer')

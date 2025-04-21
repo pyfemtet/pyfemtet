@@ -26,7 +26,7 @@ from pyfemtet._util.femtet_autosave import *
 from pyfemtet._i18n import Msg
 
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
 from pyfemtet.opt.interface._base_interface import COMInterface
 
 from pyfemtet.logger import get_module_logger
@@ -34,7 +34,7 @@ from pyfemtet._util.helper import float_
 
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
-    from pyfemtet.opt.problem import Objective, Constraint
+    from pyfemtet.opt.problem.problem import Objective, Constraint
 
 logger = get_module_logger('opt.interface')
 
@@ -773,7 +773,7 @@ class ExcelInterface(COMInterface):
         return self._get_wb(self.teardown_xlsm_path)
 
     # ===== update =====
-    def update_parameter(self, x: SupportedVariableTypes) -> None:
+    def update_parameter(self, x: dict[str, SupportedVariableTypes]) -> None:
 
         COMInterface.update_parameter(self, x)
 

@@ -19,7 +19,7 @@ from pyfemtet._i18n import _
 from pyfemtet.opt.history import *
 from pyfemtet.opt.interface import *
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.variable_manager import *
+from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet._util.dask_util import *
 from pyfemtet._util.closing import closing
 from pyfemtet.logger import get_optuna_logger, remove_all_output, get_module_logger
@@ -532,8 +532,6 @@ def debug_1():
     # sampler = BoTorchSampler(n_startup_trials=5)
 
     os.chdir(os.path.dirname(__file__))
-
-    from pyfemtet.opt.exceptions import PostProcessError
 
     def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
         d = _opt.get_variables()

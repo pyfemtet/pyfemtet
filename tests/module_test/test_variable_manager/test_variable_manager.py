@@ -1,10 +1,10 @@
-from pyfemtet.opt.variable_manager._string_as_expression import _ExpressionFromString
-from pyfemtet.opt.variable_manager import *
+from pyfemtet.opt.problem.variable_manager._string_as_expression import _ExpressionFromString
+from pyfemtet.opt.problem.variable_manager import *
 
 
 def test_internal_ExpressionFromString():
     import sympy
-    from pyfemtet.opt.variable_manager._variable_manager import Variable
+    from pyfemtet.opt.problem.variable_manager._variable_manager import Variable
 
     a = Variable(); a.name = 'a'; a.value = 1
     b = Variable(); b.name = 'b'; b.value = 3

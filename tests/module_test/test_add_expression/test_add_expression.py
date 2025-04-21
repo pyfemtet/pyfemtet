@@ -1,5 +1,5 @@
 import sympy
-from pyfemtet.opt.variable_manager import *
+from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
 

@@ -9,7 +9,7 @@ from pywintypes import com_error
 
 from pyfemtet._i18n import _
 
-from pyfemtet.opt.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface
 from pyfemtet.opt.interface._solidworks_interface import SolidworksInterface

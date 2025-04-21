@@ -27,7 +27,7 @@ class _ExpressionFromString:
     _expr_str: str
     _sympy_expr: Expr
 
-    def __init__(self, expression_string: str | float = None, sympy_expr: Expr = None):
+    def __init__(self, expression_string: str | Number = None, sympy_expr: Expr = None):
         """
         Raises:
             SympifyError: Sympy が認識できない場合

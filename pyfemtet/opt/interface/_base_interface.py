@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 
 from pyfemtet._util.dask_util import *
 from pyfemtet.logger import get_module_logger
-from pyfemtet.opt.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
 
 logger = get_module_logger('opt.interface', False)
 

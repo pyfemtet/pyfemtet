@@ -1,6 +1,7 @@
-from typing import Callable
+from typing import Callable, TypeAlias
 
 import inspect
+from numbers import Real  # マイナーなので型ヒントには使わず isinstance で使う
 from graphlib import TopologicalSorter
 
 import numpy as np
@@ -26,16 +27,17 @@ __all__ = [
 ]
 
 
-SupportedVariableTypes = str | float
+SupportedVariableTypes: TypeAlias = str | Real  # isinstance で使いうるので Real
 
 
 class Variable:
     name: str
-    value: ...
+    value: SupportedVariableTypes
     pass_to_fem: bool
     properties: dict[str, ...]
 
     def __init__(self):
+        # noinspection PyTypeChecker
         self.value = None
         self.properties = {}
 
@@ -225,7 +227,7 @@ class VariableManager:
                 dependency: set[str] = var._expr.dependency
 
                 # order 順に見ているので value は正しいはず
-                dependency_values: dict[str, float] = {
+                dependency_values: dict[str, SupportedVariableTypes] = {
                     dep_name: self.variables[dep_name].value
                     for dep_name in dependency
                 }
