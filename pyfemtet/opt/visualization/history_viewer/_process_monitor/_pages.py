@@ -241,7 +241,7 @@ class WorkerPage(AbstractPage):
 
         # noinspection PyAttributeOutsideInit
         self.worker_status_alerts = []
-        for i in range(len(self.application.worker_addresses)):
+        for i in range(len(self.application.worker_names)):
             id_worker_alert = f'worker-status-alert-{i}'
             alert = dbc.Alert('worker status here', id=id_worker_alert, color='dark')
             self.worker_status_alerts.append(alert)
@@ -270,10 +270,15 @@ class WorkerPage(AbstractPage):
 
             ret = []
 
-            for worker_address, worker_status in (
-                    zip(self.application.worker_addresses, self.application.worker_status_list)):
+            for worker_name, worker_address, worker_status in (
+                    zip(
+                        self.application.worker_names,
+                        self.application.worker_addresses,
+                        self.application.worker_status_list,
+                    )):
                 worker_status_message = worker_status.value.str()
-                ret.append(f'{worker_address} is {worker_status_message}')
+                ret.append(f'{worker_name} ({worker_address}) is '
+                           f'{worker_status_message}')
 
             ret.extend(
                 [self.application.get_status_color(worker_status)

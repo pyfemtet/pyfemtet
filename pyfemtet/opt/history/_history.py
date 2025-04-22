@@ -49,7 +49,11 @@ logger = get_module_logger('opt.history', True)
 
 def create_err_msg_from_exception(e: Exception):
     """:meta private:"""
-    return type(e).__name__ + ' / ' + ' '.join(map(str, e.args))
+    additional = ' '.join(map(str, e.args))
+    if additional == '':
+        return type(e).__name__
+    else:
+        return type(e).__name__ + f'({additional})'
 
 
 class TrialState(StrEnum):
@@ -309,7 +313,7 @@ class ColumnManager:
     @staticmethod
     def columns_to_keep_even_if_nan():
         return [
-            'message',
+            'messages',
         ]
 
     def initialize(
@@ -594,7 +598,10 @@ class ColumnManager:
     @staticmethod
     def _reconvert_objects(df: pd.DataFrame, meta_columns: list[str]):
         for column, meta_column in zip(df.columns, meta_columns):
-            # list は csv を経由することで str になるので restore
+            # messages は df の段階で _RECORD_MESSAGE_DELIMITER
+            # separated な str なのでここで restore してはいけない
+
+            # choices list は csv を経由することで str になるので restore
             if meta_column == 'prm.cat.choices':
                 df[column] = [ast.literal_eval(d) for d in df[column]]
 
@@ -606,6 +613,9 @@ class ColumnManager:
 
         else:
             return np.unique(df['sub_fidelity_name'].values).tolist()
+
+
+_RECORD_MESSAGE_DELIMITER = ' | '
 
 
 @dataclasses.dataclass
@@ -627,7 +637,7 @@ class Record:
     state: TrialState = TrialState.undefined
     datetime_start: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
     datetime_end: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
-    message: str = ''
+    messages: list = dataclasses.field(default_factory=list)
     hypervolume: float | None = None
     feasibility: bool | None = None
     optimality: bool | None = None
@@ -676,7 +686,11 @@ class Record:
                 d.update({f(prm_name): param.choices})
             else:
                 raise NotImplementedError
-
+        
+        # messages to str
+        messages_str = _RECORD_MESSAGE_DELIMITER.join(d['messages'])
+        d.update({'messages': messages_str})
+        
         d.update(**{k: v.value for k, v in y.items()})
         d.update(**{f'{k}_direction': v.direction for k, v in y.items()})
         d.update(**{k: v.value for k, v in c.items()})
@@ -817,7 +831,7 @@ class Records:
             # load df from line 3
             loaded_df = pd.read_csv(f, encoding=ENCODING, header=0)
 
-        # choices は list だったものが str になるので型変換
+        # df を csv にする過程で失われる list などのオブジェクトを restore
         ColumnManager._reconvert_objects(loaded_df, loaded_meta_columns)
 
         # この段階では column_dtypes が setup されていない可能性があるので

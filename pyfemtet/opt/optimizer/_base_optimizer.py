@@ -86,6 +86,7 @@ class AbstractOptimizer:
     _done_setup_before_parallel: bool
     _done_load_problem_from_fem: bool
     _worker_index: int | str | None
+    _worker_name: str | None
 
     def __init__(self):
 
@@ -114,6 +115,7 @@ class AbstractOptimizer:
         self._done_setup_before_parallel = False
         self._done_load_problem_from_fem = False
         self._worker_index: int | str | None = None
+        self._worker_name: str | None = None
 
     # ===== public =====
 
@@ -307,6 +309,15 @@ class AbstractOptimizer:
             strict: bool = True,
             using_fem: bool | None = None,
     ):
+
+        if lower_bound is None and upper_bound is None:
+            raise ValueError(_(
+                en_message='One of `lower_bound` and `upper_bound` '
+                           'should be set.',
+                jp_message='`lower_bound` and `upper_bound` のうち'
+                           '少なくとも一つは指定されなければなりません。'
+            ))
+
         cns = Constraint()
         cns.fun = fun
         cns.args = args or ()
@@ -428,8 +439,8 @@ class AbstractOptimizer:
         def _postprocess(self):
             pass
 
-        @staticmethod
         def _solve_or_raise(
+                self,
                 opt_: AbstractOptimizer,
                 parameters: TrialInput,
                 variables_pass_to_fem: dict[str, SupportedVariableTypes],
@@ -458,6 +469,8 @@ class AbstractOptimizer:
                 record.sub_fidelity_name = opt_.sub_fidelity_name
                 record.fidelity = opt_.fidelity
                 record.datetime_start = datetime_start
+                if self.opt._worker_name is not None:
+                    record.messages.append(self.opt._worker_name)
 
                 # check skip
                 if not opt_._should_solve(history):
@@ -486,7 +499,7 @@ class AbstractOptimizer:
                     _log_hidden_constraint(e)
                     record.c = hard_c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = (
+                    record.messages.append(
                             _('Hidden constraint violation '
                               'during hard constraint function '
                               'evaluation: ')
@@ -500,7 +513,7 @@ class AbstractOptimizer:
                 if len(violation_names) > 0:
                     record.c = hard_c
                     record.state = TrialState.hard_constraint_violation
-                    record.message = (
+                    record.messages.append(
                             _('Hard constraint violation: ')
                             + ', '.join(violation_names))
 
@@ -521,7 +534,7 @@ class AbstractOptimizer:
                     _log_hidden_constraint(e)
                     record.c = hard_c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = (
+                    record.messages.append(
                             _('Hidden constraint violation in FEM update: ')
                             + create_err_msg_from_exception(e))
 
@@ -541,7 +554,7 @@ class AbstractOptimizer:
                     _log_hidden_constraint(e)
                     record.c = hard_c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = (
+                    record.messages.append(
                             _('Hidden constraint violation during '
                               'objective function evaluation: ')
                             + create_err_msg_from_exception(e))
@@ -566,7 +579,7 @@ class AbstractOptimizer:
                     record.y = y
                     record.c = _c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.message = (
+                    record.messages.append(
                             _('Hidden constraint violation during '
                               'soft constraint function evaluation: ')
                             + create_err_msg_from_exception(e))
@@ -671,6 +684,7 @@ class AbstractOptimizer:
     def _run(
             self,
             worker_idx: int | str,
+            worker_name: str,
             history: History,
             entire_status: WorkerStatus,
             worker_status: WorkerStatus,
@@ -682,6 +696,7 @@ class AbstractOptimizer:
         self.entire_status = entire_status
         self.worker_status = worker_status
         self._worker_index = worker_idx
+        self._worker_name = worker_name
         self.worker_status_list = worker_status_list
 
         class SettingStatusFinished:
@@ -717,7 +732,10 @@ class AbstractOptimizer:
                 else:
                     self.worker_status.value = WorkerStatus.finished
 
-        logger.info(_('worker {worker_idx} started', worker_idx=worker_idx))
+        logger.info(_(
+            en_message='worker `{worker}` started.',
+            worker=worker_name,
+        ))
 
         with SettingStatusFinished():
 
@@ -751,7 +769,10 @@ class AbstractOptimizer:
 
             self.run()
 
-        logger.info(_('worker {worker_idx} successfully finished!', worker_idx=worker_idx))
+        logger.info(_(
+            en_message='worker `{worker}` successfully finished!',
+            worker=worker_name,
+        ))
 
     def _logging(self):
 

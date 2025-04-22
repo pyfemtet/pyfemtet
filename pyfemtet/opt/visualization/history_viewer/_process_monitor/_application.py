@@ -58,6 +58,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
             history,
             status,
             worker_addresses,
+            worker_names,
             worker_status_list,
             is_debug=False,
     ):
@@ -71,7 +72,8 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
 
         # register arguments
         self._local_data = history.get_df()  # scheduler への負荷を避けるためアクセスは while loop の中で行う
-        self.worker_addresses: List[str] = worker_addresses
+        self.worker_names: List[str] = worker_names
+        self.worker_addresses = worker_addresses
         self.entire_status: WorkerStatus = status  # include actor
         self.worker_status_list: List[WorkerStatus] = worker_status_list  # include actor
 
@@ -153,8 +155,8 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
         return df
 
 
-def process_monitor_main(history, status, worker_addresses, worker_status_list, host=None, port=None, host_record=None):
-    g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_status_list)
+def process_monitor_main(history, status, worker_addresses, worker_names, worker_status_list, host=None, port=None, host_record=None):
+    g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_names, worker_status_list)
 
     g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
     g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Callable, Sequence
+from typing import Callable, Sequence
 
 import os
 import sys
@@ -16,16 +16,14 @@ from pyfemtet._util.dask_util import *
 from pyfemtet.opt.worker_status import *
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.problem.variable_manager import *
+from pyfemtet.opt.interface import *
+from pyfemtet.opt.optimizer import *
+from pyfemtet.opt.optimizer._base_optimizer import DIRECTION
 from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.visualization.history_viewer._process_monitor._application import (
     process_monitor_main,
     MonitorHostRecord
 )
-
-if TYPE_CHECKING:
-    from pyfemtet.opt.interface import *
-    from pyfemtet.opt.optimizer import *
-    from pyfemtet.opt.optimizer._base_optimizer import DIRECTION
 
 
 logger = get_module_logger('opt.femopt', False)
@@ -188,6 +186,7 @@ class FEMOpt:
             confirm_before_exit: bool = True,
             history_path: str = None,
             with_monitor: bool = True,
+            scheduler_address: str = None,
     ):
 
         # ===== show initialize info =====
@@ -206,29 +205,41 @@ class FEMOpt:
             self.opt.history.path = history_path
 
         # construct opt workers
-        if n_parallel == 1:
-            cluster = nullcontext()
-            # noinspection PyTypeChecker
-            client = DummyClient()
+        n_using_cluster_workers = n_parallel  # workers excluding main
+        if scheduler_address is None:
+            n_using_cluster_workers = n_using_cluster_workers - 1
+            worker_name_base = 'Sub'
+            if n_parallel == 1:
+                cluster = nullcontext()
+                # noinspection PyTypeChecker
+                client = DummyClient()
 
+            else:
+                logger.info(_('Launching processes...'))
+                cluster = LocalCluster(
+                    n_workers=n_parallel - 1,
+                    threads_per_worker=1 if n_parallel > 1 else None,
+                    processes=True if n_parallel > 1 else False,
+                )
+
+                logger.info(_('Connecting cluster...'))
+                client = Client(
+                    cluster,
+                )
         else:
-            logger.info(_('Launching processes...'))
-            cluster = LocalCluster(
-                n_workers=n_parallel - 1,
-                threads_per_worker=1 if n_parallel > 1 else None,
-                processes=True if n_parallel > 1 else False,
-            )
-
-            logger.info(_('Connecting cluster...'))
-            client = Client(
-                cluster,
-            )
+            worker_name_base = 'Remote Worker'
+            cluster = nullcontext()
+            client = Client(scheduler_address)
 
         # construct other workers
+        main_worker_names = list()
         logger.info(_('Launching threads...'))
-        executor_workers = 3  # main, save_history, watch_status
+        executor_workers = 2  # save_history, watch_status
         if with_monitor:
             executor_workers += 1  # monitor
+        if scheduler_address is None:
+            executor_workers += 1  # main
+            main_worker_names.append('Main')
         executor = ThreadPoolExecutor(
             max_workers=executor_workers,
             thread_name_prefix='thread_worker'
@@ -250,14 +261,18 @@ class FEMOpt:
 
             # create worker status list
             entire_status = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
-            worker_status_list = [WorkerStatus(f'worker-status-{i}') for i in range(n_parallel)]
+            assert n_parallel == len(main_worker_names) + n_using_cluster_workers
+
+            worker_status_list = []
+            for i in range(n_parallel):
+                worker_status = WorkerStatus(f'worker-status-{i}')
+                worker_status.value = WorkerStatus.initializing
+                worker_status_list.append(worker_status)
             entire_status.value = WorkerStatus.initializing
 
-            # Get workers
-            nannies: tuple[Nanny] = tuple(client.cluster.workers.values())
-
-            # Assign roles
-            opt_worker_addresses = [n.worker_address for n in nannies]
+            # Get workers and Assign roles
+            opt_worker_addresses = list(client.scheduler_info()['workers'].keys())[:n_using_cluster_workers]
+            opt_worker_names = [f'{worker_name_base} {i+1}' for i in range(n_using_cluster_workers)]
 
             # Setting up monitor
             if with_monitor:
@@ -270,7 +285,8 @@ class FEMOpt:
                     process_monitor_main,
                     history=self.opt.history,
                     status=entire_status,
-                    worker_addresses=['main'] + opt_worker_addresses,
+                    worker_addresses=main_worker_names + opt_worker_addresses,
+                    worker_names=main_worker_names + opt_worker_names,
                     worker_status_list=worker_status_list,
                     host=self.monitor_info['host'],
                     port=self.monitor_info['port'],
@@ -288,28 +304,38 @@ class FEMOpt:
             futures = client.map(
                 self.opt._run,
                 # Arguments of func
-                range(1, n_parallel),
-                [self.opt.history] * (n_parallel - 1),
-                [entire_status] * (n_parallel - 1),
-                worker_status_list[1:],
-                [worker_status_list] * (n_parallel - 1),
-                [wait_setup] * (n_parallel - 1),
+                range(n_using_cluster_workers),  # worker_index
+                opt_worker_names,  # worker_name
+                [self.opt.history] * n_using_cluster_workers,  # history
+                [entire_status] * n_using_cluster_workers,  # entire_status
+                worker_status_list[:n_using_cluster_workers],  # worker_status
+                [worker_status_list] * n_using_cluster_workers,  # worker_status_list
+                [wait_setup] * n_using_cluster_workers,  # wait_other_process_setup
                 # Arguments of map
                 workers=opt_worker_addresses,
                 allow_other_workers=False,
             )
 
             # Run on main process
-            # noinspection PyTypeChecker
-            future = executor.submit(
-                self.opt._run,
-                'Main',
-                self.opt.history,
-                entire_status,
-                worker_status_list[0],
-                worker_status_list,
-                wait_setup
-            )
+            assert len(main_worker_names) == 0 or len(main_worker_names) == 1
+            if len(main_worker_names) == 1:
+                # noinspection PyTypeChecker
+                future = executor.submit(
+                    self.opt._run,
+                    main_worker_names[0],
+                    main_worker_names[0],
+                    self.opt.history,
+                    entire_status,
+                    worker_status_list[0],
+                    worker_status_list,
+                    wait_setup
+                )
+            else:
+                class DummyFuture:
+                    def result(self):
+                        pass
+
+                future = DummyFuture()
 
             # Saving history
             def save_history():
@@ -527,7 +553,53 @@ def debug_2():
     femopt.optimize(n_parallel=1)
 
 
+def debug_3():
+    # noinspection PyUnresolvedReferences
+    from time import sleep
+    # from pyfemtet.opt.optimizer import InterruptOptimization
+    import optuna
+    from pyfemtet.opt.interface import AbstractFEMInterface, NoFEM
+
+    def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
+        x = _opt.get_variables('values')
+        # print(os.getpid())
+        # raise RuntimeError
+        # raise Interrupt
+        # if get_worker() is None:
+        #     raise RuntimeError
+        return (x ** 2).sum()
+
+    def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
+        x = _opt.get_variables('values')
+        return x[0]
+
+    _opt = OptunaOptimizer()
+    _opt.sampler = optuna.samplers.TPESampler(seed=42)
+
+    _fem = NoFEM()
+    _opt.fem = _fem
+
+    _args = (_opt,)
+
+    _opt.add_parameter('x1', 1, -1, 1, step=0.2)
+    _opt.add_parameter('x2', 1, -1, 1, step=0.2)
+
+    _opt.add_constraint('cns', _cns, lower_bound=-0.5, args=_args)
+
+    _opt.add_objective('obj', _parabola, args=_args)
+
+    _femopt = FEMOpt(fem=_fem, opt=_opt)
+    _femopt.optimize(
+        scheduler_address='<dask scheduler で起動したスケジューラの tcp をここに入力>',
+        n_trials=80,
+        n_parallel=6,
+        with_monitor=True,
+        confirm_before_exit=False,
+    )
+
+
 if __name__ == '__main__':
     # for i in range(1):
     #     debug_1()
-    debug_2()
+    # debug_2()
+    debug_3()
