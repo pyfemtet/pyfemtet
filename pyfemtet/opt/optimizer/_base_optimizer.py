@@ -64,6 +64,11 @@ def _duplicated_name_check(name, names):
 
 class AbstractOptimizer:
 
+    # optimize
+    n_trials: int | None
+    timeout: float | None
+    seed: int | None
+
     # problem
     variable_manager: VariableManager
     objectives: Objectives
@@ -71,7 +76,6 @@ class AbstractOptimizer:
     fidelity: Fidelity | None
     sub_fidelity_name: str
     sub_fidelity_models: SubFidelityModels | None
-    seed: int | None
 
     # system
     history: History
@@ -87,6 +91,8 @@ class AbstractOptimizer:
 
         # optimization
         self.seed = None
+        self.n_trials = None
+        self.timeout = None
 
         # Problem
         self.variable_manager = VariableManager()

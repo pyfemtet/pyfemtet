@@ -37,13 +37,40 @@ class _ScipyCallback:
 
 class ScipyOptimizer(AbstractOptimizer):
 
-    def __init__(self):
+    _timeout: None = None
+    _n_trials: None = None
+
+    def __init__(self, method: str = None, tol=None):
         super().__init__()
 
-        self.method = None
-        self.tol = None
+        self.method = method
+        self.tol = tol
         self.options = {}
         self.constraint_enhancement = 0.001
+
+    @property
+    def timeout(self):
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, value):
+        if value is not None:
+            raise NotImplementedError(_(
+                en_message='`ScipyOptimizer` cannot use timeout.',
+                jp_message='`ScipyOptimizer` では timeout は指定できません。'
+            ))
+
+    @property
+    def n_trials(self):
+        return self._n_trials
+
+    @n_trials.setter
+    def n_trials(self, value):
+        if value is not None:
+            raise NotImplementedError(_(
+                en_message='`ScipyOptimizer` cannot use n_trials.',
+                jp_message='`ScipyOptimizer` では n_trials は指定できません。'
+            ))
 
     def _get_x0(self) -> np.ndarray:
 

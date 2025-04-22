@@ -1,21 +1,31 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING, Callable, Sequence
+
 import os
 import sys
 from time import sleep, time
 from contextlib import nullcontext
 from concurrent.futures import ThreadPoolExecutor
 
+import sympy
+
 import _pyfemtet
 
-from pyfemtet._i18n import _
+from pyfemtet._i18n.messages import _
 from pyfemtet._util.dask_util import *
-from pyfemtet.opt.optimizer import *
 from pyfemtet.opt.worker_status import *
-from pyfemtet.opt.interface import *
+from pyfemtet.opt.problem.problem import *
+from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.visualization.history_viewer._process_monitor._application import (
     process_monitor_main,
     MonitorHostRecord
 )
+
+if TYPE_CHECKING:
+    from pyfemtet.opt.interface import *
+    from pyfemtet.opt.optimizer import *
+    from pyfemtet.opt.optimizer._base_optimizer import DIRECTION
 
 
 logger = get_module_logger('opt.femopt', False)
@@ -29,12 +39,115 @@ class FEMOpt:
             fem: AbstractFEMInterface = None,
             opt: AbstractOptimizer = None,
     ):
-
         self.opt: AbstractOptimizer = opt or OptunaOptimizer()
         self.opt.fem = fem or FemtetInterface()
         self.monitor_info: dict[str, str | int | None] = dict(
             host=None, port=None,
         )
+
+    def add_constant_value(
+            self,
+            name: str,
+            value: SupportedVariableTypes,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+    ):
+        self.opt.add_constant_value(name, value, properties, pass_to_fem=pass_to_fem)
+
+    def add_parameter(
+            self,
+            name: str,
+            initial_value: float | None = None,
+            lower_bound: float | None = None,
+            upper_bound: float | None = None,
+            step: float | None = None,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+            fix: bool = False,
+    ) -> None:
+        self.opt.add_parameter(name, initial_value, lower_bound, upper_bound, step, properties, pass_to_fem=pass_to_fem, fix=fix)
+
+    def add_expression_string(
+            self,
+            name: str,
+            expression_string: str,
+            properties: dict[str, ...] | None = None,
+    ) -> None:
+        self.opt.add_expression_string(name, expression_string, properties)
+
+    def add_expression_sympy(
+            self,
+            name: str,
+            sympy_expr: sympy.Expr,
+            properties: dict[str, ...] | None = None,
+    ) -> None:
+        self.opt.add_expression_sympy(name, sympy_expr, properties)
+
+    def add_expression(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            properties: dict[str, ...] | None = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ) -> None:
+        self.opt.add_expression(name, fun, properties, args, kwargs)
+
+    def add_categorical_parameter(
+            self,
+            name: str,
+            initial_value: str | None = None,
+            choices: list[str] | None = None,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+            fix: bool = False,
+    ) -> None:
+        self.opt.add_categorical_parameter(name, initial_value, choices, properties, pass_to_fem=pass_to_fem, fix=fix)
+
+    def add_objective(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            direction: DIRECTION = 'minimize',
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ) -> None:
+        self.opt.add_objective(name, fun, direction, args, kwargs)
+
+    def add_objectives(
+            self,
+            names: str | list[str],
+            fun: Callable[..., Sequence[float]],
+            n_return: int,
+            directions: DIRECTION | Sequence[DIRECTION] = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+        self.opt.add_objectives(names, fun, n_return, directions, args, kwargs)
+
+    def add_constraint(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            lower_bound: float | None = None,
+            upper_bound: float | None = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+            strict: bool = True,
+            using_fem: bool | None = None,
+    ):
+        self.opt.add_constraint(name, fun, lower_bound, upper_bound, args, kwargs, strict, using_fem)
+
+    def add_sub_fidelity_model(
+            self,
+            name: str,
+            sub_fidelity_model: SubFidelityModel,
+            fidelity: Fidelity,
+    ):
+        self.opt.add_sub_fidelity_model(name, sub_fidelity_model, fidelity)
 
     def set_monitor_host(self, host: str = None, port: int = None):
         """Sets the host IP address and the port of the process monitor.
@@ -87,8 +200,8 @@ class FEMOpt:
         client: Client
 
         # set arguments
-        # self.opt.n_trials = n_trials
-        # self.opt.timeout = timeout
+        self.opt.n_trials = n_trials
+        self.opt.timeout = timeout
         if history_path is not None:
             self.opt.history.path = history_path
 
