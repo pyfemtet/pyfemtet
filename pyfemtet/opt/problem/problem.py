@@ -152,7 +152,7 @@ class ObjectiveResult:
 class ObjectivesFunc:
     """複数の値を返す関数を単一の float を返す関数に分割する。"""
 
-    def __init__(self, fun: Callable[..., Sequence[float]], n_return: int):  # TODO: np.array の型ヒントが通るか
+    def __init__(self, fun: Callable[..., Sequence[float]], n_return: int):
         # Optimizer に追加される数と一致することを保証したいので
         # n_returns が必要
         self._called: list[bool] | None = None
