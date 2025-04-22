@@ -675,6 +675,7 @@ class AbstractOptimizer:
             entire_status: WorkerStatus,
             worker_status: WorkerStatus,
             worker_status_list: list[WorkerStatus],
+            wait_other_process_setup: bool,
     ) -> None:
 
         self.history = history
@@ -725,25 +726,26 @@ class AbstractOptimizer:
             self.worker_status.value = WorkerStatus.launching_fem
             self.fem._setup_after_parallel(self)
 
-            self.worker_status.value = WorkerStatus.waiting
-            while True:
-                self._check_and_raise_interruption()
+            if wait_other_process_setup:
+                self.worker_status.value = WorkerStatus.waiting
+                while True:
+                    self._check_and_raise_interruption()
 
-                # 他のすべての worker_status が wait 以上になったら break
-                logger.debug([ws.value for ws in worker_status_list])
-                if all([ws.value >= WorkerStatus.waiting
-                        for ws in worker_status_list]):
+                    # 他のすべての worker_status が wait 以上になったら break
+                    logger.debug([ws.value for ws in worker_status_list])
+                    if all([ws.value >= WorkerStatus.waiting
+                            for ws in worker_status_list]):
 
-                    # リソースの競合等を避けるため
-                    # break する前に index 秒待つ
-                    if isinstance(worker_idx, str):
-                        wait_second = 0.
-                    else:
-                        wait_second = int(worker_idx + 1)
-                    sleep(wait_second)
-                    break
+                        # リソースの競合等を避けるため
+                        # break する前に index 秒待つ
+                        if isinstance(worker_idx, str):
+                            wait_second = 0.
+                        else:
+                            wait_second = int(worker_idx + 1)
+                        sleep(wait_second)
+                        break
 
-                sleep(1)
+                    sleep(1)
 
             self.worker_status.value = WorkerStatus.running
 

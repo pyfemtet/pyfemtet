@@ -293,6 +293,7 @@ class FEMOpt:
                 [entire_status] * (n_parallel - 1),
                 worker_status_list[1:],
                 [worker_status_list] * (n_parallel - 1),
+                [wait_setup] * (n_parallel - 1),
                 # Arguments of map
                 workers=opt_worker_addresses,
                 allow_other_workers=False,
@@ -307,6 +308,7 @@ class FEMOpt:
                 entire_status,
                 worker_status_list[0],
                 worker_status_list,
+                wait_setup
             )
 
             # Saving history
