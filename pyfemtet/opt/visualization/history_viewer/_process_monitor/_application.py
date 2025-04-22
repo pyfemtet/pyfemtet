@@ -18,6 +18,18 @@ from pyfemtet._i18n import Msg
 logger = get_module_logger('opt.femopt', False)
 
 
+class MonitorHostRecord:
+
+    def __init__(self):
+        self.info = dict()
+
+    def set(self, host, port):
+        self.info.update(dict(host=host, port=port))
+
+    def get(self):
+        return self.info
+
+
 class ProcessMonitorApplication(PyFemtetApplicationBase):
     """"""
     """

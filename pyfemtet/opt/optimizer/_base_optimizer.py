@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Callable, TypeAlias, Sequence
+from typing import Callable, TypeAlias, Sequence, Literal
 from numbers import Real  # マイナーなので型ヒントでは使わず、isinstance で使う
 from time import sleep
 
@@ -23,6 +23,14 @@ __all__ = [
     '_FReturnValue',
 ]
 
+
+DIRECTION: TypeAlias = (
+        float
+        | Literal[
+            'minimize',
+            'maximize',
+        ]
+)
 
 logger = get_module_logger('opt.optimizer', True)
 
@@ -63,6 +71,7 @@ class AbstractOptimizer:
     fidelity: Fidelity | None
     sub_fidelity_name: str
     sub_fidelity_models: SubFidelityModels | None
+    seed: int | None
 
     # system
     history: History
@@ -75,6 +84,9 @@ class AbstractOptimizer:
     _worker_index: int | str | None
 
     def __init__(self):
+
+        # optimization
+        self.seed = None
 
         # Problem
         self.variable_manager = VariableManager()
@@ -99,15 +111,24 @@ class AbstractOptimizer:
 
     # ===== public =====
 
-    def add_variable(
+    def add_constant_value(
             self,
             name: str,
-            value: float,
+            value: SupportedVariableTypes,
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
     ):
-        var = NumericVariable()
+        if isinstance(value, Real):
+            var = NumericVariable()
+        elif isinstance(value, str):
+            var = CategoricalVariable()
+        else:
+            raise ValueError(_(
+                en_message='Supported variable types are Real or str, got {type}',
+                jp_message='サポートされている変数の型は Real か str ですが、{type} が指定されました。',
+                type=type(value),
+            ))
         var.name = name
         var.value = value
         var.pass_to_fem = pass_to_fem
@@ -118,9 +139,9 @@ class AbstractOptimizer:
     def add_parameter(
             self,
             name: str,
-            initial_value: float | None,
-            lower_bound: float | None,
-            upper_bound: float | None,
+            initial_value: float | None = None,
+            lower_bound: float | None = None,
+            upper_bound: float | None = None,
             step: float | None = None,
             properties: dict[str, ...] | None = None,
             *,
@@ -189,8 +210,8 @@ class AbstractOptimizer:
     def add_categorical_parameter(
             self,
             name: str,
-            initial_value: str | None,
-            choices: list[str] | None,
+            initial_value: str | None = None,
+            choices: list[str] | None = None,
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
@@ -214,7 +235,7 @@ class AbstractOptimizer:
             self,
             name: str,
             fun: Callable[..., float],
-            direction: str | float = 'minimize',
+            direction: DIRECTION = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
     ) -> None:
@@ -231,7 +252,7 @@ class AbstractOptimizer:
             names: str | list[str],
             fun: Callable[..., Sequence[float]],
             n_return: int,
-            directions: str | Sequence[str | float] = None,
+            directions: DIRECTION | Sequence[DIRECTION] = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
     ):

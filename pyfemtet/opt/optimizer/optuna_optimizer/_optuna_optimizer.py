@@ -51,16 +51,18 @@ class OptunaOptimizer(AbstractOptimizer):
     sampler_kwargs: dict
     n_trials: int | None
     timeout: float | None
-    seed: int | None
     callbacks: list
 
-    def __init__(self):
+    def __init__(
+            self,
+            sampler_class: type[optuna.samplers.BaseSampler] = None,
+            sampler_kwargs: dict[str, ...] = None,
+    ):
         super().__init__()
-        self.sampler_kwargs = {}
-        self.sampler_class = TPESampler
+        self.sampler_kwargs = sampler_kwargs or {}
+        self.sampler_class = sampler_class or TPESampler
         self.n_trials: int | None = None
         self.timeout: float | None = None
-        self.seed: int | None = None
         self.callbacks = []
 
     def _check_and_raise_interruption(self) -> None:

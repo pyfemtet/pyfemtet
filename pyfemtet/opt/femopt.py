@@ -1,5 +1,6 @@
 import os
-from time import sleep
+import sys
+from time import sleep, time
 from contextlib import nullcontext
 from concurrent.futures import ThreadPoolExecutor
 
@@ -9,8 +10,12 @@ from pyfemtet._i18n import _
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.optimizer import *
 from pyfemtet.opt.worker_status import *
+from pyfemtet.opt.interface import *
 from pyfemtet.logger import get_module_logger
-from pyfemtet.opt.visualization.history_viewer._process_monitor._application import process_monitor_main
+from pyfemtet.opt.visualization.history_viewer._process_monitor._application import (
+    process_monitor_main,
+    MonitorHostRecord
+)
 
 
 logger = get_module_logger('opt.femopt', False)
@@ -19,12 +24,60 @@ logger = get_module_logger('opt.femopt', False)
 class FEMOpt:
     opt: AbstractOptimizer
 
+    def __init__(
+            self,
+            fem: AbstractFEMInterface = None,
+            opt: AbstractOptimizer = None,
+    ):
+
+        self.opt: AbstractOptimizer = opt or OptunaOptimizer()
+        self.opt.fem = fem or FemtetInterface()
+        self.monitor_info: dict[str, str | int | None] = dict(
+            host=None, port=None,
+        )
+
+    def set_monitor_host(self, host: str = None, port: int = None):
+        """Sets the host IP address and the port of the process monitor.
+
+        Args:
+            host (str):
+                The hostname or IP address of the monitor server.
+            port (int, optional):
+                The port number of the monitor server.
+                If None, ``8080`` will be used.
+                Defaults to None.
+
+        Tip:
+            Specifying host ``0.0.0.0`` allows viewing monitor
+            from all computers on the local network.
+
+            If no hostname is specified, the monitor server
+            will be hosted on ``localhost``.
+
+            We can access process monitor by accessing
+            ```localhost:8080``` on our browser by default.
+
+        """
+        if host is not None:
+            self.monitor_info.update(host=host)
+        if port is not None:
+            self.monitor_info.update(port=port)
+
+    def set_random_seed(self, seed: int):
+        self.opt.seed = seed
+
     def optimize(
             self,
+            n_trials: int = None,
             n_parallel: int = 1,
+            timeout: float = None,
+            wait_setup: bool = True,
+            confirm_before_exit: bool = True,
+            history_path: str = None,
             with_monitor: bool = True,
-    ) -> None:
+    ):
 
+        # ===== show initialize info =====
         logger.info(
             _(
                 '===== pyfemtet version {ver} =====',
@@ -32,10 +85,19 @@ class FEMOpt:
             )
         )
         client: Client
+
+        # set arguments
+        # self.opt.n_trials = n_trials
+        # self.opt.timeout = timeout
+        if history_path is not None:
+            self.opt.history.path = history_path
+
+        # construct opt workers
         if n_parallel == 1:
             cluster = nullcontext()
             # noinspection PyTypeChecker
             client = DummyClient()
+
         else:
             logger.info(_('Launching processes...'))
             cluster = LocalCluster(
@@ -49,10 +111,11 @@ class FEMOpt:
                 cluster,
             )
 
+        # construct other workers
         logger.info(_('Launching threads...'))
         executor_workers = 3  # main, save_history, watch_status
         if with_monitor:
-            executor_workers += 1
+            executor_workers += 1  # monitor
         executor = ThreadPoolExecutor(
             max_workers=executor_workers,
             thread_name_prefix='thread_worker'
@@ -86,6 +149,9 @@ class FEMOpt:
             # Setting up monitor
             if with_monitor:
                 logger.info(_('Launching Monitor...'))
+
+                monitor_host_record = MonitorHostRecord()
+
                 # noinspection PyTypeChecker,PyUnusedLocal
                 monitor_future = executor.submit(
                     process_monitor_main,
@@ -93,9 +159,14 @@ class FEMOpt:
                     status=entire_status,
                     worker_addresses=['main'] + opt_worker_addresses,
                     worker_status_list=worker_status_list,
+                    host=self.monitor_info['host'],
+                    port=self.monitor_info['port'],
+                    host_record=monitor_host_record,
                 )
+
             else:
                 monitor_future = None
+                monitor_host_record = None
 
             logger.info(_('Setting up optimization problem...'))
             entire_status.value = WorkerStatus.running
@@ -159,6 +230,34 @@ class FEMOpt:
                 logger.debug('All workers finished!')
             future_watching = executor.submit(watch_worker_status, )
 
+            if monitor_host_record is not None:
+                # update additional_data of history
+                # to notify how to emit interruption
+                # signal by external processes
+                monitor_record_wait_start = time()
+                while len(monitor_host_record.get()) == 0:
+                    sleep(0.1)
+                    if time() - monitor_record_wait_start > 30:
+                        logger.warning(_(
+                            en_message='Getting monitor host information is '
+                                       'failed within 30 seconds. '
+                                       'It can not be able to terminate by '
+                                       'requesting POST '
+                                       '`<host>:<port>/interrupt` '
+                                       'by an external process.',
+                            jp_message='モニターの情報取得が 30 秒以内に'
+                                       '終わりませんでした。最適化プロセスは、'
+                                       '外部プロセスから '
+                                       '`<host>:<port>/interrupt` に POST を'
+                                       'リクエストしても終了できない可能性が'
+                                       'あります。'
+                        ))
+                        break
+                if len(monitor_host_record.get()) > 0:
+                    self.opt.history.additional_data.update(
+                        monitor_host_record.get()
+                    )
+
             # Terminating monitor even if exception is raised
             class TerminatingMonitor:
 
@@ -183,7 +282,52 @@ class FEMOpt:
                 future_saving.result()
                 future_watching.result()
 
+            if confirm_before_exit:
+                confirm_msg = _(
+                    en_message='The optimization is now complete. '
+                               'You can view the results on the monitor '
+                               'until you press Enter to exit the program.',
+                    jp_message='最適化が終了しました。'
+                               'プログラムを終了するまで、'
+                               '結果をプロセスモニターで確認できます。\n'
+                               'Enter を押すとプログラムを終了します。'
+                )
+                result_viewer_msg = _(
+                    en_message='After the program ends, '
+                               'you can check the optimization results '
+                               'using the result viewer.\n'
+                               'The result viewer can be launched by '
+                               'performing one of the following actions:\n'
+                               '- (Windows only) Launch the `pyfemtet-opt-result-viewer` '
+                               'shortcut on your desktop if exists.\n'
+                               '- (Windows only) Launch {path}.\n'
+                               '- Execute "py -m pyfemtet.opt.visualization.history_viewer" '
+                               'in the command line',
+                    jp_message='プログラム終了後も、結果ビューワを使って最適化結果を'
+                               '確認することができます。'
+                               '結果ビューワは以下のいずれかを実施すると起動できます。\n'
+                               '- （ウィンドウズのみ）デスクトップの pyfemtet-opt-result-viewer '
+                               'ショートカットを起動する\n'
+                               '- （ウィンドウズのみ）{path} を起動する\n'
+                               '- コマンドラインで「py -m pyfemtet.opt.visualization.history_viewer」'
+                               'を実行する',
+                    path=os.path.abspath(
+                        os.path.join(
+                            os.path.dirname(sys.executable),
+                            'pyfemtet-opt-result-viewer.exe'
+                        )
+                    ) + ' (or .cmd)'
+                )
+                print("====================")
+                print(confirm_msg)
+                print("--------------------")
+                print(result_viewer_msg)
+
+            df = self.opt.history.get_df()
+
         logger.info(_('All processes are terminated.'))
+
+        return df
 
 
 def debug_1():
