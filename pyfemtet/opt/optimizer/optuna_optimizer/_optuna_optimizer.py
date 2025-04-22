@@ -34,11 +34,11 @@ logger = get_module_logger('opt.optimizer', False)
 remove_all_output(get_optuna_logger())
 
 warnings.filterwarnings('ignore', 'set_metric_names', optuna.exceptions.ExperimentalWarning)
-warnings.filterwarnings('ignore', 'Argument ``constraints_func`` is an experimental feature.', optuna.exceptions.ExperimentalWarning)
+warnings.filterwarnings('ignore', 'Argument ``constraints_func`` is an experimental feature.',
+                        optuna.exceptions.ExperimentalWarning)
 
 
 class OptunaOptimizer(AbstractOptimizer):
-
     # system
     study_name = 'pyfemtet-study'
     storage: str | optuna.storages.BaseStorage
@@ -64,6 +64,37 @@ class OptunaOptimizer(AbstractOptimizer):
         self.n_trials: int | None = None
         self.timeout: float | None = None
         self.callbacks = []
+
+    # ===== method checker =====
+    # noinspection PyMethodOverriding
+    def add_parameter(
+            self,
+            name: str,
+            initial_value: float,
+            lower_bound: float,
+            upper_bound: float,
+            step: float | None = None,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+            fix: bool = False,
+    ) -> None:
+        AbstractOptimizer.add_parameter(self, name, initial_value, lower_bound, upper_bound, step, properties,
+                                        pass_to_fem=pass_to_fem, fix=fix)
+
+    # noinspection PyMethodOverriding
+    def add_categorical_parameter(
+            self,
+            name: str,
+            initial_value: str,
+            choices: list[str],
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+            fix: bool = False,
+    ) -> None:
+        AbstractOptimizer.add_categorical_parameter(self, name, initial_value, choices, properties,
+                                                    pass_to_fem=pass_to_fem, fix=fix)
 
     def _check_and_raise_interruption(self) -> None:
         try:
@@ -277,7 +308,6 @@ class OptunaOptimizer(AbstractOptimizer):
         # with many pruned trials.
         if issubclass(self.sampler_class, optuna.samplers.TPESampler) \
                 and self.history.is_restart:
-
             # get unique tmp file
             tmp_storage_path = tempfile.mktemp(suffix='.db')
             self._existing_storage_path = self.storage_path
@@ -312,7 +342,6 @@ class OptunaOptimizer(AbstractOptimizer):
 
         # if new study, create it.
         if not self.history.is_restart:
-
             # create study
             study = optuna.create_study(
                 study_name=self.study_name,
@@ -496,6 +525,7 @@ class OptunaOptimizer(AbstractOptimizer):
                     # from processing study to existing one.
                     def copy_back(_, trial):
                         existing_study.add_trial(trial)
+
                     self.callbacks.append(copy_back)
 
                 # callback
@@ -545,7 +575,7 @@ def debug_1():
 
     def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
         x = _opt.get_variables('values')
-        return ((x-0.1) ** 2).sum()
+        return ((x - 0.1) ** 2).sum()
 
     def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
         x = _opt.get_variables('values')

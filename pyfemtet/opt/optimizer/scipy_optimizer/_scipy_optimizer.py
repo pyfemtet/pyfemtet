@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import minimize, OptimizeResult
 from scipy.optimize import NonlinearConstraint
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import Msg, _
 from pyfemtet._util.closing import closing
 from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.problem.problem import *
@@ -51,6 +51,13 @@ class ScipyOptimizer(AbstractOptimizer):
         params: dict[str, Parameter] = self.variable_manager.get_variables(
             filter='parameter', format='raw'
         )
+
+        for param in params.values():
+            if isinstance(param, CategoricalVariable):
+                raise NotImplementedError(_(
+                    en_message='Scipy can optimize only numerical parameters.',
+                    jp_message='Scipy では数値パラメータのみ最適化できます。'
+                ))
 
         # params のうち fix == True のものを除く
         x0 = np.array([p.value for p in params.values() if not p.properties.get('fix', False)])
