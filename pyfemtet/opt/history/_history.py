@@ -15,6 +15,8 @@ from contextlib import nullcontext
 import numpy as np
 import pandas as pd
 
+import pyfemtet
+
 from pyfemtet._i18n import *
 from pyfemtet._util.df_util import *
 from pyfemtet._util.dask_util import *
@@ -1107,7 +1109,7 @@ class History:
         self.path: str | None = None
         self._finalized: bool = False
         self.is_restart = False
-        self.additional_data = dict()
+        self.additional_data = dict(version=pyfemtet.__version__)
         self.column_order_mode: ColumnOrderMode = ColumnOrderMode.per_category
 
     def __str__(self):
@@ -1170,12 +1172,12 @@ class History:
         self.obj_names = list(obj_names)
         self.cns_names = list(cns_names)
         self.sub_fidelity_names = list(sub_fidelity_names)
-        self.additional_data = additional_data
+        self.additional_data.update(additional_data)
 
         if not self._finalized:
             # ここで column_dtypes が決定する
             self._records.column_manager.initialize(
-                parameters, self.obj_names, self.cns_names, additional_data, self.column_order_mode
+                parameters, self.obj_names, self.cns_names, self.additional_data, self.column_order_mode
             )
 
             # initialize

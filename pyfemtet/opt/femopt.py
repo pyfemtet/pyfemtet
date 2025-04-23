@@ -199,8 +199,8 @@ class FEMOpt:
         client: Client
 
         # set arguments
-        self.opt.n_trials = n_trials
-        self.opt.timeout = timeout
+        self.opt.n_trials = n_trials or self.opt.n_trials
+        self.opt.timeout = timeout or self.opt.timeout
         if history_path is not None:
             self.opt.history.path = history_path
 
@@ -326,7 +326,7 @@ class FEMOpt:
                     main_worker_names[0],
                     self.opt.history,
                     entire_status,
-                    worker_status_list[0],
+                    worker_status_list[n_using_cluster_workers:][0],
                     worker_status_list,
                     wait_setup
                 )
@@ -430,8 +430,7 @@ class FEMOpt:
                                'until you press Enter to exit the program.',
                     jp_message='最適化が終了しました。'
                                'プログラムを終了するまで、'
-                               '結果をプロセスモニターで確認できます。\n'
-                               'Enter を押すとプログラムを終了します。'
+                               '結果をプロセスモニターで確認できます。'
                 )
                 result_viewer_msg = _(
                     en_message='After the program ends, '
@@ -447,22 +446,21 @@ class FEMOpt:
                     jp_message='プログラム終了後も、結果ビューワを使って最適化結果を'
                                '確認することができます。'
                                '結果ビューワは以下のいずれかを実施すると起動できます。\n'
-                               '- （ウィンドウズのみ）デスクトップの pyfemtet-opt-result-viewer '
+                               '- （Windows のみ）デスクトップの pyfemtet-opt-result-viewer '
                                'ショートカットを起動する\n'
-                               '- （ウィンドウズのみ）{path} を起動する\n'
+                               '- （Windows のみ）{dir} にある {filename} を起動する\n'
                                '- コマンドラインで「py -m pyfemtet.opt.visualization.history_viewer」'
                                'を実行する',
-                    path=os.path.abspath(
-                        os.path.join(
-                            os.path.dirname(sys.executable),
-                            'pyfemtet-opt-result-viewer.exe'
-                        )
-                    ) + ' (or .cmd)'
+                    dir=os.path.abspath(os.path.dirname(sys.executable)),
+                    filename='pyfemtet-opt-result-viewer.exe (or .cmd)',
                 )
                 print("====================")
                 print(confirm_msg)
-                print("--------------------")
                 print(result_viewer_msg)
+                print(_(
+                    en_message='Press Enter to quit...',
+                    jp_message='終了するには Enter を押してください...',
+                ))
 
             df = self.opt.history.get_df()
 
@@ -498,7 +496,7 @@ def debug_1():
     _fem = NoFEM()
     _opt.fem = _fem
 
-    _args = (_fem, _opt)
+    _args = (_opt,)
 
     _opt.add_parameter('x1', 1, -1, 1, step=0.2)
     _opt.add_parameter('x2', 1, -1, 1, step=0.2)
@@ -507,9 +505,9 @@ def debug_1():
 
     _opt.add_objective('obj', _parabola, args=_args)
 
-    _femopt = FEMOpt()
+    _femopt = FEMOpt(fem=_fem, opt=_opt)
     _femopt.opt = _opt
-    _femopt.opt.history.path = 'v1test/femopt-restart-test.csv'
+    # _femopt.opt.history.path = 'v1test/femopt-restart-test.csv'
     _femopt.optimize(n_parallel=2)
 
     print(os.path.abspath(_femopt.opt.history.path))
@@ -600,6 +598,6 @@ def debug_3():
 
 if __name__ == '__main__':
     # for i in range(1):
-    #     debug_1()
+        debug_1()
     # debug_2()
-    debug_3()
+    # debug_3()

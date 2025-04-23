@@ -37,7 +37,6 @@ from pyfemtet.opt._test_utils.record_history import remove_extra_data_from_csv
 import pytest
 
 
-
 here = os.path.dirname(__file__)
 
 pyfemtet_root = rf'{here}\..\..\pyfemtet'

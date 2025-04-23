@@ -50,7 +50,9 @@ def test_new_additional_data():
     print(m)
     print(a_data, type(a_data))
     print(opt.history.additional_data)
-    assert opt.history.additional_data == fem._get_additional_data()
+    co = {'version': '0.0.0'}
+    co.update(fem._get_additional_data())
+    assert opt.history.additional_data == co
 
 
 def test_restart_additional_data():
@@ -124,8 +126,8 @@ def test_history_duplicated_name():
 
 
 if __name__ == '__main__':
-    test_standalone_history()
+    # test_standalone_history()
     test_new_additional_data()
     test_restart_additional_data()
-    test_history_column_order()
-    test_history_duplicated_name()
+    # test_history_column_order()
+    # test_history_duplicated_name()
