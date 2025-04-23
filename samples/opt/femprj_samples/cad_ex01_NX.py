@@ -19,7 +19,7 @@ from win32com.client import constants
 
 from pyfemtet.opt import FEMOpt
 from pyfemtet.opt.interface import FemtetWithNXInterface
-from pyfemtet.core import ModelError
+from pyfemtet.opt.exceptions import ModelError
 
 
 here, me = os.path.split(__file__)
@@ -124,11 +124,11 @@ if __name__ == '__main__':
     femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)
 
     # Add the constraint function to the optimization problem.
-    femopt.add_constraint(C_minus_B, 'C>B', lower_bound=1, args=femopt.opt)
+    femopt.add_constraint(fun=C_minus_B, name='C>B', lower_bound=1, args=(femopt.opt,))
 
     # Add the objective function to the optimization problem.
-    femopt.add_objective(von_mises, name='von Mises (Pa)')
-    femopt.add_objective(mass, name='mass (kg)')
+    femopt.add_objective(fun=von_mises, name='von Mises (Pa)')
+    femopt.add_objective(fun=mass, name='mass (kg)')
 
     # Run optimization.
     femopt.set_random_seed(42)

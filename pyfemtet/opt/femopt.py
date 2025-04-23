@@ -201,8 +201,7 @@ class FEMOpt:
         # set arguments
         self.opt.n_trials = n_trials or self.opt.n_trials
         self.opt.timeout = timeout or self.opt.timeout
-        if history_path is not None:
-            self.opt.history.path = history_path
+        self.opt.history.path = history_path or self.opt.history.path
 
         # construct opt workers
         n_using_cluster_workers = n_parallel  # workers excluding main

@@ -23,8 +23,8 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
 
     def __init__(
                 self,
-                femprj_path: str,
                 sldprt_path: str,
+                femprj_path: str = None,
                 model_name: str = None,
                 connect_method: str = "auto",
                 save_pdt: str = "all",

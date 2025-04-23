@@ -102,7 +102,7 @@ class Function:
                     f.__globals__[name] = cls()
 
     def eval(self, fem: AbstractFEMInterface) -> float:
-        return float(self.fun(fem._object_pass_to_fun, *self.args, **self.kwargs))
+        return float(self.fun(fem.object_pass_to_fun, *self.args, **self.kwargs))
 
 
 class Functions(dict[str, Function]):

@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     # Add the objective function to the optimization problem.
     # The target bending angle is 90 degrees.
-    femopt.add_objective(bending, name='final angle (degree)', direction=90)
+    femopt.add_objective(fun=bending, name='final angle (degree)', direction=90)
 
     # Run optimization.
     femopt.set_random_seed(42)

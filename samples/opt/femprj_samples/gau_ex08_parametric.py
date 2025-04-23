@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # Add the objective function to the optimization problem.
     # The target inductance is 0.1 uF.
-    femopt.add_objective(inductance, name='self-inductance (F)', direction=1e-7)
+    femopt.add_objective(fun=inductance, name='self-inductance (F)', direction=1e-7)
 
     # Run optimization.
     femopt.set_random_seed(42)

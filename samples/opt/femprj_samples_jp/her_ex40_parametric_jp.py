@@ -127,12 +127,12 @@ if __name__ == '__main__':
     femopt.add_parameter('port_x', 5, 1, 20)
 
     # 拘束関数を最適化問題に追加
-    femopt.add_constraint(antenna_is_smaller_than_substrate, 'アンテナと基板エッジの間隙', lower_bound=1, args=(opt,))
-    femopt.add_constraint(port_is_inside_antenna, 'アンテナエッジと給電ポートの間隙', lower_bound=1, args=(opt,))
+    femopt.add_constraint(fun=antenna_is_smaller_than_substrate, name='アンテナと基板エッジの間隙', lower_bound=1, args=(opt,))
+    femopt.add_constraint(fun=port_is_inside_antenna, name='アンテナエッジと給電ポートの間隙', lower_bound=1, args=(opt,))
 
     # 目的関数を最適化問題に追加
     # 共振周波数の目標は 3.0 GHz です。
-    femopt.add_objective(s.get_resonance_frequency, '第一共振周波数(Hz)', direction=3.0 * 1e9)
+    femopt.add_objective(fun=s.get_resonance_frequency, name='第一共振周波数(Hz)', direction=3.0 * 1e9)
 
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=15)

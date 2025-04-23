@@ -59,7 +59,7 @@ class AbstractFEMInterface:
     # ===== Function =====
 
     @property
-    def _object_pass_to_fun(self):
+    def object_pass_to_fun(self):
         return self
 
     # ===== dask util =====

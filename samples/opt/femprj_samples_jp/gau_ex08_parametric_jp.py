@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     # 目的関数を最適化問題に追加
     # 目標の自己インダクタンスは 0.1 μF です。
-    femopt.add_objective(inductance, name='自己インダクタンス (F)', direction=1e-7)
+    femopt.add_objective(fun=inductance, name='自己インダクタンス (F)', direction=1e-7)
 
     # 最適化を実行
     femopt.set_random_seed(42)

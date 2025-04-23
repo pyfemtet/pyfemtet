@@ -148,8 +148,8 @@ class FemtetWithNXInterface(FemtetInterface, _NXInterface):
 
     def __init__(
             self,
-            femprj_path: str,
             prt_path: str,
+            femprj_path: str = None,
             model_name: str = None,
             connect_method: str = "auto",  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
             save_pdt: str = "all",  # 'all' or None

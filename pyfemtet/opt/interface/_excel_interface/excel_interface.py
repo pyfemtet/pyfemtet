@@ -314,6 +314,10 @@ class ExcelInterface(COMInterface):
         self.use_named_range = use_named_range
         self.force_override_when_load = force_override_when_load
 
+    @property
+    def object_pass_to_fun(self):
+        return self.excel
+
     # ===== setup =====
     def _setup_before_parallel(self) -> None:
         # メインプロセスで、並列プロセスを開始する前に行う前処理

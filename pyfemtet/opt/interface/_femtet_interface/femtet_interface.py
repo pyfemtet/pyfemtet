@@ -176,7 +176,7 @@ class FemtetInterface(COMInterface):
     # ===== system =====
 
     @property
-    def _object_pass_to_fun(self):
+    def object_pass_to_fun(self):
         return self.Femtet
 
     def _setup_before_parallel(self):
