@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-23 11:41+0900\n"
+"POT-Creation-Date: 2025-04-23 13:09+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -483,6 +483,58 @@ msgstr ""
 
 #: ../source/pages/migration_to_v1.rst:13
 msgid "The main changes in version 1 are listed on this page along with usage examples. If you need to modify your existing scripts, please refer to the examples below."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:19
+msgid "Index of this page"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:22
+msgid "How to import exceptions like ModelError"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:24
+msgid "They will be moved to ``pyfemtet.opt.exceptions`` module."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:36
+msgid "add_objective() and add_constraints()"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:39
+msgid "``name`` argument"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:41
+msgid "The ``name`` argument will be the first argument and required."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:60
+msgid "``args`` argument"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:62
+msgid "The ``args`` will be recognized as a sequence."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:76
+msgid "Arguments of User-Defined Functions in cases other than FemtetInterface"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:78
+msgid "In cases other than ``FemtetInterface`` (for example, ``ExcelInterface``), the first argument of user-defined functions is given by PyFemtet."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:82
+msgid "This item is not relevant when using the FemtetInterface and its derived classes (such as FemtetWithNXInterface)."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:102
+msgid "What is passed to the first argument varies depending on the FEMInterface you using. For example, ``ExcelInterface`` passes COM object of Excel(R) to your function."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:106
+msgid "For details, please refer to the :doc:`api` (``~Interface.object_pass_to_fun``) of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
 msgstr ""
 
 #: ../source/pages/script_builder.rst:2

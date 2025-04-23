@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-23 11:41+0900\n"
+"POT-Creation-Date: 2025-04-23 13:09+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -486,6 +486,58 @@ msgstr "バージョン 0.9 以降はバージョン 1 への移行バージョ�
 #: ../source/pages/migration_to_v1.rst:13
 msgid "The main changes in version 1 are listed on this page along with usage examples. If you need to modify your existing scripts, please refer to the examples below."
 msgstr "バージョン 1 での主要な変更点はこのページに実装例とともに掲載しています。あなたの運用しているスクリプトの変更が必要な場合、以下の例を参考にしてください。"
+
+#: ../source/pages/migration_to_v1.rst:19
+msgid "Index of this page"
+msgstr "このページの目次"
+
+#: ../source/pages/migration_to_v1.rst:22
+msgid "How to import exceptions like ModelError"
+msgstr "ModelError などの例外のインポート"
+
+#: ../source/pages/migration_to_v1.rst:24
+msgid "They will be moved to ``pyfemtet.opt.exceptions`` module."
+msgstr "これらの例外クラスは ``pyfemtet.opt.exceptions`` モジュールに移動されます。"
+
+#: ../source/pages/migration_to_v1.rst:36
+msgid "add_objective() and add_constraints()"
+msgstr "add_objective() と add_constraints()"
+
+#: ../source/pages/migration_to_v1.rst:39
+msgid "``name`` argument"
+msgstr "引数 ``name``"
+
+#: ../source/pages/migration_to_v1.rst:41
+msgid "The ``name`` argument will be the first argument and required."
+msgstr "引数 ``name`` は第一位置引数になり、必須になります。"
+
+#: ../source/pages/migration_to_v1.rst:60
+msgid "``args`` argument"
+msgstr "引数 ``args``"
+
+#: ../source/pages/migration_to_v1.rst:62
+msgid "The ``args`` will be recognized as a sequence."
+msgstr "引数 ``args`` は配列として認識されます。"
+
+#: ../source/pages/migration_to_v1.rst:76
+msgid "Arguments of User-Defined Functions in cases other than FemtetInterface"
+msgstr "FemtetInterface 以外を使っている場合のユーザー定義関数の引数"
+
+#: ../source/pages/migration_to_v1.rst:78
+msgid "In cases other than ``FemtetInterface`` (for example, ``ExcelInterface``), the first argument of user-defined functions is given by PyFemtet."
+msgstr "``FemtetInterface`` 以外のインターフェース（例えば、 ``ExcelInterface`` ）を使っている場合、ユーザー定義関数の第一引数は PyFemtet から自動的に与えられるようになります。"
+
+#: ../source/pages/migration_to_v1.rst:82
+msgid "This item is not relevant when using the FemtetInterface and its derived classes (such as FemtetWithNXInterface)."
+msgstr "この項目は、FemtetInterface とその派生クラス（例えば FemtetWithNXInterface ）を使っている方には影響がありません。"
+
+#: ../source/pages/migration_to_v1.rst:102
+msgid "What is passed to the first argument varies depending on the FEMInterface you using. For example, ``ExcelInterface`` passes COM object of Excel(R) to your function."
+msgstr "第一引数として何が与えられるかは、お使いのインターフェースによって異なります。例えば、 ``ExcelInterface`` の場合 Excel(R) の COM オブジェクトが与えられます。"
+
+#: ../source/pages/migration_to_v1.rst:106
+msgid "For details, please refer to the :doc:`api` (``~Interface.object_pass_to_fun``) of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
+msgstr "より詳しくは、  :doc:`api` の ``~Interface.object_pass_to_fun`` 項目を参照してください。もしインターフェースクラスの項目に ``object_pass_to_fun`` の項目がなければ、継承元クラスの項目をご覧ください。"
 
 #: ../source/pages/script_builder.rst:2
 msgid "GUI"
@@ -977,4 +1029,3 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 
 #~ msgid "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 #~ msgstr ""
-

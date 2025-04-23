@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyfemtet package" href="../modules/pyfemtet.html" />
+    <link rel="prev" title="Procedure for Running Cluster Calculations (Experimental Feature)" href="usage_pages/how_to_deploy_cluster.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#most-major-classes">Most Major Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-major-classes">Other Major Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fem-interfaces">FEM Interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optimizers">Optimizers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#entire-reference">Entire Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/pyfemtet.html">pyfemtet package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pages/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<p>Source: <a class="reference external" href="https://github.com/pyfemtet/pyfemtet">https://github.com/pyfemtet/pyfemtet</a></p>
+<section id="most-major-classes">
+<h2>Most Major Classes<a class="headerlink" href="#most-major-classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.html#pyfemtet.opt.FEMOpt" title="pyfemtet.opt.FEMOpt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.FEMOpt</span></code></a>([fem, opt, ...])</p></td>
+<td><p>Class to control FEM interface and optimizer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.html#pyfemtet.opt.FemtetInterface" title="pyfemtet.opt.FemtetInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.FemtetInterface</span></code></a>([femprj_path, ...])</p></td>
+<td><p>Control Femtet from optimizer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.html#pyfemtet.opt.OptunaOptimizer" title="pyfemtet.opt.OptunaOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.OptunaOptimizer</span></code></a>([...])</p></td>
+<td><p>Optimizer using <code class="docutils literal notranslate"><span class="pre">`optuna`</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="other-major-classes">
+<h2>Other Major Classes<a class="headerlink" href="#other-major-classes" title="Link to this heading"></a></h2>
+<section id="fem-interfaces">
+<h3>FEM Interfaces<a class="headerlink" href="#fem-interfaces" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.NoFEM" title="pyfemtet.opt.interface.NoFEM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.interface.NoFEM</span></code></a>(**kwargs)</p></td>
+<td><p>Dummy interface without FEM.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetInterface" title="pyfemtet.opt.interface.FemtetInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.interface.FemtetInterface</span></code></a>([...])</p></td>
+<td><p>Control Femtet from optimizer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithSolidworksInterface" title="pyfemtet.opt.interface.FemtetWithSolidworksInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.interface.FemtetWithSolidworksInterface</span></code></a>(...)</p></td>
+<td><p>Control Femtet and Solidworks.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithNXInterface" title="pyfemtet.opt.interface.FemtetWithNXInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.interface.FemtetWithNXInterface</span></code></a>(...)</p></td>
+<td><p>Control Femtet and NX.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="optimizers">
+<h3>Optimizers<a class="headerlink" href="#optimizers" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.OptunaOptimizer" title="pyfemtet.opt.optimizer.OptunaOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.optimizer.OptunaOptimizer</span></code></a>([...])</p></td>
+<td><p>Optimizer using <code class="docutils literal notranslate"><span class="pre">`optuna`</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.ScipyOptimizer" title="pyfemtet.opt.optimizer.ScipyOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.optimizer.ScipyOptimizer</span></code></a>(...)</p></td>
+<td><p>Optimizer using <code class="docutils literal notranslate"><span class="pre">`scipy`</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.ScipyScalarOptimizer" title="pyfemtet.opt.optimizer.ScipyScalarOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyfemtet.opt.optimizer.ScipyScalarOptimizer</span></code></a>(...)</p></td>
+<td><p>Optimizer using <code class="docutils literal notranslate"><span class="pre">`scipy`</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="entire-reference">
+<h2>Entire Reference<a class="headerlink" href="#entire-reference" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/pyfemtet.html">pyfemtet package</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage_pages/how_to_deploy_cluster.html" class="btn btn-neutral float-left" title="Procedure for Running Cluster Calculations (Experimental Feature)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules/pyfemtet.html" class="btn btn-neutral float-right" title="pyfemtet package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
