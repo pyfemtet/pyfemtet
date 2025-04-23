@@ -46,6 +46,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../index.html">ホーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/migration_to_v1.html">バージョン 1 への移行</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">発展的な例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
@@ -304,6 +305,8 @@
     <span class="n">teardown_procedure_args</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span>
 
     <span class="n">use_named_range</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># input を定義したシートにおいて input の値を名前付き範囲で指定するかどうか。</span>
+
+    <span class="n">force_override_when_load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># .py で add_... されている変数などを Excel の内容で上書きするかどうか。</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -857,6 +860,13 @@
             <span class="c1"># name</span>
             <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
 
+            <span class="c1"># if the variable is already added by</span>
+            <span class="c1"># add_parameter or add_expression,</span>
+            <span class="c1"># use it.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_override_when_load</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get_variables</span><span class="p">():</span>
+                    <span class="k">continue</span>
+
             <span class="c1"># value</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
 
@@ -930,6 +940,12 @@
             <span class="c1"># name</span>
             <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
 
+            <span class="c1"># if the objective is already added by</span>
+            <span class="c1"># add_objective, use it.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_override_when_load</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">continue</span>
+
             <span class="c1"># direction</span>
             <span class="n">direction</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ParseAsObjective</span><span class="o">.</span><span class="n">direction</span><span class="p">]</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_cell_value_empty</span><span class="p">(</span><span class="n">direction</span><span class="p">),</span> <span class="s1">&#39;direction is empty.&#39;</span>
@@ -976,6 +992,12 @@
 
             <span class="c1"># name</span>
             <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ParseAsConstraint</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+            <span class="c1"># if the constraint is already added by</span>
+            <span class="c1"># add_constraint, use it.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_override_when_load</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">continue</span>
 
             <span class="c1"># lb (optional)</span>
             <span class="n">lb</span> <span class="o">=</span> <span class="kc">None</span>

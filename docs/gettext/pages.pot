@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 09:23+0900\n"
+"POT-Creation-Date: 2025-04-23 11:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,27 +21,19 @@ msgid "License"
 msgstr ""
 
 #: ../../LICENSE:1
-msgid "Copyright (c) 2023 Kazuma Naito All rights reserved."
+msgid "Copyright 2025 Kazuma NAITO"
 msgstr ""
 
-#: ../../LICENSE:4
-msgid "Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:"
+#: ../../LICENSE:3
+msgid "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:"
 msgstr ""
 
-#: ../../LICENSE:6
-msgid "Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer."
+#: ../../LICENSE:5
+msgid "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software."
 msgstr ""
 
-#: ../../LICENSE:8
-msgid "Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution."
-msgstr ""
-
-#: ../../LICENSE:10
-msgid "Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission."
-msgstr ""
-
-#: ../../LICENSE:12
-msgid "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#: ../../LICENSE:7
+msgid "THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 msgstr ""
 
 #: ../source/pages/advanced_examples.rst:2
@@ -471,6 +463,26 @@ msgstr ""
 
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:14
 msgid "This step will open the Femtet help window. **You don't need to run the help window, so close it.**"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:2
+msgid "migration_to_v1"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:4
+msgid "**To Users of PyFemtet 0.x**"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:6
+msgid "In PyFemtet v1, many functions and arguments have been changed to improve user-friendliness and development efficiency."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:9
+msgid "Versions 0.9 and later serve as transition versions to v1, where legacy functions and arguments are still fully available; however, features that have been changed or removed will issue warnings."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:13
+msgid "The main changes in version 1 are listed on this page along with usage examples. If you need to modify your existing scripts, please refer to the examples below."
 msgstr ""
 
 #: ../source/pages/script_builder.rst:2

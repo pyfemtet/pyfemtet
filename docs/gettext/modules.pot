@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 09:23+0900\n"
+"POT-Creation-Date: 2025-04-23 11:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,9 +81,10 @@ msgstr ""
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:5
 #: ../source/modules/pyfemtet.logger.rst:5
 #: ../source/modules/pyfemtet.opt.interface.rst:5
+#: ../source/modules/pyfemtet.opt.meta_script.rst:5
 #: ../source/modules/pyfemtet.opt.optimizer.rst:16
 #: ../source/modules/pyfemtet.opt.prediction.rst:16
-#: ../source/modules/pyfemtet.opt.rst:16
+#: ../source/modules/pyfemtet.opt.rst:17
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.rst:13
 #: ../source/modules/pyfemtet.rst:27
@@ -360,14 +361,14 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
+#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.load_objective:0
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
+#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.load_objective:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
 #: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface.update:0
 #: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
@@ -866,46 +867,46 @@ msgid "The connection method. Default is 'auto'. Other valid values are 'new' or
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:13
-msgid "The type to save result file. Can specify 'all' or None. Default is 'all'."
+msgid "The type to save result file. Valid values are 'all', 'none' or 'optimal'. Default is 'all'."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:16
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:17
 msgid "Whether to strictly specify the PID in Femtet connection. Default is True."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:19
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:20
 msgid "Whether to allow without a project. Default is False."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:21
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:22
 msgid "Whether to open the result with GUI. Default is True."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:23
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:24
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives.   .. note::     Indexes start at 0, but the parametric analysis    output settings in the Femtet dialog box indicate    setting numbers starting at 1.  .. warning::     **Setting this argument deletes the parametric    analysis swept table set in the femprj file.**    If you do not want to delete the swept table,    make a copy of the original file."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:23
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:24
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:31
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:32
 msgid "Indexes start at 0, but the parametric analysis output settings in the Femtet dialog box indicate setting numbers starting at 1."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:37
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:38
 msgid "**Setting this argument deletes the parametric analysis swept table set in the femprj file.** If you do not want to delete the swept table, make a copy of the original file."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:42
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:43
 msgid "Additional arguments from inherited classes."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:46
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:47
 msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:54
+#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:55
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr ""
 
@@ -1334,7 +1335,7 @@ msgid "Excel マクロ関数に渡す引数をリストまたはタプルで 指
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:32
-msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'auto' です。"
+msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'new' です。"
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:35
@@ -1472,6 +1473,10 @@ msgstr ""
 
 #: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`, :py:class:`~abc.ABC`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.meta_script.rst:2
+msgid "pyfemtet.opt.meta\\_script package"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:2

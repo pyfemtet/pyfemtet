@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 09:23+0900\n"
+"POT-Creation-Date: 2025-04-23 11:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../source/index.rst:104
+#: ../source/index.rst:114
 msgid "Home"
 msgstr ""
 
@@ -53,65 +53,77 @@ msgid "--> |Femtet|"
 msgstr ""
 
 #: ../source/index.rst:27
-msgid "Main Features of PyFemtet"
+msgid "**To users of PyFemtet 0.x**"
 msgstr ""
 
 #: ../source/index.rst:29
-msgid "PyFemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of PyFemtet is design parameter optimization, which is implemented as a subpackage ``pyfemtet.opt``."
-msgstr ""
-
-#: ../source/index.rst:31
-msgid "The optimization feature by ``pyfemtet.opt`` has the following characteristics:"
+msgid "In PyFemtet v1, many functions and arguments have been changed to improve user-friendliness and development efficiency. Please refer to the following page for details."
 msgstr ""
 
 #: ../source/index.rst:33
+msgid ":doc:`pages/migration_to_v1`"
+msgstr ""
+
+#: ../source/index.rst:37
+msgid "Main Features of PyFemtet"
+msgstr ""
+
+#: ../source/index.rst:39
+msgid "PyFemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of PyFemtet is design parameter optimization, which is implemented as a subpackage ``pyfemtet.opt``."
+msgstr ""
+
+#: ../source/index.rst:41
+msgid "The optimization feature by ``pyfemtet.opt`` has the following characteristics:"
+msgstr ""
+
+#: ../source/index.rst:43
 msgid "Single-objective and multi-objective optimization"
 msgstr ""
 
-#: ../source/index.rst:34
+#: ../source/index.rst:44
 msgid "Real-time progress display with process monitoring"
 msgstr ""
 
-#: ../source/index.rst:35
+#: ../source/index.rst:45
 msgid "Parallel computation with multiple instances of Femtet"
 msgstr ""
 
-#: ../source/index.rst:36
+#: ../source/index.rst:46
 msgid "Result output in easy-to-analyze csv format for Excel and other tools"
 msgstr ""
 
-#: ../source/index.rst:40
+#: ../source/index.rst:50
 msgid "Examples"
 msgstr ""
 
-#: ../source/index.rst:44
+#: ../source/index.rst:54
 msgid "Inductance of a solenoid coil"
 msgstr ""
 
-#: ../source/index.rst:52
+#: ../source/index.rst:62
 msgid "In magnetic field analysis, the self-inductance of a finite-length solenoid coil is set to a specific value."
 msgstr ""
 
-#: ../source/index.rst:55
+#: ../source/index.rst:65
 msgid "Resonant frequency of a circular patch antenna"
 msgstr ""
 
-#: ../source/index.rst:63
+#: ../source/index.rst:73
 msgid "In electromagnetic wave analysis, the resonant frequency of a circular patch antenna is set to a specific value."
 msgstr ""
 
-#: ../source/index.rst:68
+#: ../source/index.rst:78
 msgid "There are more examples in the :doc:`pages/examples` section."
 msgstr ""
 
-#: ../source/index.rst:72
+#: ../source/index.rst:82
 msgid "Simple API"
 msgstr ""
 
-#: ../source/index.rst:74
+#: ../source/index.rst:84
 msgid "Below is an example of multi-objective optimization. You can set up the problem with ``add_parameter()`` and ``add_objective()``, and then execute it with ``optimize()``. For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the :doc:`pages/usage` section."
 msgstr ""
 
-#: ../source/index.rst:102
+#: ../source/index.rst:112
 msgid "Table of Contents"
 msgstr ""

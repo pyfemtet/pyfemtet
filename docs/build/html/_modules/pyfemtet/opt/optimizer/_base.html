@@ -46,6 +46,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/migration_to_v1.html">migration_to_v1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">Advanced Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
@@ -306,8 +307,8 @@
             <span class="n">y</span><span class="p">,</span>
             <span class="n">c</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-            <span class="n">postprocess_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_postprocess_func</span><span class="p">,</span>
-            <span class="n">postprocess_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_create_postprocess_args</span><span class="p">(),</span>
+            <span class="n">postprocess_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_postprocess_func</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">_record_infeasible</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">postprocess_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_create_postprocess_args</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">_record_infeasible</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;output: </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>

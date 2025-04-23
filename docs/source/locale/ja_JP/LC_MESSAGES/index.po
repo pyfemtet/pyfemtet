@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-01 13:32+0900\n"
+"POT-Creation-Date: 2025-04-23 11:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -16,9 +16,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.15.0\n"
+"Generated-By: Babel 2.17.0\n"
 
-#: ../source/index.rst:104
+#: ../source/index.rst:114
 msgid "Home"
 msgstr "ホーム"
 
@@ -55,66 +55,78 @@ msgid "--> |Femtet|"
 msgstr ""
 
 #: ../source/index.rst:27
+msgid "**To users of PyFemtet 0.x**"
+msgstr "PyFemtet 0.x をご利用中の皆様へ"
+
+#: ../source/index.rst:29
+msgid "In PyFemtet v1, many functions and arguments have been changed to improve user-friendliness and development efficiency. Please refer to the following page for details."
+msgstr "PyFemtet バージョン 1 では、ユーザビリティと保守性等の向上のため、関数や引数の仕様が変更されています。詳しくは、以下のページをご覧ください。"
+
+#: ../source/index.rst:33
+msgid ":doc:`pages/migration_to_v1`"
+msgstr ""
+
+#: ../source/index.rst:37
 msgid "Main Features of PyFemtet"
 msgstr "PyFemtet の主要な機能"
 
-#: ../source/index.rst:29
+#: ../source/index.rst:39
 msgid "PyFemtet is a library that provides functionality using the Python macro interface of Femtet. Currently, the only feature of PyFemtet is design parameter optimization, which is implemented as a subpackage ``pyfemtet.opt``."
 msgstr "PyFemtet は Femtet の Python マクロインターフェースを利用して機能を提供するライブラリです。現在、 **PyFemtet の唯一の機能は設計パラメータの最適化** であり、``pyfemtet.opt`` サブパッケージとして実装されています。"
 
-#: ../source/index.rst:31
+#: ../source/index.rst:41
 msgid "The optimization feature by ``pyfemtet.opt`` has the following characteristics:"
 msgstr "``pyfemtet.opt`` は、以下の特徴を有します。"
 
-#: ../source/index.rst:33
+#: ../source/index.rst:43
 msgid "Single-objective and multi-objective optimization"
 msgstr "単目的および多目的の最適化"
 
-#: ../source/index.rst:34
+#: ../source/index.rst:44
 msgid "Real-time progress display with process monitoring"
 msgstr "プロセスモニタによるリアルタイム進行状況の表示"
 
-#: ../source/index.rst:35
+#: ../source/index.rst:45
 msgid "Parallel computation with multiple instances of Femtet"
 msgstr "複数の Femtet インスタンスによる並列計算"
 
-#: ../source/index.rst:36
+#: ../source/index.rst:46
 msgid "Result output in easy-to-analyze csv format for Excel and other tools"
 msgstr "Excel 等で分析が容易な csv 形式での結果出力"
 
-#: ../source/index.rst:40
+#: ../source/index.rst:50
 msgid "Examples"
 msgstr "例題"
 
-#: ../source/index.rst:44
+#: ../source/index.rst:54
 msgid "Inductance of a solenoid coil"
 msgstr "ソレノイドコイルのインダクタンス"
 
-#: ../source/index.rst:52
+#: ../source/index.rst:62
 msgid "In magnetic field analysis, the self-inductance of a finite-length solenoid coil is set to a specific value."
 msgstr "磁場解析で有限長ソレノイドコイルの自己インダクタンスを特定の値にします。"
 
-#: ../source/index.rst:55
+#: ../source/index.rst:65
 msgid "Resonant frequency of a circular patch antenna"
 msgstr "円形パッチアンテナの共振周波数"
 
-#: ../source/index.rst:63
+#: ../source/index.rst:73
 msgid "In electromagnetic wave analysis, the resonant frequency of a circular patch antenna is set to a specific value."
 msgstr "電磁波解析で円形パッチアンテナの共振周波数を特定の値にします。"
 
-#: ../source/index.rst:68
+#: ../source/index.rst:78
 msgid "There are more examples in the :doc:`pages/examples` section."
 msgstr ":doc:`pages/examples` セクションにより多くの実施例があります。"
 
-#: ../source/index.rst:72
+#: ../source/index.rst:82
 msgid "Simple API"
 msgstr "シンプルな API"
 
-#: ../source/index.rst:74
+#: ../source/index.rst:84
 msgid "Below is an example of multi-objective optimization. You can set up the problem with ``add_parameter()`` and ``add_objective()``, and then execute it with ``optimize()``. For everything else, you can use the regular Femtet macro script. For more detailed examples, please check the :doc:`pages/usage` section."
 msgstr "下記は多目的最適化の実施例です。``add_parameter()`` と ``add_objective()`` で問題を設定し、``optimize()`` で実施することができます。それ以外は通常の Femtet のマクロスクリプトを使用します。詳細な実施例は :doc:`pages/usage` セクションを確認してください。"
 
-#: ../source/index.rst:102
+#: ../source/index.rst:112
 msgid "Table of Contents"
 msgstr "目次"
 
