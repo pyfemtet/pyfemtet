@@ -26,21 +26,22 @@ if __name__ == '__main__':
 import os
 import datetime
 import importlib
-import pyfemtet
 import shutil
 import numpy as np
 import pandas as pd
 from femtetutils import util
 from win32com.client import Dispatch
-from pyfemtet.opt._test_utils.record_history import remove_extra_data_from_csv
+
+from tests.utils.history_processor import remove_additional_data
 
 import pytest
 
 
 here = os.path.dirname(__file__)
 
-pyfemtet_root = rf'{here}\..\..\pyfemtet'
-sample_root = rf'{pyfemtet_root}\opt\samples\femprj_sample'
+project_root = rf'{here}\..\..'
+sample_root = rf'{project_root}\samples\opt\femprj_samples'
+sample_root_jp = rf'{project_root}\samples\opt\femprj_samples_jp'
 
 results = here + '/results'
 
@@ -56,6 +57,7 @@ class SampleTest:
             related_file_paths: list[str] = None,
     ):
         self.py_path: str = os.path.abspath(sample_py_path)
+        self.py_path_jp: str = os.path.join(sample_root_jp, os.path.basename(self.py_path.replace('.py', '_jp.py')))
         self.femprj_path: str = os.path.abspath(sample_femprj_path) if sample_femprj_path is not None else self.py_path.replace('.py', '.femprj')
         self.record_mode: bool = record_mode
         self.threshold = threshold
@@ -66,8 +68,10 @@ class SampleTest:
         else:
             self.related_file_paths = related_file_paths
 
-        assert os.path.exists(self.py_path)
-        assert os.path.exists(self.femprj_path)
+        assert os.path.exists(self.py_path), self.py_path
+        assert os.path.exists(self.femprj_path), self.femprj_path
+        if not os.path.isfile(self.py_path_jp):
+            print(f'jp file of {os.path.basename(self.py_path)} not found.')
 
     @property
     def ref_path(self):
@@ -87,21 +91,29 @@ class SampleTest:
         base = os.path.basename(self.py_path)
         return results + '/' + base + '_ref.csv'
 
-    @property
-    def dif_path(self):
-        base = os.path.basename(self.py_path)
+    def dif_path(self, jp):
+        if jp:
+            target = self.py_path_jp
+        else:
+            target = self.py_path
+        base = os.path.basename(target)
         return results + '/' + self._now + '_' + base + '_dif.csv'
 
-    def load_script(self) -> str:
-        with open(self.py_path, 'r', encoding='utf-8') as f:
+    def load_script(self, jp=False) -> str:
+        if jp:
+            target = self.py_path_jp
+        else:
+            target = self.py_path
+
+        with open(target, 'r', encoding='utf-8') as f:
             script = f.read()
         return script
 
-    def modify_script(self, script: str) -> str:
+    def modify_script(self, script: str, jp) -> str:
 
         # femopt = FEMOpt(...
         # => femopt.FEMOpt(history_path=...,  にする
-        history_path_path = self.ref_path if self.record_mode else self.dif_path
+        history_path_path = self.ref_path if self.record_mode else self.dif_path(jp)
 
         _buff = script.replace(
             f'femopt = FEMOpt(',
@@ -139,7 +151,7 @@ class SampleTest:
 
         return path
 
-    def run(self):
+    def run(self, jp=False):
 
         # Femtet 起動
         util.auto_execute_femtet()
@@ -157,25 +169,26 @@ class SampleTest:
             os.chdir(here)
 
             # スクリプトの編集実行
-            script = self.load_script()
-            mod_script = self.modify_script(script)
+            script = self.load_script(jp)
+            mod_script = self.modify_script(script, jp)
         
             # {GEN_PY_NAME}.py を保存
             self.save_script(mod_script)
         
-            # history を削除
+            # 前の history があれば削除
             if self.record_mode and os.path.exists(self.ref_path):
                 os.remove(self.ref_path)
                 db_path = self.ref_path.replace('.csv', '.db')
                 if os.path.exists(db_path):
                     os.remove(db_path)
-            elif (not self.record_mode) and os.path.exists(self.dif_path):
-                os.remove(self.dif_path)
-                db_path = self.dif_path.replace('.csv', '.db')
+            elif (not self.record_mode) and os.path.exists(self.dif_path(jp)):
+                os.remove(self.dif_path(jp))
+                db_path = self.dif_path(jp).replace('.csv', '.db')
                 if os.path.exists(db_path):
                     os.remove(db_path)
 
             # {GEN_PY_NAME}.py を実行
+            # noinspection PyUnresolvedReferences
             import generated_sample_script
             importlib.reload(generated_sample_script)
             generated_sample_script.main()
@@ -189,12 +202,12 @@ class SampleTest:
 
         # record_mode なら、extra_data を削除する
         if self.record_mode:
-            remove_extra_data_from_csv(self.ref_path)
+            remove_additional_data(self.ref_path)
 
         # そうでなければ、ref と比較する
         else:
             # csv 取得
-            dif_values = _get_simplified_df_values(self.dif_path)
+            dif_values = _get_simplified_df_values(self.dif_path(jp))
 
             # ref csv 取得
             ref_values = _get_simplified_df_values(self.ref_path)
@@ -246,6 +259,7 @@ def test_constrained_pipe(record_mode=False):
         threshold=0.5,
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.sample
@@ -255,6 +269,7 @@ def test_sample_gau_ex08_parametric(record_mode=False):
         record_mode=record_mode,
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.sample
@@ -264,6 +279,7 @@ def test_sample_her_ex40_parametric(record_mode=False):
         record_mode=record_mode,
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.sample
@@ -273,6 +289,7 @@ def test_sample_wat_ex14_parametric(record_mode=False):
         record_mode=record_mode,
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.sample
@@ -282,6 +299,7 @@ def test_sample_paswat_ex1_parametric(record_mode=False):
         record_mode=record_mode,
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.sample
@@ -290,7 +308,8 @@ def test_sample_gal_ex58_parametric(record_mode=False):
         rf'{sample_root}\gal_ex58_parametric.py',
         record_mode=record_mode,
     )
-    sample_test.run()
+    # sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.sample
@@ -300,6 +319,7 @@ def test_sample_parametric_if(record_mode=False):
         record_mode=record_mode,
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.cad
@@ -310,6 +330,7 @@ def test_cad_sample_sldworks_ex01(record_mode=False):
         related_file_paths=[rf'{sample_root}\cad_ex01_SW.SLDPRT'],
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 @pytest.mark.cad
@@ -320,6 +341,7 @@ def test_cad_sample_nx_ex01(record_mode=False):
         related_file_paths=[rf'{sample_root}\cad_ex01_NX.prt'],
     )
     sample_test.run()
+    sample_test.run(jp=True)
 
 
 if __name__ == '__main__':
@@ -328,7 +350,7 @@ if __name__ == '__main__':
     # test_sample_her_ex40_parametric(record_mode=False)
     # test_sample_wat_ex14_parametric(record_mode=False)
     # test_sample_paswat_ex1_parametric(record_mode=False)
-    # test_sample_gal_ex58_parametric(record_mode=False)
+    test_sample_gal_ex58_parametric(record_mode=False)
     # test_sample_parametric_if(record_mode=False)
-    test_cad_sample_sldworks_ex01(record_mode=False)
-    test_cad_sample_nx_ex01(record_mode=False)
+    # test_cad_sample_sldworks_ex01(record_mode=False)
+    # test_cad_sample_nx_ex01(record_mode=False)

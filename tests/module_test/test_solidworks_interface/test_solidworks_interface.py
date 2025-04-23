@@ -55,7 +55,7 @@ def test_parallel_femtet_with_solidworks():
 
     femopt = FEMOpt()
     femopt.opt = opt
-    femopt.optimize(n_parallel=3)
+    femopt.optimize(n_parallel=3, confirm_before_exit=False)
 
 
 if __name__ == '__main__':

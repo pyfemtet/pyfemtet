@@ -461,6 +461,7 @@ class FEMOpt:
                     en_message='Press Enter to quit...',
                     jp_message='終了するには Enter を押してください...',
                 ))
+                input()
 
             df = self.opt.history.get_df()
 
