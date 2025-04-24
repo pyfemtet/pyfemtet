@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 from pyfemtet.opt.exceptions import SolveError
 from pyfemtet.opt import OptunaOptimizer, FEMOpt
-from pyfemtet.opt.optimizer import PoFBoTorchSampler
+from pyfemtet.opt.optimizer import PoFBoTorchSampler, PartialOptimizeACQFConfig
 
 
 class SParameterCalculator:
@@ -112,7 +112,10 @@ if __name__ == '__main__':
     opt = OptunaOptimizer(
         sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
-            n_startup_trials=10,
+            n_startup_trials=3,
+            partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
+                timeout_sec=30.,
+            ),
         )
     )
     
@@ -132,7 +135,7 @@ if __name__ == '__main__':
 
     # Add the objective function to the optimization problem.
     # The target frequency is 3.0 GHz.
-    femopt.add_objective(fun=s.get_resonance_frequency, name='first resonant frequency(Hz)', direction=3.0 * 1e9)
+    femopt.add_objective(fun=s.get_resonance_frequency, name='first resonant frequency(Hz)', direction=3.5 * 1e9)
 
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=15)
+    femopt.optimize(n_trials=6)
