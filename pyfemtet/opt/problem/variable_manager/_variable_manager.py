@@ -1,4 +1,4 @@
-from typing import Callable, TypeAlias
+from typing import Callable, TypeAlias, Literal
 
 import inspect
 from numbers import Real  # マイナーなので型ヒントには使わず isinstance で使う
@@ -245,7 +245,9 @@ class VariableManager:
     def get_variables(
             self,
             *,
-            filter: str | tuple | None = None,  # 'pass_to_fem' and 'parameter' (OR filter)
+            filter: (Literal['pass_to_fem', 'parameter']
+                     | tuple[Literal['pass_to_fem', 'parameter']]
+                     | None) = None,  # 'pass_to_fem' and 'parameter' (OR filter)
             format: str = None,  # None, 'dict' and 'values'
     ) -> (
         dict[str, Variable]

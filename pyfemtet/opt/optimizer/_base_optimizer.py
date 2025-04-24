@@ -348,6 +348,11 @@ class AbstractOptimizer:
             format=format,
         )
 
+    def get_parameter(self, format='dict'):
+        return self.variable_manager.get_variables(
+            format=format, filter='parameter'
+        )
+
     def set_solve_condition(self, fun: Callable[[History], bool]):
         self.solve_condition = fun
 
