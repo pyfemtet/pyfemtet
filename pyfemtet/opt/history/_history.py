@@ -65,6 +65,7 @@ class TrialState(StrEnum):
     hard_constraint_violation = 'Hard constraint violation'
     soft_constraint_violation = 'Soft constraint violation'
 
+    # Hidden Constraint
     model_error = 'Model error'
     mesh_error = 'Mesh error'
     solve_error = 'Solve error'
@@ -644,26 +645,7 @@ class Record:
     feasibility: bool | None = None
     optimality: bool | None = None
 
-    def _calc_feasibility(self):
-        # skipped -> None (empty)
-        # succeeded -> calc
-
-        feasibility = True
-
-        if self.state == TrialState.skipped:
-            self.feasibility = None
-            return
-
-        for cns_result in self.c.values():
-            v_dict = cns_result.calc_violation()
-            if any([v > 0 for v in v_dict.values()]):
-                feasibility = False
-
-        self.feasibility = feasibility
-
     def as_df(self, dtypes: dict = None):
-
-        self._calc_feasibility()
 
         # noinspection PyUnresolvedReferences
         keys = self.__dataclass_fields__.copy().keys()
@@ -1263,10 +1245,23 @@ class History:
 
                 row: pd.Series | None = None
 
+                # record feasibility
+                # skipped -> None (empty)
+                # succeeded -> True
+                # else -> False
+                if self_.record.state == TrialState.skipped:
+                    self_.record.feasibility = None
+
+                elif self_.record.state == TrialState.succeeded:
+                    self_.record.feasibility = True
+
+                else:
+                    self_.record.feasibility = False
+
                 # append
                 if exc_type is None:
                     row = self_.append()
-
+                # 1st argument of issubclass cannot be None
                 elif issubclass(exc_type, ExceptionDuringOptimization):
                     row = self_.append()
 
