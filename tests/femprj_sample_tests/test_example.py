@@ -10,16 +10,8 @@
 if __name__ == '__main__':
 => def main():  にする
 
-    ...
-
-    femopt = FEMOpt(...  # fem は指定していない前提
-    => femopt.FEMOpt(history_path, にする
-
-    ...
-
-
-    femopt.optimize(...
-    => femopt.optimize(confirm_before_exit=False, ...  にする
+femopt.optimize(...
+=> femopt.optimize(history_path=history_path, confirm_before_exit=False, ...  にする
 
 """
 
@@ -73,8 +65,7 @@ class SampleTest:
         if not os.path.isfile(self.py_path_jp):
             print(f'jp file of {os.path.basename(self.py_path)} not found.')
 
-    @property
-    def ref_path(self):
+    def ref_path(self, jp):
         """
         Notes:
             here
@@ -88,7 +79,11 @@ class SampleTest:
             path of <basename1>_ref.csv
 
         """
-        base = os.path.basename(self.py_path)
+        if jp:
+            target = self.py_path_jp
+        else:
+            target = self.py_path
+        base = os.path.basename(target)
         return results + '/' + base + '_ref.csv'
 
     def dif_path(self, jp):
@@ -111,20 +106,15 @@ class SampleTest:
 
     def modify_script(self, script: str, jp) -> str:
 
-        # femopt = FEMOpt(...
-        # => femopt.FEMOpt(history_path=...,  にする
-        history_path_path = self.ref_path if self.record_mode else self.dif_path(jp)
+        history_path_path = self.ref_path(jp) if self.record_mode else self.dif_path(jp)
 
-        _buff = script.replace(
-            f'femopt = FEMOpt(',
-            f'femopt = FEMOpt(history_path=r"{history_path_path}", '
-        )
+        _buff = script
 
         # femopt.optimize(...
-        # => femopt.optimize(confirm_before_exit=False, ...  にする
+        # => femopt.optimize(history_path, confirm_before_exit=False, ...  にする
         _buff = _buff.replace(
             f'femopt.optimize(',
-            f'femopt.optimize(confirm_before_exit=False, '
+            f'femopt.optimize(confirm_before_exit=False, history_path=r"{history_path_path}", '
         )
 
         _buff = _buff.replace(
@@ -176,9 +166,9 @@ class SampleTest:
             self.save_script(mod_script)
         
             # 前の history があれば削除
-            if self.record_mode and os.path.exists(self.ref_path):
-                os.remove(self.ref_path)
-                db_path = self.ref_path.replace('.csv', '.db')
+            if self.record_mode and os.path.exists(self.ref_path(jp)):
+                os.remove(self.ref_path(jp))
+                db_path = self.ref_path(jp).replace('.csv', '.db')
                 if os.path.exists(db_path):
                     os.remove(db_path)
             elif (not self.record_mode) and os.path.exists(self.dif_path(jp)):
@@ -202,7 +192,7 @@ class SampleTest:
 
         # record_mode なら、extra_data を削除する
         if self.record_mode:
-            remove_additional_data(self.ref_path)
+            remove_additional_data(self.ref_path(jp))
 
         # そうでなければ、ref と比較する
         else:
@@ -210,7 +200,7 @@ class SampleTest:
             dif_values = _get_simplified_df_values(self.dif_path(jp))
 
             # ref csv 取得
-            ref_values = _get_simplified_df_values(self.ref_path)
+            ref_values = _get_simplified_df_values(self.ref_path(jp))
 
             # 比較
             rate = (np.abs(dif_values - ref_values) / ref_values).mean()
@@ -252,7 +242,7 @@ def _get_simplified_df_values(csv_path):
 
 
 # @pytest.mark.sample  # 再現性がないのでテストから除外
-def test_constrained_pipe(record_mode=False):
+def test_constrained_pipe(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\constrained_pipe.py',
         record_mode=record_mode,
@@ -263,7 +253,7 @@ def test_constrained_pipe(record_mode=False):
 
 
 @pytest.mark.sample
-def test_sample_gau_ex08_parametric(record_mode=False):
+def test_sample_gau_ex08_parametric(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\gau_ex08_parametric.py',
         record_mode=record_mode,
@@ -273,7 +263,7 @@ def test_sample_gau_ex08_parametric(record_mode=False):
 
 
 @pytest.mark.sample
-def test_sample_her_ex40_parametric(record_mode=False):
+def test_sample_her_ex40_parametric(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\her_ex40_parametric.py',
         record_mode=record_mode,
@@ -283,7 +273,7 @@ def test_sample_her_ex40_parametric(record_mode=False):
 
 
 @pytest.mark.sample
-def test_sample_wat_ex14_parametric(record_mode=False):
+def test_sample_wat_ex14_parametric(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\wat_ex14_parametric.py',
         record_mode=record_mode,
@@ -293,7 +283,7 @@ def test_sample_wat_ex14_parametric(record_mode=False):
 
 
 @pytest.mark.sample
-def test_sample_paswat_ex1_parametric(record_mode=False):
+def test_sample_paswat_ex1_parametric(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\paswat_ex1_parametric.py',
         record_mode=record_mode,
@@ -303,7 +293,7 @@ def test_sample_paswat_ex1_parametric(record_mode=False):
 
 
 @pytest.mark.sample
-def test_sample_gal_ex58_parametric(record_mode=False):
+def test_sample_gal_ex58_parametric(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\gal_ex58_parametric.py',
         record_mode=record_mode,
@@ -313,7 +303,7 @@ def test_sample_gal_ex58_parametric(record_mode=False):
 
 
 @pytest.mark.sample
-def test_sample_parametric_if(record_mode=False):
+def test_sample_parametric_if(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\ParametricIF.py',
         record_mode=record_mode,
@@ -323,7 +313,7 @@ def test_sample_parametric_if(record_mode=False):
 
 
 @pytest.mark.cad
-def test_cad_sample_sldworks_ex01(record_mode=False):
+def test_cad_sample_sldworks_ex01(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\cad_ex01_SW.py',
         record_mode=record_mode,
@@ -334,7 +324,7 @@ def test_cad_sample_sldworks_ex01(record_mode=False):
 
 
 @pytest.mark.cad
-def test_cad_sample_nx_ex01(record_mode=False):
+def test_cad_sample_nx_ex01(record_mode=True):
     sample_test = SampleTest(
         rf'{sample_root}\cad_ex01_NX.py',
         record_mode=record_mode,
@@ -345,12 +335,12 @@ def test_cad_sample_nx_ex01(record_mode=False):
 
 
 if __name__ == '__main__':
-    # test_constrained_pipe(record_mode=False)
-    # test_sample_gau_ex08_parametric(record_mode=False)
-    # test_sample_her_ex40_parametric(record_mode=False)
-    # test_sample_wat_ex14_parametric(record_mode=False)
-    # test_sample_paswat_ex1_parametric(record_mode=False)
-    test_sample_gal_ex58_parametric(record_mode=False)
-    # test_sample_parametric_if(record_mode=False)
-    # test_cad_sample_sldworks_ex01(record_mode=False)
-    # test_cad_sample_nx_ex01(record_mode=False)
+    test_constrained_pipe(record_mode=True)
+    test_sample_gau_ex08_parametric(record_mode=True)
+    test_sample_her_ex40_parametric(record_mode=True)
+    test_sample_wat_ex14_parametric(record_mode=True)
+    test_sample_paswat_ex1_parametric(record_mode=True)
+    test_sample_gal_ex58_parametric(record_mode=True)
+    test_sample_parametric_if(record_mode=True)
+    test_cad_sample_sldworks_ex01(record_mode=True)
+    test_cad_sample_nx_ex01(record_mode=True)

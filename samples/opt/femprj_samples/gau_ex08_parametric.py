@@ -46,7 +46,7 @@ if __name__ == '__main__':
     # Add design variables to the optimization problem.
     # (Specify the variables registered in the femprj file.)
     femopt.add_parameter("helical_pitch", 6, lower_bound=4.2, upper_bound=8)
-    femopt.add_parameter("coil_radius", 10, lower_bound=1, upper_bound=10)
+    femopt.add_parameter("coil_radius", 10, lower_bound=3, upper_bound=10)
     femopt.add_parameter("n_turns", 5, lower_bound=1, upper_bound=5)
 
     # Add the objective function to the optimization problem.

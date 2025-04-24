@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     # 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)。
     femopt.add_parameter("helical_pitch", 6, lower_bound=4.2, upper_bound=8)
-    femopt.add_parameter("coil_radius", 10, lower_bound=1, upper_bound=10)
+    femopt.add_parameter("coil_radius", 10, lower_bound=3, upper_bound=10)
     femopt.add_parameter("n_turns", 5, lower_bound=1, upper_bound=5)
 
     # 目的関数を最適化問題に追加
