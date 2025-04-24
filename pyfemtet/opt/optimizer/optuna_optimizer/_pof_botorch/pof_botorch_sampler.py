@@ -261,7 +261,7 @@ class PartialOptimizeACQFConfig:
 
 
 def _optimize_acqf_util(
-        partial_optimize_acqf_kwargs,
+        partial_optimize_acqf_kwargs: PartialOptimizeACQFConfig,
         botorch_nlc,
         acqf,
         bounds,
@@ -270,9 +270,17 @@ def _optimize_acqf_util(
         original_num_restarts,
         original_raw_samples,
 ):
-    # optimize_acqf の探索に parameter constraints を追加します。
-    # 挙動を調整するための引数を取得
+    options = original_options
+
+    # ACQF Patch 内で log-sigmoid しているので
+    # non-negative にしてもよい
+    options.update({'nonnegative': True})
+
+    # ユーザー側で挙動を調整するための引数を取得
     kwargs = partial_optimize_acqf_kwargs.kwargs.copy()
+    options.update(kwargs.pop('options'))
+
+    # optimize_acqf の探索に parameter constraints を追加します。
     if botorch_nlc is not None:
 
         # parameter constraint を適用するための kwargs
@@ -280,29 +288,24 @@ def _optimize_acqf_util(
         q = nlc_kwargs.pop('q')
         batch_limit = nlc_kwargs.pop('options_batch_limit')
 
-        # 元実装の引数を上書き
-        options = original_options
-        options.update({"batch_limit": batch_limit})
-        options.update(kwargs.pop('options'))
+        # parameter constraint を適用するための option
+        options.update({"batch_limit": batch_limit})  # batch_limit must be 1
+        options.update({'nonnegative': True})  # nonnegative must be True (実際に得る獲得関数も log-sigmoid で wrap しているので判定不要で True にしてよい)
 
         candidates, _ = optimize_acqf(
             acq_function=acqf,
             bounds=bounds,
             q=q,
-            num_restarts=20,
-            raw_samples=1024,
+            num_restarts=original_num_restarts,  # =20,
+            raw_samples=original_raw_samples,  # =1024,
             options=options,
             sequential=True,
             **nlc_kwargs,
             **kwargs,
         )
 
+    # しません。
     else:
-
-        # noinspection PyTypeChecker
-        options = {
-            "batch_limit": 5, "maxiter": 200, "nonnegative": True
-        }.update(kwargs.pop('options'))
 
         candidates, _ = optimize_acqf(
             acq_function=acqf,
@@ -832,7 +835,6 @@ class PoFConfig:
 #  log の場合は base acqf との足し算にしていたが、
 #  pof が小さすぎる場合に -inf になるので一旦取りやめ
 #  clamp_min で勾配の問題が起きなければそっちのほうが健全
-# noinspection PyUnusedLocal
 def acqf_patch_factory(acqf_class, is_log_acqf=False):
 
     class ACQFWithPoF(acqf_class):
