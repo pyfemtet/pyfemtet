@@ -76,16 +76,11 @@ def Lock(name, client=None):
     return _lock
 
 
-class DummyCluster:
-    def __init__(self):
-        self.workers = dict()
-
-
 class DummyClient:
 
-    @property
-    def cluster(self):
-        return DummyCluster()
+    @staticmethod
+    def scheduler_info():
+        return dict(workers=dict())
 
     def __enter__(self):
         return self
