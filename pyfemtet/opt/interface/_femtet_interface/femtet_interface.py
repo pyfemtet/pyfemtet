@@ -412,6 +412,11 @@ class FemtetInterface(COMInterface):
         self.femprj_path = self.Femtet.Project
         self.model_name = self.Femtet.AnalysisModelName
 
+        # femprj が指定されていなければこの時点でのパスをオリジナルとする
+        if self._original_femprj_path is None:
+            assert get_worker() is None
+            self._original_femprj_path = self.femprj_path
+
     # ===== call femtet API =====
 
     def _check_gaudi_accessible(self) -> bool:
