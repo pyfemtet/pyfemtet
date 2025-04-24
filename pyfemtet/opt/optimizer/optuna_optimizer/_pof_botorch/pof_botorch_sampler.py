@@ -183,7 +183,7 @@ def _get_constraint_funcs(n_constraints: int) -> list[Callable[[torch.Tensor], t
 
 
 def log_sigmoid(X: torch.Tensor) -> torch.Tensor:
-    return torch.log(1 - torch.sigmoid(-X))
+    return torch.log(torch.sigmoid(X))
 
 
 class PartialOptimizeACQFConfig:
