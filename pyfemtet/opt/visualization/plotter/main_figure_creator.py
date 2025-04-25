@@ -105,7 +105,7 @@ def get_default_figure(history, df) -> go.Figure:
     fig.update_traces(hoverinfo="none", hovertemplate=None)
     fig.update_layout(
         clickmode='event+select',
-        transition_duration=1000,
+        transition_duration=900,  # 画面更新の頻度よりも短くする
     )
 
     return fig
@@ -113,7 +113,7 @@ def get_default_figure(history, df) -> go.Figure:
 
 def _get_single_objective_plot(history: History, df: pd.DataFrame):
 
-    df = _ls.localize(df)
+    df: pd.DataFrame = _ls.localize(df)
     obj_name = history.obj_names[0]
 
     df_main = get_partial_df(df, equality_filters=MAIN_FILTER)
@@ -191,7 +191,7 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
             else:
                 anti_indices.append(i)
 
-    # ===== 最適でない点を灰色で打つ =====
+    # ===== すべての点を灰色で打つ =====
     fig.add_trace(
         go.Scatter(
             x=df_main['trial'],
@@ -206,7 +206,7 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
         )
     )
 
-    # ===== その時点までの最小の点を青で打つ =====
+    # ===== その時点までの最小の点を青で打つ（上から描く） =====
     fig.add_trace(
         go.Scatter(
             x=df_main['trial'].iloc[indices],
