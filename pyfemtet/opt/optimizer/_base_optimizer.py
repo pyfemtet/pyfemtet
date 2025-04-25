@@ -470,7 +470,13 @@ class AbstractOptimizer:
             with record_to_history as record:
 
                 # record common result
+                # input
                 record.x = parameters
+                # output (the value is nan, required for direction recording to graph)
+                record.y = TrialOutput(
+                    {obj_name: ObjectiveResult(obj, opt_.fem, float('nan'))
+                     for obj_name, obj in opt_.objectives.items()}
+                )
                 record.sub_fidelity_name = opt_.sub_fidelity_name
                 record.fidelity = opt_.fidelity
                 record.datetime_start = datetime_start
