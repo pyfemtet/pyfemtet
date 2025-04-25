@@ -772,7 +772,7 @@ class EntireDependentValuesCalculator:
         assert self.records.df_wrapper.lock.locked()
 
         # calc trial
-        trial_number = np.arange(len(self.partial_df)).astype(int)
+        trial_number = 1 + np.arange(len(self.partial_df)).astype(int)
 
         # update
         self.partial_df.loc[:, 'trial'] = trial_number
