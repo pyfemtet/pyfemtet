@@ -112,7 +112,7 @@ if __name__ == '__main__':
     opt = OptunaOptimizer(
         sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
-            n_startup_trials=3,
+            n_startup_trials=4,
             partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
                 timeout_sec=30.,
             ),
@@ -134,8 +134,8 @@ if __name__ == '__main__':
     femopt.add_constraint(fun=port_is_inside_antenna, name='antenna and port clearance', lower_bound=1, args=(opt,))
 
     # Add the objective function to the optimization problem.
-    # The target frequency is 3.0 GHz.
-    femopt.add_objective(fun=s.get_resonance_frequency, name='first resonant frequency(Hz)', direction=3.5 * 1e9)
+    # The target frequency is 3.3 GHz.
+    femopt.add_objective(fun=s.get_resonance_frequency, name='first resonant frequency(Hz)', direction=3.3 * 1e9)
 
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=6)
+    femopt.optimize(n_trials=10)

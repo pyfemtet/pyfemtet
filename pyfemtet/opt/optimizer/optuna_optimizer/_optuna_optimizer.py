@@ -6,7 +6,7 @@ import inspect
 import tempfile
 import warnings
 from time import sleep
-from contextlib import nullcontext
+from contextlib import suppress, nullcontext
 
 import numpy as np
 
@@ -95,15 +95,6 @@ class OptunaOptimizer(AbstractOptimizer):
     ) -> None:
         AbstractOptimizer.add_categorical_parameter(self, name, initial_value, choices, properties,
                                                     pass_to_fem=pass_to_fem, fix=fix)
-
-    def _check_and_raise_interruption(self) -> None:
-        try:
-            AbstractOptimizer._check_and_raise_interruption(self)
-        except InterruptOptimization as e:
-            if hasattr(self, 'current_trial'):
-                if self.current_trial is not None:
-                    self.current_trial.study.stop()
-            raise e
 
     class _SolveSet(AbstractOptimizer._SolveSet):
         opt: OptunaOptimizer
@@ -533,12 +524,11 @@ class OptunaOptimizer(AbstractOptimizer):
                     self.callbacks.append(self._get_callback(self.n_trials))
 
                 # run
-                with self._setting_status():
+                with self._setting_status(), suppress(InterruptOptimization):
                     study.optimize(
                         self._objective,
                         timeout=self.timeout,
                         callbacks=self.callbacks,
-                        catch=[InterruptOptimization],
                     )
 
 
