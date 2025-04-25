@@ -12,7 +12,7 @@ from pyfemtet.opt.visualization.history_viewer._base_application import *
 from pyfemtet.opt.visualization.history_viewer._complex_components.main_graph import *
 
 from pyfemtet.opt.worker_status import *
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import Msg, _
 
 if TYPE_CHECKING:
     from pyfemtet.opt.visualization.history_viewer._process_monitor._application import ProcessMonitorApplication
@@ -40,8 +40,8 @@ DBC_COLUMN_STYLE_RIGHT = {
 class HomePage(AbstractPage):
     application: ProcessMonitorApplication
 
-    def __init__(self, title, rel_url='/'):
-        super().__init__(title, rel_url)
+    def __init__(self, title, rel_url, application: ProcessMonitorApplication):
+        super().__init__(title, rel_url, application)
 
     def setup_component(self):
         # main graph
@@ -63,13 +63,18 @@ class HomePage(AbstractPage):
             color='secondary',
         )
 
-        # stop update button
+        # keep axis range
+        button_label = _(
+                en_message='Keep {y_or_xy} ranges',
+                jp_message='{y_or_xy} 範囲を維持',
+                y_or_xy='Y' if len(self.application.history.obj_names) == 1 else 'XY'
+            )
         # noinspection PyAttributeOutsideInit
-        self.toggle_update_graph_button = dbc.Checkbox(
-            label=Msg.LABEL_AUTO_UPDATE,
+        self.toggle_keep_graph_range_button = dbc.Checkbox(
+            label=button_label,
             class_name='form-switch',
-            id='toggle-update-graph',
-            value=True,
+            id='toggle-keep-range',
+            value=False,
         )
 
         # interrupt button
@@ -109,7 +114,7 @@ class HomePage(AbstractPage):
                 self.entire_status,
                 dbc.Row(
                     children=[
-                        dbc.Col(self.toggle_update_graph_button),
+                        dbc.Col(self.toggle_keep_graph_range_button),
                         dbc.Col(self.interrupt_button, style=DBC_COLUMN_STYLE_RIGHT),
                     ],
                 ),
@@ -133,19 +138,15 @@ class HomePage(AbstractPage):
 
         # ===== history data to graph ======
         @app.callback(
-            Output(self.main_graph.dummy.id, 'children', allow_duplicate=True),  # fire update graph callback
+            Output(self.main_graph.callback_chain_key.id, self.main_graph.callback_chain_arg_keep_range, allow_duplicate=True),  # fire update graph callback
             Input(self.interval.id, self.interval.Prop.n_intervals),
-            State(self.toggle_update_graph_button.id, self.toggle_update_graph_button.Prop.value),
+            State(self.toggle_keep_graph_range_button.id, self.toggle_keep_graph_range_button.Prop.value),
             State(self.main_graph.data_length.id, self.main_graph.data_length_prop),  # check should update or not
             prevent_initial_call=True,)
-        def update_graph(_, update_switch, current_graph_data_length):
+        def update_graph(_, keep_range, current_graph_data_length):
             current_graph_data_length = 0 if current_graph_data_length is None else current_graph_data_length
 
             if callback_context.triggered_id is None:
-                raise PreventUpdate
-
-            # update_switch is unchecked, do nothing
-            if not update_switch:
                 raise PreventUpdate
 
             # If new data does not exist, do nothing
@@ -153,7 +154,7 @@ class HomePage(AbstractPage):
                 raise PreventUpdate
 
             # fire callback
-            return ''
+            return keep_range
 
         # ===== show optimization state =====
         @app.callback(

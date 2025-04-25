@@ -158,7 +158,7 @@ class ProcessMonitorApplication(PyFemtetApplicationBase):
 def process_monitor_main(history, status, worker_addresses, worker_names, worker_status_list, host=None, port=None, host_record=None):
     g_application = ProcessMonitorApplication(history, status, worker_addresses, worker_names, worker_status_list)
 
-    g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS)
+    g_home_page = HomePage(Msg.PAGE_TITLE_PROGRESS, '/', g_application)
     g_rsm_page = PredictionModelPage(Msg.PAGE_TITLE_PREDICTION_MODEL, '/prediction-model', g_application)
     g_optuna = OptunaVisualizerPage(Msg.PAGE_TITLE_OPTUNA_VISUALIZATION, '/optuna', g_application)
     g_worker_page = WorkerPage(Msg.PAGE_TITLE_WORKERS, '/workers', g_application)

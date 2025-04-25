@@ -1,3 +1,9 @@
+import os
+import base64
+from time import time
+
+import numpy as np
+
 # type hint
 from dash.development.base_component import Component
 
@@ -14,11 +20,6 @@ from pyfemtet.opt.visualization.history_viewer._wrapped_components import dcc, d
 import pandas as pd
 # import plotly.express as px
 import plotly.graph_objs as go
-
-# the others
-import os
-import base64
-import numpy as np
 
 from pyfemtet.opt.visualization.plotter import main_figure_creator
 from pyfemtet.opt.visualization.history_viewer._base_application import AbstractPage, logger
@@ -88,7 +89,12 @@ class MainGraph(AbstractPage):
         ]
 
     def setup_component(self):
-        self.dummy = html.Div(id='main-graph-dummy')
+        self.callback_chain_arg_keep_range = 'data-keep-range'  # must be starts with "data-"
+        self.callback_chain_key = html.Data(
+            id='main-graph-callback-key',
+            **{self.callback_chain_arg_keep_range: False}
+        )
+
         self.location = dcc.Location(id='main-graph-location', refresh=True)
 
         # setup header
@@ -191,7 +197,7 @@ class MainGraph(AbstractPage):
         # setup component
         self.graph_card = dbc.Card(
             [
-                self.dummy,
+                self.callback_chain_key,
                 self.location,
                 self.data_length,
                 self.card_header,
@@ -424,9 +430,9 @@ class MainGraph(AbstractPage):
             Output(self.data_length.id, self.data_length_prop),  # To determine whether Process Monitor should update the graph, the main graph remembers the current amount of data.
             inputs=dict(
                 active_tab_id=Input(self.tabs.id, 'active_tab'),
-                _dummy=Input(self.dummy, 'children'),
+                keep_range=Input(self.callback_chain_key, self.callback_chain_arg_keep_range),  # entry point of callback chain from MonitorApplication.HomePage
                 is_3d=Input(self.switch_3d, 'value'),
-                obj_names=(
+                selected_obj_names=(
                     Input(self.axis1_dropdown, 'label'),
                     Input(self.axis2_dropdown, 'label'),
                     Input(self.axis3_dropdown, 'label'),
@@ -439,36 +445,70 @@ class MainGraph(AbstractPage):
         )
         def redraw_main_graph(
                 active_tab_id: str,
-                _dummy,
+                keep_range,
                 is_3d: bool,
-                obj_names: tuple[str],
-                current_figure: dict | None,
+                selected_obj_names: tuple[str | None, str | None, str | None],
+                current_figure: dict,
         ):
-            # noinspection PyBroadException
-            try:
-                kwargs = {}
-                if active_tab_id == self.TAB_ID_OBJECTIVE_PLOT:
-                    if not is_3d:
-                        obj_names = obj_names[:-1]
-                    kwargs = dict(
-                        obj_names=obj_names
-                    )
-                figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
+            kwargs = {}
+            if active_tab_id == self.TAB_ID_OBJECTIVE_PLOT:
+                if not is_3d:
+                    selected_obj_names = selected_obj_names[:-1]
+                kwargs = dict(
+                    obj_names=selected_obj_names
+                )
+            new_figure: go.Figure
+            new_figure, new_length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
 
-                if current_figure is not None:
-                    if len(self.application.history.obj_names) == 1:
-                        if 'xaxis' in current_figure['layout']:
-                            current_figure['layout'].pop('xaxis')
-                    if 'selections' in current_figure['layout']:
-                        current_figure['layout'].pop('selections')
-                    figure.update_layout(
-                        current_figure['layout'],
-                    )
+            # ===== UI の状態をグラフの更新前後で保持 =====
 
-            except Exception:
-                figure, length = self.get_fig_by_tab_id(active_tab_id, with_length=True, kwargs=kwargs)
+            # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
 
-            return figure, length
+            # 一括で維持する設定
+            new_figure.layout.uirevision = 'dont change'  # bool(str | Real) must be True
+
+            # 軸範囲は更新したいので別管理（こちらが優先される）
+            change_x_range = (not keep_range) or (len(self.application.history.obj_names) == 1)
+            change_y_range = not keep_range
+
+            # Splom, Scatter 共通の API で処理可能
+            def update_axis_uirevision(key_base, should_change):
+                # 各 dimension について処理を開始
+                # Splom, Scatter 共通で処理可能
+                for i in range(len(self.application.history.obj_names)):
+
+                    # Splom の layout 中の axis 命名規則に対応した key を作成
+                    # dim0: 'xaxis', dim1: 'xaxis2', dim2: 'xaxis3'...
+                    if i == 0:
+                        key_suffix = ''
+                    else:
+                        key_suffix = str(i + 1)
+                    key = f'{key_base}{key_suffix}'
+
+                    # main_figure_creator で Splom に細工をしているので
+                    # 存在しない key がある
+                    if key in current_figure['layout']:
+
+                        # uirevision を決める
+                        if should_change:
+                            uirevision = time()
+                        else:
+                            new_figure.update_layout(
+                                **{key: dict(autorange=False)}
+                            )
+                            uirevision = current_figure['layout'][key].get('uirevision', f'dont change {key}')
+                        print(uirevision)
+
+                        # set revision
+                        if uirevision is not None:
+                            new_figure.update_layout(
+                                **{key: dict(uirevision=uirevision)}
+                            )
+
+            update_axis_uirevision('xaxis', change_x_range)
+            update_axis_uirevision('yaxis', change_y_range)
+
+            return new_figure, new_length
 
         # ===== Save Selection =====
         @app.callback(
