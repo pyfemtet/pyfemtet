@@ -497,7 +497,6 @@ class MainGraph(AbstractPage):
                                 **{key: dict(autorange=False)}
                             )
                             uirevision = current_figure['layout'][key].get('uirevision', f'dont change {key}')
-                        print(uirevision)
 
                         # set revision
                         if uirevision is not None:
