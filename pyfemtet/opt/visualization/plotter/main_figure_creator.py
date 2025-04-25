@@ -116,6 +116,14 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
     df: pd.DataFrame = _ls.localize(df)
     obj_name = history.obj_names[0]
 
+    # 「成功した試行数」を表示するために
+    # obj が na ではない row の連番を作成
+    df = (df[~df[obj_name].isna()]).copy()
+    SUCCEEDED_TRIAL_COLUMN = 'succeeded_trial'
+    assert SUCCEEDED_TRIAL_COLUMN not in df.columns
+    df[SUCCEEDED_TRIAL_COLUMN] = range(len(df))
+    df[SUCCEEDED_TRIAL_COLUMN] += 1
+
     df_main = get_partial_df(df, equality_filters=MAIN_FILTER)
 
     df.columns = [c.replace(' / ', '<BR>/ ') for c in df.columns]
@@ -148,7 +156,7 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
         obj_name_per_sub_fidelity = obj_names_per_sub_fidelity[0]
         df_sub = get_partial_df(df, equality_filters=dict(sub_fidelity_name=sub_fidelity_name))
         trace = go.Scatter(
-            x=df_sub['trial'],
+            x=df_sub[SUCCEEDED_TRIAL_COLUMN],
             y=df_sub[obj_name_per_sub_fidelity],
             mode='markers',
             marker=dict(color=color, symbol='square-open'),
@@ -194,12 +202,9 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
     # ===== すべての点を灰色で打つ =====
     fig.add_trace(
         go.Scatter(
-            x=df_main['trial'],
+            x=df_main[SUCCEEDED_TRIAL_COLUMN],
             y=df_main[obj_name],
-            customdata=df_main['trial'].values.reshape((-1, 1)),
-            # x=df_main['trial'][anti_indices],
-            # y=df_main[obj_name][anti_indices],
-            # customdata=df_main['trial'][anti_indices].values.reshape((-1, 1)),
+            customdata=df_main[SUCCEEDED_TRIAL_COLUMN].values.reshape((-1, 1)),
             mode="markers",
             marker=dict(color='#6c757d', size=6),
             name=Msg.LEGEND_LABEL_ALL_SOLUTIONS,
@@ -209,7 +214,7 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
     # ===== その時点までの最小の点を青で打つ（上から描く） =====
     fig.add_trace(
         go.Scatter(
-            x=df_main['trial'].iloc[indices],
+            x=df_main[SUCCEEDED_TRIAL_COLUMN].iloc[indices],
             y=df_main[obj_name].iloc[indices],
             mode="markers+lines",
             marker=dict(color='#007bff', size=9),
@@ -222,7 +227,8 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
 
     # ===== その時点までの最小の点から現在までの平行点線を引く =====
     if len(indices) > 1:
-        x = [df_main['trial'].iloc[indices].iloc[-1], df_main['trial'].iloc[-1]]
+        x = [df_main[SUCCEEDED_TRIAL_COLUMN].iloc[indices].iloc[-1],
+             df_main[SUCCEEDED_TRIAL_COLUMN].iloc[-1]]
         y = [df_main[obj_name].iloc[indices].iloc[-1]] * 2
         fig.add_trace(
             go.Scatter(
@@ -238,7 +244,8 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
     # ===== direction が float の場合、目標値を描く =====
     if len(df_main) > 1:
         if isinstance(direction, float):
-            x = [df_main['trial'].iloc[0], df_main['trial'].iloc[-1]]
+            x = [df_main[SUCCEEDED_TRIAL_COLUMN].iloc[0],
+                 df_main[SUCCEEDED_TRIAL_COLUMN].iloc[-1]]
             y = [direction] * 2
             fig.add_trace(
                 go.Scatter(
