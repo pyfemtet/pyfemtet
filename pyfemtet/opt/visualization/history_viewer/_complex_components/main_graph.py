@@ -546,7 +546,9 @@ class MainGraph(AbstractPage):
             xrange = figure['layout']['xaxis']['range']
             # yrange = figure['layout']['yaxis']['range']
 
-            is_left = pt['x'] < np.mean(xrange)
+            # trial の x は plotly 上 categorical 扱い
+            # にしているので float に直す
+            is_left = float(pt['x']) < np.mean(xrange)
 
             # デフォルトでは Hover が Point に重なり、
             # Hover した瞬間に Un-hover する場合があるので

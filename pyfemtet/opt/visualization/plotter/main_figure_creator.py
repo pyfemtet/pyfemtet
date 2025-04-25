@@ -79,6 +79,10 @@ def get_hypervolume_plot(_: History, df: pd.DataFrame) -> go.Figure:
             # transition_duration=1000,  # Causes graph freeze on tab change
             xaxis_title=Msg.GRAPH_AXIS_LABEL_TRIAL,
             yaxis_title='hypervolume',
+            xaxis=dict(
+                tick0=1,
+                type='category',
+            )
         )
     )
 
@@ -252,6 +256,10 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
             title_text=Msg.GRAPH_TITLE_SINGLE_OBJECTIVE,
             xaxis_title=Msg.GRAPH_AXIS_LABEL_TRIAL,
             yaxis_title=obj_name,
+            xaxis=dict(
+                tick0=1,
+                type='category',  # 負の数や小数点を表示しない。ただし hover の callback があるのでオフセットしたり文字を入れたりしないこと
+            )
         )
     )
 
