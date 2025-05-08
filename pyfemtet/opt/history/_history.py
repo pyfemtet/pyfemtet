@@ -1227,17 +1227,19 @@ class History:
 
                 trial_name = '_'.join(name_parts)
 
+                # FIXME: メインフィデリティだけでなく、FEM に
+                #   対応するフィデリティ又はサブサンプリングのみ
+                #   フィルタした情報を提供するようにする。
+                #   フィデリティの話は現在解析を実行している opt が
+                #   必要なので、recording メソッドの引数に
+                #   それを追加する
+                df = self.get_df(equality_filters=self.MAIN_FILTER)
+
                 if client is not None:
                     client.run_on_scheduler(
                         fem._postprocess_after_recording,
                         trial_name=trial_name,
-                        # FIXME: メインフィデリティだけでなく、FEM に
-                        #   対応するフィデリティ又はサブサンプリングのみ
-                        #   フィルタした情報を提供するようにする。
-                        #   フィデリティの話は現在解析を実行している opt が
-                        #   必要なので、recording メソッドの引数に
-                        #   それを追加する
-                        df=self.get_df(equality_filters=self.MAIN_FILTER),
+                        df=df,
                         **(fem._create_postprocess_args()),
                     )
 
@@ -1245,6 +1247,7 @@ class History:
                     fem._postprocess_after_recording(
                         dask_scheduler=None,
                         trial_name=trial_name,
+                        df=df,
                         **(fem._create_postprocess_args())
                     )
 
