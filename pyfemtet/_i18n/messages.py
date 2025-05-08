@@ -221,30 +221,31 @@ class Message:
         'Cannot use categorical parameter with ScipyOptimizer'
     )
     ERR_SCIPY_HARD_CONSTRAINT_VIOLATION = _(
-        # 'hard constraint を扱うには'
-        # 'method に SLSQP を使用してください。'
-        # 'SLSQP を使用しているのにこのメッセージが表示される場合、'
-        # 'options から eps を小さくするか、'
-        # 'eps の値の範囲内で x が変動したときの'
-        # '拘束関数の変動量を上回るように'
-        # 'constraint_enhancement を大きくしてみてください。'
-        'Hard constraint violation! scipy cannot continue '
-        'optimization. Only `SLSQP` supports optimization '
-        'with hard constraint optimization problem. '
-        'If you see this message even if you are using it, '
-        'please try to following:\n'
-        '- Use small `eps` by `options` argument.\n'
-        '- Set `constraint_enhancement`to the value that '
-        'it larger than the variation of the constraint'
-        'function when input variables within the range '
-        'of `eps`.'
+        en_message='Hard constraint violation! scipy cannot continue '
+                   'optimization. Only `SLSQP` supports optimization '
+                   'with hard constraint optimization problem. '
+                   'If you see this message even if you are using it, '
+                   'please try to following:\n'
+                   '- Use small `eps` by `options` argument.\n'
+                   '- Set `constraint_enhancement`to the value that '
+                   'it larger than the variation of the constraint '
+                   'function when input variables within the range '
+                   'of `eps`.',
+        jp_message='hard constraint を扱うには'
+                   'method に SLSQP を使用してください。'
+                   'SLSQP を使用しているのにこのメッセージが表示される場合、\n'
+                   '- options から eps を小さくするか、'
+                   '- eps の値の範囲内で x が変動したときの'
+                   '拘束関数の変動量を上回るように'
+                   'constraint_enhancement を大きく\n'
+                   'してみてください。',
     )
     ERR_SCIPY_HIDDEN_CONSTRAINT = _(
-        # 'ScipyOptimizer では解析ができない'
-        # '設計変数の組合せをスキップできません。'
-        'ScipyOptimizer cannot continue optimization '
-        'when encountered the input variables that '
-        'break FEM model.'
+        en_message='ScipyOptimizer cannot continue optimization '
+                   'when encountered the input variables that '
+                   'break FEM model.',
+        jp_message='ScipyOptimizer では解析ができない'
+                   '設計変数の組合せをスキップできません。'
     )
     ERR_SCIPY_NOT_IMPLEMENT_SKIP = _('ScipyOptimizer cannot skip solve.')
 
