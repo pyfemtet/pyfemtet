@@ -131,10 +131,11 @@ def _is_feasible(
         trans: _SearchSpaceTransform,
         x: np.ndarray,
         constraint_enhancement: float = None,
+        constraint_scaling: float = None,
 ) -> bool:
     for cns in constraints:
         cns_value = _evaluate_pyfemtet_cns(cns, opt, trans, x)
-        cns_result = ConstraintResult(cns, opt.fem, cns_value, constraint_enhancement)
+        cns_result = ConstraintResult(cns, opt.fem, cns_value, constraint_enhancement, constraint_scaling)
         if cns_result.check_violation() is not None:
             return False
     return True
@@ -152,11 +153,13 @@ class NonlinearInequalityConstraints:
             opt: AbstractOptimizer,
             trans: _SearchSpaceTransform,
             constraint_enhancement: float = None,
+            constraint_scaling: float = None,
     ):
         self.trans = trans
         self.constraints = constraints
         self.opt = opt
         self.ce = constraint_enhancement or 0.
+        self.cs = constraint_scaling or 1.
 
         self.nonlinear_inequality_constraints = []
         cns: Constraint
@@ -180,7 +183,7 @@ class NonlinearInequalityConstraints:
             feasible_q_list = []
             for each_q in each_num_restarts:
                 x: np.ndarray = each_q.detach().numpy()  # normalized parameters
-                if _is_feasible(self.constraints, self.opt, self.trans, x, self.ce):
+                if _is_feasible(self.constraints, self.opt, self.trans, x, self.ce, self.cs):
                     feasible_q_list.append(each_q)  # Keep only feasible rows
 
             if feasible_q_list:  # Only add if there are feasible rows

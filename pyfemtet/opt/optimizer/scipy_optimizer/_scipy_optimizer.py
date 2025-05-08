@@ -47,6 +47,7 @@ class ScipyOptimizer(AbstractOptimizer):
         self.tol = tol
         self.options = {}
         self.constraint_enhancement = 0.001
+        self.constraint_scaling = 1.
 
     @property
     def timeout(self):
@@ -206,14 +207,49 @@ class ScipyOptimizer(AbstractOptimizer):
                         )
                     )
 
-                scipy_cns = NonlinearConstraint(
-                    fun=lambda xk_, cns_=cns: self._scipy_constraint_fun(xk_, cns_),
-                    lb=(cns.lower_bound or -np.inf) + self.constraint_enhancement,
-                    ub=(cns.upper_bound or np.inf) - self.constraint_enhancement,
-                    keep_feasible=cns.hard,  # doesn't work??
-                    finite_diff_rel_step=self.options.get('finite_diff_rel_step', None),
-                )
-                out.append(scipy_cns)
+                # constraint_scaling を使うためには violation を計算しなければならない
+                # TODO: 上下両端が決められている場合は二回計算することになるのでそれを解消する
+                if cns.lower_bound is not None:
+                    scipy_cns = NonlinearConstraint(
+                        fun=(
+                            lambda xk_, cns_=cns:
+                                (
+                                    cns.lower_bound
+                                    - self._scipy_constraint_fun(xk_, cns_)
+                                ) * self.constraint_scaling
+                                + self.constraint_enhancement
+                        ),
+                        lb=-np.inf,
+                        ub=0,
+                        keep_feasible=cns.hard,
+                        finite_diff_rel_step=self.options.get('finite_diff_rel_step', None),
+                    )
+                    out.append(scipy_cns)
+                if cns.upper_bound is not None:
+                    scipy_cns = NonlinearConstraint(
+                        fun=(
+                            lambda xk_, cns_=cns:
+                                (
+                                    self._scipy_constraint_fun(xk_, cns_)
+                                    - cns.upper_bound
+                                ) * self.constraint_scaling
+                                + self.constraint_enhancement
+                        ),
+                        lb=-np.inf,
+                        ub=0,
+                        keep_feasible=cns.hard,
+                        finite_diff_rel_step=self.options.get('finite_diff_rel_step', None),
+                    )
+                    out.append(scipy_cns)
+
+            # scipy_cns = NonlinearConstraint(
+                #     fun=lambda xk_, cns_=cns: self._scipy_constraint_fun(xk_, cns_),
+                #     lb=(cns.lower_bound or -np.inf) + self.constraint_enhancement,
+                #     ub=(cns.upper_bound or np.inf) - self.constraint_enhancement,
+                #     keep_feasible=cns.hard,
+                #     finite_diff_rel_step=self.options.get('finite_diff_rel_step', None),
+                # )
+                # out.append(scipy_cns)
 
             # use dict object
             else:
@@ -234,8 +270,10 @@ class ScipyOptimizer(AbstractOptimizer):
                     scipy_cns = dict(
                         type='ineq',
                         fun=(lambda xk_, cns_=cns:
-                             self._scipy_constraint_fun(xk_, cns_)
-                             - cns_.lower_bound
+                             (
+                                 self._scipy_constraint_fun(xk_, cns_)
+                                 - cns_.lower_bound
+                             ) * self.constraint_scaling
                              - self.constraint_enhancement),
                     )
                     out.append(scipy_cns)
@@ -244,8 +282,10 @@ class ScipyOptimizer(AbstractOptimizer):
                     scipy_cns = dict(
                         type='ineq',
                         fun=(lambda xk_, cns_=cns:
-                             cns_.upper_bound
-                             - self._scipy_constraint_fun(xk_, cns_)
+                             (
+                                 cns_.upper_bound
+                                 - self._scipy_constraint_fun(xk_, cns_)
+                             ) * self.constraint_scaling
                              - self.constraint_enhancement),
                     )
                     out.append(scipy_cns)

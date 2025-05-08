@@ -200,14 +200,20 @@ class PartialOptimizeACQFConfig:
             scipy_minimize_kwargs: dict = None,
             # torch
             # pyfemtet
-            constraint_enhancement: float = 0.001,
+            constraint_enhancement: float = None,
+            constraint_scaling: float = 1e6,
 
     ):
 
         # gen_candidate_scipy が scipy.optimize.minimize の
-        # トレランスの範囲内で拘束違反を起こす場合があるため
-        # 拘束を微小量強化
+        # トレランス（eps）の範囲内で拘束違反を起こす解を提案する
+        # 場合がある
+        # eps の範囲内で x が変動した際の constraint の変動量は
+        # 予測も規定もできないので定数を指定させる
         self.constraint_enhancement = constraint_enhancement or 0.
+
+        # 単純に violation を大きく評価すれば解決する問題でもある
+        self.constraint_scaling = constraint_scaling or 1.
 
         # method = 'COBYLA'
         # scipy_minimize_kwargs = dict(
@@ -1180,11 +1186,13 @@ class PoFBoTorchSampler(BoTorchSampler):
             if len(hard_constraints) > 0:
 
                 ce = self.partial_optimize_acqf_kwargs.constraint_enhancement
+                cs = self.partial_optimize_acqf_kwargs.constraint_scaling
                 botorch_nli_cons = NonlinearInequalityConstraints(
                     hard_constraints,
                     self.pyfemtet_optimizer,
                     trans,
                     ce,
+                    cs,
                 )
             else:
                 botorch_nli_cons = None
