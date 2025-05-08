@@ -194,10 +194,18 @@ class PartialOptimizeACQFConfig:
             self,
             *,
             gen_candidates: str = 'scipy',  # 'scipy' or 'torch'
+
             timeout_sec: float = None,
+            # 制限1. 初期条件の探索には適用されない。
+            # 制限2. scipy.optimize の iter の callback で判定されるので
+            # その途中では timeout の判定処理が入らない。
+            # 目的関数を wrap して botorch\optim\utils\timeout.py のように
+            # raise OptimizationTimeoutError(current_x=xk, runtime=runtime)
+            # すればもっと小刻みに timeout 判定が得られるかもしれない。
+
             # scipy
             method: str = None,  # 'COBYLA, COBYQA, SLSQP or trust-constr
-            scipy_minimize_kwargs: dict = None,
+            scipy_minimize_kwargs: dict = None,  # 'maxiter': 200 など
             # torch
             # pyfemtet
             constraint_enhancement: float = None,
@@ -223,7 +231,7 @@ class PartialOptimizeACQFConfig:
 
         # method = 'SLSQP'
         # scipy_minimize_kwargs = dict(
-        #   ftol=0.1,  # 獲得関数のトレランス
+        #   ftol=0.1,  # 獲得関数のトレランス. 拘束のトレランスは共通？
         # )
 
         # method = 'COBYQA'
@@ -247,10 +255,9 @@ class PartialOptimizeACQFConfig:
 
             elif gen_candidates == 'torch':
                 # gen_candidates = gen_candidates_torch
-                raise NotImplementedError('`gen_candidates_torch` cannot handle '
-                                          'nonlinear inequality constraint.')
+                raise NotImplementedError
             else:
-                raise ValueError('`gen_candidates` must be "scipy" or "torch".')
+                raise ValueError('`gen_candidates` must be "scipy".')
 
         self.kwargs = dict(
             gen_candidates=gen_candidates,
@@ -262,7 +269,7 @@ class PartialOptimizeACQFConfig:
                 #   ExpMAStoppingCriterion
                 #   lr
             ),
-            timeout_sec=timeout_sec,  # ?
+            timeout_sec=timeout_sec,
         )
 
 
