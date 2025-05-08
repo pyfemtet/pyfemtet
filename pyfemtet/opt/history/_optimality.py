@@ -43,7 +43,7 @@ def calc_optimality(y_internal: np.ndarray, feasibility: np.ndarray) -> np.ndarr
                 continue
 
             # 重複した解なら比較しない
-            elif np.allclose(y_values, another_y_values):
+            elif np.allclose(y_values, another_y_values, atol=0, rtol=0.01):
                 assert np.all(~np.isnan(y_values))
                 assert np.all(~np.isnan(another_y_values))
                 continue
