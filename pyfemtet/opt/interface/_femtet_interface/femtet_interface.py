@@ -121,15 +121,16 @@ class FemtetInterface(COMInterface):
     com_members = {'Femtet': 'FemtetMacro.Femtet'}
 
     def __init__(
-        self,
-        femprj_path: str = None,
-        model_name: str = None,
-        connect_method: str = "auto",  # dask worker では __init__ の中で 'new' にするので super() の引数にしない。（しても意味がない）
-        save_pdt: str = "all",  # 'all', 'none' or 'optimal'
-        strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
-        allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
-        open_result_with_gui: bool = True,
-        parametric_output_indexes_use_as_objective: dict[int, str or float] = None,  # TODO: Remove this
+            self,
+            femprj_path: str = None,
+            model_name: str = None,
+            connect_method: str = "auto",  # dask worker では __init__ の中で 'new' にする
+            save_pdt: str = "all",  # 'all', 'none' or 'optimal'
+            strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
+            allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
+            open_result_with_gui: bool = True,
+            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,  # TODO: Remove this
+            always_open_copy=False,
     ):
         # warning
         if parametric_output_indexes_use_as_objective is not None:
@@ -148,6 +149,7 @@ class FemtetInterface(COMInterface):
         self._original_femprj_path = self.femprj_path
         self.open_result_with_gui = open_result_with_gui
         self.save_pdt = save_pdt
+        self._always_open_copy = always_open_copy
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None
@@ -165,17 +167,22 @@ class FemtetInterface(COMInterface):
 
         # connect to Femtet
         self._connect_and_open_femtet()
+        assert self.connected_method != 'unconnected'
 
-        # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
-        # self.quit_when_destruct = self.connected_method == "new"
+        if self._always_open_copy:
+            # 現時点でFemtet に model を close する機能がない
+            #   + executor でも CAD 連携等でモデルに
+            #   わかりにくい変更が入らないように
+            #   _tmp_dir のファイルを開くようにしたため
+            #   _tmp_dir 削除時の permission error を
+            #   避けるために Femtet を強制 close する
+            # Femtet で model が close できるようになれば
+            #   この条件分岐は不要になる
+            self.quit_when_destruct = True
 
-        # Femtet に model を close する機能がない
-        #   + executor でも CAD 連携等でモデルに
-        #   わかりにくい変更が入らないように
-        #   _tmp_dir のファイルを開くようにしたため
-        #   _tmp_dir 削除時の permission error を
-        #   避けるために Femtet を強制 close する
-        self.quit_when_destruct = True
+        else:
+            # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
+            self.quit_when_destruct = self.connected_method == "new"
 
     # ===== system =====
 
@@ -193,9 +200,15 @@ class FemtetInterface(COMInterface):
 
     def _setup_after_parallel(self, opt: AbstractOptimizer = None):
 
+        # main worker かつ always_open_copy でないときのみ
+        # femprj_path を切り替えない
+        if (get_worker() is None) and not self._always_open_copy:
+            pass
+
         # worker space の femprj に切り替える
-        suffix = self._get_worker_index_from_optimizer(opt)
-        self.femprj_path = self._rename_and_get_path_on_worker_space(self._original_femprj_path, suffix)
+        else:
+            suffix = self._get_worker_index_from_optimizer(opt)
+            self.femprj_path = self._rename_and_get_path_on_worker_space(self._original_femprj_path, suffix)
 
         # dask process ならば Femtet を起動
         worker = get_worker()

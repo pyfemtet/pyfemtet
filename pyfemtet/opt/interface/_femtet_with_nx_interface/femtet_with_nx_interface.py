@@ -157,6 +157,7 @@ class FemtetWithNXInterface(FemtetInterface, _NXInterface):
             allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui: bool = True,
             parametric_output_indexes_use_as_objective: dict[int, str or float] = None,  # TODO: Remove this
+            always_open_copy=False,
             export_curves: bool or None = None,
             export_surfaces: bool or None = None,
             export_solids: bool or None = None,
@@ -173,6 +174,7 @@ class FemtetWithNXInterface(FemtetInterface, _NXInterface):
             allow_without_project=allow_without_project,
             open_result_with_gui=open_result_with_gui,
             parametric_output_indexes_use_as_objective=parametric_output_indexes_use_as_objective,
+            always_open_copy=always_open_copy,
         )
 
         _NXInterface.__init__(

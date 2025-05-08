@@ -22,18 +22,19 @@ if TYPE_CHECKING:
 class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, AbstractFEMInterface):
 
     def __init__(
-                self,
-                sldprt_path: str,
-                femprj_path: str = None,
-                model_name: str = None,
-                connect_method: str = "auto",
-                save_pdt: str = "all",
-                strictly_pid_specify: bool = True,
-                allow_without_project: bool = False,
-                open_result_with_gui: bool = True,
-                parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
-                close_solidworks_on_terminate=False,
-                solidworks_visible=True,
+            self,
+            sldprt_path: str,
+            femprj_path: str = None,
+            model_name: str = None,
+            connect_method: str = "auto",
+            save_pdt: str = "all",
+            strictly_pid_specify: bool = True,
+            allow_without_project: bool = False,
+            open_result_with_gui: bool = True,
+            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
+            always_open_copy=False,
+            close_solidworks_on_terminate=False,
+            solidworks_visible=True,
     ):
         SolidworksInterface.__init__(
             self,
@@ -52,6 +53,7 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
             allow_without_project=allow_without_project,
             open_result_with_gui=open_result_with_gui,
             parametric_output_indexes_use_as_objective=parametric_output_indexes_use_as_objective,
+            always_open_copy=always_open_copy,
         )
 
         self._warn_if_undefined_variable = False

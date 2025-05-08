@@ -2,6 +2,7 @@ from pyfemtet._util.closing import closing
 
 import numpy as np
 from win32com.client import Dispatch
+from femtetutils.util import execute_femtet
 
 from tests import get
 from pyfemtet.opt.interface import FemtetInterface
@@ -59,6 +60,41 @@ def test_femtet_interface_api_calling():
     fem.close(force=False, timeout=3)
 
 
+def test_femtet_always_open_copy_flag():
+    execute_femtet()
+
+    opt = AbstractOptimizer()
+
+    fem = FemtetInterface(
+        femprj_path=get(__file__, 'test_femtet_interface.femprj'),
+        always_open_copy=True,
+        connect_method='existing',
+    )
+
+    fem._setup_before_parallel()
+    fem._setup_after_parallel(opt)
+
+    print(fem.Femtet.ProjectTitle)
+    assert fem.Femtet.ProjectTitle != 'test_femtet_interface'
+
+    fem.close()
+
+    fem = FemtetInterface(
+        femprj_path=get(__file__, 'test_femtet_interface.femprj'),
+        always_open_copy=False,
+        connect_method='existing',
+    )
+
+    fem._setup_before_parallel()
+    fem._setup_after_parallel(opt)
+
+    print(fem.Femtet.Project)
+    assert fem.Femtet.ProjectTitle == 'test_femtet_interface'
+
+    fem.close()
+
+
 if __name__ == '__main__':
     # test_run_femtet_interface()
-    test_femtet_interface_api_calling()
+    # test_femtet_interface_api_calling()
+    test_femtet_always_open_copy_flag()
