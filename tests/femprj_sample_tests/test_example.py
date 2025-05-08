@@ -336,9 +336,9 @@ def test_cad_sample_nx_ex01(record_mode=False):
 
 if __name__ == '__main__':
     # test_constrained_pipe(record_mode=True)
-    # test_sample_gau_ex08_parametric(record_mode=True)
+    test_sample_gau_ex08_parametric(record_mode=True)
     # test_sample_her_ex40_parametric(record_mode=True)
-    test_sample_wat_ex14_parametric(record_mode=True)
+    # test_sample_wat_ex14_parametric(record_mode=True)
     # test_sample_paswat_ex1_parametric(record_mode=True)
     # test_sample_gal_ex58_parametric(record_mode=True)
     # test_sample_parametric_if(record_mode=True)
