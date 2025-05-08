@@ -25,7 +25,7 @@ def inductance(Femtet):
     Gogh = Femtet.Gogh
 
     coil_name = Gogh.Gauss.GetCoilList()[0]
-    return Gogh.Gauss.GetL(coil_name, coil_name)  # unit: F
+    return Gogh.Gauss.GetL(coil_name, coil_name) * 1e6  # unit: uF
 
 
 if __name__ == '__main__':
@@ -51,8 +51,8 @@ if __name__ == '__main__':
 
     # Add the objective function to the optimization problem.
     # The target inductance is 0.1 uF.
-    femopt.add_objective(fun=inductance, name='self-inductance (F)', direction=1e-7)
+    femopt.add_objective(fun=inductance, name='self-inductance (μF)', direction=0.1)
 
     # Run optimization.
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=20)
+    femopt.optimize(n_trials=15)
