@@ -1,37 +1,28 @@
 import platform
-from typing import TYPE_CHECKING
 
-from pyfemtet.opt.interface._base import FEMInterface
-from pyfemtet.opt.interface._base import NoFEM
+from ._base_interface import AbstractFEMInterface, NoFEM
 
-if (platform.system() == 'Windows') or TYPE_CHECKING:
-    from pyfemtet.opt.interface._femtet import FemtetInterface
-    from pyfemtet.opt.interface._femtet_with_sldworks import FemtetWithSolidworksInterface
-    from pyfemtet.opt.interface._femtet_with_nx import FemtetWithNXInterface
-    from pyfemtet.opt.interface._excel_interface import ExcelInterface
+if platform.system() == 'Windows':
+    from ._femtet_interface import FemtetInterface
+    from ._femtet_with_nx_interface import FemtetWithNXInterface
+    from ._femtet_with_solidworks import FemtetWithSolidworksInterface
+    from ._excel_interface import ExcelInterface
+    from ._with_excel_settings import *
 
-else:
-    class NotAvailableForWindows:
-        def __init__(self, *args, **kwargs):
-            raise NotImplementedError
-
-
-    FemtetInterface = type('FemtetInterface', (NotAvailableForWindows,), {})
-    FemtetWithSolidworksInterface = type('FemtetWithSolidworksInterface', (FemtetInterface,), {})
-    FemtetWithNXInterface = type('FemtetWithNXInterface', (FemtetInterface,), {})
-    ExcelInterface = type('ExcelInterface', (NotAvailableForWindows,), {})
-
-from pyfemtet.opt.interface._surrogate._base import SurrogateModelInterfaceBase
-from pyfemtet.opt.interface._surrogate._singletaskgp import PoFBoTorchInterface
+from ._surrogate_model_interface import AbstractSurrogateModelInterfaceBase
+from ._surrogate_model_interface import BoTorchInterface
+from ._surrogate_model_interface import PoFBoTorchInterface
 
 
 __all__ = [
-    'FEMInterface',
+    'AbstractFEMInterface',
     'NoFEM',
     'FemtetInterface',
-    'FemtetWithSolidworksInterface',
     'FemtetWithNXInterface',
+    'FemtetWithSolidworksInterface',
     'ExcelInterface',
-    'SurrogateModelInterfaceBase',
+    'FemtetWithExcelSettingsInterface',
+    'AbstractSurrogateModelInterfaceBase',
+    'BoTorchInterface',
     'PoFBoTorchInterface',
 ]

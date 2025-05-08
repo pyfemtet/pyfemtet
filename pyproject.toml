@@ -19,8 +19,8 @@ psutil = "^5.9.6"
 pywin32 = { version = "^306", markers = "sys_platform=='win32'" }
 femtetutils = { version = "^1.0.0", markers = "sys_platform=='win32'" }
 # distributed
-dask = "^2023.12.1"
-distributed = "^2023.12.1"
+dask = "~2024.12.1"
+distributed = "~2024.12.1"
 # ui
 dash = "^2.17.0"
 plotly = "^5.22.0"
@@ -57,6 +57,8 @@ bokeh = "^3.3.3"
 pytest = "^7.4.3"
 pytest-dashboard = "^0.1.2"
 fire = "^0.6.0"
+# others
+black = "^25.1.0"
 
 [[tool.poetry.source]]
 name = "pytorch-cpu"
@@ -67,7 +69,7 @@ priority = "explicit"
 brep = ["brepmatching"]  # pip install pyfemtet[brep]
 
 [tool.poetry.scripts]
-pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.result_viewer.application:main'
+pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.history_viewer.result_viewer._application:result_viewer_main'
 
 [tool.pytest.ini_options]
 filterwarnings = [

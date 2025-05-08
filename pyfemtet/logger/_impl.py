@@ -4,7 +4,6 @@ import sys
 import datetime
 import locale
 from threading import Lock
-from pathlib import Path
 import platform
 
 from colorlog import ColoredFormatter
@@ -176,14 +175,14 @@ def setup_package_root_logger(package_name):
 
 # ===== module logger =====
 
-def get_module_logger(name: str, __module_name__: str, ) -> logging.Logger:
+def get_module_logger(name: str, debug=False) -> logging.Logger:
     """Return the module-level logger.
 
     The format is defined in the package_root_logger.
 
     Args:
         name (str): The logger name to want.
-        __module_name__ (str): __name__ of the module.
+        debug (bool, optional): Output DEBUG level message or not.
 
     Returns:
         logging.Logger:
@@ -206,7 +205,7 @@ def get_module_logger(name: str, __module_name__: str, ) -> logging.Logger:
         logger.propagate = True
 
     # If debug mode, set specific level.
-    if __module_name__ == '__main__':
+    if debug:
         logger.setLevel(logging.DEBUG)
 
     return logger
@@ -215,8 +214,8 @@ def get_module_logger(name: str, __module_name__: str, ) -> logging.Logger:
 if __name__ == '__main__':
 
     root_logger = setup_package_root_logger('logger')
-    optimizer_logger = get_module_logger('logger.optimizer', __name__); optimizer_logger.setLevel(logging.INFO)
-    interface_logger = get_module_logger('logger.interface', __name__)
+    optimizer_logger = get_module_logger('logger.optimizer', False); optimizer_logger.setLevel(logging.INFO)
+    interface_logger = get_module_logger('logger.interface', False)
 
     root_logger.info("This is root logger's info.")
     optimizer_logger.info("This is optimizer logger's info.")

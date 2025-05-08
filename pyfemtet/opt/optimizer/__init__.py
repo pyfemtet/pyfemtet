@@ -1,16 +1,14 @@
-from pyfemtet.opt.optimizer._base import AbstractOptimizer, logger, OptimizationMethodChecker
-from pyfemtet.opt.optimizer._optuna._optuna import OptunaOptimizer
-from pyfemtet.opt.optimizer._scipy import ScipyOptimizer
-from pyfemtet.opt.optimizer._scipy_scalar import ScipyScalarOptimizer
+from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, SubFidelityModel
+from pyfemtet.opt.optimizer.optuna_optimizer import OptunaOptimizer, PoFConfig, PoFBoTorchSampler, PartialOptimizeACQFConfig
+from pyfemtet.opt.optimizer.scipy_optimizer import ScipyOptimizer
 
-from pyfemtet.opt.optimizer._optuna._pof_botorch import PoFBoTorchSampler, PoFConfig
 
 __all__ = [
-    'ScipyScalarOptimizer',
-    'ScipyOptimizer',
-    'OptunaOptimizer',
     'AbstractOptimizer',
-    'logger',
+    'SubFidelityModel',
+    'OptunaOptimizer',
     'PoFBoTorchSampler',
     'PoFConfig',
+    'ScipyOptimizer',
+    'PartialOptimizeACQFConfig',
 ]

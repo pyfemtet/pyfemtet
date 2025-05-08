@@ -26,5 +26,5 @@ PyFemtet.egg-info
 /build
 
 *.mo
-/pyfemtet/opt/visualization/result_viewer/sample/optimize_sample.py
+/pyfemtet/opt/visualization/_result_viewer/sample/optimize_sample.py
 docs/result.txt

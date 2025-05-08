@@ -1,0 +1,18 @@
+,prm,prm_lower_bound,prm_upper_bound,prm,prm_choices,obj,obj_direction,,,,,,
+,,,,,,,,,,,,,
+trial,x1,x1_lower_bound,x1_upper_bound,x2,x2_choices,obj,obj_direction,state,datetime_start,datetime_end,message,feasibility,optimality
+0,85.63019613,50,100,A,"['A', 'B', 'C']",85.63019613,minimize,Success,48:10.2,48:10.2,,TRUE,FALSE
+1,76.66824027,50,100,B,"['A', 'B', 'C']",76.66824027,minimize,Hidden constraint violation,48:11.7,48:11.7,,FALSE,FALSE
+2,62.68444915,50,100,C,"['A', 'B', 'C']",62.68444915,minimize,Hidden constraint violation,48:16.6,48:16.6,,FALSE,FALSE
+3,63.08476439,50,100,A,"['A', 'B', 'C']",63.08476439,minimize,Success,48:20.2,48:20.2,,TRUE,FALSE
+4,78.95677052,50,100,B,"['A', 'B', 'C']",78.95677052,minimize,Hidden constraint violation,48:23.5,48:23.5,,FALSE,FALSE
+5,79.90834979,50,100,C,"['A', 'B', 'C']",79.90834979,minimize,Hidden constraint violation,48:27.2,48:27.2,,FALSE,FALSE
+6,97.4442698,50,100,A,"['A', 'B', 'C']",97.4442698,minimize,Success,48:29.8,48:29.8,,TRUE,FALSE
+7,87.12500776,50,100,B,"['A', 'B', 'C']",87.12500776,minimize,Hidden constraint violation,03:52.7,03:52.7,,FALSE,FALSE
+8,69.56378151,50,100,C,"['A', 'B', 'C']",69.56378151,minimize,Hidden constraint violation,04:00.1,04:00.1,,FALSE,FALSE
+9,80.49012367,50,100,A,"['A', 'B', 'C']",80.49012367,minimize,Success,04:06.2,04:06.2,,TRUE,FALSE
+10,87.55804836,50,100,B,"['A', 'B', 'C']",87.55804836,minimize,Hidden constraint violation,04:13.1,04:13.1,,FALSE,FALSE
+11,59.55103039,50,100,C,"['A', 'B', 'C']",59.55103039,minimize,Hidden constraint violation,04:19.3,04:19.3,,FALSE,FALSE
+12,97.91995423,50,100,A,"['A', 'B', 'C']",97.91995423,minimize,Success,04:24.6,04:24.6,,TRUE,FALSE
+13,91.01111473,50,100,B,"['A', 'B', 'C']",91.01111473,minimize,Hidden constraint violation,04:31.3,04:31.3,,FALSE,FALSE
+14,53.36556413,50,100,C,"['A', 'B', 'C']",53.36556413,minimize,Hidden constraint violation,04:36.6,04:36.6,,FALSE,FALSE

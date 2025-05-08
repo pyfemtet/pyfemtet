@@ -9,7 +9,13 @@ import win32process
 
 from pyfemtet.logger import get_module_logger
 
-logger = get_module_logger('util.excel', __name__)
+
+__all__ = [
+    'watch_excel_macro_error'
+]
+
+
+logger = get_module_logger('util.excel', False)
 
 
 def _get_pid(hwnd):
@@ -152,7 +158,6 @@ def watch_excel_macro_error(excel_, timeout, restore_book=True):
     return _ExcelDialogProcessor(excel_, timeout, restore_book)
 
 
-
 if __name__ == '__main__':
 
     import os
@@ -161,8 +166,8 @@ if __name__ == '__main__':
     path = os.path.abspath('sample.xlsm')
     path2 = os.path.abspath('sample2.xlsm')
 
-
     from win32com.client import Dispatch
+    # noinspection PyUnresolvedReferences
     from pythoncom import com_error
 
     logger.debug('Excel を起動しています。')

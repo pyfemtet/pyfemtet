@@ -1,5 +1,5 @@
 import logging
-from pyfemtet.logger._impl import (
+from ._impl import (
     get_module_logger,
     add_file_output,
     set_stdout_output,
@@ -7,6 +7,13 @@ from pyfemtet.logger._impl import (
     remove_stdout_output,
     remove_all_output,
 )
+
+__all__ = [
+    'get_module_logger',
+    'get_dask_logger',
+    'get_optuna_logger',
+    'get_dash_logger',
+]
 
 
 def get_dask_logger():

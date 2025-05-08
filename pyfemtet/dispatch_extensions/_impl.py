@@ -1,28 +1,27 @@
-from typing import Tuple
-
-import os
 from time import time, sleep
 from multiprocessing import current_process
 
 from tqdm import tqdm
-import psutil
-from dask.distributed import Lock
 
-import win32process
-import win32gui
-from win32com.client import Dispatch
+from win32com.client import Dispatch, CDispatch
 
 from femtetutils import util
 
-from multiprocessing.context import BaseContext, SpawnProcess, _concrete_contexts
-from multiprocessing.process import _children, _cleanup
-from multiprocessing.managers import SyncManager
-
-from pyfemtet._message import Msg
-
+from pyfemtet._i18n import Msg
+from pyfemtet._util.dask_util import *
+from pyfemtet._util.process_util import *
 from pyfemtet.logger import get_module_logger
 
-logger = get_module_logger('dispatch', __name__)
+
+__all__ = [
+    'launch_and_dispatch_femtet',
+    'dispatch_femtet',
+    'dispatch_specific_femtet',
+    'DispatchExtensionException',
+]
+
+
+logger = get_module_logger('dispatch', False)
 
 
 DISPATCH_TIMEOUT = 120
@@ -38,114 +37,16 @@ class FemtetNotFoundException(DispatchExtensionException):
 
 class FemtetConnectionTimeoutError(DispatchExtensionException):
     """Raises when connection trials is timed out."""
-    pass
-
-
-class IFemtet:
-    """IDispatch object to contact with Femtet.
-
-    Usage:
-        >>> from win32com.client import Dispatch
-        >>> from femtetutils import const
-        >>> Femtet = Dispatch(const.CFemtet)
-        >>> print(Femtet.Version)
-
-        or
-
-        >>> from win32com.client import Dispatch
-        >>> Femtet = Dispatch('FemtetMacro.Femtet')
-        >>> print(Femtet.Version)
-
-    This is just an dummy class for type hint.
-    More detail usage, see Femtet Macro Help.
-
-    """
-    pass
-
-
-class _NestableSpawnProcess(SpawnProcess):
-    _start_method = 'nestable_spawn'
-
-    def start(self):
-        """This method is modified version of multiprocess.process.BaseProcess.start().
-
-        By using this class, it may become a zombie process.
-
-        """
-
-        #
-        # multiprocessing/process.py
-        #
-        # Copyright (c) 2006-2008, R Oudkerk
-        # Licensed to PSF under a Contributor Agreement.
-        #
-
-        self._check_closed()
-        assert self._popen is None, 'cannot start a process twice'
-        assert self._parent_pid == os.getpid(), \
-               'can only start a process object created by current process'
-        # assert not _current_process._config.get('daemon'), \
-        #        'daemonic processes are not allowed to have children'
-        _cleanup()
-        self._popen = self._Popen(self)
-        self._sentinel = self._popen.sentinel
-        # Avoid a refcycle if the target function holds an indirect
-        # reference to the process object (see bpo-30775)
-        del self._target, self._args, self._kwargs
-        _children.add(self)
-
-
-class _NestableSpawnContext(BaseContext):
-
-    #
-    # multiprocessing/process.py
-    #
-    # Copyright (c) 2006-2008, R Oudkerk
-    # Licensed to PSF under a Contributor Agreement.
-    #
-
-    _name = 'nestable_spawn'
-    Process = _NestableSpawnProcess
-
-
-_concrete_contexts.update(
-    dict(nestable_spawn=_NestableSpawnContext())
-)
-
-
-def _get_hwnds(pid):
-    """Proces ID から window handle を取得します."""
-    def callback(hwnd, _hwnds):
-        if win32gui.IsWindowVisible(hwnd) and win32gui.IsWindowEnabled(hwnd):
-            _, found_pid = win32process.GetWindowThreadProcessId(hwnd)
-            if found_pid == pid:
-                _hwnds.append(hwnd)
-        return True
-    hwnds = []
-    win32gui.EnumWindows(callback, hwnds)
-    return hwnds
-
-
-def _get_pid(hwnd):
-    """Window handle から process ID を取得します."""
-    if hwnd > 0:
-        _, pid = win32process.GetWindowThreadProcessId(hwnd)
-    else:
-        pid = 0
-    return pid
-
-
-def _get_pids(process_name):
-    """Process のイメージ名から実行中の process ID を取得します."""
-    pids = [p.info["pid"] for p in psutil.process_iter(attrs=["pid", "name"]) if p.info["name"] == process_name]
-    return pids
 
 
 def _get_subprocess_log_prefix():
     return f'({current_process().name}) '
 
 
-def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strictly_pid_specify=True) -> Tuple[IFemtet, int]:
+def launch_and_dispatch_femtet(
+        timeout=DISPATCH_TIMEOUT,
+        strictly_pid_specify=True
+) -> tuple[CDispatch, int]:
     """Launch Femtet by new process and connect to it.
 
     The wrapper for Dispatch() but returns PID with IFemtet.
@@ -162,11 +63,12 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strictly_pid_specify=Tr
         tuple[IFemtet, int]: An object for controlling Femtet and the PID of the Femtet being controlled.
 
     """
+
     # launch femtet
     util.execute_femtet()
     pid = util.get_last_executed_femtet_process_id()
     logger.debug(f'Target pid is {pid}.')
-    for _ in tqdm(range(5), 'wait for launch femtet...'):
+    for _ in tqdm(range(5), Msg.WAIT_FOR_LAUNCH_FEMTET):
         sleep(1)
 
     # dispatch femtet
@@ -174,18 +76,12 @@ def launch_and_dispatch_femtet(timeout=DISPATCH_TIMEOUT, strictly_pid_specify=Tr
         Femtet, pid = dispatch_specific_femtet(pid, timeout)
     else:
         # worker process なら排他処理する
-        try:
-            with Lock('simply-dispatch-femtet'):
-                Femtet, pid = dispatch_femtet()
-        except RuntimeError as e:
-            if "distributed.lock.Lock" in str(e):
-                Femtet, pid = dispatch_femtet()
-            else:
-                raise e
+        with Lock('simply-dispatch-femtet'):
+            Femtet, pid = dispatch_femtet()
     return Femtet, pid
 
 
-def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple[IFemtet, int]:
+def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> tuple[CDispatch, int]:
     """Connect to existing Femtet process.
 
     The wrapper for Dispatch() but returns PID with IFemtet.
@@ -202,23 +98,11 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple
 
     """
 
-    """
-
-    Args:
-        timeout (int or float, optional): Seconds to wait for connection. Defaults to DISPATCH_TIMEOUT.
-        subprocess_log_prefix (str, optional): The prefix of log message.
-
-    Raises:
-        FemtetConnectionTimeoutError: Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched).
-
-    Returns:
-        Tuple[IFemtet, int]:
-    """
     # Dispatch
     if subprocess_log_prefix:
         logger.debug('%s'+'Try to connect Femtet.', subprocess_log_prefix)
     else:
-        logger.info('Try to connect Femtet.')
+        logger.info(Msg.TRY_TO_CONNECT_FEMTET)
     Femtet = Dispatch('FemtetMacro.Femtet')
     logger.debug('%s'+'Dispatch finished.', subprocess_log_prefix)
 
@@ -229,10 +113,13 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple
 
         # 接続が確立
         if hwnd > 0:
-            logger.debug('%s'+f'Dispatched hwnd is {hwnd} and its pid is {_get_pid(hwnd)}. Connection established.', subprocess_log_prefix)
+            logger.debug('%s'+f'Dispatched hwnd is {hwnd} and'
+                              f'its pid is {_get_pid(hwnd)}.'
+                              f'Connection established.', subprocess_log_prefix)
             break
         else:
-            logger.debug('%s'+f'Dispatched hwnd is {hwnd}. Waiting for establishing connection.', subprocess_log_prefix)
+            logger.debug('%s'+f'Dispatched hwnd is {hwnd}.'
+                              f'Waiting for establishing connection.', subprocess_log_prefix)
 
         # 接続がタイムアウト
         if time()-start > timeout:
@@ -245,7 +132,7 @@ def dispatch_femtet(timeout=DISPATCH_TIMEOUT, subprocess_log_prefix='') -> Tuple
     if subprocess_log_prefix:
         logger.debug('%s'+f'Successfully connected. The pid of Femtet is {pid}.', subprocess_log_prefix)
     else:
-        logger.info(f'Successfully connected. The pid of Femtet is {pid}.')
+        logger.info(Msg.F_FEMTET_CONNECTED(pid))
 
     return Femtet, pid
 
@@ -328,56 +215,13 @@ def _block_other_femtets(
             sleep(1)
 
 
-def dispatch_specific_femtet(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
-    """Connect Existing Femtet whose process id is specified.
+def dispatch_specific_femtet(pid, timeout=DISPATCH_TIMEOUT) -> tuple[CDispatch, int]:
 
-    Warnings:
-        Once Femtet is connected a python process,
-        the python process can only connect it during the process lifetime
-        even if the process runs this function.
-
-    Example:
-
-        If you have 2 free Femtet processes (their pid is 1000 and 1001),
-        you can only connect to first connected Femtet
-        and cannot change the connection.
-
-        >>> from pyfemtet.dispatch_extensions import dispatch_specific_femtet
-        >>> Femtet1, pid1 = dispatch_specific_femtet(pid=1000)
-        >>> print(pid1)  # 1000
-        >>> Femtet2, pid2 = dispatch_specific_femtet(pid=1001)
-        >>> print(pid2)  # not 1001, but 1000
-
-        If you want to reconnect another process, please restart python script or interpreter.
-
-        If you want to connect 2 more Femtet processes from single script or interprete,
-        please consider parallel processing.
-
-    Args:
-        timeout (int, optional): Raises an error if the connection is not established within the specified timeout.
-
-    Raises:
-        FemtetConnectionTimeoutError: Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched).
-
-    Returns:
-        tuple[IFemtet, int]: An object for controlling Femtet and the PID of the Femtet being controlled.
+    with Lock('dispatch-specific-femtet'):
+        return _dispatch_specific_femtet_core(pid, timeout)
 
 
-    """
-    try:
-        with Lock('dispatch-specific-femtet'):
-            return _dispatch_specific_femtet_core(pid, timeout)
-    except RuntimeError as e:
-        if 'object not properly initialized' in str(e):
-            pass
-        else:
-            raise e
-    return _dispatch_specific_femtet_core(pid, timeout)  # for logger, out of except.
-
-
-def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemtet, int]:
-
-    # TODO: 安定性を見て lock_main を復活させるか決める
+def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> tuple[CDispatch, int]:
 
     if timeout < 5:
         raise ValueError(f'Timeout to dispatch specific femtet should equal or be over 5.')
@@ -388,13 +232,10 @@ def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemt
     if not (pid in pids):
         raise FemtetNotFoundException(f"Femtet (pid = {pid}) doesn't exist.")
 
-    logger.info('Searching specific Femtet...')
+    logger.info(Msg.F_SEARCHING_FEMTET_WITH_SPECIFIC_PID(pid))
 
     # 子プロセスの準備
-    # with Manager() as manager:
-    m = SyncManager(ctx=_NestableSpawnContext())  # このへんが時間のかかる処理
-    m.start()
-    with m as manager:
+    with _NestableSyncManager() as manager:
         # フラグの準備
         connection_flags = manager.list()
         lock_inter_subproc = manager.Lock()
@@ -407,7 +248,6 @@ def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemt
         processes = []
         for subprocess_id in tqdm(range(len(pids)), 'Specifying connection...'):
             p = _NestableSpawnProcess(
-            # p = Process(
                 target=_block_other_femtets,
                 args=(
                     pid,
@@ -435,7 +275,12 @@ def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemt
                     lock_inter_subproc.release()
                 except RuntimeError:
                     pass
-                raise FemtetConnectionTimeoutError(f'Connect trial with specific Femtet (pid = {pid}) is timed out in {timeout} sec')
+                raise FemtetConnectionTimeoutError(
+                    Msg.F_ERR_FEMTET_CONNECTION_TIMEOUT(
+                        pid=pid,
+                        timeout=timeout,
+                    )
+                )
             sleep(1)
 
         # # subprocesses の Dispatch 終了後、target_pid の解放を待つ
@@ -459,8 +304,7 @@ def _dispatch_specific_femtet_core(pid, timeout=DISPATCH_TIMEOUT) -> Tuple[IFemt
     if my_pid != pid:  # pid の結果が違う場合
         txt = f'Target pid is {pid}, but connected pid is {my_pid}. '
         txt += f'The common reason is that THIS python process once connected {pid}.'
-        logger.warn(txt)
-        # warnings.warn(txt)
+        logger.warning(txt)
 
     return Femtet, my_pid
 
