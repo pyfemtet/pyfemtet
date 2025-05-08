@@ -316,6 +316,11 @@ class ExcelInterface(COMInterface):
 
     @property
     def object_pass_to_fun(self):
+        """The object pass to the first argument of user-defined objective functions.
+
+        Returns:
+            excel (CDispatch): COM object of Microsoft Excel.
+        """
         return self.excel
 
     # ===== setup =====

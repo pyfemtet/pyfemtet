@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.dispatch_extensions._impl &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.dispatch_extensions._impl</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.dispatch_extensions._impl</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_process</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dispatch</span><span class="p">,</span> <span class="n">CDispatch</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">femtetutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.dask_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.process_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;launch_and_dispatch_femtet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;dispatch_femtet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;dispatch_specific_femtet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DispatchExtensionException&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;dispatch&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+
+<span class="n">DISPATCH_TIMEOUT</span> <span class="o">=</span> <span class="mi">120</span>
+
+
+<div class="viewcode-block" id="DispatchExtensionException">
+<a class="viewcode-back" href="../../../modules/pyfemtet.dispatch_extensions.html#pyfemtet.dispatch_extensions.DispatchExtensionException">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DispatchExtensionException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FemtetNotFoundException</span><span class="p">(</span><span class="n">DispatchExtensionException</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raises when (specific) Femtet process doesn&#39;t exist.&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FemtetConnectionTimeoutError</span><span class="p">(</span><span class="n">DispatchExtensionException</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raises when connection trials is timed out.&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_subprocess_log_prefix</span><span class="p">():</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">current_process</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">) &#39;</span>
+
+
+<div class="viewcode-block" id="launch_and_dispatch_femtet">
+<a class="viewcode-back" href="../../../modules/pyfemtet.dispatch_extensions.html#pyfemtet.dispatch_extensions.launch_and_dispatch_femtet">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">launch_and_dispatch_femtet</span><span class="p">(</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="n">DISPATCH_TIMEOUT</span><span class="p">,</span>
+        <span class="n">strictly_pid_specify</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CDispatch</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch Femtet by new process and connect to it.</span>
+
+<span class="sd">    The wrapper for Dispatch() but returns PID with IFemtet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        timeout (int, optional): Raises an error if the connection is not established within the specified timeout.</span>
+<span class="sd">        strictly_pid_specify (bool, optional): Attempts to establish a connection to the launched Femtet strictly.</span>
+<span class="sd">            This may result in slower processing due to process exclusivity handling.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FemtetConnectionTimeoutError: Couldn&#39;t connect Femtet process for some reason (i.e. Femtet.exe is not launched).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple[IFemtet, int]: An object for controlling Femtet and the PID of the Femtet being controlled.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># launch femtet</span>
+    <span class="n">util</span><span class="o">.</span><span class="n">execute_femtet</span><span class="p">()</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_last_executed_femtet_process_id</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Target pid is </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">Msg</span><span class="o">.</span><span class="n">WAIT_FOR_LAUNCH_FEMTET</span><span class="p">):</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># dispatch femtet</span>
+    <span class="k">if</span> <span class="n">strictly_pid_specify</span><span class="p">:</span>
+        <span class="n">Femtet</span><span class="p">,</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">dispatch_specific_femtet</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># worker process なら排他処理する</span>
+        <span class="k">with</span> <span class="n">Lock</span><span class="p">(</span><span class="s1">&#39;simply-dispatch-femtet&#39;</span><span class="p">):</span>
+            <span class="n">Femtet</span><span class="p">,</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">dispatch_femtet</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">Femtet</span><span class="p">,</span> <span class="n">pid</span></div>
+
+
+
+<div class="viewcode-block" id="dispatch_femtet">
+<a class="viewcode-back" href="../../../modules/pyfemtet.dispatch_extensions.html#pyfemtet.dispatch_extensions.dispatch_femtet">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dispatch_femtet</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">DISPATCH_TIMEOUT</span><span class="p">,</span> <span class="n">subprocess_log_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CDispatch</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect to existing Femtet process.</span>
+
+<span class="sd">    The wrapper for Dispatch() but returns PID with IFemtet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        timeout (int, optional): Raises an error if the connection is not established within the specified timeout.</span>
+<span class="sd">        subprocess_log_prefix (str, optional): A prefix to output in logs. Typically used only for internal processing.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FemtetConnectionTimeoutError: Couldn&#39;t connect Femtet process for some reason (i.e. Femtet.exe is not launched).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple[IFemtet, int]: An object for controlling Femtet and the PID of the Femtet being controlled.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Dispatch</span>
+    <span class="k">if</span> <span class="n">subprocess_log_prefix</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;Try to connect Femtet.&#39;</span><span class="p">,</span> <span class="n">subprocess_log_prefix</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">TRY_TO_CONNECT_FEMTET</span><span class="p">)</span>
+    <span class="n">Femtet</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;Dispatch finished.&#39;</span><span class="p">,</span> <span class="n">subprocess_log_prefix</span><span class="p">)</span>
+
+    <span class="c1"># timeout 秒以内に接続が確立するか</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">hwnd</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">hWnd</span>
+
+        <span class="c1"># 接続が確立</span>
+        <span class="k">if</span> <span class="n">hwnd</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Dispatched hwnd is </span><span class="si">{</span><span class="n">hwnd</span><span class="si">}</span><span class="s1"> and&#39;</span>
+                              <span class="sa">f</span><span class="s1">&#39;its pid is </span><span class="si">{</span><span class="n">_get_pid</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>
+                              <span class="sa">f</span><span class="s1">&#39;Connection established.&#39;</span><span class="p">,</span> <span class="n">subprocess_log_prefix</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Dispatched hwnd is </span><span class="si">{</span><span class="n">hwnd</span><span class="si">}</span><span class="s1">.&#39;</span>
+                              <span class="sa">f</span><span class="s1">&#39;Waiting for establishing connection.&#39;</span><span class="p">,</span> <span class="n">subprocess_log_prefix</span><span class="p">)</span>
+
+        <span class="c1"># 接続がタイムアウト</span>
+        <span class="k">if</span> <span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FemtetConnectionTimeoutError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Connection trial with Femtet is timed out in </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
+
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># pid を取得</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="n">_get_pid</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subprocess_log_prefix</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Successfully connected. The pid of Femtet is </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">,</span> <span class="n">subprocess_log_prefix</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">F_FEMTET_CONNECTED</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">Femtet</span><span class="p">,</span> <span class="n">pid</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_block_other_femtets</span><span class="p">(</span>
+        <span class="n">target_pid</span><span class="p">,</span>
+        <span class="n">subprocess_idx</span><span class="p">,</span>
+        <span class="n">connection_flags</span><span class="p">,</span>
+        <span class="n">timeout_main_wait_for_us</span><span class="p">,</span>
+        <span class="n">lock_inter_subproc</span><span class="p">,</span>
+        <span class="c1"># lock_main,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Target 以外の pid を持つ Femtet と接続し、他の（メインの）プロセスが接続できないようにする。</span>
+
+<span class="sd">    ただし、Femtet の Dispatch ルールは一意なので、</span>
+<span class="sd">    ターゲットの Femtet と接続するまでの他のプロセスだけをブロックする。</span>
+<span class="sd">    接続可能な Femtet がなければ timeout するまで接続を試行しようとするが、</span>
+<span class="sd">    ひとつでも timeout すれば、それ以降のプロセスは dispatch する必要がない。</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Dispatch を行う</span>
+    <span class="k">if</span> <span class="n">connection_flags</span><span class="p">[</span><span class="n">subprocess_idx</span><span class="p">]:</span>
+        <span class="c1"># 他のタイムアウトしたプロセスによってスキップフラグを立てられた場合</span>
+        <span class="n">my_pid</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lock_inter_subproc</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Subprocess started.&#39;</span><span class="p">,</span> <span class="n">_get_subprocess_log_prefix</span><span class="p">())</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">my_pid</span> <span class="o">=</span> <span class="n">dispatch_femtet</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">_get_subprocess_log_prefix</span><span class="p">())</span>
+        <span class="k">except</span> <span class="n">DispatchExtensionException</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Connection failed. The other subprocesses will skip.&#39;</span><span class="p">,</span> <span class="n">_get_subprocess_log_prefix</span><span class="p">())</span>
+            <span class="n">my_pid</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># ひとつでもここに来れば、それ以降は探しても無駄なのでスキップフラグを立てる</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">connection_flags</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">connection_flags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">lock_inter_subproc</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+    <span class="c1"># # target なら Dispatch の終了を通知する前に main を lock する</span>
+    <span class="c1"># if my_pid == target_pid:</span>
+    <span class="c1">#     lock_main.acquire()</span>
+
+    <span class="c1"># Dispatch の終了を通知</span>
+    <span class="n">connection_flags</span><span class="p">[</span><span class="n">subprocess_idx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># # pid が目的のものなら他の subprocesses すべてが Dispatch 終了後に開放する</span>
+    <span class="c1"># pid が目的のものなら即刻開放する</span>
+    <span class="k">if</span> <span class="n">my_pid</span> <span class="o">==</span> <span class="n">target_pid</span><span class="p">:</span>
+        <span class="c1"># while True:</span>
+        <span class="c1">#     start = time()</span>
+        <span class="c1">#     if all(connection_flags[:-1]):</span>
+        <span class="c1">#         break</span>
+        <span class="c1">#     if time()-start &gt; timeout_main_wait_for_us:</span>
+        <span class="c1">#         return -1</span>
+        <span class="c1">#     sleep(1)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Release </span><span class="si">{</span><span class="n">my_pid</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">,</span> <span class="n">_get_subprocess_log_prefix</span><span class="p">())</span>
+        <span class="c1"># lock_main.release()</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># my_pid が非正なら何にも関与しないので即刻終了する</span>
+    <span class="k">elif</span> <span class="n">my_pid</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;Failed or timed out to connect Femtet.&#39;</span><span class="p">,</span> <span class="n">_get_subprocess_log_prefix</span><span class="p">())</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c1"># そうでなければメインプロセスが Dispatch を終えるまで解放しない</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Connected to </span><span class="si">{</span><span class="n">my_pid</span><span class="si">}</span><span class="s1">. Keep connection to block.&#39;</span><span class="p">,</span> <span class="n">_get_subprocess_log_prefix</span><span class="p">())</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">connection_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;Main process seems to connect target Femtet.&#39;</span><span class="p">,</span> <span class="n">_get_subprocess_log_prefix</span><span class="p">())</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start</span> <span class="o">&gt;</span> <span class="n">timeout_main_wait_for_us</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;Timed out to wait for the main process to </span><span class="si">{</span><span class="n">timeout_main_wait_for_us</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">_get_subprocess_log_prefix</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="dispatch_specific_femtet">
+<a class="viewcode-back" href="../../../modules/pyfemtet.dispatch_extensions.html#pyfemtet.dispatch_extensions.dispatch_specific_femtet">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dispatch_specific_femtet</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DISPATCH_TIMEOUT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CDispatch</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+
+    <span class="k">with</span> <span class="n">Lock</span><span class="p">(</span><span class="s1">&#39;dispatch-specific-femtet&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_dispatch_specific_femtet_core</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_specific_femtet_core</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DISPATCH_TIMEOUT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CDispatch</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+
+    <span class="k">if</span> <span class="n">timeout</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Timeout to dispatch specific femtet should equal or be over 5.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># 存在する Femtet プロセスの列挙</span>
+    <span class="n">pids</span> <span class="o">=</span> <span class="n">_get_pids</span><span class="p">(</span><span class="s1">&#39;Femtet.exe&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PID of existing Femtet processes: </span><span class="si">{</span><span class="n">pids</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">FemtetNotFoundException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Femtet (pid = </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">) doesn&#39;t exist.&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">F_SEARCHING_FEMTET_WITH_SPECIFIC_PID</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
+
+    <span class="c1"># 子プロセスの準備</span>
+    <span class="k">with</span> <span class="n">_NestableSyncManager</span><span class="p">()</span> <span class="k">as</span> <span class="n">manager</span><span class="p">:</span>
+        <span class="c1"># フラグの準備</span>
+        <span class="n">connection_flags</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="n">lock_inter_subproc</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="c1"># lock_main = manager.Lock()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># [-1]は自プロセス用のフラグ</span>
+            <span class="n">connection_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># 目的以外の Femtet をブロックする子プロセスを開始</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Start subprocess to block Femtet other than target pid.&#39;</span><span class="p">)</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">subprocess_id</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">)),</span> <span class="s1">&#39;Specifying connection...&#39;</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">_NestableSpawnProcess</span><span class="p">(</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">_block_other_femtets</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">pid</span><span class="p">,</span>
+                    <span class="n">subprocess_id</span><span class="p">,</span>
+                    <span class="n">connection_flags</span><span class="p">,</span>
+                    <span class="mi">10</span><span class="p">,</span>
+                    <span class="n">lock_inter_subproc</span><span class="p">,</span>
+                    <span class="c1"># lock_main,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="c1"># 子プロセスの Dispatch 完了を待つ</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">connection_flags</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
+                <span class="c1"># 子プロセスを終了する</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">lock_inter_subproc</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">raise</span> <span class="n">FemtetConnectionTimeoutError</span><span class="p">(</span>
+                    <span class="n">Msg</span><span class="o">.</span><span class="n">F_ERR_FEMTET_CONNECTION_TIMEOUT</span><span class="p">(</span>
+                        <span class="n">pid</span><span class="o">=</span><span class="n">pid</span><span class="p">,</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># # subprocesses の Dispatch 終了後、target_pid の解放を待つ</span>
+        <span class="c1"># lock_main.acquire()</span>
+
+        <span class="c1"># 子プロセスによるブロックが終了しているので Dispatch する</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Block process seems to be finished. Try Dispatch.&#39;</span><span class="p">)</span>
+            <span class="n">Femtet</span><span class="p">,</span> <span class="n">my_pid</span> <span class="o">=</span> <span class="n">dispatch_femtet</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DispatchExtensionException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># lock_main.release()</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="c1"># Dispatch 完了を通知</span>
+        <span class="n">connection_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># サブプロセスすべての正常終了を待つ</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">my_pid</span> <span class="o">!=</span> <span class="n">pid</span><span class="p">:</span>  <span class="c1"># pid の結果が違う場合</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Target pid is </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s1">, but connected pid is </span><span class="si">{</span><span class="n">my_pid</span><span class="si">}</span><span class="s1">. &#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;The common reason is that THIS python process once connected </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s1">.&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Femtet</span><span class="p">,</span> <span class="n">my_pid</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_debug</span><span class="p">():</span>
+    <span class="n">launch_and_dispatch_femtet</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">_Femtet</span><span class="p">,</span> <span class="n">_my_pid</span> <span class="o">=</span> <span class="n">launch_and_dispatch_femtet</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="c1"># _Femtet, _my_pid = dispatch_specific_femtet(pid=26124)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

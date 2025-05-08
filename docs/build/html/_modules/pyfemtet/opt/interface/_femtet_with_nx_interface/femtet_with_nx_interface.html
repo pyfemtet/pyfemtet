@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+<span class="c1"># noinspection PyUnresolvedReferences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pywintypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">com_error</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span><span class="p">,</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._femtet_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">FemtetInterface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+
+
+<span class="n">here</span><span class="p">,</span> <span class="n">me</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">JOURNAL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">here</span><span class="p">,</span> <span class="s1">&#39;update_model.py&#39;</span><span class="p">))</span>
+
+
+<span class="c1"># NX 単体で Interface 化する予定がないのでモジュール分割しない</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_NXInterface</span><span class="p">(</span><span class="n">AbstractFEMInterface</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">prt_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">export_curves</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_surfaces</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_solids</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_flattened_assembly</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># check NX installation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_journal_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;UGII_BASE_DIR&#39;</span><span class="p">),</span> <span class="s1">&#39;NXBIN&#39;</span><span class="p">,</span> <span class="s1">&#39;run_journal.exe&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_journal_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;`run_journal.exe` is not found. &#39;</span>
+                           <span class="s1">&#39;Please check:</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;- NX is installed.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;- The environment variable `UGII_BASE_DIR` is set.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;- `&lt;UGII_BASE_DIR&gt;</span><span class="se">\\</span><span class="s1">NXBIN</span><span class="se">\\</span><span class="s1">run_journal.exe` exists.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;「run_journal.exe」 が見つかりませんでした。&#39;</span>
+                           <span class="s1">&#39;以下のことを確認してください。</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;- NX がインストールされている</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;- 環境変数 UGII_BASE_DIR が設定されている</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;- &lt;UGII_BASE_DIR&gt;</span><span class="se">\\</span><span class="s1">NXBIN</span><span class="se">\\</span><span class="s1">run_journal.exe が存在する&#39;</span>
+            <span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">prt_path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prt_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_curves</span> <span class="o">=</span> <span class="n">export_curves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_surfaces</span> <span class="o">=</span> <span class="n">export_surfaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_solids</span> <span class="o">=</span> <span class="n">export_solids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_flattened_assembly</span> <span class="o">=</span> <span class="n">export_flattened_assembly</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distribute_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># get suffix</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_index_from_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+
+        <span class="c1"># rename and get worker path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_and_get_path_on_worker_space</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prt_path</span><span class="p">,</span>
+            <span class="n">suffix</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_export_xt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xt_path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update .x_t&quot;&quot;&quot;</span>
+
+        <span class="c1"># 前のが存在するならば消しておく</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">xt_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">xt_path</span><span class="p">)</span>
+
+        <span class="c1"># 変数の json 文字列を作る</span>
+        <span class="n">str_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="p">)</span>
+
+        <span class="c1"># create dumped json of export settings</span>
+        <span class="n">tmp_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">include_curves</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_curves</span><span class="p">,</span>
+            <span class="n">include_surfaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_surfaces</span><span class="p">,</span>
+            <span class="n">include_solids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_solids</span><span class="p">,</span>
+            <span class="n">flatten_assembly</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">export_flattened_assembly</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dumped_json_export_settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">)</span>
+
+        <span class="c1"># NX journal を使ってモデルを編集する</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_journal_path</span><span class="p">,</span>  <span class="c1"># run_journal.exe</span>
+                <span class="n">JOURNAL_PATH</span><span class="p">,</span>  <span class="c1"># update_model.py</span>
+                <span class="s1">&#39;-args&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">,</span>
+                <span class="n">str_json</span><span class="p">,</span>
+                <span class="n">xt_path</span><span class="p">,</span>
+                <span class="n">dumped_json_export_settings</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+            <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">cwd</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># この時点で x_t ファイルがなければ NX がモデル更新に失敗しているはず</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">xt_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ModelError</span>
+
+
+<div class="viewcode-block" id="FemtetWithNXInterface">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithNXInterface">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FemtetWithNXInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">,</span> <span class="n">_NXInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Control Femtet and NX.</span>
+
+<span class="sd">    Using this class, you can import CAD files created</span>
+<span class="sd">    in NX through the Parasolid format into a</span>
+<span class="sd">    Femtet project. It allows you to pass design</span>
+<span class="sd">    variables to NX, update the model, and</span>
+<span class="sd">    perform analysis using the updated model in Femtet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        prt_path (str):</span>
+<span class="sd">            The path to .prt file containing the</span>
+<span class="sd">            CAD data from which the import is made.</span>
+
+<span class="sd">        export_curves(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        export_surfaces(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        export_solids(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        export_flattened_assembly(bool or None, optional):</span>
+<span class="sd">            Defaults to None.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        ```export_*``` arguments sets</span>
+<span class="sd">        parasolid export setting of NX.</span>
+<span class="sd">        If None, PyFemtet does not change</span>
+<span class="sd">        the current setting of NX.</span>
+
+<span class="sd">        It is recommended not to change these values</span>
+<span class="sd">        from the settings used when exporting the</span>
+<span class="sd">        Parasolid that was imported into Femtet.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">prt_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">femprj_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">connect_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>  <span class="c1"># dask worker では __init__ の中で &#39;new&#39; にするので super() の引数にしない。（しても意味がない）</span>
+            <span class="n">save_pdt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>  <span class="c1"># &#39;all&#39; or None</span>
+            <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># dask worker では True にしたいので super() の引数にしない。</span>
+            <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># main でのみ True を許容したいので super() の引数にしない。</span>
+            <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO: Remove this</span>
+            <span class="n">export_curves</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_surfaces</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_solids</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_flattened_assembly</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="n">FemtetInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">femprj_path</span><span class="o">=</span><span class="n">femprj_path</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
+            <span class="n">connect_method</span><span class="o">=</span><span class="n">connect_method</span><span class="p">,</span>
+            <span class="n">save_pdt</span><span class="o">=</span><span class="n">save_pdt</span><span class="p">,</span>
+            <span class="n">strictly_pid_specify</span><span class="o">=</span><span class="n">strictly_pid_specify</span><span class="p">,</span>
+            <span class="n">allow_without_project</span><span class="o">=</span><span class="n">allow_without_project</span><span class="p">,</span>
+            <span class="n">open_result_with_gui</span><span class="o">=</span><span class="n">open_result_with_gui</span><span class="p">,</span>
+            <span class="n">parametric_output_indexes_use_as_objective</span><span class="o">=</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">_NXInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">prt_path</span><span class="o">=</span><span class="n">prt_path</span><span class="p">,</span>
+            <span class="n">export_curves</span><span class="o">=</span><span class="n">export_curves</span><span class="p">,</span>
+            <span class="n">export_surfaces</span><span class="o">=</span><span class="n">export_surfaces</span><span class="p">,</span>
+            <span class="n">export_solids</span><span class="o">=</span><span class="n">export_solids</span><span class="p">,</span>
+            <span class="n">export_flattened_assembly</span><span class="o">=</span><span class="n">export_flattened_assembly</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">_NXInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
+        <span class="n">_NXInterface</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FemtetWithNXInterface.update_model">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithNXInterface.update_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># 競合しないよう保存先を temp にしておく</span>
+        <span class="n">worker_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_space</span><span class="p">()</span>
+        <span class="n">xt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">worker_space</span><span class="p">,</span> <span class="s1">&#39;temp.x_t&#39;</span><span class="p">)</span>
+
+        <span class="c1"># export parasolid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_export_xt</span><span class="p">(</span><span class="n">xt_path</span><span class="p">)</span>
+
+        <span class="c1"># LastXTPath を更新する</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">LastXTPath</span> <span class="o">=</span> <span class="n">xt_path</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="n">com_error</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;This feature is available from Femtet version 2023.2. Please update Femtet.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># update_parameter で変数は更新されているので</span>
+        <span class="c1"># ここでモデルを完全に再構築できる</span>
+        <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_debug_1</span><span class="p">():</span>
+
+    <span class="n">fem</span> <span class="o">=</span> <span class="n">_NXInterface</span><span class="p">(</span>
+        <span class="n">prt_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;model1.prt&#39;</span><span class="p">),</span>
+        <span class="n">export_solids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">fem</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
+    <span class="n">fem</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">()</span>
+    <span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
+    <span class="n">fem</span><span class="o">.</span><span class="n">_export_xt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;model1.x_t&#39;</span><span class="p">))</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">_debug_1</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

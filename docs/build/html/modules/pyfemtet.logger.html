@@ -60,7 +60,6 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../pages/api.html#entire-reference">Entire Reference</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
 </ul>
 </li>
@@ -110,6 +109,29 @@
 <dt class="sig sig-object py" id="pyfemtet.logger.get_dask_logger">
 <span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_dask_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger.html#get_dask_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_dask_logger" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfemtet.logger.get_module_logger">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_module_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger/_impl.html#get_module_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_module_logger" title="Link to this definition"></a></dt>
+<dd><p>Return the module-level logger.</p>
+<p>The format is defined in the package_root_logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The logger name to want.</p></li>
+<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Output DEBUG level message or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The logger its name is <code class="docutils literal notranslate"><span class="pre">root_package.subpackage.module</span></code>.
+child level logger’s signal propagates to the parent logger
+and is shown in the parent(s)’s handler(s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)">logging.Logger</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyfemtet.logger.get_optuna_logger">

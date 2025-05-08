@@ -24,7 +24,7 @@
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="検索" href="../search.html" />
     <link rel="next" title="pyfemtet.logger package" href="pyfemtet.logger.html" />
-    <link rel="prev" title="pyfemtet.brep package" href="pyfemtet.brep.html" /> 
+    <link rel="prev" title="pyfemtet package" href="pyfemtet.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -60,7 +60,6 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../pages/api.html#entire-reference">Entire Reference</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
 </ul>
 </li>
@@ -101,6 +100,71 @@
 <h1>pyfemtet.dispatch_extensions package<a class="headerlink" href="#pyfemtet-dispatch-extensions-package" title="Link to this heading"></a></h1>
 <section id="module-pyfemtet.dispatch_extensions">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.dispatch_extensions" title="Link to this heading"></a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyfemtet.dispatch_extensions.DispatchExtensionException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.dispatch_extensions.</span></span><span class="sig-name descname"><span class="pre">DispatchExtensionException</span></span><a class="reference internal" href="../_modules/pyfemtet/dispatch_extensions/_impl.html#DispatchExtensionException"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.dispatch_extensions.DispatchExtensionException" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfemtet.dispatch_extensions.dispatch_femtet">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.dispatch_extensions.</span></span><span class="sig-name descname"><span class="pre">dispatch_femtet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subprocess_log_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/dispatch_extensions/_impl.html#dispatch_femtet"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.dispatch_extensions.dispatch_femtet" title="Link to this definition"></a></dt>
+<dd><p>Connect to existing Femtet process.</p>
+<p>The wrapper for Dispatch() but returns PID with IFemtet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Raises an error if the connection is not established within the specified timeout.</p></li>
+<li><p><strong>subprocess_log_prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – A prefix to output in logs. Typically used only for internal processing.</p></li>
+</ul>
+</dd>
+<dt class="field-even">例外<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>FemtetConnectionTimeoutError</strong> – Couldn’t connect Femtet process for some reason (i.e. Femtet.exe is not launched).</p>
+</dd>
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An object for controlling Femtet and the PID of the Femtet being controlled.</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[IFemtet, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfemtet.dispatch_extensions.dispatch_specific_femtet">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.dispatch_extensions.</span></span><span class="sig-name descname"><span class="pre">dispatch_specific_femtet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/dispatch_extensions/_impl.html#dispatch_specific_femtet"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.dispatch_extensions.dispatch_specific_femtet" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<em>CDispatch</em>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfemtet.dispatch_extensions.launch_and_dispatch_femtet">
+<span class="sig-prename descclassname"><span class="pre">pyfemtet.dispatch_extensions.</span></span><span class="sig-name descname"><span class="pre">launch_and_dispatch_femtet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strictly_pid_specify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/dispatch_extensions/_impl.html#launch_and_dispatch_femtet"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.dispatch_extensions.launch_and_dispatch_femtet" title="Link to this definition"></a></dt>
+<dd><p>Launch Femtet by new process and connect to it.</p>
+<p>The wrapper for Dispatch() but returns PID with IFemtet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Raises an error if the connection is not established within the specified timeout.</p></li>
+<li><p><strong>strictly_pid_specify</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Attempts to establish a connection to the launched Femtet strictly.
+This may result in slower processing due to process exclusivity handling.</p></li>
+</ul>
+</dd>
+<dt class="field-even">例外<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>FemtetConnectionTimeoutError</strong> – Couldn’t connect Femtet process for some reason (i.e. Femtet.exe is not launched).</p>
+</dd>
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An object for controlling Femtet and the PID of the Femtet being controlled.</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[IFemtet, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -108,7 +172,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pyfemtet.brep.html" class="btn btn-neutral float-left" title="pyfemtet.brep package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyfemtet.html" class="btn btn-neutral float-left" title="pyfemtet package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="pyfemtet.logger.html" class="btn btn-neutral float-right" title="pyfemtet.logger package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

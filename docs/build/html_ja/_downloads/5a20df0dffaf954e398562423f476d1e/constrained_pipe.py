@@ -5,8 +5,8 @@
 
 """
 
-from optuna_integration import BoTorchSampler
 from pyfemtet.opt import FEMOpt, OptunaOptimizer
+from pyfemtet.opt.optimizer import PoFBoTorchSampler
 
 
 def mises_stress(Femtet):
@@ -66,7 +66,7 @@ def radius_diff(Femtet, opt):
 if __name__ == '__main__':
     # 最適化手法のセットアップ
     opt = OptunaOptimizer(
-        sampler_class=BoTorchSampler,
+        sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
             n_startup_trials=3,  # 最初の 3 回はランダムサンプリングを行います。
         )
@@ -79,14 +79,14 @@ if __name__ == '__main__':
 
     # 最適化の実行中に外側の半径を超えないように strict 拘束を追加します。
     femopt.add_constraint(
-        radius_diff,  # 拘束関数 (ここでは 外半径 - 内半径).
+        fun=radius_diff,  # 拘束関数 (ここでは 外半径 - 内半径).
         name='管厚さ',  # 拘束関数にはプログラム上の名前とは別に自由な名前を付与できます.
         lower_bound=1,  # 拘束関数の下限 (ここでは管の厚みを最低 1 とする).
         args=(femopt.opt,)  # 拘束関数に渡される、Femtet 以外の追加の引数.
     )
 
     # 目的関数の追加
-    femopt.add_objective(mises_stress, name='ミーゼス応力')
+    femopt.add_objective(fun=mises_stress, name='ミーゼス応力')
 
     # 最適化の実行
     femopt.set_random_seed(42)

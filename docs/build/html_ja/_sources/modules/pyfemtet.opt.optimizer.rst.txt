@@ -1,13 +1,14 @@
 pyfemtet.opt.optimizer package
 ==============================
 
-Submodules
-----------
+Subpackages
+-----------
 
 .. toctree::
    :maxdepth: 1
 
-   pyfemtet.opt.optimizer.parameter
+   pyfemtet.opt.optimizer.optuna_optimizer
+   pyfemtet.opt.optimizer.scipy_optimizer
 
 Module contents
 ---------------

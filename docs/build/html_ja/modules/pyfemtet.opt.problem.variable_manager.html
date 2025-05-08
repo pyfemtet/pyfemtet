@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.problem.variable_manager package &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="pyfemtet.opt.problem.problem.html" />
+    <link rel="prev" title="pyfemtet.opt.problem package" href="pyfemtet.opt.problem.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/migration_to_v1.html">バージョン 1 への移行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/advanced_examples.html">発展的な例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/usage.html">使い方</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pages/api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../pages/api.html#most-major-classes">Most Major Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pages/api.html#other-major-classes">Other Major Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../pages/api.html#entire-reference">Entire Reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../pages/api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet package</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.opt.html">pyfemtet.opt package</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.opt.problem.html">pyfemtet.opt.problem package</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.problem.variable_manager package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/pyfemtet.opt.problem.variable_manager.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pyfemtet-opt-problem-variable-manager-package">
+<h1>pyfemtet.opt.problem.variable_manager package<a class="headerlink" href="#pyfemtet-opt-problem-variable-manager-package" title="Link to this heading"></a></h1>
+<section id="module-pyfemtet.opt.problem.variable_manager">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.opt.problem.variable_manager" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.CategoricalParameter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">CategoricalParameter</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#CategoricalParameter"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.CategoricalParameter" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.CategoricalVariable" title="pyfemtet.opt.problem.variable_manager._variable_manager.CategoricalVariable"><code class="xref py py-class docutils literal notranslate"><span class="pre">CategoricalVariable</span></code></a>, <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Parameter" title="pyfemtet.opt.problem.variable_manager._variable_manager.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.CategoricalParameter.choices">
+<span class="sig-name descname"><span class="pre">choices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.CategoricalParameter.choices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.CategoricalVariable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">CategoricalVariable</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#CategoricalVariable"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.CategoricalVariable" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.CategoricalVariable.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.CategoricalVariable.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.Expression">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">Expression</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#Expression"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.Expression" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.ExpressionFromFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">ExpressionFromFunction</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#ExpressionFromFunction"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.ExpressionFromFunction" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Expression" title="pyfemtet.opt.problem.variable_manager._variable_manager.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.ExpressionFromFunction.args">
+<span class="sig-name descname"><span class="pre">args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.ExpressionFromFunction.args" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.ExpressionFromFunction.fun">
+<span class="sig-name descname"><span class="pre">fun</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.ExpressionFromFunction.fun" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.ExpressionFromFunction.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.ExpressionFromFunction.kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.ExpressionFromString">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">ExpressionFromString</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#ExpressionFromString"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.ExpressionFromString" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Expression" title="pyfemtet.opt.problem.variable_manager._variable_manager.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a>, <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.NumericVariable" title="pyfemtet.opt.problem.variable_manager._variable_manager.NumericVariable"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericVariable</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.ExpressionFromString.InternalClass">
+<span class="sig-name descname"><span class="pre">InternalClass</span></span><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.ExpressionFromString.InternalClass" title="Link to this definition"></a></dt>
+<dd><p>:py:class:<a href="#id1"><span class="problematic" id="id2">`</span></a>~pyfemtet.opt.problem.variable_manager._string_as_expression._ExpressionFromString`の別名です。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.InvalidExpression">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">InvalidExpression</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_string_as_expression.html#InvalidExpression"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.InvalidExpression" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.NumericParameter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">NumericParameter</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#NumericParameter"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.NumericParameter" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.NumericVariable" title="pyfemtet.opt.problem.variable_manager._variable_manager.NumericVariable"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericVariable</span></code></a>, <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Parameter" title="pyfemtet.opt.problem.variable_manager._variable_manager.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.NumericParameter.lower_bound">
+<span class="sig-name descname"><span class="pre">lower_bound</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.NumericParameter.lower_bound" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.NumericParameter.step">
+<span class="sig-name descname"><span class="pre">step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.NumericParameter.step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.NumericParameter.upper_bound">
+<span class="sig-name descname"><span class="pre">upper_bound</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.NumericParameter.upper_bound" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.NumericParameter.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.NumericParameter.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.NumericVariable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">NumericVariable</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#NumericVariable"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.NumericVariable" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.NumericVariable.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.NumericVariable.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.Parameter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">Parameter</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#Parameter"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.Parameter" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.SympifyError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">SympifyError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_exc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sympy/core/sympify.html#SympifyError"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.SympifyError" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.Variable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">Variable</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#Variable"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.Variable" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.Variable.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.Variable.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.Variable.pass_to_fem">
+<span class="sig-name descname"><span class="pre">pass_to_fem</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.Variable.pass_to_fem" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.Variable.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.Variable.properties" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.Variable.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/numbers.html#numbers.Real" title="(in Python v3.13)"><span class="pre">Real</span></a></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.Variable.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.VariableManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.problem.variable_manager.</span></span><span class="sig-name descname"><span class="pre">VariableManager</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#VariableManager"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.VariableManager" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.VariableManager.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.VariableManager.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.VariableManager.eval_expressions">
+<span class="sig-name descname"><span class="pre">eval_expressions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#VariableManager.eval_expressions"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.VariableManager.eval_expressions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.VariableManager.evaluation_order">
+<span class="sig-name descname"><span class="pre">evaluation_order</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.VariableManager.evaluation_order" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.VariableManager.get_variables">
+<span class="sig-name descname"><span class="pre">get_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#VariableManager.get_variables"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.VariableManager.get_variables" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><em>Literal</em></a><em>[</em><em>'pass_to_fem'</em><em>, </em><em>'parameter'</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>~typing.Literal</em><em>[</em><em>'pass_to_fem'</em><em>, </em><em>'parameter'</em><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a>] | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Parameter" title="pyfemtet.opt.problem.variable_manager._variable_manager.Parameter"><em>Parameter</em></a>] | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a> | <a class="reference external" href="https://docs.python.org/3/library/numbers.html#numbers.Real" title="(in Python v3.13)"><em>Real</em></a>] | <em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.VariableManager.resolve">
+<span class="sig-name descname"><span class="pre">resolve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/problem/variable_manager/_variable_manager.html#VariableManager.resolve"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.VariableManager.resolve" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.problem.variable_manager.VariableManager.variables">
+<span class="sig-name descname"><span class="pre">variables</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><span class="pre">Variable</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.problem.variable_manager.VariableManager.variables" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyfemtet.opt.problem.html" class="btn btn-neutral float-left" title="pyfemtet.opt.problem package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyfemtet.opt.problem.problem.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

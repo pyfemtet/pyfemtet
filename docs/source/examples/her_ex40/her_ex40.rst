@@ -56,7 +56,7 @@ Execution Result of the Sample Code
 
    Execution result of her_ex40_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is the resonant frequency.
 
-After 20 iterations, the the best frequency was calculated to be 2.991 GHz.
+After 10 iterations, the the best frequency was calculated to be 3.29 GHz.
 
 .. note::
 

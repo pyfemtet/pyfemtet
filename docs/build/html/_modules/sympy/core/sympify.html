@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sympy.core.sympify &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sympy.core.sympify</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sympy.core.sympify</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;sympify -- convert objects SymPy internal format&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">mpmath.libmp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mlib</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">getmro</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.core.random</span><span class="w"> </span><span class="kn">import</span> <span class="n">choice</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_parameters</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.utilities.iterables</span><span class="w"> </span><span class="kn">import</span> <span class="n">iterable</span>
+
+
+<div class="viewcode-block" id="SympifyError">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.SympifyError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SympifyError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">base_exc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_exc</span> <span class="o">=</span> <span class="n">base_exc</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_exc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;SympifyError: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;Sympify of expression &#39;</span><span class="si">%s</span><span class="s2">&#39; failed, because of exception being &quot;</span>
+            <span class="s2">&quot;raised:</span><span class="se">\n</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_exc</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_exc</span><span class="p">)))</span></div>
+
+
+
+<span class="n">converter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Basic</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1">#holds the conversions defined in SymPy itself, i.e. non-user defined conversions</span>
+<span class="n">_sympy_converter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Basic</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1">#alias for clearer use in the library</span>
+<span class="n">_external_converter</span> <span class="o">=</span> <span class="n">converter</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CantSympify</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mix in this trait to a class to disallow sympification of its instances.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ========</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy import sympify</span>
+<span class="sd">    &gt;&gt;&gt; from sympy.core.sympify import CantSympify</span>
+
+<span class="sd">    &gt;&gt;&gt; class Something(dict):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    ...</span>
+<span class="sd">    &gt;&gt;&gt; sympify(Something())</span>
+<span class="sd">    {}</span>
+
+<span class="sd">    &gt;&gt;&gt; class Something(dict, CantSympify):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    ...</span>
+<span class="sd">    &gt;&gt;&gt; sympify(Something())</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    SympifyError: SympifyError: {}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_numpy_instance</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if an object is an instance of a type from the numpy module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This check avoids unnecessarily importing NumPy.  We check the whole</span>
+    <span class="c1"># __mro__ in case any base type is a numpy type.</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">type_</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s1">&#39;numpy&#39;</span>
+               <span class="k">for</span> <span class="n">type_</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_convert_numpy_types</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">sympify_args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a numpy datatype input to an appropriate SymPy type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">iscomplex</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_sympy_converter</span><span class="p">[</span><span class="nb">complex</span><span class="p">](</span><span class="n">a</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sympify</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="o">**</span><span class="n">sympify_args</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span>
+        <span class="n">prec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">nmant</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="c1"># E.g. double precision means prec=53 but nmant=52</span>
+        <span class="c1"># Leading bit of mantissa is always 1, so is not stored</span>
+        <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">mlib</span><span class="o">.</span><span class="n">from_rational</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">prec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Float</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">prec</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convert_xor</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rational</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">evaluate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts an arbitrary expression to a type that can be used inside SymPy.</span>
+
+<span class="sd">    Explanation</span>
+<span class="sd">    ===========</span>
+
+<span class="sd">    It will convert Python ints into instances of :class:`~.Integer`, floats</span>
+<span class="sd">    into instances of :class:`~.Float`, etc. It is also able to coerce</span>
+<span class="sd">    symbolic expressions which inherit from :class:`~.Basic`. This can be</span>
+<span class="sd">    useful in cooperation with SAGE.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">        Note that this function uses ``eval``, and thus shouldn&#39;t be used on</span>
+<span class="sd">        unsanitized input.</span>
+
+<span class="sd">    If the argument is already a type that SymPy understands, it will do</span>
+<span class="sd">    nothing but return that value. This can be used at the beginning of a</span>
+<span class="sd">    function to ensure you are working with the correct type.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ========</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy import sympify</span>
+
+<span class="sd">    &gt;&gt;&gt; sympify(2).is_integer</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; sympify(2).is_real</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; sympify(2.0).is_real</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&quot;2.0&quot;).is_real</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&quot;2e-45&quot;).is_real</span>
+<span class="sd">    True</span>
+
+<span class="sd">    If the expression could not be converted, a SympifyError is raised.</span>
+
+<span class="sd">    &gt;&gt;&gt; sympify(&quot;x***2&quot;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    SympifyError: SympifyError: &quot;could not parse &#39;x***2&#39;&quot;</span>
+
+<span class="sd">    When attempting to parse non-Python syntax using ``sympify``, it raises a</span>
+<span class="sd">    ``SympifyError``:</span>
+
+<span class="sd">    &gt;&gt;&gt; sympify(&quot;2x+1&quot;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    SympifyError: Sympify of expression &#39;could not parse &#39;2x+1&#39;&#39; failed</span>
+
+<span class="sd">    To parse non-Python syntax, use ``parse_expr`` from ``sympy.parsing.sympy_parser``.</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy.parsing.sympy_parser import parse_expr</span>
+<span class="sd">    &gt;&gt;&gt; parse_expr(&quot;2x+1&quot;, transformations=&quot;all&quot;)</span>
+<span class="sd">    2*x + 1</span>
+
+<span class="sd">    For more details about ``transformations``: see :func:`~sympy.parsing.sympy_parser.parse_expr`</span>
+
+<span class="sd">    Locals</span>
+<span class="sd">    ------</span>
+
+<span class="sd">    The sympification happens with access to everything that is loaded</span>
+<span class="sd">    by ``from sympy import *``; anything used in a string that is not</span>
+<span class="sd">    defined by that import will be converted to a symbol. In the following,</span>
+<span class="sd">    the ``bitcount`` function is treated as a symbol and the ``O`` is</span>
+<span class="sd">    interpreted as the :class:`~.Order` object (used with series) and it raises</span>
+<span class="sd">    an error when used improperly:</span>
+
+<span class="sd">    &gt;&gt;&gt; s = &#39;bitcount(42)&#39;</span>
+<span class="sd">    &gt;&gt;&gt; sympify(s)</span>
+<span class="sd">    bitcount(42)</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&quot;O(x)&quot;)</span>
+<span class="sd">    O(x)</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&quot;O + 1&quot;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    TypeError: unbound method...</span>
+
+<span class="sd">    In order to have ``bitcount`` be recognized it can be imported into a</span>
+<span class="sd">    namespace dictionary and passed as locals:</span>
+
+<span class="sd">    &gt;&gt;&gt; ns = {}</span>
+<span class="sd">    &gt;&gt;&gt; exec(&#39;from sympy.core.evalf import bitcount&#39;, ns)</span>
+<span class="sd">    &gt;&gt;&gt; sympify(s, locals=ns)</span>
+<span class="sd">    6</span>
+
+<span class="sd">    In order to have the ``O`` interpreted as a Symbol, identify it as such</span>
+<span class="sd">    in the namespace dictionary. This can be done in a variety of ways; all</span>
+<span class="sd">    three of the following are possibilities:</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy import Symbol</span>
+<span class="sd">    &gt;&gt;&gt; ns[&quot;O&quot;] = Symbol(&quot;O&quot;)  # method 1</span>
+<span class="sd">    &gt;&gt;&gt; exec(&#39;from sympy.abc import O&#39;, ns)  # method 2</span>
+<span class="sd">    &gt;&gt;&gt; ns.update(dict(O=Symbol(&quot;O&quot;)))  # method 3</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&quot;O + 1&quot;, locals=ns)</span>
+<span class="sd">    O + 1</span>
+
+<span class="sd">    If you want *all* single-letter and Greek-letter variables to be symbols</span>
+<span class="sd">    then you can use the clashing-symbols dictionaries that have been defined</span>
+<span class="sd">    there as private variables: ``_clash1`` (single-letter variables),</span>
+<span class="sd">    ``_clash2`` (the multi-letter Greek names) or ``_clash`` (both single and</span>
+<span class="sd">    multi-letter names that are defined in ``abc``).</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy.abc import _clash1</span>
+<span class="sd">    &gt;&gt;&gt; set(_clash1)  # if this fails, see issue #23903</span>
+<span class="sd">    {&#39;E&#39;, &#39;I&#39;, &#39;N&#39;, &#39;O&#39;, &#39;Q&#39;, &#39;S&#39;}</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;I &amp; Q&#39;, _clash1)</span>
+<span class="sd">    I &amp; Q</span>
+
+<span class="sd">    Strict</span>
+<span class="sd">    ------</span>
+
+<span class="sd">    If the option ``strict`` is set to ``True``, only the types for which an</span>
+<span class="sd">    explicit conversion has been defined are converted. In the other</span>
+<span class="sd">    cases, a SympifyError is raised.</span>
+
+<span class="sd">    &gt;&gt;&gt; print(sympify(None))</span>
+<span class="sd">    None</span>
+<span class="sd">    &gt;&gt;&gt; sympify(None, strict=True)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    SympifyError: SympifyError: None</span>
+
+<span class="sd">    .. deprecated:: 1.6</span>
+
+<span class="sd">       ``sympify(obj)`` automatically falls back to ``str(obj)`` when all</span>
+<span class="sd">       other conversion methods fail, but this is deprecated. ``strict=True``</span>
+<span class="sd">       will disable this deprecated behavior. See</span>
+<span class="sd">       :ref:`deprecated-sympify-string-fallback`.</span>
+
+<span class="sd">    Evaluation</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    If the option ``evaluate`` is set to ``False``, then arithmetic and</span>
+<span class="sd">    operators will be converted into their SymPy equivalents and the</span>
+<span class="sd">    ``evaluate=False`` option will be added. Nested ``Add`` or ``Mul`` will</span>
+<span class="sd">    be denested first. This is done via an AST transformation that replaces</span>
+<span class="sd">    operators with their SymPy equivalents, so if an operand redefines any</span>
+<span class="sd">    of those operations, the redefined operators will not be used. If</span>
+<span class="sd">    argument a is not a string, the mathematical expression is evaluated</span>
+<span class="sd">    before being passed to sympify, so adding ``evaluate=False`` will still</span>
+<span class="sd">    return the evaluated result of expression.</span>
+
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;2**2 / 3 + 5&#39;)</span>
+<span class="sd">    19/3</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;2**2 / 3 + 5&#39;, evaluate=False)</span>
+<span class="sd">    2**2/3 + 5</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;4/2+7&#39;, evaluate=True)</span>
+<span class="sd">    9</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;4/2+7&#39;, evaluate=False)</span>
+<span class="sd">    4/2 + 7</span>
+<span class="sd">    &gt;&gt;&gt; sympify(4/2+7, evaluate=False)</span>
+<span class="sd">    9.00000000000000</span>
+
+<span class="sd">    Extending</span>
+<span class="sd">    ---------</span>
+
+<span class="sd">    To extend ``sympify`` to convert custom objects (not derived from ``Basic``),</span>
+<span class="sd">    just define a ``_sympy_`` method to your class. You can do that even to</span>
+<span class="sd">    classes that you do not own by subclassing or adding the method at runtime.</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy import Matrix</span>
+<span class="sd">    &gt;&gt;&gt; class MyList1(object):</span>
+<span class="sd">    ...     def __iter__(self):</span>
+<span class="sd">    ...         yield 1</span>
+<span class="sd">    ...         yield 2</span>
+<span class="sd">    ...         return</span>
+<span class="sd">    ...     def __getitem__(self, i): return list(self)[i]</span>
+<span class="sd">    ...     def _sympy_(self): return Matrix(self)</span>
+<span class="sd">    &gt;&gt;&gt; sympify(MyList1())</span>
+<span class="sd">    Matrix([</span>
+<span class="sd">    [1],</span>
+<span class="sd">    [2]])</span>
+
+<span class="sd">    If you do not have control over the class definition you could also use the</span>
+<span class="sd">    ``converter`` global dictionary. The key is the class and the value is a</span>
+<span class="sd">    function that takes a single argument and returns the desired SymPy</span>
+<span class="sd">    object, e.g. ``converter[MyList] = lambda x: Matrix(x)``.</span>
+
+<span class="sd">    &gt;&gt;&gt; class MyList2(object):   # XXX Do not do this if you control the class!</span>
+<span class="sd">    ...     def __iter__(self):  #     Use _sympy_!</span>
+<span class="sd">    ...         yield 1</span>
+<span class="sd">    ...         yield 2</span>
+<span class="sd">    ...         return</span>
+<span class="sd">    ...     def __getitem__(self, i): return list(self)[i]</span>
+<span class="sd">    &gt;&gt;&gt; from sympy.core.sympify import converter</span>
+<span class="sd">    &gt;&gt;&gt; converter[MyList2] = lambda x: Matrix(x)</span>
+<span class="sd">    &gt;&gt;&gt; sympify(MyList2())</span>
+<span class="sd">    Matrix([</span>
+<span class="sd">    [1],</span>
+<span class="sd">    [2]])</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    =====</span>
+
+<span class="sd">    The keywords ``rational`` and ``convert_xor`` are only used</span>
+<span class="sd">    when the input is a string.</span>
+
+<span class="sd">    convert_xor</span>
+<span class="sd">    -----------</span>
+
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;x^y&#39;,convert_xor=True)</span>
+<span class="sd">    x**y</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;x^y&#39;,convert_xor=False)</span>
+<span class="sd">    x ^ y</span>
+
+<span class="sd">    rational</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;0.1&#39;,rational=False)</span>
+<span class="sd">    0.1</span>
+<span class="sd">    &gt;&gt;&gt; sympify(&#39;0.1&#39;,rational=True)</span>
+<span class="sd">    1/10</span>
+
+<span class="sd">    Sometimes autosimplification during sympification results in expressions</span>
+<span class="sd">    that are very different in structure than what was entered. Until such</span>
+<span class="sd">    autosimplification is no longer done, the ``kernS`` function might be of</span>
+<span class="sd">    some use. In the example below you can see how an expression reduces to</span>
+<span class="sd">    $-1$ by autosimplification, but does not do so when ``kernS`` is used.</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy.core.sympify import kernS</span>
+<span class="sd">    &gt;&gt;&gt; from sympy.abc import x</span>
+<span class="sd">    &gt;&gt;&gt; -2*(-(-x + 1/x)/(x*(x - 1/x)**2) - 1/(x*(x - 1/x))) - 1</span>
+<span class="sd">    -1</span>
+<span class="sd">    &gt;&gt;&gt; s = &#39;-2*(-(-x + 1/x)/(x*(x - 1/x)**2) - 1/(x*(x - 1/x))) - 1&#39;</span>
+<span class="sd">    &gt;&gt;&gt; sympify(s)</span>
+<span class="sd">    -1</span>
+<span class="sd">    &gt;&gt;&gt; kernS(s)</span>
+<span class="sd">    -2*(-(-x + 1/x)/(x*(x - 1/x)**2) - 1/(x*(x - 1/x))) - 1</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ==========</span>
+
+<span class="sd">    a :</span>
+<span class="sd">        - any object defined in SymPy</span>
+<span class="sd">        - standard numeric Python types: ``int``, ``long``, ``float``, ``Decimal``</span>
+<span class="sd">        - strings (like ``&quot;0.09&quot;``, ``&quot;2e-19&quot;`` or ``&#39;sin(x)&#39;``)</span>
+<span class="sd">        - booleans, including ``None`` (will leave ``None`` unchanged)</span>
+<span class="sd">        - dicts, lists, sets or tuples containing any of the above</span>
+
+<span class="sd">    convert_xor : bool, optional</span>
+<span class="sd">        If true, treats ``^`` as exponentiation.</span>
+<span class="sd">        If False, treats ``^`` as XOR itself.</span>
+<span class="sd">        Used only when input is a string.</span>
+
+<span class="sd">    locals : any object defined in SymPy, optional</span>
+<span class="sd">        In order to have strings be recognized it can be imported</span>
+<span class="sd">        into a namespace dictionary and passed as locals.</span>
+
+<span class="sd">    strict : bool, optional</span>
+<span class="sd">        If the option strict is set to ``True``, only the types for which</span>
+<span class="sd">        an explicit conversion has been defined are converted. In the</span>
+<span class="sd">        other cases, a SympifyError is raised.</span>
+
+<span class="sd">    rational : bool, optional</span>
+<span class="sd">        If ``True``, converts floats into :class:`~.Rational`.</span>
+<span class="sd">        If ``False``, it lets floats remain as it is.</span>
+<span class="sd">        Used only when input is a string.</span>
+
+<span class="sd">    evaluate : bool, optional</span>
+<span class="sd">        If False, then arithmetic and operators will be converted into</span>
+<span class="sd">        their SymPy equivalents. If True the expression will be evaluated</span>
+<span class="sd">        and the result will be returned.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># XXX: If a is a Basic subclass rather than instance (e.g. sin rather than</span>
+    <span class="c1"># sin(x)) then a.__sympy__ will be the property. Only on the instance will</span>
+    <span class="c1"># a.__sympy__ give the *value* of the property (True). Since sympify(sin)</span>
+    <span class="c1"># was used for a long time we allow it to pass. However if strict=True as</span>
+    <span class="c1"># is the case in internal calls to _sympify then we only allow</span>
+    <span class="c1"># is_sympy=True.</span>
+    <span class="c1">#</span>
+    <span class="c1"># https://github.com/sympy/sympy/issues/20124</span>
+    <span class="n">is_sympy</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s1">&#39;__sympy__&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_sympy</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span>
+    <span class="k">elif</span> <span class="n">is_sympy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">a</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SympifyError</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">CantSympify</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">SympifyError</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;__class__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1">#Check if there exists a converter for any of the types in the mro</span>
+    <span class="k">for</span> <span class="n">superclass</span> <span class="ow">in</span> <span class="n">getmro</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="c1">#First check for user defined converters</span>
+        <span class="n">conv</span> <span class="o">=</span> <span class="n">_external_converter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">superclass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">conv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#if none exists, check for SymPy defined converters</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">_sympy_converter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">superclass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">conv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">conv</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SympifyError</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">a</span>
+
+    <span class="k">if</span> <span class="n">evaluate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">evaluate</span> <span class="o">=</span> <span class="n">global_parameters</span><span class="o">.</span><span class="n">evaluate</span>
+
+    <span class="c1"># Support for basic numpy datatypes</span>
+    <span class="k">if</span> <span class="n">_is_numpy_instance</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_convert_numpy_types</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="nb">locals</span><span class="p">,</span>
+                <span class="n">convert_xor</span><span class="o">=</span><span class="n">convert_xor</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">rational</span><span class="o">=</span><span class="n">rational</span><span class="p">,</span>
+                <span class="n">evaluate</span><span class="o">=</span><span class="n">evaluate</span><span class="p">)</span>
+
+    <span class="n">_sympy_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;_sympy_&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_sympy_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">_sympy_</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strict</span><span class="p">:</span>
+        <span class="c1"># Put numpy array conversion _before_ float/int, see</span>
+        <span class="c1"># &lt;https://github.com/sympy/sympy/issues/13924&gt;.</span>
+        <span class="n">flat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;flat&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">flat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.tensor.array</span><span class="w"> </span><span class="kn">import</span> <span class="n">Array</span>
+                <span class="k">return</span> <span class="n">Array</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># works with e.g. NumPy arrays</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_is_numpy_instance</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="c1"># Scalar arrays (those with zero dimensions) have sympify</span>
+                <span class="c1"># called on the scalar element.</span>
+                <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">sympify</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+                                       <span class="nb">locals</span><span class="o">=</span><span class="nb">locals</span><span class="p">,</span>
+                                       <span class="n">convert_xor</span><span class="o">=</span><span class="n">convert_xor</span><span class="p">,</span>
+                                       <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span>
+                                       <span class="n">rational</span><span class="o">=</span><span class="n">rational</span><span class="p">,</span>
+                                       <span class="n">evaluate</span><span class="o">=</span><span class="n">evaluate</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">SympifyError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s1">&#39;__float__&#39;</span><span class="p">):</span>
+            <span class="c1"># float and int can coerce size-one numpy arrays to their lone</span>
+            <span class="c1"># element.  See issue https://github.com/numpy/numpy/issues/10404.</span>
+            <span class="k">return</span> <span class="n">sympify</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s1">&#39;__int__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">sympify</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SympifyError</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">iterable</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)([</span><span class="n">sympify</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="nb">locals</span><span class="p">,</span> <span class="n">convert_xor</span><span class="o">=</span><span class="n">convert_xor</span><span class="p">,</span>
+                <span class="n">rational</span><span class="o">=</span><span class="n">rational</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="n">evaluate</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">a</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># Not all iterables are rebuildable with their type.</span>
+            <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">SympifyError</span><span class="p">(</span><span class="s1">&#39;cannot sympify object of type </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.parsing.sympy_parser</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">parse_expr</span><span class="p">,</span> <span class="n">TokenError</span><span class="p">,</span>
+                                            <span class="n">standard_transformations</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.parsing.sympy_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_xor</span> <span class="k">as</span> <span class="n">t_convert_xor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.parsing.sympy_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">rationalize</span> <span class="k">as</span> <span class="n">t_rationalize</span>
+
+    <span class="n">transformations</span> <span class="o">=</span> <span class="n">standard_transformations</span>
+
+    <span class="k">if</span> <span class="n">rational</span><span class="p">:</span>
+        <span class="n">transformations</span> <span class="o">+=</span> <span class="p">(</span><span class="n">t_rationalize</span><span class="p">,)</span>
+    <span class="k">if</span> <span class="n">convert_xor</span><span class="p">:</span>
+        <span class="n">transformations</span> <span class="o">+=</span> <span class="p">(</span><span class="n">t_convert_xor</span><span class="p">,)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">,</span> <span class="n">transformations</span><span class="o">=</span><span class="n">transformations</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="n">evaluate</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">TokenError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SympifyError</span><span class="p">(</span><span class="s1">&#39;could not parse </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">expr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sympify</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Short version of :func:`~.sympify` for internal usage for ``__add__`` and</span>
+<span class="sd">    ``__eq__`` methods where it is ok to allow some things (like Python</span>
+<span class="sd">    integers and floats) in the expression. This excludes things (like strings)</span>
+<span class="sd">    that are unwise to allow into such an expression.</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy import Integer</span>
+<span class="sd">    &gt;&gt;&gt; Integer(1) == 1</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; Integer(1) == &#39;1&#39;</span>
+<span class="sd">    False</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy.abc import x</span>
+<span class="sd">    &gt;&gt;&gt; x + 1</span>
+<span class="sd">    x + 1</span>
+
+<span class="sd">    &gt;&gt;&gt; x + &#39;1&#39;</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    TypeError: unsupported operand type(s) for +: &#39;Symbol&#39; and &#39;str&#39;</span>
+
+<span class="sd">    see: sympify</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">kernS</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use a hack to try keep autosimplification from distributing a</span>
+<span class="sd">    a number into an Add; this modification does not</span>
+<span class="sd">    prevent the 2-arg Mul from becoming an Add, however.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ========</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy.core.sympify import kernS</span>
+<span class="sd">    &gt;&gt;&gt; from sympy.abc import x, y</span>
+
+<span class="sd">    The 2-arg Mul distributes a number (or minus sign) across the terms</span>
+<span class="sd">    of an expression, but kernS will prevent that:</span>
+
+<span class="sd">    &gt;&gt;&gt; 2*(x + y), -(x + 1)</span>
+<span class="sd">    (2*x + 2*y, -x - 1)</span>
+<span class="sd">    &gt;&gt;&gt; kernS(&#39;2*(x + y)&#39;)</span>
+<span class="sd">    2*(x + y)</span>
+<span class="sd">    &gt;&gt;&gt; kernS(&#39;-(x + 1)&#39;)</span>
+<span class="sd">    -(x + 1)</span>
+
+<span class="sd">    If use of the hack fails, the un-hacked string will be passed to sympify...</span>
+<span class="sd">    and you get what you get.</span>
+
+<span class="sd">    XXX This hack should not be necessary once issue 4596 has been resolved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hit</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">quoted</span> <span class="o">=</span> <span class="s1">&#39;&quot;&#39;</span> <span class="ow">in</span> <span class="n">s</span> <span class="ow">or</span> <span class="s2">&quot;&#39;&quot;</span> <span class="ow">in</span> <span class="n">s</span>
+    <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">s</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">quoted</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">s</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">SympifyError</span><span class="p">(</span><span class="s1">&#39;unmatched left parenthesis&#39;</span><span class="p">)</span>
+
+        <span class="c1"># strip all space from s</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="n">olds</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="c1"># now use space to represent a symbol that</span>
+        <span class="c1"># will</span>
+        <span class="c1"># step 1. turn potential 2-arg Muls into 3-arg versions</span>
+        <span class="c1"># 1a. *( -&gt; * *(</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*(&#39;</span><span class="p">,</span> <span class="s1">&#39;* *(&#39;</span><span class="p">)</span>
+        <span class="c1"># 1b. close up exponentials</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;** *&#39;</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">)</span>
+        <span class="c1"># 2. handle the implied multiplication of a negated</span>
+        <span class="c1"># parenthesized expression in two steps</span>
+        <span class="c1"># 2a:  -(...)  --&gt;  -( *(...)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="s1">&#39;-( *(&#39;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-(&#39;</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="c1"># 2b: double the matching closing parenthesis</span>
+        <span class="c1"># -( *(...)  --&gt;  -( *(...))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">nest</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">target</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>  <span class="c1"># assumption below</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span><span class="p">:</span>
+                    <span class="n">nest</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;)&quot;</span><span class="p">:</span>
+                    <span class="n">nest</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">nest</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[:</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">:]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">2</span>  <span class="c1"># the first char after 2nd )</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+            <span class="c1"># get a unique kern</span>
+            <span class="n">kern</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span>
+            <span class="k">while</span> <span class="n">kern</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+                <span class="n">kern</span> <span class="o">+=</span> <span class="n">choice</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">kern</span><span class="p">)</span>
+            <span class="n">hit</span> <span class="o">=</span> <span class="n">kern</span> <span class="ow">in</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hit</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>  <span class="c1"># the kern might cause unknown errors...</span>
+            <span class="k">if</span> <span class="n">hit</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">olds</span>  <span class="c1"># maybe it didn&#39;t like the kern; use un-kerned s</span>
+                <span class="n">hit</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>  <span class="c1"># let original error raise</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hit</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">expr</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.symbol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span>
+    <span class="n">rep</span> <span class="o">=</span> <span class="p">{</span><span class="n">Symbol</span><span class="p">(</span><span class="n">kern</span><span class="p">):</span> <span class="mi">1</span><span class="p">}</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clear</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">expr</span><span class="p">)([</span><span class="n">_clear</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="s1">&#39;subs&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">rep</span><span class="p">,</span> <span class="n">hack2</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">expr</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">_clear</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+    <span class="c1"># hope that kern is not there anymore</span>
+    <span class="k">return</span> <span class="n">expr</span>
+
+
+<span class="c1"># Avoid circular import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Basic</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

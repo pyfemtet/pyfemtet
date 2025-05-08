@@ -150,8 +150,8 @@
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="kn">from</span><span class="w"> </span><span class="nn">optuna_integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoTorchSampler</span>
-<span class="linenos"> 9</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
+<span class="linenos"> 8</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMOpt</span><span class="p">,</span> <span class="n">OptunaOptimizer</span>
+<span class="linenos"> 9</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">PoFBoTorchSampler</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span><span class="k">def</span><span class="w"> </span><span class="nf">mises_stress</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
@@ -211,7 +211,7 @@
 <span class="linenos">66</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 <span class="linenos">67</span>    <span class="c1"># 最適化手法のセットアップ</span>
 <span class="linenos">68</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
-<span class="linenos">69</span>        <span class="n">sampler_class</span><span class="o">=</span><span class="n">BoTorchSampler</span><span class="p">,</span>
+<span class="linenos">69</span>        <span class="n">sampler_class</span><span class="o">=</span><span class="n">PoFBoTorchSampler</span><span class="p">,</span>
 <span class="linenos">70</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
 <span class="linenos">71</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="c1"># 最初の 3 回はランダムサンプリングを行います。</span>
 <span class="linenos">72</span>        <span class="p">)</span>
@@ -224,14 +224,14 @@
 <span class="linenos">79</span>
 <span class="linenos">80</span>    <span class="c1"># 最適化の実行中に外側の半径を超えないように strict 拘束を追加します。</span>
 <span class="linenos">81</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span>
-<span class="linenos">82</span>        <span class="n">radius_diff</span><span class="p">,</span>  <span class="c1"># 拘束関数 (ここでは 外半径 - 内半径).</span>
+<span class="linenos">82</span>        <span class="n">fun</span><span class="o">=</span><span class="n">radius_diff</span><span class="p">,</span>  <span class="c1"># 拘束関数 (ここでは 外半径 - 内半径).</span>
 <span class="linenos">83</span>        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;管厚さ&#39;</span><span class="p">,</span>  <span class="c1"># 拘束関数にはプログラム上の名前とは別に自由な名前を付与できます.</span>
 <span class="linenos">84</span>        <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># 拘束関数の下限 (ここでは管の厚みを最低 1 とする).</span>
 <span class="linenos">85</span>        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">femopt</span><span class="o">.</span><span class="n">opt</span><span class="p">,)</span>  <span class="c1"># 拘束関数に渡される、Femtet 以外の追加の引数.</span>
 <span class="linenos">86</span>    <span class="p">)</span>
 <span class="linenos">87</span>
 <span class="linenos">88</span>    <span class="c1"># 目的関数の追加</span>
-<span class="linenos">89</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">mises_stress</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ミーゼス応力&#39;</span><span class="p">)</span>
+<span class="linenos">89</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">mises_stress</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ミーゼス応力&#39;</span><span class="p">)</span>
 <span class="linenos">90</span>
 <span class="linenos">91</span>    <span class="c1"># 最適化の実行</span>
 <span class="linenos">92</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>

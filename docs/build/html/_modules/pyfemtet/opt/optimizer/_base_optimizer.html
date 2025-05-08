@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.optimizer._base_optimizer &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.optimizer._base_optimizer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.optimizer._base_optimizer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>  <span class="c1"># マイナーなので型ヒントでは使わず、isinstance で使う</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n.messages</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.worker_status</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;AbstractOptimizer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SubFidelityModel&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SubFidelityModels&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_FReturnValue&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="n">DIRECTION</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">float</span>
+        <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span>
+            <span class="s1">&#39;minimize&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;maximize&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.optimizer&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_hidden_constraint</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">):</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="n">create_err_msg_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;----- Hidden constraint violation! -----&#39;</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;error: </span><span class="si">{err_msg}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">err_msg</span><span class="o">=</span><span class="n">err_msg</span><span class="p">))</span>
+
+
+<span class="n">_FReturnValue</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">TrialOutput</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">TrialConstraintOutput</span><span class="p">,</span> <span class="n">Record</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;There are duplicated name </span><span class="si">{name}</span><span class="s1">. If there are &#39;</span>
+                           <span class="s1">&#39;duplicate names for parameters or objective &#39;</span>
+                           <span class="s1">&#39;functions, the later defined ones will overwrite &#39;</span>
+                           <span class="s1">&#39;the earlier ones. Please be careful to ensure &#39;</span>
+                           <span class="s1">&#39;that this overwriting is intentional.&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;名前 </span><span class="si">{name}</span><span class="s1"> が重複しています。パラメータや目的関数&#39;</span>
+                           <span class="s1">&#39;などの名前が重複すると、後から定義したものが上書き&#39;</span>
+                           <span class="s1">&#39;されます。この上書きが意図したものであるかどうか、&#39;</span>
+                           <span class="s1">&#39;十分に注意してください。&#39;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="AbstractOptimizer">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbstractOptimizer</span><span class="p">:</span>
+
+    <span class="c1"># optimize</span>
+    <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+
+    <span class="c1"># problem</span>
+    <span class="n">variable_manager</span><span class="p">:</span> <span class="n">VariableManager</span>
+    <span class="n">objectives</span><span class="p">:</span> <span class="n">Objectives</span>
+    <span class="n">constraints</span><span class="p">:</span> <span class="n">Constraints</span>
+    <span class="n">fidelity</span><span class="p">:</span> <span class="n">Fidelity</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">sub_fidelity_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">sub_fidelity_models</span><span class="p">:</span> <span class="n">SubFidelityModels</span> <span class="o">|</span> <span class="kc">None</span>
+
+    <span class="c1"># system</span>
+    <span class="n">history</span><span class="p">:</span> <span class="n">History</span>
+    <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span>
+    <span class="n">entire_status</span><span class="p">:</span> <span class="n">WorkerStatus</span>
+    <span class="n">worker_status</span><span class="p">:</span> <span class="n">WorkerStatus</span>
+    <span class="n">worker_status_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WorkerStatus</span><span class="p">]</span>
+    <span class="n">_done_setup_before_parallel</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">_done_load_problem_from_fem</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">_worker_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">_worker_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># optimization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Problem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span> <span class="o">=</span> <span class="n">VariableManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="n">Objectives</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="n">Constraints</span><span class="p">()</span>
+
+        <span class="c1"># multi-fidelity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fidelity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_name</span> <span class="o">=</span> <span class="n">MAIN_FIDELITY_NAME</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span> <span class="o">=</span> <span class="n">SubFidelityModels</span><span class="p">()</span>
+
+        <span class="c1"># System</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve_condition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">History</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="p">:</span> <span class="n">WorkerStatus</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="p">(</span><span class="n">ENTIRE_PROCESS_STATUS_KEY</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="p">:</span> <span class="n">WorkerStatus</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="p">(</span><span class="s1">&#39;worker-status&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WorkerStatus</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_done_setup_before_parallel</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_done_load_problem_from_fem</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># ===== public =====</span>
+
+<div class="viewcode-block" id="AbstractOptimizer.add_constant_value">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_constant_value">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_constant_value</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">:</span> <span class="n">SupportedVariableTypes</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Real</span><span class="p">):</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">NumericVariable</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">CategoricalVariable</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Supported variable types are Real or str, got </span><span class="si">{type}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;サポートされている変数の型は Real か str ですが、</span><span class="si">{type}</span><span class="s1"> が指定されました。&#39;</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+            <span class="p">))</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_parameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_parameter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">fix</span><span class="p">:</span>
+            <span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;fix&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="n">prm</span> <span class="o">=</span> <span class="n">NumericParameter</span><span class="p">()</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">initial_value</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="n">lower_bound</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="n">upper_bound</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">prm</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_expression_string">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_expression_string">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_expression_string</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">expression_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="o">.</span><span class="n">InternalClass</span><span class="p">(</span><span class="n">expression_string</span><span class="o">=</span><span class="n">expression_string</span><span class="p">)</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_expression_sympy">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_expression_sympy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_expression_sympy</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">sympy_expr</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="o">.</span><span class="n">InternalClass</span><span class="p">(</span><span class="n">sympy_expr</span><span class="o">=</span><span class="n">sympy_expr</span><span class="p">)</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_expression">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_expression">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_expression</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromFunction</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="n">fun</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_categorical_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_categorical_parameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_categorical_parameter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">choices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">fix</span><span class="p">:</span>
+            <span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;fix&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="n">prm</span> <span class="o">=</span> <span class="n">CategoricalParameter</span><span class="p">()</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">initial_value</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span>
+        <span class="n">prm</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">prm</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_objective">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_objective">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_objective</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">direction</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">=</span> <span class="s1">&#39;minimize&#39;</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">Objective</span><span class="p">()</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="n">fun</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">()</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">obj</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_objectives">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_objectives">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_objectives</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
+            <span class="n">n_return</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">directions</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DIRECTION</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># argument processing</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_return</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
+            <span class="c1"># names = names</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;`names` must be a string or an array of strings.&#39;</span><span class="p">,</span>
+                  <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;`names` は文字列か文字列の配列でなければなりません。&#39;</span><span class="p">,)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">directions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">directions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;minimize&#39;</span> <span class="k">for</span> <span class="n">__</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_return</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">directions</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">directions</span><span class="p">,</span> <span class="n">Real</span><span class="p">):</span>
+                <span class="n">directions</span> <span class="o">=</span> <span class="p">[</span><span class="n">directions</span> <span class="k">for</span> <span class="n">__</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_return</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># directions = directions</span>
+                <span class="k">pass</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">directions</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_return</span>
+
+        <span class="n">function_factory</span> <span class="o">=</span> <span class="n">ObjectivesFunc</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">n_return</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">directions</span><span class="p">)):</span>
+            <span class="n">fun_i</span> <span class="o">=</span> <span class="n">function_factory</span><span class="o">.</span><span class="n">get_fun_that_returns_ith_value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span>
+                <span class="n">fun</span><span class="o">=</span><span class="n">fun_i</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_constraint">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_constraint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_constraint</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">using_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">lower_bound</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper_bound</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;One of `lower_bound` and `upper_bound` &#39;</span>
+                           <span class="s1">&#39;should be set.&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;`lower_bound` and `upper_bound` のうち&#39;</span>
+                           <span class="s1">&#39;少なくとも一つは指定されなければなりません。&#39;</span>
+            <span class="p">))</span>
+
+        <span class="n">cns</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">()</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="n">fun</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">()</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="n">lower_bound</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="n">upper_bound</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">hard</span> <span class="o">=</span> <span class="n">strict</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">_opt</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">cns</span><span class="o">.</span><span class="n">using_fem</span> <span class="o">=</span> <span class="n">using_fem</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">cns</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.add_sub_fidelity_model">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_sub_fidelity_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_sub_fidelity_model</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">sub_fidelity_model</span><span class="p">:</span> <span class="n">SubFidelityModel</span><span class="p">,</span>
+            <span class="n">fidelity</span><span class="p">:</span> <span class="n">Fidelity</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">sub_fidelity_model</span><span class="o">.</span><span class="n">variable_manager</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span> <span class="o">=</span> <span class="n">SubFidelityModels</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fidelity</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sub_fidelity_model</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.get_variables">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.get_variables">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
+            <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.get_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.get_parameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
+            <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractOptimizer.set_solve_condition">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.set_solve_condition">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_solve_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">History</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve_condition</span> <span class="o">=</span> <span class="n">fun</span></div>
+
+
+    <span class="c1"># ===== private =====</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_should_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve_condition</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_y</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrialOutput</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">TrialOutput</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">obj_result</span> <span class="o">=</span> <span class="n">ObjectiveResult</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">obj_result</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_convert_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">TrialOutput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">value_internal</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">value_internal</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_hard_c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">TrialConstraintOutput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrialConstraintOutput</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">hard</span><span class="p">:</span>
+                <span class="n">cns_result</span> <span class="o">=</span> <span class="n">ConstraintResult</span><span class="p">(</span><span class="n">cns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">cns_result</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_soft_c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">TrialConstraintOutput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrialConstraintOutput</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cns</span><span class="o">.</span><span class="n">hard</span><span class="p">:</span>
+                <span class="n">cns_result</span> <span class="o">=</span> <span class="n">ConstraintResult</span><span class="p">(</span><span class="n">cns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">cns_result</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_hard_constraint_violation_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hard_c</span><span class="p">:</span> <span class="n">TrialConstraintOutput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">violation_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">hard_c</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">cns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">l_or_u</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">check_violation</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">l_or_u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;----- Hard constraint violation! -----&#39;</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;constraint: </span><span class="si">{name}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluated value: </span><span class="si">{value}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">l_or_u</span> <span class="o">==</span> <span class="s1">&#39;lower_bound&#39;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;lower bound: </span><span class="si">{lb}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="n">cns</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">))</span>
+                    <span class="n">violation_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">l_or_u</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">l_or_u</span> <span class="o">==</span> <span class="s1">&#39;upper_bound&#39;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;upper bound: </span><span class="si">{ub}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="n">cns</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">))</span>
+                    <span class="n">violation_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">l_or_u</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">return</span> <span class="n">violation_names</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_raise_interruption</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">...</span><span class="p">:</span>
+        <span class="c1"># raise Interrupt</span>
+        <span class="n">interrupted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">interrupting</span>
+        <span class="k">if</span> <span class="n">interrupted</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">interrupting</span>
+            <span class="k">raise</span> <span class="n">InterruptOptimization</span>
+
+    <span class="c1"># ===== solve =====</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_SolveSet</span><span class="p">:</span>
+
+        <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
+        <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="n">opt</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_hard_constraint_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">HardConstraintViolation</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_hidden_constraint_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">_HiddenConstraintViolation</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_skip_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">SkipSolve</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_if_succeeded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_return</span><span class="p">:</span> <span class="n">_FReturnValue</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_solve_or_raise</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
+                <span class="n">variables_pass_to_fem</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span>
+                <span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">datetime_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FReturnValue</span><span class="p">:</span>
+
+            <span class="c1"># create context</span>
+            <span class="k">if</span> <span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">record_to_history</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">recording</span><span class="p">(</span><span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">class</span><span class="w"> </span><span class="nc">DummyRecordContext</span><span class="p">:</span>
+                    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">Record</span><span class="p">()</span>
+
+                    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+                        <span class="k">pass</span>
+
+                <span class="n">record_to_history</span> <span class="o">=</span> <span class="n">DummyRecordContext</span><span class="p">()</span>
+
+            <span class="c1"># processing with recording</span>
+            <span class="k">with</span> <span class="n">record_to_history</span> <span class="k">as</span> <span class="n">record</span><span class="p">:</span>
+
+                <span class="c1"># record common result</span>
+                <span class="c1"># input</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">parameters</span>
+                <span class="c1"># output (the value is nan, required for direction recording to graph)</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">TrialOutput</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">ObjectiveResult</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span>
+                     <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">opt_</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="p">)</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">sub_fidelity_name</span> <span class="o">=</span> <span class="n">opt_</span><span class="o">.</span><span class="n">sub_fidelity_name</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">fidelity</span> <span class="o">=</span> <span class="n">opt_</span><span class="o">.</span><span class="n">fidelity</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">datetime_start</span> <span class="o">=</span> <span class="n">datetime_start</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_worker_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_worker_name</span><span class="p">)</span>
+
+                <span class="c1"># check skip</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">opt_</span><span class="o">.</span><span class="n">_should_solve</span><span class="p">(</span><span class="n">history</span><span class="p">):</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">skipped</span>
+                    <span class="k">raise</span> <span class="n">SkipSolve</span>
+
+                <span class="c1"># start solve</span>
+                <span class="k">if</span> <span class="n">opt_</span><span class="o">.</span><span class="n">sub_fidelity_models</span> <span class="o">!=</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;fidelity: (</span><span class="si">{name}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">opt_</span><span class="o">.</span><span class="n">sub_fidelity_name</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;input variables:&#39;</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+                <span class="c1"># ===== update FEM parameter =====</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;updating variables...&#39;</span><span class="p">))</span>
+                <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">variables_pass_to_fem</span><span class="p">)</span>
+                <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+                <span class="c1"># ===== evaluate hard constraint =====</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluating constraint functions...&#39;</span><span class="p">))</span>
+
+                <span class="n">hard_c</span> <span class="o">=</span> <span class="n">TrialConstraintOutput</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">_hard_c</span><span class="p">(</span><span class="n">hard_c</span><span class="p">)</span>
+
+                <span class="k">except</span> <span class="n">_HiddenConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">_log_hidden_constraint</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">hard_c</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">get_corresponding_state_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Hidden constraint violation &#39;</span>
+                              <span class="s1">&#39;during hard constraint function &#39;</span>
+                              <span class="s1">&#39;evaluation: &#39;</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="n">create_err_msg_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                    <span class="k">raise</span> <span class="n">e</span>
+
+                <span class="c1"># check hard constraint violation</span>
+                <span class="n">violation_names</span> <span class="o">=</span> <span class="n">opt_</span><span class="o">.</span><span class="n">_get_hard_constraint_violation_names</span><span class="p">(</span><span class="n">hard_c</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">violation_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">hard_c</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">hard_constraint_violation</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Hard constraint violation: &#39;</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">violation_names</span><span class="p">))</span>
+
+                    <span class="k">raise</span> <span class="n">HardConstraintViolation</span>
+
+                <span class="c1"># ===== update FEM =====</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Solving FEM...&#39;</span><span class="p">))</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+                <span class="c1"># if hidden constraint violation</span>
+                <span class="k">except</span> <span class="n">_HiddenConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+                    <span class="n">_log_hidden_constraint</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">hard_c</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">get_corresponding_state_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Hidden constraint violation in FEM update: &#39;</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="n">create_err_msg_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+                    <span class="k">raise</span> <span class="n">e</span>
+
+                <span class="c1"># ===== evaluate y =====</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluating objective functions...&#39;</span><span class="p">))</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">y</span><span class="p">:</span> <span class="n">TrialOutput</span> <span class="o">=</span> <span class="n">opt_</span><span class="o">.</span><span class="n">_y</span><span class="p">()</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+                <span class="c1"># if intentional error (by user)</span>
+                <span class="k">except</span> <span class="n">_HiddenConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+                    <span class="n">_log_hidden_constraint</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">hard_c</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">get_corresponding_state_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Hidden constraint violation during &#39;</span>
+                              <span class="s1">&#39;objective function evaluation: &#39;</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="n">create_err_msg_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+                    <span class="k">raise</span> <span class="n">e</span>
+
+                <span class="c1"># ===== evaluate soft constraint =====</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluating remaining constraints...&#39;</span><span class="p">))</span>
+
+                <span class="n">soft_c</span> <span class="o">=</span> <span class="n">TrialConstraintOutput</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">_soft_c</span><span class="p">(</span><span class="n">soft_c</span><span class="p">)</span>
+
+                <span class="c1"># if intentional error (by user)</span>
+                <span class="k">except</span> <span class="n">_HiddenConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">_log_hidden_constraint</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+                    <span class="n">_c</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">_c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">soft_c</span><span class="p">)</span>
+                    <span class="n">_c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hard_c</span><span class="p">)</span>
+
+                    <span class="n">record</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">_c</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">get_corresponding_state_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Hidden constraint violation during &#39;</span>
+                              <span class="s1">&#39;soft constraint function evaluation: &#39;</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="n">create_err_msg_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+                    <span class="k">raise</span> <span class="n">e</span>
+
+                <span class="c1"># ===== merge and sort constraints =====</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">TrialConstraintOutput</span><span class="p">()</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">soft_c</span><span class="p">)</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hard_c</span><span class="p">)</span>
+
+                <span class="c1"># get values as minimize</span>
+                <span class="n">y_internal</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">opt_</span><span class="o">.</span><span class="n">_convert_y</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;output:&#39;</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">succeeded</span>
+
+                <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_internal</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">record</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
+                <span class="n">x_pass_to_fem_</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span>
+                <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FReturnValue</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">vm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variable_manager</span>
+
+            <span class="c1"># opt_ はメインの opt 又は sub_fidelity</span>
+            <span class="n">opt_</span> <span class="o">=</span> <span class="n">opt_</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt_</span> <span class="o">=</span> <span class="n">opt_</span>
+
+            <span class="c1"># check interruption</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+            <span class="c1"># if opt_ is not self, update variable manager</span>
+            <span class="n">opt_</span><span class="o">.</span><span class="n">variable_manager</span> <span class="o">=</span> <span class="n">vm</span>
+
+            <span class="c1"># preprocess</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">()</span>
+
+            <span class="c1"># declare output</span>
+            <span class="n">f_return</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># start solve</span>
+            <span class="n">datetime_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">f_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_or_raise</span><span class="p">(</span>
+                    <span class="n">opt_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="n">datetime_start</span>
+                <span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">HardConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hard_constraint_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">_HiddenConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_constraint_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">SkipSolve</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_skip_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_if_succeeded</span><span class="p">(</span><span class="n">f_return</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_postprocess</span><span class="p">()</span>
+
+            <span class="c1"># check interruption</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">f_return</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_solve_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SolveSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c1"># ===== run and setup =====</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setting_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># noinspection PyMethodParameters</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">_SettingStatus</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">crashed</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">crashed</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">finishing</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">finishing</span>
+
+        <span class="k">return</span> <span class="n">_SettingStatus</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AbstractOptimizer.run">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">worker_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">history</span><span class="p">:</span> <span class="n">History</span><span class="p">,</span>
+            <span class="n">entire_status</span><span class="p">:</span> <span class="n">WorkerStatus</span><span class="p">,</span>
+            <span class="n">worker_status</span><span class="p">:</span> <span class="n">WorkerStatus</span><span class="p">,</span>
+            <span class="n">worker_status_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WorkerStatus</span><span class="p">],</span>
+            <span class="n">wait_other_process_setup</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span> <span class="o">=</span> <span class="n">entire_status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span> <span class="o">=</span> <span class="n">worker_status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_index</span> <span class="o">=</span> <span class="n">worker_idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_name</span> <span class="o">=</span> <span class="n">worker_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span> <span class="o">=</span> <span class="n">worker_status_list</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">SettingStatusFinished</span><span class="p">:</span>
+
+            <span class="c1"># noinspection PyMethodParameters</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+            <span class="c1"># noinspection PyMethodParameters</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">crashed</span>
+
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">traceback</span><span class="w"> </span><span class="kn">import</span> <span class="n">print_tb</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="n">_</span><span class="p">(</span>
+                            <span class="s1">&#39;===== Exception raised in worker </span><span class="si">{worker_idx}</span><span class="s1"> =====&#39;</span><span class="p">,</span>
+                            <span class="n">worker_idx</span><span class="o">=</span><span class="n">worker_idx</span>
+                        <span class="p">),</span>
+                        <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+                    <span class="p">)</span>
+                    <span class="n">print_tb</span><span class="p">(</span><span class="n">exc_tb</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="n">_</span><span class="p">(</span>
+                            <span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">: </span><span class="si">{exc_val}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">name</span><span class="o">=</span><span class="n">exc_type</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                            <span class="n">exc_val</span><span class="o">=</span><span class="n">exc_val</span>
+                        <span class="p">),</span>
+                        <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+                    <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">finished</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;worker `</span><span class="si">{worker}</span><span class="s1">` started.&#39;</span><span class="p">,</span>
+            <span class="n">worker</span><span class="o">=</span><span class="n">worker_name</span><span class="p">,</span>
+        <span class="p">))</span>
+
+        <span class="k">with</span> <span class="n">SettingStatusFinished</span><span class="p">():</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">initializing</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">launching_fem</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">wait_other_process_setup</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">waiting</span>
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+                    <span class="c1"># 他のすべての worker_status が wait 以上になったら break</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">([</span><span class="n">ws</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">ws</span> <span class="ow">in</span> <span class="n">worker_status_list</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">ws</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">waiting</span>
+                            <span class="k">for</span> <span class="n">ws</span> <span class="ow">in</span> <span class="n">worker_status_list</span><span class="p">]):</span>
+
+                        <span class="c1"># リソースの競合等を避けるため</span>
+                        <span class="c1"># break する前に index 秒待つ</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">worker_idx</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                            <span class="n">wait_second</span> <span class="o">=</span> <span class="mf">0.</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">wait_second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">worker_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">sleep</span><span class="p">(</span><span class="n">wait_second</span><span class="p">)</span>
+                        <span class="k">break</span>
+
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">running</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;worker `</span><span class="si">{worker}</span><span class="s1">` successfully finished!&#39;</span><span class="p">,</span>
+            <span class="n">worker</span><span class="o">=</span><span class="n">worker_name</span><span class="p">,</span>
+        <span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># noinspection PyMethodParameters</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">LoggingOutput</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="n">self_</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;▼▼▼▼▼ solve </span><span class="si">{</span><span class="n">self_</span><span class="o">.</span><span class="n">count</span><span class="si">}</span><span class="s1"> start ▼▼▼▼▼&#39;</span><span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;▲▲▲▲▲ solve </span><span class="si">{</span><span class="n">self_</span><span class="o">.</span><span class="n">count</span><span class="si">}</span><span class="s1"> end ▲▲▲▲▲</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">LoggingOutput</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_problem_from_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_load_problem_from_fem</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_load_problem_from_fem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_done_load_problem_from_fem</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># noinspection PyMethodMayBeStatic</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_additional_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_collect_additional_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">additional_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">())</span>
+        <span class="n">additional_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">additional_data</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finalize_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">_finalized</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span>
+                <span class="n">parameters</span><span class="p">,</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_name</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                <span class="n">additional_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_collect_additional_data</span><span class="p">()</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_setup_before_parallel</span><span class="p">:</span>
+
+            <span class="c1"># check compatibility with fem if needed</span>
+            <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">pass_to_fem</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_check_param_and_raise</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span>
+
+            <span class="c1"># resolve evaluation order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_done_setup_before_parallel</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># check sub fidelity models</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span> <span class="o">=</span> <span class="n">SubFidelityModels</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sub_fidelity_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="n">sub_fidelity_model</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">sub_fidelity_model</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="c1"># finalize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_problem_from_fem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_history</span><span class="p">()</span>
+
+        <span class="c1"># setup if needed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="SubFidelityModel">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.SubFidelityModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubFidelityModel</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SubFidelityModels</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubFidelityModel</span><span class="p">]):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">SubFidelityModel</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">:</span> <span class="n">Fidelity</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">sub_fidelity_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fidelity</span> <span class="o">=</span> <span class="n">fidelity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">model</span><span class="p">})</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

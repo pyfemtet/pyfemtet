@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-06 10:23+0900\n"
+"POT-Creation-Date: 2025-05-08 16:17+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:2
 msgid "External CAD (NX) Integration"
@@ -328,8 +328,8 @@ msgid "Execution result of gau_ex08_parametric.py. The horizontal axis is the nu
 msgstr "gau_ex08_parametric.py の実行結果。 横軸が試行回数、縦軸が自己インダクタンスです。"
 
 #: ../source/examples/gau_ex08/gau_ex08.rst:59
-msgid "After 20 iterations, the self-inductance was calculated to be 0.103 µF."
-msgstr "20 回の反復計算の結果、自己インダクタンスは 0.103 μF となります。"
+msgid "After 15 iterations, the self-inductance was calculated to be 0.101 µF."
+msgstr "15 回の反復計算の結果、自己インダクタンスは 0.101 μF となります。"
 
 #: ../source/examples/her_ex40/her_ex40.rst:2
 msgid "Resonant frequency of a circular patch antenna"
@@ -384,8 +384,8 @@ msgid "Execution result of her_ex40_parametric.py. The horizontal axis is the nu
 msgstr "her_ex40_parametric.py の実行結果。 横軸が試行回数、 縦軸が共振周波数です。"
 
 #: ../source/examples/her_ex40/her_ex40.rst:59
-msgid "After 20 iterations, the the best frequency was calculated to be 2.991 GHz."
-msgstr "20 回の反復計算の結果、 最良の共振周波数は 2.991 GHz となります。"
+msgid "After 10 iterations, the the best frequency was calculated to be 3.29 GHz."
+msgstr "10 回の反復計算の結果、 最良の共振周波数は 3.29 GHz となります。"
 
 #: ../source/examples/parametric_output_objective/parametric_output_objective.rst:2
 msgid "Parametric Output as Objective"
@@ -754,4 +754,3 @@ msgstr "実行環境や解析モデルによって並列化による高速化効
 
 #~ msgid "About the coding, see below section `Sample Code`."
 #~ msgstr "プログラム作成方法については、下部セクション「サンプルコード」をご覧ください。"
-

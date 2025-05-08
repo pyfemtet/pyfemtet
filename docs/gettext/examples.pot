@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-08 11:40+0900\n"
+"POT-Creation-Date: 2025-05-08 16:17+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -326,7 +326,7 @@ msgid "Execution result of gau_ex08_parametric.py. The horizontal axis is the nu
 msgstr ""
 
 #: ../source/examples/gau_ex08/gau_ex08.rst:59
-msgid "After 20 iterations, the self-inductance was calculated to be 0.103 µF."
+msgid "After 15 iterations, the self-inductance was calculated to be 0.101 µF."
 msgstr ""
 
 #: ../source/examples/her_ex40/her_ex40.rst:2
@@ -382,7 +382,7 @@ msgid "Execution result of her_ex40_parametric.py. The horizontal axis is the nu
 msgstr ""
 
 #: ../source/examples/her_ex40/her_ex40.rst:59
-msgid "After 20 iterations, the the best frequency was calculated to be 2.991 GHz."
+msgid "After 10 iterations, the the best frequency was calculated to be 3.29 GHz."
 msgstr ""
 
 #: ../source/examples/parametric_output_objective/parametric_output_objective.rst:2

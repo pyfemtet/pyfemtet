@@ -167,9 +167,9 @@ to execute it.</p>
 <span class="linenos"> 12</span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_peaks</span>
 <span class="linenos"> 13</span><span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 <span class="linenos"> 14</span>
-<span class="linenos"> 15</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolveError</span>
+<span class="linenos"> 15</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolveError</span>
 <span class="linenos"> 16</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptunaOptimizer</span><span class="p">,</span> <span class="n">FEMOpt</span>
-<span class="linenos"> 17</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">PoFBoTorchSampler</span>
+<span class="linenos"> 17</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">PoFBoTorchSampler</span><span class="p">,</span> <span class="n">PartialOptimizeACQFConfig</span>
 <span class="linenos"> 18</span>
 <span class="linenos"> 19</span>
 <span class="linenos"> 20</span><span class="k">class</span><span class="w"> </span><span class="nc">SParameterCalculator</span><span class="p">:</span>
@@ -267,30 +267,33 @@ to execute it.</p>
 <span class="linenos">112</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">(</span>
 <span class="linenos">113</span>        <span class="n">sampler_class</span><span class="o">=</span><span class="n">PoFBoTorchSampler</span><span class="p">,</span>
 <span class="linenos">114</span>        <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-<span class="linenos">115</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-<span class="linenos">116</span>        <span class="p">)</span>
-<span class="linenos">117</span>    <span class="p">)</span>
-<span class="linenos">118</span>    
-<span class="linenos">119</span>    <span class="c1"># Initialize the FEMOpt object.</span>
-<span class="linenos">120</span>    <span class="c1"># (establish connection between the optimization problem and Femtet)</span>
-<span class="linenos">121</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
-<span class="linenos">122</span>    
-<span class="linenos">123</span>    <span class="c1"># Add design variables to the optimization problem.</span>
-<span class="linenos">124</span>    <span class="c1"># (Specify the variables registered in the femprj file.)</span>
-<span class="linenos">125</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;antenna_radius&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-<span class="linenos">126</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
-<span class="linenos">127</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;port_x&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-<span class="linenos">128</span>
-<span class="linenos">129</span>    <span class="c1"># Add the constraint function to the optimization problem.</span>
-<span class="linenos">130</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">antenna_is_smaller_than_substrate</span><span class="p">,</span> <span class="s1">&#39;antenna and substrate clearance&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">opt</span><span class="p">,))</span>
-<span class="linenos">131</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">port_is_inside_antenna</span><span class="p">,</span> <span class="s1">&#39;antenna and port clearance&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">opt</span><span class="p">,))</span>
-<span class="linenos">132</span>
-<span class="linenos">133</span>    <span class="c1"># Add the objective function to the optimization problem.</span>
-<span class="linenos">134</span>    <span class="c1"># The target frequency is 3.0 GHz.</span>
-<span class="linenos">135</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">get_resonance_frequency</span><span class="p">,</span> <span class="s1">&#39;first resonant frequency(Hz)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">3.0</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">)</span>
-<span class="linenos">136</span>
-<span class="linenos">137</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="linenos">138</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="linenos">115</span>            <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="linenos">116</span>            <span class="n">partial_optimize_acqf_kwargs</span><span class="o">=</span><span class="n">PartialOptimizeACQFConfig</span><span class="p">(</span>
+<span class="linenos">117</span>                <span class="n">timeout_sec</span><span class="o">=</span><span class="mf">30.</span><span class="p">,</span>
+<span class="linenos">118</span>            <span class="p">),</span>
+<span class="linenos">119</span>        <span class="p">)</span>
+<span class="linenos">120</span>    <span class="p">)</span>
+<span class="linenos">121</span>    
+<span class="linenos">122</span>    <span class="c1"># Initialize the FEMOpt object.</span>
+<span class="linenos">123</span>    <span class="c1"># (establish connection between the optimization problem and Femtet)</span>
+<span class="linenos">124</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
+<span class="linenos">125</span>    
+<span class="linenos">126</span>    <span class="c1"># Add design variables to the optimization problem.</span>
+<span class="linenos">127</span>    <span class="c1"># (Specify the variables registered in the femprj file.)</span>
+<span class="linenos">128</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;antenna_radius&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="linenos">129</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="linenos">130</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;port_x&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="linenos">131</span>
+<span class="linenos">132</span>    <span class="c1"># Add the constraint function to the optimization problem.</span>
+<span class="linenos">133</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">antenna_is_smaller_than_substrate</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;antenna and substrate clearance&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">opt</span><span class="p">,))</span>
+<span class="linenos">134</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">port_is_inside_antenna</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;antenna and port clearance&#39;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">opt</span><span class="p">,))</span>
+<span class="linenos">135</span>
+<span class="linenos">136</span>    <span class="c1"># Add the objective function to the optimization problem.</span>
+<span class="linenos">137</span>    <span class="c1"># The target frequency is 3.3 GHz.</span>
+<span class="linenos">138</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">get_resonance_frequency</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;first resonant frequency(Hz)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">3.3</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">)</span>
+<span class="linenos">139</span>
+<span class="linenos">140</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">141</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -303,7 +306,7 @@ to execute it.</p>
 <p><span class="caption-text">Execution result of her_ex40_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is the resonant frequency.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<p>After 20 iterations, the the best frequency was calculated to be 2.991 GHz.</p>
+<p>After 10 iterations, the the best frequency was calculated to be 3.29 GHz.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on.</p>

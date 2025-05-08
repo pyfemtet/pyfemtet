@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 # ===== const =====
 $package_root = "$PSScriptRoot\..\..\..\..\"
-$sample_location = "$package_root\pyfemtet\opt\advanced_samples\restart"
+$sample_location = "$package_root\samples\opt\advanced_samples\restart"
 
 
 # ===== helper =====

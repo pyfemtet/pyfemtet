@@ -38,7 +38,6 @@ def main(n_trials, sampler_class: type[BaseSampler], sampler_kwargs: dict):
 
     """
 
-
     # Femtet に接続します。
     fem = FemtetInterface(
         femprj_path='gal_ex13_parametric.femprj',
@@ -50,9 +49,25 @@ def main(n_trials, sampler_class: type[BaseSampler], sampler_kwargs: dict):
         sampler_kwargs=sampler_kwargs,
     )
 
+    femopt = FEMOpt(
+        fem=fem,
+        opt=opt,
+    )
+
+    # 設計パラメータを指定します。
+    femopt.add_parameter('length', 0.1, 0.02, 0.2)
+    femopt.add_parameter('width', 0.01, 0.001, 0.02)
+    femopt.add_parameter('base_radius', 0.008, 0.006, 0.01)
+
+    # 目的関数を指定します。
+    femopt.add_objective(fun=get_res_freq, name='First Resonant Frequency (Hz)', direction=800)
+
+    # 最適化を実行します。
+    femopt.set_random_seed(42)
+
     # リスタートするためには以前の最適化の履歴を
     # 新しい最適化プログラムに知らせる必要があります。
-    # FEMOpt の `history_path` 引数に csv を指定すると、
+    # FEMOpt.optimize の `history_path` 引数に csv を指定すると、
     # それが存在しない場合、新しい csv ファイルを作り、
     # それが存在する場合、その csv ファイルの続きから
     # 最適化を実行します。
@@ -68,23 +83,11 @@ def main(n_trials, sampler_class: type[BaseSampler], sampler_kwargs: dict):
     #   OptunaOptimizer を使用する場合、csv と同名の
     #   .db ファイル (ここでは restarting-sample.db) が
     #   csv ファイルと同じフォルダにある必要があります。
-    femopt = FEMOpt(
-        fem=fem,
-        opt=opt,
-        history_path='restarting-sample.csv'
+    femopt.optimize(
+        history_path='restarting-sample.csv',
+        n_trials=n_trials,
+        confirm_before_exit=False
     )
-
-    # 設計パラメータを指定します。
-    femopt.add_parameter('length', 0.1, 0.02, 0.2)
-    femopt.add_parameter('width', 0.01, 0.001, 0.02)
-    femopt.add_parameter('base_radius', 0.008, 0.006, 0.01)
-
-    # 目的関数を指定します。
-    femopt.add_objective(fun=get_res_freq, name='First Resonant Frequency (Hz)', direction=800)
-
-    # 最適化を実行します。
-    femopt.set_random_seed(42)
-    femopt.optimize(n_trials=n_trials, confirm_before_exit=False)
 
 
 if __name__ == '__main__':

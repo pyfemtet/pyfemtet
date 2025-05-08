@@ -25,7 +25,7 @@ def inductance(Femtet):
     Gogh = Femtet.Gogh
 
     coil_name = Gogh.Gauss.GetCoilList()[0]
-    return Gogh.Gauss.GetL(coil_name, coil_name)  # unit: F
+    return Gogh.Gauss.GetL(coil_name, coil_name) * 1e6  # unit: uF
 
 
 if __name__ == '__main__':
@@ -46,13 +46,13 @@ if __name__ == '__main__':
     # Add design variables to the optimization problem.
     # (Specify the variables registered in the femprj file.)
     femopt.add_parameter("helical_pitch", 6, lower_bound=4.2, upper_bound=8)
-    femopt.add_parameter("coil_radius", 10, lower_bound=1, upper_bound=10)
+    femopt.add_parameter("coil_radius", 10, lower_bound=3, upper_bound=10)
     femopt.add_parameter("n_turns", 5, lower_bound=1, upper_bound=5)
 
     # Add the objective function to the optimization problem.
     # The target inductance is 0.1 uF.
-    femopt.add_objective(inductance, name='self-inductance (F)', direction=1e-7)
+    femopt.add_objective(fun=inductance, name='self-inductance (μF)', direction=0.1)
 
     # Run optimization.
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=20)
+    femopt.optimize(n_trials=15)

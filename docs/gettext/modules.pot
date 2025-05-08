@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-08 11:40+0900\n"
+"POT-Creation-Date: 2025-05-08 16:17+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,1455 +24,761 @@ msgstr ""
 msgid "pyfemtet package"
 msgstr ""
 
+#: ../source/modules/pyfemtet.opt.optimizer.rst:5
+#: ../source/modules/pyfemtet.opt.problem.rst:5
 #: ../source/modules/pyfemtet.opt.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.rst:5
 #: ../source/modules/pyfemtet.rst:5
 msgid "Subpackages"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.optimizer.rst:5
-#: ../source/modules/pyfemtet.opt.prediction.rst:5
-#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:5
-#: ../source/modules/pyfemtet.rst:16
-msgid "Submodules"
-msgstr ""
-
-#: ../source/modules/pyfemtet.rst:19
-msgid "pyfemtet.core module"
-msgstr ""
-
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.FemtetAutomationError:1
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.MeshError:1
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.ModelError:1
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.SolveError:1
-msgid "Bases: :py:class:`Exception`"
-msgstr ""
-
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.FemtetAutomationError:1
-msgid "Exception raised for errors in automating Femtet."
-msgstr ""
-
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.FemtetAutomationError.add_note:1
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.MeshError.add_note:1
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.ModelError.add_note:1
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.SolveError.add_note:1
-msgid "Exception.add_note(note) -- add a note to the exception"
-msgstr ""
-
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.MeshError:1
-msgid "Exception raised for errors in the meshing."
-msgstr ""
-
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.MeshError:3
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.ModelError:3
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.SolveError:3
-msgid "If this exception is thrown during an optimization calculation, the process attempts to skip that attempt if possible."
-msgstr ""
-
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.ModelError:1
-msgid "Exception raised for errors in the model update."
-msgstr ""
-
-#: ../../pyfemtet/core.py:docstring of pyfemtet.core.SolveError:1
-msgid "Exception raised for errors in the solver."
-msgstr ""
-
-#: ../source/modules/pyfemtet.brep.rst:5
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:5
 #: ../source/modules/pyfemtet.logger.rst:5
+#: ../source/modules/pyfemtet.opt.history.rst:5
 #: ../source/modules/pyfemtet.opt.interface.rst:5
 #: ../source/modules/pyfemtet.opt.meta_script.rst:5
-#: ../source/modules/pyfemtet.opt.optimizer.rst:16
-#: ../source/modules/pyfemtet.opt.prediction.rst:16
-#: ../source/modules/pyfemtet.opt.rst:17
-#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:24
-#: ../source/modules/pyfemtet.opt.visualization.rst:13
-#: ../source/modules/pyfemtet.rst:27
+#: ../source/modules/pyfemtet.opt.optimizer.optuna_optimizer.rst:5
+#: ../source/modules/pyfemtet.opt.optimizer.rst:14
+#: ../source/modules/pyfemtet.opt.optimizer.scipy_optimizer.rst:5
+#: ../source/modules/pyfemtet.opt.prediction.rst:5
+#: ../source/modules/pyfemtet.opt.problem.rst:24
+#: ../source/modules/pyfemtet.opt.problem.variable_manager.rst:5
+#: ../source/modules/pyfemtet.opt.rst:46
+#: ../source/modules/pyfemtet.opt.visualization.history_viewer.result_viewer.rst:5
+#: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:13
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:24
+#: ../source/modules/pyfemtet.opt.visualization.rst:14
+#: ../source/modules/pyfemtet.rst:15
 msgid "Module contents"
-msgstr ""
-
-#: ../source/modules/pyfemtet.brep.rst:2
-msgid "pyfemtet.brep package"
 msgstr ""
 
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:2
 msgid "pyfemtet.dispatch\\_extensions package"
 msgstr ""
 
+#: ../../pyfemtet/dispatch_extensions/_impl.py:docstring of pyfemtet.dispatch_extensions._impl.DispatchExtensionException:1
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.ExceptionDuringOptimization:1
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.FEMError:1
+#: ../../pyfemtet/opt/problem/variable_manager/_string_as_expression.py:docstring of pyfemtet.opt.problem.variable_manager._string_as_expression.InvalidExpression:1
+msgid "Bases: :py:class:`Exception`"
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:1
+msgid "Connect to existing Femtet process."
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:3
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:3
+msgid "The wrapper for Dispatch() but returns PID with IFemtet."
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:0
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:0
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_categorical_parameter:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_constant_value:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_constraint:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_expression:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_expression_string:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_expression_sympy:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_objective:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_objectives:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_parameter:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_sub_fidelity_model:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.optimize:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_random_seed:0
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.get_df:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_constraints:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_objectives:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_variables:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.constraint_from_excel:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.load_constraints:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.load_objectives:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.load_variables:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.objective_from_excel:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.load_objectives:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:0
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:0
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface:0
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase:0
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase.load_objectives:0
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase.load_variables:0
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.BoTorchInterface:0
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.PoFBoTorchInterface:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_categorical_parameter:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_constant_value:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_constraint:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_string:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_sympy:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objective:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objectives:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_sub_fidelity_model:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.set_solve_condition:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_categorical_parameter:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_parameter:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PartialOptimizeACQFConfig:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.train_model_c:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFConfig:0
+#: ../../pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:docstring of pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.AbstractModel.fit:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.AbstractModel.predict:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.PyFemtetModel.fit:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.PyFemtetModel.predict:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.PyFemtetModel.update_model:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.SingleTaskGPModel.fit:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.SingleTaskGPModel.predict:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ConstraintResult:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Function.eval:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectiveResult:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectivesFunc:0
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables:0
+#: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot:0
+#: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot:0
+#: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot2d:0
+#: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot3d:0
+#: ../../pyfemtet/opt/worker_status.py:docstring of pyfemtet.opt.worker_status.WorkerStatus:0
+msgid "Parameters"
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:5
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:5
+msgid "Raises an error if the connection is not established within the specified timeout."
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:7
+msgid "A prefix to output in logs. Typically used only for internal processing."
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:0
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:0
+msgid "Raises"
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:10
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:11
+msgid "Couldn't connect Femtet process for some reason (i.e. Femtet.exe is not launched)."
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:0
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:0
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:0
+msgid "Returns"
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:12
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:13
+msgid "An object for controlling Femtet and the PID of the Femtet being controlled."
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:0
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_specific_femtet:0
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:0
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_categorical_parameter:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_expression:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_expression_string:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_expression_sympy:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_objective:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_parameter:0
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.get_df:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.NoFEM.update:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.load_variables:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.femtet_is_alive:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_model:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:0
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.BoTorchInterface.update:0
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.PoFBoTorchInterface.update:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_categorical_parameter:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_string:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_sympy:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objective:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.run:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_categorical_parameter:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_parameter:0
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.AbstractModel.predict:0
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.PyFemtetModel.predict:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ConstraintResult.calc_violation:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ConstraintResult.check_violation:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Function.eval:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Objective.convert:0
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables:0
+#: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_default_figure:0
+#: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot:0
+#: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot:0
+#: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot2d:0
+#: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot3d:0
+msgid "Return type"
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:1
+msgid "Launch Femtet by new process and connect to it."
+msgstr ""
+
+#: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:7
+msgid "Attempts to establish a connection to the launched Femtet strictly. This may result in slower processing due to process exclusivity handling."
+msgstr ""
+
 #: ../source/modules/pyfemtet.logger.rst:2
 msgid "pyfemtet.logger package"
+msgstr ""
+
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:1
+msgid "Return the module-level logger."
+msgstr ""
+
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:3
+msgid "The format is defined in the package_root_logger."
+msgstr ""
+
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:5
+msgid "The logger name to want."
+msgstr ""
+
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:7
+msgid "Output DEBUG level message or not."
+msgstr ""
+
+#: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:10
+msgid "The logger its name is ``root_package.subpackage.module``. child level logger's signal propagates to the parent logger and is shown in the parent(s)'s handler(s)."
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.rst:2
 msgid "pyfemtet.opt package"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface:1
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:1
-msgid "Bases: :py:class:`~abc.ABC`"
+#: ../source/modules/pyfemtet.opt.problem.rst:13
+#: ../source/modules/pyfemtet.opt.rst:19
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:5
+msgid "Submodules"
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:1
-msgid "Abstract base class for an interface of optimization library."
+#: ../source/modules/pyfemtet.opt.rst:22
+msgid "pyfemtet.opt.exceptions module"
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:5
-msgid "The finite element method object."
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.HardConstraintViolation:1
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.InterruptOptimization:1
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.SkipSolve:1
+msgid "Bases: :py:class:`~pyfemtet.opt.exceptions.ExceptionDuringOptimization`"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:13
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:0
-msgid "type"
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.MeshError:1
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.ModelError:1
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.PostProcessError:1
+#: ../../pyfemtet/opt/exceptions.py:docstring of pyfemtet.opt.exceptions.SolveError:1
+msgid "Bases: :py:class:`~pyfemtet.opt.exceptions.FEMError`, :py:class:`~pyfemtet.opt.exceptions._HiddenConstraintViolation`"
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:7
-msgid "FEMInterface"
+#: ../source/modules/pyfemtet.opt.rst:30
+msgid "pyfemtet.opt.femopt module"
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:11
-msgid "The class of the finite element method object."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:17
-msgid "The keyword arguments used to instantiate the finite element method object."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:19
-msgid "dict"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:23
-msgid "The variables using optimization process including parameters."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:25
-msgid "ExpressionEvaluator"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:29
-msgid "A dictionary containing the objective functions used in the optimization."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:31
-msgid "dict[str, Objective]"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:35
-msgid "A dictionary containing the constraint functions used in the optimization."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:37
-msgid "dict[str, Constraint]"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:41
-msgid "An actor object that records the history of each iteration in the optimization process."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:43
-msgid "History"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:47
-msgid "The random seed used for random number generation during the optimization process."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer:49
-msgid "int or None"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:1
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:1
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:1
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:1
-msgid "Calculate objectives and constraints."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objectives:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:0
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_random_seed:0
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:0
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:0
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.set_df:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM.update:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.constraint_from_excel:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.objective_from_excel:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_model:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.update_model:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_model:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_sw_model:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.filter_feasible:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.filter_feasible:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface.update:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer.add_init_parameter:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.before_trial:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:0
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.Expression:0
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.ExpressionEvaluator.add_expression:0
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.ExpressionEvaluator.add_parameter:0
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.Parameter:0
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.Variable:0
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit:0
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:0
-#: ../../pyfemtet/opt/visualization/result_viewer/application.py:docstring of pyfemtet.opt.visualization._base.SidebarApplicationBase.add_page:0
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization._base.AbstractPage.add_subpage:0
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.Tutorial.control_visibility_by_style:0
-msgid "Parameters"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:3
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:3
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:3
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:3
-msgid "Optimization parameters."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:5
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:5
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:5
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:5
-msgid "If True, skip fem.update() and record self.generate_invalid_results()."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:0
-msgid "Returns"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:8
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:8
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:8
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:8
-msgid "The list of internal objective values, un-normalized objective values and constraint values."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.get_df:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:0
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM.update:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.load_parameter:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update:0
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_model:0
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.update_model:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_objective:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:0
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.load_objective:0
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_constraint:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.load_parameter:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.load_objective:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:0
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface.update:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.run:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.before_trial:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.reseed_rng:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.f:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:0
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:0
-msgid "Return type"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:1
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:1
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:1
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:1
-msgid "Returns the parameters in the specified format."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:3
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:3
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:3
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:3
-msgid "The desired format of the parameters. Can be 'df' (DataFrame), 'values' (np.ndarray), 'dict' or 'raw' (list of Variable object). Defaults to 'dict'."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:11
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:11
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:11
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:11
-msgid "The parameters in the specified format."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:0
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:0
-msgid "Raises"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:13
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:13
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:13
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.get_parameter:13
-msgid "If an invalid format is provided."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.run:1
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer.run:1
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer.run:1
-msgid "Start optimization."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:1
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:1
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:1
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:1
-msgid "Update parameter."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:3
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:3
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:3
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter:3
-msgid "Key is the name of parameter and the value is the value of it. The partial set is available."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:1
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:1
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:1
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:1
-msgid "Update parameter with values."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_base.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:3
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:3
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:3
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._base.AbstractOptimizer.set_parameter_values:3
-msgid "Values of all parameters."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface:1
-msgid "Abstract base class for the interface with FEM software."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface:3
-msgid "Stores information necessary to restore FEMInterface instance in a subprocess."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface:5
-msgid "The concrete class should call super().__init__() with the desired arguments when restoring."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface:7
-msgid "keyword arguments for FEMInterface (re)constructor."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._base.FEMInterface.check_param_value:1
-msgid "Checks the value of a parameter in the FEM model (if implemented in concrete class)."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:1
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM.update:1
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update:1
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update:1
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface.update:1
-msgid "Updates the FEM analysis based on the proposed parameters."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:1
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:1
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:1
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:1
-msgid "Updates only FEM variables (if implemented in concrete class)."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.FEMInterface.update_parameter:3
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface.update_parameter:3
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:3
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter:3
-msgid "If this method is implemented, it is able to get parameter via FEMInterface."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:1
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:1
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:1
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.ExpressionEvaluator:1
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.Variable:1
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt:1
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History:1
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface:1
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer:1
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PartialOptimizeACQFConfig:1
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFConfig:1
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.AbstractModel:1
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.PyFemtetModel:1
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ConstraintResult:1
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Function:1
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectiveResult:1
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectivesFunc:1
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.Variable:1
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager:1
+#: ../../pyfemtet/opt/worker_status.py:docstring of pyfemtet.opt.worker_status.WorkerStatus:1
 msgid "Bases: :py:class:`object`"
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:1
-msgid "Class to control FEM interface and optimizer."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:3
-msgid "The FEM software interface. Defaults to None (automatically set to :class:`FemtetInterface`)."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:6
-msgid "The numerical optimizer object. Defaults to None (automatically set to :class:`OptunaOptimizer` with :class:`optuna.samplers.TPESampler`)."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:10
-msgid "The path to the history file. Defaults to None. If None, '%Y_%m_%d_%H_%M_%S.csv' is created in current directory."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:14
-msgid "When performing cluster computing, please specify the address of the scheduler computer here.  .. seealso:: https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:14
-msgid "When performing cluster computing, please specify the address of the scheduler computer here."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:17
-msgid "https://pyfemtet.readthedocs.io/en/stable/pages/usage_pages/how_to_deploy_cluster.html"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:23
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:20
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:17
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:29
-msgid "Examples"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:24
-msgid "When specifying and opening a femprj and model, we write"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt:30
-msgid "When specifying optimization algorithm, we write"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:1
-msgid "Adds a constraint to the optimization problem."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:3
-msgid "The constraint function."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:5
-msgid "The name of the constraint. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:7
-msgid "The lower bound of the constraint. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:9
-msgid "The upper bound of the constraint. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:11
-msgid "Flag indicating if it is a strict constraint. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:13
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:15
-msgid "Additional arguments for the constraint function. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:17
-msgid "Using FEM or not in the constraint function. It may make the processing time in strict constraints in BoTorchSampler. Defaults to None. If None, PyFemtet checks the access to Femtet and estimate using Femtet or not automatically."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:22
-msgid "When ```strict``` == True and using OptunaOptimizer along with :class:`PoFBoTorchSampler`, PyFemtet will solve an optimization subproblem to propose new variables. During this process, the constraint function ```fun``` will be executed at each iteration of the subproblem, which may include time-consuming operations such as retrieving 3D model information via FEMInterface. As a result, it may not be feasible to complete the overall optimization within a realistic timeframe."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:47
-msgid "Examples:"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:31
-msgid "For example, in a case where the bottom area of the model is constrained, the following approach may require a very long time."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:41
-msgid "Instead, please do the following."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:50
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:14
-msgid "If the FEMInterface is FemtetInterface, the 1st argument of fun should be Femtet (IPyDispatch) object."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_constraint:52
-msgid "If name is None, name is a string with the prefix `\"cns_\"` followed by a sequential number."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:1
-msgid "Add expression to the optimization problem."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:5
-msgid "This feature is highly experimental and may change in the future."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:8
-msgid "The name of the variable."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:10
-msgid "An expression function. The arguments that you want to use as input variables must be the same with ``name`` of Variable objects added by ``add_parameter()`` or ``add_expression()``. If you use other objects as argument of the function, you must specify ``kwargs``."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:12
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:13
-msgid "Additional information about the parameter. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:14
-msgid "Remaining arguments of ``fun``. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:16
-msgid "If this variable is used directly in FEM model update or not. If False, this variable can be just used as inpt of other expressions. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:21
-msgid "When adding variable a and b; a is not directly included as model variables but an optimization parameter, b is not a parameter but a model variable and the relationship of these 2 variables is ```b = a ** 2```, we write:"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:34
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:38
-msgid "Notes:"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:33
-msgid "The argument names of function to calculate variable must match the ```name``` of the parameter."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:37
-msgid "In this case, only strings that can be used as Python variables are valid for ```name``` argument of :func:`FEMOpt.add_parameter`."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_expression:40
-msgid "When adding variable r, theta and x, y; r, theta is an optimization parameter and x, y is an intermediate variable to calculate constraint function, we write"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:1
-msgid "Adds an objective to the optimization problem."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:3
-msgid "The objective function. This argument is optional but"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:5
-msgid "The name of the objective. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:7
-msgid "The optimization direction. Varid values are 'maximize', 'minimize' or a float value. Defaults to 'minimize'."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:9
-msgid "Additional arguments for the objective function. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:11
-msgid "Additional keyword arguments for the objective function. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:18
-msgid "When add a complex objective (for example, want to dynamically set body to calculate temperature and use product of the temperature and one of the parameters as objective) , we write"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_objective:36
-msgid "If name is None, name is a string with the prefix `\"obj_\"` followed by a sequential number."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:1
-msgid "Adds a parameter to the optimization problem."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:3
-msgid "The name of the parameter."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:5
-msgid "The initial value of the parameter. Defaults to None. If None, try to get initial value from FEMInterface."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:7
-msgid "The lower bound of the parameter. Defaults to None. Some optimization algorithms require this."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:9
-msgid "The upper bound of the parameter. Defaults to None. Some optimization algorithms require this."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:11
-msgid "The step of parameter. If specified, parameter is used as discrete. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:15
-msgid "If this variable is used directly in FEM model update or not. If False, this parameter can be just used as inpt of expressions. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:17
-msgid "パラメータを initial_value で固定します。 開発時にパラメータを振るか振らないかを 簡単に変更するための便利引数です。 True のとき、lower_bound, upper_bound, step, properties の 値は、有効かどうかのチェックには使われますが、最適化では 使われなくなります。 デフォルトは False です。"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:26
-msgid "If initial_value is not specified and the value for the given name is also not specified in FEM."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:30
-msgid "When adding parameter a (-1 <= a <= 1; initial value is 0), we write"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:34
-msgid "Note that the ```note``` argument can be set any name in this case."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.add_parameter:36
-msgid "When adding discrete parameter a (-1 <= a <= 1; initial value is 0, step 0.5), we write"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.get_parameter:1
-msgid "Deprecated method."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.get_parameter:3
-msgid "Planed to remove in future version. Use FEMOpt.opt.get_parameter() instead."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:1
-msgid "Runs the main optimization process."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:3
-msgid "The number of trials. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:6
-msgid "The number of parallel processes. Defaults to 1. Note that even if this argument is 1, :class:`FEMOpt` makes some child processes to run process monitor, status monitor, etc."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:12
-msgid "The maximum amount of time in seconds that each trial can run. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:16
-msgid "Wait for all workers launching FEM system. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:19
-msgid "Insert stop before exit to continue to show process monitor."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:25
-msgid "If set_monitor_host() is not executed, a local server for monitoring will be started at localhost:8080."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:29
-msgid "See Also:"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:30
-msgid ":func:`FEMOpt.set_monitor_host`"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:34
-msgid "If ``n_trials`` and ``timeout`` are both None, it runs forever until interrupting by the user."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:39
-msgid "If ``n_parallel`` >= 2, depending on the end timing, ``n_trials`` may be exceeded by up to ``n_parallel-1`` times."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.optimize:44
-msgid "If ``n_parallel`` >= 2 and ``fem`` is a subclass of ``FemtetInterface``, the ``strictly_pid_specify`` of subprocess is set to ``False``. So **it is recommended to close all other Femtet processes before running.**"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:1
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:1
 msgid "Sets the host IP address and the port of the process monitor."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:3
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:3
 msgid "The hostname or IP address of the monitor server."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:5
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:5
 msgid "The port number of the monitor server. If None, ``8080`` will be used. Defaults to None."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:12
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:12
 msgid "Specifying host ``0.0.0.0`` allows viewing monitor from all computers on the local network."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:15
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:15
 msgid "If no hostname is specified, the monitor server will be hosted on ``localhost``."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_monitor_host:18
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:18
 msgid "We can access process monitor by accessing ```localhost:8080``` on our browser by default."
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_random_seed:1
-msgid "Sets the random seed for reproducibility."
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.substrate_size:1
+msgid "基板のXY平面上での専有面積を計算します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.set_random_seed:3
-msgid "The random seed value to be set."
+#: ../source/modules/pyfemtet.opt.rst:38
+msgid "pyfemtet.opt.worker\\_status module"
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.terminate_all:1
-msgid "Deprecated method. We plan to remove this in future version."
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._base_interface.COMInterface`"
 msgstr ""
 
-#: ../../pyfemtet/opt/_femopt.py:docstring of pyfemtet.opt._femopt.FEMOpt.terminate_all:3
-msgid "In current version, the termination processes are automatically execute in the last of :func:`FEMOpt.optimize`."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM:1
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:1
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:1
-msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`"
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:1
 msgid "Control Femtet from optimizer."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:3
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:3
 msgid "The path to the project file. If not specified, get it from connected Femtet."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:6
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:6
 msgid "The name of the model. If not specified, get it from connected Femtet or the first model when Femtet open the project file."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:10
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:10
 msgid "The connection method. Default is 'auto'. Other valid values are 'new' or 'existing'."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:13
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:13
 msgid "The type to save result file. Valid values are 'all', 'none' or 'optimal'. Default is 'all'."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:17
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:17
 msgid "Whether to strictly specify the PID in Femtet connection. Default is True."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:20
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:20
 msgid "Whether to allow without a project. Default is False."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:22
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:22
 msgid "Whether to open the result with GUI. Default is True."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:24
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:24
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives.   .. note::     Indexes start at 0, but the parametric analysis    output settings in the Femtet dialog box indicate    setting numbers starting at 1.  .. warning::     **Setting this argument deletes the parametric    analysis swept table set in the femprj file.**    If you do not want to delete the swept table,    make a copy of the original file."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:24
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:24
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:32
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:32
 msgid "Indexes start at 0, but the parametric analysis output settings in the Femtet dialog box indicate setting numbers starting at 1."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:38
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:38
 msgid "**Setting this argument deletes the parametric analysis swept table set in the femprj file.** If you do not want to delete the swept table, make a copy of the original file."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:43
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:43
 msgid "Additional arguments from inherited classes."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:47
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:47
 msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface:55
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:55
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.check_param_value:1
-msgid "Check param_name is set in femprj file or not."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.check_param_value:5
-msgid "This function works with Femtet version 2023.1.1 and above. Otherwise, no check is performed."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:1
-msgid "Connects to a Femtet process."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:3
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:3
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:3
-msgid "The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:5
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:5
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:5
-msgid "The process ID of an existing Femtet process and wanted to connect."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:10
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:10
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:10
-msgid "When connect_method is 'new', starts a new Femtet process and connects to it. `pid` will be ignored."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:15
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:15
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:15
-msgid "When 'existing', connect to an existing Femtet process. However, if there are no Femtets to which it can connect (i.e. already connected to another Python or Excel process), it throws an exception."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:22
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:22
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.connect_femtet:22
-msgid "When set to 'auto', first tries 'existing', and if that fails, connects with 'new'. If `pid` is specified and failed to connect, it will not try existing another Femtet process."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.femtet_is_alive:1
-msgid "Returns connected femtet process is existing or not."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.open:1
-msgid "Open specific analysis model with connected Femtet."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.postprocess:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.postprocess:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.postprocess:1
-msgid "A method called just after :func:`solve`."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.postprocess:3
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.postprocess:3
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.postprocess:3
-msgid "This method is called just after solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired postprocessing after the solve and before evaluating objectives."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.preprocess:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.preprocess:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.preprocess:1
-msgid "A method called just before :func:`solve`."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.preprocess:3
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.preprocess:3
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.preprocess:3
-msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.quit:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.quit:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.quit:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.close:1
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.close:1
 msgid "Force to terminate connected Femtet."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.solve:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:1
+msgid "Connects to a Femtet process."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:3
+msgid "The connection method. Can be 'new', 'existing', or 'auto'. Defaults to 'auto'."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:6
+msgid "The process ID of an existing Femtet process and wanted to connect."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:11
+msgid "When connect_method is 'new', starts a new Femtet process and connects to it. `pid` will be ignored."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:16
+msgid "When 'existing', connect to an existing Femtet process. However, if there are no Femtets to which it can connect (i.e. already connected to another Python or Excel process), it throws an exception."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:23
+msgid "When set to 'auto', first tries 'existing', and if that fails, connects with 'new'. If `pid` is specified and failed to connect, it will not try existing another Femtet process."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.femtet_is_alive:1
+msgid "Returns connected femtet process is existing or not."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:1
+msgid "Open specific analysis model with connected Femtet."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:1
+msgid "A method called just after :func:`solve`."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:3
+msgid "This method is called just after solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired postprocessing after the solve and before evaluating objectives."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:1
+msgid "A method called just before :func:`solve`."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:3
+msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:1
 msgid "Execute FEM analysis."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update:1
 msgid "See :func:`FEMInterface.update`"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_model:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_model:1
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface.update_model:1
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_model:1
 msgid "Updates the analysis model only."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.update_parameter:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:1
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter:1
 msgid "Update parameter of femprj."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:1
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:1
 msgid "Use output setting of Femtet parametric analysis as an objective function."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:3
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:3
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:3
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:3
 msgid "The index of output settings tab in parametric analysis dialog of Femtet. Starts at 1."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:5
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:5
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:5
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:5
 msgid "Objective direction. Valid input is one of 'minimize', 'maximize' or a specific value. Defaults to 'minimize'."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:8
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:8
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective:8
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:10
 msgid "None"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:1
-msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet.FemtetInterface`"
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.SubFidelityModel:1
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer:1
+#: ../../pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:docstring of pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer:1
+msgid "Bases: :py:class:`~pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer`"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:1
-msgid "Control Femtet and NX."
+#: ../source/modules/pyfemtet.opt.history.rst:2
+msgid "pyfemtet.opt.history package"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:3
-msgid "Using this class, you can import CAD files created in NX through the Parasolid format into a Femtet project. It allows you to pass design variables to NX, update the model, and perform analysis using the updated model in Femtet."
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.ColumnOrderMode:1
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.TrialState:1
+msgid "Bases: :py:class:`~pyfemtet._util.str_enum.StrEnum`"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:9
-msgid "The path to .prt file containing the CAD data from which the import is made."
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.ColumnOrderMode:1
+msgid "The order rule of the history csv columns."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:12
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:14
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:16
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:18
-msgid "Defaults to None."
+#: ../../docstring of pyfemtet.opt.history.ColumnOrderMode.important_first:1
+msgid "The values of parameters and objectives first."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:20
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:13
-msgid "For other arguments, please refer to the :class:`FemtetInterface` class."
+#: ../../docstring of pyfemtet.opt.history.ColumnOrderMode.per_category:1
+msgid "Sort per each object."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:24
-msgid "Notes"
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History:1
+msgid "最適化の試行の履歴を管理します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:25
-msgid "```export_*``` arguments sets parasolid export setting of NX. If None, PyFemtet does not change the current setting of NX."
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.get_df:1
+msgid "Returns the optimization history."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface:30
-msgid "It is recommended not to change these values from the settings used when exporting the Parasolid that was imported into Femtet."
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.get_df:3
+msgid "The {column: value} というフォーマットの matching filter."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.check_param_value:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.check_param_value:1
-msgid "Override FemtetInterface.check_param_value()."
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.get_df:7
+msgid "Returns: The optimization history."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.check_param_value:3
-msgid "Do nothing because the parameter can be registered to not only .femprj but also .prt."
+#: ../../docstring of pyfemtet.opt.history.History.path:1
+msgid "The existing or destination CSV path."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_nx/_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.update_model:1
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_model:1
-msgid "Update .x_t"
+#: ../../docstring of pyfemtet.opt.history.History.path:3
+msgid "If not specified, the CSV file is saved in the format \"pyfemtet.opt_%Y%m%d_%H%M%S.csv\" when the optimization process starts."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:1
-msgid "Control Femtet and Solidworks."
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.save:1
+msgid "Export the optimization history."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:3
-msgid "Using this class, you can import CAD files created in Solidworks through the Parasolid format into a Femtet project. It allows you to pass design variables to Solidworks, update the model, and perform analysis using the updated model in Femtet."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface:10
-msgid "The path to .sldprt file containing the CAD data from which the import is made."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.check_param_value:3
-msgid "Do nothing because the parameter can be registered to not only .femprj but also .SLDPRT."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_sldworks.py:docstring of pyfemtet.opt.interface._femtet_with_sldworks.FemtetWithSolidworksInterface.update_sw_model:1
-msgid "Update .sldprt"
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:1
-msgid "Class for managing the history of optimization results."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:3
-msgid "The path to the csv file."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:5
-msgid "The names of parameters. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:7
-msgid "The names of objectives. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:9
-msgid "The names of constraints. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:11
-msgid "Dask client."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History:13
-msgid "The method to calculate hypervolume or the reference point itself. Valid values are 'dynamic-pareto' or 'dynamic-nadir' or 'nadir' or 'pareto' or fixed point (in objective function space)."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.create_df_columns:1
-msgid "Create columns of history."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.load:1
-msgid "Load existing result csv."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:1
-msgid "Records the optimization results in the history."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:3
-msgid "Record only. NOT save."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:5
-msgid "The parameter values."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:7
-msgid "The objective functions."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:9
-msgid "The constraint functions."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:11
-msgid "The objective values."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:13
-msgid "The constraint values."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:15
-msgid "Additional information or messages related to the optimization results."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:17
-msgid "fem method to call after solving. i.e. save result file. Must take trial(int) for 1st argument."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.record:19
-msgid "arguments for `postprocess_func`. i.e. create binary data of result file in the worker process."
-msgstr ""
-
-#: ../../pyfemtet/opt/_femopt_core.py:docstring of pyfemtet.opt._femopt_core.History.save:1
-msgid "Save csv file."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_base.py:docstring of pyfemtet.opt.interface._base.NoFEM:1
-msgid "Dummy interface without FEM. Intended for debugging purposes."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:1
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:1
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:1
-msgid "Bases: :py:class:`~pyfemtet.opt.optimizer._base.AbstractOptimizer`"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:1
-msgid "Optimizer using ```optuna```."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:3
-msgid "This class provides an interface for the optimization engine using Optuna. For more details, please refer to the Optuna documentation."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:7
-msgid "https://optuna.readthedocs.io/en/stable/reference/index.html"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:9
-msgid "A sampler class from Optuna. If not specified, ```optuna.samplers.TPESampler``` is specified. This defines the sampling strategy used during optimization. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:14
-msgid "A dictionary of keyword arguments to be passed to the sampler class. This allows for customization of the sampling process. Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:18
-msgid "A method or a collection of methods to be added during initialization. This can be used to specify additional setup procedures. Currently, the only valid value is 'LHS' (using Latin Hypercube Sampling). Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer:28
-msgid "Do not include ```constraints_func``` in ```sampler_kwargs```. It is generated and provided by :func:`FEMOpt.add_constraint`."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer.add_init_parameter:1
-msgid "Add additional initial parameter for evaluate."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer.add_init_parameter:3
-msgid "The parameter set is ignored if the main() is continued."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer.add_init_parameter:5
-msgid "Parameter to evaluate before run optimization algorithm."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer.add_init_parameter:7
-msgid "Optional. If specified, the name is saved in the history row. Default to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_optuna.py:docstring of pyfemtet.opt.optimizer._optuna._optuna.OptunaOptimizer.run:1
-msgid "Set random seed, sampler, study and run study.optimize()."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:1
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:1
-msgid "Optimizer using ```scipy```."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:3
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:3
-msgid "This class provides an interface for the optimization engine using Scipy. For more details, please refer to the Scipy documentation."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:7
-msgid "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:9
-msgid "The keyword arguments of ```scipy.optimize.minimize```."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:14
-msgid "The return value of ```scipy.optimize.minimize```."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy.py:docstring of pyfemtet.opt.optimizer._scipy.ScipyOptimizer:16
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:16
-msgid "OptimizeResult"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:7
-msgid "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:9
-msgid "The keyword arguments of ```scipy.optimize.minimize_scalar```."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_scipy_scalar.py:docstring of pyfemtet.opt.optimizer._scipy_scalar.ScipyScalarOptimizer:14
-msgid "The return value of ```scipy.optimize.minimize_scalar```."
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.save:3
+msgid "The destination path is :class:`History.path`."
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:1
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.NoFEM:1
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._base_interface.AbstractFEMInterface`"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.BoTorchInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase`"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:1
 msgid "Excel を計算コアとして利用するためのクラス。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:3
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:3
 msgid "通常の有限要素法を Excel に 置き換えて使用することが可能です。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:6
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:6
 msgid "すでに Excel マクロと Femtet を 連携させた自動解析システムを 構築している場合、このクラスは それをラップします。これにより、 PyFemtet を用いた最適化を 行う際に便利な機能を提供します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:13
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:13
 msgid "設計変数の定義を含む Excel ファイルのパスを指定 します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:16
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:16
 msgid "設計変数の定義を含むシートの名前を指定します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:18
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:18
 msgid "目的関数の定義を含む Excel ファイルのパスを指定 します。指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:22
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:22
 msgid "目的関数の定義を含む含むシートの名前を指定します。 指定しない場合は ``input_sheet_name`` と同じと見 做します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:26
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:26
+msgid "最適化ループ中に呼ぶ Excel マクロ関数を 含む xlsm のパスです。 指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:31
 msgid "Excel マクロ関数名を指定します。指定しない場合は ``FemtetMacro.FemtetMain`` と見做します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:29
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:34
 msgid "Excel マクロ関数に渡す引数をリストまたはタプルで 指定します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:32
-msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'new' です。"
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:37
+msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'auto' です。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:35
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:40
 msgid "Excel マクロ関数のタイムアウト時間を秒単位で指定 します。 None の場合はタイムアウトなしとなります。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:38
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:43
 msgid "セットアップ時に呼ぶ関数を含む xlsm のパスです。 指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:42
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:47
 msgid "セットアップ時に呼ぶマクロ関数名です。 指定しない場合、セットアップ時に何もしません。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:45
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:50
 msgid "セットアップ時に呼ぶマクロ関数の引数です。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:47
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:52
 msgid "終了時に呼ぶ関数を含む xlsm のパスです。 指定しない場合は ``input_xlsm_path`` と 同じと見做します。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:51
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:56
 msgid "終了時に呼ぶマクロ関数名です。 指定しない場合、終了時に何もしません。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:54
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:59
 msgid "終了時に呼ぶマクロ関数の引数です。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:56
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:61
 msgid "excel を可視化するかどうかです。 ただし、 True を指定した場合でもマクロの実行中は 不可視になります。 デフォルトは False です。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:61
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:66
 msgid "excel ダイアログを表示するかどうかです。 デバッグ目的の場合以外は True にしないでください。 デフォルトは False です。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:65
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:70
 msgid "終了時に Excel を終了するかどうかです。 指定しない場合、 connect_method が 'new' の場合 True とふるまい 'auto' の場合 False と振舞います。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:69
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:74
 msgid "excel を対話モードにするかどうかです。 False にすると、 visible == True であっても 自動化プロセス中にユーザーが誤って Excel 本体を操作できないようにします。 デフォルトは True です。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:78
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:83
 msgid "設計変数の定義を含む Excel ファイルのパス。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:80
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:92
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:0
+msgid "type"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:85
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:97
 msgid "Path"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:84
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:89
 msgid "設計変数の定義を含むシートの名前。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:86
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:98
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:104
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:116
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:91
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:103
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:109
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:121
 msgid "str"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:90
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:95
 msgid "目的関数の定義を含む Excel ファイルのパス。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:96
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:101
 msgid "目的関数の定義を含む含むシートの名前。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:102
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:107
 msgid "実行する Excel マクロ関数名。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:108
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:113
 msgid "Excel マクロ関数に渡す引数のリストまたはタプル。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:110
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:115
 msgid "list or tuple"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:114
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:119
 msgid "接続方法。'new' または 'auto'。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:120
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:125
 msgid "Excel マクロ関数の実行タイムアウト。 Noneの場合は無制限。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:123
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:128
 msgid "float or None"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:127
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:132
 msgid "プログラム終了時に Excel を終了するかどうか。 connect_method が 'new' の場合 True, 'auto' の場合 False。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:131
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:136
 msgid "bool"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:135
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:140
 msgid "Excel の COM オブジェクト。"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:137
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:143
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:149
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:155
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:161
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:142
 msgid "CDispatch"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:141
-msgid "設計変数を含むシートの COM オブジェクト。"
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface`, :py:class:`~pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface._NXInterface`"
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:147
-msgid "目的関数を含むシートの COM オブジェクト。"
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:1
+msgid "Control Femtet and NX."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:153
-#: ../../pyfemtet/opt/interface/_excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.ExcelInterface:159
-msgid "設計変数を含む xlsm ファイルの COM オブジェクト。"
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:3
+msgid "Using this class, you can import CAD files created in NX through the Parasolid format into a Femtet project. It allows you to pass design variables to NX, update the model, and perform analysis using the updated model in Femtet."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_surrogate/_singletaskgp.py:docstring of pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface:1
-msgid "Bases: :py:class:`~pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase`"
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:9
+msgid "The path to .prt file containing the CAD data from which the import is made."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_surrogate/_base.py:docstring of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase:1
-msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`, :py:class:`~abc.ABC`"
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:12
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:14
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:16
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:18
+msgid "Defaults to None."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:22
+msgid "Notes"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:23
+msgid "```export_*``` arguments sets parasolid export setting of NX. If None, PyFemtet does not change the current setting of NX."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:28
+msgid "It is recommended not to change these values from the settings used when exporting the Parasolid that was imported into Femtet."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface`, :py:class:`~pyfemtet.opt.interface._solidworks_interface.solidworks_interface.SolidworksInterface`, :py:class:`~pyfemtet.opt.interface._base_interface.AbstractFEMInterface`"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.PoFBoTorchInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.BoTorchInterface`, :py:class:`~pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase`"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.meta_script.rst:2
@@ -1483,323 +789,138 @@ msgstr ""
 msgid "pyfemtet.opt.optimizer package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.optimizer.rst:8
-msgid "pyfemtet.opt.optimizer.parameter module"
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler:1
+msgid "Bases: :py:class:`~optuna_integration.botorch.botorch.BoTorchSampler`"
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.Expression:1
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.Parameter:1
-msgid "Bases: :py:class:`~pyfemtet.opt.optimizer.parameter.Variable`"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/parameter.py:docstring of pyfemtet.opt.optimizer.parameter.ExpressionEvaluator.get_variables:1
-msgid "format: dict, values, df, raw(list of Variable object)"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:1
-msgid "Bases: :py:class:`~optuna.samplers._base.BaseSampler`"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:1
-msgid "A sampler that forked from BoTorchSampler."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:3
-msgid "This sampler improves the BoTorchSampler to account for known/hidden constraints and repeated penalties."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:6
-msgid "https://optuna.readthedocs.io/en/v3.0.0-b1/reference/generated/optuna.integration.BoTorchSampler.html"
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:8
-msgid "An optional function that suggests the next candidates. It must take the training data, the objectives, the constraints, the search space bounds and return the next candidates. The arguments are of type ``torch.Tensor``. The return value must be a ``torch.Tensor``. However, if ``constraints_func`` is omitted, constraints will be :obj:`None`. For any constraints that failed to compute, the tensor will contain NaN.  If omitted, it is determined automatically based on the number of objectives and whether a constraint is specified. If the number of objectives is one and no constraint is specified, log-Expected Improvement is used. If constraints are specified, quasi MC-based batch Expected Improvement (qEI) is used. If the number of objectives is either two or three, Quasi MC-based batch Expected Hypervolume Improvement (qEHVI) is used. Otherwise, for a larger number of objectives, analytic Expected Hypervolume Improvement is used if no constraints are specified, or the faster Quasi MC-based extended ParEGO (qParEGO) is used if constraints are present.  The function should assume *maximization* of the objective.  .. seealso::     See :func:`optuna_integration.botorch.qei_candidates_func` for an example."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:8
-msgid "An optional function that suggests the next candidates. It must take the training data, the objectives, the constraints, the search space bounds and return the next candidates. The arguments are of type ``torch.Tensor``. The return value must be a ``torch.Tensor``. However, if ``constraints_func`` is omitted, constraints will be :obj:`None`. For any constraints that failed to compute, the tensor will contain NaN."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:15
-msgid "If omitted, it is determined automatically based on the number of objectives and whether a constraint is specified. If the number of objectives is one and no constraint is specified, log-Expected Improvement is used. If constraints are specified, quasi MC-based batch Expected Improvement (qEI) is used. If the number of objectives is either two or three, Quasi MC-based batch Expected Hypervolume Improvement (qEHVI) is used. Otherwise, for a larger number of objectives, analytic Expected Hypervolume Improvement is used if no constraints are specified, or the faster Quasi MC-based extended ParEGO (qParEGO) is used if constraints are present."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:26
-msgid "The function should assume *maximization* of the objective."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:29
-msgid "See :func:`optuna_integration.botorch.qei_candidates_func` for an example."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:30
-msgid "An optional function that computes the objective constraints. It must take a :class:`~optuna.trial.FrozenTrial` and return the constraints. The return value must be a sequence of :obj:`float` s. A value strictly larger than 0 means that a constraint is violated. A value equal to or smaller than 0 is considered feasible.  If omitted, no constraints will be passed to ``candidates_func`` nor taken into account during suggestion."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:30
-msgid "An optional function that computes the objective constraints. It must take a :class:`~optuna.trial.FrozenTrial` and return the constraints. The return value must be a sequence of :obj:`float` s. A value strictly larger than 0 means that a constraint is violated. A value equal to or smaller than 0 is considered feasible."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:35
-msgid "If omitted, no constraints will be passed to ``candidates_func`` nor taken into account during suggestion."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:37
-msgid "Number of initial trials, that is the number of trials to resort to independent sampling."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:39
-msgid "If True, the acquisition function takes into consideration the running parameters whose evaluation has not completed. Enabling this option is considered to improve the performance of parallel optimization.  .. note::     Added in v3.2.0 as an experimental argument."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:39
-msgid "If True, the acquisition function takes into consideration the running parameters whose evaluation has not completed. Enabling this option is considered to improve the performance of parallel optimization."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:44
-msgid "Added in v3.2.0 as an experimental argument."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:45
-msgid "An independent sampler to use for the initial trials and for parameters that are conditional."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:47
-msgid "Seed for random number generator."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:48
-msgid "A ``torch.device`` to store input and output data of BoTorch. Please set a CUDA device if you fasten sampling."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:50
-msgid "Sampler settings."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler:54
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:7
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler:2
 msgid "Added in v2.4.0 as an experimental feature. The interface may change in newer versions without prior notice. See https://github.com/optuna/optuna/releases/tag/v2.4.0."
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:1
-msgid "Trial post-processing."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:3
-msgid "This method is called after the objective function returns and right before the trial is finished and its state is stored."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:10
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.before_trial:13
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:8
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:13
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:12
-msgid "Target study object."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:11
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:9
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:14
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:13
-msgid "Target trial object. Take a copy before modifying this object."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:13
-msgid "Resulting trial state."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.after_trial:14
-msgid "Resulting trial values. Guaranteed to not be :obj:`None` if trial succeeded."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.before_trial:1
-msgid "Trial pre-processing."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.before_trial:3
-msgid "This method is called before the objective function is called and right after the trial is instantiated. More precisely, this method is called during trial initialization, just before the :func:`~optuna.samplers.BaseSampler.infer_relative_search_space` call. In other words, it is responsible for pre-processing that should be done before inferring the search space."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.before_trial:10
-msgid "Added in v3.3.0 as an experimental feature. The interface may change in newer versions without prior notice. See https://github.com/optuna/optuna/releases/tag/v3.3.0."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.before_trial:14
-msgid "Target trial object."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:1
-msgid "Infer the search space that will be used by relative sampling in the target trial."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:3
-msgid "This method is called right before :func:`~optuna.samplers.BaseSampler.sample_relative` method, and the search space returned by this method is passed to it. The parameters not contained in the search space will be sampled by using :func:`~optuna.samplers.BaseSampler.sample_independent` method."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:12
-msgid "A dictionary containing the parameter names and parameter's distributions."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.infer_relative_search_space:15
-msgid "Please refer to :func:`~optuna.search_space.intersection_search_space` as an implementation of :func:`~optuna.samplers.BaseSampler.infer_relative_search_space`."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.reseed_rng:1
-msgid "Reseed sampler's random number generator."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.reseed_rng:3
-msgid "This method is called by the :class:`~optuna.study.Study` instance if trials are executed in parallel with the option ``n_jobs>1``. In that case, the sampler instance will be replicated including the state of the random number generator, and they may suggest the same values. To prevent this issue, this method assigns a different seed to each random number generator."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:1
-msgid "Sample a parameter for a given distribution."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:3
-msgid "This method is called only for the parameters not contained in the search space returned by :func:`~optuna.samplers.BaseSampler.sample_relative` method. This method is suitable for sampling algorithms that do not use relationship between parameters such as random sampling and TPE."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:9
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:8
-msgid "The failed trials are ignored by any build-in samplers when they sample new parameters. Thus, failed trials are regarded as deleted in the samplers' perspective."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:16
-msgid "Name of the sampled parameter."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:17
-msgid "Distribution object that specifies a prior and/or scale of the sampling algorithm."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_independent:19
-msgid "A parameter value."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:1
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:1
 msgid "Sample parameters in a given search space."
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:3
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:3
 msgid "This method is called once at the beginning of each trial, i.e., right before the evaluation of the objective function. This method is suitable for sampling algorithms that use relationship between parameters such as Gaussian Process and CMA-ES."
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:15
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:8
+msgid "The failed trials are ignored by any build-in samplers when they sample new parameters. Thus, failed trials are regarded as deleted in the samplers' perspective."
+msgstr ""
+
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:12
+msgid "Target study object."
+msgstr ""
+
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:13
+msgid "Target trial object. Take a copy before modifying this object."
+msgstr ""
+
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:15
 msgid "The search space returned by :func:`~optuna.samplers.BaseSampler.infer_relative_search_space`."
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFBoTorchSampler.sample_relative:18
+#: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:18
 msgid "A dictionary containing the parameter names and the values."
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:1
-msgid "Configuration of PoFBoTorchSampler"
+#: ../source/modules/pyfemtet.opt.optimizer.optuna_optimizer.rst:2
+msgid "pyfemtet.opt.optimizer.optuna\\_optimizer package"
 msgstr ""
 
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:3
-msgid "Whether to consider Probability of Feasibility. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:6
-msgid "Exponent for Probability of Feasibility. A larger value places more emphasis on feasibility. If 0, Probability of Feasibility is not considered. Defaults to 1."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:10
-msgid "Boundary value for calculating Probability of Feasibility with CDF. Generally between 0 and 1, with 0.5 being recommended. A larger value places more emphasis on feasibility. Defaults to 0.5."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:14
-msgid "Whether to apply symlog to the base acquisition function values. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:17
-msgid "Whether to apply Probability of Feasibility only when the base acquisition function is positive. Defaults to False."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:20
-msgid "Whether to change gamma dynamically. When True, ```gamma``` argument is ignored. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:23
-msgid "Whether to change threshold dynamically. When True, ```threshold``` argument is ignored. Defaults to False."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:26
-msgid "Whether to apply a penalty coefficient on the base acquisition function values near sampled points. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:29
-msgid "Enhances the penalty coefficient if the same value is repeated. When True, it behaves as if enable_repeat_penalty is set to True. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:32
-msgid "Specifies how many recent proposal values are referenced when determining the magnitude of penalties when enable_dynamic_repeat_penalty is True. Defaults to 3."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:35
-msgid "Defines how small the norm distance between proposed parameters needs to be in normalized parameter space [0, 1] for a stronger penalty effect. Extreme values may cause numerical instability. Defaults to 0.1."
-msgstr ""
-
-#: ../../pyfemtet/opt/optimizer/_optuna/_pof_botorch.py:docstring of pyfemtet.opt.optimizer._optuna._pof_botorch.PoFConfig:39
-msgid "Whether to treat observation errors as non-existent when training the regression model with the objective function value. The default is True because there is essentially no observational error in a FEM analysis. This is different from the original BoTorchSampler implementation."
+#: ../source/modules/pyfemtet.opt.optimizer.scipy_optimizer.rst:2
+msgid "pyfemtet.opt.optimizer.scipy\\_optimizer package"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.prediction.rst:2
 msgid "pyfemtet.opt.prediction package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.prediction.rst:8
-msgid "pyfemtet.opt.prediction.single\\_task\\_gp module"
+#: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.SingleTaskGPModel:1
+msgid "Bases: :py:class:`~pyfemtet.opt.prediction._model.AbstractModel`"
 msgstr ""
 
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel:1
-msgid "Bases: :py:class:`~pyfemtet.opt.prediction._base.PredictionModelBase`"
+#: ../source/modules/pyfemtet.opt.problem.rst:2
+msgid "pyfemtet.opt.problem package"
 msgstr ""
 
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel:1
-msgid "Simple interface surrogate model using ```SingleTaskGP```."
+#: ../source/modules/pyfemtet.opt.problem.rst:16
+msgid "pyfemtet.opt.problem.problem module"
 msgstr ""
 
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel:3
-msgid "https://botorch.org/api/models.html#botorch.models.gp_regression.SingleTaskGP"
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Constraint:1
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Objective:1
+msgid "Bases: :py:class:`~pyfemtet.opt.problem.problem.Function`"
 msgstr ""
 
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit:1
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:1
-msgid "Input. (Point number) rows and (variable number) columns."
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Constraints:1
+msgid "Bases: :py:class:`dict`\\ [:py:class:`str`, :py:class:`~pyfemtet.opt.problem.problem.Constraint`]"
 msgstr ""
 
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.fit:3
-msgid "Output. (Point number) rows and (objective number) columns."
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Functions:1
+msgid "Bases: :py:class:`dict`\\ [:py:class:`str`, :py:class:`~pyfemtet.opt.problem.problem.Function`]"
 msgstr ""
 
-#: ../../pyfemtet/opt/prediction/single_task_gp.py:docstring of pyfemtet.opt.prediction.single_task_gp.SingleTaskGPModel.predict:4
-msgid "(Point number) rows and (objective number) columns. Index 0 is mean and index 1 is std."
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Objectives:1
+msgid "Bases: :py:class:`dict`\\ [:py:class:`str`, :py:class:`~pyfemtet.opt.problem.problem.Objective`]"
+msgstr ""
+
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectivesFunc:1
+msgid "複数の値を返す関数を単一の float を返す関数に分割する。"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.problem.variable_manager.rst:2
+msgid "pyfemtet.opt.problem.variable\\_manager package"
+msgstr ""
+
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.CategoricalParameter:1
+msgid "Bases: :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.CategoricalVariable`, :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.Parameter`"
+msgstr ""
+
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.CategoricalVariable:1
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.Expression:1
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.NumericVariable:1
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.Parameter:1
+msgid "Bases: :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.Variable`"
+msgstr ""
+
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.ExpressionFromFunction:1
+msgid "Bases: :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.Expression`"
+msgstr ""
+
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.ExpressionFromString:1
+msgid "Bases: :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.Expression`, :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.NumericVariable`"
+msgstr ""
+
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.NumericParameter:1
+msgid "Bases: :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.NumericVariable`, :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.Parameter`"
+msgstr ""
+
+#: ../../.venv/Lib/site-packages/sympy/core/sympify.py:docstring of sympy.core.sympify.SympifyError:1
+msgid "Bases: :py:class:`ValueError`"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.rst:2
 msgid "pyfemtet.opt.visualization package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:2
-msgid "pyfemtet.opt.visualization.result\\_viewer package"
+#: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:2
+msgid "pyfemtet.opt.visualization.history\\_viewer package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:8
-msgid "pyfemtet.opt.visualization.result\\_viewer.application module"
+#: ../source/modules/pyfemtet.opt.visualization.history_viewer.result_viewer.rst:2
+msgid "pyfemtet.opt.visualization.history\\_viewer.result\\_viewer package"
 msgstr ""
 
-#: ../../pyfemtet/opt/visualization/result_viewer/application.py:docstring of pyfemtet.opt.visualization.result_viewer.application.ResultViewerApplication:1
-msgid "Bases: :py:class:`~pyfemtet.opt.visualization._base.PyFemtetApplicationBase`"
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:2
+msgid "pyfemtet.opt.visualization.plotter package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:16
-msgid "pyfemtet.opt.visualization.result\\_viewer.pages module"
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:8
+msgid "pyfemtet.opt.visualization.plotter.main\\_figure\\_creator module"
 msgstr ""
 
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.HomePage:1
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.PredictionModelPage:1
-#: ../../pyfemtet/opt/visualization/result_viewer/pages.py:docstring of pyfemtet.opt.visualization.result_viewer.pages.Tutorial:1
-msgid "Bases: :py:class:`~pyfemtet.opt.visualization._base.AbstractPage`"
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:16
+msgid "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 msgstr ""

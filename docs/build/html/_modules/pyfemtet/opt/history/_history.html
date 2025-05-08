@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.history._history &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.history._history</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.history._history</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyfemtet</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.df_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.dask_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.str_enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history._optimality</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history._hypervolume</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;TrialState&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;History&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ColumnOrderMode&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Record&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;create_err_msg_from_exception&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CorrespondingColumnNameRuler&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MAIN_FILTER&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">MAIN_FILTER</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">:</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">}</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.history&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_err_msg_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+    <span class="n">additional</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">additional</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">additional</span><span class="si">}</span><span class="s1">)&#39;</span>
+
+
+<div class="viewcode-block" id="TrialState">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.TrialState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TrialState</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+
+    <span class="n">succeeded</span> <span class="o">=</span> <span class="s1">&#39;Success&#39;</span>
+    <span class="n">skipped</span> <span class="o">=</span> <span class="s1">&#39;Skip&#39;</span>
+    <span class="n">hard_constraint_violation</span> <span class="o">=</span> <span class="s1">&#39;Hard constraint violation&#39;</span>
+    <span class="n">soft_constraint_violation</span> <span class="o">=</span> <span class="s1">&#39;Soft constraint violation&#39;</span>
+
+    <span class="c1"># Hidden Constraint</span>
+    <span class="n">model_error</span> <span class="o">=</span> <span class="s1">&#39;Model error&#39;</span>
+    <span class="n">mesh_error</span> <span class="o">=</span> <span class="s1">&#39;Mesh error&#39;</span>
+    <span class="n">solve_error</span> <span class="o">=</span> <span class="s1">&#39;Solve error&#39;</span>
+    <span class="n">post_error</span> <span class="o">=</span> <span class="s1">&#39;Post-processing error&#39;</span>
+
+    <span class="n">unknown_error</span> <span class="o">=</span> <span class="s1">&#39;Unknown error&#39;</span>
+    <span class="n">undefined</span> <span class="o">=</span> <span class="s1">&#39;undefined&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_corresponding_state_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrialState</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ModelError</span><span class="p">):</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">model_error</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">MeshError</span><span class="p">):</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">mesh_error</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">SolveError</span><span class="p">):</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">solve_error</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">PostProcessError</span><span class="p">):</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">post_error</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">HardConstraintViolation</span><span class="p">):</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">hard_constraint_violation</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">SkipSolve</span><span class="p">):</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">skipped</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">unknown_error</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_corresponding_exception_from_state</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">TrialState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">model_error</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">ModelError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">mesh_error</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">MeshError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">solve_error</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">SolveError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">post_error</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">PostProcessError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">unknown_error</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="ne">Exception</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">hard_constraint_violation</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">HardConstraintViolation</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">skipped</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">SkipSolve</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">e</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_hidden_constraint_violation_states</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">get_corresponding_state_from_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">exception_type</span> <span class="ow">in</span> <span class="n">_HiddenConstraintViolation</span><span class="o">.</span><span class="n">__pyfemtet_subclasses__</span><span class="p">]</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DataFrameWrapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+    <span class="n">__df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="n">_lock_name</span> <span class="o">=</span> <span class="s1">&#39;edit-df&#39;</span>
+    <span class="n">_dataset_name</span> <span class="o">=</span> <span class="s1">&#39;df&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Lock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lock_name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lock_if_not_locked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">nullcontext</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            equality_filters (dict, optional):</span>
+<span class="sd">                {column: value} formatted dict.</span>
+<span class="sd">                Each condition is considered as</span>
+<span class="sd">                an &#39;and&#39; condition.</span>
+
+<span class="sd">                Defaults to no filter.</span>
+
+<span class="sd">        Returns (pd.DataFrame):</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+
+        <span class="c1"># dask クラスターがある場合</span>
+        <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># あるけど with を抜けている場合</span>
+            <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__df</span>
+
+            <span class="c1"># 健在の場合</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">df</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">with</span> <span class="n">Lock</span><span class="p">(</span><span class="s1">&#39;access_dataset_df&#39;</span><span class="p">):</span>
+                    <span class="c1"># datasets 内に存在する場合</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_name</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">():</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset_name</span><span class="p">)</span>
+
+                    <span class="c1"># set の前に get されることはあってはならない</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span>
+
+                <span class="k">assert</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="c1"># dask クラスターがない場合</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__df</span>
+
+        <span class="c1"># filter に合致するものを取得</span>
+        <span class="k">if</span> <span class="n">equality_filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df:</span>
+<span class="sd">            equality_filters (dict, optional):</span>
+<span class="sd">                {column: value} formatted dict.</span>
+<span class="sd">                Each condition is considered as</span>
+<span class="sd">                an &#39;and&#39; condition.</span>
+<span class="sd">                Only the indexed rows will be updated.</span>
+
+<span class="sd">                Defaults to no filter.</span>
+
+<span class="sd">        Returns (pd.DataFrame):</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># フィルタを適用</span>
+        <span class="c1"># partial_df を get_df した時点のものから</span>
+        <span class="c1"># 変わっていたらエラーになる</span>
+        <span class="k">if</span> <span class="n">equality_filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">(),</span> <span class="s1">&#39;set_df() with equality_filters must be called with locking.&#39;</span>
+            <span class="n">partial_df</span> <span class="o">=</span> <span class="n">df</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+            <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">partial_df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">)</span>
+
+        <span class="c1"># dask クラスター上のデータを更新</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">Lock</span><span class="p">(</span><span class="s1">&#39;access_dataset_df&#39;</span><span class="p">):</span>
+
+                    <span class="c1"># datasets 上に存在する場合は削除（上書きができない）</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_name</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">():</span>
+
+                        <span class="c1"># remove</span>
+                        <span class="n">client</span><span class="o">.</span><span class="n">unpublish_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset_name</span><span class="p">)</span>
+
+                    <span class="c1"># update</span>
+                    <span class="n">client</span><span class="o">.</span><span class="n">publish_dataset</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset_name</span><span class="p">:</span> <span class="n">df</span><span class="p">})</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="c1"># local のデータを更新</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__df</span> <span class="o">=</span> <span class="n">df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_dask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Register the df initialized before dask context.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__df</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">end_dask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Get back the df on dask to use the value outside</span>
+        <span class="c1"># dask context.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CorrespondingColumnNameRuler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">direction_name</span><span class="p">(</span><span class="n">obj_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">obj_name</span> <span class="o">+</span> <span class="s1">&#39;_direction&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prm_lower_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">prm_name</span> <span class="o">+</span> <span class="s1">&#39;_lower_bound&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prm_upper_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">prm_name</span> <span class="o">+</span> <span class="s1">&#39;_upper_bound&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prm_choices_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">prm_name</span> <span class="o">+</span> <span class="s1">&#39;_choices&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prm_step_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">prm_name</span> <span class="o">+</span> <span class="s1">&#39;_step&#39;</span>
+
+
+<div class="viewcode-block" id="ColumnOrderMode">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.ColumnOrderMode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ColumnOrderMode</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The order rule of the history csv columns.&quot;&quot;&quot;</span>
+    <span class="n">per_category</span> <span class="o">=</span> <span class="s1">&#39;per_category&#39;</span>  <span class="c1">#: Sort per each object.</span>
+    <span class="n">important_first</span> <span class="o">=</span> <span class="s1">&#39;important_first&#39;</span>  <span class="c1">#: The values of parameters and objectives first.</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DuplicatedColumnNameError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">NoDuplicateDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key_</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">DuplicatedColumnNameError</span><span class="p">(</span>
+                    <span class="n">_</span><span class="p">(</span>
+                        <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The name `</span><span class="si">{name}</span><span class="s1">` is duplicated. &#39;</span>
+                                   <span class="s1">&#39;Please use another name.&#39;</span><span class="p">,</span>
+                        <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;名前 「</span><span class="si">{name}</span><span class="s1">」 が重複しています。&#39;</span>
+                                   <span class="s1">&#39;別の名前を使ってください。&#39;</span><span class="p">,</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">key_</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ColumnManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span>
+    <span class="n">y_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">c_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">column_dtypes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span>
+    <span class="n">meta_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">columns_to_keep_even_if_nan</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s1">&#39;messages&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
+            <span class="n">y_names</span><span class="p">,</span>
+            <span class="n">c_names</span><span class="p">,</span>
+            <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">column_order_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_names</span> <span class="o">=</span> <span class="n">y_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_names</span> <span class="o">=</span> <span class="n">c_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_full_sorted_column_information</span><span class="p">(</span>
+            <span class="n">additional_data</span><span class="o">=</span><span class="n">additional_data</span><span class="p">,</span>
+            <span class="n">column_order_mode</span><span class="o">=</span><span class="n">column_order_mode</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_full_sorted_column_information</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">extra_y_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">extra_c_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">column_order_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">extra_parameters</span> <span class="o">=</span> <span class="n">extra_parameters</span> <span class="ow">or</span> <span class="n">TrialInput</span><span class="p">()</span>
+        <span class="n">extra_y_names</span> <span class="o">=</span> <span class="n">extra_y_names</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">extra_c_names</span> <span class="o">=</span> <span class="n">extra_c_names</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="c1"># column name になるので重複は許されない</span>
+        <span class="n">column_dtypes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">NoDuplicateDict</span><span class="p">()</span>
+        <span class="n">meta_columns</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">column_dtypes_later</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">NoDuplicateDict</span><span class="p">()</span>
+        <span class="n">meta_columns_later</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">column_order_mode</span> <span class="o">==</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span><span class="p">:</span>
+            <span class="n">target_cds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">column_dtypes</span>
+            <span class="n">target_mcs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">meta_columns</span>
+        <span class="k">elif</span> <span class="n">column_order_mode</span> <span class="o">==</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">important_first</span><span class="p">:</span>
+            <span class="n">target_cds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">column_dtypes_later</span>
+            <span class="n">target_mcs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">meta_columns_later</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Unknown </span><span class="si">{</span><span class="n">column_order_mode</span><span class="si">=}</span><span class="s1">&#39;</span>
+
+        <span class="c1"># noinspection PyUnresolvedReferences</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="c1"># Note:</span>
+            <span class="c1">#   as_df() で空欄になりうるカラムには</span>
+            <span class="c1">#   Nan や &#39;&#39; を許容する dtype を指定すること</span>
+            <span class="c1">#   例えば、 trial に int を指定してはいけない</span>
+            <span class="c1">#</span>
+            <span class="c1"># Note:</span>
+            <span class="c1">#   pandas は column_dtypes に str を受け付けない</span>
+            <span class="c1">#   (object にキャストされる模様)</span>
+
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                    <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">NumericParameter</span><span class="p">):</span>
+                        <span class="c1"># important</span>
+                        <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">prm_name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.num.value&#39;</span><span class="p">)</span>
+
+                        <span class="c1"># later</span>
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="nb">float</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.num.lower_bound&#39;</span><span class="p">)</span>
+
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_upper_bound_name</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="nb">float</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.num.upper_bound&#39;</span><span class="p">)</span>
+
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_step_name</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="nb">float</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.num.step&#39;</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">CategoricalParameter</span><span class="p">):</span>
+                        <span class="c1"># important</span>
+                        <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">prm_name</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
+                        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.cat.value&#39;</span><span class="p">)</span>
+
+                        <span class="c1"># later</span>
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="nb">object</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.cat.choices&#39;</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+                <span class="k">for</span> <span class="n">extra_prm_name</span><span class="p">,</span> <span class="n">extra_param</span> <span class="ow">in</span> <span class="n">extra_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extra_param</span><span class="p">,</span> <span class="n">NumericParameter</span><span class="p">):</span>
+                        <span class="c1"># later</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">extra_prm_name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">extra_prm_name</span><span class="p">):</span> <span class="nb">object</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_upper_bound_name</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">extra_prm_name</span><span class="p">):</span> <span class="nb">object</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extra_param</span><span class="p">,</span> <span class="n">CategoricalParameter</span><span class="p">):</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">extra_prm_name</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span>
+                        <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">extra_prm_name</span><span class="p">):</span> <span class="nb">object</span><span class="p">})</span>
+                        <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">direction_name</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_names</span><span class="p">:</span>
+                    <span class="c1"># important</span>
+                    <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="nb">object</span><span class="p">})</span>  <span class="c1"># str | float</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">extra_y_names</span><span class="p">:</span>
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="nb">object</span><span class="p">})</span>  <span class="c1"># str | float</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>
+
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_names</span><span class="p">:</span>
+                    <span class="c1"># important</span>
+                    <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">extra_c_names</span><span class="p">:</span>
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="c1"># additional_data を入れる</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_additional_data_column</span><span class="p">():</span>
+                <span class="c1"># important</span>
+                <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
+                <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">additional_data</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()))</span>
+
+            <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="s1">&#39;feasibility&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;optimality&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;sub_sampling&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="c1"># important</span>
+                <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
+                <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># later</span>
+                <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
+                <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">column_dtypes_later</span><span class="p">)</span>
+        <span class="n">meta_columns</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">meta_columns_later</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">column_dtypes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span> <span class="o">=</span> <span class="n">meta_columns</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_additional_data_column</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s1">&#39;trial&#39;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_additional_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">meta_column</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_additional_data_column</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">meta_column</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">meta_column</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_get_additional_data_column</span><span class="p">()</span><span class="si">}</span><span class="s1">&quot; is not found in given columns.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_filter_columns</span><span class="p">(</span><span class="n">meta_column</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta_columns</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="si">=}</span><span class="s1"> and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">meta_columns</span><span class="p">)</span><span class="si">=}</span><span class="s1">&#39;</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">column_</span><span class="p">,</span> <span class="n">meta_column_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">meta_column_</span> <span class="o">==</span> <span class="n">meta_column</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_filter_prm_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;prm.num.value&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
+                <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;prm.cat.value&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_column</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="n">meta_column</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_prm_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_columns</span><span class="p">(</span><span class="s1">&#39;prm.num.value&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_columns</span><span class="p">(</span><span class="s1">&#39;prm.cat.value&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_obj_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_columns</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cns_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_columns</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+        <span class="n">prm_lb_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">prm_lb_name</span> <span class="ow">in</span> <span class="n">columns</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+        <span class="n">prm_choices_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">prm_choices_name</span> <span class="ow">in</span> <span class="n">columns</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_numerical_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_categorical_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">NumericParameter</span><span class="p">()</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">prm_name</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># lower_bound</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># upper bound</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_upper_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># step</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_step_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">elif</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">CategoricalParameter</span><span class="p">()</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">prm_name</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reconvert_objects</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">meta_column</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">):</span>
+            <span class="c1"># messages は df の段階で _RECORD_MESSAGE_DELIMITER</span>
+            <span class="c1"># separated な str なのでここで restore してはいけない</span>
+
+            <span class="c1"># choices list は csv を経由することで str になるので restore</span>
+            <span class="k">if</span> <span class="n">meta_column</span> <span class="o">==</span> <span class="s1">&#39;prm.cat.choices&#39;</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_sub_fidelity_names</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+        <span class="k">if</span> <span class="s1">&#39;sub_fidelity_name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">MAIN_FIDELITY_NAME</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+
+<span class="n">_RECORD_MESSAGE_DELIMITER</span> <span class="o">=</span> <span class="s1">&#39; | &#39;</span>
+
+
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Record</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+    <span class="c1"># x, y, c のみ特殊で、データの展開や関連情報の</span>
+    <span class="c1"># 列への展開を必要とするが、他の field は</span>
+    <span class="c1"># ここに定義すればよい</span>
+
+    <span class="n">trial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trial_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sub_sampling</span><span class="p">:</span> <span class="n">SubSampling</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sub_fidelity_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fidelity</span><span class="p">:</span> <span class="n">Fidelity</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrialInput</span><span class="p">)</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">TrialOutput</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrialOutput</span><span class="p">)</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">TrialConstraintOutput</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrialConstraintOutput</span><span class="p">)</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">TrialState</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">undefined</span>
+    <span class="n">datetime_start</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    <span class="n">datetime_end</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">hypervolume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">feasibility</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">optimality</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtypes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># noinspection PyUnresolvedReferences</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+        <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">TrialOutput</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+        <span class="n">c</span><span class="p">:</span> <span class="n">TrialConstraintOutput</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+
+        <span class="c1"># prm</span>
+        <span class="k">for</span> <span class="n">prm_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">prm_name</span><span class="p">:</span> <span class="n">param</span><span class="o">.</span><span class="n">value</span><span class="p">})</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">NumericParameter</span><span class="p">):</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="n">param</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">})</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_upper_bound_name</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="n">param</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">})</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_step_name</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="n">param</span><span class="o">.</span><span class="n">step</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">CategoricalParameter</span><span class="p">):</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span> <span class="n">param</span><span class="o">.</span><span class="n">choices</span><span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        
+        <span class="c1"># messages to str</span>
+        <span class="n">messages_str</span> <span class="o">=</span> <span class="n">_RECORD_MESSAGE_DELIMITER</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;messages&#39;</span><span class="p">])</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;messages&#39;</span><span class="p">:</span> <span class="n">messages_str</span><span class="p">})</span>
+        
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">_direction&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">direction</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+            <span class="n">columns</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dtypes</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_state_str_from_series</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">TrialState</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">undefined</span>
+        <span class="k">if</span> <span class="s1">&#39;state&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EntireDependentValuesCalculator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">records</span><span class="p">:</span> <span class="n">Records</span><span class="p">,</span>
+            <span class="n">equality_filters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">entire_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="n">records</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equality_filters</span> <span class="o">=</span> <span class="n">equality_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entire_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">entire_df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">entire_df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+
+        <span class="c1"># get column names</span>
+        <span class="n">obj_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">get_obj_names</span><span class="p">()</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">direction_name</span>
+        <span class="n">obj_direction_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">obj_names</span><span class="p">]</span>
+
+        <span class="c1"># get values</span>
+        <span class="n">all_obj_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">[</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">all_obj_directions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">[</span><span class="n">obj_direction_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">feasibility</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">[</span><span class="s1">&#39;feasibility&#39;</span><span class="p">]</span>
+
+        <span class="c1"># convert values as minimization problem</span>
+        <span class="n">y_internal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">all_obj_values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">obj_values</span><span class="p">,</span> <span class="n">obj_directions</span><span class="p">)</span> \
+                <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">all_obj_values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">all_obj_directions</span><span class="o">.</span><span class="n">T</span><span class="p">)):</span>
+            <span class="n">y_internal</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span>
+                    <span class="nb">map</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">Objective</span><span class="o">.</span><span class="n">_convert</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">),</span>
+                        <span class="nb">zip</span><span class="p">(</span><span class="n">obj_values</span><span class="p">,</span> <span class="n">obj_directions</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_y_internal</span> <span class="o">=</span> <span class="n">y_internal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_feasibility</span> <span class="o">=</span> <span class="n">feasibility</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_optimality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+
+        <span class="c1"># calc optimality</span>
+        <span class="n">optimality</span> <span class="o">=</span> <span class="n">calc_optimality</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_y_internal</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_feasibility</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;optimality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimality</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_hypervolume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+
+        <span class="c1"># calc hypervolume</span>
+        <span class="n">hv_values</span> <span class="o">=</span> <span class="n">calc_hypervolume</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_y_internal</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_feasibility</span><span class="p">,</span>
+            <span class="n">ref_point</span><span class="o">=</span><span class="s1">&#39;nadir-up-to-the-point&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;hypervolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hv_values</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_trial_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+
+        <span class="c1"># calc trial</span>
+        <span class="n">trial_number</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trial_number</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Records</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:</span>
+
+<span class="sd">    最適化の試行全体の情報を格納するモデルクラス</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_wrapper</span><span class="p">:</span> <span class="n">DataFrameWrapper</span>
+    <span class="n">column_manager</span><span class="p">:</span> <span class="n">ColumnManager</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span> <span class="o">=</span> <span class="n">DataFrameWrapper</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loaded_meta_columns</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="c1"># 新しく始まる場合に備えカラムを設定</span>
+            <span class="c1"># load の場合はあとで上書きされる</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([],</span> <span class="n">columns</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="c1"># load meta_column</span>
+            <span class="n">loaded_meta_columns</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+            <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>  <span class="c1"># empty line</span>
+            <span class="c1"># load df from line 3</span>
+            <span class="n">loaded_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># df を csv にする過程で失われる list などのオブジェクトを restore</span>
+        <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_reconvert_objects</span><span class="p">(</span><span class="n">loaded_df</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">)</span>
+
+        <span class="c1"># この段階では column_dtypes が setup されていない可能性があるので</span>
+        <span class="c1"># compatibility check をしない。よって set_df しない。</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loaded_meta_columns</span> <span class="o">=</span> <span class="n">loaded_meta_columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span> <span class="o">=</span> <span class="n">loaded_df</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_problem_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># 読み込んだデータがないのであれば何もしない</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># 順番が違ってもいいが、</span>
+        <span class="c1"># 構成に変更がないこと。</span>
+        <span class="c1"># ただし obj は減っていてもいい。</span>
+        <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_meta_columns</span>
+
+        <span class="c1"># prm_names が過不足ないか</span>
+        <span class="n">loaded_prm_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_prm_names</span><span class="p">(</span>
+                <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">prm_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">get_prm_names</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loaded_prm_names</span> <span class="o">-</span> <span class="n">prm_names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm_names</span> <span class="o">-</span> <span class="n">loaded_prm_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Incompatible parameter setting.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># obj_names が増えていないか</span>
+        <span class="n">loaded_obj_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">,</span> <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
+        <span class="n">obj_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">get_obj_names</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_names</span> <span class="o">-</span> <span class="n">loaded_obj_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Incompatible objective setting.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># cns_names が過不足ないか</span>
+        <span class="c1"># TODO: cns の上下限は変更されてはならない。</span>
+        <span class="n">loaded_cns_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">,</span> <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
+        <span class="n">cns_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">get_cns_names</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loaded_cns_names</span> <span class="o">-</span> <span class="n">cns_names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">cns_names</span> <span class="o">-</span> <span class="n">loaded_cns_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Incompatible constraint setting.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reinitialize_record_with_loaded_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_order_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span><span class="p">):</span>
+
+        <span class="c1"># 読み込んだデータがないのであれば何もしない</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_meta_columns</span>
+        <span class="n">loaded_prm_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_prm_names</span><span class="p">(</span><span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
+        <span class="n">loaded_obj_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">,</span> <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
+        <span class="n">loaded_cns_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">,</span> <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
+
+        <span class="c1"># loaded df に存在するが Record に存在しないカラムを Record に追加</span>
+        <span class="n">extra_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">extra_y_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">extra_c_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">l_col</span><span class="p">,</span> <span class="n">l_meta</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">):</span>
+
+            <span class="c1"># 現在の Record に含まれないならば</span>
+            <span class="k">if</span> <span class="n">l_col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                <span class="c1"># それが prm_name ならば</span>
+                <span class="k">if</span> <span class="n">l_col</span> <span class="ow">in</span> <span class="n">loaded_prm_names</span><span class="p">:</span>
+
+                    <span class="c1"># それが Categorical ならば</span>
+                    <span class="k">if</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span><span class="p">(</span><span class="n">l_col</span><span class="p">)</span> <span class="ow">in</span> <span class="n">loaded_columns</span><span class="p">:</span>
+                        <span class="n">param</span> <span class="o">=</span> <span class="n">CategoricalParameter</span><span class="p">()</span>
+                        <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">l_col</span>
+                        <span class="n">param</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                        <span class="n">param</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="c1"># それが Numeric ならば</span>
+                    <span class="k">elif</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span><span class="p">(</span><span class="n">l_col</span><span class="p">)</span> <span class="ow">in</span> <span class="n">loaded_columns</span><span class="p">:</span>
+                        <span class="n">param</span> <span class="o">=</span> <span class="n">NumericParameter</span><span class="p">()</span>
+                        <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">l_col</span>
+                        <span class="n">param</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                        <span class="n">param</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                        <span class="n">param</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+                    <span class="n">extra_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">l_col</span><span class="p">:</span> <span class="n">param</span><span class="p">})</span>
+
+                <span class="c1"># obj_name ならば</span>
+                <span class="k">elif</span> <span class="n">l_col</span> <span class="ow">in</span> <span class="n">loaded_obj_names</span><span class="p">:</span>
+                    <span class="n">extra_y_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_col</span><span class="p">)</span>
+
+                <span class="c1"># cns_name ならば</span>
+                <span class="k">elif</span> <span class="n">l_col</span> <span class="ow">in</span> <span class="n">loaded_cns_names</span><span class="p">:</span>
+                    <span class="n">extra_c_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_col</span><span class="p">)</span>
+
+        <span class="c1"># additional data を取得</span>
+        <span class="n">a_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">(</span><span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">set_full_sorted_column_information</span><span class="p">(</span>
+            <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
+            <span class="n">extra_y_names</span><span class="o">=</span><span class="n">extra_y_names</span><span class="p">,</span>
+            <span class="n">extra_c_names</span><span class="o">=</span><span class="n">extra_c_names</span><span class="p">,</span>
+            <span class="n">additional_data</span><span class="o">=</span><span class="n">a_data</span><span class="p">,</span>
+            <span class="n">column_order_mode</span><span class="o">=</span><span class="n">column_order_mode</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># worker に影響しないように loaded_df のコピーを作成</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># loaded df に存在しないが Record に存在するカラムを追加</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="c1"># column ごとの default 値を追加</span>
+                <span class="k">if</span> <span class="n">col</span> <span class="o">==</span> <span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">MAIN_FIDELITY_NAME</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="c1"># column_dtypes を設定</span>
+        <span class="c1"># 与える column_dtypes のほうが多い場合</span>
+        <span class="c1"># エラーになるので余分なものを削除</span>
+        <span class="c1"># 与える column_dtypes が少ない分には</span>
+        <span class="c1"># (pandas としては) 問題ない</span>
+        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_df</span><span class="o">.</span><span class="n">columns</span><span class="p">}</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
+
+        <span class="c1"># 並べ替え</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="p">)</span>
+
+        <span class="c1"># OK なので読み込んだデータを set_df する</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_nan_columns</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">,</span> <span class="n">columns_to_keep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df:</span>
+<span class="sd">            meta_columns:</span>
+<span class="sd">            columns_to_keep: Allowing these columns to all NaN values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Removed DataFrame and corresponding meta_columns.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">nan_columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">columns_to_keep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">columns_to_keep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">columns_to_keep_even_if_nan</span><span class="p">()</span>
+        <span class="n">nan_columns</span><span class="p">[</span><span class="n">columns_to_keep</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">fdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="o">~</span><span class="n">nan_columns</span><span class="p">]</span>
+        <span class="n">f_meta_columns</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">meta_columns</span><span class="p">)[</span><span class="o">~</span><span class="n">nan_columns</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">fdf</span><span class="p">,</span> <span class="n">f_meta_columns</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+        <span class="c1"># filter NaN columns</span>
+        <span class="n">df</span><span class="p">,</span> <span class="n">meta_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_nan_columns</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">get_df</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ENCODING</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">lineterminator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># write meta_columns</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">meta_columns</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta_columns</span><span class="p">))</span>  <span class="c1"># empty line</span>
+                <span class="c1"># write df from line 3</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">lineterminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="n">Msg</span><span class="o">.</span><span class="n">F_WARN_HISTORY_CSV_NOT_ACCESSIBLE</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+
+        <span class="c1"># get row</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">as_df</span><span class="p">(</span><span class="n">dtypes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="p">)</span>
+
+        <span class="c1"># concat</span>
+        <span class="n">dfw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span>
+
+        <span class="c1"># append</span>
+        <span class="k">with</span> <span class="n">dfw</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+
+            <span class="n">df</span> <span class="o">=</span> <span class="n">dfw</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># ここで空のカラムを削除しては</span>
+                <span class="c1"># データの並びがおかしくなるケースが出る</span>
+                <span class="n">new_df</span> <span class="o">=</span> <span class="n">row</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># pandas の型推定の仕様変更対策で</span>
+                <span class="c1"># 空のカラムは削除する</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+
+                <span class="n">new_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">df</span><span class="p">,</span> <span class="n">row</span><span class="p">],</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="c1"># calc entire-dependent values</span>
+            <span class="c1"># must be in with block to keep</span>
+            <span class="c1"># the entire data compatibility</span>
+            <span class="c1"># during processing.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_entire_dependent_values</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
+
+            <span class="n">dfw</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
+
+            <span class="c1"># postprocess after recording で使うために</span>
+            <span class="c1"># 計算済み最終行を返す</span>
+            <span class="k">return</span> <span class="n">new_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_entire_dependent_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock_if_not_locked</span><span class="p">:</span>
+
+            <span class="c1"># update main fidelity</span>
+            <span class="n">equality_filters</span> <span class="o">=</span> <span class="n">MAIN_FILTER</span>
+            <span class="n">mgr</span> <span class="o">=</span> <span class="n">EntireDependentValuesCalculator</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">equality_filters</span><span class="p">,</span>
+                <span class="n">processing_df</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">update_optimality</span><span class="p">()</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">update_hypervolume</span><span class="p">()</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">update_trial_number</span><span class="p">()</span>
+            <span class="n">pdf</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">partial_df</span>
+            <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">processing_df</span><span class="p">,</span> <span class="n">partial_df</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="n">equality_filters</span><span class="p">)</span>
+
+            <span class="c1"># update sub fidelity</span>
+            <span class="n">entire_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+            <span class="n">sub_fidelity_names</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">entire_df</span><span class="p">[</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">MAIN_FIDELITY_NAME</span> <span class="ow">in</span> <span class="n">sub_fidelity_names</span><span class="p">:</span>
+                <span class="n">sub_fidelity_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">MAIN_FIDELITY_NAME</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">sub_fidelity_name</span> <span class="ow">in</span> <span class="n">sub_fidelity_names</span><span class="p">:</span>
+                <span class="n">equality_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">:</span> <span class="n">sub_fidelity_name</span><span class="p">}</span>
+                <span class="n">mgr</span> <span class="o">=</span> <span class="n">EntireDependentValuesCalculator</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">equality_filters</span><span class="p">,</span>
+                    <span class="n">processing_df</span>
+                <span class="p">)</span>
+                <span class="n">mgr</span><span class="o">.</span><span class="n">update_trial_number</span><span class="p">()</span>
+            <span class="n">pdf</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">partial_df</span>
+            <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">processing_df</span><span class="p">,</span> <span class="n">partial_df</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="n">equality_filters</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="History">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.History">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">History</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;最適化の試行の履歴を管理します。&quot;&quot;&quot;</span>
+    <span class="n">_records</span><span class="p">:</span> <span class="n">Records</span>
+    <span class="n">prm_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">obj_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">cns_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">sub_fidelity_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">is_restart</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The existing or destination CSV path.</span>
+
+<span class="sd">    If not specified, the CSV file is saved in the format</span>
+<span class="sd">    &quot;pyfemtet.opt_%Y%m%d_%H%M%S.csv&quot;</span>
+<span class="sd">    when the optimization process starts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MAIN_FILTER</span> <span class="o">=</span> <span class="n">MAIN_FILTER</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_restart</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">pyfemtet</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span><span class="p">:</span> <span class="n">ColumnOrderMode</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">start_dask</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">end_dask</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">with_finalize</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_restart</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">with_finalize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_from_loaded_data</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finalize_from_loaded_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_restart</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finalized</span><span class="p">:</span>
+
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">loaded_df</span>
+            <span class="n">meta_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">loaded_meta_columns</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_filter_prm_names</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_get_sub_fidelity_names</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
+
+            <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span><span class="p">:</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_get_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+                <span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">prm_name</span><span class="p">:</span> <span class="n">param</span><span class="p">})</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span>
+                <span class="n">parameters</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_names</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">finalize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
+            <span class="n">obj_names</span><span class="p">,</span>
+            <span class="n">cns_names</span><span class="p">,</span>
+            <span class="n">sub_fidelity_names</span><span class="p">,</span>
+            <span class="n">additional_data</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">obj_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cns_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sub_fidelity_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finalized</span><span class="p">:</span>
+            <span class="c1"># ここで column_dtypes が決定する</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span>
+                <span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span>
+            <span class="p">)</span>
+
+            <span class="c1"># initialize</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;pyfemtet.opt_%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S.csv&quot;</span><span class="p">)</span>
+
+            <span class="c1"># load</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">load_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">check_problem_compatibility</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">reinitialize_record_with_loaded_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalized</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="History.get_df">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.History.get_df">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the optimization history.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            equality_filters (dict, optional):</span>
+<span class="sd">                The {column: value} というフォーマットの</span>
+<span class="sd">                matching filter.</span>
+
+<span class="sd">        Returns: The optimization history.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+
+        <span class="c1"># noinspection PyMethodParameters</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">RecordContext</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="n">self_</span><span class="o">.</span><span class="n">record</span> <span class="o">=</span> <span class="n">Record</span><span class="p">()</span>
+                <span class="n">self_</span><span class="o">.</span><span class="n">record_as_df</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">self_</span><span class="o">.</span><span class="n">record</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">datetime_end</span> <span class="o">=</span> <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">datetime_end</span> \
+                    <span class="k">if</span> <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">datetime_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+                    <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="p">)</span>
+
+            <span class="nd">@staticmethod</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">postprocess_after_recording</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+
+                <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+
+                <span class="n">name_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">]):</span>
+                    <span class="n">fid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">fid</span> <span class="o">!=</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">:</span>
+                        <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+
+                <span class="k">assert</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">])</span>
+                <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]))</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">]):</span>
+                    <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">]))</span>
+
+                <span class="n">trial_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_parts</span><span class="p">)</span>
+
+                <span class="c1"># FIXME: メインフィデリティだけでなく、FEM に</span>
+                <span class="c1">#   対応するフィデリティ又はサブサンプリングのみ</span>
+                <span class="c1">#   フィルタした情報を提供するようにする。</span>
+                <span class="c1">#   フィデリティの話は現在解析を実行している opt が</span>
+                <span class="c1">#   必要なので、recording メソッドの引数に</span>
+                <span class="c1">#   それを追加する</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">client</span><span class="o">.</span><span class="n">run_on_scheduler</span><span class="p">(</span>
+                        <span class="n">fem</span><span class="o">.</span><span class="n">_postprocess_after_recording</span><span class="p">,</span>
+                        <span class="n">trial_name</span><span class="o">=</span><span class="n">trial_name</span><span class="p">,</span>
+                        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+                        <span class="o">**</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">_create_postprocess_args</span><span class="p">()),</span>
+                    <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fem</span><span class="o">.</span><span class="n">_postprocess_after_recording</span><span class="p">(</span>
+                        <span class="n">dask_scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">trial_name</span><span class="o">=</span><span class="n">trial_name</span><span class="p">,</span>
+                        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+                        <span class="o">**</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">_create_postprocess_args</span><span class="p">())</span>
+                    <span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+
+                <span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="c1"># record feasibility</span>
+                <span class="c1"># skipped -&gt; None (empty)</span>
+                <span class="c1"># succeeded -&gt; True</span>
+                <span class="c1"># else -&gt; False</span>
+                <span class="k">if</span> <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">skipped</span><span class="p">:</span>
+                    <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">feasibility</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">elif</span> <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">succeeded</span><span class="p">:</span>
+                    <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">feasibility</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">feasibility</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># append</span>
+                <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">self_</span><span class="o">.</span><span class="n">append</span><span class="p">()</span>
+                <span class="c1"># 1st argument of issubclass cannot be None</span>
+                <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">ExceptionDuringOptimization</span><span class="p">):</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">self_</span><span class="o">.</span><span class="n">append</span><span class="p">()</span>
+
+                <span class="c1"># if append is succeeded,</span>
+                <span class="c1"># do fem.post_processing</span>
+                <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">self_</span><span class="o">.</span><span class="n">postprocess_after_recording</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+                <span class="c1"># save history</span>
+                <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">RecordContext</span><span class="p">()</span>
+
+<div class="viewcode-block" id="History.save">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.History.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export the optimization history.</span>
+
+<span class="sd">        The destination path is :class:`History.path`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_optuna_study_for_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+
+        <span class="c1"># create study</span>
+        <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="c1"># storage=&#39;sqlite:///&#39; + os.path.basename(self.path) + &#39;_dummy.db&#39;,</span>
+            <span class="n">sampler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pruner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">study_name</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)))</span>
+        <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># add trial to study</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="o">=</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+
+            <span class="c1"># trial</span>
+            <span class="n">trial_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="c1"># state</span>
+            <span class="n">state_str</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">get_state_str_from_series</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">state_str</span> <span class="o">!=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">succeeded</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span>
+            <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">))</span>
+
+            <span class="c1"># params</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="n">prm_name</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span> <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span><span class="p">}</span>
+            <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span>
+
+            <span class="c1"># distribution</span>
+            <span class="n">distributions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">BaseDistribution</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                <span class="c1"># float</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+                    <span class="n">lb_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+                    <span class="n">ub_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_upper_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">FloatDistribution</span><span class="p">(</span>
+                        <span class="n">low</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="n">lb_name</span><span class="p">],</span>
+                        <span class="n">high</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="n">ub_name</span><span class="p">],</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># categorical</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+                    <span class="n">choices_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">CategoricalDistribution</span><span class="p">(</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="n">choices_name</span><span class="p">]</span>
+                    <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+                <span class="n">distributions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">prm_name</span><span class="p">:</span> <span class="n">dist</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">distributions</span><span class="o">=</span><span class="n">distributions</span><span class="p">))</span>
+
+            <span class="c1"># objective</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+
+            <span class="c1"># add to study</span>
+            <span class="n">trial</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_trial</span><span class="p">(</span><span class="o">**</span><span class="n">trial_kwargs</span><span class="p">)</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">add_trial</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">study</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_numerical_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_categorical_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

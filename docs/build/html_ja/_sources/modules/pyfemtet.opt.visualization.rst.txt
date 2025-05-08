@@ -7,7 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
-   pyfemtet.opt.visualization.result_viewer
+   pyfemtet.opt.visualization.history_viewer
+   pyfemtet.opt.visualization.plotter
 
 Module contents
 ---------------

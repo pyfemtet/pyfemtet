@@ -181,6 +181,11 @@ class FemtetInterface(COMInterface):
 
     @property
     def object_pass_to_fun(self):
+        """The object pass to the first argument of user-defined objective functions.
+
+        Returns:
+            Femtet (CDispatch): COM object of Femtet.
+        """
         return self.Femtet
 
     def _setup_before_parallel(self):

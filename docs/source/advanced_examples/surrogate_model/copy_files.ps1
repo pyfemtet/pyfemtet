@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 # ===== const =====
 $package_root = "$PSScriptRoot\..\..\..\..\"
-$sample_location = "$package_root\pyfemtet\opt\advanced_samples\surrogate_model"
+$sample_location = "$package_root\samples\opt\advanced_samples\surrogate_model"
 
 
 # ===== helper =====

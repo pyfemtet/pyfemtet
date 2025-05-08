@@ -38,6 +38,7 @@ Finally, you will get a ``.py`` script to run optimization with your ``.femprj``
 
 
 .. _manualinstallation:
+
 Manual Installation
 -------------------
 

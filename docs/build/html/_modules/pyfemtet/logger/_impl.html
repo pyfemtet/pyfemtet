@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.logger._impl &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../logger.html">pyfemtet.logger</a></li>
+      <li class="breadcrumb-item active">pyfemtet.logger._impl</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.logger._impl</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">locale</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">colorlog</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColoredFormatter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_worker</span>
+
+<span class="n">LOCALE</span><span class="p">,</span> <span class="n">LOCALE_ENCODING</span> <span class="o">=</span> <span class="n">locale</span><span class="o">.</span><span class="n">getlocale</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Windows&#39;</span><span class="p">:</span>
+    <span class="n">DATEFMT</span> <span class="o">=</span> <span class="s1">&#39;%#m/</span><span class="si">%#d</span><span class="s1"> %#H:%M&#39;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">DATEFMT</span> <span class="o">=</span> <span class="s1">&#39;%-m/</span><span class="si">%-d</span><span class="s1"> %-H:%M&#39;</span>
+
+<span class="n">__lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>  <span class="c1"># thread 並列されたタスクがアクセスする場合に備えて</span>
+
+<span class="n">__initialized_root_packages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+
+<span class="c1"># ===== set dask worker prefix to ``ROOT`` logger =====</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_dask_worker_name</span><span class="p">():</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;(Main)&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">worker</span> <span class="o">=</span> <span class="n">get_worker</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># local なら index, cluster なら tcp address</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(Sub</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">name</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_DaskLogRecord</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">_get_dask_worker_name</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">msg</span>
+        <span class="k">return</span> <span class="n">msg</span>
+
+
+<span class="n">logging</span><span class="o">.</span><span class="n">setLogRecordFactory</span><span class="p">(</span><span class="n">_DaskLogRecord</span><span class="p">)</span>
+
+
+<span class="c1"># ===== format config =====</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">__create_formatter</span><span class="p">(</span><span class="n">colored</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">colored</span><span class="p">:</span>
+        <span class="c1"># colorized</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(log_color)s</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;[</span><span class="si">%(name)s</span><span class="s2"> </span><span class="si">%(levelname).4s</span><span class="s2">]&quot;</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="si">%(asctime)s</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%(reset)s</span><span class="s2">&quot;</span>
+
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">ColoredFormatter</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2"> %(message)s&quot;</span><span class="p">,</span>
+            <span class="n">datefmt</span><span class="o">=</span><span class="n">DATEFMT</span><span class="p">,</span>
+            <span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">log_colors</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;DEBUG&quot;</span><span class="p">:</span> <span class="s2">&quot;purple&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;INFO&quot;</span><span class="p">:</span> <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;WARNING&quot;</span><span class="p">:</span> <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ERROR&quot;</span><span class="p">:</span> <span class="s2">&quot;light_red&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;CRITICAL&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;[</span><span class="si">%(name)s</span><span class="s2"> </span><span class="si">%(levelname).4s</span><span class="s2">]&quot;</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2"> %(message)s&quot;</span><span class="p">,</span>
+            <span class="n">datefmt</span><span class="o">=</span><span class="n">DATEFMT</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">formatter</span>
+
+
+<span class="c1"># ===== handler config =====</span>
+
+<span class="n">STDOUT_HANDLER_NAME</span> <span class="o">=</span> <span class="s1">&#39;stdout-handler&#39;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">__get_stdout_handler</span><span class="p">():</span>
+    <span class="n">stdout_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="n">stdout_handler</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="n">STDOUT_HANDLER_NAME</span><span class="p">)</span>
+    <span class="n">stdout_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">__create_formatter</span><span class="p">(</span><span class="n">colored</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">stdout_handler</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">__has_stdout_handler</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">([</span><span class="n">handler</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">!=</span> <span class="n">STDOUT_HANDLER_NAME</span> <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">set_stdout_output</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">__has_stdout_handler</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">__get_stdout_handler</span><span class="p">())</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_stdout_output</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">__has_stdout_handler</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">__get_stdout_handler</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add_file_output</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add FileHandler to the logger.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: THe name of the added handler.</span>
+<span class="sd">        Its format is &#39;filehandler-{os.path.basename(filepath)}&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># certify filepath</span>
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">-%H%M%S&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">.log&#39;</span>
+
+    <span class="c1"># add file handler</span>
+    <span class="n">file_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">LOCALE_ENCODING</span><span class="p">)</span>
+    <span class="n">file_handler</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;filehandler-</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">file_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">__create_formatter</span><span class="p">(</span><span class="n">colored</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">file_handler</span><span class="p">)</span>
+
+    <span class="c1"># set (default) log level</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_file_output</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes FileHandler from the logger.</span>
+
+<span class="sd">    If filepath is None, remove all FileHandler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;filehandler-&#39;</span> <span class="ow">in</span> <span class="n">handler</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">handler_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;filehandler-</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">handler_name</span> <span class="o">==</span> <span class="n">handler</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_all_output</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
+
+
+<span class="c1"># ===== root-package logger =====</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_package_root_logger</span><span class="p">(</span><span class="n">package_name</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">__initialized_root_packages</span>
+    <span class="k">if</span> <span class="n">package_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">__initialized_root_packages</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">__lock</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">set_stdout_output</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+            <span class="n">__initialized_root_packages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">logger</span>
+
+
+<span class="c1"># ===== module logger =====</span>
+
+<div class="viewcode-block" id="get_module_logger">
+<a class="viewcode-back" href="../../../modules/pyfemtet.logger.html#pyfemtet.logger.get_module_logger">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_module_logger</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the module-level logger.</span>
+
+<span class="sd">    The format is defined in the package_root_logger.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): The logger name to want.</span>
+<span class="sd">        debug (bool, optional): Output DEBUG level message or not.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        logging.Logger:</span>
+<span class="sd">            The logger its name is ``root_package.subpackage.module``.</span>
+<span class="sd">            child level logger&#39;s signal propagates to the parent logger</span>
+<span class="sd">            and is shown in the parent(s)&#39;s handler(s).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># check root logger initialized</span>
+    <span class="n">name_arr</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">__initialized_root_packages</span><span class="p">:</span>
+        <span class="n">setup_package_root_logger</span><span class="p">(</span><span class="n">name_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># get logger</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># If not root logger, ensure propagate is True.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name_arr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># If debug mode, set specific level.</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">logger</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">root_logger</span> <span class="o">=</span> <span class="n">setup_package_root_logger</span><span class="p">(</span><span class="s1">&#39;logger&#39;</span><span class="p">)</span>
+    <span class="n">optimizer_logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;logger.optimizer&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">);</span> <span class="n">optimizer_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">interface_logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;logger.interface&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">root_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;This is root logger&#39;s info.&quot;</span><span class="p">)</span>
+    <span class="n">optimizer_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;This is optimizer logger&#39;s info.&quot;</span><span class="p">)</span>
+
+    <span class="n">add_file_output</span><span class="p">(</span><span class="n">interface_logger</span><span class="p">,</span> <span class="s1">&#39;test-module-log.log&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">interface_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debugging...&#39;</span><span class="p">)</span>
+    <span class="n">remove_file_output</span><span class="p">(</span><span class="n">interface_logger</span><span class="p">,</span> <span class="s1">&#39;test-module-log.log&#39;</span><span class="p">)</span>
+
+    <span class="n">interface_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug is finished.&#39;</span><span class="p">)</span>
+    <span class="n">root_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;This message will not be shown &quot;</span>
+                      <span class="s2">&quot;even if the module_logger&#39;s level &quot;</span>
+                      <span class="s2">&quot;is logging.DEBUG.&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

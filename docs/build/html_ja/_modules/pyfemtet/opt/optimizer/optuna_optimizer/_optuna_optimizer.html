@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/migration_to_v1.html">バージョン 1 への移行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/advanced_examples.html">発展的な例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span><span class="p">,</span> <span class="n">nullcontext</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TPESampler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.study</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxTrialsCallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna_integration.dask</span><span class="w"> </span><span class="kn">import</span> <span class="n">DaskStorage</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.dask_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.closing</span><span class="w"> </span><span class="kn">import</span> <span class="n">closing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_optuna_logger</span><span class="p">,</span> <span class="n">remove_all_output</span><span class="p">,</span> <span class="n">get_module_logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer.optuna_optimizer._optuna_attribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptunaAttribute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">PoFBoTorchSampler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.worker_status</span><span class="w"> </span><span class="kn">import</span> <span class="n">WorkerStatus</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.optimizer&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+<span class="n">remove_all_output</span><span class="p">(</span><span class="n">get_optuna_logger</span><span class="p">())</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;set_metric_names&#39;</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ExperimentalWarning</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;Argument ``constraints_func`` is an experimental feature.&#39;</span><span class="p">,</span>
+                        <span class="n">optuna</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ExperimentalWarning</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OptunaOptimizer">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.optuna_optimizer.html#pyfemtet.opt.OptunaOptimizer">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OptunaOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+    <span class="c1"># system</span>
+    <span class="n">study_name</span> <span class="o">=</span> <span class="s1">&#39;pyfemtet-study&#39;</span>
+    <span class="n">storage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">BaseStorage</span>
+    <span class="n">storage_path</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">current_trial</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">Trial</span> <span class="o">|</span> <span class="kc">None</span>
+
+    <span class="c1"># settings</span>
+    <span class="c1"># sampler: optuna.samplers.BaseSampler | None = None  # reseed_rng が seed 指定できないため</span>
+    <span class="n">sampler_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">BaseSampler</span><span class="p">]</span>
+    <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">callbacks</span><span class="p">:</span> <span class="nb">list</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">sampler_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">BaseSampler</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span> <span class="o">=</span> <span class="n">sampler_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span> <span class="o">=</span> <span class="n">sampler_class</span> <span class="ow">or</span> <span class="n">TPESampler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># ===== method checker =====</span>
+    <span class="c1"># noinspection PyMethodOverriding</span>
+<div class="viewcode-block" id="OptunaOptimizer.add_parameter">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.optuna_optimizer.html#pyfemtet.opt.OptunaOptimizer.add_parameter">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_parameter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">AbstractOptimizer</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">initial_value</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span>
+                                        <span class="n">pass_to_fem</span><span class="o">=</span><span class="n">pass_to_fem</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="n">fix</span><span class="p">)</span></div>
+
+
+    <span class="c1"># noinspection PyMethodOverriding</span>
+<div class="viewcode-block" id="OptunaOptimizer.add_categorical_parameter">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.optuna_optimizer.html#pyfemtet.opt.OptunaOptimizer.add_categorical_parameter">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_categorical_parameter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">choices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">AbstractOptimizer</span><span class="o">.</span><span class="n">add_categorical_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">initial_value</span><span class="p">,</span> <span class="n">choices</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span>
+                                                    <span class="n">pass_to_fem</span><span class="o">=</span><span class="n">pass_to_fem</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="n">fix</span><span class="p">)</span></div>
+
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_SolveSet</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="o">.</span><span class="n">_SolveSet</span><span class="p">):</span>
+        <span class="n">opt</span><span class="p">:</span> <span class="n">OptunaOptimizer</span>
+        <span class="n">optuna_attr</span><span class="p">:</span> <span class="n">OptunaAttribute</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c1"># prepare attribute</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_common</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+            <span class="c1"># if (hidden) constraint violation, set trial attribute</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">pf_state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">get_corresponding_state_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">v_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_create_infeasible_constraints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_hard_constraint_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">HardConstraintViolation</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_common</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_hidden_constraint_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">_HiddenConstraintViolation</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_common</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_skip_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">SkipSolve</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">pf_state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">skipped</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_if_succeeded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_return</span><span class="p">:</span> <span class="n">_FReturnValue</span><span class="p">):</span>
+
+            <span class="n">y</span><span class="p">,</span> <span class="n">dict_y_internal</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">record</span> <span class="o">=</span> <span class="n">f_return</span>
+
+            <span class="c1"># convert constraint to **sorted** violation</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">cns_name</span><span class="p">,</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># This is {lower or upper: violation_value} dict</span>
+                <span class="n">violation</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">cns_name</span><span class="p">]</span><span class="o">.</span><span class="n">calc_violation</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">l_or_u</span><span class="p">,</span> <span class="n">violation_value</span> <span class="ow">in</span> <span class="n">violation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">key_</span> <span class="o">=</span> <span class="n">cns_name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">l_or_u</span>
+                    <span class="n">v</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key_</span><span class="p">:</span> <span class="n">violation_value</span><span class="p">})</span>
+
+            <span class="c1"># register results</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">v_values</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">y_values</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dict_y_internal</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">pf_state</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">state</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c1"># update trial attribute</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">current_trial</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_infeasible_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="n">opt_</span> <span class="o">=</span> <span class="n">opt_</span> <span class="k">if</span> <span class="n">opt_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">cns</span> <span class="ow">in</span> <span class="n">opt_</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="mf">1e9</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">FrozenTrial</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">key</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">get_violation_from_trial_attr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">Trial</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_trial</span> <span class="o">=</span> <span class="n">trial</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_logging</span><span class="p">():</span>
+
+            <span class="n">vm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span>
+
+            <span class="c1"># check interruption</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+            <span class="c1"># parameter suggestion</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">prm</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">prm</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fix&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>  <span class="c1"># default is False</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prm</span><span class="p">,</span> <span class="n">NumericParameter</span><span class="p">):</span>
+                    <span class="n">prm</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span>
+                        <span class="n">name</span><span class="p">,</span>
+                        <span class="n">prm</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span>
+                        <span class="n">prm</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">,</span>
+                        <span class="n">step</span><span class="o">=</span><span class="n">prm</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
+                        <span class="n">log</span><span class="o">=</span><span class="n">prm</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">__default</span> <span class="o">:=</span> <span class="kc">False</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prm</span><span class="p">,</span> <span class="n">CategoricalParameter</span><span class="p">):</span>
+                    <span class="n">prm</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span>
+                        <span class="n">name</span><span class="p">,</span> <span class="n">prm</span><span class="o">.</span><span class="n">choices</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+            <span class="c1"># evaluate expressions</span>
+            <span class="n">vm</span><span class="o">.</span><span class="n">eval_expressions</span><span class="p">()</span>
+
+            <span class="c1"># check interruption</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+            <span class="c1"># construct TrialInput</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span>
+            <span class="n">x_pass_to_fem</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
+
+            <span class="c1"># prepare solve</span>
+            <span class="n">solve_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_solve_set</span><span class="p">()</span>
+
+            <span class="c1"># process main fidelity model</span>
+            <span class="n">f_return</span> <span class="o">=</span> <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">f_return</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y_internal</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y_internal</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">f_return</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+
+            <span class="c1"># process sub_fidelity_models</span>
+            <span class="k">for</span> <span class="n">sub_fidelity_name</span><span class="p">,</span> <span class="n">sub_opt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># _SolveSet に特殊な初期化を入れていないので</span>
+                <span class="c1"># sub fidelity でも初期化せず使用可能</span>
+                <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem</span><span class="p">,</span> <span class="n">sub_opt</span><span class="p">)</span>
+
+            <span class="c1"># check interruption</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
+
+            <span class="c1"># clear trial</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_trial</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># To avoid trial FAILED with hard constraint</span>
+            <span class="c1"># violation, check pf_state and raise TrialPruned.</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">key</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">get_pf_state_from_trial_attr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">TrialState</span><span class="o">.</span><span class="n">hard_constraint_violation</span><span class="p">,</span>
+                <span class="n">TrialState</span><span class="o">.</span><span class="n">model_error</span><span class="p">,</span>
+                <span class="n">TrialState</span><span class="o">.</span><span class="n">mesh_error</span><span class="p">,</span>
+                <span class="n">TrialState</span><span class="o">.</span><span class="n">solve_error</span><span class="p">,</span>
+                <span class="n">TrialState</span><span class="o">.</span><span class="n">post_error</span><span class="p">,</span>
+            <span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">optuna</span><span class="o">.</span><span class="n">TrialPruned</span>
+
+            <span class="c1"># if main solve skipped, y_internal is empty.</span>
+            <span class="c1"># this should be processed as FAIL.</span>
+            <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">skipped</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="k">return</span> <span class="n">y_internal</span>
+
+        <span class="k">if</span> <span class="n">get_client</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+        <span class="c1"># restart である場合、追加 N 回と見做す</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="o">=</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
+            <span class="n">n_existing_succeeded_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">succeeded</span><span class="p">])</span>
+            <span class="n">n_trials</span> <span class="o">=</span> <span class="n">n_trials</span> <span class="o">+</span> <span class="n">n_existing_succeeded_trials</span>
+
+        <span class="k">return</span> <span class="n">MaxTrialsCallback</span><span class="p">(</span><span class="n">n_trials</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_setup_before_parallel</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">AbstractOptimizer</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># set flag inside this</span>
+
+        <span class="c1"># set default values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span> <span class="ow">or</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="c1"># remove automatically-given arguments</span>
+        <span class="k">if</span> <span class="s1">&#39;seed&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;sampler_kwargs `seed` は&#39;</span>
+                          <span class="s1">&#39;Optimizer.set_random_seed() で&#39;</span>
+                          <span class="s1">&#39;与えてください。引数は無視されます。&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;seed&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;constraints_func&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;sampler_kwargs `constraints_func` は&#39;</span>
+                          <span class="s1">&#39;pyfemtet.opt の内部で自動的に与えられます。&#39;</span>
+                          <span class="s1">&#39;引数は無視されます。&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;constraints_func&#39;</span><span class="p">)</span>
+
+        <span class="c1"># create storage path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.db&#39;</span>
+
+        <span class="c1"># file check</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
+            <span class="c1"># check db file existing</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># certify no db file</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="p">)</span>
+
+        <span class="c1"># if TPESampler and re-starting,</span>
+        <span class="c1"># create temporary study to avoid error</span>
+        <span class="c1"># with many pruned trials.</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span><span class="p">)</span> \
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
+            <span class="c1"># get unique tmp file</span>
+            <span class="n">tmp_storage_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mktemp</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.db&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span> <span class="o">=</span> <span class="n">tmp_storage_path</span>
+
+            <span class="c1"># load existing study</span>
+            <span class="n">existing_study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">load_study</span><span class="p">(</span>
+                <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                <span class="n">storage</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># create new study</span>
+            <span class="n">tmp_study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span>
+                <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                <span class="n">storage</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Copy COMPLETE trials to temporary study.</span>
+            <span class="n">existing_trials</span> <span class="o">=</span> <span class="n">existing_study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,))</span>
+            <span class="n">tmp_study</span><span class="o">.</span><span class="n">add_trials</span><span class="p">(</span><span class="n">existing_trials</span><span class="p">)</span>
+
+        <span class="c1"># setup storage</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">get_storage</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">DaskStorage</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># if new study, create it.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
+            <span class="c1"># create study</span>
+            <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span>
+                <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span>
+                <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="c1"># set objective names</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">set_metric_names</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+            <span class="c1"># initial trial</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">user_attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Initial values&quot;</span><span class="p">})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># reseed</span>
+        <span class="n">worker</span> <span class="o">=</span> <span class="n">get_worker</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">worker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># self.sampler.reseed_rng()  # サブプロセスのランダム化が固定されない</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_index</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">+=</span> <span class="n">idx</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_tpe_addressing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_existing_storage_path&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_removing_tmp_db_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_tpe_addressing</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">nullcontext</span><span class="p">()</span>
+
+        <span class="c1"># noinspection PyMethodParameters</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">RemovingTempDB</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+
+                <span class="c1"># clean up temporary file</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">_CachedStorage</span><span class="p">):</span>
+                    <span class="n">rdb_storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">_backend</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">RDBStorage</span><span class="p">):</span>
+                    <span class="n">rdb_storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="n">DaskStorage</span><span class="p">):</span>
+                    <span class="n">base_storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_base_storage</span><span class="p">()</span>
+                    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base_storage</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">_CachedStorage</span><span class="p">)</span>
+                    <span class="n">rdb_storage</span> <span class="o">=</span> <span class="n">base_storage</span><span class="o">.</span><span class="n">_backend</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">)</span><span class="si">=}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rdb_storage</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">RDBStorage</span><span class="p">)</span>
+
+                <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+
+                <span class="c1"># 最後のプロセスにしか消せないので、</span>
+                <span class="c1"># 各 worker は dispose だけは行い、</span>
+                <span class="c1"># 削除は失敗しても気にしないことにする</span>
+
+                <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># 通常 dispose</span>
+                    <span class="n">rdb_storage</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+
+                <span class="c1"># run_on_scheduler での dispose</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="c1"># 他の worker を待つ</span>
+                    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">ws</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">finishing</span> <span class="k">for</span> <span class="n">ws</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span><span class="p">]):</span>
+                            <span class="k">break</span>
+                        <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="c1"># 通常 dispose</span>
+                    <span class="n">rdb_storage</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+
+                    <span class="k">def</span><span class="w"> </span><span class="nf">dispose_</span><span class="p">(</span><span class="n">dask_scheduler</span><span class="p">):</span>
+                        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="n">DaskStorage</span><span class="p">)</span>
+                        <span class="n">name_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">name</span>
+                        <span class="n">ext</span> <span class="o">=</span> <span class="n">dask_scheduler</span><span class="o">.</span><span class="n">extensions</span><span class="p">[</span><span class="s2">&quot;optuna&quot;</span><span class="p">]</span>
+                        <span class="n">base_storage_</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">storages</span><span class="p">[</span><span class="n">name_</span><span class="p">]</span>
+                        <span class="n">rdb_storage_</span> <span class="o">=</span> <span class="n">base_storage_</span><span class="o">.</span><span class="n">_backend</span>
+                        <span class="n">rdb_storage_</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+
+                    <span class="n">client</span><span class="o">.</span><span class="n">run_on_scheduler</span><span class="p">(</span><span class="n">dispose_</span><span class="p">)</span>
+                    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+                <span class="c1"># try remove</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;パーミッションエラー。</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="si">}</span><span class="s1"> の削除処理をスキップします。&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="si">}</span><span class="s1"> の削除に成功しました。&#39;</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span>
+
+        <span class="k">return</span> <span class="n">RemovingTempDB</span><span class="p">()</span>
+
+<div class="viewcode-block" id="OptunaOptimizer.run">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.optuna_optimizer.html#pyfemtet.opt.OptunaOptimizer.run">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># ===== finalize =====</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize</span><span class="p">()</span>
+
+        <span class="c1"># ===== construct sampler =====</span>
+
+        <span class="c1"># automatically-given arguments</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">constraints_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraint</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
+            <span class="p">)</span>
+
+        <span class="n">actual_sampler_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">arguments</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="c1"># the key is valid, pass to sampler</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">arguments</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">actual_sampler_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">})</span>
+
+            <span class="c1"># if not automatically-given arguments,</span>
+            <span class="c1"># show warning</span>
+            <span class="k">elif</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;seed&#39;</span><span class="p">,</span> <span class="s1">&#39;constraints_func&#39;</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The given argument </span><span class="si">{key}</span><span class="s1"> is not &#39;</span>
+                               <span class="s1">&#39;included in ones of </span><span class="si">{sampler_name}</span><span class="s1">. &#39;</span>
+                               <span class="s1">&#39;</span><span class="si">{key}</span><span class="s1"> is ignored.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{key}</span><span class="s1"> は </span><span class="si">{sampler_name}</span><span class="s1"> の&#39;</span>
+                               <span class="s1">&#39;有効な引数ではないので&#39;</span>
+                               <span class="s1">&#39;無視されます。&#39;</span><span class="p">,</span>
+                    <span class="n">key</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+                    <span class="n">sampler_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                <span class="p">))</span>
+
+            <span class="c1"># else, ignore it</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># noinspection PyArgumentList</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="p">(</span><span class="o">**</span><span class="n">actual_sampler_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># if PoFBoTorchSampler, set opt</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">PoFBoTorchSampler</span><span class="p">):</span>
+            <span class="n">sampler</span><span class="o">.</span><span class="n">pyfemtet_optimizer</span> <span class="o">=</span> <span class="bp">self</span>  <span class="c1"># FIXME: multi-fidelity に対応できない?</span>
+
+        <span class="c1"># ===== load study and run =====</span>
+
+        <span class="c1"># after quit FEM, try to remove tmp db</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removing_tmp_db_if_needed</span><span class="p">():</span>
+
+            <span class="c1"># quit FEM even if abnormal termination</span>
+            <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">):</span>
+
+                <span class="c1"># load study creating in setup_before_parallel()</span>
+                <span class="c1"># located on dask scheduler</span>
+                <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">load_study</span><span class="p">(</span>
+                    <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                    <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span>
+                    <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># if tpe_addressing, load main study</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_tpe_addressing</span><span class="p">():</span>
+                    <span class="c1"># load it</span>
+                    <span class="n">existing_study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">load_study</span><span class="p">(</span>
+                        <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                        <span class="n">storage</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># and add callback to copy-back</span>
+                    <span class="c1"># from processing study to existing one.</span>
+                    <span class="k">def</span><span class="w"> </span><span class="nf">copy_back</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+                        <span class="n">existing_study</span><span class="o">.</span><span class="n">add_trial</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy_back</span><span class="p">)</span>
+
+                <span class="c1"># callback</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span><span class="p">))</span>
+
+                <span class="c1"># run</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setting_status</span><span class="p">(),</span> <span class="n">suppress</span><span class="p">(</span><span class="n">InterruptOptimization</span><span class="p">):</span>
+                    <span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span><span class="p">,</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+                        <span class="n">callbacks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">,</span>
+                    <span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">debug_1</span><span class="p">():</span>
+    <span class="c1"># from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import</span>
+    <span class="c1"># sampler = PoFBoTorchSampler(</span>
+    <span class="c1">#     n_startup_trials=5,</span>
+    <span class="c1">#     seed=42,</span>
+    <span class="c1">#     constraints_func=self._constraint,</span>
+    <span class="c1">#     pof_config=PoFConfig(</span>
+    <span class="c1">#         # consider_pof=False,</span>
+    <span class="c1">#         # feasibility_cdf_threshold=&#39;mean&#39;,</span>
+    <span class="c1">#     ),</span>
+    <span class="c1">#     partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(</span>
+    <span class="c1">#         # gen_candidates=&#39;scipy&#39;,</span>
+    <span class="c1">#         timeout_sec=5.,</span>
+    <span class="c1">#         # method=&#39;SLSQP&#39;  # &#39;COBYLA, COBYQA, SLSQP or trust-constr</span>
+    <span class="c1">#         tol=0.1,</span>
+    <span class="c1">#         # scipy_minimize_kwargs=dict(),</span>
+    <span class="c1">#     ),</span>
+    <span class="c1"># )</span>
+    <span class="c1"># from optuna_integration import BoTorchSampler</span>
+    <span class="c1"># sampler = BoTorchSampler(n_startup_trials=5)</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parabola</span><span class="p">(</span><span class="n">_fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">_opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_opt</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;x1&#39;</span><span class="p">]</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;x2&#39;</span><span class="p">]</span>
+        <span class="c1"># if _cns(_fem, _opt) &lt; 0:</span>
+        <span class="c1">#     raise PostProcessError</span>
+        <span class="k">return</span> <span class="n">x1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parabola2</span><span class="p">(</span><span class="n">_fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">_opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">_opt</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cns</span><span class="p">(</span><span class="n">_fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">_opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">_opt</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">_fem</span> <span class="o">=</span> <span class="n">NoFEM</span><span class="p">()</span>
+    <span class="n">_opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">()</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">_fem</span>
+
+    <span class="c1"># _opt.sampler = optuna.samplers.RandomSampler(seed=42)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">sampler_class</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span>
+    <span class="c1"># _opt.sampler_class = optuna.samplers.RandomSampler</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">sampler_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;x1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;x2&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_categorical_parameter</span><span class="p">(</span><span class="s1">&#39;x3&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">])</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">,</span> <span class="n">_cns</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=-</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">_fem</span><span class="p">,</span> <span class="n">_opt</span><span class="p">))</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">,</span> <span class="n">_parabola</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">_fem</span><span class="p">,</span> <span class="n">_opt</span><span class="p">))</span>
+    <span class="c1"># _opt.add_objective(&#39;obj2&#39;, _parabola2, args=(_fem, _opt))</span>
+
+    <span class="c1"># # ===== sub-fidelity =====</span>
+    <span class="c1"># __fem = NoFEM()</span>
+    <span class="c1"># __opt = SubFidelityModel()</span>
+    <span class="c1"># __opt.fem = __fem</span>
+    <span class="c1"># __opt.add_objective(&#39;obj1&#39;, _parabola, args=(__fem, __opt))</span>
+    <span class="c1"># __opt.add_objective(&#39;obj2&#39;, _parabola2, args=(__fem, __opt))</span>
+    <span class="c1">#</span>
+    <span class="c1"># _opt.add_sub_fidelity_model(name=&#39;low-fidelity&#39;, sub_fidelity_model=__opt, fidelity=0.5)</span>
+    <span class="c1">#</span>
+    <span class="c1"># def _solve_condition(_history: History):</span>
+    <span class="c1">#</span>
+    <span class="c1">#     sub_fidelity_df = _history.get_df(</span>
+    <span class="c1">#         {&#39;sub_fidelity_name&#39;: &#39;low-fidelity&#39;}</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     idx = sub_fidelity_df[&#39;state&#39;] == TrialState.succeeded</span>
+    <span class="c1">#     pdf = sub_fidelity_df[idx]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return len(pdf) % 5 == 0</span>
+    <span class="c1">#</span>
+    <span class="c1"># _opt.set_solve_condition(_solve_condition)</span>
+
+    <span class="c1"># _opt.history.path = &#39;restart-test.csv&#39;</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="c1"># import plotly.express as px</span>
+    <span class="c1"># _df = _opt.history.get_df()</span>
+    <span class="c1"># px.scatter_3d(_df, x=&#39;x1&#39;, y=&#39;x2&#39;, z=&#39;obj&#39;, color=&#39;fidelity&#39;, opacity=0.5).show()</span>
+
+    <span class="n">_opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">substrate_size</span><span class="p">(</span><span class="n">Femtet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;基板のXY平面上での専有面積を計算します。&quot;&quot;&quot;</span>
+    <span class="n">substrate_w</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_w&#39;</span><span class="p">)</span>
+    <span class="n">substrate_d</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">GetVariableValue</span><span class="p">(</span><span class="s1">&#39;substrate_d&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">substrate_w</span> <span class="o">*</span> <span class="n">substrate_d</span>  <span class="c1"># 単位: mm2</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">debug_2</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._femtet_interface.femtet_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">FemtetInterface</span>
+
+    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">(</span>
+        <span class="n">femprj_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;wat_ex14_parametric_jp.femprj&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">()</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">fem</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;substrate_w&quot;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;substrate_d&quot;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">34</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;基板サイズ(mm2)&#39;</span><span class="p">,</span> <span class="n">fun</span><span class="o">=</span><span class="n">substrate_size</span><span class="p">)</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;femtet-test.csv&#39;</span><span class="p">)</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">debug_3</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._femtet_interface.femtet_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">FemtetInterface</span>
+
+    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">(</span>
+        <span class="n">femprj_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;wat_ex14_parametric_jp.femprj&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">fem</span><span class="o">.</span><span class="n">use_parametric_output_as_objective</span><span class="p">(</span>
+        <span class="n">number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">()</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">fem</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;substrate_w&quot;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;substrate_d&quot;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">34</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;femtet-test.csv&#39;</span><span class="p">)</span>
+
+    <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">debug_3</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

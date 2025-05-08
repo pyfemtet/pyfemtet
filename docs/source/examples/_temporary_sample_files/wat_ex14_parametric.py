@@ -44,12 +44,12 @@ if __name__ == '__main__':
 
     # 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)
     femopt.add_parameter("substrate_w", 40, lower_bound=22, upper_bound=60)
-    femopt.add_parameter("substrate_d", 60, lower_bound=34, upper_bound=60)
+    femopt.add_parameter("substrate_d", 60, lower_bound=33, upper_bound=60)
 
     # 目的関数を最適化問題に追加
-    femopt.add_objective(chip_temp, name='MAINCHIP<br>最高温度(度)', direction='minimize', args=('MAINCHIP',))
-    femopt.add_objective(chip_temp, name='SUBCHIP<br>最高温度(度)', direction='minimize', args=('SUBCHIP',))
-    femopt.add_objective(substrate_size, name='基板サイズ(mm2)')
+    femopt.add_objective(fun=chip_temp, name='MAINCHIP<br>最高温度(度)', direction='minimize', args=('MAINCHIP',))
+    femopt.add_objective(fun=chip_temp, name='SUBCHIP<br>最高温度(度)', direction='minimize', args=('SUBCHIP',))
+    femopt.add_objective(fun=substrate_size, name='基板サイズ(mm2)')
 
     # 最適化を実行
     femopt.set_random_seed(42)

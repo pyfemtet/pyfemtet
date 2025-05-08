@@ -180,7 +180,7 @@ to execute it.</p>
 <span class="linenos">25</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
 <span class="linenos">26</span>
 <span class="linenos">27</span>    <span class="n">coil_name</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetCoilList</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<span class="linenos">28</span>    <span class="k">return</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetL</span><span class="p">(</span><span class="n">coil_name</span><span class="p">,</span> <span class="n">coil_name</span><span class="p">)</span>  <span class="c1"># unit: F</span>
+<span class="linenos">28</span>    <span class="k">return</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetL</span><span class="p">(</span><span class="n">coil_name</span><span class="p">,</span> <span class="n">coil_name</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span>  <span class="c1"># unit: uF</span>
 <span class="linenos">29</span>
 <span class="linenos">30</span>
 <span class="linenos">31</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -201,16 +201,16 @@ to execute it.</p>
 <span class="linenos">46</span>    <span class="c1"># Add design variables to the optimization problem.</span>
 <span class="linenos">47</span>    <span class="c1"># (Specify the variables registered in the femprj file.)</span>
 <span class="linenos">48</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;helical_pitch&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<span class="linenos">49</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;coil_radius&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">49</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;coil_radius&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="linenos">50</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;n_turns&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 <span class="linenos">51</span>
 <span class="linenos">52</span>    <span class="c1"># Add the objective function to the optimization problem.</span>
 <span class="linenos">53</span>    <span class="c1"># The target inductance is 0.1 uF.</span>
-<span class="linenos">54</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">inductance</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;self-inductance (F)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
+<span class="linenos">54</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">inductance</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;self-inductance (μF)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="linenos">55</span>
 <span class="linenos">56</span>    <span class="c1"># Run optimization.</span>
 <span class="linenos">57</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="linenos">58</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="linenos">58</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">n_trials</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -223,7 +223,7 @@ to execute it.</p>
 <p><span class="caption-text">Execution result of gau_ex08_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is self-inductance.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<p>After 20 iterations, the self-inductance was calculated to be 0.103 µF.</p>
+<p>After 15 iterations, the self-inductance was calculated to be 0.101 µF.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Results may vary slightly depending on the versions of Femtet, PyFemtet, and the optimization engine it depends on.</p>

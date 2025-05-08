@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.exceptions &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/migration_to_v1.html">バージョン 1 への移行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/advanced_examples.html">発展的な例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.exceptions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>pyfemtet.opt.exceptions のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;ExceptionDuringOptimization&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FEMError&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_HiddenConstraintViolation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ModelError&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MeshError&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SolveError&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PostProcessError&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HardConstraintViolation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;InterruptOptimization&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SkipSolve&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;show_experimental_warning&#39;</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="ExceptionDuringOptimization">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.ExceptionDuringOptimization">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExceptionDuringOptimization</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="o">...</span></div>
+
+<div class="viewcode-block" id="FEMError">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.FEMError">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FEMError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="o">...</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_HiddenConstraintViolation</span><span class="p">(</span><span class="n">ExceptionDuringOptimization</span><span class="p">):</span>
+
+    <span class="n">__pyfemtet_subclasses__</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_HiddenConstraintViolation</span><span class="o">.</span><span class="n">__pyfemtet_subclasses__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ModelError">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.ModelError">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelError</span><span class="p">(</span><span class="n">FEMError</span><span class="p">,</span> <span class="n">_HiddenConstraintViolation</span><span class="p">):</span> <span class="o">...</span></div>
+
+<div class="viewcode-block" id="MeshError">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.MeshError">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeshError</span><span class="p">(</span><span class="n">FEMError</span><span class="p">,</span> <span class="n">_HiddenConstraintViolation</span><span class="p">):</span> <span class="o">...</span></div>
+
+<div class="viewcode-block" id="SolveError">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.SolveError">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SolveError</span><span class="p">(</span><span class="n">FEMError</span><span class="p">,</span> <span class="n">_HiddenConstraintViolation</span><span class="p">):</span> <span class="o">...</span></div>
+
+<div class="viewcode-block" id="PostProcessError">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.PostProcessError">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PostProcessError</span><span class="p">(</span><span class="n">FEMError</span><span class="p">,</span> <span class="n">_HiddenConstraintViolation</span><span class="p">):</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="HardConstraintViolation">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.HardConstraintViolation">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HardConstraintViolation</span><span class="p">(</span><span class="n">ExceptionDuringOptimization</span><span class="p">):</span> <span class="o">...</span></div>
+
+<div class="viewcode-block" id="InterruptOptimization">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.InterruptOptimization">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InterruptOptimization</span><span class="p">(</span><span class="n">ExceptionDuringOptimization</span><span class="p">):</span> <span class="o">...</span></div>
+
+<div class="viewcode-block" id="SkipSolve">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.SkipSolve">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SkipSolve</span><span class="p">(</span><span class="n">ExceptionDuringOptimization</span><span class="p">):</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="show_experimental_warning">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.show_experimental_warning">[ドキュメント]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_experimental_warning</span><span class="p">(</span><span class="n">feature_name</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s1"> は実験的機能です。将来 API 等が&#39;</span>
+                  <span class="sa">f</span><span class="s1">&#39;大きく変更されるか、機能自体が削除される&#39;</span>
+                  <span class="sa">f</span><span class="s1">&#39;可能性があります。&#39;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

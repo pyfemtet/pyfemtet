@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.problem.problem &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.problem.problem</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.problem.problem</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># noinspection PyUnresolvedReferences</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pythoncom</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dispatch</span><span class="p">,</span> <span class="n">Constants</span><span class="p">,</span> <span class="n">constants</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="c1"># noinspection PyPep8Naming</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CoInitialize</span><span class="p">():</span> <span class="o">...</span>
+    <span class="c1"># noinspection PyPep8Naming</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CoUninitialize</span><span class="p">():</span> <span class="o">...</span>
+    <span class="n">Dispatch</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s1">&#39;NoDispatch&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">object</span><span class="p">,),</span> <span class="p">{})</span>
+    <span class="n">Constants</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s1">&#39;NoConstants&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">object</span><span class="p">,),</span> <span class="p">{})</span>
+    <span class="n">constants</span> <span class="o">=</span> <span class="n">Constants</span><span class="p">()</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.helper</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;TrialInput&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TrialOutput&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TrialConstraintOutput&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Function&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Functions&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Objective&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ObjectiveResult&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Objectives&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ObjectivesFunc&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Constraint&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ConstraintResult&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Constraints&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Fidelity&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SubSampling&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MAIN_FIDELITY_NAME&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">MAIN_FIDELITY_NAME</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="Function">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Function">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Function</span><span class="p">:</span>
+    <span class="n">_fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span>
+    <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fun</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ScapeGoat</span><span class="o">.</span><span class="n">restore_constants</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fun</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fun</span>
+
+    <span class="nd">@fun</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fun</span> <span class="o">=</span> <span class="n">f</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pickle 時に _fun が参照する constants を _ScapeGoat にする&quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">if</span> <span class="s1">&#39;_fun&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ScapeGoat</span><span class="o">.</span><span class="n">remove_constants</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;_fun&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pickle 時に _fun が参照する _ScapeGoat を constants にする&quot;&quot;&quot;</span>
+        <span class="n">CoInitialize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;_fun&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ScapeGoat</span><span class="o">.</span><span class="n">restore_constants</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;_fun&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_ScapeGoat</span><span class="p">:</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">restore_constants</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="o">...</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;f の存在する global スコープの _Scapegoat 変数を constants に変更&quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;__globals__&#39;</span><span class="p">):</span>
+                <span class="k">return</span>
+
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="vm">__globals__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+                    <span class="c1"># try 不要</span>
+                    <span class="c1"># fun の定義がこのファイル上にある場合、つまりデバッグ時のみ</span>
+                    <span class="c1"># remove_constants がこのスコープの constants を消すので</span>
+                    <span class="c1"># constants を再インポートする必要がある</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
+                    <span class="n">f</span><span class="o">.</span><span class="vm">__globals__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">constants</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">remove_constants</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="o">...</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;f の存在する global スコープの Constants 変数を _Scapegoat に変更&quot;&quot;&quot;</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;__globals__&#39;</span><span class="p">):</span>
+                <span class="k">return</span>
+
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="vm">__globals__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Constants</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="vm">__globals__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Function.eval">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Function.eval">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">object_pass_to_fun</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Functions">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Functions">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Functions</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Function</span><span class="p">]):</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Objective">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Objective">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Objective</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+
+        <span class="n">direction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">float_</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">direction</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">value_as_minimize</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">direction</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;minimize&#39;</span><span class="p">:</span>
+                <span class="n">value_as_minimize</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="n">direction</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;maximize&#39;</span><span class="p">:</span>
+                <span class="n">value_as_minimize</span> <span class="o">=</span> <span class="o">-</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if value is nan, return nan</span>
+            <span class="n">value_as_minimize</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">direction</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="k">return</span> <span class="n">value_as_minimize</span>
+
+<div class="viewcode-block" id="Objective.convert">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Objective.convert">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ObjectiveResult">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.ObjectiveResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ObjectiveResult</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Objective</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">obj_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">obj_value</span> <span class="k">if</span> <span class="n">obj_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">direction</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ObjectivesFunc">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.ObjectivesFunc">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ObjectivesFunc</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;複数の値を返す関数を単一の float を返す関数に分割する。&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="n">n_return</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="c1"># Optimizer に追加される数と一致することを保証したいので</span>
+        <span class="c1"># n_returns が必要</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_called</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">fun</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_return</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">n_return</span>
+
+<div class="viewcode-block" id="ObjectivesFunc.get_fun_that_returns_ith_value">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.ObjectivesFunc.get_fun_that_returns_ith_value">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_fun_that_returns_ith_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_return</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Index </span><span class="si">{i}</span><span class="s1"> is over n_return=</span><span class="si">{n_return}</span><span class="s1">.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;インデックス </span><span class="si">{i}</span><span class="s1"> は n_return=</span><span class="si">{n_return}</span><span class="s1"> を超えています。&#39;</span><span class="p">,</span>
+                    <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">n_return</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_return</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># iter として提供する callable オブジェクト</span>
+        <span class="c1"># self の情報にもアクセスする必要があり</span>
+        <span class="c1"># それぞれが iter された時点での i 番目という</span>
+        <span class="c1"># 情報も必要なのでこのスコープで定義する必要がある</span>
+        <span class="c1"># noinspection PyMethodParameters</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">NthFunc</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">i_</span><span class="p">):</span>
+                <span class="c1"># 何番目の要素であるかを保持</span>
+                <span class="n">self_</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">i_</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+                <span class="c1"># 何番目の要素であるか</span>
+                <span class="n">i_</span> <span class="o">=</span> <span class="n">self_</span><span class="o">.</span><span class="n">i</span>
+
+                <span class="c1"># 一度も呼ばれていなければ評価する</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_called</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_called</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">__</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">]</span>
+
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_return</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span>
+                        <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The number of return values of </span><span class="si">{fun_name}</span><span class="s1"> is </span><span class="si">{n_values}</span><span class="s1">. &#39;</span>
+                                   <span class="s1">&#39;This is inconsistent with the specified n_return; </span><span class="si">{n_return}</span><span class="s1">.&#39;</span><span class="p">,</span>
+                        <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{fun_name}</span><span class="s1"> の実行結果の値の数は </span><span class="si">{n_values}</span><span class="s1"> でした。&#39;</span>
+                                   <span class="s1">&#39;これは指定された n_return=</span><span class="si">{n_return}</span><span class="s1"> と一致しません。&#39;</span><span class="p">,</span>
+                        <span class="n">fun_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                        <span class="n">n_values</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">),</span>
+                        <span class="n">n_return</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_return</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># i_ が呼ばれたのでフラグを立てる</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_called</span><span class="p">[</span><span class="n">i_</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">i_</span><span class="p">]</span>
+
+                <span class="c1"># すべてのフラグが立ったならクリアする</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_called</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_called</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="c1"># 値を返す</span>
+                <span class="k">return</span> <span class="n">value</span>
+
+            <span class="c1"># noinspection PyPropertyDefinition</span>
+            <span class="nd">@property</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">__globals__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                <span class="c1"># ScapeGoat 実装への対処</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="p">,</span> <span class="s1">&#39;__globals__&#39;</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="o">.</span><span class="vm">__globals__</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="c1"># N 番目の値を返す関数を返す</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">NthFunc</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">f</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Objectives">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Objectives">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Objectives</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Objective</span><span class="p">]):</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Constraint">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Constraint">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Constraint</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">hard</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">_using_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">using_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_using_fem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_check_using_fem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_using_fem</span>
+
+    <span class="nd">@using_fem</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">using_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_using_fem</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="ConstraintResult">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.ConstraintResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstraintResult</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">cns</span><span class="p">:</span> <span class="n">Constraint</span><span class="p">,</span>
+            <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span>
+            <span class="n">cns_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">constraint_enhancement</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># offset により scipy.minimize が拘束違反の解を返す問題を回避する</span>
+            <span class="n">constraint_scaling</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># scaling により scipy.minimize が拘束違反の解を返す問題を回避する</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">cns_value</span> <span class="k">if</span> <span class="n">cns_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cns</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">lower_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">upper_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hard</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">cns</span><span class="o">.</span><span class="n">hard</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ce</span> <span class="o">=</span> <span class="n">constraint_enhancement</span> <span class="ow">or</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cs</span> <span class="o">=</span> <span class="n">constraint_scaling</span> <span class="ow">or</span> <span class="mf">1.</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConstraintResult.calc_violation">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.ConstraintResult.calc_violation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_violation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;lower_bound&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cs</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">-</span> <span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ce</span><span class="p">})</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;upper_bound&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cs</span> <span class="o">*</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ce</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="ConstraintResult.check_violation">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.ConstraintResult.check_violation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_violation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">violation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_violation</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">l_or_u</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">violation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">l_or_u</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Constraints">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.Constraints">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Constraints</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Constraint</span><span class="p">]):</span>
+    <span class="k">pass</span></div>
+
+
+
+<span class="n">Fidelity</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+
+
+<span class="n">SubSampling</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">int</span>
+
+
+<span class="n">TrialInput</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Variable</span><span class="p">]</span>
+<span class="n">TrialOutput</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ObjectiveResult</span><span class="p">]</span>
+<span class="n">TrialConstraintOutput</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ConstraintResult</span><span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

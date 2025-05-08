@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-08 11:48+0900\n"
+"POT-Creation-Date: 2025-05-08 16:17+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,11 +77,7 @@ msgid "Most Major Classes"
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
-msgid ":py:obj:`pyfemtet.opt.FEMOpt <pyfemtet.opt.FEMOpt>`\\ \\(\\[fem\\, opt\\, ...\\]\\)"
-msgstr ""
-
-#: ../source/pages/api.rst:16:<autosummary>:1
-msgid "Class to control FEM interface and optimizer."
+msgid ":py:obj:`pyfemtet.opt.FEMOpt <pyfemtet.opt.FEMOpt>`\\ \\(\\[fem\\, opt\\]\\)"
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
@@ -89,7 +85,7 @@ msgid ":py:obj:`pyfemtet.opt.FemtetInterface <pyfemtet.opt.FemtetInterface>`\\ \
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Control Femtet from optimizer."
 msgstr ""
 
@@ -97,68 +93,47 @@ msgstr ""
 msgid ":py:obj:`pyfemtet.opt.OptunaOptimizer <pyfemtet.opt.OptunaOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:16:<autosummary>:1
-#: ../source/pages/api.rst:42:<autosummary>:1
-msgid "Optimizer using ```optuna```."
-msgstr ""
-
 #: ../source/pages/api.rst:18
 msgid "Other Major Classes"
 msgstr ""
 
-#: ../source/pages/api.rst:23
+#: ../source/pages/api.rst:22
 msgid "FEM Interfaces"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
-msgid ":py:obj:`pyfemtet.opt.interface.NoFEM <pyfemtet.opt.interface.NoFEM>`\\ \\(\\*\\*kwargs\\)"
+#: ../source/pages/api.rst:31:<autosummary>:1
+msgid ":py:obj:`pyfemtet.opt.interface.NoFEM <pyfemtet.opt.interface.NoFEM>`\\ \\(\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
-msgid "Dummy interface without FEM."
-msgstr ""
-
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetInterface <pyfemtet.opt.interface.FemtetInterface>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithSolidworksInterface <pyfemtet.opt.interface.FemtetWithSolidworksInterface>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
-msgid "Control Femtet and Solidworks."
-msgstr ""
-
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithNXInterface <pyfemtet.opt.interface.FemtetWithNXInterface>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Control Femtet and NX."
 msgstr ""
 
-#: ../source/pages/api.rst:34
+#: ../source/pages/api.rst:33
 msgid "Optimizers"
 msgstr ""
 
-#: ../source/pages/api.rst:42:<autosummary>:1
+#: ../source/pages/api.rst:40:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.OptunaOptimizer <pyfemtet.opt.optimizer.OptunaOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:42:<autosummary>:1
-msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyOptimizer <pyfemtet.opt.optimizer.ScipyOptimizer>`\\ \\(...\\)"
+#: ../source/pages/api.rst:40:<autosummary>:1
+msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyOptimizer <pyfemtet.opt.optimizer.ScipyOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:42:<autosummary>:1
-msgid "Optimizer using ```scipy```."
-msgstr ""
-
-#: ../source/pages/api.rst:42:<autosummary>:1
-msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyScalarOptimizer <pyfemtet.opt.optimizer.ScipyScalarOptimizer>`\\ \\(...\\)"
-msgstr ""
-
-#: ../source/pages/api.rst:44
+#: ../source/pages/api.rst:42
 msgid "Entire Reference"
 msgstr ""
 
@@ -586,23 +561,23 @@ msgstr ""
 msgid "Finally, you will get a ``.py`` script to run optimization with your ``.femprj`` file."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:42
+#: ../source/pages/script_builder.rst:43
 msgid "Manual Installation"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:44
+#: ../source/pages/script_builder.rst:45
 msgid "If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:48
+#: ../source/pages/script_builder.rst:49
 msgid "If you have no icon on your desktop, search `pyfemtet-opt.exe` in `Scripts` folder of your python environment."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:50
+#: ../source/pages/script_builder.rst:51
 msgid "To check where your python environment is, run following command in `cmd`::"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:54
+#: ../source/pages/script_builder.rst:55
 msgid "The command above returns full path of your `python.exe` file. Typically the `Scripts` folder exists in where the `python.exe` exists."
 msgstr ""
 

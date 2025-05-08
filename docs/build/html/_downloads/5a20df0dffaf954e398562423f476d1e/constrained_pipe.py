@@ -65,6 +65,7 @@ def radius_diff(Femtet, opt):
     external_r = params['external_r']
     return external_r - internal_r
 
+
 if __name__ == '__main__':
     # Setup optimization method
     opt = OptunaOptimizer(
@@ -82,14 +83,14 @@ if __name__ == '__main__':
     # Add the strict constraint not to exceed the
     # outer radius while the optimization is running.
     femopt.add_constraint(
-        radius_diff,  # Constraint function (returns external radius - internal radius).
+        fun=radius_diff,  # Constraint function (returns external radius - internal radius).
         name='wall thickness',  # You can name the function anything you want.
         lower_bound=1,  # Lower bound of constraint function (set minimum wall thickness is 1).
         args=(femopt.opt,)  # Additional arguments passed to the function.
     )
 
     # Add the objective
-    femopt.add_objective(mises_stress, name='Mises Stress')
+    femopt.add_objective(fun=mises_stress, name='Mises Stress')
 
     # Run optimization.
     femopt.set_random_seed(42)

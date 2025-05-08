@@ -12,9 +12,9 @@ import numpy as np
 from scipy.signal import find_peaks
 from tqdm import tqdm
 
-from pyfemtet.core import SolveError
+from pyfemtet.opt.exceptions import SolveError
 from pyfemtet.opt import OptunaOptimizer, FEMOpt
-from pyfemtet.opt.optimizer import PoFBoTorchSampler
+from pyfemtet.opt.optimizer import PoFBoTorchSampler, PartialOptimizeACQFConfig
 
 
 class SParameterCalculator:
@@ -112,7 +112,10 @@ if __name__ == '__main__':
     opt = OptunaOptimizer(
         sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
-            n_startup_trials=10,
+            n_startup_trials=4,
+            partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
+                timeout_sec=30.,
+            ),
         )
     )
     
@@ -127,12 +130,12 @@ if __name__ == '__main__':
     femopt.add_parameter('port_x', 5, 1, 20)
 
     # Add the constraint function to the optimization problem.
-    femopt.add_constraint(antenna_is_smaller_than_substrate, 'antenna and substrate clearance', lower_bound=1, args=(opt,))
-    femopt.add_constraint(port_is_inside_antenna, 'antenna and port clearance', lower_bound=1, args=(opt,))
+    femopt.add_constraint(fun=antenna_is_smaller_than_substrate, name='antenna and substrate clearance', lower_bound=1, args=(opt,))
+    femopt.add_constraint(fun=port_is_inside_antenna, name='antenna and port clearance', lower_bound=1, args=(opt,))
 
     # Add the objective function to the optimization problem.
-    # The target frequency is 3.0 GHz.
-    femopt.add_objective(s.get_resonance_frequency, 'first resonant frequency(Hz)', direction=3.0 * 1e9)
+    # The target frequency is 3.3 GHz.
+    femopt.add_objective(fun=s.get_resonance_frequency, name='first resonant frequency(Hz)', direction=3.3 * 1e9)
 
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=15)
+    femopt.optimize(n_trials=10)

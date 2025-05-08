@@ -17,7 +17,6 @@ Most Major Classes
 Other Major Classes
 -------------------
 
-.. TODO: automatically generate following classes
 
 FEM Interfaces
 ^^^^^^^^^^^^^^
@@ -37,7 +36,6 @@ Optimizers
 
    pyfemtet.opt.optimizer.OptunaOptimizer
    pyfemtet.opt.optimizer.ScipyOptimizer
-   pyfemtet.opt.optimizer.ScipyScalarOptimizer
 
 
 Entire Reference

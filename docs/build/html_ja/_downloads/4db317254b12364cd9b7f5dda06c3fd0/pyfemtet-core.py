@@ -94,13 +94,13 @@ def core(
     femopt = FEMOpt(
         fem=fem,
         opt=opt,
-        history_path=csv_path,
     )
 
     if seed is not None:
         femopt.set_random_seed(42)
 
     femopt.optimize(
+        history_path=csv_path,
         n_trials=n_trials,
         n_parallel=n_parallel,
         timeout=timeout,

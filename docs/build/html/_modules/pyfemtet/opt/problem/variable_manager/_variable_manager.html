@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.problem.variable_manager._variable_manager &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.problem.variable_manager._variable_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.problem.variable_manager._variable_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>  <span class="c1"># マイナーなので型ヒントには使わず isinstance で使う</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">graphlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">TopologicalSorter</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">._string_as_expression</span><span class="w"> </span><span class="kn">import</span> <span class="n">_ExpressionFromString</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;SupportedVariableTypes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Parameter&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Variable&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NumericVariable&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NumericParameter&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CategoricalVariable&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CategoricalParameter&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Expression&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ExpressionFromFunction&#39;</span><span class="p">,</span>
+    <span class="c1"># &#39;NumericExpressionFromFunction&#39;,</span>
+    <span class="c1"># &#39;CategoricalExpressionFromFunction&#39;,</span>
+    <span class="s1">&#39;ExpressionFromString&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;VariableManager&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="n">SupportedVariableTypes</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Real</span>  <span class="c1"># isinstance で使いうるので Real</span>
+
+
+<div class="viewcode-block" id="Variable">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Variable</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">SupportedVariableTypes</span>
+    <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># noinspection PyTypeChecker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Parameter">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Parameter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Parameter</span><span class="p">(</span><span class="n">Variable</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="NumericVariable">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.NumericVariable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NumericVariable</span><span class="p">(</span><span class="n">Variable</span><span class="p">):</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">float</span></div>
+
+
+
+<div class="viewcode-block" id="NumericParameter">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.NumericParameter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NumericParameter</span><span class="p">(</span><span class="n">NumericVariable</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="CategoricalVariable">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.CategoricalVariable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CategoricalVariable</span><span class="p">(</span><span class="n">Variable</span><span class="p">):</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+
+<div class="viewcode-block" id="CategoricalParameter">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.CategoricalParameter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CategoricalParameter</span><span class="p">(</span><span class="n">CategoricalVariable</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+    <span class="n">choices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="Expression">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Expression">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Expression</span><span class="p">(</span><span class="n">Variable</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="ExpressionFromFunction">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.ExpressionFromFunction">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExpressionFromFunction</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">NumericExpressionFromFunction</span><span class="p">(</span><span class="n">ExpressionFromFunction</span><span class="p">,</span> <span class="n">NumericVariable</span><span class="p">):</span>
+    <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CategoricalExpressionFromFunction</span><span class="p">(</span><span class="n">ExpressionFromFunction</span><span class="p">,</span> <span class="n">CategoricalVariable</span><span class="p">):</span>
+    <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ExpressionFromString">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.ExpressionFromString">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExpressionFromString</span><span class="p">(</span><span class="n">Expression</span><span class="p">,</span> <span class="n">NumericVariable</span><span class="p">):</span>
+    <span class="n">_expr</span><span class="p">:</span> <span class="n">_ExpressionFromString</span>
+    <span class="n">InternalClass</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">_ExpressionFromString</span></div>
+
+
+
+<div class="viewcode-block" id="VariableManager">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.VariableManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariableManager</span><span class="p">:</span>
+
+    <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Variable</span><span class="p">]</span>
+    <span class="n">dependencies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">evaluation_order</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>  <span class="c1"># 評価する順番</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_dependencies</span><span class="p">(</span><span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+
+        <span class="n">dependencies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">all_var_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">var_name</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="c1"># Expression ならば、fun の引数のうち</span>
+            <span class="c1"># variables の名前であるものを dependency とする</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ExpressionFromFunction</span><span class="p">):</span>
+                <span class="n">arg_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="n">dep_var_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_var_names</span> <span class="o">&amp;</span> <span class="n">arg_names</span>
+                <span class="n">dependency</span> <span class="o">=</span> <span class="n">dep_var_names</span>
+
+            <span class="c1"># ExpressionString であれば、</span>
+            <span class="c1"># 使われている変数を解析する</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ExpressionFromString</span><span class="p">):</span>
+                <span class="n">dependency</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">_expr</span><span class="o">.</span><span class="n">dependency</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Variable</span><span class="p">)</span>
+                <span class="n">dependency</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">dependencies</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">var_name</span><span class="p">:</span> <span class="n">dependency</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">dependencies</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_evaluation_order</span><span class="p">(</span><span class="n">dependencies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">TopologicalSorter</span><span class="p">(</span><span class="n">dependencies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">static_order</span><span class="p">())</span>
+
+<div class="viewcode-block" id="VariableManager.resolve">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.VariableManager.resolve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_evaluation_order</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariableManager.eval_expressions">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.VariableManager.eval_expressions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eval_expressions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_order</span><span class="p">:</span>
+
+            <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+
+            <span class="c1"># fun を持つ場合</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ExpressionFromFunction</span><span class="p">):</span>
+
+                <span class="c1"># pop するので list をコピーしておく</span>
+                <span class="n">user_def_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+                <span class="c1"># 位置引数を揃え、残りをキーワード引数にする</span>
+                <span class="n">pos_args</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">kw_args</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+
+                <span class="c1"># 引数順に調べる</span>
+                <span class="n">required_arg_names</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">required_arg_names</span><span class="p">:</span>
+
+                    <span class="c1"># 位置引数であ（りう）る</span>
+                    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="o">&lt;=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">:</span>
+
+                        <span class="c1"># 変数である</span>
+                        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                            <span class="c1"># order 順に見ているのですでに value が正しいはず</span>
+                            <span class="n">pos_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+                        <span class="c1"># ユーザー定義位置引数である</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">pos_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_def_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                            <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pop from empty list</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="p">[]</span>
+                                <span class="k">for</span> <span class="n">p_</span> <span class="ow">in</span> <span class="n">required_arg_names</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">p_</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
+                                        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*</span><span class="si">{</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                                    <span class="k">elif</span> <span class="n">p_</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
+                                        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;**</span><span class="si">{</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                                <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span>
+                                    <span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+                                    <span class="n">_</span><span class="p">(</span>
+                                        <span class="s1">&#39;Missing arguments! &#39;</span>
+                                        <span class="s1">&#39;The arguments specified by `args`: </span><span class="si">{var_args}</span><span class="s1"> / &#39;</span>
+                                        <span class="s1">&#39;The arguments specified by `kwargs`: </span><span class="si">{var_kwargs}</span><span class="s1"> / &#39;</span>
+                                        <span class="s1">&#39;Required arguments: </span><span class="si">{msg}</span><span class="s1">&#39;</span><span class="p">,</span>
+                                        <span class="n">var_args</span><span class="o">=</span><span class="n">var</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+                                        <span class="n">var_kwargs</span><span class="o">=</span><span class="n">var</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
+                                        <span class="n">msg</span><span class="o">=</span><span class="n">msg</span>
+                                    <span class="p">),</span>
+                                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+                    <span class="c1"># *args である</span>
+                    <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
+
+                        <span class="c1"># ユーザー定義位置引数でないとおかしい</span>
+                        <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Extra positional argument name cannot be duplicated with a variable name.&#39;</span><span class="p">)</span>
+
+                        <span class="c1"># *args なので残り全部を pos_args に入れる</span>
+                        <span class="n">pos_args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">user_def_args</span><span class="p">)</span>
+
+                    <span class="c1"># キーワード引数である</span>
+                    <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">KEYWORD_ONLY</span><span class="p">:</span>
+
+                        <span class="c1"># 変数である</span>
+                        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                            <span class="c1"># order 順に見ているのですでに value が正しいはず</span>
+                            <span class="n">kw_args</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">})</span>
+
+                    <span class="c1"># **kwargs である</span>
+                    <span class="k">else</span><span class="p">:</span>
+
+                        <span class="c1"># kw_args にユーザー定義キーワード引数を入れているので何もしなくてよい</span>
+                        <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Extra keyword argument name cannot be duplicated with a variable name.&#39;</span><span class="p">)</span>
+
+                <span class="c1"># fun を実行する</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">pos_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+
+            <span class="c1"># string expression の場合</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ExpressionFromString</span><span class="p">):</span>
+
+                <span class="c1"># dependency_values を作る</span>
+                <span class="n">dependency</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">_expr</span><span class="o">.</span><span class="n">dependency</span>
+
+                <span class="c1"># order 順に見ているので value は正しいはず</span>
+                <span class="n">dependency_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">dep_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">dep_name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                    <span class="k">for</span> <span class="n">dep_name</span> <span class="ow">in</span> <span class="n">dependency</span>
+                <span class="p">}</span>
+
+                <span class="c1"># 計算</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">_expr</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">dependency_values</span><span class="p">)</span>
+
+            <span class="c1"># その他 = Expression ではない場合</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># optimizer によって直接 update されている</span>
+                <span class="c1"># はずなので何もしなくてよい</span>
+                <span class="k">pass</span></div>
+
+
+    <span class="c1"># noinspection PyShadowingBuiltins</span>
+<div class="viewcode-block" id="VariableManager.get_variables">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.VariableManager.get_variables">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variables</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="nb">filter</span><span class="p">:</span> <span class="p">(</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span> <span class="s1">&#39;parameter&#39;</span><span class="p">]</span>
+                     <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span> <span class="s1">&#39;parameter&#39;</span><span class="p">]]</span>
+                     <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># &#39;pass_to_fem&#39; and &#39;parameter&#39; (OR filter)</span>
+            <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># None, &#39;dict&#39; and &#39;values&#39;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
+        <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Variable</span><span class="p">]</span>
+        <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]</span>
+        <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span>
+        <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">):</span>
+
+        <span class="n">raw</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;pass_to_fem&#39;</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span><span class="p">:</span>
+                        <span class="n">raw</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
+
+                <span class="k">if</span> <span class="s1">&#39;parameter&#39;</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+                        <span class="n">raw</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">raw</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">raw</span>
+
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">raw</span>
+
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;dict&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span>
+                    <span class="s1">&#39;invalid format </span><span class="si">{format}</span><span class="s1"> is passed to &#39;</span>
+                    <span class="s1">&#39;VariableManager.get_variables(). &#39;</span>
+                    <span class="s1">&#39;Valid formats are one of (`raw`, `dict`, `values`).&#39;</span><span class="p">,</span>
+                    <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

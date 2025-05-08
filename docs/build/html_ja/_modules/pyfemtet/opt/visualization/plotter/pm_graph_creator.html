@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.visualization.plotter.pm_graph_creator &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/migration_to_v1.html">バージョン 1 への移行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/advanced_examples.html">発展的な例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.visualization.plotter.pm_graph_creator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>pyfemtet.opt.visualization.plotter.pm_graph_creator のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.df_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.prediction._model</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.prediction._helper</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;plot2d&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;plot3d&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_grid_values</span><span class="p">(</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">prm_name_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">history</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name_</span><span class="p">):</span>
+        <span class="n">lb_</span><span class="p">,</span> <span class="n">ub_</span> <span class="o">=</span> <span class="n">get_bounds_containing_entire_bounds</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">prm_name_</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lb_</span><span class="p">,</span> <span class="n">ub_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">history</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name_</span><span class="p">):</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="n">get_choices_containing_entire_bounds</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">prm_name_</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">choices</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<div class="viewcode-block" id="plot2d">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.plotter.pm_graph_creator.html#pyfemtet.opt.visualization.plotter.pm_graph_creator.plot2d">[ドキュメント]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot2d</span><span class="p">(</span>
+        <span class="n">history</span><span class="p">:</span> <span class="n">History</span><span class="p">,</span>
+        <span class="n">prm_name1</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">obj_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">pyfemtet_model</span><span class="p">:</span> <span class="n">PyFemtetModel</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_plot</span><span class="p">(</span>
+        <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+        <span class="n">prm_name1</span><span class="o">=</span><span class="n">prm_name1</span><span class="p">,</span>
+        <span class="n">prm_name2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+        <span class="n">pyfemtet_model</span><span class="o">=</span><span class="n">pyfemtet_model</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="plot3d">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.visualization.plotter.pm_graph_creator.html#pyfemtet.opt.visualization.plotter.pm_graph_creator.plot3d">[ドキュメント]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot3d</span><span class="p">(</span>
+        <span class="n">history</span><span class="p">:</span> <span class="n">History</span><span class="p">,</span>
+        <span class="n">prm_name1</span><span class="p">,</span>
+        <span class="n">prm_name2</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">obj_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">pyfemtet_model</span><span class="p">:</span> <span class="n">PyFemtetModel</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_plot</span><span class="p">(</span>
+        <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+        <span class="n">prm_name1</span><span class="o">=</span><span class="n">prm_name1</span><span class="p">,</span>
+        <span class="n">prm_name2</span><span class="o">=</span><span class="n">prm_name2</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+        <span class="n">pyfemtet_model</span><span class="o">=</span><span class="n">pyfemtet_model</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_plot</span><span class="p">(</span>
+        <span class="n">history</span><span class="p">:</span> <span class="n">History</span><span class="p">,</span>
+        <span class="n">prm_name1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">prm_name2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">obj_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">pyfemtet_model</span><span class="p">:</span> <span class="n">PyFemtetModel</span><span class="p">,</span>
+        <span class="n">n</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+
+    <span class="n">is_3d</span> <span class="o">=</span> <span class="n">prm_name2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="c1"># prepare input</span>
+    <span class="k">if</span> <span class="n">is_3d</span><span class="p">:</span>
+        <span class="n">prm_values1</span> <span class="o">=</span> <span class="n">get_grid_values</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">prm_name1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">prm_values2</span> <span class="o">=</span> <span class="n">get_grid_values</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">prm_name2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="c1"># plot 用の格子点を作成</span>
+        <span class="n">xx1</span><span class="p">,</span> <span class="n">xx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">prm_values1</span><span class="p">,</span> <span class="n">prm_values2</span><span class="p">)</span>
+
+        <span class="c1"># predict 用のデータを作成</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">xx1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">xx2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prm_values1</span> <span class="o">=</span> <span class="n">get_grid_values</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">prm_name1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">xx1</span> <span class="o">=</span> <span class="n">prm_values1</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">xx1</span>
+        <span class="n">prm_values2</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">xx2</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># predict 用の入力を作成</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">xx1</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span> <span class="nb">len</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">prm_name</span> <span class="o">==</span> <span class="n">prm_name1</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x1</span>
+        <span class="k">elif</span> <span class="n">prm_name</span> <span class="o">==</span> <span class="n">prm_name2</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">x2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;prm_name2 must be None.&#39;</span>
+            <span class="n">x</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span>
+
+    <span class="c1"># predict</span>
+    <span class="n">z_mean_</span><span class="p">,</span> <span class="n">z_std_</span> <span class="o">=</span> <span class="n">pyfemtet_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># target objective を抽出</span>
+    <span class="n">obj_idx</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">obj_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">obj_name</span><span class="p">)</span>
+    <span class="n">z_mean</span><span class="p">,</span> <span class="n">z_std</span> <span class="o">=</span> <span class="n">z_mean_</span><span class="p">[:,</span> <span class="n">obj_idx</span><span class="p">],</span> <span class="n">z_std_</span><span class="p">[:,</span> <span class="n">obj_idx</span><span class="p">]</span>
+
+    <span class="c1"># 3d 用 grid に変換</span>
+    <span class="k">if</span> <span class="n">is_3d</span><span class="p">:</span>
+        <span class="n">zz_mean</span><span class="p">,</span> <span class="n">zz_std</span> <span class="o">=</span> <span class="n">z_mean</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xx1</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">z_std</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xx1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">zz_mean</span><span class="p">,</span> <span class="n">zz_std</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="c1"># plot</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+
+    <span class="c1"># rsm</span>
+    <span class="k">if</span> <span class="n">is_3d</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">prm_name2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">prm_values2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">xx2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">zz_mean</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">zz_std</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">zz_upper</span> <span class="o">=</span> <span class="n">zz_mean</span> <span class="o">+</span> <span class="n">zz_std</span>
+        <span class="n">zz_lower</span> <span class="o">=</span> <span class="n">zz_mean</span> <span class="o">-</span> <span class="n">zz_std</span>
+
+        <span class="c1"># std</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">zz_upper</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">xx1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">xx2</span><span class="p">,</span>
+            <span class="n">showscale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Upper of pred. std-dev&#39;</span><span class="p">)))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">zz_lower</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">xx1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">xx2</span><span class="p">,</span>
+            <span class="n">showscale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Lower of pred. std-dev&#39;</span><span class="p">)))</span>
+
+        <span class="c1"># mean</span>
+        <span class="n">contours</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">,</span> <span class="n">prm_values</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">prm_name1</span><span class="p">,</span> <span class="n">prm_name2</span><span class="p">),</span> <span class="p">(</span><span class="n">prm_values1</span><span class="p">,</span> <span class="n">prm_values2</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">history</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">prm_values</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">prm_values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="n">contours</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">highlight</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                    <span class="n">start</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">ub</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">ub</span> <span class="o">-</span> <span class="n">lb</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">,</span>
+                <span class="p">)})</span>
+            <span class="k">elif</span> <span class="n">history</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+                <span class="n">contours</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">highlight</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                <span class="p">)})</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">xx1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">xx2</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">zz_mean</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction&#39;</span><span class="p">),</span>
+                <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">contours</span><span class="o">=</span><span class="n">contours</span><span class="p">,</span>
+                <span class="n">colorbar</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                    <span class="n">xref</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># std</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">x1</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">z_mean</span> <span class="o">+</span> <span class="n">z_std</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">z_mean</span> <span class="o">-</span> <span class="n">z_std</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Std-dev of pred.&#39;</span><span class="p">),</span>
+                <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;toself&#39;</span><span class="p">,</span>
+                <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># mean</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z_mean</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># scatter</span>
+    <span class="n">sub_fidelity_names</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">sub_fidelity_names</span>
+    <span class="n">obj_names_per_sub_fidelity_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">history</span><span class="o">.</span><span class="n">obj_names</span> <span class="k">for</span> <span class="n">__</span> <span class="ow">in</span> <span class="n">sub_fidelity_names</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">is_3d</span><span class="p">:</span>
+
+        <span class="c1"># main</span>
+        <span class="n">df_main</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">MAIN_FILTER</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter3d</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">df_main</span><span class="p">[</span><span class="n">prm_name1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_main</span><span class="p">[</span><span class="n">prm_name2</span><span class="p">],</span> <span class="n">z</span><span class="o">=</span><span class="n">df_main</span><span class="p">[</span><span class="n">obj_name</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;trial&#39;</span><span class="p">,</span>
+        <span class="p">))</span>
+
+        <span class="c1"># sub fidelity</span>
+        <span class="k">for</span> <span class="p">(</span>
+                <span class="n">sub_fidelity_name</span><span class="p">,</span>
+                <span class="n">obj_names_per_sub_fidelity</span><span class="p">,</span>
+                <span class="c1"># color</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">sub_fidelity_names</span><span class="p">,</span>
+            <span class="n">obj_names_per_sub_fidelity_list</span><span class="p">,</span>
+            <span class="c1"># px.colors.qualitative.G10[::-1]</span>
+        <span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">sub_fidelity_name</span> <span class="o">==</span> <span class="n">MAIN_FILTER</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">df_sub</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">sub_fidelity_name</span><span class="o">=</span><span class="n">sub_fidelity_name</span><span class="p">))</span>
+
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter3d</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">df_sub</span><span class="p">[</span><span class="n">prm_name1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_sub</span><span class="p">[</span><span class="n">prm_name2</span><span class="p">],</span> <span class="n">z</span><span class="o">=</span><span class="n">df_sub</span><span class="p">[</span><span class="n">obj_name</span><span class="p">],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;square-open&#39;</span><span class="p">,</span>  <span class="c1"># TODO: sequence 化</span>
+                <span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;trial of </span><span class="si">{</span><span class="n">sub_fidelity_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># main</span>
+        <span class="n">df_main</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">MAIN_FILTER</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">df_main</span><span class="p">[</span><span class="n">prm_name1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_main</span><span class="p">[</span><span class="n">obj_name</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;trial&#39;</span><span class="p">,</span>
+        <span class="p">))</span>
+
+        <span class="c1"># sub fidelity</span>
+        <span class="k">for</span> <span class="p">(</span>
+                <span class="n">sub_fidelity_name</span><span class="p">,</span>
+                <span class="n">obj_names_per_sub_fidelity</span><span class="p">,</span>
+                <span class="c1"># color</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">sub_fidelity_names</span><span class="p">,</span>
+            <span class="n">obj_names_per_sub_fidelity_list</span><span class="p">,</span>
+            <span class="c1"># px.colors.qualitative.G10[::-1]</span>
+        <span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">sub_fidelity_name</span> <span class="o">==</span> <span class="n">MAIN_FILTER</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">df_sub</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">sub_fidelity_name</span><span class="o">=</span><span class="n">sub_fidelity_name</span><span class="p">))</span>
+
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">df_sub</span><span class="p">[</span><span class="n">prm_name1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_sub</span><span class="p">[</span><span class="n">obj_name</span><span class="p">],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;square-open&#39;</span><span class="p">,</span>  <span class="c1"># TODO: sequence 化</span>
+                <span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;trial of </span><span class="si">{</span><span class="n">sub_fidelity_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="p">))</span>
+
+    <span class="c1"># set opacity by its distance</span>
+    <span class="n">params_</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">params_</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">prm_name1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_3d</span><span class="p">:</span>
+        <span class="n">params_</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">prm_name2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params_</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">opacity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># distance を計算する用のデータを分割</span>
+        <span class="n">prm_names_for_distances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">prm_values_for_distances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">prm_names_for_categorical</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">prm_values_for_categorical</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="n">params_</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">history</span><span class="o">.</span><span class="n">is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+                <span class="n">prm_names_for_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+                <span class="n">prm_values_for_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_</span><span class="p">[</span><span class="n">prm_name</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">history</span><span class="o">.</span><span class="n">is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+                <span class="n">prm_names_for_categorical</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+                <span class="n">prm_values_for_categorical</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_</span><span class="p">[</span><span class="n">prm_name</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="c1"># distance が大きい程 opacity を小さくする</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prm_names_for_distances</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">target_points</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">prm_names_for_distances</span><span class="p">]</span>
+            <span class="n">hyper_plane</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">prm_values_for_distances</span><span class="p">)</span>
+            <span class="n">distances_to_hyper_plane</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">target_points</span> <span class="o">-</span> <span class="n">hyper_plane</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">opacity</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">distances_to_hyper_plane</span> <span class="o">/</span> <span class="n">distances_to_hyper_plane</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">opacity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+
+        <span class="c1"># categorical データが一致しないぶんだけ opacity を 1/N する</span>
+        <span class="n">target_points</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">prm_names_for_categorical</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">hyper_plane</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">prm_values_for_categorical</span><span class="p">)</span>
+        <span class="c1"># noinspection PyUnresolvedReferences</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_points</span> <span class="o">==</span> <span class="n">hyper_plane</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># 0 になると困る</span>
+        <span class="c1"># noinspection PyUnusedLocal</span>
+        <span class="n">opacity</span> <span class="o">=</span> <span class="n">opacity</span> <span class="o">*</span> <span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="n">count</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>  <span class="c1"># FIXME: 0 除算エラーが取り切れていない場合がある</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_opacity</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter3d</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">):</span>
+            <span class="n">trace</span><span class="o">.</span><span class="n">marker</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;rgba(0, 0, 0, </span><span class="si">{</span><span class="n">o</span><span class="si">:</span><span class="s1"> .2f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">opacity</span><span class="p">]</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">for_each_trace</span><span class="p">(</span><span class="n">set_opacity</span><span class="p">)</span>
+
+    <span class="c1"># axis name</span>
+    <span class="k">if</span> <span class="n">is_3d</span><span class="p">:</span>
+        <span class="c1"># layout</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction Model&#39;</span><span class="p">),</span>
+            <span class="n">xaxis_title</span><span class="o">=</span><span class="n">prm_name1</span><span class="p">,</span>
+            <span class="n">yaxis_title</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Prediction Model&#39;</span><span class="p">),</span>
+            <span class="n">scene</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">xaxis_title</span><span class="o">=</span><span class="n">prm_name1</span><span class="p">,</span>
+                <span class="n">yaxis_title</span><span class="o">=</span><span class="n">prm_name2</span><span class="p">,</span>
+                <span class="n">zaxis_title</span><span class="o">=</span><span class="n">obj_name</span>
+            <span class="p">),</span>
+            <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

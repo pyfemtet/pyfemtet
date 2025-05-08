@@ -51,9 +51,9 @@ if __name__ == '__main__':
 
     # Add the objective function to the optimization problem.
     # The target bending angle is 90 degrees.
-    femopt.add_objective(chip_temp, name='max temp. of<br>MAINCHIP (degree)', direction='minimize', args=('MAINCHIP',))
-    femopt.add_objective(chip_temp, name='max temp. of<br>SUBCHIP (degree)', direction='minimize', args=('SUBCHIP',))
-    femopt.add_objective(substrate_size, name='substrate size (mm2)', direction='minimize')
+    femopt.add_objective(fun=chip_temp, name='max temp. of<br>MAINCHIP (degree)', direction='minimize', args=('MAINCHIP',))
+    femopt.add_objective(fun=chip_temp, name='max temp. of<br>SUBCHIP (degree)', direction='minimize', args=('SUBCHIP',))
+    femopt.add_objective(fun=substrate_size, name='substrate size (mm2)', direction='minimize')
 
     # Run optimization.
     femopt.set_random_seed(42)
