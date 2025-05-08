@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-23 13:09+0900\n"
+"POT-Creation-Date: 2025-05-08 11:48+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -536,8 +536,8 @@ msgid "What is passed to the first argument varies depending on the FEMInterface
 msgstr "第一引数として何が与えられるかは、お使いのインターフェースによって異なります。例えば、 ``ExcelInterface`` の場合 Excel(R) の COM オブジェクトが与えられます。"
 
 #: ../source/pages/migration_to_v1.rst:106
-msgid "For details, please refer to the :doc:`api` (``~Interface.object_pass_to_fun``) of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
-msgstr "より詳しくは、  :doc:`api` の ``~Interface.object_pass_to_fun`` 項目を参照してください。もしインターフェースクラスの項目に ``object_pass_to_fun`` の項目がなければ、継承元クラスの項目をご覧ください。"
+msgid "For details, please refer to the `API Reference of Latest version <https://pyfemtet.readthedocs.io/en/latest/pages/api.html>`__ of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
+msgstr "より詳しくは、 `開発中最新バージョンの API リファレンス <https://pyfemtet.readthedocs.io/ja/latest/pages/api.html>`__ の ``~Interface.object_pass_to_fun`` 項目を参照してください。もしインターフェースクラスの項目に ``object_pass_to_fun`` の項目がなければ、継承元クラスの項目をご覧ください。"
 
 #: ../source/pages/script_builder.rst:2
 msgid "GUI"

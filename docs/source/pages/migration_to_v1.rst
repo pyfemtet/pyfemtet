@@ -104,10 +104,7 @@ and its derived classes (such as FemtetWithNXInterface).
    to your function. 
    
    For details, please refer to
-   the :doc:`api` (``~Interface.object_pass_to_fun``) of each class.
+   the `API Reference of Latest version <https://pyfemtet.readthedocs.io/en/latest/pages/api.html>`__ of each class.
    If the concrete class’s API reference does not include
    an object_pass_to_fun section, please refer to the
    corresponding section in its parent class.
-
-
-
