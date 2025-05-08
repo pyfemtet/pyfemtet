@@ -22,6 +22,16 @@ Abstract
 
     - --> |Femtet|
 
+.. important::
+
+    **To users of PyFemtet 0.x**
+
+    In PyFemtet v1, many functions and arguments have been changed
+    to improve user-friendliness and development efficiency.
+    Please refer to the following page for details.
+
+     :doc:`pages/migration_to_v1` 
+
 
 Main Features of PyFemtet
 ----------------------------
@@ -106,6 +116,7 @@ Table of Contents
 
     Home <self>
     pages/installation
+    pages/migration_to_v1 
     pages/examples
     pages/advanced_examples
     pages/script_builder

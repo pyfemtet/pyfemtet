@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-06 09:15+0900\n"
+"POT-Creation-Date: 2025-04-23 11:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../source/modules/modules.rst:2
 msgid "pyfemtet"
@@ -80,9 +80,10 @@ msgstr "ソルバーにおけるエラーに対して発生する例外です。
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:5
 #: ../source/modules/pyfemtet.logger.rst:5
 #: ../source/modules/pyfemtet.opt.interface.rst:5
+#: ../source/modules/pyfemtet.opt.meta_script.rst:5
 #: ../source/modules/pyfemtet.opt.optimizer.rst:16
 #: ../source/modules/pyfemtet.opt.prediction.rst:16
-#: ../source/modules/pyfemtet.opt.rst:16
+#: ../source/modules/pyfemtet.opt.rst:17
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.rst:13
 #: ../source/modules/pyfemtet.rst:27
@@ -291,6 +292,7 @@ msgstr "内部的に使用されるために変換された目的関数の値、
 #: pyfemtet.opt.interface._femtet.FemtetInterface.update_model
 #: pyfemtet.opt.interface._femtet.FemtetInterface.use_parametric_output_as_objective
 #: pyfemtet.opt.interface._femtet_with_nx._interface.FemtetWithNXInterface.update_model
+#: pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.load_objective
 #: pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase.update_parameter
 #: pyfemtet.opt.interface._surrogate._singletaskgp.PoFBoTorchInterface.update
 #: pyfemtet.opt.optimizer._base.AbstractOptimizer.f
@@ -750,47 +752,48 @@ msgid "The connection method. Default is 'auto'. Other valid values are 'new' or
 msgstr "接続方法です。デフォルトは 'auto' です。他の有効な値は 'new' または 'existing' です。"
 
 #: of pyfemtet.opt.interface._femtet.FemtetInterface:13
-msgid "The type to save result file. Can specify 'all' or None. Default is 'all'."
+#, fuzzy
+msgid "The type to save result file. Valid values are 'all', 'none' or 'optimal'. Default is 'all'."
 msgstr "結果ファイルを保存するタイプです。 'all' または None を指定できます。デフォルトは 'all' です。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:16
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:17
 msgid "Whether to strictly specify the PID in Femtet connection. Default is True."
 msgstr "Femtet 接続で PID を厳密に指定するかどうかです。デフォルトは True です。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:19
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:20
 msgid "Whether to allow without a project. Default is False."
 msgstr "プロジェクトなしでの実行を許可するかどうかです。デフォルトは False です。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:21
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:22
 msgid "Whether to open the result with GUI. Default is True."
 msgstr "結果を GUI で開くかどうかです。デフォルトは True です。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:23
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:24
 #, fuzzy
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives.   .. note::     Indexes start at 0, but the parametric analysis    output settings in the Femtet dialog box indicate    setting numbers starting at 1.  .. warning::     **Setting this argument deletes the parametric    analysis swept table set in the femprj file.**    If you do not want to delete the swept table,    make a copy of the original file."
 msgstr "目的関数として使用するパラメトリック出力インデックスのリストとその方向です。指定されていない場合は None となり、パラメトリック出力は目的として使用されません。  .. note::     インデックスは0から始まりますが、Femtet のパラメトリック解析ダイアログの結果出力設定タブには、1から始まる設定番号が表示されます。  .. warning::     **この引数を設定すると、femprj ファイルに設定されているパラメトリック解析スイープテーブルが削除されます。** スイープテーブルを削除したくない場合は、元のファイルをコピーしてください。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:23
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:24
 msgid "A list of parametric output indexes and its direction to use as the objective function. If not specified, it will be None and no parametric outputs are used as objectives."
 msgstr "目的関数として使用するパラメトリック出力インデックスのリストとその方向です。指定されていない場合は None となり、パラメトリック出力は目的として使用されません。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:31
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:32
 msgid "Indexes start at 0, but the parametric analysis output settings in the Femtet dialog box indicate setting numbers starting at 1."
 msgstr "インデックスは0から始まりますが、Femtet のパラメトリック解析ダイアログの結果出力設定タブには、1から始まる設定番号が表示されます。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:37
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:38
 msgid "**Setting this argument deletes the parametric analysis swept table set in the femprj file.** If you do not want to delete the swept table, make a copy of the original file."
 msgstr "**この引数を設定すると、femprj ファイルに設定されているパラメトリック解析スイープテーブルが削除されます。** スイープテーブルを削除したくない場合は、元のファイルをコピーしてください。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:42
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:43
 msgid "Additional arguments from inherited classes."
 msgstr "継承されたクラスからの追加引数です。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:46
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:47
 msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
 msgstr "コンストラクタで ``strictly_pid_specify=True`` を指定しても、**並列処理では接続の動作が** ``strictly_pid_specify=False`` **のようになります**。これは大きなオーバーヘッドによるものです。したがって、``n_parallel`` が 2 以上の場合は、FEMOpt.optimize() を実行する前にすべての Femtet プロセスを閉じるべきです。"
 
-#: of pyfemtet.opt.interface._femtet.FemtetInterface:54
+#: of pyfemtet.opt.interface._femtet.FemtetInterface:55
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr "Python と Femtet を接続する方法についての情報を探している場合は、:func:`connect_femtet` を参照してください。"
 
@@ -1212,7 +1215,7 @@ msgid "Excel マクロ関数に渡す引数をリストまたはタプルで 指
 msgstr ""
 
 #: of pyfemtet.opt.interface._excel_interface.ExcelInterface:32
-msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'auto' です。"
+msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'new' です。"
 msgstr ""
 
 #: of pyfemtet.opt.interface._excel_interface.ExcelInterface:35
@@ -1351,6 +1354,10 @@ msgstr ""
 
 #: of pyfemtet.opt.interface._surrogate._base.SurrogateModelInterfaceBase:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._base.FEMInterface`, :py:class:`~abc.ABC`"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.meta_script.rst:2
+msgid "pyfemtet.opt.meta\\_script package"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:2
@@ -1714,4 +1721,7 @@ msgstr ""
 
 #~ msgid "metadata of optimization process."
 #~ msgstr "最適化プロセスを実行します。"
+
+#~ msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'auto' です。"
+#~ msgstr ""
 
