@@ -12,8 +12,9 @@ from scipy.signal import find_peaks
 from tqdm import tqdm
 from optuna.integration.botorch import BoTorchSampler
 
-from pyfemtet.core import SolveError
+from pyfemtet.opt.exceptions import SolveError
 from pyfemtet.opt import OptunaOptimizer, FEMOpt
+from pyfemtet.opt.optimizer import PoFBoTorchSampler, PartialOptimizeACQFConfig
 
 
 class SParameterCalculator:
@@ -112,9 +113,12 @@ if __name__ == '__main__':
 
     # 数値最適化問題の初期化 (最適化手法を決定します)
     opt = OptunaOptimizer(
-        sampler_class=BoTorchSampler,
+        sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
-            n_startup_trials=10,
+            n_startup_trials=4,
+            partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
+                timeout_sec=30.,
+            ),
         )
     )
     
@@ -132,7 +136,7 @@ if __name__ == '__main__':
 
     # 目的関数を最適化問題に追加
     # 共振周波数の目標は 3.0 GHz です。
-    femopt.add_objective(fun=s.get_resonance_frequency, name='第一共振周波数(Hz)', direction=3.0 * 1e9)
+    femopt.add_objective(fun=s.get_resonance_frequency, name='第一共振周波数(Hz)', direction=3.3 * 1e9)
 
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=15)
+    femopt.optimize(n_trials=10)

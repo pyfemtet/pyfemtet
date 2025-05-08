@@ -5,8 +5,8 @@
 
 """
 
-from optuna_integration import BoTorchSampler
 from pyfemtet.opt import FEMOpt, OptunaOptimizer
+from pyfemtet.opt.optimizer import PoFBoTorchSampler
 
 
 def mises_stress(Femtet):
@@ -66,7 +66,7 @@ def radius_diff(Femtet, opt):
 if __name__ == '__main__':
     # 最適化手法のセットアップ
     opt = OptunaOptimizer(
-        sampler_class=BoTorchSampler,
+        sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
             n_startup_trials=3,  # 最初の 3 回はランダムサンプリングを行います。
         )
