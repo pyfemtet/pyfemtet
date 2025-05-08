@@ -37,6 +37,18 @@ def test_scipy_optimizer():
     )
     opt.constraint_enhancement += opt.options.get('eps', 0.) * 1000
 
+    # optimize_acqf と違って solve ごとに violation を見ているので
+    # 例えば SLSQP で jac の計算のために eps の範囲内で x が変動することで
+    # 拘束違反の値が提案されることを scaling によって避けることはできない
+    # optimize_acqf の内部の minimize の場合は対象が FEM ではなく
+    # ACQF なので、サブ最適化問題の中で拘束違反をチェックする機構は
+    # scipy.optimize に任せており、そこでは jac の計算のための
+    # x の変動の範囲内で拘束違反することを許容している。
+    # 最適化対象が FEM ではなく ACQF なので最適化結果が厳密に拘束違反でさえ
+    # なければよく、そういう場合は scaling で対処が可能である。
+    # opt.constraint_enhancement = 0
+    # opt.constraint_scaling = 1e6
+
     opt.run()
 
     sleep(1)
@@ -87,4 +99,4 @@ def test_scipy_optimizer_1():
 
 if __name__ == '__main__':
     test_scipy_optimizer()
-    test_scipy_optimizer_1()
+    # test_scipy_optimizer_1()

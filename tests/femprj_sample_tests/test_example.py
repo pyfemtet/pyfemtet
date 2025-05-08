@@ -241,8 +241,8 @@ def _get_simplified_df_values(csv_path):
     return pdf.values.astype(float)
 
 
-# @pytest.mark.sample  # 再現性がないのでテストから除外
-def test_constrained_pipe(record_mode=True):
+@pytest.mark.skip(reason='No reproductive.')
+def test_constrained_pipe(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\constrained_pipe.py',
         record_mode=record_mode,
@@ -253,7 +253,7 @@ def test_constrained_pipe(record_mode=True):
 
 
 @pytest.mark.sample
-def test_sample_gau_ex08_parametric(record_mode=True):
+def test_sample_gau_ex08_parametric(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\gau_ex08_parametric.py',
         record_mode=record_mode,
@@ -263,7 +263,7 @@ def test_sample_gau_ex08_parametric(record_mode=True):
 
 
 @pytest.mark.sample
-def test_sample_her_ex40_parametric(record_mode=True):
+def test_sample_her_ex40_parametric(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\her_ex40_parametric.py',
         record_mode=record_mode,
@@ -273,7 +273,7 @@ def test_sample_her_ex40_parametric(record_mode=True):
 
 
 @pytest.mark.sample
-def test_sample_wat_ex14_parametric(record_mode=True):
+def test_sample_wat_ex14_parametric(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\wat_ex14_parametric.py',
         record_mode=record_mode,
@@ -283,7 +283,7 @@ def test_sample_wat_ex14_parametric(record_mode=True):
 
 
 @pytest.mark.sample
-def test_sample_paswat_ex1_parametric(record_mode=True):
+def test_sample_paswat_ex1_parametric(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\paswat_ex1_parametric.py',
         record_mode=record_mode,
@@ -293,17 +293,17 @@ def test_sample_paswat_ex1_parametric(record_mode=True):
 
 
 @pytest.mark.sample
-def test_sample_gal_ex58_parametric(record_mode=True):
+def test_sample_gal_ex58_parametric(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\gal_ex58_parametric.py',
         record_mode=record_mode,
     )
-    # sample_test.run()
+    sample_test.run()
     sample_test.run(jp=True)
 
 
 @pytest.mark.sample
-def test_sample_parametric_if(record_mode=True):
+def test_sample_parametric_if(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\ParametricIF.py',
         record_mode=record_mode,
@@ -313,7 +313,7 @@ def test_sample_parametric_if(record_mode=True):
 
 
 @pytest.mark.skip(reason='Solidworks 2023 topology compatibility problem.')
-def test_cad_sample_sldworks_ex01(record_mode=True):
+def test_cad_sample_sldworks_ex01(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\cad_ex01_SW.py',
         record_mode=record_mode,
@@ -324,7 +324,7 @@ def test_cad_sample_sldworks_ex01(record_mode=True):
 
 
 @pytest.mark.cad
-def test_cad_sample_nx_ex01(record_mode=True):
+def test_cad_sample_nx_ex01(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\cad_ex01_NX.py',
         record_mode=record_mode,
@@ -335,12 +335,12 @@ def test_cad_sample_nx_ex01(record_mode=True):
 
 
 if __name__ == '__main__':
-    test_constrained_pipe(record_mode=True)
-    test_sample_gau_ex08_parametric(record_mode=True)
-    test_sample_her_ex40_parametric(record_mode=True)
+    # test_constrained_pipe(record_mode=True)
+    # test_sample_gau_ex08_parametric(record_mode=True)
+    # test_sample_her_ex40_parametric(record_mode=True)
     test_sample_wat_ex14_parametric(record_mode=True)
-    test_sample_paswat_ex1_parametric(record_mode=True)
-    test_sample_gal_ex58_parametric(record_mode=True)
-    test_sample_parametric_if(record_mode=True)
-    test_cad_sample_sldworks_ex01(record_mode=True)
-    test_cad_sample_nx_ex01(record_mode=True)
+    # test_sample_paswat_ex1_parametric(record_mode=True)
+    # test_sample_gal_ex58_parametric(record_mode=True)
+    # test_sample_parametric_if(record_mode=True)
+    # test_cad_sample_sldworks_ex01(record_mode=True)
+    # test_cad_sample_nx_ex01(record_mode=True)
