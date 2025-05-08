@@ -1,3 +1,4 @@
+import os
 from time import sleep
 import numpy as np
 from pyfemtet.opt.interface import NoFEM
@@ -20,9 +21,11 @@ def constraint2(_, opt: ScipyOptimizer):
 
 
 def test_scipy_optimizer():
-
     opt = ScipyOptimizer()
     opt.fem = NoFEM()
+    if os.path.isfile('tmp.csv'):
+        os.remove('tmp.csv')
+    opt.history.path = 'tmp.csv'
 
     opt.add_parameter('x1', 1, -1, 1)
     opt.add_parameter('x2', -1, -1, 1)
@@ -76,6 +79,9 @@ def scipy_optimizer_var(
 
     opt = ScipyOptimizer()
     opt.fem = NoFEM()
+    if os.path.isfile('tmp.csv'):
+        os.remove('tmp.csv')
+    opt.history.path = 'tmp.csv'
 
     opt.add_parameter('x1', -1, -1, 1)
     opt.add_parameter('x2', -1, -1, 1)
