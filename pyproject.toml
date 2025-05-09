@@ -1,75 +1,70 @@
-[tool.poetry]
+[project]
 name = "pyfemtet"
-version = "0.1.0"  # ignored by versioning plugin
+dynamic = ["version"]
 description = "Design parameter optimization using Femtet."
-authors = ["kazuma.naito <148934231+pyfemtet@users.noreply.github.com>"]
+authors = [{ name = "kazuma.naito", email = "148934231+pyfemtet@users.noreply.github.com" }]
+requires-python = ">= 3.10, < 3.13"
 readme = "README.md"
 license = "MIT"
-repository = "https://github.com/pyfemtet/pyfemtet"
-
-[tool.poetry.dependencies]
-# core
-python = " >= 3.10, < 3.13"
-babel = "^2.15.0"
-tqdm = "^4.66.1"
-colorlog = "^6.8.0"
-psutil = "^5.9.6"
-# win32 / Femtet
-# markers requires ```poetry config installer.re-resolve false```
-pywin32 = { version = "^306", markers = "sys_platform=='win32'" }
-femtetutils = { version = "^1.0.0", markers = "sys_platform=='win32'" }
-# distributed
-dask = "~2024.12.1"
-distributed = "~2024.12.1"
-# ui
-dash = "^2.17.0"
-plotly = "^5.22.0"
-dash-bootstrap-components = "^1.5.0"
-# numerical
-numpy = "^2.0.0"
-pandas = "^2.2.3"
-openpyxl = "^3.1.2"
-scipy = "^1.11.4"
-optuna =  ">=3.4.0, <5.0.0"
-optuna-integration = ">=3.6.0, <5.0.0"
-botorch = "~0.12.0"
-torch = [
-    { version = "~2.5.1", source = "pytorch-cpu", markers = "sys_platform=='linux'" },
-    { version = "~2.5.1", markers = "sys_platform!='linux'"  },
+dependencies = [
+    "babel>=2.15.0,<3",
+    "tqdm>=4.66.1,<5",
+    "colorlog>=6.8.0,<7",
+    "psutil>=5.9.6,<6",
+    "pywin32>=306,<307 ; sys_platform=='win32'",
+    "femtetutils>=1.0.0,<2 ; sys_platform=='win32'",
+    "dask~=2024.12.1",
+    "distributed~=2024.12.1",
+    "dash>=2.17.0,<3",
+    "plotly>=5.22.0,<6",
+    "dash-bootstrap-components>=1.5.0,<2",
+    "numpy>=2.0.0,<3",
+    "pandas>=2.2.3,<3",
+    "openpyxl>=3.1.2,<4",
+    "scipy>=1.11.4,<2",
+    "optuna>=3.4.0, <5.0.0",
+    "optuna-integration>=3.6.0, <5.0.0",
+    "botorch~=0.12.0",
+    "torch",  # version は botorch が解決
+    "fire>=0.6.0,<0.7",
+    "pyyaml>=6.0.2,<7",
 ]
-brepmatching = {version = "^0.1.8", optional = true}
-fire = "^0.6.0"
-pyyaml = "^6.0.2"
 
-[tool.poetry.group.dev.dependencies]
-# license
-pip-licenses = "^4.3.3"
-# docs
-sphinx = "==7.2.6"
-myst-parser = "==2.0.0"
-sphinx-rtd-theme = "==2.0.0"
-sphinx-autobuild = "==2021.3.14"
-sphinx-design = "==0.5.0"
-sphinx-intl = "==2.2.0"
-# debug
-bokeh = "^3.3.3"
-# test
-pytest = "^7.4.3"
-pytest-dashboard = "^0.1.2"
-fire = "^0.6.0"
-# others
-black = "^25.1.0"
+[project.optional-dependencies]
+brep = ["brepmatching>=0.1.8,<0.2"]
 
-[[tool.poetry.source]]
+[project.urls]
+Repository = "https://github.com/pyfemtet/pyfemtet"
+
+[project.scripts]
+pyfemtet-opt-result-viewer = "pyfemtet.opt.visualization.history_viewer.result_viewer._application:result_viewer_main"
+
+[dependency-groups]
+dev = [
+    "pip-licenses>=4.3.3,<5",
+    "sphinx==7.2.6",
+    "myst-parser==2.0.0",
+    "sphinx-rtd-theme==2.0.0",
+    "sphinx-autobuild==2021.3.14",
+    "sphinx-design==0.5.0",
+    "sphinx-intl==2.2.0",
+    "bokeh>=3.3.3,<4",
+    "pytest>=7.4.3,<8",
+    "pytest-dashboard>=0.1.2,<0.2",
+    "black>=25.1.0,<26",
+]
+
+[[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
-priority = "explicit"
+explicit = true
 
-[tool.poetry.extras]
-brep = ["brepmatching"]  # pip install pyfemtet[brep]
+[tool.uv.sources]
+# linux の場合のみ index-url 指定がないと GPU 版が入る
+torch = [{ index = "pytorch-cpu", marker = "sys_platform=='linux'" }]
 
-[tool.poetry.scripts]
-pyfemtet-opt-result-viewer = 'pyfemtet.opt.visualization.history_viewer.result_viewer._application:result_viewer_main'
+[tool.uv-dynamic-versioning]
+fallback-version = "0.0.0"
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -84,9 +79,9 @@ markers = [
     "excel",
 ]
 
-[tool.poetry-dynamic-versioning]
-enable = true
-
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
