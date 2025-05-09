@@ -25,7 +25,7 @@ dependencies = [
     "optuna>=3.4.0, <5.0.0",
     "optuna-integration>=3.6.0, <5.0.0",
     "botorch~=0.12.0",
-    "torch",  # version は botorch が解決
+    "torch",  # botorch specifies torch's version
     "fire>=0.6.0,<0.7",
     "pyyaml>=6.0.2,<7",
 ]
@@ -60,7 +60,7 @@ url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
 [tool.uv.sources]
-# linux の場合のみ index-url 指定がないと GPU 版が入る
+# Defaults to installing CUDA without index-url specification only on linux
 torch = [{ index = "pytorch-cpu", marker = "sys_platform=='linux'" }]
 
 [tool.uv-dynamic-versioning]
