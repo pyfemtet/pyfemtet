@@ -6,18 +6,18 @@ build:
     python: "3.11"
   commands:
     - mkdir --parents $READTHEDOCS_OUTPUT/html/
-    - mkdir --parents $READTHEDOCS_OUTPUTdoctrees
+    - mkdir --parents $READTHEDOCS_OUTPUT/doctrees
     - echo $READTHEDOCS_OUTPUT
     - echo $READTHEDOCS_LANGUAGE
 
     - |
       if [ "$READTHEDOCS_LANGUAGE" = "en" ]; then
         cp --recursive docs/build/html/* $READTHEDOCS_OUTPUT/html/;
-        cp --recursive docs/build/doctrees/* $READTHEDOCS_OUTPUTdoctrees;
+        cp --recursive docs/build/doctrees/* $READTHEDOCS_OUTPUT/doctrees;
       fi
 
     - |
       if [ "$READTHEDOCS_LANGUAGE" = "ja" ]; then
         cp --recursive docs/build/html_ja/* $READTHEDOCS_OUTPUT/html/;
-        cp --recursive docs/build/doctrees_ja/* $READTHEDOCS_OUTPUTdoctrees;
+        cp --recursive docs/build/doctrees_ja/* $READTHEDOCS_OUTPUT/doctrees;
       fi
