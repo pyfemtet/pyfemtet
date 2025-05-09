@@ -1,22 +1,24 @@
-version: "2"
+version: "3"
 
 build:
   os: "ubuntu-22.04"
   tools:
     python: "3.11"
   commands:
-    - mkdir --parents _readthedocs/html/
+    # destination: $READTHEDOCS_OUTPUT/html
+    - mkdir --parents $READTHEDOCS_OUTPUT/html/
     - mkdir --parents _build/doctrees
+    - echo $READTHEDOCS_OUTPUT
     - echo $READTHEDOCS_LANGUAGE
 
     - |
       if [ "$READTHEDOCS_LANGUAGE" = "en" ]; then
-        cp --recursive docs/build/html/* _readthedocs/html/;
+        cp --recursive docs/build/html/* $READTHEDOCS_OUTPUT/html/;
         cp --recursive docs/build/doctrees/* _build/doctrees;
       fi
 
     - |
       if [ "$READTHEDOCS_LANGUAGE" = "ja" ]; then
-        cp --recursive docs/build/html_ja/* _readthedocs/html/;
+        cp --recursive docs/build/html_ja/* $READTHEDOCS_OUTPUT/html/;
         cp --recursive docs/build/doctrees_ja/* _build/doctrees;
       fi
