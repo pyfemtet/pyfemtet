@@ -295,6 +295,9 @@ class Function:
 
     def __init__(self, fun, name, args, kwargs):
 
+        # ===== for 1.0 warning =====
+        self._shown = False
+
         # serializable でない COM 定数を parallelize するため
         # COM 定数を一度 _Scapegoat 型のオブジェクトにする
         # ParametricIF で使う dll 関数は _FuncPtr 型であって __globals__ を持たないが、
@@ -326,6 +329,15 @@ class Function:
         # Femtet 特有の処理
         if isinstance(fem, FemtetInterface):
             args = (fem.object_passed_to_functions, *args)
+        else:
+            # ===== for 1.0 warning =====
+            if not self._shown:
+                logger.warning('From version 1.0, an object associated with the Interface '
+                               'will be automatically passed as the first argument. '
+                               'For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. '
+                               '(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)')
+                self._shown = True
+
         return float(self.fun(*args, **self.kwargs))
 
     def _restore_constants(self):

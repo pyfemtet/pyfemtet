@@ -367,6 +367,12 @@ class FEMOpt:
 
         """
 
+        # ===== warning for v1.0 =====
+        if name in None:
+            logger.warning('From version 1.0, `name` will be the first required argument. '
+                           'For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. '
+                           '(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)')
+
         # 引数の処理
         if fun is None:
             from pyfemtet.opt.interface import SurrogateModelInterfaceBase
@@ -401,6 +407,13 @@ class FEMOpt:
             args: tuple or None = None,
             kwargs: dict or None = None,
     ):
+
+        # ===== warning for v1.0 =====
+        if names in None:
+            logger.warning('From version 1.0, `names` will be the first required argument. '
+                           'For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. '
+                           '(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)')
+
         from pyfemtet.opt._femopt_core import ObjectivesFunc
         components = ObjectivesFunc(fun, n_return)
 
@@ -492,6 +505,12 @@ class FEMOpt:
             If name is None, name is a string with the prefix `"cns_"` followed by a sequential number.
 
         """
+
+        # ===== warning for v1.0 =====
+        if name in None:
+            logger.warning('From version 1.0, `name` will be the first required argument. '
+                           'For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. '
+                           '(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)')
 
         # 引数の処理
         if args is None:
