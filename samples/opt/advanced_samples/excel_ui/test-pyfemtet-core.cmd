@@ -1,14 +1,14 @@
 cd %~dp0
-rem poetry run python pyfemtet-core.py --help
-rem poetry run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3
-rem poetry run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3 --n_startup_trials=10 --timeout=3.14
-rem poetry run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3 --n_startup_trials=10 --timeout=5
-rem poetry run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3.14 --n_startup_trials=10 --timeout=5
-poetry run python pyfemtet-core.py ^
-    ƒCƒ“ƒ^[ƒtƒF[ƒX.xlsm ^
-    --input_sheet_name="İŒv•Ï”" ^
-    --output_sheet_name="–Ú“IŠÖ”" ^
-    --constraint_sheet_name="S‘©ŠÖ”" ^
+rem uv run python pyfemtet-core.py --help
+rem uv run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3
+rem uv run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3 --n_startup_trials=10 --timeout=3.14
+rem uv run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3 --n_startup_trials=10 --timeout=5
+rem uv run python pyfemtet-core.py "xlsm" "femprj" "input_sheet" 3.14 --n_startup_trials=10 --timeout=5
+uv run python pyfemtet-core.py ^
+    ï¿½Cï¿½ï¿½ï¿½^ï¿½[ï¿½tï¿½Fï¿½[ï¿½X.xlsm ^
+    --input_sheet_name="ï¿½İŒvï¿½Ïï¿½" ^
+    --output_sheet_name="ï¿½Ú“Iï¿½Öï¿½" ^
+    --constraint_sheet_name="ï¿½Sï¿½ï¿½ï¿½Öï¿½" ^
 
     --n_parallel=1 ^
     --csv_path="test.csv" ^

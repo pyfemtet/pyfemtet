@@ -29,4 +29,4 @@ Copy-Item -Path "$SAMPLES_SOURCE\*" -Destination $SAMPLES_ON_DOC_SOURCE -Recurse
 Copy-Item -Path $INSTALLER -Destination $INSTALLER_ON_DOC_SOURCE -Force
 
 start http://127.0.0.1:8000
-poetry run sphinx-autobuild .\docs\source .\docs\build
+uv run sphinx-autobuild .\docs\source .\docs\build
