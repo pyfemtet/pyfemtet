@@ -1,0 +1,14 @@
+interface_class: NoFEM
+interface_kwargs: {}
+optimizer_class: OptunaOptimizer
+optimizer_kwargs:
+    sampler_class: TPESampler
+    sampler_kwargs:
+        n_startup_trials: 3
+seed: 42
+optimize_kwargs:
+    n_trials: 3
+    confirm_before_exit: False
+additional_module_paths:
+  - user_defined_function.py
+confirm_before_abnormal_termination: False

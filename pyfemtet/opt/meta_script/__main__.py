@@ -11,7 +11,7 @@ try:
     if __name__ == '__main__':
         print(f'pyfemtet {pyfemtet.__version__} starting.')
 
-    from pyfemtet._message.messages import encoding
+    from pyfemtet._i18n import ENCODING
 
     from fire import Fire
     import yaml
@@ -21,11 +21,6 @@ try:
     from pyfemtet.opt import FEMOpt
     from pyfemtet.opt.interface import *
     from pyfemtet.opt.optimizer import *
-    from pyfemtet.opt.interface._femtet_excel import FemtetWithExcelSettingsInterface
-    from pyfemtet.opt.interface._surrogate_excel import PoFBoTorchInterfaceWithExcelSettingsInterface
-
-    # for debug
-    DEBUG = False
 
     class ContentContext:
 
@@ -62,13 +57,12 @@ try:
             yaml_path: str = None,
 
             interface_class: str = None,  # including parameter definition excel
-            interface_kwargs: str = None,  # including Parametric Analysis Output
+            interface_kwargs: str | dict = None,  # including Parametric Analysis Output
             optimizer_class: str = None,
-            optimizer_kwargs: str = None,
-            femopt_kwargs: str = None,
+            optimizer_kwargs: str | dict = None,
             seed: str = 'null',
-            optimize_kwargs: str = None,
-            additional_module_paths: list[str] = None,
+            optimize_kwargs: str | dict = None,
+            additional_module_paths: str | list[str] = None,
 
             confirm_before_abnormal_termination: bool = True,
     ):
@@ -80,17 +74,16 @@ try:
                 and load by .yaml file.
                 The yaml file must contain the other arguments.
 
-            interface_class: FemtetWithExcelSettingsInterface or SurrogateModelInterface.
+            interface_class: Class whose name ends with `~WithExcelSettingsInterface`.
             interface_kwargs: See documentation of each interface class.
             optimizer_class: OptunaOptimizer or ScipyOptimizer.
             optimizer_kwargs: See documentation of each optimizer class.
-            femopt_kwargs: See documentation of FEMOpt.
             seed: int or None.
             optimize_kwargs: See documentation of FEMOpt.optimize().
             additional_module_paths:
                 The .py file paths containing user-defined objective and constraints functions.
                 The module must contain __objective_functions__ or __constraint_functions__.
-                They must be a dict variable that contains the required arguments of
+                They must be a `list` of `dict` that contains the required arguments of
                 `FEMOpt.add_objective()` or `FEMOpt.add_constraint()` method.
                 Note that the `args` argument of constraint function is reserved by meta_script
                 and that value is fixed to `FEMOpt.opt`, so you can not use `args` argument
@@ -104,37 +97,44 @@ try:
         global CONFIRM_BEFORE_ABNORMAL_TERMINATION
         CONFIRM_BEFORE_ABNORMAL_TERMINATION = confirm_before_abnormal_termination
 
-        # load variables from yaml file
+        # Override arguments,
+        # if yaml is given.
+        # ===================
         if yaml_path is not None:
 
             # check
             if os.path.isfile(yaml_path):
-                context = open(yaml_path, 'r', encoding='utf-8')
+                # noinspection PyBroadException
+                try:
+                    context = open(yaml_path, 'r', encoding='utf-8')
+                except Exception:
+                    context = open(yaml_path, 'r', encoding=ENCODING)
 
             else:
-                if DEBUG:
-                    print('debug mode')
-                    context = ContentContext(yaml_path)  # yaml_path is yaml content
+                raise FileNotFoundError(yaml_path)
 
-                else:
-                    raise FileNotFoundError(yaml_path)
-
-            # load **as yaml content**
+            # load
             with context as f:
                 d = yaml.safe_load(f)
                 interface_class = yaml.safe_dump(d['interface_class'], allow_unicode=True)
                 interface_kwargs = yaml.safe_dump(d['interface_kwargs'], allow_unicode=True)
                 optimizer_class = yaml.safe_dump(d['optimizer_class'], allow_unicode=True)
                 optimizer_kwargs = yaml.safe_dump(d['optimizer_kwargs'], allow_unicode=True)
-                femopt_kwargs = yaml.safe_dump(d['femopt_kwargs'], allow_unicode=True)
                 seed = yaml.safe_dump(d['seed'], allow_unicode=True)
                 optimize_kwargs = yaml.safe_dump(d['optimize_kwargs'], allow_unicode=True)
                 additional_module_paths = yaml.safe_dump(d.get('additional_module_paths', None), allow_unicode=True)
 
-        # load **python variables** from yaml content
+        # Construct python variables
+        # by evaluating string
+        # or Fire arguments
+        # ==========================
 
         # additional import
-        additional_module_paths_ = yaml.safe_load(additional_module_paths)
+        # -----------------
+        if yaml_path is not None:
+            additional_module_paths_ = yaml.safe_load(additional_module_paths)
+        else:
+            additional_module_paths_ = [yaml.safe_load(p) for p in additional_module_paths]
 
         if additional_module_paths_ is not None:
 
@@ -147,24 +147,43 @@ try:
                 if hasattr(additional_module, '__all__'):
                     globals().update({key: getattr(additional_module, key) for key in additional_module.__all__})
 
-        Interface = eval(yaml.safe_load(interface_class))
-        interface_kwargs_ = yaml.safe_load(interface_kwargs)
+        # Python variables
+        # ----------------
+        if yaml_path is not None:
+            Interface = eval(yaml.safe_load(interface_class))
+            interface_kwargs_ = yaml.safe_load(interface_kwargs)
 
-        Optimizer = eval(yaml.safe_load(optimizer_class))
-        optimizer_kwargs_ = yaml.safe_load(optimizer_kwargs)
+            Optimizer = eval(yaml.safe_load(optimizer_class))
+            optimizer_kwargs_ = yaml.safe_load(optimizer_kwargs)
 
-        optimizer_kwargs_['sampler_class'] = eval(optimizer_kwargs_['sampler_class'])
+            optimizer_kwargs_['sampler_class'] = eval(optimizer_kwargs_['sampler_class'])
 
-        femopt_kwargs_ = yaml.safe_load(femopt_kwargs)
+            seed_ = yaml.safe_load(seed)
 
-        seed_ = yaml.safe_load(seed)
+            optimize_kwargs_ = yaml.safe_load(optimize_kwargs)
 
-        optimize_kwargs_ = yaml.safe_load(optimize_kwargs)
+        else:
+            Interface = eval(interface_class)
+            interface_kwargs_ = interface_kwargs
 
+            Optimizer = eval(optimizer_class)
+            optimizer_kwargs_ = optimizer_kwargs
+
+            optimizer_kwargs_['sampler_class'] = eval(optimizer_kwargs_['sampler_class'])
+
+            seed_ = seed
+
+            optimize_kwargs_ = optimize_kwargs
+
+        # meta-script
+        # ===========
+
+        # prepare common object
         fem = Interface(**interface_kwargs_)
         opt = Optimizer(**optimizer_kwargs_)
-        femopt = FEMOpt(fem=fem, opt=opt, **femopt_kwargs_)
+        femopt = FEMOpt(fem=fem, opt=opt)
 
+        # add user-defined functions
         if additional_module_paths_ is not None:
 
             for i, path_ in enumerate(additional_module_paths_):
@@ -196,6 +215,7 @@ try:
                             kwargs=d.get('kwargs'),
                         )
 
+        # optimize
         femopt.set_random_seed(seed_)
         femopt.optimize(**optimize_kwargs_)
 
@@ -210,4 +230,6 @@ except Exception as e:
     print_exception(e)
     print()
     if CONFIRM_BEFORE_ABNORMAL_TERMINATION:
-        input('終了するには Enter を押してください。')
+        input('Press Enter to quit...')
+
+    raise e  # for test
