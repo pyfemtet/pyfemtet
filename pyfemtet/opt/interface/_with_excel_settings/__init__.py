@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, TypeAlias
 import platform
 
 
-__all__ = []
+__all__ = []  # appended later
 
 
 if platform.system() == 'Windows':
