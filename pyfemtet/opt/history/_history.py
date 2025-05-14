@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeAlias, Literal
 
 import os
 import csv
@@ -281,6 +281,9 @@ class ColumnOrderMode(StrEnum):
     """The order rule of the history csv columns."""
     per_category = 'per_category'  #: Sort per each object.
     important_first = 'important_first'  #: The values of parameters and objectives first.
+
+
+ColumnOrderModeStr: TypeAlias = Literal['per_category', 'important_first']
 
 
 class DuplicatedColumnNameError(Exception):
@@ -1092,7 +1095,7 @@ class History:
         self._finalized: bool = False
         self.is_restart = False
         self.additional_data = dict(version=pyfemtet.__version__)
-        self.column_order_mode: ColumnOrderMode = ColumnOrderMode.per_category
+        self.column_order_mode: ColumnOrderMode | ColumnOrderModeStr = ColumnOrderMode.per_category
 
     def __str__(self):
         return self._records.__str__()
