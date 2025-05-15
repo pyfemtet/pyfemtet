@@ -29,3 +29,10 @@ PyFemtet.egg-info
 /pyfemtet/opt/visualization/_result_viewer/sample/optimize_sample.py
 docs/result.txt
 /uv.lock
+.env
+secret.yaml
+*.yaml
+*.xml
+*.cmd
+*_pyfemtet_final_test_record.html
+.test-running
