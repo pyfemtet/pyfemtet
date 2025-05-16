@@ -368,7 +368,7 @@ class FEMOpt:
         """
 
         # ===== warning for v1.0 =====
-        if name in None:
+        if name is None:
             logger.warning('From version 1.0, `name` will be the first required argument. '
                            'For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. '
                            '(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)')
@@ -409,7 +409,7 @@ class FEMOpt:
     ):
 
         # ===== warning for v1.0 =====
-        if names in None:
+        if names is None:
             logger.warning('From version 1.0, `names` will be the first required argument. '
                            'For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. '
                            '(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)')
@@ -507,7 +507,7 @@ class FEMOpt:
         """
 
         # ===== warning for v1.0 =====
-        if name in None:
+        if name is None:
             logger.warning('From version 1.0, `name` will be the first required argument. '
                            'For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. '
                            '(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)')
