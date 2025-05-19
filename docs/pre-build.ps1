@@ -30,7 +30,7 @@ Copy-Item -Path $INSTALLER -Destination $INSTALLER_ON_DOC_SOURCE -Force
 
 # update api references
 if (Test-Path "docs/source/modules") {Remove-Item "docs/source/modules" -Force -Recurse}
-poetry run sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs/source/modules" pyfemtet
+uv run --no-sync sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs/source/modules" pyfemtet
 
 # setup other sample files
 powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1"
@@ -38,7 +38,7 @@ powershell "$SOURCE_DIR\advanced_examples\excel_ui\copy_files.ps1"
 powershell "$SOURCE_DIR\advanced_examples\restart\copy_files.ps1"
 
 # build English document
-poetry run python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
+uv run --no-sync python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
 
 # copy and overwrite with Japanese sample files
 Copy-Item -Path "$SAMPLES_SOURCE_JP\*" -Destination $SAMPLES_ON_DOC_SOURCE -Force -Recurse
@@ -58,7 +58,7 @@ foreach ($file in $files) {
 Copy-Item -Path $INSTALLER_JP -Destination $INSTALLER_ON_DOC_SOURCE -Force
 
 # update api references
-poetry run sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs/source/modules" pyfemtet
+uv run --no-sync sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs/source/modules" pyfemtet
 
 # setup other sample files
 powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1" 1  # is_JP
@@ -66,6 +66,6 @@ powershell "$SOURCE_DIR\advanced_examples\excel_ui\copy_files.ps1" 1  # is_JP
 powershell "$SOURCE_DIR\advanced_examples\restart\copy_files.ps1" 1  # is_JP
 
 # build Japanese document
-poetry run python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
+uv run --no-sync python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
 
 pause

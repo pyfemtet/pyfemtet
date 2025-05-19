@@ -6,6 +6,12 @@ GUI
 .. figure:: images/pyfemtet-opt-script-builder.png
 
 
+.. note::
+
+    PyFemtet core library is published under MIT,
+    but the GUI tool is published under LGPL-v3.
+
+
 Installation
 ------------
 
@@ -38,12 +44,13 @@ Finally, you will get a ``.py`` script to run optimization with your ``.femprj``
 
 
 .. _manualinstallation:
+
 Manual Installation
 -------------------
 
 If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::
 
-    py -m pip install pyfemtet-opt-gui
+    py -m pip install pyfemtet-opt-gui --no-warn-script-location
 
 If you have no icon on your desktop, search `pyfemtet-opt.exe` in `Scripts` folder of your python environment.
 
