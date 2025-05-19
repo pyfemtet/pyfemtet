@@ -49,10 +49,13 @@ dev = [
     "sphinx-design==0.5.0",
     "sphinx-intl==2.2.0",
     "bokeh>=3.3.3,<4",
+    "black>=25.1.0,<26",
+]
+test = [
     "pytest>=7.4.3,<8",
     "pytest-dashboard>=0.1.2,<0.2",
-    "black>=25.1.0,<26",
     "pytest-cov>=6.1.1",
+    "pytest-reporter-html-dots>=0.11.0",
 ]
 
 [[tool.uv.index]]
@@ -72,12 +75,13 @@ filterwarnings = [
     'ignore::DeprecationWarning',
 ]
 markers = [
-    # "example: marks tests as slow (deselect with '-m \"not example\"')",
+    "slow",
     "sample",
+    "femtet",
     "cad",
-    "nofem",
-    "brep",
     "excel",
+    "brep",
+    "manual",
 ]
 
 [build-system]
