@@ -377,6 +377,9 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
 
+        <span class="c1"># ===== for 1.0 warning =====</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shown</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="c1"># serializable でない COM 定数を parallelize するため</span>
         <span class="c1"># COM 定数を一度 _Scapegoat 型のオブジェクトにする</span>
         <span class="c1"># ParametricIF で使う dll 関数は _FuncPtr 型であって __globals__ を持たないが、</span>
@@ -408,6 +411,15 @@
         <span class="c1"># Femtet 特有の処理</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fem</span><span class="p">,</span> <span class="n">FemtetInterface</span><span class="p">):</span>
             <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">object_passed_to_functions</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># ===== for 1.0 warning =====</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shown</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;From version 1.0, an object associated with the Interface &#39;</span>
+                               <span class="s1">&#39;will be automatically passed as the first argument. &#39;</span>
+                               <span class="s1">&#39;For more details, please see https://pyfemtet.readthedocs.io/en/stable/pages/migration_to_v1.html. &#39;</span>
+                               <span class="s1">&#39;(日本語版サイト; https://pyfemtet.readthedocs.io/ja/stable/pages/migration_to_v1.html)&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_shown</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_restore_constants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

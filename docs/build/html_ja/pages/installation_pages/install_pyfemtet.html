@@ -103,6 +103,21 @@
 <p>以下のスクリプトをダウンロードして実行してください。</p>
 <p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a></p>
 <p>.ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>このスクリプトはインストールが失敗した場合もダイアログが出現するようになっています。もしコマンドプロンプトの画面が表示されすぐに消える場合は、 .ps1 スクリプトの実行自体がうまくいっていない可能性があります。</p>
+<p>そのような場合は、下記の手順で .ps1 スクリプトを実行できる場合があります。</p>
+<ol class="arabic">
+<li><p>ウィンドウズキーを押し、 <cite>cmd</cite> と入力し、 <cite>管理者として実行</cite> を選択する。</p></li>
+<li><p>下記のコマンドを実行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="o">-</span><span class="n">ExecutionPolicy</span> <span class="n">ByPass</span> <span class="o">&lt;</span><span class="n">path</span>\<span class="n">to</span>\<span class="n">downloaded</span>\<span class="n">pyfemtet</span><span class="o">-</span><span class="n">installer</span><span class="o">.</span><span class="n">ps1</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p><strong>*セキュリティに関する警告*</strong></p>
+<p>このコマンドは一時的にセキュリティ要件を緩和して powershell スクリプトを実行します。このコマンドを実行する前に、コマンドで指定している .ps1 ファイルがこのページからダウンロードしたものであることを確認してください。</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>このスクリプトは Python のインストール構成に <cite>py launcher</cite> が含まれていることを前提としています。Python のカスタムインストールを行った場合は、 <strong>そのインストール構成に `py launcher` が含まれていることを確認してください。</strong></p>

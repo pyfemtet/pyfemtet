@@ -105,6 +105,26 @@ instructions at the end of this page.</p>
 <p>Please download and run the script below.</p>
 <p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a></p>
 <p>To run the .ps1 file, right click and select “run with powershell”.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This script will show some dialogs even if the installation fails.
+If a command prompt window disappears immediately and no dialog shown,
+you may fail to run .ps1 script itself.</p>
+<p>In such case, the following step and command may help to launch .ps1
+script correctly.</p>
+<ol class="arabic">
+<li><p>Press Windows key, enter <cite>cmd</cite> and <cite>Run as administrator</cite>.</p></li>
+<li><p>Run the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="o">-</span><span class="n">ExecutionPolicy</span> <span class="n">ByPass</span> <span class="o">&lt;</span><span class="n">path</span>\<span class="n">to</span>\<span class="n">downloaded</span>\<span class="n">pyfemtet</span><span class="o">-</span><span class="n">installer</span><span class="o">.</span><span class="n">ps1</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p><strong>*Security Warnings*</strong></p>
+<p>This command temporarily relaxes the security requirements to run powershell script.
+Before executing this command, please ensure that the .ps1 file you specifying
+is the one downloaded from the above source.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This script assumes that your Python installation includes <cite>py launcher</cite>.

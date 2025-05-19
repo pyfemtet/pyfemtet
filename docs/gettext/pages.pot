@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-08 11:48+0900\n"
+"POT-Creation-Date: 2025-05-19 12:40+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,7 +89,7 @@ msgid ":py:obj:`pyfemtet.opt.FemtetInterface <pyfemtet.opt.FemtetInterface>`\\ \
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Control Femtet from optimizer."
 msgstr ""
 
@@ -98,7 +98,7 @@ msgid ":py:obj:`pyfemtet.opt.OptunaOptimizer <pyfemtet.opt.OptunaOptimizer>`\\ \
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
-#: ../source/pages/api.rst:42:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid "Optimizer using ```optuna```."
 msgstr ""
 
@@ -106,59 +106,59 @@ msgstr ""
 msgid "Other Major Classes"
 msgstr ""
 
-#: ../source/pages/api.rst:23
+#: ../source/pages/api.rst:22
 msgid "FEM Interfaces"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.NoFEM <pyfemtet.opt.interface.NoFEM>`\\ \\(\\*\\*kwargs\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Dummy interface without FEM."
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetInterface <pyfemtet.opt.interface.FemtetInterface>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithSolidworksInterface <pyfemtet.opt.interface.FemtetWithSolidworksInterface>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Control Femtet and Solidworks."
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithNXInterface <pyfemtet.opt.interface.FemtetWithNXInterface>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:32:<autosummary>:1
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Control Femtet and NX."
 msgstr ""
 
-#: ../source/pages/api.rst:34
+#: ../source/pages/api.rst:33
 msgid "Optimizers"
 msgstr ""
 
-#: ../source/pages/api.rst:42:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.OptunaOptimizer <pyfemtet.opt.optimizer.OptunaOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:42:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyOptimizer <pyfemtet.opt.optimizer.ScipyOptimizer>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:42:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid "Optimizer using ```scipy```."
 msgstr ""
 
-#: ../source/pages/api.rst:42:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyScalarOptimizer <pyfemtet.opt.optimizer.ScipyScalarOptimizer>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:44
+#: ../source/pages/api.rst:43
 msgid "Entire Reference"
 msgstr ""
 
@@ -263,7 +263,7 @@ msgid "Constrains combinations of variables."
 msgstr ""
 
 #: ../source/pages/installation.rst:2
-#: ../source/pages/script_builder.rst:10
+#: ../source/pages/script_builder.rst:16
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:10
 msgid "Installation"
 msgstr ""
@@ -281,7 +281,7 @@ msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:8
-msgid "python 3.10 or later (3.11 or 3.12 recommended)"
+msgid "python >= 3.10, <=3.12 (3.11 or 3.12 recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:11
@@ -365,15 +365,39 @@ msgstr ""
 msgid "To run the .ps1 file, right click and select \"run with powershell\"."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:22
-msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:21
+msgid "This script will show some dialogs even if the installation fails. If a command prompt window disappears immediately and no dialog shown, you may fail to run .ps1 script itself."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:29
-msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:25
+msgid "In such case, the following step and command may help to launch .ps1 script correctly."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:28
+msgid "Press Windows key, enter `cmd` and `Run as administrator`."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:30
+msgid "Run the following command::"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:34
+msgid "***Security Warnings***"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:36
+msgid "This command temporarily relaxes the security requirements to run powershell script. Before executing this command, please ensure that the .ps1 file you specifying is the one downloaded from the above source."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:43
+msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:50
+msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:57
 msgid "If this step fails, try the following steps manually:"
 msgstr ""
 
@@ -390,22 +414,35 @@ msgid "Input install command"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:14
-msgid "Run following command::"
+msgid "Run following command."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:22
-msgid "Wait for installation"
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:16
+msgid "(Only PyFemtet core library:)::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:24
-msgid "Depending on the environment, the following installation screen may be displayed and may not change for several minutes or even several tens of minutes."
-msgstr ""
-
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:28
-msgid "Installation Screen"
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:21
+msgid "(With GUI tool to build script:)::"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:31
+#: ../source/pages/script_builder.rst:11
+msgid "PyFemtet core library is published under MIT, but the GUI tool is published under LGPL-v3."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:36
+msgid "Wait for installation"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:38
+msgid "Depending on the environment, the following installation screen may be displayed and may not change for several minutes or even several tens of minutes."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:42
+msgid "Installation Screen"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:45
 msgid "Wait until the \"Installed successfully...\" message appears on the screen."
 msgstr ""
 
@@ -545,64 +582,64 @@ msgstr ""
 msgid "``pyfemtet.opt`` has a GUI tool for script builder to run optimization: ``pyfemtet-opt-gui``."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:14
+#: ../source/pages/script_builder.rst:20
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:14
 msgid "If you successfully ran `onestop-installer`, you already have the GUI tool."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:16
+#: ../source/pages/script_builder.rst:22
 msgid "More information, see :doc:`installation_pages/install_pyfemtet` or :ref:`manualinstallation` ."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:20
+#: ../source/pages/script_builder.rst:26
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:47
 msgid "Launch GUI"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:22
+#: ../source/pages/script_builder.rst:28
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:49
 msgid "Double click desktop icon."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:26
+#: ../source/pages/script_builder.rst:32
 msgid "It may takes a long time for first time launching."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:30
+#: ../source/pages/script_builder.rst:36
 #: ../source/pages/usage.rst:2
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:55
 msgid "Usage"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:32
+#: ../source/pages/script_builder.rst:38
 msgid "Before launch tool, you prepare a .femprj file that define the FEM problem with parametric modeling and parametric analysis output settings."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:35
+#: ../source/pages/script_builder.rst:41
 msgid "Then Launch the tool and setup optimization problem following the tool's explanation."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:37
+#: ../source/pages/script_builder.rst:43
 msgid "Finally, you will get a ``.py`` script to run optimization with your ``.femprj`` file."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:42
+#: ../source/pages/script_builder.rst:49
 msgid "Manual Installation"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:44
+#: ../source/pages/script_builder.rst:51
 msgid "If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:48
+#: ../source/pages/script_builder.rst:55
 msgid "If you have no icon on your desktop, search `pyfemtet-opt.exe` in `Scripts` folder of your python environment."
 msgstr ""
 
-#: ../source/pages/script_builder.rst:50
+#: ../source/pages/script_builder.rst:57
 msgid "To check where your python environment is, run following command in `cmd`::"
 msgstr ""
 
-#: ../source/pages/script_builder.rst:54
+#: ../source/pages/script_builder.rst:61
 msgid "The command above returns full path of your `python.exe` file. Typically the `Scripts` folder exists in where the `python.exe` exists."
 msgstr ""
 
