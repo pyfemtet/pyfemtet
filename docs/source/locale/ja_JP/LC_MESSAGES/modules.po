@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-08 16:17+0900\n"
+"POT-Creation-Date: 2025-05-19 09:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -36,6 +36,17 @@ msgstr ""
 msgid "Subpackages"
 msgstr ""
 
+#: ../source/modules/pyfemtet.opt.problem.rst:13
+#: ../source/modules/pyfemtet.opt.rst:19
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:5
+#: ../source/modules/pyfemtet.rst:15
+msgid "Submodules"
+msgstr ""
+
+#: ../source/modules/pyfemtet.rst:18
+msgid "pyfemtet.core module"
+msgstr ""
+
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:5
 #: ../source/modules/pyfemtet.logger.rst:5
 #: ../source/modules/pyfemtet.opt.history.rst:5
@@ -52,7 +63,7 @@ msgstr ""
 #: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:13
 #: ../source/modules/pyfemtet.opt.visualization.plotter.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.rst:14
-#: ../source/modules/pyfemtet.rst:15
+#: ../source/modules/pyfemtet.rst:26
 msgid "Module contents"
 msgstr ""
 
@@ -181,6 +192,10 @@ msgstr ""
 #: of pyfemtet.dispatch_extensions._impl.dispatch_femtet
 #: pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet
 #: pyfemtet.logger._impl.get_module_logger
+#: pyfemtet.opt.FemtetInterface.object_pass_to_fun
+#: pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun
+#: pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun
+#: pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative
 msgid "Returns"
@@ -195,6 +210,7 @@ msgstr ""
 #: pyfemtet.dispatch_extensions._impl.dispatch_specific_femtet
 #: pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet
 #: pyfemtet.logger._impl.get_module_logger
+#: pyfemtet.opt.FemtetInterface.object_pass_to_fun
 #: pyfemtet.opt.femopt.FEMOpt.add_categorical_parameter
 #: pyfemtet.opt.femopt.FEMOpt.add_expression
 #: pyfemtet.opt.femopt.FEMOpt.add_expression_string
@@ -202,6 +218,8 @@ msgstr ""
 #: pyfemtet.opt.femopt.FEMOpt.add_objective
 #: pyfemtet.opt.femopt.FEMOpt.add_parameter
 #: pyfemtet.opt.history._history.History.get_df
+#: pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun
+#: pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update_parameter
 #: pyfemtet.opt.interface._base_interface.NoFEM.update
@@ -277,12 +295,6 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.rst:2
 msgid "pyfemtet.opt package"
-msgstr ""
-
-#: ../source/modules/pyfemtet.opt.problem.rst:13
-#: ../source/modules/pyfemtet.opt.rst:19
-#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:5
-msgid "Submodules"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.rst:22
@@ -477,6 +489,19 @@ msgstr "'auto' に設定されている場合、最初に 'existing' を試み�
 msgid "Returns connected femtet process is existing or not."
 msgstr "接続された Femtet プロセスが存在するかどうかを返します。"
 
+#: of pyfemtet.opt.FemtetInterface.object_pass_to_fun:1
+#: pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun:1
+#: pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:1
+#: pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:1
+msgid "The object pass to the first argument of user-defined objective functions."
+msgstr ""
+
+#: of pyfemtet.opt.FemtetInterface.object_pass_to_fun:3
+#: pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:3
+#, fuzzy
+msgid "COM object of Femtet."
+msgstr "Femtet プロセスに接続します。"
+
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:1
 msgid "Open specific analysis model with connected Femtet."
@@ -612,6 +637,10 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
+msgstr ""
+
+#: of pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun:3
+msgid "self (AbstractFEMInterface)"
 msgstr ""
 
 #: of pyfemtet.opt.interface._base_interface.NoFEM:1
@@ -794,6 +823,10 @@ msgstr ""
 #: of
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:142
 msgid "CDispatch"
+msgstr ""
+
+#: of pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:3
+msgid "COM object of Microsoft Excel."
 msgstr ""
 
 #: of

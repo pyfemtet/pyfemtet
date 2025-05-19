@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-08 16:17+0900\n"
+"POT-Creation-Date: 2025-05-19 09:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,6 +33,17 @@ msgstr ""
 msgid "Subpackages"
 msgstr ""
 
+#: ../source/modules/pyfemtet.opt.problem.rst:13
+#: ../source/modules/pyfemtet.opt.rst:19
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:5
+#: ../source/modules/pyfemtet.rst:15
+msgid "Submodules"
+msgstr ""
+
+#: ../source/modules/pyfemtet.rst:18
+msgid "pyfemtet.core module"
+msgstr ""
+
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:5
 #: ../source/modules/pyfemtet.logger.rst:5
 #: ../source/modules/pyfemtet.opt.history.rst:5
@@ -49,7 +60,7 @@ msgstr ""
 #: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:13
 #: ../source/modules/pyfemtet.opt.visualization.plotter.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.rst:14
-#: ../source/modules/pyfemtet.rst:15
+#: ../source/modules/pyfemtet.rst:26
 msgid "Module contents"
 msgstr ""
 
@@ -178,6 +189,10 @@ msgstr ""
 #: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.dispatch_femtet:0
 #: ../../pyfemtet/dispatch_extensions/__init__.py:docstring of pyfemtet.dispatch_extensions._impl.launch_and_dispatch_femtet:0
 #: ../../pyfemtet/logger/__init__.py:docstring of pyfemtet.logger._impl.get_module_logger:0
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.FemtetInterface.object_pass_to_fun:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative:0
 msgid "Returns"
@@ -202,9 +217,12 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update:0
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.NoFEM.update:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:0
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.load_variables:0
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update:0
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.FemtetInterface.object_pass_to_fun:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.femtet_is_alive:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:0
@@ -274,12 +292,6 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.rst:2
 msgid "pyfemtet.opt package"
-msgstr ""
-
-#: ../source/modules/pyfemtet.opt.problem.rst:13
-#: ../source/modules/pyfemtet.opt.rst:19
-#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:5
-msgid "Submodules"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.rst:22
@@ -451,6 +463,18 @@ msgstr ""
 msgid "Returns connected femtet process is existing or not."
 msgstr ""
 
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun:1
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.FemtetInterface.object_pass_to_fun:1
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:1
+msgid "The object pass to the first argument of user-defined objective functions."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.FemtetInterface.object_pass_to_fun:3
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:3
+msgid "COM object of Femtet."
+msgstr ""
+
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:1
 msgid "Open specific analysis model with connected Femtet."
 msgstr ""
@@ -567,6 +591,10 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun:3
+msgid "self (AbstractFEMInterface)"
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.NoFEM:1
@@ -736,6 +764,10 @@ msgstr ""
 
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:142
 msgid "CDispatch"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:3
+msgid "COM object of Microsoft Excel."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:1

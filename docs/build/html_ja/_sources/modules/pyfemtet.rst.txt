@@ -11,6 +11,14 @@ Subpackages
    pyfemtet.logger
    pyfemtet.opt
 
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   pyfemtet.core
+
 Module contents
 ---------------
 

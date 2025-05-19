@@ -205,15 +205,16 @@
     <span class="n">com_members</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Femtet&#39;</span><span class="p">:</span> <span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">femprj_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">connect_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>  <span class="c1"># dask worker では __init__ の中で &#39;new&#39; にするので super() の引数にしない。（しても意味がない）</span>
-        <span class="n">save_pdt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>  <span class="c1"># &#39;all&#39;, &#39;none&#39; or &#39;optimal&#39;</span>
-        <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># dask worker では True にしたいので super() の引数にしない。</span>
-        <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># main でのみ True を許容したいので super() の引数にしない。</span>
-        <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO: Remove this</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">femprj_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">connect_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>  <span class="c1"># dask worker では __init__ の中で &#39;new&#39; にする</span>
+            <span class="n">save_pdt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>  <span class="c1"># &#39;all&#39;, &#39;none&#39; or &#39;optimal&#39;</span>
+            <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># dask worker では True にしたいので super() の引数にしない。</span>
+            <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># main でのみ True を許容したいので super() の引数にしない。</span>
+            <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO: Remove this</span>
+            <span class="n">always_open_copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># warning</span>
         <span class="k">if</span> <span class="n">parametric_output_indexes_use_as_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -232,6 +233,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_original_femprj_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span> <span class="o">=</span> <span class="n">open_result_with_gui</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_pdt</span> <span class="o">=</span> <span class="n">save_pdt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_always_open_copy</span> <span class="o">=</span> <span class="n">always_open_copy</span>
 
         <span class="c1"># その他のメンバーの宣言や初期化</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span> <span class="o">=</span> <span class="kc">None</span>
@@ -249,17 +251,22 @@
 
         <span class="c1"># connect to Femtet</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connect_and_open_femtet</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_method</span> <span class="o">!=</span> <span class="s1">&#39;unconnected&#39;</span>
 
-        <span class="c1"># 接続した Femtet の種類に応じて del 時に quit するかどうか決める</span>
-        <span class="c1"># self.quit_when_destruct = self.connected_method == &quot;new&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_always_open_copy</span><span class="p">:</span>
+            <span class="c1"># 現時点でFemtet に model を close する機能がない</span>
+            <span class="c1">#   + executor でも CAD 連携等でモデルに</span>
+            <span class="c1">#   わかりにくい変更が入らないように</span>
+            <span class="c1">#   _tmp_dir のファイルを開くようにしたため</span>
+            <span class="c1">#   _tmp_dir 削除時の permission error を</span>
+            <span class="c1">#   避けるために Femtet を強制 close する</span>
+            <span class="c1"># Femtet で model が close できるようになれば</span>
+            <span class="c1">#   この条件分岐は不要になる</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1"># Femtet に model を close する機能がない</span>
-        <span class="c1">#   + executor でも CAD 連携等でモデルに</span>
-        <span class="c1">#   わかりにくい変更が入らないように</span>
-        <span class="c1">#   _tmp_dir のファイルを開くようにしたため</span>
-        <span class="c1">#   _tmp_dir 削除時の permission error を</span>
-        <span class="c1">#   避けるために Femtet を強制 close する</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 接続した Femtet の種類に応じて del 時に quit するかどうか決める</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_method</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span>
 
     <span class="c1"># ===== system =====</span>
 
@@ -277,9 +284,15 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
+        <span class="c1"># main worker かつ always_open_copy でないときのみ</span>
+        <span class="c1"># femprj_path を切り替えない</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">get_worker</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_always_open_copy</span><span class="p">:</span>
+            <span class="k">pass</span>
+
         <span class="c1"># worker space の femprj に切り替える</span>
-        <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_index_from_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_and_get_path_on_worker_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_femprj_path</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_index_from_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_and_get_path_on_worker_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_femprj_path</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
 
         <span class="c1"># dask process ならば Femtet を起動</span>
         <span class="n">worker</span> <span class="o">=</span> <span class="n">get_worker</span><span class="p">()</span>

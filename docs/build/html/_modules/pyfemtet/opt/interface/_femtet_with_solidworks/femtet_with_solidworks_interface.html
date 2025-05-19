@@ -106,18 +106,19 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FemtetWithSolidworksInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">,</span> <span class="n">SolidworksInterface</span><span class="p">,</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="bp">self</span><span class="p">,</span>
-                <span class="n">sldprt_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                <span class="n">femprj_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">connect_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-                <span class="n">save_pdt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
-                <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">close_solidworks_on_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">solidworks_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">sldprt_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">femprj_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">connect_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+            <span class="n">save_pdt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+            <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">always_open_copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">close_solidworks_on_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">solidworks_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">SolidworksInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -136,6 +137,7 @@
             <span class="n">allow_without_project</span><span class="o">=</span><span class="n">allow_without_project</span><span class="p">,</span>
             <span class="n">open_result_with_gui</span><span class="o">=</span><span class="n">open_result_with_gui</span><span class="p">,</span>
             <span class="n">parametric_output_indexes_use_as_objective</span><span class="o">=</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">,</span>
+            <span class="n">always_open_copy</span><span class="o">=</span><span class="n">always_open_copy</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_warn_if_undefined_variable</span> <span class="o">=</span> <span class="kc">False</span>

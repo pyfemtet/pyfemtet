@@ -82,7 +82,7 @@
   <h1>Source code for pyfemtet.opt.history._history</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
@@ -369,6 +369,9 @@
     <span class="n">per_category</span> <span class="o">=</span> <span class="s1">&#39;per_category&#39;</span>  <span class="c1">#: Sort per each object.</span>
     <span class="n">important_first</span> <span class="o">=</span> <span class="s1">&#39;important_first&#39;</span>  <span class="c1">#: The values of parameters and objectives first.</span></div>
 
+
+
+<span class="n">ColumnOrderModeStr</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;per_category&#39;</span><span class="p">,</span> <span class="s1">&#39;important_first&#39;</span><span class="p">]</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">DuplicatedColumnNameError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -1182,7 +1185,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_finalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_restart</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">pyfemtet</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span><span class="p">:</span> <span class="n">ColumnOrderMode</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span><span class="p">:</span> <span class="n">ColumnOrderMode</span> <span class="o">|</span> <span class="n">ColumnOrderModeStr</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>

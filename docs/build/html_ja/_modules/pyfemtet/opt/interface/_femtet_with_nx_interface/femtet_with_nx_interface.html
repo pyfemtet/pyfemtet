@@ -241,6 +241,7 @@
             <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># main でのみ True を許容したいので super() の引数にしない。</span>
             <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO: Remove this</span>
+            <span class="n">always_open_copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">export_curves</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">export_surfaces</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">export_solids</span><span class="p">:</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -257,6 +258,7 @@
             <span class="n">allow_without_project</span><span class="o">=</span><span class="n">allow_without_project</span><span class="p">,</span>
             <span class="n">open_result_with_gui</span><span class="o">=</span><span class="n">open_result_with_gui</span><span class="p">,</span>
             <span class="n">parametric_output_indexes_use_as_objective</span><span class="o">=</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="p">,</span>
+            <span class="n">always_open_copy</span><span class="o">=</span><span class="n">always_open_copy</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">_NXInterface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>

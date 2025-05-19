@@ -11,11 +11,25 @@ Launch command prompt
 Input install command
 ---------------------
 
-Run following command::   
+Run following command.
 
-    py -m pip install pyfemtet --no-warn-script-location
+    (Only PyFemtet core library:)::
+
+        py -m pip install pyfemtet --no-warn-script-location
+
+
+    (With GUI tool to build script:)::
+
+        py -m pip install pyfemtet-opt-gui --no-warn-script-location
+
 
 .. figure:: pip_on_cmd.png
+
+
+.. note::
+
+    PyFemtet core library is published under MIT,
+    but the GUI tool is published under LGPL-v3.
 
 
 Wait for installation

@@ -16,6 +16,27 @@ Please download and run the script below.
 
 To run the .ps1 file, right click and select "run with powershell".
 
+.. note::
+
+    This script will show some dialogs even if the installation fails.
+    If a command prompt window disappears immediately and no dialog shown,
+    you may fail to run .ps1 script itself.
+
+    In such case, the following step and command may help to launch .ps1
+    script correctly.
+
+    1. Press Windows key, enter `cmd` and `Run as administrator`.
+
+    2. Run the following command::
+
+        powershell -ExecutionPolicy ByPass <path\to\downloaded\pyfemtet-installer.ps1>
+
+    ***Security Warnings***
+
+    This command temporarily relaxes the security requirements to run powershell script.
+    Before executing this command, please ensure that the .ps1 file you specifying
+    is the one downloaded from the above source.
+
 
 .. warning::
 
