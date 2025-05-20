@@ -10,10 +10,9 @@ from time import sleep
 import numpy as np
 from scipy.signal import find_peaks
 from tqdm import tqdm
-from optuna.integration.botorch import BoTorchSampler
 
 from pyfemtet.opt.exceptions import SolveError
-from pyfemtet.opt import OptunaOptimizer, FEMOpt
+from pyfemtet.opt import FemtetInterface, OptunaOptimizer, FEMOpt
 from pyfemtet.opt.optimizer import PoFBoTorchSampler, PartialOptimizeACQFConfig
 
 
@@ -37,7 +36,7 @@ class SParameterCalculator:
         for mode in tqdm(range(Gogh.Hertz.nMode), '周波数と S(1, 1) の関係を取得'):
             # 周波数モード設定
             Gogh.Hertz.Mode = mode
-            sleep(0.01)
+            sleep(0.1)
 
             # 周波数を取得
             freq = Gogh.Hertz.GetFreq().Real
@@ -121,9 +120,14 @@ if __name__ == '__main__':
             ),
         )
     )
+
+    # Femtet との接続 (モード切替の描画負荷を軽減するため GUI 設定を OFF にする)
+    fem = FemtetInterface(
+        open_result_with_gui=False
+    )
     
     # FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)
-    femopt = FEMOpt(opt=opt)
+    femopt = FEMOpt(fem=fem, opt=opt)
     
     # 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)
     femopt.add_parameter('antenna_radius', 10, 5, 20)
