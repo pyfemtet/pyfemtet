@@ -3,7 +3,7 @@ name = "pyfemtet"
 dynamic = ["version"]
 description = "Design parameter optimization using Femtet."
 authors = [{ name = "kazuma.naito", email = "148934231+pyfemtet@users.noreply.github.com" }]
-requires-python = ">= 3.10, < 3.13"
+requires-python = ">= 3.10, < 3.14"
 readme = "README.md"
 license = "MIT"
 dependencies = [
@@ -11,7 +11,7 @@ dependencies = [
     "tqdm>=4.66.1,<5",
     "colorlog>=6.8.0,<7",
     "psutil>=5.9.6,<6",
-    "pywin32>=306,<307 ; sys_platform=='win32'",
+    "pywin32>=306, <311 ; sys_platform=='win32'",  # python pinning
     "femtetutils>=1.0.0,<2 ; sys_platform=='win32'",
     "dask~=2024.12.1",
     "distributed~=2024.12.1",
@@ -24,14 +24,14 @@ dependencies = [
     "scipy>=1.11.4,<2",
     "optuna>=3.4.0, <5.0.0",
     "optuna-integration>=3.6.0, <5.0.0",
-    "botorch~=0.12.0",
+    "botorch>=0.12.0, <0.15.0",
     "torch",  # botorch specifies torch's version
     "fire>=0.6.0,<0.7",
     "pyyaml>=6.0.2,<7",
 ]
 
-[project.optional-dependencies]
-brep = ["brepmatching>=0.1.8,<0.2"]
+#[project.optional-dependencies]
+#brep = ["brepmatching>=0.1.8,<0.2"]
 
 [project.urls]
 Repository = "https://github.com/pyfemtet/pyfemtet"
