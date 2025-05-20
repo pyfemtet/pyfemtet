@@ -810,13 +810,19 @@ class Records:
 
     def load(self, path: str):
 
-        with open(path, 'r', encoding=ENCODING, newline='\n') as f:
-            reader = csv.reader(f, delimiter=',')
-            # load meta_column
-            loaded_meta_columns = reader.__next__()
-            reader.__next__()  # empty line
-            # load df from line 3
-            loaded_df = pd.read_csv(f, encoding=ENCODING, header=0)
+        for encoding in (ENCODING, 'utf-8'):
+            try:
+                with open(path, 'r', encoding=encoding, newline='\n') as f:
+                    reader = csv.reader(f, delimiter=',')
+                    # load meta_column
+                    loaded_meta_columns = reader.__next__()
+                    reader.__next__()  # empty line
+                    # load df from line 3
+                    loaded_df = pd.read_csv(f, encoding=encoding, header=0)
+                break
+
+            except UnicodeDecodeError:
+                continue
 
         # df を csv にする過程で失われる list などのオブジェクトを restore
         ColumnManager._reconvert_objects(loaded_df, loaded_meta_columns)
@@ -1192,6 +1198,29 @@ class History:
         """
         return self._records.df_wrapper.get_df(equality_filters)
 
+    @staticmethod
+    def get_trial_name(trial=None, fidelity=None, sub_sampling=None, row: pd.Series = None):
+        if row is not None:
+            assert not math.isnan(row['trial'])
+            trial = row['trial']
+            fidelity = row['fidelity'] if not math.isnan(row['fidelity']) else None
+            sub_sampling = row['sub_sampling'] if not math.isnan(row['sub_sampling']) else None
+
+        name_parts = ['trial']
+        if fidelity is not None:
+            fid = str(fidelity)
+            if fid != MAIN_FIDELITY_NAME:
+                name_parts.append(fid)
+
+        name_parts.append(str(trial))
+
+        if sub_sampling is not None:
+            name_parts.append(str(sub_sampling))
+
+        trial_name = '_'.join(name_parts)
+
+        return trial_name
+
     def recording(self, fem: AbstractFEMInterface):
         """:meta private:"""
 
@@ -1216,19 +1245,7 @@ class History:
 
                 client = get_client()
 
-                name_parts = ['trial']
-                if not math.isnan(row['fidelity']):
-                    fid = str(row['fidelity'])
-                    if fid != MAIN_FIDELITY_NAME:
-                        name_parts.append(fid)
-
-                assert not math.isnan(row['trial'])
-                name_parts.append(str(row['trial']))
-
-                if not math.isnan(row['sub_sampling']):
-                    name_parts.append(str(row['sub_sampling']))
-
-                trial_name = '_'.join(name_parts)
+                trial_name = self.get_trial_name(row=row)
 
                 # FIXME: メインフィデリティだけでなく、FEM に
                 #   対応するフィデリティ又はサブサンプリングのみ

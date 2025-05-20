@@ -9,8 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import sympy
 
-import _pyfemtet
-
+import pyfemtet
 from pyfemtet._i18n.messages import _
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.worker_status import *
@@ -193,7 +192,7 @@ class FEMOpt:
         logger.info(
             _(
                 '===== pyfemtet version {ver} =====',
-                ver=_pyfemtet.__version__,
+                ver=pyfemtet.__version__,
             )
         )
         client: Client

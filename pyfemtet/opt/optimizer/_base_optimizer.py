@@ -260,7 +260,7 @@ class AbstractOptimizer:
             names: str | list[str],
             fun: Callable[..., Sequence[float]],
             n_return: int,
-            directions: DIRECTION | Sequence[DIRECTION] = None,
+            directions: DIRECTION | Sequence[DIRECTION | None] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
     ):

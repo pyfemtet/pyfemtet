@@ -1,9 +1,7 @@
-import json
 import os
 import tempfile
 import base64
-
-import shutil
+from traceback import print_exception
 
 from dash import Output, Input, State, callback_context, no_update
 from dash.exceptions import PreventUpdate
@@ -16,7 +14,7 @@ from pyfemtet.opt.visualization.history_viewer._complex_components.main_graph im
 from pyfemtet.opt.visualization.history_viewer._complex_components.control_femtet import *
 from pyfemtet.opt.visualization.history_viewer._complex_components.alert_region import *
 
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import Msg, _
 
 
 __all__ = [
@@ -171,7 +169,7 @@ class HomePage(AbstractPage):
             State(self.alert_region.alert_region.id, 'children'),
             prevent_initial_call=True,
         )
-        def open_pdt(_, selection_data, current_alerts):
+        def open_pdt(_1, selection_data, current_alerts):
             # open_pdt allows to open "解析結果単体" without opening any femprj.
 
             # check Femtet state
@@ -206,20 +204,32 @@ class HomePage(AbstractPage):
 
             # check pdt_path in selection_data
             pt = selection_data['points'][0]
-            trial = pt['customdata'][0]
+            trial = pt['customdata'][0]  # TODO: MAIN 以外のデータに対応
+
+            # construct trial_name
+            trial_name = History.get_trial_name(trial=trial, fidelity=None, sub_sampling=None)
 
             # get pdt path
             pdt_path = self.femtet_control.fem._create_path(
-                femprj_path, model_name, trial, '.pdt',
+                femprj_path, model_name, trial_name, 'pdt',
             )
 
             # check pdt exists
             if not os.path.exists(pdt_path):
-                msg = ('.pdt file is not found. '
-                       'Please check the .Results folder. '
-                       'Note that .pdt file save mode depends on '
-                       'the `save_pdt` argument of FemtetInterface in optimization script'
-                       '(default to `all`).')
+                msg = _(
+                    en_message='.pdt file ({pdt_path}) is not found. '
+                               'Please check the .Results folder. '
+                               'Note that .pdt file save mode depends on '
+                               'the `save_pdt` argument of FemtetInterface in optimization script'
+                               '(default to `all`).',
+                    jp_message='.pdt file ({pdt_path}) is not found. '
+                               'Please check the .Results folder. '
+                               'Note that .pdt file save mode depends on '
+                               'the `save_pdt` argument of FemtetInterface in optimization script'
+                               '(default to `all`).',
+                    pdt_path=pdt_path,
+                )
+
                 alerts = self.alert_region.create_alerts(msg, color='danger')
                 return alerts
 
@@ -243,7 +253,7 @@ class HomePage(AbstractPage):
             State(self.alert_region.alert_region.id, 'children'),
             prevent_initial_call=True,
         )
-        def update_parameter(_, selection_data, current_alerts):
+        def update_parameter(_1, selection_data, current_alerts):
 
             # check Femtet state
             connection_state = self.femtet_control.check_femtet_state()
@@ -280,21 +290,29 @@ class HomePage(AbstractPage):
                 ...
 
             except Exception as e:
-                msg = ('Unknown error has occurred in analysis model compatibility check. '
-                       f'exception message is: {e}')
+                print_exception(e)
+                msg = _(
+                    en_message='Unknown error has occurred in '
+                               'analysis model compatibility check. '
+                               'Exception message: {e}',
+                    jp_message='Unknown error has occurred in '
+                               'analysis model compatibility check. '
+                               'Exception message: {e}',
+                    e=e
+                )
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return alerts
 
             try:
                 # get nth trial from selection data
                 pt = selection_data['points'][0]
-                trial = pt['customdata'][0]
+                trial = pt['customdata'][0]  # FIXME: MAIN 以外のデータに対応
 
                 # get parameter and update model
                 df = self.application.get_df()
                 row = df[df['trial'] == trial]
                 prm_names = self.application.history.prm_names
-                prm_values = row[prm_names].values
+                prm_values = row[prm_names].values.ravel()
                 x = {name: value for name, value in zip(prm_names, prm_values)}
 
                 self.femtet_control.fem.update_parameter(x)
@@ -305,6 +323,7 @@ class HomePage(AbstractPage):
                 return no_update
 
             except Exception as e:
+                print_exception(e)
                 msg = ('Unknown error has occurred in updating model. '
                        f'exception message is: {e}')
                 alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
@@ -648,43 +667,47 @@ class Tutorial(AbstractPage):
             if callback_context.triggered_id is None:
                 raise PreventUpdate
 
-            # get sample file
-            import _pyfemtet
-            package_root = os.path.dirname(_pyfemtet.__file__)
-            sample_dir = os.path.join(package_root, 'opt', 'samples', 'femprj_sample')  # FIXME: locale によってパスを変える
-            path = os.path.join(sample_dir, 'wat_ex14_parametric_test_result.reccsv')
+            # copy sample files
+            here = os.path.abspath(os.path.dirname(__file__))
+            sample_dir = os.path.join(here, 'tutorial_files')  # TODO: locale ごとにファイルを用意する
 
-            if not os.path.exists(path):
+            # get sample file
+            path = os.path.join(sample_dir, 'tutorial_gau_ex08.csv')
+            if not os.path.isfile(path):
                 msg = Msg.ERR_SAMPLE_CSV_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, alerts
-            destination_file = path.replace('wat_ex14_parametric_test_result.reccsv', 'tutorial.csv')
-            shutil.copyfile(path, destination_file)
             self.application.history = History()
-            self.application.history.load_csv(destination_file, with_finalize=True)
+            self.application.history.load_csv(path, with_finalize=True)
 
-            source_file = path.replace('_test_result.reccsv', '.femprj')
-            if not os.path.exists(source_file):
+            femprj_path = path.replace('.csv', '_parametric.femprj')
+            if not os.path.isfile(femprj_path):
                 msg = Msg.ERR_SAMPLE_FEMPRJ_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, alerts
-            destination_file = source_file.replace('wat_ex14_parametric', 'tutorial')
-            shutil.copyfile(source_file, destination_file)
 
-            source_folder = path.replace('_test_result.reccsv', '.Results')
-            if not os.path.exists(source_file):
+            result_folder = femprj_path.replace('.femprj', '.Results')
+            if not os.path.isdir(result_folder):
                 msg = Msg.ERR_FEMPRJ_RESULT_NOT_FOUND
                 alerts = self.home_page.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                 return no_update, no_update, alerts
-            destination_folder = source_folder.replace('wat_ex14_parametric', 'tutorial')
-            shutil.copytree(source_folder, destination_folder, dirs_exist_ok=True)
 
-            self.application.history._records.column_manager.meta_columns[0] = json.dumps(
-                dict(
-                    femprj_path=destination_file,
-                    model_name='Ex14',
-                )
+            history = self.application.history
+
+            additional_data = history.additional_data
+            additional_data.update(dict(
+                femprj_path=femprj_path
+            ))
+
+            history.finalize(
+                parameters=history._records.column_manager.parameters,
+                obj_names=history.obj_names,
+                cns_names=history.cns_names,
+                sub_fidelity_names=history.sub_fidelity_names,
+                additional_data=additional_data,
             )
+
+            print(additional_data)
 
             return active_tab, 1, no_update
 

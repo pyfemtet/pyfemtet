@@ -642,6 +642,10 @@ class FemtetInterface(COMInterface):
                 ):
                     _post_activate_message(self.Femtet.hWnd)
             else:
+                import sys
+                print(fun, file=sys.stderr)
+                print(args, file=sys.stderr)
+                print(kwargs, file=sys.stderr)
                 returns = fun(*args, **kwargs)
 
         # API の実行に失敗
@@ -995,6 +999,7 @@ class FemtetInterface(COMInterface):
     @staticmethod
     def _create_path(femprj_path, model_name, trial_name, ext):
         result_dir = femprj_path.replace(".femprj", ".Results")
+        ext = ext.removeprefix('.')
         pdt_path = os.path.join(result_dir, model_name + f"_{trial_name}.{ext}")
         return pdt_path
 
