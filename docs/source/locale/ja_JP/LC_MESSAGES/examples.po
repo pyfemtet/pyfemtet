@@ -497,7 +497,7 @@ msgstr "関係する例題: :doc:`../wat_ex14/wat_ex14`"
 
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:19
 msgid "Keep the :download:`sample project<../_temporary_sample_files/paswat_ex1_parametric.femprj>` open in Femtet, and double-click on the :download:`sample code<../_temporary_sample_files/paswat_ex1_parametric.py>` to execute it."
-msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/paswat_ex1_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/wat_ex14_parametric.py>` をダブルクリックして実行してください。"
+msgstr ":download:`サンプルプロジェクト<../_temporary_sample_files/paswat_ex1_parametric.femprj>` を Femtet で開いたまま、 :download:`サンプルコード<../_temporary_sample_files/paswat_ex1_parametric.py>` をダブルクリックして実行してください。"
 
 #: ../source/examples/paswat_ex1/paswat_ex1.rst:25
 msgid "For details on the FEM problem, please refer to FemtetHelp / Examples / Simple Fluid-Thermal Analysis / Example 1."

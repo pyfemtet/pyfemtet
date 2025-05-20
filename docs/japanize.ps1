@@ -8,7 +8,7 @@ $GETTEXT_DIR = "./docs/gettext"
 
 uv run --no-sync sphinx-apidoc -f -o $SOURCE_DIR\modules .\pyfemtet
 
-if (-not (test-path $LOCALE_DIR)) {mkdir $LOCALE_DIR}cd
+if (-not (test-path $LOCALE_DIR)) {mkdir $LOCALE_DIR}
 
 uv run --no-sync sphinx-build -b gettext $SOURCE_DIR $GETTEXT_DIR
 uv run --no-sync sphinx-intl update -p $GETTEXT_DIR -l ja_JP -d $LOCALE_DIR --line-width=-1
