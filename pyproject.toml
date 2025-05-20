@@ -26,7 +26,7 @@ dependencies = [
     "optuna-integration>=3.6.0, <5.0.0",
     "botorch>=0.12.0, <0.15.0",
     "torch",  # botorch specifies torch's version
-    "fire>=0.6.0,<0.7",
+    "fire>=0.7",  # It probably has a strong backward compatibility.
     "pyyaml>=6.0.2,<7",
 ]
 
@@ -53,7 +53,7 @@ dev = [
 ]
 test = [
     "pytest>=7.4.3,<8",
-    "pytest-dashboard>=0.1.2,<0.2",
+    "pytest-dashboard>=0.1.3",
     "pytest-cov>=6.1.1",
     "pytest-reporter-html-dots>=0.11.0",
 ]
