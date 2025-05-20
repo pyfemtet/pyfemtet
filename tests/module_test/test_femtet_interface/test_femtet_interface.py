@@ -44,7 +44,7 @@ def test_run_femtet_interface():
         )
 
 
-@pytest.mark.skip(reason='requires manual control')
+@pytest.mark.manual
 def test_femtet_interface_api_calling():
 
     fem = FemtetInterface(allow_without_project=True)
@@ -57,7 +57,14 @@ def test_femtet_interface_api_calling():
     point.Y = 0.
     point.Z = 0.
     fem.Femtet.Gaudi.CreateVertex(point)
-    fem.close(force=False, timeout=3)
+
+    print('保存するかどうかのダイアログが Femtet に出て、タイムアウト警告が出るか？')
+    try:
+        fem.close(force=False, timeout=3)
+    except Exception as e:
+        print(e)
+    result = input('ダイアログか警告が出なかったら NG と入力\n>>> ') or ''
+    assert result.upper() == 'NO'
 
 
 def test_femtet_always_open_copy_flag():
@@ -77,8 +84,6 @@ def test_femtet_always_open_copy_flag():
     print(fem.Femtet.ProjectTitle)
     assert fem.Femtet.ProjectTitle != 'test_femtet_interface'
 
-    fem.close()
-
     fem = FemtetInterface(
         femprj_path=get(__file__, 'test_femtet_interface.femprj'),
         always_open_copy=False,
@@ -90,7 +95,6 @@ def test_femtet_always_open_copy_flag():
 
     print(fem.Femtet.Project)
     assert fem.Femtet.ProjectTitle == 'test_femtet_interface'
-
     fem.close()
 
 

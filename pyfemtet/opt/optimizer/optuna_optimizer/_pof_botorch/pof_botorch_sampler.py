@@ -112,7 +112,6 @@ with try_import() as _imports:
 with try_import() as _imports_logei:
     from botorch.acquisition.analytic import LogConstrainedExpectedImprovement
     from botorch.acquisition.analytic import LogExpectedImprovement
-    from botorch.acquisition.analytic import _compute_log_prob_feas
 
 
 with try_import() as _imports_qhvkg:
