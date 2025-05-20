@@ -23,7 +23,7 @@ from pyfemtet._util.process_util import *
 from pyfemtet._util.excel_parse_util import *
 from pyfemtet._util.excel_macro_util import *
 from pyfemtet._util.femtet_autosave import *
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import _
 
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
@@ -408,7 +408,9 @@ class ExcelInterface(COMInterface):
         if self.setup_procedure_name is not None:
 
             logger.info(
-                Msg.F_MACRO_RUNNING(
+                _(
+                    en_message='{procedure_kind} procedure {procedure_name} is running...',
+                    jp_message='{procedure_kind} プロシージャ {procedure_name} を実行中です...',
                     procedure_kind='Setup',
                     procedure_name=self.setup_procedure_name
                 )
@@ -430,7 +432,9 @@ class ExcelInterface(COMInterface):
 
                 except com_error as e:
                     raise RuntimeError(
-                        Msg.F_RUN_EXCEL_MACRO_FAILED(
+                        _(
+                            en_message='Failed to run macro {procedure_name}. The original message is: {exception}',
+                            jp_message='マクロ {procedure_name} の実行に失敗しました。エラーメッセージ: {exception}',
                             procedure_name=self.setup_procedure_name,
                             exception=e
                         )
@@ -440,13 +444,18 @@ class ExcelInterface(COMInterface):
 
         # ===== 新しい excel instance を起動 =====
         # 起動
-        logger.info(Msg.LAUNCH_EXCEL)
+        logger.info(_(
+            en_message='Launching and connecting to Microsoft Excel...',
+            jp_message='Microsoft Excel を起動して接続しています...',
+        ))
         if connect_method == 'auto':
             self.excel = Dispatch('Excel.Application')
         else:
             self.excel = DispatchEx('Excel.Application')
-        logger.info(Msg.EXCEL_CONNECTED)
-
+        logger.info(_(
+            en_message='The connection to Excel is established.',
+            jp_message='Excel への接続が確立されました。',
+        ))
         # FemtetRef.xla を開く
         self.open_femtet_ref_xla()
         sleep(0.5)
@@ -497,7 +506,11 @@ class ExcelInterface(COMInterface):
         # certify
         if not os.path.exists(xla_file_path):
             raise FileNotFoundError(
-                Msg.F_FEMTET_XLA_IS_NOT_FOUND(xla_file_path)
+                _(
+                    en_message='Femtet XLA file not found: {xla_file_path}',
+                    jp_message='Femtet XLA ファイルが見つかりません: {xla_file_path}',
+                    xla_file_path=xla_file_path
+                )
             )
 
         # self.excel.Workbooks.Add(xla_file_path)
@@ -739,9 +752,13 @@ class ExcelInterface(COMInterface):
                 return sh
         else:
             raise WorkSheetNotFoundError(
-                Msg.F_SHEET_NOT_FOUND(
-                    sh_name=name,
-                    wb_name=wb.Name
+                _(
+                    en_message='{xla_file_path} not found. Please check the '
+                               '"Enable Macros" command was executed.',
+                    jp_message='{xla_file_path}が見つかりません。'
+                               '"マクロを有効にする" command が実行'
+                               'されたか確認してください。',
+                    xla_file_path=wb.Name
                 )
             )
 
@@ -793,7 +810,12 @@ class ExcelInterface(COMInterface):
                     self.sh_input.Range(key).value = value
                 except com_error:
                     logger.warning(
-                        Msg.EXCEL_CHANGE_PARSE_METHOD
+                        _(
+                            en_message='The cell address specification by named range is failed. '
+                                       'The process changes the specification method to table based.',
+                            jp_message='名前範囲によるセルアドレス指定に失敗しました。'
+                                       '処理は指定方法をテーブルに変更します。',
+                        )
                     )
                     self.use_named_range = False
                     break
@@ -827,7 +849,12 @@ class ExcelInterface(COMInterface):
 
         except com_error as e:
             raise SolveError(
-                Msg.F_RUN_EXCEL_MACRO_FAILED(
+                # 変換後(あなたの出力)
+                _(
+                    en_message='Failed to run macro {procedure_name}. '
+                               'The original message is: {exception}',
+                    jp_message='マクロ {procedure_name} の実行に失敗しました。 '
+                               'エラーメッセージ: {exception}',
                     procedure_name=self.procedure_name,
                     exception=e
                 )
@@ -870,12 +897,12 @@ class ExcelInterface(COMInterface):
         # 終了処理を必要なら実施する
         if self.teardown_procedure_name is not None:
 
-            logger.info(
-                Msg.F_MACRO_RUNNING(
-                    procedure_kind='Teardown',
-                    procedure_name=self.teardown_procedure_name
-                )
-            )
+            logger.info(_(
+                en_message='{procedure_kind} procedure {procedure_name} is running...',
+                jp_message='{procedure_kind} プロシージャ {procedure_name} が実行中...',
+                procedure_kind='Teardown',
+                procedure_name=self.teardown_procedure_name
+            ))
 
             with Lock('excel_teardown_procedure'):
                 try:
@@ -892,7 +919,11 @@ class ExcelInterface(COMInterface):
 
                 except com_error as e:
                     raise RuntimeError(
-                        Msg.F_RUN_EXCEL_MACRO_FAILED(
+                        _(
+                            en_message='Failed to run macro {procedure_name}. '
+                                       'The original message is: {exception}',
+                            jp_message='マクロ {procedure_name} の実行に失敗しました。 '
+                                       'エラーメッセージ： {exception}',
                             procedure_name=self.teardown_procedure_name,
                             exception=e
                         )
@@ -901,7 +932,10 @@ class ExcelInterface(COMInterface):
         # excel プロセスを終了する
         if self.terminate_excel_when_quit:
 
-            logger.info(Msg.INFO_TERMINATING_EXCEL)
+            logger.info(_(
+                en_message='Terminating Excel process...',
+                jp_message='Excel プロセスを終了しています...',
+            ))
 
             already_terminated = not hasattr(self, 'excel')
             if already_terminated:
@@ -917,10 +951,16 @@ class ExcelInterface(COMInterface):
 
             # ここで Excel のプロセスが残らず落ちる
             gc.collect()
-            logger.info(Msg.INFO_TERMINATED_EXCEL)
+            logger.info(_(
+                en_message='Excel process is terminated.',
+                jp_message='Excel プロセスは終了しました。',
+            ))
 
             if self._with_femtet_autosave_setting:
-                logger.info(Msg.INFO_RESTORING_FEMTET_AUTOSAVE)
+                logger.info(_(
+                    en_message='Restore Femtet setting of autosave.',
+                    jp_message='Femtet の自動保存設定を復元しています。',
+                ))
                 _set_autosave_enabled(self._femtet_autosave_buffer)
 
         # そうでない場合でもブックは閉じる

@@ -353,14 +353,38 @@ class FemtetInterface(COMInterface):
         if not hasattr(constants, "STATIC_C"):
             cmd = f"{sys.executable} -m win32com.client.makepy FemtetMacro"
             subprocess.run(cmd, shell=True)
-            message = Msg.ERR_NO_MAKEPY
+
+            message = _(
+                en_message='It was detected that the configuration of '
+                           'Femtet python macro constants has not been '
+                           'completed. The configuration was done '
+                           'automatically '
+                           '(python -m win32com.client.makepy FemtetMacro). '
+                           'Please restart the program. '
+                           'If the error persists, please run '
+                           '"py -m win32com.client.makepy FemtetMacro" '
+                           'or "python -m win32com.client.makepy FemtetMacro" '
+                           'on the command prompt.',
+                jp_message='Femtet Pythonマクロ定数の設定が完了していない'
+                           'ことが検出されました。設定は自動で行われました'
+                           '(py -m win32com.client.makepy FemtetMacro)。 '
+                           'プログラムを再起動してください。'
+                           'エラーが解消されない場合は、'
+                           '"py -m win32com.client.makepy FemtetMacro" か '
+                           '"python -m win32com.client.makepy FemtetMacro" '
+                           'コマンドをコマンドプロンプトで実行してください。'
+            )
+
             logger.error("================")
             logger.error(message)
             logger.error("================")
             raise RuntimeError(message)
 
         if self.Femtet is None:
-            raise RuntimeError(Msg.ERR_FEMTET_CONNECTION_FAILED)
+            raise RuntimeError(_(
+                en_message='Failed to connect to Femtet.',
+                jp_message='Femtet への接続に失敗しました。',
+            ))
 
     def open(self, femprj_path: str, model_name: str or None = None) -> None:
         """Open specific analysis model with connected Femtet."""
@@ -643,9 +667,6 @@ class FemtetInterface(COMInterface):
                     _post_activate_message(self.Femtet.hWnd)
             else:
                 import sys
-                print(fun, file=sys.stderr)
-                print(args, file=sys.stderr)
-                print(kwargs, file=sys.stderr)
                 returns = fun(*args, **kwargs)
 
         # API の実行に失敗

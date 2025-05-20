@@ -265,9 +265,7 @@ if __name__ == '__main__':
     if not g_succeeded:
         g_dll.GetLastErrorMsg.restype = ctypes.c_char_p  # or wintypes.LPCSTR
         g_error_msg: bytes = g_dll.GetLastErrorMsg()
-        print(g_error_msg)
         g_error_msg: str = g_error_msg.decode(encoding='932')
-        print(g_error_msg)
 
     # 結果取得：内部的にはエラーになっているはず
     g_parametric_result_index = 1
@@ -280,6 +278,4 @@ if __name__ == '__main__':
     # csv を見てエラーがあるかどうか判断せざるを得ない。
     g_dll.GetLastErrorMsg.restype = ctypes.c_char_p  # or wintypes.LPCSTR
     g_error_msg: bytes = g_dll.GetLastErrorMsg()
-    print(g_error_msg)
     g_error_msg: str = g_error_msg.decode(encoding='932')
-    print(g_error_msg)

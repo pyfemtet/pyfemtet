@@ -12,7 +12,7 @@ class Message:
 
     # ===== pyfemtet.dispatch_extensions =====
     WAIT_FOR_LAUNCH_FEMTET = _('Waiting for launch femtet...')
-    TRY_TO_CONNECT_FEMTET = _('Try to connect Femtet.')
+    TRY_TO_CONNECT_FEMTET = _('Trying to connect Femtet...')
 
     @staticmethod
     def F_FEMTET_CONNECTED(pid):
@@ -50,15 +50,6 @@ class Message:
         'so do not access Femtet.Gogh. If you want your '
         'constraints to include values after analysis is performed, set '
         'the `strict` argument to False.')
-
-    @staticmethod
-    def F_WARN_HISTORY_CSV_NOT_ACCESSIBLE(path):
-        return _(
-            'History csv file ({path}) is in use and cannot be written to. '
-            'Please free this file before exiting the program, '
-            'otherwise history data will be lost.',
-            path=path
-        )
 
     OPTIMIZATION_FINISHED = _('Optimization finished. Results were saved in following:')
     ERR_NO_BOUNDS = _('No bounds specified.')
@@ -103,7 +94,7 @@ class Message:
     ERR_MODEL_MESH_FAILED = _('Mesh generation failed')
     ERR_PARAMETRIC_SOLVE_FAILED = _('Parametric solve failed')
     ERR_SOLVE_FAILED = _('Solve failed.')
-    ERR_OPEN_RESULT_FAILED = _('Open result failed.')
+    ERR_OPEN_RESULT_FAILED = _('Failed to open result.')
     ERR_CLOSE_FEMTET_FAILED = _('Failed to close Femtet.')
     ERR_FAILED_TO_SAVE_PDT = _('Failed to save result (.pdt) file.')
     ERR_FAILED_TO_SAVE_JPG = _('Failed to save screenshot (.jpg).')
@@ -115,79 +106,6 @@ class Message:
     INFO_RESTORING_FEMTET_AUTOSAVE = _('Restore Femtet setting of autosave.')
     ERR_PARAMETRIC_CSV_CONTAINS_ERROR = _('Failed to make output from Femtet. '
                                           'Please check output settings of Parametric Analysis.')
-
-    # ===== ExcelInterface =====
-    LAUNCH_EXCEL = _('Launching and connecting to Microsoft Excel...')
-    EXCEL_CONNECTED = _('The connection to Excel is established.')
-
-    @staticmethod
-    def F_FEMTET_XLA_IS_NOT_FOUND(xla_file_path):
-        return _(
-            '{xla_file_path} not found. Please check the '
-            '"Enable Macros" command was executed.',
-            xla_file_path=xla_file_path
-        )
-
-    @staticmethod
-    def F_SHEET_NOT_FOUND(sh_name, wb_name):
-        return _(
-            'Sheet {sh_name} does not exist in the book {wb_name}.',
-            sh_name=sh_name,
-            wb_name=wb_name
-        )
-
-    EXCEL_CHANGE_PARSE_METHOD = _(
-        'The cell address specification by named range is failed. '
-        'The process changes the specification method to table based.'
-    )
-
-    @staticmethod
-    def F_MACRO_RUNNING(procedure_kind, procedure_name):
-        return _(
-            '{procedure_kind} procedure {procedure_name} is running...',
-            procedure_kind=procedure_kind,
-            procedure_name=procedure_name,
-        )
-
-    @staticmethod
-    def F_RUN_EXCEL_MACRO_FAILED(procedure_name, exception):
-        return _(
-            'Failed to run macro {procedure_name}. '
-            'The original message is: {exception}',
-            procedure_name=procedure_name,
-            exception=exception,
-        )
-
-    # ===== solidworks =====
-    SW_CONNECTING = _('Launching and connecting to Solidworks...')
-
-    @staticmethod
-    def F_SW_CLOSING_MODEL(model_name):
-        return _(
-            'Closing {model_name} in Solidworks...',
-            model_name=model_name,
-        )
-
-    @staticmethod
-    def F_SW_MODEL_CLOSED(model_name):
-        return _('{model_name} is closed.', model_name=model_name)
-
-    # ===== Surrogate model =====
-    @staticmethod
-    def F_POF_UNDER_THRESH(
-            pof,
-            thresh,
-    ):
-        return _(
-            'The surrogate model estimated '
-            'that the probability of '
-            'feasibility (PoF) is {pof}. '
-            'This is under {thresh}. '
-            'So this trial is processed as '
-            'a constraint violation.',
-            pof=pof,
-            thresh=thresh,
-        )
 
     # ===== pyfemtet.opt.optimizer =====
     ERR_NOT_IMPLEMENTED = _('The following features are not supported by the specified optimization method. ')
@@ -338,9 +256,6 @@ class Message:
                           'the `save_pdt` argument of FemtetInterface in optimization script'
                           '(default to `all`).')
     ERR_FAILED_TO_OPEN_PREFIX = _('Failed to open ')
-    ERR_NO_SUCH_MODEL_IN_FEMPRJ = _('Specified model is not in current project. '
-                                    'Please check opened project. '
-                                    'For example, not "analysis model only" but your .femprj file.')
     WARN_INCONSISTENT_FEMPRJ_PATH = _('.femprj file path of the history csv is invalid. Please certify matching between csv and opening .femprj file.')
     WARN_INVALID_MODEL_NAME = _('Analysis model name of the history csv is invalid. Please certify matching between csv and opening analysis model.')
     WARN_INCONSISTENT_MODEL_NAME = _('Analysis model name of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and opening analysis model.')

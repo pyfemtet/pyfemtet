@@ -157,7 +157,6 @@ class HomePage(AbstractPage):
                     f.write(file_content)
                 self.application.history = History()
                 self.application.history.load_csv(csv_path, with_finalize=True)
-                print(self.application.history.get_df())
 
             return f'current file: {file_name}', active_tab_id
 
@@ -275,7 +274,21 @@ class HomePage(AbstractPage):
                 # check model to open is included in current project
                 if (self.femtet_control.fem.femprj_path != Femtet.Project) \
                         or (self.femtet_control.fem.model_name not in Femtet.GetAnalysisModelNames_py()):
-                    msg = Msg.ERR_NO_SUCH_MODEL_IN_FEMPRJ + f' model name: {self.femtet_control.fem.model_name}'
+
+                    msg = _(
+                        en_message='Model {model_name} is not in current project. '
+                                   'Please check opened project. '
+                                   'For example, if you have "Analysis Results '
+                                   'Only" open, please switch the project to '
+                                   '{prj_name}.',
+                        jp_message='モデル {model_name} は現在のプロジェクトに含まれていません。'
+                                   '開いているプロジェクトを確認してください。例えば「解析結果単体」'
+                                   'を開いている場合、プロジェクトを {prj_name} に切り替えてください。',
+                        model_name=self.femtet_control.fem.model_name,
+                        prj_name=os.path.basename(self.femtet_control.fem.femprj_path),
+                    )
+
+
                     alerts = self.alert_region.create_alerts(msg, color='danger', current_alerts=current_alerts)
                     return alerts
 
@@ -706,8 +719,6 @@ class Tutorial(AbstractPage):
                 sub_fidelity_names=history.sub_fidelity_names,
                 additional_data=additional_data,
             )
-
-            print(additional_data)
 
             return active_tab, 1, no_update
 

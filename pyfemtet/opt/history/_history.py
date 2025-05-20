@@ -998,7 +998,15 @@ class Records:
                 df.to_csv(f, index=False, encoding=ENCODING, lineterminator='\n')
         except PermissionError:
             logger.warning(
-                Msg.F_WARN_HISTORY_CSV_NOT_ACCESSIBLE(path)
+                _(
+                    en_message='History csv file ({path}) is in use and cannot be written to. '
+                               'Please free this file before exiting the program, '
+                               'otherwise history data will be lost.',
+                    jp_message='履歴のCSVファイル（{path}）が使用中のため書き込みできません。'
+                               'プログラムを終了する前にこのファイルを閉じてください。'
+                               'そうしない場合、履歴データが失われます。',
+                    path=path,
+                )
             )
 
     def append(self, record: Record) -> pd.Series:

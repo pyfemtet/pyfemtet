@@ -14,7 +14,6 @@ from pyfemtet.opt.visualization.history_viewer._process_monitor._pages import *
 
 from pyfemtet._i18n import Msg
 
-
 logger = get_module_logger('opt.femopt', False)
 
 
