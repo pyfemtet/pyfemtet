@@ -3,6 +3,7 @@ from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
 
+# noinspection PyUnusedLocal
 def expression1(prm1, prm2, arg1, *args, kwarg2=None, **kwargs):
     # print(prm1, prm2)
     # print(arg1, args, kwarg2, kwargs)
