@@ -13,7 +13,7 @@ from scipy.signal import find_peaks
 from tqdm import tqdm
 
 from pyfemtet.opt.exceptions import SolveError
-from pyfemtet.opt import OptunaOptimizer, FEMOpt
+from pyfemtet.opt import FemtetInterface, OptunaOptimizer, FEMOpt
 from pyfemtet.opt.optimizer import PoFBoTorchSampler, PartialOptimizeACQFConfig
 
 
@@ -37,7 +37,7 @@ class SParameterCalculator:
         for mode in tqdm(range(Gogh.Hertz.nMode), 'Obtain frequency and S-parameter.'):
             # mode setting
             Gogh.Hertz.Mode = mode
-            sleep(0.01)
+            sleep(0.1)
 
             # Obtain frequency
             freq = Gogh.Hertz.GetFreq().Real
@@ -118,10 +118,15 @@ if __name__ == '__main__':
             ),
         )
     )
+
+    # Connect to Femtet (Disable GUI result to reduce the rendering load when switching modes.)
+    fem = FemtetInterface(
+        open_result_with_gui=False
+    )
     
     # Initialize the FEMOpt object.
     # (establish connection between the optimization problem and Femtet)
-    femopt = FEMOpt(opt=opt)
+    femopt = FEMOpt(fem=fem, opt=opt)
     
     # Add design variables to the optimization problem.
     # (Specify the variables registered in the femprj file.)

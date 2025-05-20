@@ -27,6 +27,12 @@ $python_command = "py"  # Comment out this line if you don't use py launcher
 
 
 
+$python_command_parts = $python_command.Split()
+$py = $python_command_parts[0]
+$py_base_args = $python_command_parts[1..($python_command_parts.Length - 1)]
+
+
+
 # ===== pre-requirement =====
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) {
     # check Femtet, Excel and Python process existing
@@ -77,10 +83,14 @@ write-host "======================"
 write-host "installing pyfemtet..."
 write-host "======================"
 # install pyfemtet-opt-gui
-& $python_command -m pip install pyfemtet-opt-gui -U --no-warn-script-location
+$python_args = "-m pip install pyfemtet-opt-gui -U --no-warn-script-location"
+$py_args = $py_base_args + $python_args.Split()
+& $py @py_args
 
 # check pyfemtet-opt-gui installed
-$installed_packages = & $python_command -m pip list
+$python_args = "-m pip list"
+$py_args = $py_base_args + $python_args.Split()
+$installed_packages = & $py @py_args
 if (-not ($installed_packages | Select-String -Pattern 'pyfemtet-opt-gui')) {
     $title = "Error!"
     $message = "PyFemtet のインストールに失敗しました。"
@@ -92,9 +102,9 @@ if (-not ($installed_packages | Select-String -Pattern 'pyfemtet-opt-gui')) {
 
 
 write-host
-write-host "========================="
+write-host "================================"
 write-host "Checking Femtet Installation ..."
-write-host "========================="
+write-host "================================"
 $software_keys = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" | Get-ItemProperty
 $installed_software = $software_keys | Where-Object { $_.DisplayName }
 $femtet_list = $installed_software | Where-Object { $_.DisplayName -like "*Femtet*" }
@@ -141,17 +151,20 @@ write-host "========================"
 write-host "COM constants setting..."
 write-host "========================"
 # win32com.client.makepy
-& $python_command -m win32com.client.makepy FemtetMacro  # return nothing
+$python_args = "-m win32com.client.makepy FemtetMacro"
+$py_args = $py_base_args + $python_args.Split()
+& $py $py_args   # return nothing
 
 # check COM constants setting
-$SOLVER_NON_C = & $python_command -c "from win32com.client import Dispatch, constants;Dispatch('FemtetMacro.Femtet');print(constants.SOLVER_NONE_C)"
+$py_args = $py_base_args + @("-c", """from win32com.client import Dispatch, constants;Dispatch('FemtetMacro.Femtet');print(constants.SOLVER_NONE_C)""")
+$SOLVER_NON_C = & $py @py_args
 if ($SOLVER_NON_C -eq "0") {
     write-host "COM constants setting: OK"
 } else{
     $title = "warning"
     $message = "PyFmetet のインストールは完了しましたが、COM 定数設定に失敗しました。"
     $message += "コマンドプロンプトで下記のコマンドを実行してください。"
-    $message += "\n py -m win32com.client.makepy FemtetMacro"
+    $message += "`r`n`r`n py -m win32com.client.makepy FemtetMacro"
     [System.Windows.Forms.MessageBox]::Show($message, $title)
 }
 
@@ -160,7 +173,8 @@ write-host "==========================="
 write-host "Create Desktop shortcuts..."
 write-host "==========================="
 # make desktop shortcut for pyfemtet-opt-gui
-$pyfemtet_package_path = & $python_command -c "import pyfemtet;print(pyfemtet.__file__)"
+$py_args = $py_base_args + @("-c", """import pyfemtet;print(pyfemtet.__file__)""")
+$pyfemtet_package_path = & $py @py_args
 $pyfemtet_opt_script_builder_path = $pyfemtet_package_path.replace("Lib\site-packages\pyfemtet\__init__.py", "Scripts\pyfemtet-opt.exe")
 $pyfemtet_opt_result_viewer_path = $pyfemtet_package_path.replace("Lib\site-packages\pyfemtet\__init__.py", "Scripts\pyfemtet-opt-result-viewer.exe")
 

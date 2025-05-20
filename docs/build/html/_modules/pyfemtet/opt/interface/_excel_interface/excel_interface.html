@@ -105,7 +105,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.excel_parse_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.excel_macro_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.femtet_autosave</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SupportedVariableTypes</span>
@@ -492,7 +492,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="n">Msg</span><span class="o">.</span><span class="n">F_MACRO_RUNNING</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{procedure_kind}</span><span class="s1"> procedure </span><span class="si">{procedure_name}</span><span class="s1"> is running...&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{procedure_kind}</span><span class="s1"> プロシージャ </span><span class="si">{procedure_name}</span><span class="s1"> を実行中です...&#39;</span><span class="p">,</span>
                     <span class="n">procedure_kind</span><span class="o">=</span><span class="s1">&#39;Setup&#39;</span><span class="p">,</span>
                     <span class="n">procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span>
                 <span class="p">)</span>
@@ -514,7 +516,9 @@
 
                 <span class="k">except</span> <span class="n">com_error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                        <span class="n">Msg</span><span class="o">.</span><span class="n">F_RUN_EXCEL_MACRO_FAILED</span><span class="p">(</span>
+                        <span class="n">_</span><span class="p">(</span>
+                            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Failed to run macro </span><span class="si">{procedure_name}</span><span class="s1">. The original message is: </span><span class="si">{exception}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;マクロ </span><span class="si">{procedure_name}</span><span class="s1"> の実行に失敗しました。エラーメッセージ: </span><span class="si">{exception}</span><span class="s1">&#39;</span><span class="p">,</span>
                             <span class="n">procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_procedure_name</span><span class="p">,</span>
                             <span class="n">exception</span><span class="o">=</span><span class="n">e</span>
                         <span class="p">)</span>
@@ -526,13 +530,18 @@
 
         <span class="c1"># ===== 新しい excel instance を起動 =====</span>
         <span class="c1"># 起動</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">LAUNCH_EXCEL</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Launching and connecting to Microsoft Excel...&#39;</span><span class="p">,</span>
+            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Microsoft Excel を起動して接続しています...&#39;</span><span class="p">,</span>
+        <span class="p">))</span>
         <span class="k">if</span> <span class="n">connect_method</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">excel</span> <span class="o">=</span> <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;Excel.Application&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">excel</span> <span class="o">=</span> <span class="n">DispatchEx</span><span class="p">(</span><span class="s1">&#39;Excel.Application&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">EXCEL_CONNECTED</span><span class="p">)</span>
-
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The connection to Excel is established.&#39;</span><span class="p">,</span>
+            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Excel への接続が確立されました。&#39;</span><span class="p">,</span>
+        <span class="p">))</span>
         <span class="c1"># FemtetRef.xla を開く</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">open_femtet_ref_xla</span><span class="p">()</span>
         <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
@@ -586,7 +595,11 @@
         <span class="c1"># certify</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">xla_file_path</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="n">Msg</span><span class="o">.</span><span class="n">F_FEMTET_XLA_IS_NOT_FOUND</span><span class="p">(</span><span class="n">xla_file_path</span><span class="p">)</span>
+                <span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Femtet XLA file not found: </span><span class="si">{xla_file_path}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Femtet XLA ファイルが見つかりません: </span><span class="si">{xla_file_path}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">xla_file_path</span><span class="o">=</span><span class="n">xla_file_path</span>
+                <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># self.excel.Workbooks.Add(xla_file_path)</span>
@@ -850,9 +863,13 @@
                 <span class="k">return</span> <span class="n">sh</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">WorkSheetNotFoundError</span><span class="p">(</span>
-                <span class="n">Msg</span><span class="o">.</span><span class="n">F_SHEET_NOT_FOUND</span><span class="p">(</span>
-                    <span class="n">sh_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                    <span class="n">wb_name</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="n">Name</span>
+                <span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{xla_file_path}</span><span class="s1"> not found. Please check the &#39;</span>
+                               <span class="s1">&#39;&quot;Enable Macros&quot; command was executed.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{xla_file_path}</span><span class="s1">が見つかりません。&#39;</span>
+                               <span class="s1">&#39;&quot;マクロを有効にする&quot; command が実行&#39;</span>
+                               <span class="s1">&#39;されたか確認してください。&#39;</span><span class="p">,</span>
+                    <span class="n">xla_file_path</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="n">Name</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -906,7 +923,12 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="k">except</span> <span class="n">com_error</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="n">Msg</span><span class="o">.</span><span class="n">EXCEL_CHANGE_PARSE_METHOD</span>
+                        <span class="n">_</span><span class="p">(</span>
+                            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The cell address specification by named range is failed. &#39;</span>
+                                       <span class="s1">&#39;The process changes the specification method to table based.&#39;</span><span class="p">,</span>
+                            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;名前範囲によるセルアドレス指定に失敗しました。&#39;</span>
+                                       <span class="s1">&#39;処理は指定方法をテーブルに変更します。&#39;</span><span class="p">,</span>
+                        <span class="p">)</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">break</span>
@@ -943,7 +965,12 @@
 
         <span class="k">except</span> <span class="n">com_error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SolveError</span><span class="p">(</span>
-                <span class="n">Msg</span><span class="o">.</span><span class="n">F_RUN_EXCEL_MACRO_FAILED</span><span class="p">(</span>
+                <span class="c1"># 変換後(あなたの出力)</span>
+                <span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Failed to run macro </span><span class="si">{procedure_name}</span><span class="s1">. &#39;</span>
+                               <span class="s1">&#39;The original message is: </span><span class="si">{exception}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;マクロ </span><span class="si">{procedure_name}</span><span class="s1"> の実行に失敗しました。 &#39;</span>
+                               <span class="s1">&#39;エラーメッセージ: </span><span class="si">{exception}</span><span class="s1">&#39;</span><span class="p">,</span>
                     <span class="n">procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procedure_name</span><span class="p">,</span>
                     <span class="n">exception</span><span class="o">=</span><span class="n">e</span>
                 <span class="p">)</span>
@@ -989,12 +1016,12 @@
         <span class="c1"># 終了処理を必要なら実施する</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="n">Msg</span><span class="o">.</span><span class="n">F_MACRO_RUNNING</span><span class="p">(</span>
-                    <span class="n">procedure_kind</span><span class="o">=</span><span class="s1">&#39;Teardown&#39;</span><span class="p">,</span>
-                    <span class="n">procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{procedure_kind}</span><span class="s1"> procedure </span><span class="si">{procedure_name}</span><span class="s1"> is running...&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{procedure_kind}</span><span class="s1"> プロシージャ </span><span class="si">{procedure_name}</span><span class="s1"> が実行中...&#39;</span><span class="p">,</span>
+                <span class="n">procedure_kind</span><span class="o">=</span><span class="s1">&#39;Teardown&#39;</span><span class="p">,</span>
+                <span class="n">procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span>
+            <span class="p">))</span>
 
             <span class="k">with</span> <span class="n">Lock</span><span class="p">(</span><span class="s1">&#39;excel_teardown_procedure&#39;</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -1011,7 +1038,11 @@
 
                 <span class="k">except</span> <span class="n">com_error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                        <span class="n">Msg</span><span class="o">.</span><span class="n">F_RUN_EXCEL_MACRO_FAILED</span><span class="p">(</span>
+                        <span class="n">_</span><span class="p">(</span>
+                            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Failed to run macro </span><span class="si">{procedure_name}</span><span class="s1">. &#39;</span>
+                                       <span class="s1">&#39;The original message is: </span><span class="si">{exception}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;マクロ </span><span class="si">{procedure_name}</span><span class="s1"> の実行に失敗しました。 &#39;</span>
+                                       <span class="s1">&#39;エラーメッセージ： </span><span class="si">{exception}</span><span class="s1">&#39;</span><span class="p">,</span>
                             <span class="n">procedure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">teardown_procedure_name</span><span class="p">,</span>
                             <span class="n">exception</span><span class="o">=</span><span class="n">e</span>
                         <span class="p">)</span>
@@ -1020,7 +1051,10 @@
         <span class="c1"># excel プロセスを終了する</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_excel_when_quit</span><span class="p">:</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_TERMINATING_EXCEL</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Terminating Excel process...&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Excel プロセスを終了しています...&#39;</span><span class="p">,</span>
+            <span class="p">))</span>
 
             <span class="n">already_terminated</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;excel&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">already_terminated</span><span class="p">:</span>
@@ -1036,10 +1070,16 @@
 
             <span class="c1"># ここで Excel のプロセスが残らず落ちる</span>
             <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_TERMINATED_EXCEL</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Excel process is terminated.&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Excel プロセスは終了しました。&#39;</span><span class="p">,</span>
+            <span class="p">))</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_femtet_autosave_setting</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">INFO_RESTORING_FEMTET_AUTOSAVE</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Restore Femtet setting of autosave.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Femtet の自動保存設定を復元しています。&#39;</span><span class="p">,</span>
+                <span class="p">))</span>
                 <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_femtet_autosave_buffer</span><span class="p">)</span>
 
         <span class="c1"># そうでない場合でもブックは閉じる</span>

@@ -898,13 +898,19 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-            <span class="c1"># load meta_column</span>
-            <span class="n">loaded_meta_columns</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
-            <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>  <span class="c1"># empty line</span>
-            <span class="c1"># load df from line 3</span>
-            <span class="n">loaded_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">encoding</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENCODING</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                    <span class="c1"># load meta_column</span>
+                    <span class="n">loaded_meta_columns</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+                    <span class="n">reader</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>  <span class="c1"># empty line</span>
+                    <span class="c1"># load df from line 3</span>
+                    <span class="n">loaded_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+                <span class="k">continue</span>
 
         <span class="c1"># df を csv にする過程で失われる list などのオブジェクトを restore</span>
         <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_reconvert_objects</span><span class="p">(</span><span class="n">loaded_df</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">)</span>
@@ -1080,7 +1086,15 @@
                 <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ENCODING</span><span class="p">,</span> <span class="n">lineterminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="n">Msg</span><span class="o">.</span><span class="n">F_WARN_HISTORY_CSV_NOT_ACCESSIBLE</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;History csv file (</span><span class="si">{path}</span><span class="s1">) is in use and cannot be written to. &#39;</span>
+                               <span class="s1">&#39;Please free this file before exiting the program, &#39;</span>
+                               <span class="s1">&#39;otherwise history data will be lost.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;履歴のCSVファイル（</span><span class="si">{path}</span><span class="s1">）が使用中のため書き込みできません。&#39;</span>
+                               <span class="s1">&#39;プログラムを終了する前にこのファイルを閉じてください。&#39;</span>
+                               <span class="s1">&#39;そうしない場合、履歴データが失われます。&#39;</span><span class="p">,</span>
+                    <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
@@ -1285,6 +1299,32 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="History.get_trial_name">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.History.get_trial_name">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_trial_name</span><span class="p">(</span><span class="n">trial</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_sampling</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">])</span>
+            <span class="n">trial</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span>
+            <span class="n">fidelity</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">sub_sampling</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">name_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">fidelity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fid</span> <span class="o">!=</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">:</span>
+                <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+
+        <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">sub_sampling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sub_sampling</span><span class="p">))</span>
+
+        <span class="n">trial_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_parts</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">trial_name</span></div>
+
+
     <span class="k">def</span><span class="w"> </span><span class="nf">recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
 
@@ -1309,19 +1349,7 @@
 
                 <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
 
-                <span class="n">name_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">]):</span>
-                    <span class="n">fid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">fid</span> <span class="o">!=</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">:</span>
-                        <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
-
-                <span class="k">assert</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">])</span>
-                <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]))</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">]):</span>
-                    <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">]))</span>
-
-                <span class="n">trial_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_parts</span><span class="p">)</span>
+                <span class="n">trial_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_trial_name</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">)</span>
 
                 <span class="c1"># FIXME: メインフィデリティだけでなく、FEM に</span>
                 <span class="c1">#   対応するフィデリティ又はサブサンプリングのみ</span>

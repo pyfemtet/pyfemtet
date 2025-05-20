@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-19 09:58+0900\n"
+"POT-Creation-Date: 2025-05-20 14:40+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,6 +102,7 @@ msgstr ""
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_random_seed:0
 #: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.get_df:0
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.History.get_trial_name:0
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_constraints:0
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_objectives:0
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_variables:0
