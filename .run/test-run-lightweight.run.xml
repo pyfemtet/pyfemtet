@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="test-run-lightweight" type="BatchConfigurationType" factoryName="Batch">
+    <module name="pyfemtet" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="WORKING_DIRECTORY" value="./tools" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SCRIPT_NAME" value="test-run-lightweight.cmd" />
+    <option name="PARAMETERS" value="" />
+    <method v="2" />
+  </configuration>
+</component>
