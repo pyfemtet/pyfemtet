@@ -54,7 +54,7 @@ def test_save_worker_name():
         assert df['messages'].values.tolist() == [
             'test main worker',
             f'test main worker{_RECORD_MESSAGE_DELIMITER}目的関数評価中の隠れた拘束違反：SolveError',
-            f'test main worker{_RECORD_MESSAGE_DELIMITER}厳格拘束違反: c_lower_bound',
+            f'test main worker{_RECORD_MESSAGE_DELIMITER}厳格拘束違反:c_lower_bound',
             'test main worker',
         ]
 

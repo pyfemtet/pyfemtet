@@ -59,7 +59,6 @@ class SolidworksInterface(COMInterface):
         self._original_sldprt_path = self.sldprt_path
 
     def connect_sw(self):
-        logger.info(Msg.SW_CONNECTING)
         logger.info(_(
             en_message='Connecting to Solidworks...',
             jp_message='Solidworks に接続しています...'
