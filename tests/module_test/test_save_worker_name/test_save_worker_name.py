@@ -43,12 +43,21 @@ def test_save_worker_name():
     # save csv as ' | ' separated str
     df = pd.read_csv(opt.history.path, encoding=ENCODING, header=2)
     print(df['messages'].values.tolist())
-    assert df['messages'].values.tolist() == [
-        'test main worker',
-        f'test main worker{_RECORD_MESSAGE_DELIMITER}Hidden constraint violation during objective function evaluation: SolveError',
-        f'test main worker{_RECORD_MESSAGE_DELIMITER}Hard constraint violation: c_lower_bound',
-        'test main worker',
-    ]
+    try:
+        assert df['messages'].values.tolist() == [
+            'test main worker',
+            f'test main worker{_RECORD_MESSAGE_DELIMITER}Hidden constraint violation during objective function evaluation: SolveError',
+            f'test main worker{_RECORD_MESSAGE_DELIMITER}Hard constraint violation: c_lower_bound',
+            'test main worker',
+        ]
+    except AssertionError:
+        assert df['messages'].values.tolist() == [
+            'test main worker',
+            f'test main worker{_RECORD_MESSAGE_DELIMITER}目的関数評価中の隠れた拘束違反：SolveError',
+            f'test main worker{_RECORD_MESSAGE_DELIMITER}厳格拘束違反: c_lower_bound',
+            'test main worker',
+        ]
+
 
 
 if __name__ == '__main__':
