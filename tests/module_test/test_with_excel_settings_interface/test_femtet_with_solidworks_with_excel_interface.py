@@ -1,11 +1,16 @@
 from contextlib import closing
 
+import pytest
+
 from pyfemtet.opt.interface import FemtetWithSolidworksWithExcelSettingsInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
 from tests import get
 
 
+@pytest.mark.femtet
+@pytest.mark.cad
+@pytest.mark.excel
 def test_load_femtet_with_excel_settings():
     opt = AbstractOptimizer()
 

@@ -1,5 +1,7 @@
 from contextlib import closing
 
+import pytest
+
 from pyfemtet.opt.interface._solidworks_interface import SolidworksInterface
 from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 from pyfemtet.opt.optimizer import OptunaOptimizer
@@ -8,6 +10,7 @@ from pyfemtet.opt.femopt import FEMOpt
 from tests import get
 
 
+@pytest.mark.cad
 def test_solidworks_interface_update():
 
     fem = SolidworksInterface(
@@ -22,6 +25,8 @@ def test_solidworks_interface_update():
         fem.update_model()
 
 
+@pytest.mark.femtet
+@pytest.mark.cad
 def test_femtet_with_solidworks_interface():
     fem = FemtetWithSolidworksInterface(
         femprj_path=get(__file__, 'test_femtet_with_cad_interface.femprj'),
@@ -36,6 +41,8 @@ def test_femtet_with_solidworks_interface():
         fem.update_model()
 
 
+@pytest.mark.femtet
+@pytest.mark.cad
 def test_parallel_femtet_with_solidworks():
 
     fem = FemtetWithSolidworksInterface(

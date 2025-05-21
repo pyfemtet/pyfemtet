@@ -2,6 +2,8 @@ from contextlib import closing
 
 import numpy as np
 
+import pytest
+
 from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.interface._excel_interface import ExcelInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
@@ -9,6 +11,7 @@ from pyfemtet.opt.optimizer import AbstractOptimizer
 from tests import get
 
 
+@pytest.mark.excel
 def test_load_single_excel():
 
     opt = AbstractOptimizer()
@@ -58,6 +61,7 @@ def test_load_single_excel():
             assert var.properties['fix'] is True
 
 
+@pytest.mark.excel
 def test_run_multiple_excel():
     opt = AbstractOptimizer()
 
@@ -100,5 +104,5 @@ def test_run_multiple_excel():
 
 
 if __name__ == '__main__':
-    test_load_single_excel()
+    # test_load_single_excel()
     test_run_multiple_excel()

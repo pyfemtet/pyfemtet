@@ -11,6 +11,7 @@ from pyfemtet.opt.optimizer import AbstractOptimizer
 import pytest
 
 
+@pytest.mark.femtet
 def test_femtet_interface():
 
     fem = FemtetInterface(
@@ -22,6 +23,7 @@ def test_femtet_interface():
         fem.update()
 
 
+@pytest.mark.femtet
 def test_run_femtet_interface():
 
     fem = FemtetInterface(
@@ -44,6 +46,7 @@ def test_run_femtet_interface():
         )
 
 
+@pytest.mark.femtet
 @pytest.mark.manual
 def test_femtet_interface_api_calling():
 
@@ -64,9 +67,10 @@ def test_femtet_interface_api_calling():
     except Exception as e:
         print(e)
     result = input('ダイアログか警告が出なかったら NG と入力\n>>> ') or ''
-    assert result.upper() == 'NO'
+    assert result.upper() == 'NG'
 
 
+@pytest.mark.femtet
 def test_femtet_always_open_copy_flag():
     execute_femtet()
 
