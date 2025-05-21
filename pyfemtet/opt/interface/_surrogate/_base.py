@@ -74,7 +74,7 @@ class SurrogateModelInterfaceBase(FEMInterface, ABC):
 
         if isinstance(self._output_directions, dict):
 
-            for index, direction in self._output_directions:
+            for index, direction in self._output_directions.items():
                 obj_name = self.train_history.obj_names[index]
                 opt.objectives[obj_name] = Objective(
                     lambda obj_name_=obj_name: self.obj[obj_name_],
