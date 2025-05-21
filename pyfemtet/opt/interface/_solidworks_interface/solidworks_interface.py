@@ -60,6 +60,10 @@ class SolidworksInterface(COMInterface):
 
     def connect_sw(self):
         logger.info(Msg.SW_CONNECTING)
+        logger.info(_(
+            en_message='Connecting to Solidworks...',
+            jp_message='Solidworks に接続しています...'
+        ))
         try:
             self.swApp = DispatchEx('SLDWORKS.Application')
         except com_error:
