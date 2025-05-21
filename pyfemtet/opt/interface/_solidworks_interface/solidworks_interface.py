@@ -13,7 +13,7 @@ from pythoncom import CoInitialize, CoUninitialize, com_error
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.interface._base_interface import COMInterface
-from pyfemtet._i18n import Msg, _
+from pyfemtet._i18n import _
 from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
 from pyfemtet.logger import get_module_logger
 
@@ -39,6 +39,7 @@ class FileNotOpenedError(Exception):
     pass
 
 
+# noinspection PyPep8Naming
 class SolidworksInterface(COMInterface):
 
     swApp: CDispatch
@@ -157,7 +158,10 @@ class SolidworksInterface(COMInterface):
             # モデル再構築
             result = swModel.EditRebuild3  # モデル再構築
             if not result:
-                raise ModelError(Msg.ERR_UPDATE_SOLIDWORKS_MODEL_FAILED)
+                raise ModelError(_(
+                    en_message='Failed to update the model on Solidworks.',
+                    jp_message='Solidworks モデルの更新に失敗しました。'
+                ))
 
     def close(self):
         if not hasattr(self, 'swApp'):
@@ -168,13 +172,24 @@ class SolidworksInterface(COMInterface):
 
         with Lock(self._access_sw_lock_name):
             model_name = os.path.basename(self.sldprt_path)
-            logger.info(Msg.F_SW_CLOSING_MODEL(model_name))
+            logger.info(_(
+                en_message='Closing {model_name} ...',
+                jp_message='モデル {model_name} を閉じています...',
+                model_name=model_name,
+            ))
+
             # 最後の Doc ならばプロセスを落とす仕様？
             self.swApp.QuitDoc(os.path.basename(self.sldprt_path))
-            logger.info(Msg.F_SW_MODEL_CLOSED(model_name))
+            # logger.info(Msg.F_SW_MODEL_CLOSED(model_name))
+            logger.info(_(
+                en_message='Successfully closed {model_name}.',
+                jp_message='モデル {model_name} を閉じました。',
+                model_name=model_name,
+            ))
             sleep(3)
 
 
+# noinspection PyPep8Naming
 def _get_model_by_basename(swApp, basename):
     swModel = swApp.ActivateDoc(basename)
     if swModel is None:

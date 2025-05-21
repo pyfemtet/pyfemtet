@@ -54,7 +54,7 @@ msgstr "正常に接続されました。FemtetのPIDは{pid}です。"
 #: pyfemtet/_i18n/messages.py:27
 #, python-brace-format
 msgid "Searching Femtet (pid = {pid}) ..."
-msgstr "FEM解析中 (pid = {pid}) を検索しています・・・"
+msgstr "Femtet (pid = {pid}) を探しています・・・"
 
 #: pyfemtet/_i18n/messages.py:34
 #, python-brace-format
