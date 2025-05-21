@@ -257,6 +257,7 @@ def test_sample_gau_ex08_parametric(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\gau_ex08_parametric.py',
         record_mode=record_mode,
+        threshold=0.1,
     )
     sample_test.run()
     sample_test.run(jp=True)

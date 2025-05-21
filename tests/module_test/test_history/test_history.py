@@ -1,5 +1,6 @@
 import os
 import csv
+import pyfemtet
 from pyfemtet.opt.history import *
 from pyfemtet.opt.history._history import DuplicatedColumnNameError
 from pyfemtet.opt.optimizer import AbstractOptimizer
@@ -50,7 +51,7 @@ def test_new_additional_data():
     print(m)
     print(a_data, type(a_data))
     print(opt.history.additional_data)
-    co = {'version': '0.0.0'}
+    co = {'version': pyfemtet.__version__}
     co.update(fem._get_additional_data())
     assert opt.history.additional_data == co
 

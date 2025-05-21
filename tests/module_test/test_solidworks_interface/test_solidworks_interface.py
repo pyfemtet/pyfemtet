@@ -59,6 +59,6 @@ def test_parallel_femtet_with_solidworks():
 
 
 if __name__ == '__main__':
-    # test_solidworks_interface_update()
-    # test_femtet_with_solidworks_interface()
+    test_solidworks_interface_update()
+    test_femtet_with_solidworks_interface()
     test_parallel_femtet_with_solidworks()
