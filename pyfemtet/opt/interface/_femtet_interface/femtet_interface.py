@@ -504,6 +504,8 @@ class FemtetInterface(COMInterface):
             name = fun.__name__
             if fun.__name__ == 'Solve':
                 context = nullcontext()
+            elif fun.__name__ == 'solve_via_parametric_dll':
+                context = nullcontext()
 
         elif isinstance(fun, str):
 
@@ -525,7 +527,7 @@ class FemtetInterface(COMInterface):
                         'If the optimization is hanging, the most reason is '
                         'a dialog is opening in Femtet and it waits for your '
                         'input. Please confirm there is no dialog in Femtet.',
-                        '{name} の実行に {warning_time_sec} 以上かかっています。'
+                        '{name} の実行に {warning_time_sec} 秒以上かかっています。'
                         'もし最適化がハングしているならば、考えられる理由として、'
                         'Femtet で予期せずダイアログが開いてユーザーの入力待ちをしている場合があります。'
                         'もし Femtet でダイアログが開いていれば、閉じてください。',
