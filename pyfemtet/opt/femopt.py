@@ -71,16 +71,20 @@ class FEMOpt:
             name: str,
             expression_string: str,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
-        self.opt.add_expression_string(name, expression_string, properties)
+        self.opt.add_expression_string(name, expression_string, properties, pass_to_fem=pass_to_fem)
 
     def add_expression_sympy(
             self,
             name: str,
             sympy_expr: sympy.Expr,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
-        self.opt.add_expression_sympy(name, sympy_expr, properties)
+        self.opt.add_expression_sympy(name, sympy_expr, properties, pass_to_fem=pass_to_fem)
 
     def add_expression(
             self,
@@ -89,8 +93,10 @@ class FEMOpt:
             properties: dict[str, ...] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
-        self.opt.add_expression(name, fun, properties, args, kwargs)
+        self.opt.add_expression(name, fun, properties, args, kwargs, pass_to_fem=pass_to_fem)
 
     def add_categorical_parameter(
             self,

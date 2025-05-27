@@ -177,11 +177,14 @@ class AbstractOptimizer:
             name: str,
             expression_string: str,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(expression_string=expression_string)
         var.properties = properties or dict()
+        var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
@@ -190,11 +193,14 @@ class AbstractOptimizer:
             name: str,
             sympy_expr: sympy.Expr,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
         var.properties = properties or dict()
+        var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
@@ -205,6 +211,8 @@ class AbstractOptimizer:
             properties: dict[str, ...] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
         var = ExpressionFromFunction()
         var.name = name
@@ -212,6 +220,7 @@ class AbstractOptimizer:
         var.args = args or tuple()
         var.kwargs = kwargs or dict()
         var.properties = properties or dict()
+        var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
