@@ -11,7 +11,8 @@ dependencies = [
     "tqdm>=4.66.1,<5",
     "colorlog>=6.8.0,<7",
     "psutil>=5.9.6,<6",
-    "pywin32>=306, <311 ; sys_platform=='win32'",  # python pinning
+    "pywin32<309 ; sys_platform == 'win32' and python_version < '3.13'",
+    "pywin32>=309 ; sys_platform == 'win32' and python_version >= '3.13'",
     "femtetutils>=1.0.0,<2 ; sys_platform=='win32'",
     "dask~=2024.12.1",
     "distributed~=2024.12.1",
