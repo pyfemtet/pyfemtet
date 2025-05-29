@@ -32,7 +32,7 @@ DIRECTION: TypeAlias = (
         ]
 )
 
-logger = get_module_logger('opt.optimizer', True)
+logger = get_module_logger('opt.optimizer', False)
 
 
 def _log_hidden_constraint(e: Exception):
