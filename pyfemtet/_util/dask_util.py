@@ -24,7 +24,7 @@ warnings.filterwarnings('ignore', category=RuntimeWarning, message="Couldn't det
 
 cfg.set({'distributed.scheduler.worker-ttl': None})
 
-logger = get_module_logger('opt.dask', True)
+logger = get_module_logger('opt.dask', False)
 
 
 __all__ = [

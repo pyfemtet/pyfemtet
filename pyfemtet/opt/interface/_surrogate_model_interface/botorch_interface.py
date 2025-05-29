@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 from scipy.stats.distributions import norm
 
@@ -24,8 +26,22 @@ __all__ = [
 
 class BoTorchInterface(AbstractSurrogateModelInterfaceBase):
 
-    def __init__(self, history_path: str = None, train_history: History = None):
-        AbstractSurrogateModelInterfaceBase.__init__(self, history_path, train_history)
+    def __init__(
+            self,
+            history_path: str = None,
+            train_history: History = None,
+            _output_directions: (
+                    Sequence[str | float]
+                    | dict[str, str | float]
+                    | dict[int, str | float]
+            ) = None
+    ):
+        AbstractSurrogateModelInterfaceBase.__init__(
+            self,
+            history_path,
+            train_history,
+            _output_directions
+        )
 
         self.model = SingleTaskGPModel()
         self.pyfemtet_model = PyFemtetModel()
@@ -62,11 +78,22 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
     def __init__(
             self,
             history_path: str,
+            train_history: History = None,
             observation_noise: float | str | None = None,
             feasibility_noise: float | str | None = None,
             feasibility_cdf_threshold: float | str = 0.5,  # or 'sample_mean'
+            _output_directions: (
+                    Sequence[str | float]
+                    | dict[str, str | float]
+                    | dict[int, str | float]
+            ) = None
     ):
-        AbstractSurrogateModelInterfaceBase.__init__(self, history_path, None)
+        AbstractSurrogateModelInterfaceBase.__init__(
+            self,
+            history_path,
+            train_history,
+            _output_directions
+        )
 
         self.model = SingleTaskGPModel()
         self.pyfemtet_model = PyFemtetModel()

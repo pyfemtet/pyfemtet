@@ -138,7 +138,7 @@ if TYPE_CHECKING:
 # noinspection PyTypeChecker
 _logger = get_logger(False)
 
-DEBUG = True
+DEBUG = False
 logger = get_module_logger('opt.PoFBoTorchSampler', DEBUG)
 
 warnings.filterwarnings('ignore', category=InputDataWarning)

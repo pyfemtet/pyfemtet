@@ -46,7 +46,7 @@ __all__ = [
 MAIN_FILTER: dict = {'sub_fidelity_name': MAIN_FIDELITY_NAME}
 
 
-logger = get_module_logger('opt.history', True)
+logger = get_module_logger('opt.history', False)
 
 
 def create_err_msg_from_exception(e: Exception):

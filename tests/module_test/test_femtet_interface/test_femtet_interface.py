@@ -1,3 +1,5 @@
+from contextlib import closing
+
 from pyfemtet._util.closing import closing
 
 import numpy as np
@@ -102,7 +104,55 @@ def test_femtet_always_open_copy_flag():
     fem.close()
 
 
+@pytest.mark.femtet
+def test_femtet_parametric_output_indices():
+
+    opt = AbstractOptimizer()
+    print()
+    print('load_objective 前:')
+    print(f'{len(opt.objectives)=}')
+
+    fem = FemtetInterface(
+        femprj_path=get(__file__, 'test_femtet_interface.femprj'),
+        parametric_output_indexes_use_as_objective={0: 'minimize', }
+    )
+
+    with closing(fem):
+
+        fem.load_objectives(opt)
+        print()
+        print('load_objective 後:')
+        print(f'{len(opt.objectives)=}')
+        print(opt.objectives)
+        assert len(opt.objectives) > 0
+
+
+@pytest.mark.femtet
+def test_femtet_add_parametric_output():
+
+    opt = AbstractOptimizer()
+    print()
+    print('use output 前:')
+    print(f'{len(opt.objectives)=}')
+
+    fem = FemtetInterface(
+        femprj_path=get(__file__, 'test_femtet_interface.femprj'),
+    )
+
+    with closing(fem):
+
+        fem.use_parametric_output_as_objective(
+            number=1, direction='minimize')
+        print()
+        print('use output 後:')
+        print(f'{len(opt.objectives)=}')
+        print(opt.objectives)
+        assert len(opt.objectives) > 0
+
+
 if __name__ == '__main__':
     # test_run_femtet_interface()
     # test_femtet_interface_api_calling()
-    test_femtet_always_open_copy_flag()
+    # test_femtet_always_open_copy_flag()
+    test_femtet_parametric_output_indices()
+    test_femtet_add_parametric_output()

@@ -31,7 +31,7 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
             strictly_pid_specify: bool = True,
             allow_without_project: bool = False,
             open_result_with_gui: bool = True,
-            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
+            parametric_output_indexes_use_as_objective: dict[int, str | float] = None,
             always_open_copy=False,
             close_solidworks_on_terminate=False,
             solidworks_visible=True,
