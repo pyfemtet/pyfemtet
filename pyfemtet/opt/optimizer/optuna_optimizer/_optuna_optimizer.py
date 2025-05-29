@@ -245,9 +245,6 @@ class OptunaOptimizer(AbstractOptimizer):
 
             return y_internal
 
-        if get_client() is None:
-            self.history.save()
-
     def _get_callback(self, n_trials: int):
 
         # restart である場合、追加 N 回と見做す
