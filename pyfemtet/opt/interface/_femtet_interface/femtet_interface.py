@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 import os
 import sys
-import warnings
 import subprocess
 from time import sleep
 from contextlib import nullcontext
@@ -119,6 +118,7 @@ class FemtetInterface(COMInterface):
     """
 
     com_members = {'Femtet': 'FemtetMacro.Femtet'}
+    _show_parametric_index_warning = True  # for GUI
 
     def __init__(
             self,
@@ -129,14 +129,19 @@ class FemtetInterface(COMInterface):
             strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
             allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui: bool = True,
-            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,  # TODO: Remove this
             always_open_copy=False,
+            # ユーザーはメソッドを使うことを推奨。GUI などで使用。
+            parametric_output_indexes_use_as_objective: dict[int, str | float] = None,
     ):
-        # warning
         if parametric_output_indexes_use_as_objective is not None:
-            warnings.warn(
-                "解析モデルに設定された既存のスイープテーブルは削除されます。"
-            )
+            if FemtetInterface._show_parametric_index_warning:
+                logger.warning(_(
+                    en_message='The argument `parametric_output_indexes_use_as_objective` is deprecated. '
+                               'Please use `FemtetInterface.use_parametric_output_as_objective()` instead.',
+                    jp_message='`parametric_output_indexes_use_as_objective` は非推奨の引数です。'
+                               '代わりに `FemtetInterface.use_parametric_output_as_objective()` '
+                               'を使ってください。',
+                ))
 
         # 引数の処理
         if femprj_path is None:
@@ -255,6 +260,13 @@ class FemtetInterface(COMInterface):
             None
 
         """
+
+        # warning
+        logger.warning(_(
+            en_message='The existing sweep table in the project will be removed.',
+            jp_message='解析モデルに設定された既存のスイープテーブルは削除されます。'
+        ))
+
         # check
         if isinstance(direction, str):
             if direction not in ("minimize", "maximize"):
