@@ -46,7 +46,7 @@ def parabola(_, opt: OptunaOptimizer):
     return (opt.get_variables('values') ** 2).sum()
 
 
-def test_surrogate_optimize():
+def test_surrogate_optimize_output_directions():
     fem_train = NoFEM()
     opt_train = OptunaOptimizer()
     opt_train.fem = fem_train
@@ -55,9 +55,10 @@ def test_surrogate_optimize():
     opt_train.add_parameter('x3', -1, -1, 1, 0.25)
     opt_train.add_objective('obj', parabola, args=(opt_train,))
     opt_train.n_trials = 10
-    opt_train.history.path = 'tmp_training.csv'
+    opt_train.history.path = 'tmp_training_test_surrogate_optimize_output_directions.csv'
     if os.path.isfile(opt_train.history.path):
         os.remove(opt_train.history.path)
+        os.remove(opt_train.history.path.removesuffix('.csv') + '.db')
     opt_train.run()
     opt_train.history.save()
 
@@ -73,7 +74,45 @@ def test_surrogate_optimize():
     opt.n_trials = 20
     opt.run()
 
+    df = opt.history.get_df()
+    assert df[opt.history.obj_names].values.min() < 3
+    print('test_surrogate_optimize_output_directions passed!')
+
+
+def test_surrogate_optimize_normal():
+    fem_train = NoFEM()
+    opt_train = OptunaOptimizer()
+    opt_train.fem = fem_train
+    opt_train.add_parameter('x1', -1, -1, 1)
+    opt_train.add_parameter('x2', -1, -1, 1)
+    opt_train.add_parameter('x3', -1, -1, 1, 0.25)
+    opt_train.add_objective('obj', parabola, args=(opt_train,))
+    opt_train.n_trials = 10
+    opt_train.history.path = 'tmp_training_test_surrogate_optimize_normal.csv'
+    if os.path.isfile(opt_train.history.path):
+        os.remove(opt_train.history.path)
+        os.remove(opt_train.history.path.removesuffix('.csv') + '.db')
+    opt_train.run()
+    opt_train.history.save()
+
+    fem = BoTorchInterface(
+        history_path=opt_train.history.path,
+    )
+    opt = OptunaOptimizer()
+    opt.fem = fem
+    opt.add_parameter('x1', -1, -1, 1)
+    opt.add_parameter('x2', -1, -1, 1)
+    opt.add_parameter('x3', -1, -1, 1, 0.25)
+    opt.add_objective('obj', lambda: 100.,)
+    opt.n_trials = 20
+    opt.run()
+
+    df = opt.history.get_df()
+    assert df[opt.history.obj_names].values.min() < 3
+    print('test_surrogate_optimize_normal passed!')
+
 
 if __name__ == '__main__':
     # test_output_directions()
-    test_surrogate_optimize()
+    # test_surrogate_optimize_output_directions()
+    test_surrogate_optimize_normal()
