@@ -973,9 +973,9 @@ class PoFBoTorchSampler(BoTorchSampler):
         feasible_trials: list[FrozenTrial] = []
         infeasible_trials: list[FrozenTrial] = []
         for trial in (completed_trials + pruned_trials):
-            state: PFTrialState = OptunaAttribute.get_pf_state_from_trial_attr(
-                trial.user_attrs[OptunaAttribute.main_fidelity_key()]
-            )
+            main_key = OptunaAttribute(self.pyfemtet_optimizer).key
+            user_attribute: OptunaAttribute.AttributeStructure = trial.user_attrs[main_key]
+            state: PFTrialState = user_attribute['pf_state']
 
             if state in self.pof_config._states_to_consider_pof:
                 infeasible_trials.append(trial)

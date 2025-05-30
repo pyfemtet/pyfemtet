@@ -1,73 +1,63 @@
 from __future__ import annotations
 
+from typing import TypedDict, Sequence
+
+import optuna.trial
+
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.optimizer._base_optimizer import *
 
 
 class OptunaAttribute:
-    """Manage optuna user attribute
+    """Manage optuna user attribute.
 
-    user attributes are:
-        sub_fidelity_name:
+    By `set_user_attr_to_trial`,
+        key (str):
+            {sub_fidelity_name}(_{subsampling_idx})
+        value (dict):
             fidelity: ...
-            OBJECTIVE_ATTR_KEY: ...
-            PYFEMTET_STATE_ATTR_KEY: ...
-            CONSTRAINT_ATTR_KEY: ...
+            internal_y_values: ...
+            violation_values: ...
+            pf_state: ...
 
     """
+    class AttributeStructure(TypedDict):
+        fidelity: Fidelity | None
+        internal_y_values: Sequence[float] | None
+        violation_values: Sequence[float] | None
+        pf_state: TrialState | None
 
-    OBJECTIVE_KEY = 'internal_objective'
-    CONSTRAINT_KEY = 'constraint'
-    PYFEMTET_TRIAL_STATE_KEY = 'pyfemtet_trial_state'
-
-    sub_fidelity_name: str  # key
-    fidelity: Fidelity | None
-    v_values: tuple | None  # violation
-    y_values: tuple | None  # internal objective
-    pf_state: TrialState | None  # PyFemtet state
-
-    def __init__(self, opt: AbstractOptimizer):
-        self.sub_fidelity_name = opt.sub_fidelity_name
-        self.fidelity = None
-        self.v_values = None
-        self.y_values = None
-        self.pf_state = None
-
-    # noinspection PyPropertyDefinition
-    @classmethod
-    def main_fidelity_key(cls):
-        return MAIN_FIDELITY_NAME
+    def __init__(
+            self,
+            opt: AbstractOptimizer,
+            subsampling_idx: SubSampling | None = None,
+    ):
+        # key
+        self.sub_fidelity_name: str = opt.sub_fidelity_name
+        self.subsampling_idx: SubSampling | None = subsampling_idx
+        # value
+        self.fidelity: Fidelity = opt.fidelity
+        self.y_values: Sequence[float] | None = None
+        self.v_values: Sequence[float] | None = None
+        self.pf_state: TrialState | None = None
 
     @property
-    def key(self):
-        return self.sub_fidelity_name
+    def key(self) -> str:
+        key = self.sub_fidelity_name
+        if self.subsampling_idx is not None:
+            key += f'_{self.subsampling_idx}'
+        return key
 
     @property
-    def value(self):
-        d = {}
-        if self.fidelity:
-            d.update({'fidelity': self.fidelity})
-        if self.y_values:
-            d.update({self.OBJECTIVE_KEY: self.y_values})
-        if self.v_values:
-            d.update({self.CONSTRAINT_KEY: self.v_values})
-        if self.pf_state:
-            d.update({self.PYFEMTET_TRIAL_STATE_KEY: self.pf_state})
-        return d
+    def value(self) -> AttributeStructure:
+        out = self.AttributeStructure(
+            fidelity=self.fidelity,
+            internal_y_values=self.y_values,
+            violation_values=self.v_values,
+            pf_state=self.pf_state,
+        )
+        return out
 
-    @staticmethod
-    def get_fidelity(optuna_attribute: OptunaAttribute):
-        return optuna_attribute.value['fidelity']
-
-    @staticmethod
-    def get_violation(optuna_attribute: OptunaAttribute):
-        return optuna_attribute.value[OptunaAttribute.CONSTRAINT_KEY]
-
-    @staticmethod
-    def get_violation_from_trial_attr(trial_attr: dict):  # value is OptunaAttribute.value
-        return trial_attr[OptunaAttribute.CONSTRAINT_KEY]
-
-    @staticmethod
-    def get_pf_state_from_trial_attr(trial_attr: dict):  # value is OptunaAttribute.value
-        return trial_attr[OptunaAttribute.PYFEMTET_TRIAL_STATE_KEY]
+    def set_user_attr_to_trial(self, trial: optuna.trial.Trial):
+        trial.set_user_attr(self.key, self.value)
