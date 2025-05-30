@@ -699,9 +699,9 @@ def debug_1s():
     # _opt.history.path = 'restart-test.csv'
     _opt.run()
 
-    import plotly.express as px
-    _df = _opt.history.get_df()
-    px.scatter_3d(_df, x='x1', y='x2', z='obj', color='fidelity', opacity=0.5).show()
+    # import plotly.express as px
+    # _df = _opt.history.get_df()
+    # px.scatter_3d(_df, x='x1', y='x2', z='obj', color='fidelity', opacity=0.5).show()
 
     _opt.history.save()
 
@@ -760,6 +760,6 @@ def debug_3():
 
 if __name__ == '__main__':
     debug_1()
-    # debug_1s()
-    # debug_2()
-    # debug_3()
+    debug_1s()
+    debug_2()
+    debug_3()
