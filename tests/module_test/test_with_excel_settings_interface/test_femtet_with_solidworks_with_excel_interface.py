@@ -11,7 +11,7 @@ from tests import get
 @pytest.mark.femtet
 @pytest.mark.cad
 @pytest.mark.excel
-def test_load_femtet_with_excel_settings():
+def test_load_femtet_with_sw_with_excel_settings():
     opt = AbstractOptimizer()
 
     fem: FemtetWithSolidworksWithExcelSettingsInterface = FemtetWithSolidworksWithExcelSettingsInterface(
@@ -49,4 +49,4 @@ def test_load_femtet_with_excel_settings():
 
 
 if __name__ == '__main__':
-    test_load_femtet_with_excel_settings()
+    test_load_femtet_with_sw_with_excel_settings()
