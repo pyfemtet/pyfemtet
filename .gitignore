@@ -29,3 +29,4 @@ PyFemtet.egg-info
 /pyfemtet/opt/visualization/_result_viewer/sample/optimize_sample.py
 docs/result.txt
 /uv.lock
+/.python-version
