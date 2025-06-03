@@ -62,6 +62,7 @@ def test_load_single_excel():
 
 
 @pytest.mark.excel
+@pytest.mark.femtet
 def test_run_multiple_excel():
     opt = AbstractOptimizer()
 
@@ -80,6 +81,10 @@ def test_run_multiple_excel():
         teardown_procedure_name='PrePostProcessing.teardown',
     )
 
+    # pytest のときのみ setup マクロが実行できない系のエラーが発生したら
+    # - pytest なしで実行できることを確認する
+    # - Excel のトラストセンターで VBA を有効にする
+    # - Excel のトラストセンターで 信頼できる場所に追加する
     with closing(fem):
 
         opt.fem = fem
