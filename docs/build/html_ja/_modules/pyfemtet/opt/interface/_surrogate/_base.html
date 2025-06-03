@@ -160,7 +160,7 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
 
-            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">obj_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
                 <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="p">[</span><span class="n">obj_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Objective</span><span class="p">(</span>
                     <span class="k">lambda</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">],</span>

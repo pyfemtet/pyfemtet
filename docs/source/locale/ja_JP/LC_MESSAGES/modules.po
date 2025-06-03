@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-19 12:40+0900\n"
+"POT-Creation-Date: 2025-06-03 11:38+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -27,9 +27,7 @@ msgstr ""
 msgid "pyfemtet package"
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.problem.rst:5
 #: ../source/modules/pyfemtet.opt.rst:5
-#: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.rst:5
 #: ../source/modules/pyfemtet.rst:5
 msgid "Subpackages"
@@ -37,8 +35,6 @@ msgstr ""
 
 #: ../source/modules/pyfemtet.opt.optimizer.rst:5
 #: ../source/modules/pyfemtet.opt.prediction.rst:5
-#: ../source/modules/pyfemtet.opt.problem.rst:13
-#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:5
 #: ../source/modules/pyfemtet.rst:16
 msgid "Submodules"
@@ -83,19 +79,11 @@ msgstr "ソルバーにおけるエラーに対して発生する例外です。
 #: ../source/modules/pyfemtet.brep.rst:5
 #: ../source/modules/pyfemtet.dispatch_extensions.rst:5
 #: ../source/modules/pyfemtet.logger.rst:5
-#: ../source/modules/pyfemtet.opt.history.rst:5
 #: ../source/modules/pyfemtet.opt.interface.rst:5
 #: ../source/modules/pyfemtet.opt.meta_script.rst:5
-#: ../source/modules/pyfemtet.opt.optimizer.optuna_optimizer.rst:5
 #: ../source/modules/pyfemtet.opt.optimizer.rst:16
-#: ../source/modules/pyfemtet.opt.optimizer.scipy_optimizer.rst:5
 #: ../source/modules/pyfemtet.opt.prediction.rst:16
-#: ../source/modules/pyfemtet.opt.problem.rst:21
-#: ../source/modules/pyfemtet.opt.problem.variable_manager.rst:5
 #: ../source/modules/pyfemtet.opt.rst:17
-#: ../source/modules/pyfemtet.opt.visualization.history_viewer.result_viewer.rst:5
-#: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:13
-#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:14
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:24
 #: ../source/modules/pyfemtet.opt.visualization.rst:13
 #: ../source/modules/pyfemtet.rst:27
@@ -1186,10 +1174,6 @@ msgstr "```scipy.optimize.minimize_scalar``` のキーワード引数です。"
 msgid "The return value of ```scipy.optimize.minimize_scalar```."
 msgstr "```scipy.optimize.minimize_scalar``` の戻り値です。"
 
-#: ../source/modules/pyfemtet.opt.history.rst:2
-msgid "pyfemtet.opt.history package"
-msgstr ""
-
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
 msgstr ""
@@ -1672,14 +1656,6 @@ msgstr ""
 msgid "Whether to treat observation errors as non-existent when training the regression model with the objective function value. The default is True because there is essentially no observational error in a FEM analysis. This is different from the original BoTorchSampler implementation."
 msgstr ""
 
-#: ../source/modules/pyfemtet.opt.optimizer.optuna_optimizer.rst:2
-msgid "pyfemtet.opt.optimizer.optuna\\_optimizer package"
-msgstr ""
-
-#: ../source/modules/pyfemtet.opt.optimizer.scipy_optimizer.rst:2
-msgid "pyfemtet.opt.optimizer.scipy\\_optimizer package"
-msgstr ""
-
 #: ../source/modules/pyfemtet.opt.prediction.rst:2
 msgid "pyfemtet.opt.prediction package"
 msgstr ""
@@ -1713,28 +1689,8 @@ msgstr "出力です。 (ポイント数) 行と (目的数) 列の二次元配�
 msgid "(Point number) rows and (objective number) columns. Index 0 is mean and index 1 is std."
 msgstr "(ポイント数) 行と (目的数) 列の二次元配列です。 インデックス 0 は平均で、インデックス 1 は標準偏差です。"
 
-#: ../source/modules/pyfemtet.opt.problem.rst:2
-msgid "pyfemtet.opt.problem package"
-msgstr ""
-
-#: ../source/modules/pyfemtet.opt.problem.variable_manager.rst:2
-msgid "pyfemtet.opt.problem.variable\\_manager package"
-msgstr ""
-
 #: ../source/modules/pyfemtet.opt.visualization.rst:2
 msgid "pyfemtet.opt.visualization package"
-msgstr ""
-
-#: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:2
-msgid "pyfemtet.opt.visualization.history\\_viewer package"
-msgstr ""
-
-#: ../source/modules/pyfemtet.opt.visualization.history_viewer.result_viewer.rst:2
-msgid "pyfemtet.opt.visualization.history\\_viewer.result\\_viewer package"
-msgstr ""
-
-#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:2
-msgid "pyfemtet.opt.visualization.plotter package"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.result_viewer.rst:2
@@ -1767,5 +1723,29 @@ msgstr ""
 #~ msgstr "最適化プロセスを実行します。"
 
 #~ msgid "Excel との接続方法を指定します。 'auto' または 'new' が利用可能です。デフォルトは 'auto' です。"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.history package"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.optimizer.optuna\\_optimizer package"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.optimizer.scipy\\_optimizer package"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.problem package"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.problem.variable\\_manager package"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.visualization.history\\_viewer package"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.visualization.history\\_viewer.result\\_viewer package"
+#~ msgstr ""
+
+#~ msgid "pyfemtet.opt.visualization.plotter package"
 #~ msgstr ""
 
