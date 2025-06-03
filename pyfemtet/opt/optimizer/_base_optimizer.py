@@ -434,6 +434,7 @@ class AbstractOptimizer:
 
         def __init__(self, opt: AbstractOptimizer):
             self.opt: AbstractOptimizer = opt
+            self.subsampling_idx: SubSampling | None = None
 
         def _preprocess(self):
             pass
@@ -460,6 +461,7 @@ class AbstractOptimizer:
                 variables_pass_to_fem: dict[str, SupportedVariableTypes],
                 history: History = None,
                 datetime_start=None,
+                trial_id=None,
         ) -> _FReturnValue:
 
             # create context
@@ -486,6 +488,8 @@ class AbstractOptimizer:
                     {obj_name: ObjectiveResult(obj, opt_.fem, float('nan'))
                      for obj_name, obj in opt_.objectives.items()}
                 )
+                record.sub_sampling = self.subsampling_idx
+                record.trial_id = trial_id
                 record.sub_fidelity_name = opt_.sub_fidelity_name
                 record.fidelity = opt_.fidelity
                 record.datetime_start = datetime_start
@@ -629,7 +633,9 @@ class AbstractOptimizer:
                 x: TrialInput,
                 x_pass_to_fem_: dict[str, SupportedVariableTypes],
                 opt_: AbstractOptimizer | None = None,
+                trial_id: str =None,
         ) -> _FReturnValue | None:
+            """Nothing will be raised even if infeasible."""
 
             vm = self.opt.variable_manager
 
@@ -643,32 +649,40 @@ class AbstractOptimizer:
             # if opt_ is not self, update variable manager
             opt_.variable_manager = vm
 
-            # preprocess
-            self._preprocess()
+            # noinspection PyMethodParameters
+            class Process:
+                def __enter__(self_):
+                    # preprocess
+                    self._preprocess()
 
-            # declare output
-            f_return = None
+                def __exit__(self_, exc_type, exc_val, exc_tb):
+                    # postprocess
+                    self._postprocess()
 
-            # start solve
-            datetime_start = datetime.datetime.now()
-            try:
-                f_return = self._solve_or_raise(
-                    opt_, x, x_pass_to_fem_, self.opt.history, datetime_start
-                )
+            with Process():
 
-            except HardConstraintViolation as e:
-                self._hard_constraint_handling(e)
+                # declare output
+                f_return = None
 
-            except _HiddenConstraintViolation as e:
-                self._hidden_constraint_handling(e)
+                # start solve
+                datetime_start = datetime.datetime.now()
+                try:
+                    f_return = self._solve_or_raise(
+                        opt_, x, x_pass_to_fem_, self.opt.history,
+                        datetime_start, trial_id
+                    )
 
-            except SkipSolve as e:
-                self._skip_handling(e)
+                except HardConstraintViolation as e:
+                    self._hard_constraint_handling(e)
 
-            else:
-                self._if_succeeded(f_return)
+                except _HiddenConstraintViolation as e:
+                    self._hidden_constraint_handling(e)
 
-            self._postprocess()
+                except SkipSolve as e:
+                    self._skip_handling(e)
+
+                else:
+                    self._if_succeeded(f_return)
 
             # check interruption
             self.opt._check_and_raise_interruption()

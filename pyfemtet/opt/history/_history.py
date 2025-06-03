@@ -1053,6 +1053,14 @@ class Records:
 
         with self.df_wrapper.lock_if_not_locked:
 
+            # check trial_id is filled
+            trial_processed = False
+            if processing_df['trial_id'].notna().all():
+                id_to_n: dict = {tid: i + 1 for i, tid
+                                 in enumerate(processing_df['trial_id'].unique())}
+                processing_df['trial'] = processing_df['trial_id'].map(id_to_n)
+                trial_processed = True
+
             # update main fidelity
             equality_filters = MAIN_FILTER
             mgr = EntireDependentValuesCalculator(
@@ -1062,13 +1070,13 @@ class Records:
             )
             mgr.update_optimality()
             mgr.update_hypervolume()
-            mgr.update_trial_number()
+            if not trial_processed:
+                mgr.update_trial_number()  # per_fidelity
             pdf = mgr.partial_df
             apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
 
             # update sub fidelity
-            entire_df = self.df_wrapper.get_df()
-            sub_fidelity_names: list = np.unique(entire_df['sub_fidelity_name']).tolist()
+            sub_fidelity_names: list = np.unique(processing_df['sub_fidelity_name']).tolist()
             if MAIN_FIDELITY_NAME in sub_fidelity_names:
                 sub_fidelity_names.remove(MAIN_FIDELITY_NAME)
             for sub_fidelity_name in sub_fidelity_names:
@@ -1078,7 +1086,8 @@ class Records:
                     equality_filters,
                     processing_df
                 )
-                mgr.update_trial_number()
+                if not trial_processed:
+                    mgr.update_trial_number()  # per_fidelity
             pdf = mgr.partial_df
             apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
 

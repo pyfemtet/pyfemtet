@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from typing import Callable
+
+import string
+import secrets
 import warnings
 from time import time, sleep
 from threading import Thread
@@ -10,6 +13,7 @@ from pyfemtet._i18n import _
 __all__ = [
     'float_',
     'time_counting',
+    'generate_random_id',
 ]
 
 
@@ -92,3 +96,8 @@ def time_counting(
         warning_message,
         warning_fun,
     )
+
+
+def generate_random_id(length: int = 16) -> str:
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
