@@ -319,7 +319,9 @@ def test_sample_parametric_if(record_mode=False):
     sample_test.run(jp=True)
 
 
-@pytest.mark.skip(reason='Solidworks 2023 topology compatibility problem.')
+@pytest.mark.sample
+@pytest.mark.femtet
+@pytest.mark.cad
 def test_cad_sample_sldworks_ex01(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\cad_ex01_SW.py',

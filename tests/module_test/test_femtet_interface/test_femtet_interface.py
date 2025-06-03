@@ -138,11 +138,13 @@ def test_femtet_add_parametric_output():
     fem = FemtetInterface(
         femprj_path=get(__file__, 'test_femtet_interface.femprj'),
     )
+    opt.fem = fem
 
     with closing(fem):
 
         fem.use_parametric_output_as_objective(
             number=1, direction='minimize')
+        opt._finalize()
         print()
         print('use output 後:')
         print(f'{len(opt.objectives)=}')
@@ -154,5 +156,5 @@ if __name__ == '__main__':
     # test_run_femtet_interface()
     # test_femtet_interface_api_calling()
     # test_femtet_always_open_copy_flag()
-    test_femtet_parametric_output_indices()
+    # test_femtet_parametric_output_indices()
     test_femtet_add_parametric_output()
