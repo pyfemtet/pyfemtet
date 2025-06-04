@@ -119,6 +119,7 @@ class FemtetInterface(COMInterface):
 
     com_members = {'Femtet': 'FemtetMacro.Femtet'}
     _show_parametric_index_warning = True  # for GUI
+    _femtet_connection_timeout = 10
 
     def __init__(
             self,
@@ -316,9 +317,9 @@ class FemtetInterface(COMInterface):
         logger.info("└ Try to connect existing Femtet process.")
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
-            self.Femtet, self.femtet_pid = dispatch_femtet(timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_femtet(timeout=self._femtet_connection_timeout)
         else:
-            self.Femtet, self.femtet_pid = dispatch_specific_femtet(pid, timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_specific_femtet(pid, timeout=self._femtet_connection_timeout)
         self.connected_method = "existing"
 
     def connect_femtet(self, connect_method: str = "auto", pid: int or None = None):
