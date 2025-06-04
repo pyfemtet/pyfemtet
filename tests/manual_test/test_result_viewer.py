@@ -18,7 +18,8 @@ def test_check_visualization_tutorial():
         f'{sys.executable} '
         '-m '
         'pyfemtet.opt.visualization.history_viewer',
-        shell=True,
+        # shell=True,
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
     )
 
     print('起動中。10秒待ちます。')
@@ -29,6 +30,12 @@ def test_check_visualization_tutorial():
 
     input('チュートリアルモードで動作確認。\nEnter でモニターを終了。')
     popen.send_signal(signal.CTRL_C_EVENT)
+    print('終了シグナルは送った')
+    try:
+        print('5 秒以内に終了しなければ強制終了します・')
+        popen.wait(timeout=5)
+    except Exception:
+        popen.terminate()
 
     assert input('結果が NG なら NG と入力\n>>> ') != 'NG'
 
