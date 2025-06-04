@@ -23,9 +23,9 @@ def constraint2(_, opt: ScipyOptimizer):
 def test_scipy_optimizer():
     opt = ScipyOptimizer()
     opt.fem = NoFEM()
-    if os.path.isfile('tmp.csv'):
-        os.remove('tmp.csv')
-    opt.history.path = 'tmp.csv'
+    if os.path.isfile('pyfemtet_tmp_scipy.csv'):
+        os.remove('pyfemtet_tmp_scipy.csv')
+    opt.history.path = 'pyfemtet_tmp_scipy.csv'
 
     opt.add_parameter('x1', 1, -1, 1)
     opt.add_parameter('x2', -1, -1, 1)
@@ -79,9 +79,9 @@ def scipy_optimizer_var(
 
     opt = ScipyOptimizer()
     opt.fem = NoFEM()
-    if os.path.isfile('tmp.csv'):
-        os.remove('tmp.csv')
-    opt.history.path = 'tmp.csv'
+    if os.path.isfile('pyfemtet_tmp_scipy.csv'):
+        os.remove('pyfemtet_tmp_scipy.csv')
+    opt.history.path = 'pyfemtet_tmp_scipy.csv'
 
     opt.add_parameter('x1', -1, -1, 1)
     opt.add_parameter('x2', -1, -1, 1)

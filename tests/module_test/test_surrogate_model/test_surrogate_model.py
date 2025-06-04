@@ -55,7 +55,7 @@ def test_surrogate_optimize_output_directions():
     opt_train.add_parameter('x3', -1, -1, 1, 0.25)
     opt_train.add_objective('obj', parabola, args=(opt_train,))
     opt_train.n_trials = 10
-    opt_train.history.path = 'tmp_training_test_surrogate_optimize_output_directions.csv'
+    opt_train.history.path = 'pyfemtet_tmp_training_test_surrogate_optimize_output_directions.csv'
     if os.path.isfile(opt_train.history.path):
         os.remove(opt_train.history.path)
         os.remove(opt_train.history.path.removesuffix('.csv') + '.db')
@@ -88,7 +88,7 @@ def test_surrogate_optimize_normal():
     opt_train.add_parameter('x3', -1, -1, 1, 0.25)
     opt_train.add_objective('obj', parabola, args=(opt_train,))
     opt_train.n_trials = 10
-    opt_train.history.path = 'tmp_training_test_surrogate_optimize_normal.csv'
+    opt_train.history.path = 'pyfemtet_tmp_training_test_surrogate_optimize_normal.csv'
     if os.path.isfile(opt_train.history.path):
         os.remove(opt_train.history.path)
         os.remove(opt_train.history.path.removesuffix('.csv') + '.db')
