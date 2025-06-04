@@ -59,6 +59,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../NX_ex01/NX_ex01.html">External CAD (NX) Integration</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">External CAD (Solidworks) Integration</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#sample-file">Sample File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#details-as-a-fem-problem">Details as a FEM Problem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-variables">Design Variables</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sample-code">Sample Code</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">Execution Result of the Sample Code</a></li>
 </ul>
@@ -106,7 +108,9 @@
 <p>An example will be explained using an H-shaped steel that was parametrically modeled in an external CAD (Solidworks) and analyzed using Femtet’s stress analysis solver to minimize volume while minimizing displacement.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Other than the sample code and execution results, the items are the same as in <a class="reference internal" href="../NX_ex01/NX_ex01.html"><span class="doc">External CAD (NX) Integration</span></a>.</p>
+<p>Other than the sample code and execution results,
+the items are similar as in
+<a class="reference internal" href="../NX_ex01/NX_ex01.html"><span class="doc">External CAD (NX) Integration</span></a>.</p>
 </div>
 <section id="sample-file">
 <h2>Sample File<a class="headerlink" href="#sample-file" title="Link to this heading"></a></h2>
@@ -117,10 +121,51 @@ and <a class="reference download internal" download="" href="../../_downloads/37
 and double-click on <a class="reference download internal" download="" href="../../_downloads/a1ea8ecd5b0cb051165b89aa4a117710/cad_ex01_SW.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">code</span></code></a> to execute.</p>
 </div>
 </section>
+<section id="details-as-a-fem-problem">
+<h2>Details as a FEM Problem<a class="headerlink" href="#details-as-a-fem-problem" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/Sldworks_ex01_analysis.png"><img alt="../../_images/Sldworks_ex01_analysis.png" src="../../_images/Sldworks_ex01_analysis.png" style="width: 450px;" /></a>
+<figcaption>
+<p><span class="caption-text">Appearance of the Model (and Analysis Conditions)</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p>fix … Fully Fixed</p></li>
+<li><p>load … Load in the -Z direction (1N)</p></li>
+<li><p>mirror … Symmetrical to the XZ plane</p></li>
+</ul>
+</section>
+<section id="design-variables">
+<h2>Design Variables<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../../_images/Sldworks_ex01_model_dsgn.png"><img alt="../../_images/Sldworks_ex01_model_dsgn.png" src="../../_images/Sldworks_ex01_model_dsgn.png" style="width: 450px;" /></a>
+<figcaption>
+<p><span class="caption-text">Appearance of the Model Section (and Design Variables)</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>Web Tickness</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>Flange Tickness</p></td>
+</tr>
+<tr class="row-even"><td><p>C</p></td>
+<td><p>Flange Bending</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="sample-code">
 <h2>Sample Code<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">cad_ex01_SW.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">cad_ex01_SW.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="sd">&quot;&quot;&quot;External CAD (SOLIDWORKS) Integration</span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="sd">Using Femtet&#39;s stress analysis solver and Dassault Systemes&#39; CAD software SOLIDWORKS,</span>
@@ -258,10 +303,10 @@ and double-click on <a class="reference download internal" download="" href="../
 </section>
 <section id="execution-result-of-the-sample-code">
 <h2>Execution Result of the Sample Code<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
-<figure class="align-default" id="id2">
+<figure class="align-default" id="id4">
 <a class="reference internal image-reference" href="../../_images/Sldworks_ex01_result.png"><img alt="../../_images/Sldworks_ex01_result.png" src="../../_images/Sldworks_ex01_result.png" style="width: 450px;" /></a>
 <figcaption>
-<p><span class="caption-text">Execution result of Sldworks_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+<p><span class="caption-text">Execution result of Sldworks_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p>After 20 trials, a Pareto set of von Mises stress and mass is obtained.</p>

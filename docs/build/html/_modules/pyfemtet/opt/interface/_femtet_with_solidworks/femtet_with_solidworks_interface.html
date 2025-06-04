@@ -102,7 +102,7 @@
 
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithSolidworksInterface">[docs]</a>
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FemtetWithSolidworksInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">,</span> <span class="n">SolidworksInterface</span><span class="p">,</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -115,7 +115,7 @@
             <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">always_open_copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">close_solidworks_on_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">solidworks_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -154,7 +154,7 @@
         <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.update_parameter">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_parameter">[docs]</a>
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_parameter">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">SolidworksInterface</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
         <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">with_warning</span><span class="p">)</span></div>
@@ -183,7 +183,7 @@
             <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.update_model">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_model">[docs]</a>
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_model">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># solidworks のモデルの更新</span>
@@ -208,7 +208,7 @@
 
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.close">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FemtetWithSolidworksInterface.close">[docs]</a>
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.close">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="n">SolidworksInterface</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">force</span><span class="p">)</span></div>

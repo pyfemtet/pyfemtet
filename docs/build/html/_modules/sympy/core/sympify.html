@@ -83,7 +83,8 @@
 <span></span><span class="sd">&quot;&quot;&quot;sympify -- convert objects SymPy internal format&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">overload</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">mpmath.libmp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mlib</span>
 
@@ -94,6 +95,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_parameters</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.utilities.iterables</span><span class="w"> </span><span class="kn">import</span> <span class="n">iterable</span>
+
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.core.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Basic</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.core.expr</span><span class="w"> </span><span class="kn">import</span> <span class="n">Expr</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.core.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Float</span>
+
+    <span class="n">Tbasic</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Tbasic&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Basic</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SympifyError">
@@ -175,10 +185,26 @@
         <span class="n">prec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">nmant</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="c1"># E.g. double precision means prec=53 but nmant=52</span>
         <span class="c1"># Leading bit of mantissa is always 1, so is not stored</span>
-        <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="n">mlib</span><span class="o">.</span><span class="n">from_rational</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">prec</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Float</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">prec</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isposinf</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isneginf</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">mlib</span><span class="o">.</span><span class="n">from_rational</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">prec</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Float</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">prec</span><span class="p">)</span>
 
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Integer</span><span class="p">:</span> <span class="o">...</span> <span class="c1"># type: ignore</span>
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Float</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">|</span> <span class="nb">complex</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expr</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Tbasic</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tbasic</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Basic</span><span class="p">:</span> <span class="o">...</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convert_xor</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rational</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">evaluate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

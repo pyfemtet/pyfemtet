@@ -114,7 +114,7 @@
         <span class="p">]</span>
 <span class="p">)</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.optimizer&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.optimizer&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_log_hidden_constraint</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">):</span>
@@ -269,11 +269,14 @@
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">expression_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="n">var</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="o">.</span><span class="n">InternalClass</span><span class="p">(</span><span class="n">expression_string</span><span class="o">=</span><span class="n">expression_string</span><span class="p">)</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
         <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span></div>
 
@@ -285,11 +288,14 @@
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">sympy_expr</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">,</span>
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="n">var</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="o">.</span><span class="n">InternalClass</span><span class="p">(</span><span class="n">sympy_expr</span><span class="o">=</span><span class="n">sympy_expr</span><span class="p">)</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
         <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span></div>
 
@@ -303,6 +309,8 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromFunction</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -310,6 +318,7 @@
         <span class="n">var</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
         <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span></div>
 
@@ -548,6 +557,7 @@
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="n">opt</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subsampling_idx</span><span class="p">:</span> <span class="n">SubSampling</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">pass</span>
@@ -574,6 +584,7 @@
                 <span class="n">variables_pass_to_fem</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span>
                 <span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">datetime_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">trial_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FReturnValue</span><span class="p">:</span>
 
             <span class="c1"># create context</span>
@@ -600,6 +611,8 @@
                     <span class="p">{</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">ObjectiveResult</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span>
                      <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">opt_</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
                 <span class="p">)</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">sub_sampling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsampling_idx</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">trial_id</span> <span class="o">=</span> <span class="n">trial_id</span>
                 <span class="n">record</span><span class="o">.</span><span class="n">sub_fidelity_name</span> <span class="o">=</span> <span class="n">opt_</span><span class="o">.</span><span class="n">sub_fidelity_name</span>
                 <span class="n">record</span><span class="o">.</span><span class="n">fidelity</span> <span class="o">=</span> <span class="n">opt_</span><span class="o">.</span><span class="n">fidelity</span>
                 <span class="n">record</span><span class="o">.</span><span class="n">datetime_start</span> <span class="o">=</span> <span class="n">datetime_start</span>
@@ -743,7 +756,9 @@
                 <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
                 <span class="n">x_pass_to_fem_</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span>
                 <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">trial_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FReturnValue</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Nothing will be raised even if infeasible.&quot;&quot;&quot;</span>
 
             <span class="n">vm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variable_manager</span>
 
@@ -757,32 +772,40 @@
             <span class="c1"># if opt_ is not self, update variable manager</span>
             <span class="n">opt_</span><span class="o">.</span><span class="n">variable_manager</span> <span class="o">=</span> <span class="n">vm</span>
 
-            <span class="c1"># preprocess</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">()</span>
+            <span class="c1"># noinspection PyMethodParameters</span>
+            <span class="k">class</span><span class="w"> </span><span class="nc">Process</span><span class="p">:</span>
+                <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
+                    <span class="c1"># preprocess</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">()</span>
 
-            <span class="c1"># declare output</span>
-            <span class="n">f_return</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+                    <span class="c1"># postprocess</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_postprocess</span><span class="p">()</span>
 
-            <span class="c1"># start solve</span>
-            <span class="n">datetime_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">f_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_or_raise</span><span class="p">(</span>
-                    <span class="n">opt_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="n">datetime_start</span>
-                <span class="p">)</span>
+            <span class="k">with</span> <span class="n">Process</span><span class="p">():</span>
 
-            <span class="k">except</span> <span class="n">HardConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_hard_constraint_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="c1"># declare output</span>
+                <span class="n">f_return</span> <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="k">except</span> <span class="n">_HiddenConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_constraint_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="c1"># start solve</span>
+                <span class="n">datetime_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">f_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_or_raise</span><span class="p">(</span>
+                        <span class="n">opt_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+                        <span class="n">datetime_start</span><span class="p">,</span> <span class="n">trial_id</span>
+                    <span class="p">)</span>
 
-            <span class="k">except</span> <span class="n">SkipSolve</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_skip_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">HardConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_hard_constraint_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_if_succeeded</span><span class="p">(</span><span class="n">f_return</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">_HiddenConstraintViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_constraint_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_postprocess</span><span class="p">()</span>
+                <span class="k">except</span> <span class="n">SkipSolve</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_skip_handling</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_if_succeeded</span><span class="p">(</span><span class="n">f_return</span><span class="p">)</span>
 
             <span class="c1"># check interruption</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>

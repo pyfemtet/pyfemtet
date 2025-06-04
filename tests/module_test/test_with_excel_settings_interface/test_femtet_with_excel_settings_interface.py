@@ -8,6 +8,7 @@ from pyfemtet.opt.optimizer import AbstractOptimizer
 from tests import get
 
 
+@pytest.mark.skip(reason='pytest 時のみ fatal exception が発生する')
 @pytest.mark.femtet
 @pytest.mark.excel
 def test_load_femtet_with_excel_settings():

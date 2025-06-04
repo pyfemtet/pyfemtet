@@ -194,7 +194,6 @@
 <span class="k">with</span> <span class="n">try_import</span><span class="p">()</span> <span class="k">as</span> <span class="n">_imports_logei</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.analytic</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogConstrainedExpectedImprovement</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.analytic</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogExpectedImprovement</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">botorch.acquisition.analytic</span><span class="w"> </span><span class="kn">import</span> <span class="n">_compute_log_prob_feas</span>
 
 
 <span class="k">with</span> <span class="n">try_import</span><span class="p">()</span> <span class="k">as</span> <span class="n">_imports_qhvkg</span><span class="p">:</span>
@@ -221,7 +220,7 @@
 <span class="c1"># noinspection PyTypeChecker</span>
 <span class="n">_logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.PoFBoTorchSampler&#39;</span><span class="p">,</span> <span class="n">DEBUG</span><span class="p">)</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">InputDataWarning</span><span class="p">)</span>
@@ -1066,9 +1065,9 @@
         <span class="n">feasible_trials</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FrozenTrial</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">infeasible_trials</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FrozenTrial</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="p">(</span><span class="n">completed_trials</span> <span class="o">+</span> <span class="n">pruned_trials</span><span class="p">):</span>
-            <span class="n">state</span><span class="p">:</span> <span class="n">PFTrialState</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">get_pf_state_from_trial_attr</span><span class="p">(</span>
-                <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">main_fidelity_key</span><span class="p">()]</span>
-            <span class="p">)</span>
+            <span class="n">main_key</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pyfemtet_optimizer</span><span class="p">)</span><span class="o">.</span><span class="n">key</span>
+            <span class="n">user_attribute</span><span class="p">:</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">AttributeStructure</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">main_key</span><span class="p">]</span>
+            <span class="n">state</span><span class="p">:</span> <span class="n">PFTrialState</span> <span class="o">=</span> <span class="n">user_attribute</span><span class="p">[</span><span class="s1">&#39;pf_state&#39;</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pof_config</span><span class="o">.</span><span class="n">_states_to_consider_pof</span><span class="p">:</span>
                 <span class="n">infeasible_trials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>

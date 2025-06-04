@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-20 14:40+0900\n"
+"POT-Creation-Date: 2025-06-04 10:39+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -531,6 +531,45 @@ msgstr ""
 msgid "None"
 msgstr ""
 
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface`, :py:class:`~pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface._NXInterface`"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:1
+msgid "Control Femtet and NX."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:3
+msgid "Using this class, you can import CAD files created in NX through the Parasolid format into a Femtet project. It allows you to pass design variables to NX, update the model, and perform analysis using the updated model in Femtet."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:9
+msgid "The path to .prt file containing the CAD data from which the import is made."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:12
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:14
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:16
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:18
+msgid "Defaults to None."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:22
+msgid "Notes"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:23
+msgid "```export_*``` arguments sets parasolid export setting of NX. If None, PyFemtet does not change the current setting of NX."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:28
+msgid "It is recommended not to change these values from the settings used when exporting the Parasolid that was imported into Femtet."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface:1
+msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface`, :py:class:`~pyfemtet.opt.interface._solidworks_interface.solidworks_interface.SolidworksInterface`, :py:class:`~pyfemtet.opt.interface._base_interface.AbstractFEMInterface`"
+msgstr ""
+
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.SubFidelityModel:1
 #: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer:1
 #: ../../pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:docstring of pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer:1
@@ -769,45 +808,6 @@ msgstr ""
 
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:3
 msgid "COM object of Microsoft Excel."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:1
-msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface`, :py:class:`~pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface._NXInterface`"
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:1
-msgid "Control Femtet and NX."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:3
-msgid "Using this class, you can import CAD files created in NX through the Parasolid format into a Femtet project. It allows you to pass design variables to NX, update the model, and perform analysis using the updated model in Femtet."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:9
-msgid "The path to .prt file containing the CAD data from which the import is made."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:12
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:14
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:16
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:18
-msgid "Defaults to None."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:22
-msgid "Notes"
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:23
-msgid "```export_*``` arguments sets parasolid export setting of NX. If None, PyFemtet does not change the current setting of NX."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:28
-msgid "It is recommended not to change these values from the settings used when exporting the Parasolid that was imported into Femtet."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface:1
-msgid "Bases: :py:class:`~pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface`, :py:class:`~pyfemtet.opt.interface._solidworks_interface.solidworks_interface.SolidworksInterface`, :py:class:`~pyfemtet.opt.interface._base_interface.AbstractFEMInterface`"
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.PoFBoTorchInterface:1

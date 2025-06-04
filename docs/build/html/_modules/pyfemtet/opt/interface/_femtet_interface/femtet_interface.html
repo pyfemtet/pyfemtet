@@ -86,7 +86,6 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
@@ -203,6 +202,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">com_members</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Femtet&#39;</span><span class="p">:</span> <span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">}</span>
+    <span class="n">_show_parametric_index_warning</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># for GUI</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -213,14 +213,19 @@
             <span class="n">strictly_pid_specify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># dask worker では True にしたいので super() の引数にしない。</span>
             <span class="n">allow_without_project</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># main でのみ True を許容したいので super() の引数にしない。</span>
             <span class="n">open_result_with_gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO: Remove this</span>
             <span class="n">always_open_copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="c1"># ユーザーはメソッドを使うことを推奨。GUI などで使用。</span>
+            <span class="n">parametric_output_indexes_use_as_objective</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="c1"># warning</span>
         <span class="k">if</span> <span class="n">parametric_output_indexes_use_as_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;解析モデルに設定された既存のスイープテーブルは削除されます。&quot;</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_show_parametric_index_warning</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The argument `parametric_output_indexes_use_as_objective` is deprecated. &#39;</span>
+                               <span class="s1">&#39;Please use `FemtetInterface.use_parametric_output_as_objective()` instead.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;`parametric_output_indexes_use_as_objective` は非推奨の引数です。&#39;</span>
+                               <span class="s1">&#39;代わりに `FemtetInterface.use_parametric_output_as_objective()` &#39;</span>
+                               <span class="s1">&#39;を使ってください。&#39;</span><span class="p">,</span>
+                <span class="p">))</span>
 
         <span class="c1"># 引数の処理</span>
         <span class="k">if</span> <span class="n">femprj_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -344,6 +349,13 @@
 <span class="sd">            None</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># warning</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The existing sweep table in the project will be removed.&#39;</span><span class="p">,</span>
+            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;解析モデルに設定された既存のスイープテーブルは削除されます。&#39;</span>
+        <span class="p">))</span>
+
         <span class="c1"># check</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;minimize&quot;</span><span class="p">,</span> <span class="s2">&quot;maximize&quot;</span><span class="p">):</span>
@@ -603,6 +615,8 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span>
             <span class="k">if</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;Solve&#39;</span><span class="p">:</span>
                 <span class="n">context</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;solve_via_parametric_dll&#39;</span><span class="p">:</span>
+                <span class="n">context</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 
@@ -624,7 +638,7 @@
                         <span class="s1">&#39;If the optimization is hanging, the most reason is &#39;</span>
                         <span class="s1">&#39;a dialog is opening in Femtet and it waits for your &#39;</span>
                         <span class="s1">&#39;input. Please confirm there is no dialog in Femtet.&#39;</span><span class="p">,</span>
-                        <span class="s1">&#39;</span><span class="si">{name}</span><span class="s1"> の実行に </span><span class="si">{warning_time_sec}</span><span class="s1"> 以上かかっています。&#39;</span>
+                        <span class="s1">&#39;</span><span class="si">{name}</span><span class="s1"> の実行に </span><span class="si">{warning_time_sec}</span><span class="s1"> 秒以上かかっています。&#39;</span>
                         <span class="s1">&#39;もし最適化がハングしているならば、考えられる理由として、&#39;</span>
                         <span class="s1">&#39;Femtet で予期せずダイアログが開いてユーザーの入力待ちをしている場合があります。&#39;</span>
                         <span class="s1">&#39;もし Femtet でダイアログが開いていれば、閉じてください。&#39;</span><span class="p">,</span>

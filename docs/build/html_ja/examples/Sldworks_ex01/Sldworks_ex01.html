@@ -59,6 +59,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../NX_ex01/NX_ex01.html">外部 CAD (NX) 連携</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">外部 CAD (Solidworks) 連携</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#sample-file">サンプルファイル</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#details-as-a-fem-problem">FEM 問題としての詳細</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-variables">設計変数</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sample-code">サンプルコード</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#execution-result-of-the-sample-code">サンプルコードの実行結果</a></li>
 </ul>
@@ -106,7 +108,7 @@
 <p>Femtet の応力解析ソルバーを用いて 外部 CAD (Solidworks) でパラメトリックモデリングを行った H 型鋼について 体積を最小化しつつ 変位を最小にする 例題を解説します。</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>サンプルコード及び実行結果以外の項目は <a class="reference internal" href="../NX_ex01/NX_ex01.html"><span class="doc">外部 CAD (NX) 連携</span></a> と同じです。</p>
+<p>サンプルコード及び実行結果以外の項目は <a class="reference internal" href="../NX_ex01/NX_ex01.html"><span class="doc">外部 CAD (NX) 連携</span></a> とほぼ同じです。</p>
 </div>
 <section id="sample-file">
 <h2>サンプルファイル<a class="headerlink" href="#sample-file" title="Link to this heading"></a></h2>
@@ -115,10 +117,51 @@
 <p><a class="reference download internal" download="" href="../../_downloads/0d4215706782c301868e09640aec0213/cad_ex01_SW.SLDPRT"><code class="xref download docutils literal notranslate"><span class="pre">サンプルモデル</span></code></a> と <a class="reference download internal" download="" href="../../_downloads/37451003c65de7ea2fcb8cfb9caf258d/cad_ex01_SW.femprj"><code class="xref download docutils literal notranslate"><span class="pre">サンプルプロジェクト</span></code></a> を同じフォルダに配置し、 プロジェクトを Femtet で開いたまま、 <a class="reference download internal" download="" href="../../_downloads/a1ea8ecd5b0cb051165b89aa4a117710/cad_ex01_SW.py"><code class="xref download docutils literal notranslate"><span class="pre">サンプルコード</span></code></a> をダブルクリックして実行してください。</p>
 </div>
 </section>
+<section id="details-as-a-fem-problem">
+<h2>FEM 問題としての詳細<a class="headerlink" href="#details-as-a-fem-problem" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/Sldworks_ex01_analysis.png"><img alt="../../_images/Sldworks_ex01_analysis.png" src="../../_images/Sldworks_ex01_analysis.png" style="width: 450px;" /></a>
+<figcaption>
+<p><span class="caption-text">モデルの外観 (解析条件)</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p>fix … 完全固定</p></li>
+<li><p>load … -Z 方向の荷重 (1N)</p></li>
+<li><p>mirror … XZ 平面対称</p></li>
+</ul>
+</section>
+<section id="design-variables">
+<h2>設計変数<a class="headerlink" href="#design-variables" title="Link to this heading"></a></h2>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../../_images/Sldworks_ex01_model_dsgn.png"><img alt="../../_images/Sldworks_ex01_model_dsgn.png" src="../../_images/Sldworks_ex01_model_dsgn.png" style="width: 450px;" /></a>
+<figcaption>
+<p><span class="caption-text">モデルの外観 (設計変数)</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>ウェブ板厚</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>フランジ板厚</p></td>
+</tr>
+<tr class="row-even"><td><p>C</p></td>
+<td><p>フランジ曲げ</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="sample-code">
 <h2>サンプルコード<a class="headerlink" href="#sample-code" title="Link to this heading"></a></h2>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">cad_ex01_SW.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">cad_ex01_SW.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="sd">&quot;&quot;&quot;外部 CAD (SOLIDWORKS) 連携</span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="sd">Femtet の応力解析ソルバ、および</span>
@@ -250,10 +293,10 @@
 </section>
 <section id="execution-result-of-the-sample-code">
 <h2>サンプルコードの実行結果<a class="headerlink" href="#execution-result-of-the-sample-code" title="Link to this heading"></a></h2>
-<figure class="align-default" id="id2">
+<figure class="align-default" id="id4">
 <a class="reference internal image-reference" href="../../_images/Sldworks_ex01_result.png"><img alt="../../_images/Sldworks_ex01_result.png" src="../../_images/Sldworks_ex01_result.png" style="width: 450px;" /></a>
 <figcaption>
-<p><span class="caption-text">Sldworks_ex01.py の実行結果。 横軸が ミーゼス応力 、 縦軸が 質量 です。</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+<p><span class="caption-text">Sldworks_ex01.py の実行結果。 横軸が ミーゼス応力 、 縦軸が 質量 です。</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p>20 回の反復計算の結果、 ミーゼス応力と質量のパレート集合が得られます。</p>
