@@ -502,7 +502,8 @@ class AbstractOptimizer:
                     raise SkipSolve
 
                 # start solve
-                if opt_.sub_fidelity_models != MAIN_FIDELITY_NAME:
+                if opt_.sub_fidelity_name != MAIN_FIDELITY_NAME:
+                    logger.info('----------')
                     logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
                 logger.info(_('input variables:'))
                 logger.info(parameters)
