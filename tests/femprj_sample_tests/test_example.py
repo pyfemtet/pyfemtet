@@ -16,9 +16,12 @@ femopt.optimize(...
 """
 
 import os
+import sys
 import datetime
 import importlib
+import subprocess
 import shutil
+from pyfemtet._i18n import ENCODING
 import numpy as np
 import pandas as pd
 from femtetutils import util
@@ -211,12 +214,20 @@ class SampleTest:
 
 
 def _get_simplified_df_values(csv_path):
-    with open(csv_path, 'r', encoding='cp932') as f:
-        meta_header = f.readline()
+    try:
+        with open(csv_path, 'r', encoding=ENCODING) as f:
+            meta_header = f.readline()
+    except UnicodeDecodeError:
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            meta_header = f.readline()
+
     meta_header = 'removed' + meta_header.split('}"')[-1]
     meta_header = meta_header.split(',')
 
-    df = pd.read_csv(csv_path, encoding='cp932', header=2)
+    try:
+        df = pd.read_csv(csv_path, encoding=ENCODING, header=2)
+    except Exception:
+        df = pd.read_csv(csv_path, encoding='utf-8', header=2)
 
     prm_names = []
     for meta_data, col in zip(meta_header, df.columns):
@@ -319,10 +330,8 @@ def test_sample_parametric_if(record_mode=False):
     sample_test.run(jp=True)
 
 
-@pytest.mark.sample
-@pytest.mark.femtet
-@pytest.mark.cad
-def test_cad_sample_sldworks_ex01(record_mode=False):
+
+def impl_cad_sample_sldworks_ex01(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\cad_ex01_SW.py',
         record_mode=record_mode,
@@ -330,6 +339,34 @@ def test_cad_sample_sldworks_ex01(record_mode=False):
     )
     sample_test.run()
     sample_test.run(jp=True)
+
+
+
+# pytest 特有の windows fatal exception 対策
+def _run(fun_name):
+    here, filename = os.path.split(__file__)
+    module_name = filename.removesuffix('.py')
+
+    subprocess.run(
+        f'{sys.executable} '
+        f'-c '
+        f'"'
+        f'import os;'
+        f'import sys;'
+        f'sys.path.append(os.getcwd());'
+        f'import {module_name} as tst;'
+        f'tst.{fun_name}()'
+        f'"',
+        cwd=os.path.abspath(here),
+        shell=True,
+    ).check_returncode()
+
+
+@pytest.mark.sample
+@pytest.mark.femtet
+@pytest.mark.cad
+def test_cad_sample_sldworks_ex01(record_mode=False):
+    _run(impl_cad_sample_sldworks_ex01.__name__)
 
 
 @pytest.mark.sample
