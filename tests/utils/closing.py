@@ -1,3 +1,5 @@
+import sys
+from traceback import print_tb
 from time import sleep
 from pyfemtet._util.closing import closing as _closing
 

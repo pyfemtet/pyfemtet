@@ -90,6 +90,8 @@ def test_femtet_always_open_copy_flag():
         print(fem.Femtet.ProjectTitle)
         assert fem.Femtet.ProjectTitle != 'test_femtet_interface'
 
+    execute_femtet()
+
     with closing(fem):
 
         fem = FemtetInterface(
@@ -156,6 +158,6 @@ def test_femtet_add_parametric_output():
 if __name__ == '__main__':
     # test_run_femtet_interface()
     # test_femtet_interface_api_calling()
-    # test_femtet_always_open_copy_flag()
+    test_femtet_always_open_copy_flag()
     # test_femtet_parametric_output_indices()
-    test_femtet_add_parametric_output()
+    # test_femtet_add_parametric_output()
