@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 14:28+0900\n"
+"POT-Creation-Date: 2025-06-04 16:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -468,17 +468,12 @@ msgid "**Setting this argument deletes the parametric analysis swept table set i
 msgstr "**この引数を設定すると、femprj ファイルに設定されているパラメトリック解析スイープテーブルが削除されます。** スイープテーブルを削除したくない場合は、元のファイルをコピーしてください。"
 
 #: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:43
-msgid "Additional arguments from inherited classes."
-msgstr "継承されたクラスからの追加引数です。"
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:47
+#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:46
 msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
 msgstr "コンストラクタで ``strictly_pid_specify=True`` を指定しても、**並列処理では接続の動作が** ``strictly_pid_specify=False`` **のようになります**。これは大きなオーバーヘッドによるものです。したがって、``n_parallel`` が 2 以上の場合は、FEMOpt.optimize() を実行する前にすべての Femtet プロセスを閉じるべきです。"
 
 #: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:55
+#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:54
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr "Python と Femtet を接続する方法についての情報を探している場合は、:func:`connect_femtet` を参照してください。"
 
@@ -2028,3 +2023,7 @@ msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 
 #~ msgid "Bases: :py:class:`~pyfemtet.opt.visualization._base.AbstractPage`"
 #~ msgstr ""
+
+#~ msgid "Additional arguments from inherited classes."
+#~ msgstr "継承されたクラスからの追加引数です。"
+

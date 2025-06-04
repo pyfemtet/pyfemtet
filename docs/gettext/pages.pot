@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 10:39+0900\n"
+"POT-Creation-Date: 2025-06-04 16:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -547,6 +547,14 @@ msgstr ""
 
 #: ../source/pages/migration_to_v1.rst:106
 msgid "For details, please refer to the `API Reference of Latest version <https://pyfemtet.readthedocs.io/en/latest/pages/api.html>`__ of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:114
+msgid "``opt.variables.get_variables()`` method"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:116
+msgid "The ``opt.variables.get_variables()`` will be deprecated. Use ``opt.get_variables()`` instead."
 msgstr ""
 
 #: ../source/pages/script_builder.rst:2

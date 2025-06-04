@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 14:28+0900\n"
+"POT-Creation-Date: 2025-06-04 16:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -455,15 +455,11 @@ msgstr ""
 msgid "**Setting this argument deletes the parametric analysis swept table set in the femprj file.** If you do not want to delete the swept table, make a copy of the original file."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:43
-msgid "Additional arguments from inherited classes."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:47
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:46
 msgid "Even if you specify ``strictly_pid_specify=True`` on the constructor, **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing** because of its large overhead. So you should close all Femtet processes before running FEMOpt.optimize() if ``n_parallel`` >= 2."
 msgstr ""
 
-#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:55
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:54
 msgid "If you search for information about the method to connect python and Femtet, see :func:`connect_femtet`."
 msgstr ""
 
