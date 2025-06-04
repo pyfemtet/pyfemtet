@@ -81,6 +81,7 @@ markers = [
     "excel",
     "brep",
     "manual",
+    "unmarked",
 ]
 
 [build-system]
