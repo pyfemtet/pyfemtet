@@ -1,7 +1,3 @@
-from contextlib import closing
-
-from pyfemtet._util.closing import closing
-
 import numpy as np
 from win32com.client import Dispatch
 from femtetutils.util import execute_femtet
@@ -11,6 +7,8 @@ from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
 import pytest
+
+from tests.utils.closing import closing
 
 
 @pytest.mark.femtet
@@ -84,24 +82,27 @@ def test_femtet_always_open_copy_flag():
         connect_method='existing',
     )
 
-    fem._setup_before_parallel()
-    fem._setup_after_parallel(opt)
+    with closing(fem):
 
-    print(fem.Femtet.ProjectTitle)
-    assert fem.Femtet.ProjectTitle != 'test_femtet_interface'
+        fem._setup_before_parallel()
+        fem._setup_after_parallel(opt)
 
-    fem = FemtetInterface(
-        femprj_path=get(__file__, 'test_femtet_interface.femprj'),
-        always_open_copy=False,
-        connect_method='existing',
-    )
+        print(fem.Femtet.ProjectTitle)
+        assert fem.Femtet.ProjectTitle != 'test_femtet_interface'
 
-    fem._setup_before_parallel()
-    fem._setup_after_parallel(opt)
+    with closing(fem):
 
-    print(fem.Femtet.Project)
-    assert fem.Femtet.ProjectTitle == 'test_femtet_interface'
-    fem.close()
+        fem = FemtetInterface(
+            femprj_path=get(__file__, 'test_femtet_interface.femprj'),
+            always_open_copy=False,
+            connect_method='existing',
+        )
+
+        fem._setup_before_parallel()
+        fem._setup_after_parallel(opt)
+
+        print(fem.Femtet.Project)
+        assert fem.Femtet.ProjectTitle == 'test_femtet_interface'
 
 
 @pytest.mark.femtet
