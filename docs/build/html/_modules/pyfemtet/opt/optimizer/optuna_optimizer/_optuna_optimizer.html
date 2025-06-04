@@ -123,6 +123,37 @@
 <div class="viewcode-block" id="OptunaOptimizer">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.optuna_optimizer.html#pyfemtet.opt.OptunaOptimizer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptunaOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An optimizer class utilizing Optuna for hyperparameter optimization.</span>
+
+<span class="sd">    This class provides an interface to conduct optimization studies using Optuna.</span>
+<span class="sd">    It manages the study lifecycle, sampler configuration, and trial execution.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        study_name (str): Name of the Optuna study.</span>
+<span class="sd">        storage (str | optuna.storages.BaseStorage): Storage URL or object for the Optuna study.</span>
+<span class="sd">        storage_path (str): Path to the Optuna study storage.</span>
+<span class="sd">        current_trial (optuna.trial.Trial | None): The current Optuna trial being evaluated.</span>
+<span class="sd">        sampler_class (type[optuna.samplers.BaseSampler]): The class of the Optuna sampler to use.</span>
+<span class="sd">        sampler_kwargs (dict): Keyword arguments to initialize the sampler.</span>
+<span class="sd">        n_trials (int | None): Number of trials to run in the study.</span>
+<span class="sd">        timeout (float | None): Maximum time allowed for the optimization.</span>
+<span class="sd">        callbacks (list): List of callback functions to invoke during optimization.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampler_class (type[optuna.samplers.BaseSampler], optional): The sampler class for suggesting parameter values. Defaults to TPESampler if None.</span>
+<span class="sd">        sampler_kwargs (dict[str, ...], optional): Dictionary of keyword arguments for the sampler. Defaults to an empty dictionary.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; optimizer = OptunaOptimizer()</span>
+<span class="sd">        &gt;&gt;&gt; optimizer.n_trials = 100</span>
+<span class="sd">        &gt;&gt;&gt; optimizer.timeout = 600</span>
+<span class="sd">        &gt;&gt;&gt; # Further configuration and usage...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># system</span>
     <span class="n">study_name</span> <span class="o">=</span> <span class="s1">&#39;pyfemtet-study&#39;</span>
     <span class="n">storage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">BaseStorage</span>

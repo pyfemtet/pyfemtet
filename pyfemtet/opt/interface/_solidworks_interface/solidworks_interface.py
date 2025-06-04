@@ -41,6 +41,27 @@ class FileNotOpenedError(Exception):
 
 # noinspection PyPep8Naming
 class SolidworksInterface(COMInterface):
+    """
+    Interface class for interacting with SolidWorks through COM automation.
+
+    This class manages the connection and interaction with SolidWorks using its COM interface.
+    It handles initialization, visibility, and clean termination of the SolidWorks application.
+
+    Attributes:
+        swApp (CDispatch): The COM dispatch object for SolidWorks application.
+        com_members (dict): Mapping of COM member names to their interface strings.
+        sldprt_path (str): Absolute path to the SolidWorks part file (.sldprt).
+        quit_solidworks_on_terminate (bool): Whether to close SolidWorks upon object destruction.
+        solidworks_visible (bool): Whether the SolidWorks application window is visible.
+
+    Args:
+        sldprt_path (str): Path to the SolidWorks part file (.sldprt).
+        close_solidworks_on_terminate (bool, optional): If True, SolidWorks will close when this object is destroyed. Defaults to False.
+        visible (bool, optional): If True, SolidWorks will be started in visible mode. Defaults to True.
+
+    Raises:
+        AssertionError: If the specified part file does not exist.
+    """
 
     swApp: CDispatch
     com_members = {'swApp': 'SLDWORKS.Application'}

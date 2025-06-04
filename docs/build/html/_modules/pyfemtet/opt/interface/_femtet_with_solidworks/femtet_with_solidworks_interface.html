@@ -104,6 +104,26 @@
 <div class="viewcode-block" id="FemtetWithSolidworksInterface">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FemtetWithSolidworksInterface</span><span class="p">(</span><span class="n">FemtetInterface</span><span class="p">,</span> <span class="n">SolidworksInterface</span><span class="p">,</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface class integrating Femtet and SolidWorks operations.</span>
+
+<span class="sd">    This class combines the capabilities of both Femtet and SolidWorks interfaces, allowing</span>
+<span class="sd">    coordinated operation between simulation (Femtet) and CAD manipulation (SolidWorks).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sldprt_path (str): Path to the SolidWorks part file (.sldprt).</span>
+<span class="sd">        femprj_path (str, optional): Path to the Femtet project file (.femprj). Defaults to None.</span>
+<span class="sd">        model_name (str, optional): Name of the model in the project. Defaults to None.</span>
+<span class="sd">        connect_method (str, optional): Connection method for Femtet. Defaults to &quot;auto&quot;.</span>
+<span class="sd">        save_pdt (str, optional): Specifies which data to save. Defaults to &quot;all&quot;.</span>
+<span class="sd">        strictly_pid_specify (bool, optional): Whether to strictly specify parameter IDs. Defaults to True.</span>
+<span class="sd">        allow_without_project (bool, optional): If True, allows operation without a project file. Defaults to False.</span>
+<span class="sd">        open_result_with_gui (bool, optional): If True, open results with GUI. Defaults to True.</span>
+<span class="sd">        parametric_output_indexes_use_as_objective (dict[int, str | float], optional): Indexes for parametric output used as objectives. Defaults to None.</span>
+<span class="sd">        always_open_copy (bool, optional): If True, always open a copy of the project. Defaults to False.</span>
+<span class="sd">        close_solidworks_on_terminate (bool, optional): If True, SolidWorks will close when this object is destroyed. Defaults to False.</span>
+<span class="sd">        solidworks_visible (bool, optional): If True, SolidWorks will be started in visible mode. Defaults to True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>

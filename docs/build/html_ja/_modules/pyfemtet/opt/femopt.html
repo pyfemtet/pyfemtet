@@ -113,6 +113,19 @@
 <div class="viewcode-block" id="FEMOpt">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.femopt.html#pyfemtet.opt.FEMOpt">[ドキュメント]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FEMOpt</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to manage finite element method (FEM) optimization using a specified optimizer and FEM interface.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        opt (AbstractOptimizer): The optimizer instance to be used for optimization.</span>
+<span class="sd">        monitor_info (dict[str, str | int | None]): Dictionary to store monitoring information such as host and port.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fem (AbstractFEMInterface, optional): An instance of a FEM interface. Defaults to None, in which case a FemtetInterface is used.</span>
+<span class="sd">        opt (AbstractOptimizer, optional): An optimizer instance. Defaults to None, in which case OptunaOptimizer is used.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>

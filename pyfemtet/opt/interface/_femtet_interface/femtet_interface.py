@@ -102,8 +102,6 @@ class FemtetInterface(COMInterface):
                 If you do not want to delete the swept table,
                 make a copy of the original file.
 
-        **kwargs: Additional arguments from inherited classes.
-
     Warning:
         Even if you specify ``strictly_pid_specify=True`` on the constructor,
         **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**

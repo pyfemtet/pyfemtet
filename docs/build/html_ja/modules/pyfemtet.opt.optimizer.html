@@ -58,10 +58,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../pages/api.html#most-major-classes">Most Major Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pages/api.html#other-major-classes">Other Major Classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../pages/api.html#entire-reference">Entire Reference</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet パッケージ</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">サブパッケージ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">サブモジュール</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">モジュール内容</a></li>
 </ul>
 </li>
 </ul>
@@ -86,7 +86,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../pages/api.html">API Reference</a></li>
-          <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet package</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet パッケージ</a></li>
           <li class="breadcrumb-item"><a href="pyfemtet.opt.html">pyfemtet.opt package</a></li>
       <li class="breadcrumb-item active">pyfemtet.opt.optimizer package</li>
       <li class="wy-breadcrumbs-aside">
@@ -101,7 +101,7 @@
   <section id="pyfemtet-opt-optimizer-package">
 <h1>pyfemtet.opt.optimizer package<a class="headerlink" href="#pyfemtet-opt-optimizer-package" title="Link to this heading"></a></h1>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<h2>サブパッケージ<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pyfemtet.opt.optimizer.optuna_optimizer.html">pyfemtet.opt.optimizer.optuna_optimizer package</a></li>
@@ -110,7 +110,7 @@
 </div>
 </section>
 <section id="module-pyfemtet.opt.optimizer">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.opt.optimizer" title="Link to this heading"></a></h2>
+<span id="module-contents"></span><h2>モジュール内容<a class="headerlink" href="#module-pyfemtet.opt.optimizer" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">AbstractOptimizer</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base_optimizer.html#AbstractOptimizer"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer" title="Link to this definition"></a></dt>
@@ -403,14 +403,125 @@
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">OptunaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.html#OptunaOptimizer"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer" title="Link to this definition"></a></dt>
 <dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code></a></p>
+<p>ハイパーパラメータ最適化のためにOptunaを利用するオプティマイザクラス。</p>
+<p>このクラスはOptunaを使用して最適化解析を実施するためのインターフェースを提供します。スタディのライフサイクル、サンプラーの設定、およびトライアルの実行を管理します。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.study_name">
+<span class="sig-name descname"><span class="pre">study_name</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.study_name" title="Link to this definition"></a></dt>
+<dd><p>Optuna スタディの名前。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.storage">
+<span class="sig-name descname"><span class="pre">storage</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.storage" title="Link to this definition"></a></dt>
+<dd><p>Optuna スタディのストレージ URL またはオブジェクト。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a> | optuna.storages.BaseStorage</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.storage_path">
+<span class="sig-name descname"><span class="pre">storage_path</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.storage_path" title="Link to this definition"></a></dt>
+<dd><p>Optunaスタディストレージへのパス。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.current_trial">
+<span class="sig-name descname"><span class="pre">current_trial</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.current_trial" title="Link to this definition"></a></dt>
+<dd><p>現在評価中の Optuna トライアル。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optuna.trial.Trial | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.sampler_class">
+<span class="sig-name descname"><span class="pre">sampler_class</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.sampler_class" title="Link to this definition"></a></dt>
+<dd><p>使用するOptunaサンプラーのクラス。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)">type</a>[optuna.samplers.BaseSampler]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.sampler_kwargs">
+<span class="sig-name descname"><span class="pre">sampler_kwargs</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.sampler_kwargs" title="Link to this definition"></a></dt>
+<dd><p>サンプラーを初期化するためのキーワード引数。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.n_trials">
+<span class="sig-name descname"><span class="pre">n_trials</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.n_trials" title="Link to this definition"></a></dt>
+<dd><p>スタディで実行する試行回数。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.timeout" title="Link to this definition"></a></dt>
+<dd><p>最適化に許可される最大時間。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.callbacks">
+<span class="sig-name descname"><span class="pre">callbacks</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.callbacks" title="Link to this definition"></a></dt>
+<dd><p>最適化中に呼び出すコールバック関数の一覧。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sampler_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><em>type</em></a><em>[</em><em>optuna.samplers.BaseSampler</em><em>]</em>) – </p></li>
-<li><p><strong>sampler_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>...</em><em>]</em>) – </p></li>
+<li><p><strong>sampler_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><em>type</em></a><em>[</em><em>optuna.samplers.BaseSampler</em><em>]</em><em>, </em><em>optional</em>) – パラメーター値を提案するためのサンプラークラス。None の場合はデフォルトで TPESampler が使用されます。</p></li>
+<li><p><strong>sampler_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>...</em><em>]</em><em>, </em><em>optional</em>) – サンプラーのキーワード引数の辞書。デフォルトは空の辞書です。</p></li>
 </ul>
 </dd>
+<dt class="field-even">例外<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong> – </p>
+</dd>
 </dl>
+<p class="rubric">サンプル</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="mi">600</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Further configuration and usage...</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.add_categorical_parameter">
 <span class="sig-name descname"><span class="pre">add_categorical_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_to_fem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.html#OptunaOptimizer.add_categorical_parameter"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.add_categorical_parameter" title="Link to this definition"></a></dt>
@@ -454,8 +565,8 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.callbacks">
-<span class="sig-name descname"><span class="pre">callbacks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.callbacks" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">callbacks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -464,8 +575,8 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.current_trial">
-<span class="sig-name descname"><span class="pre">current_trial</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">optuna.trial.Trial</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.current_trial" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">current_trial</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">optuna.trial.Trial</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -489,8 +600,8 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.n_trials">
-<span class="sig-name descname"><span class="pre">n_trials</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.n_trials" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">n_trials</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -504,13 +615,13 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.sampler_class">
-<span class="sig-name descname"><span class="pre">sampler_class</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">optuna.samplers.BaseSampler</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.sampler_class" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">sampler_class</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">optuna.samplers.BaseSampler</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.sampler_kwargs">
-<span class="sig-name descname"><span class="pre">sampler_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.sampler_kwargs" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">sampler_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -524,18 +635,18 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.storage">
-<span class="sig-name descname"><span class="pre">storage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">optuna.storages.BaseStorage</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.storage" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">storage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">optuna.storages.BaseStorage</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.storage_path">
-<span class="sig-name descname"><span class="pre">storage_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.storage_path" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">storage_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.study_name">
-<span class="sig-name descname"><span class="pre">study_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyfemtet-study'</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.study_name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">study_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyfemtet-study'</span></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -549,8 +660,8 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.OptunaOptimizer.timeout">
-<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.OptunaOptimizer.timeout" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -599,8 +710,7 @@
 <dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">BoTorchSampler</span></code></p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>Added in v2.4.0 as an experimental feature. The interface may change in newer versions
-without prior notice. See <a class="reference external" href="https://github.com/optuna/optuna/releases/tag/v2.4.0">https://github.com/optuna/optuna/releases/tag/v2.4.0</a>.</p>
+<p>v2.4.0で実験的機能として追加されました。インターフェースは予告なく新版で変更される場合があります。詳細は <a class="reference external" href="https://github.com/optuna/optuna/releases/tag/v2.4.0">https://github.com/optuna/optuna/releases/tag/v2.4.0</a> をご覧ください。</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
@@ -646,28 +756,22 @@ without prior notice. See <a class="reference external" href="https://github.com
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_relative">
 <span class="sig-name descname"><span class="pre">sample_relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_space</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.html#PoFBoTorchSampler.sample_relative"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFBoTorchSampler.sample_relative" title="Link to this definition"></a></dt>
-<dd><p>Sample parameters in a given search space.</p>
-<p>This method is called once at the beginning of each trial, i.e., right before the
-evaluation of the objective function. This method is suitable for sampling algorithms
-that use relationship between parameters such as Gaussian Process and CMA-ES.</p>
+<dd><p>与えられた探索空間内のサンプルパラメータ。</p>
+<p>このメソッドは各試行の開始時、すなわち目的関数の評価直前に一度呼び出されます。このメソッドは、ガウス過程やCMA-ESのようにパラメータ間の関係性を利用するサンプリングアルゴリズムに適しています。</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>The failed trials are ignored by any build-in samplers when they sample new
-parameters. Thus, failed trials are regarded as deleted in the samplers』
-perspective.</p>
+<p>ビルトインサンプラーは新しいパラメータをサンプリングする際に失敗した試行を無視します。したがって、失敗した試行はサンプラーの観点では削除されたものと見なされます。</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>study</strong> (<em>Study</em>) – Target study object.</p></li>
-<li><p><strong>trial</strong> (<em>FrozenTrial</em>) – Target trial object.
-Take a copy before modifying this object.</p></li>
-<li><p><strong>search_space</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>BaseDistribution</em><em>]</em>) – The search space returned by
-<code class="xref py py-func docutils literal notranslate"><span class="pre">infer_relative_search_space()</span></code>.</p></li>
+<li><p><strong>study</strong> (<em>Study</em>) – 対象解析対象。</p></li>
+<li><p><strong>trial</strong> (<em>FrozenTrial</em>) – 対象試行オブジェクト。このオブジェクトを変更する前にコピーを作成してください。</p></li>
+<li><p><strong>search_space</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>BaseDistribution</em><em>]</em>) – <code class="xref py py-func docutils literal notranslate"><span class="pre">infer_relative_search_space()</span></code> から返される探索空間。</p></li>
 </ul>
 </dd>
 <dt class="field-even">戻り値<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dictionary containing the parameter names and the values.</p>
+<dd class="field-even"><p>最適化で使用されるパラメータ名と値を含む dict です。</p>
 </dd>
 <dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a>]</p>
@@ -731,9 +835,69 @@ Take a copy before modifying this object.</p></li>
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">ScipyOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.html#ScipyOptimizer"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer" title="Link to this definition"></a></dt>
 <dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code></a></p>
+<p>SciPy の最適化手法を利用するオプティマイザクラス。</p>
+<p>このクラスは SciPy の最適化ルーチンのラッパーとして機能し、最適化手法、許容誤差、およびオプションのカスタマイズを可能にします。また、拘束条件の取り扱いに対して強化およびスケーリングの機構を提供します。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.method" title="Link to this definition"></a></dt>
+<dd><p>使用する最適化手法(例：「BFGS」、「Nelder-Mead」)。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.tol">
+<span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.tol" title="Link to this definition"></a></dt>
+<dd><p>終了の許容誤差。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.options">
+<span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.options" title="Link to this definition"></a></dt>
+<dd><p>SciPyオプティマイザに渡す追加のオプション。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.constraint_enhancement">
+<span class="sig-name descname"><span class="pre">constraint_enhancement</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.constraint_enhancement" title="Link to this definition"></a></dt>
+<dd><p>拘束処理を強化するために小さな値を加算しました。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.ScipyOptimizer.constraint_scaling">
+<span class="sig-name descname"><span class="pre">constraint_scaling</span></span><a class="headerlink" href="#pyfemtet.opt.optimizer.ScipyOptimizer.constraint_scaling" title="Link to this definition"></a></dt>
+<dd><p>拘束に適用されるスケーリング係数。</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – 使用する最適化手法(例：「BFGS」、「Nelder-Mead」)。</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>None</em>) – 終了の許容誤差。</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py property">

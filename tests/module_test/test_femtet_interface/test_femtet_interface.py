@@ -67,7 +67,7 @@ def test_femtet_interface_api_calling():
     except Exception as e:
         print(e)
     result = input('ダイアログか警告が出なかったら NG と入力\n>>> ') or ''
-    assert result.upper() == 'NG'
+    assert result.upper() != 'NG'
 
 
 @pytest.mark.femtet

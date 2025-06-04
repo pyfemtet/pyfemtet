@@ -39,6 +39,37 @@ warnings.filterwarnings('ignore', 'Argument ``constraints_func`` is an experimen
 
 
 class OptunaOptimizer(AbstractOptimizer):
+    """
+    An optimizer class utilizing Optuna for hyperparameter optimization.
+
+    This class provides an interface to conduct optimization studies using Optuna.
+    It manages the study lifecycle, sampler configuration, and trial execution.
+
+    Attributes:
+        study_name (str): Name of the Optuna study.
+        storage (str | optuna.storages.BaseStorage): Storage URL or object for the Optuna study.
+        storage_path (str): Path to the Optuna study storage.
+        current_trial (optuna.trial.Trial | None): The current Optuna trial being evaluated.
+        sampler_class (type[optuna.samplers.BaseSampler]): The class of the Optuna sampler to use.
+        sampler_kwargs (dict): Keyword arguments to initialize the sampler.
+        n_trials (int | None): Number of trials to run in the study.
+        timeout (float | None): Maximum time allowed for the optimization.
+        callbacks (list): List of callback functions to invoke during optimization.
+
+    Args:
+        sampler_class (type[optuna.samplers.BaseSampler], optional): The sampler class for suggesting parameter values. Defaults to TPESampler if None.
+        sampler_kwargs (dict[str, ...], optional): Dictionary of keyword arguments for the sampler. Defaults to an empty dictionary.
+
+    Raises:
+        None
+
+    Examples:
+        >>> optimizer = OptunaOptimizer()
+        >>> optimizer.n_trials = 100
+        >>> optimizer.timeout = 600
+        >>> # Further configuration and usage...
+    """
+
     # system
     study_name = 'pyfemtet-study'
     storage: str | optuna.storages.BaseStorage
