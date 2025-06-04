@@ -814,8 +814,19 @@ class AbstractOptimizer:
         # noinspection PyMethodParameters
         class LoggingOutput:
             def __enter__(self_):
-                self_.count = len(self.history.get_df()) + 1
-                logger.info(f'▼▼▼▼▼ solve {self_.count} start ▼▼▼▼▼')
+                df = self.history.get_df(
+                    equality_filters=MAIN_FILTER
+                )
+                self_.count = len(df) + 1
+
+                succeeded_count = len(df[df['state'] == TrialState.succeeded])
+                succeeded_text = _(
+                    en_message='{succeeded_count} succeeded trials',
+                    jp_message='成功した試行数: {succeeded_count}',
+                    succeeded_count=succeeded_count,
+                )
+
+                logger.info(f'▼▼▼▼▼ solve {self_.count} ({succeeded_text}) start ▼▼▼▼▼')
 
             def __exit__(self_, exc_type, exc_val, exc_tb):
                 logger.info(f'▲▲▲▲▲ solve {self_.count} end ▲▲▲▲▲\n')

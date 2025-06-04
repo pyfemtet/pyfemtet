@@ -43,7 +43,10 @@ __all__ = [
     'MAIN_FILTER',
 ]
 
-MAIN_FILTER: dict = {'sub_fidelity_name': MAIN_FIDELITY_NAME}
+MAIN_FILTER: dict = {
+    'sub_fidelity_name': MAIN_FIDELITY_NAME,
+    'sub_sampling': float('nan')
+}
 
 
 logger = get_module_logger('opt.history', False)
