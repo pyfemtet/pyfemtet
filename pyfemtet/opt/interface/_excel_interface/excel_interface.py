@@ -258,8 +258,6 @@ class ExcelInterface(COMInterface):
             force_override_when_load: bool = False,
     ):
 
-        show_experimental_warning("ExcelInterface")
-
         def proc_path(path_):
             if path_ is None:
                 return self._original_input_xlsm_path
