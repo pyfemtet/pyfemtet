@@ -32,7 +32,7 @@ DIRECTION: TypeAlias = (
         ]
 )
 
-logger = get_module_logger('opt.optimizer', True)
+logger = get_module_logger('opt.optimizer', False)
 
 
 def _log_hidden_constraint(e: Exception):
@@ -177,11 +177,14 @@ class AbstractOptimizer:
             name: str,
             expression_string: str,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(expression_string=expression_string)
         var.properties = properties or dict()
+        var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
@@ -190,11 +193,14 @@ class AbstractOptimizer:
             name: str,
             sympy_expr: sympy.Expr,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
         var.properties = properties or dict()
+        var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
@@ -205,6 +211,8 @@ class AbstractOptimizer:
             properties: dict[str, ...] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
         var = ExpressionFromFunction()
         var.name = name
@@ -212,6 +220,7 @@ class AbstractOptimizer:
         var.args = args or tuple()
         var.kwargs = kwargs or dict()
         var.properties = properties or dict()
+        var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.variables.update({name: var})
 
@@ -425,6 +434,7 @@ class AbstractOptimizer:
 
         def __init__(self, opt: AbstractOptimizer):
             self.opt: AbstractOptimizer = opt
+            self.subsampling_idx: SubSampling | None = None
 
         def _preprocess(self):
             pass
@@ -451,6 +461,7 @@ class AbstractOptimizer:
                 variables_pass_to_fem: dict[str, SupportedVariableTypes],
                 history: History = None,
                 datetime_start=None,
+                trial_id=None,
         ) -> _FReturnValue:
 
             # create context
@@ -477,6 +488,8 @@ class AbstractOptimizer:
                     {obj_name: ObjectiveResult(obj, opt_.fem, float('nan'))
                      for obj_name, obj in opt_.objectives.items()}
                 )
+                record.sub_sampling = self.subsampling_idx
+                record.trial_id = trial_id
                 record.sub_fidelity_name = opt_.sub_fidelity_name
                 record.fidelity = opt_.fidelity
                 record.datetime_start = datetime_start
@@ -489,7 +502,8 @@ class AbstractOptimizer:
                     raise SkipSolve
 
                 # start solve
-                if opt_.sub_fidelity_models != MAIN_FIDELITY_NAME:
+                if opt_.sub_fidelity_name != MAIN_FIDELITY_NAME:
+                    logger.info('----------')
                     logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
                 logger.info(_('input variables:'))
                 logger.info(parameters)
@@ -620,7 +634,9 @@ class AbstractOptimizer:
                 x: TrialInput,
                 x_pass_to_fem_: dict[str, SupportedVariableTypes],
                 opt_: AbstractOptimizer | None = None,
+                trial_id: str =None,
         ) -> _FReturnValue | None:
+            """Nothing will be raised even if infeasible."""
 
             vm = self.opt.variable_manager
 
@@ -634,32 +650,40 @@ class AbstractOptimizer:
             # if opt_ is not self, update variable manager
             opt_.variable_manager = vm
 
-            # preprocess
-            self._preprocess()
+            # noinspection PyMethodParameters
+            class Process:
+                def __enter__(self_):
+                    # preprocess
+                    self._preprocess()
 
-            # declare output
-            f_return = None
+                def __exit__(self_, exc_type, exc_val, exc_tb):
+                    # postprocess
+                    self._postprocess()
 
-            # start solve
-            datetime_start = datetime.datetime.now()
-            try:
-                f_return = self._solve_or_raise(
-                    opt_, x, x_pass_to_fem_, self.opt.history, datetime_start
-                )
+            with Process():
 
-            except HardConstraintViolation as e:
-                self._hard_constraint_handling(e)
+                # declare output
+                f_return = None
 
-            except _HiddenConstraintViolation as e:
-                self._hidden_constraint_handling(e)
+                # start solve
+                datetime_start = datetime.datetime.now()
+                try:
+                    f_return = self._solve_or_raise(
+                        opt_, x, x_pass_to_fem_, self.opt.history,
+                        datetime_start, trial_id
+                    )
 
-            except SkipSolve as e:
-                self._skip_handling(e)
+                except HardConstraintViolation as e:
+                    self._hard_constraint_handling(e)
 
-            else:
-                self._if_succeeded(f_return)
+                except _HiddenConstraintViolation as e:
+                    self._hidden_constraint_handling(e)
 
-            self._postprocess()
+                except SkipSolve as e:
+                    self._skip_handling(e)
+
+                else:
+                    self._if_succeeded(f_return)
 
             # check interruption
             self.opt._check_and_raise_interruption()
@@ -790,8 +814,19 @@ class AbstractOptimizer:
         # noinspection PyMethodParameters
         class LoggingOutput:
             def __enter__(self_):
-                self_.count = len(self.history.get_df()) + 1
-                logger.info(f'▼▼▼▼▼ solve {self_.count} start ▼▼▼▼▼')
+                df = self.history.get_df(
+                    equality_filters=MAIN_FILTER
+                )
+                self_.count = len(df) + 1
+
+                succeeded_count = len(df[df['state'] == TrialState.succeeded])
+                succeeded_text = _(
+                    en_message='{succeeded_count} succeeded trials',
+                    jp_message='成功した試行数: {succeeded_count}',
+                    succeeded_count=succeeded_count,
+                )
+
+                logger.info(f'▼▼▼▼▼ solve {self_.count} ({succeeded_text}) start ▼▼▼▼▼')
 
             def __exit__(self_, exc_type, exc_val, exc_tb):
                 logger.info(f'▲▲▲▲▲ solve {self_.count} end ▲▲▲▲▲\n')

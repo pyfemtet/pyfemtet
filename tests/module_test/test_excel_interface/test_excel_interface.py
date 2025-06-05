@@ -1,5 +1,3 @@
-from contextlib import closing
-
 import numpy as np
 
 import pytest
@@ -9,6 +7,7 @@ from pyfemtet.opt.interface._excel_interface import ExcelInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
 from tests import get
+from tests.utils.closing import closing
 
 
 @pytest.mark.excel
@@ -26,42 +25,45 @@ def test_load_single_excel():
         display_alerts=True,
     )
 
-    opt.fem = fem
+    with closing(fem):
 
-    opt._load_problem_from_fem()
+        opt.fem = fem
 
-    for var in opt.get_variables(format='raw').values():
-        print(f'----- {var.name} ----')
-        for attr in dir(var):
-            if not attr.startswith('_'):
-                print(attr, getattr(var, attr))
+        opt._load_problem_from_fem()
 
-        if var.name == 'x':
-            assert isinstance(var, NumericParameter)
-            assert var.value == 0.5
-            assert var.lower_bound == 0
-            assert var.upper_bound == 10
-            assert var.step == 1
+        for var in opt.get_variables(format='raw').values():
+            print(f'----- {var.name} ----')
+            for attr in dir(var):
+                if not attr.startswith('_'):
+                    print(attr, getattr(var, attr))
 
-        elif var.name == 'y':
-            assert isinstance(var, NumericParameter)
-            assert var.value == 6
-            assert var.lower_bound == 1
-            assert var.upper_bound == 10
-            assert var.step is None
+            if var.name == 'x':
+                assert isinstance(var, NumericParameter)
+                assert var.value == 0.5
+                assert var.lower_bound == 0
+                assert var.upper_bound == 10
+                assert var.step == 1
 
-        elif var.name == 'z':
-            assert isinstance(var, CategoricalParameter)
-            assert var.value == 'A'
-            assert var.choices == ['A', 'B', 'C']
+            elif var.name == 'y':
+                assert isinstance(var, NumericParameter)
+                assert var.value == 6
+                assert var.lower_bound == 1
+                assert var.upper_bound == 10
+                assert var.step is None
 
-        elif var.name == 'no_use_1':
-            assert isinstance(var, NumericParameter)
-            assert var.value == 3
-            assert var.properties['fix'] is True
+            elif var.name == 'z':
+                assert isinstance(var, CategoricalParameter)
+                assert var.value == 'A'
+                assert var.choices == ['A', 'B', 'C']
+
+            elif var.name == 'no_use_1':
+                assert isinstance(var, NumericParameter)
+                assert var.value == 3
+                assert var.properties['fix'] is True
 
 
 @pytest.mark.excel
+@pytest.mark.femtet
 def test_run_multiple_excel():
     opt = AbstractOptimizer()
 
@@ -80,6 +82,10 @@ def test_run_multiple_excel():
         teardown_procedure_name='PrePostProcessing.teardown',
     )
 
+    # pytest のときのみ setup マクロが実行できない系のエラーが発生したら
+    # - pytest なしで実行できることを確認する
+    # - Excel のトラストセンターで VBA を有効にする
+    # - Excel のトラストセンターで 信頼できる場所に追加する
     with closing(fem):
 
         opt.fem = fem

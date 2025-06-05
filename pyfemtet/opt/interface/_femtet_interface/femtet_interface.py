@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 import os
 import sys
-import warnings
 import subprocess
 from time import sleep
 from contextlib import nullcontext
@@ -103,8 +102,6 @@ class FemtetInterface(COMInterface):
                 If you do not want to delete the swept table,
                 make a copy of the original file.
 
-        **kwargs: Additional arguments from inherited classes.
-
     Warning:
         Even if you specify ``strictly_pid_specify=True`` on the constructor,
         **the connection behavior is like** ``strictly_pid_specify=False`` **in parallel processing**
@@ -119,6 +116,8 @@ class FemtetInterface(COMInterface):
     """
 
     com_members = {'Femtet': 'FemtetMacro.Femtet'}
+    _show_parametric_index_warning = True  # for GUI
+    _femtet_connection_timeout = 10
 
     def __init__(
             self,
@@ -129,14 +128,19 @@ class FemtetInterface(COMInterface):
             strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
             allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui: bool = True,
-            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,  # TODO: Remove this
             always_open_copy=False,
+            # ユーザーはメソッドを使うことを推奨。GUI などで使用。
+            parametric_output_indexes_use_as_objective: dict[int, str | float] = None,
     ):
-        # warning
         if parametric_output_indexes_use_as_objective is not None:
-            warnings.warn(
-                "解析モデルに設定された既存のスイープテーブルは削除されます。"
-            )
+            if FemtetInterface._show_parametric_index_warning:
+                logger.warning(_(
+                    en_message='The argument `parametric_output_indexes_use_as_objective` is deprecated. '
+                               'Please use `FemtetInterface.use_parametric_output_as_objective()` instead.',
+                    jp_message='`parametric_output_indexes_use_as_objective` は非推奨の引数です。'
+                               '代わりに `FemtetInterface.use_parametric_output_as_objective()` '
+                               'を使ってください。',
+                ))
 
         # 引数の処理
         if femprj_path is None:
@@ -255,6 +259,13 @@ class FemtetInterface(COMInterface):
             None
 
         """
+
+        # warning
+        logger.warning(_(
+            en_message='The existing sweep table in the project will be removed.',
+            jp_message='解析モデルに設定された既存のスイープテーブルは削除されます。'
+        ))
+
         # check
         if isinstance(direction, str):
             if direction not in ("minimize", "maximize"):
@@ -304,9 +315,9 @@ class FemtetInterface(COMInterface):
         logger.info("└ Try to connect existing Femtet process.")
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
-            self.Femtet, self.femtet_pid = dispatch_femtet(timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_femtet(timeout=self._femtet_connection_timeout)
         else:
-            self.Femtet, self.femtet_pid = dispatch_specific_femtet(pid, timeout=5)
+            self.Femtet, self.femtet_pid = dispatch_specific_femtet(pid, timeout=self._femtet_connection_timeout)
         self.connected_method = "existing"
 
     def connect_femtet(self, connect_method: str = "auto", pid: int or None = None):
@@ -504,6 +515,8 @@ class FemtetInterface(COMInterface):
             name = fun.__name__
             if fun.__name__ == 'Solve':
                 context = nullcontext()
+            elif fun.__name__ == 'solve_via_parametric_dll':
+                context = nullcontext()
 
         elif isinstance(fun, str):
 
@@ -525,7 +538,7 @@ class FemtetInterface(COMInterface):
                         'If the optimization is hanging, the most reason is '
                         'a dialog is opening in Femtet and it waits for your '
                         'input. Please confirm there is no dialog in Femtet.',
-                        '{name} の実行に {warning_time_sec} 以上かかっています。'
+                        '{name} の実行に {warning_time_sec} 秒以上かかっています。'
                         'もし最適化がハングしているならば、考えられる理由として、'
                         'Femtet で予期せずダイアログが開いてユーザーの入力待ちをしている場合があります。'
                         'もし Femtet でダイアログが開いていれば、閉じてください。',

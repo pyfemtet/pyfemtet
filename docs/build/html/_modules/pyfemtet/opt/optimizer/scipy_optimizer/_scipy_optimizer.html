@@ -120,6 +120,25 @@
 <div class="viewcode-block" id="ScipyOptimizer">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.ScipyOptimizer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ScipyOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optimizer class that utilizes SciPy optimization methods.</span>
+
+<span class="sd">    This class serves as a wrapper around SciPy&#39;s optimization routines,</span>
+<span class="sd">    allowing customization of the optimization method, tolerance, and options.</span>
+<span class="sd">    It also provides mechanisms for handling constraints with enhancement and scaling.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        method (str): The optimization method to use (e.g., &#39;BFGS&#39;, &#39;Nelder-Mead&#39;).</span>
+<span class="sd">        tol (float or None): Tolerance for termination.</span>
+<span class="sd">        options (dict): Additional options to pass to the SciPy optimizer.</span>
+<span class="sd">        constraint_enhancement (float): Small value added to enhance constraint handling.</span>
+<span class="sd">        constraint_scaling (float): Scaling factor applied to constraints.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        method (str): The optimization method to use (e.g., &#39;BFGS&#39;, &#39;Nelder-Mead&#39;).</span>
+<span class="sd">        tol (float or None): Tolerance for termination.</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_timeout</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">_n_trials</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>

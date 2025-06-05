@@ -29,6 +29,19 @@ logger = get_module_logger('opt.femopt', False)
 
 
 class FEMOpt:
+    """
+    A class to manage finite element method (FEM) optimization using a specified optimizer and FEM interface.
+
+    Attributes:
+        opt (AbstractOptimizer): The optimizer instance to be used for optimization.
+        monitor_info (dict[str, str | int | None]): Dictionary to store monitoring information such as host and port.
+
+    Args:
+        fem (AbstractFEMInterface, optional): An instance of a FEM interface. Defaults to None, in which case a FemtetInterface is used.
+        opt (AbstractOptimizer, optional): An optimizer instance. Defaults to None, in which case OptunaOptimizer is used.
+
+    """
+
     opt: AbstractOptimizer
 
     def __init__(
@@ -71,16 +84,20 @@ class FEMOpt:
             name: str,
             expression_string: str,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
-        self.opt.add_expression_string(name, expression_string, properties)
+        self.opt.add_expression_string(name, expression_string, properties, pass_to_fem=pass_to_fem)
 
     def add_expression_sympy(
             self,
             name: str,
             sympy_expr: sympy.Expr,
             properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
-        self.opt.add_expression_sympy(name, sympy_expr, properties)
+        self.opt.add_expression_sympy(name, sympy_expr, properties, pass_to_fem=pass_to_fem)
 
     def add_expression(
             self,
@@ -89,8 +106,10 @@ class FEMOpt:
             properties: dict[str, ...] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
+            *,
+            pass_to_fem: bool = True,
     ) -> None:
-        self.opt.add_expression(name, fun, properties, args, kwargs)
+        self.opt.add_expression(name, fun, properties, args, kwargs, pass_to_fem=pass_to_fem)
 
     def add_categorical_parameter(
             self,

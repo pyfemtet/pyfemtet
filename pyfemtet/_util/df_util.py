@@ -1,3 +1,4 @@
+from math import isnan
 import pandas as pd
 
 
@@ -9,8 +10,24 @@ __all__ = [
 
 def get_index(df, equality_filters):
     # フィルタ条件に一致する行のインデックスを取得
+
+    # na との == での比較は常に False なので別処理するために別リストを作る
+    want_na_keys = []
+    for key, value in equality_filters.items():
+        if isinstance(value, float):
+            if isnan(value):
+                want_na_keys.append(key)
+    [equality_filters.pop(key) for key in want_na_keys]
+
+    # na 以外の比較
     # noinspection PyUnresolvedReferences
-    return (df[list(equality_filters.keys())] == pd.Series(equality_filters)).all(axis=1)
+    out: pd.Series = (df[list(equality_filters.keys())] == pd.Series(equality_filters)).all(axis=1)
+
+    # na との比較
+    for key in want_na_keys:
+        out = out & df[key].isna()
+
+    return out
 
 
 def get_partial_df(df: pd.DataFrame, equality_filters: dict):

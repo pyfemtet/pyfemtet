@@ -156,7 +156,7 @@ class FemtetWithNXInterface(FemtetInterface, _NXInterface):
             strictly_pid_specify: bool = True,  # dask worker では True にしたいので super() の引数にしない。
             allow_without_project: bool = False,  # main でのみ True を許容したいので super() の引数にしない。
             open_result_with_gui: bool = True,
-            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,  # TODO: Remove this
+            parametric_output_indexes_use_as_objective: dict[int, str | float] = None,
             always_open_copy=False,
             export_curves: bool or None = None,
             export_surfaces: bool or None = None,

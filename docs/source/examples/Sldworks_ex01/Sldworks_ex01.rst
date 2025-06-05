@@ -7,7 +7,9 @@ An example will be explained using an H-shaped steel that was parametrically mod
 
 .. note::
 
-   Other than the sample code and execution results, the items are the same as in :doc:`../NX_ex01/NX_ex01`.
+   Other than the sample code and execution results,
+   the items are similar as in
+   :doc:`../NX_ex01/NX_ex01`.
 
 
 
@@ -18,6 +20,38 @@ Sample File
    Place the :download:`sample model<../_temporary_sample_files/cad_ex01_SW.SLDPRT>`
    and :download:`sample project<../_temporary_sample_files/cad_ex01_SW.femprj>` in the same folder, keep the project open in Femtet,
    and double-click on :download:`sample code<../_temporary_sample_files/cad_ex01_SW.py>` to execute.
+
+
+
+Details as a FEM Problem
+------------------------------
+
+.. figure:: Sldworks_ex01_analysis.png
+   :width: 450
+   
+   Appearance of the Model (and Analysis Conditions)
+
+- fix ... Fully Fixed
+- load ... Load in the -Z direction (1N)
+- mirror ... Symmetrical to the XZ plane
+
+
+
+Design Variables
+------------------------------
+
+.. figure:: Sldworks_ex01_model_dsgn.png
+   :width: 450
+   
+   Appearance of the Model Section (and Design Variables)
+
+============== ===============
+Variable Name  Description
+============== ===============
+A              Web Tickness
+B              Flange Tickness
+C              Flange Bending
+============== ===============
 
 
 

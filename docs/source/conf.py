@@ -18,20 +18,26 @@ import logging
 project_root_path = os.path.abspath('..')
 sys.path.insert(0, project_root_path)
 
-# -- Supress duplicate object warning --
+# -- Supress specific warnings --
 
 # Get sphinx logger
 logger = logging.getLogger('sphinx')
 
 
 # Add filter to supress specific message
-class FilterDuplicateWarning(logging.Filter):
+class FilterWarnings(logging.Filter):
     def filter(self, record):
-        return "duplicate object description of" not in record.getMessage()
+
+        out = (
+            "duplicate object description of" not in record.getMessage()
+            and "'modules/pyfemtet.core' that doesn't have a title" not in record.getMessage()
+        )
+
+        return out
 
 
 # Add it to logger (In sphinx, no handler is used.)
-logger.addFilter(FilterDuplicateWarning())
+logger.addFilter(FilterWarnings())
 
 
 # -- Project information -----------------------------------------------------

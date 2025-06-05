@@ -491,7 +491,7 @@ msgstr "グラフを自動更新"
 
 #: pyfemtet/_i18n/messages.py:242
 msgid "Interrupt Optimization"
-msgstr "最適化を中断しました"
+msgstr "最適化を中断"
 
 #: pyfemtet/_i18n/messages.py:244
 msgid "Result"

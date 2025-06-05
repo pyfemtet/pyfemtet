@@ -16,8 +16,10 @@ build_script = docs_root / 'pre-build.ps1'
 def test_check_visualization_tutorial():
     popen = subprocess.Popen(
         f'{sys.executable} '
-        f'-m '
-        f'pyfemtet.opt.visualization.history_viewer',
+        '-m '
+        'pyfemtet.opt.visualization.history_viewer',
+        # shell=True,
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
     )
 
     print('起動中。10秒待ちます。')
@@ -26,11 +28,16 @@ def test_check_visualization_tutorial():
     print('')
 
 
-    input('Enter で終了')
-
+    input('チュートリアルモードで動作確認。\nEnter でモニターを終了。')
     popen.send_signal(signal.CTRL_C_EVENT)
+    print('終了シグナルは送った')
+    try:
+        print('5 秒以内に終了しなければ強制終了します・')
+        popen.wait(timeout=5)
+    except Exception:
+        popen.terminate()
 
-    input('終わった？')
+    assert input('結果が NG なら NG と入力\n>>> ') != 'NG'
 
 
 if __name__ == '__main__':

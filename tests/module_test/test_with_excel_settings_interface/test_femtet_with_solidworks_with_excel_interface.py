@@ -1,4 +1,6 @@
-from contextlib import closing
+import os
+import sys
+import subprocess
 
 import pytest
 
@@ -6,12 +8,30 @@ from pyfemtet.opt.interface import FemtetWithSolidworksWithExcelSettingsInterfac
 from pyfemtet.opt.optimizer import AbstractOptimizer
 
 from tests import get
+from tests.utils.closing import closing
 
 
-@pytest.mark.femtet
-@pytest.mark.cad
-@pytest.mark.excel
-def test_load_femtet_with_excel_settings():
+# pytest 特有の windows fatal exception 対策
+def _run(fun_name):
+    here, filename = os.path.split(__file__)
+    module_name = filename.removesuffix('.py')
+
+    subprocess.run(
+        f'{sys.executable} '
+        f'-c '
+        f'"'
+        f'import os;'
+        f'import sys;'
+        f'sys.path.append(os.getcwd());'
+        f'import {module_name} as tst;'
+        f'tst.{fun_name}()'
+        f'"',
+        cwd=os.path.abspath(here),
+        shell=True,
+    ).check_returncode()
+
+
+def impl_load_femtet_with_sw_with_excel_settings():
     opt = AbstractOptimizer()
 
     fem: FemtetWithSolidworksWithExcelSettingsInterface = FemtetWithSolidworksWithExcelSettingsInterface(
@@ -48,5 +68,12 @@ def test_load_femtet_with_excel_settings():
                 assert False, '予期しない目的変数名'
 
 
+@pytest.mark.femtet
+@pytest.mark.cad
+@pytest.mark.excel
+def test_load_femtet_with_sw_with_excel_settings():
+    _run(impl_load_femtet_with_sw_with_excel_settings.__name__)
+
+
 if __name__ == '__main__':
-    test_load_femtet_with_excel_settings()
+    test_load_femtet_with_sw_with_excel_settings()

@@ -39,6 +39,37 @@ warnings.filterwarnings('ignore', 'Argument ``constraints_func`` is an experimen
 
 
 class OptunaOptimizer(AbstractOptimizer):
+    """
+    An optimizer class utilizing Optuna for hyperparameter optimization.
+
+    This class provides an interface to conduct optimization studies using Optuna.
+    It manages the study lifecycle, sampler configuration, and trial execution.
+
+    Attributes:
+        study_name (str): Name of the Optuna study.
+        storage (str | optuna.storages.BaseStorage): Storage URL or object for the Optuna study.
+        storage_path (str): Path to the Optuna study storage.
+        current_trial (optuna.trial.Trial | None): The current Optuna trial being evaluated.
+        sampler_class (type[optuna.samplers.BaseSampler]): The class of the Optuna sampler to use.
+        sampler_kwargs (dict): Keyword arguments to initialize the sampler.
+        n_trials (int | None): Number of trials to run in the study.
+        timeout (float | None): Maximum time allowed for the optimization.
+        callbacks (list): List of callback functions to invoke during optimization.
+
+    Args:
+        sampler_class (type[optuna.samplers.BaseSampler], optional): The sampler class for suggesting parameter values. Defaults to TPESampler if None.
+        sampler_kwargs (dict[str, ...], optional): Dictionary of keyword arguments for the sampler. Defaults to an empty dictionary.
+
+    Raises:
+        None
+
+    Examples:
+        >>> optimizer = OptunaOptimizer()
+        >>> optimizer.n_trials = 100
+        >>> optimizer.timeout = 600
+        >>> # Further configuration and usage...
+    """
+
     # system
     study_name = 'pyfemtet-study'
     storage: str | optuna.storages.BaseStorage
@@ -122,7 +153,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
             y, dict_y_internal, c, record = f_return
 
-            # convert constraint to **sorted** violation
+            # convert constraint to **sorted 1-d array** violation
             assert len(c) == len(self.opt_.constraints)
             v = {}
             for cns_name, cns in self.opt_.constraints.items():
@@ -139,10 +170,7 @@ class OptunaOptimizer(AbstractOptimizer):
 
         def _postprocess(self):
             # update trial attribute
-            self.opt.current_trial.set_user_attr(
-                self.optuna_attr.key,
-                self.optuna_attr.value,
-            )
+            self.optuna_attr.set_user_attr_to_trial(self.opt.current_trial)
 
     def _create_infeasible_constraints(self, opt_: AbstractOptimizer = None) -> tuple:
         opt_ = opt_ if opt_ is not None else self
@@ -155,9 +183,9 @@ class OptunaOptimizer(AbstractOptimizer):
         return tuple(1e9 * np.ones(count, dtype=np.float64))
 
     def _constraint(self, trial: optuna.trial.FrozenTrial):
-        key = OptunaAttribute(self).key
-        value = trial.user_attrs[key]
-        return OptunaAttribute.get_violation_from_trial_attr(value)
+        main_key = OptunaAttribute(self).key
+        user_attribute: OptunaAttribute.AttributeStructure = trial.user_attrs[main_key]
+        return user_attribute['violation_values']
 
     def _objective(self, trial: optuna.trial.Trial):
 
@@ -226,9 +254,9 @@ class OptunaOptimizer(AbstractOptimizer):
 
             # To avoid trial FAILED with hard constraint
             # violation, check pf_state and raise TrialPruned.
-            key = OptunaAttribute(self).key
-            value = trial.user_attrs[key]
-            state = OptunaAttribute.get_pf_state_from_trial_attr(value)
+            main_key = OptunaAttribute(self).key
+            user_attribute: OptunaAttribute.AttributeStructure = trial.user_attrs[main_key]
+            state: TrialState = user_attribute['pf_state']
             if state in [
                 TrialState.hard_constraint_violation,
                 TrialState.model_error,
@@ -244,9 +272,6 @@ class OptunaOptimizer(AbstractOptimizer):
                 return None
 
             return y_internal
-
-        if get_client() is None:
-            self.history.save()
 
     def _get_callback(self, n_trials: int):
 
@@ -587,16 +612,16 @@ def debug_1():
     _opt.add_parameter('x1', 1, -1, 1, step=0.1)
     _opt.add_parameter('x2', 1, -1, 1, step=0.1)
     _opt.add_categorical_parameter('x3', 'a', choices=['a', 'b', 'c'])
-    _opt.add_constraint('cns', _cns, lower_bound=-0.9, args=(_fem, _opt))
-    _opt.add_objective('obj1', _parabola, args=(_fem, _opt))
-    # _opt.add_objective('obj2', _parabola2, args=(_fem, _opt))
+    # _opt.add_constraint('cns', _cns, lower_bound=-0.9, args=(_opt,))
+    _opt.add_objective('obj1', _parabola, args=(_opt,))
+    # _opt.add_objective('obj2', _parabola2, args=(_opt,))
 
     # # ===== sub-fidelity =====
     # __fem = NoFEM()
     # __opt = SubFidelityModel()
     # __opt.fem = __fem
-    # __opt.add_objective('obj1', _parabola, args=(__fem, __opt))
-    # __opt.add_objective('obj2', _parabola2, args=(__fem, __opt))
+    # __opt.add_objective('obj1', _parabola, args=(__opt,))
+    # # __opt.add_objective('obj2', _parabola2, args=(__opt,))
     #
     # _opt.add_sub_fidelity_model(name='low-fidelity', sub_fidelity_model=__opt, fidelity=0.5)
     #
@@ -611,6 +636,96 @@ def debug_1():
     #     return len(pdf) % 5 == 0
     #
     # _opt.set_solve_condition(_solve_condition)
+
+    # _opt.history.path = 'restart-test.csv'
+    _opt.run()
+
+    # import plotly.express as px
+    # _df = _opt.history.get_df()
+    # px.scatter_3d(_df, x='x1', y='x2', z='obj', color='fidelity', opacity=0.5).show()
+
+    _opt.history.save()
+
+
+def debug_1s():
+    # from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import
+    # sampler = PoFBoTorchSampler(
+    #     n_startup_trials=5,
+    #     seed=42,
+    #     constraints_func=self._constraint,
+    #     pof_config=PoFConfig(
+    #         # consider_pof=False,
+    #         # feasibility_cdf_threshold='mean',
+    #     ),
+    #     partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(
+    #         # gen_candidates='scipy',
+    #         timeout_sec=5.,
+    #         # method='SLSQP'  # 'COBYLA, COBYQA, SLSQP or trust-constr
+    #         tol=0.1,
+    #         # scipy_minimize_kwargs=dict(),
+    #     ),
+    # )
+    # from optuna_integration import BoTorchSampler
+    # sampler = BoTorchSampler(n_startup_trials=5)
+
+    os.chdir(os.path.dirname(__file__))
+
+    def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
+        d = _opt.get_variables()
+        x1 = d['x1']
+        x2 = d['x2']
+        # if _cns(_fem, _opt) < 0:
+        #     raise PostProcessError
+        return x1 ** 2 + x2 ** 2
+
+    def _parabola2(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
+        x = _opt.get_variables('values')
+        return ((x - 0.1) ** 2).sum()
+
+    def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer) -> float:
+        x = _opt.get_variables('values')
+        return x[0]
+
+    _fem = NoFEM()
+    _opt = OptunaOptimizer()
+    _opt.fem = _fem
+
+    # _opt.sampler = optuna.samplers.RandomSampler(seed=42)
+    _opt.seed = 42
+    _opt.sampler_class = optuna.samplers.TPESampler
+    # _opt.sampler_class = optuna.samplers.RandomSampler
+    _opt.sampler_kwargs = dict(
+        n_startup_trials=5,
+    )
+    _opt.n_trials = 10
+
+    _opt.add_parameter('x1', 1, -1, 1, step=0.1)
+    _opt.add_parameter('x2', 1, -1, 1, step=0.1)
+    _opt.add_categorical_parameter('x3', 'a', choices=['a', 'b', 'c'])
+    # _opt.add_constraint('cns', _cns, lower_bound=-0.9, args=(_opt,))
+    _opt.add_objective('obj1', _parabola, args=(_opt,))
+    # _opt.add_objective('obj2', _parabola2, args=(_opt,))
+
+    # ===== sub-fidelity =====
+    __fem = NoFEM()
+    __opt = SubFidelityModel()
+    __opt.fem = __fem
+    __opt.add_objective('obj1', _parabola, args=(__opt,))
+    # __opt.add_objective('obj2', _parabola2, args=(__opt,))
+
+    _opt.add_sub_fidelity_model(name='low-fidelity', sub_fidelity_model=__opt, fidelity=0.5)
+
+    def _solve_condition(_history: History):
+
+        sub_fidelity_df = _history.get_df(
+            {'sub_fidelity_name': 'low-fidelity'}
+        )
+        idx = sub_fidelity_df['state'] == TrialState.succeeded
+        pdf = sub_fidelity_df[idx]
+
+        return len(pdf) % 5 == 0
+
+    _opt.set_solve_condition(_solve_condition)
 
     # _opt.history.path = 'restart-test.csv'
     _opt.run()
@@ -669,10 +784,13 @@ def debug_3():
     opt.add_parameter(name="substrate_d", initial_value=60, lower_bound=34, upper_bound=60)
 
     opt.n_trials = 5
-    opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test.csv')
+    opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test-2.csv')
 
     opt.run()
 
 
 if __name__ == '__main__':
+    debug_1()
+    debug_1s()
+    debug_2()
     debug_3()

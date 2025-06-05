@@ -123,6 +123,37 @@
 <div class="viewcode-block" id="OptunaOptimizer">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.optuna_optimizer.html#pyfemtet.opt.OptunaOptimizer">[ドキュメント]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptunaOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An optimizer class utilizing Optuna for hyperparameter optimization.</span>
+
+<span class="sd">    This class provides an interface to conduct optimization studies using Optuna.</span>
+<span class="sd">    It manages the study lifecycle, sampler configuration, and trial execution.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        study_name (str): Name of the Optuna study.</span>
+<span class="sd">        storage (str | optuna.storages.BaseStorage): Storage URL or object for the Optuna study.</span>
+<span class="sd">        storage_path (str): Path to the Optuna study storage.</span>
+<span class="sd">        current_trial (optuna.trial.Trial | None): The current Optuna trial being evaluated.</span>
+<span class="sd">        sampler_class (type[optuna.samplers.BaseSampler]): The class of the Optuna sampler to use.</span>
+<span class="sd">        sampler_kwargs (dict): Keyword arguments to initialize the sampler.</span>
+<span class="sd">        n_trials (int | None): Number of trials to run in the study.</span>
+<span class="sd">        timeout (float | None): Maximum time allowed for the optimization.</span>
+<span class="sd">        callbacks (list): List of callback functions to invoke during optimization.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampler_class (type[optuna.samplers.BaseSampler], optional): The sampler class for suggesting parameter values. Defaults to TPESampler if None.</span>
+<span class="sd">        sampler_kwargs (dict[str, ...], optional): Dictionary of keyword arguments for the sampler. Defaults to an empty dictionary.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; optimizer = OptunaOptimizer()</span>
+<span class="sd">        &gt;&gt;&gt; optimizer.n_trials = 100</span>
+<span class="sd">        &gt;&gt;&gt; optimizer.timeout = 600</span>
+<span class="sd">        &gt;&gt;&gt; # Further configuration and usage...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># system</span>
     <span class="n">study_name</span> <span class="o">=</span> <span class="s1">&#39;pyfemtet-study&#39;</span>
     <span class="n">storage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">BaseStorage</span>
@@ -212,7 +243,7 @@
 
             <span class="n">y</span><span class="p">,</span> <span class="n">dict_y_internal</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">record</span> <span class="o">=</span> <span class="n">f_return</span>
 
-            <span class="c1"># convert constraint to **sorted** violation</span>
+            <span class="c1"># convert constraint to **sorted 1-d array** violation</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
             <span class="n">v</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">cns_name</span><span class="p">,</span> <span class="n">cns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -229,10 +260,7 @@
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="c1"># update trial attribute</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">current_trial</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_attr</span><span class="o">.</span><span class="n">set_user_attr_to_trial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">current_trial</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_infeasible_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
         <span class="n">opt_</span> <span class="o">=</span> <span class="n">opt_</span> <span class="k">if</span> <span class="n">opt_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span>
@@ -245,9 +273,9 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="mf">1e9</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">FrozenTrial</span><span class="p">):</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">key</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">get_violation_from_trial_attr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">main_key</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">key</span>
+        <span class="n">user_attribute</span><span class="p">:</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">AttributeStructure</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">main_key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">user_attribute</span><span class="p">[</span><span class="s1">&#39;violation_values&#39;</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">Trial</span><span class="p">):</span>
 
@@ -316,9 +344,9 @@
 
             <span class="c1"># To avoid trial FAILED with hard constraint</span>
             <span class="c1"># violation, check pf_state and raise TrialPruned.</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">key</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">state</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">get_pf_state_from_trial_attr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">main_key</span> <span class="o">=</span> <span class="n">OptunaAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">key</span>
+            <span class="n">user_attribute</span><span class="p">:</span> <span class="n">OptunaAttribute</span><span class="o">.</span><span class="n">AttributeStructure</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="n">main_key</span><span class="p">]</span>
+            <span class="n">state</span><span class="p">:</span> <span class="n">TrialState</span> <span class="o">=</span> <span class="n">user_attribute</span><span class="p">[</span><span class="s1">&#39;pf_state&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">[</span>
                 <span class="n">TrialState</span><span class="o">.</span><span class="n">hard_constraint_violation</span><span class="p">,</span>
                 <span class="n">TrialState</span><span class="o">.</span><span class="n">model_error</span><span class="p">,</span>
@@ -334,9 +362,6 @@
                 <span class="k">return</span> <span class="kc">None</span>
 
             <span class="k">return</span> <span class="n">y_internal</span>
-
-        <span class="k">if</span> <span class="n">get_client</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 
@@ -681,16 +706,16 @@
     <span class="n">_opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;x1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
     <span class="n">_opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;x2&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
     <span class="n">_opt</span><span class="o">.</span><span class="n">add_categorical_parameter</span><span class="p">(</span><span class="s1">&#39;x3&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">])</span>
-    <span class="n">_opt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">,</span> <span class="n">_cns</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=-</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">_fem</span><span class="p">,</span> <span class="n">_opt</span><span class="p">))</span>
-    <span class="n">_opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">,</span> <span class="n">_parabola</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">_fem</span><span class="p">,</span> <span class="n">_opt</span><span class="p">))</span>
-    <span class="c1"># _opt.add_objective(&#39;obj2&#39;, _parabola2, args=(_fem, _opt))</span>
+    <span class="c1"># _opt.add_constraint(&#39;cns&#39;, _cns, lower_bound=-0.9, args=(_opt,))</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">,</span> <span class="n">_parabola</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">_opt</span><span class="p">,))</span>
+    <span class="c1"># _opt.add_objective(&#39;obj2&#39;, _parabola2, args=(_opt,))</span>
 
     <span class="c1"># # ===== sub-fidelity =====</span>
     <span class="c1"># __fem = NoFEM()</span>
     <span class="c1"># __opt = SubFidelityModel()</span>
     <span class="c1"># __opt.fem = __fem</span>
-    <span class="c1"># __opt.add_objective(&#39;obj1&#39;, _parabola, args=(__fem, __opt))</span>
-    <span class="c1"># __opt.add_objective(&#39;obj2&#39;, _parabola2, args=(__fem, __opt))</span>
+    <span class="c1"># __opt.add_objective(&#39;obj1&#39;, _parabola, args=(__opt,))</span>
+    <span class="c1"># # __opt.add_objective(&#39;obj2&#39;, _parabola2, args=(__opt,))</span>
     <span class="c1">#</span>
     <span class="c1"># _opt.add_sub_fidelity_model(name=&#39;low-fidelity&#39;, sub_fidelity_model=__opt, fidelity=0.5)</span>
     <span class="c1">#</span>
@@ -705,6 +730,96 @@
     <span class="c1">#     return len(pdf) % 5 == 0</span>
     <span class="c1">#</span>
     <span class="c1"># _opt.set_solve_condition(_solve_condition)</span>
+
+    <span class="c1"># _opt.history.path = &#39;restart-test.csv&#39;</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="c1"># import plotly.express as px</span>
+    <span class="c1"># _df = _opt.history.get_df()</span>
+    <span class="c1"># px.scatter_3d(_df, x=&#39;x1&#39;, y=&#39;x2&#39;, z=&#39;obj&#39;, color=&#39;fidelity&#39;, opacity=0.5).show()</span>
+
+    <span class="n">_opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">debug_1s</span><span class="p">():</span>
+    <span class="c1"># from pyfemtet.opt.optimizer.optuna_optimizer.pof_botorch.pof_botorch_sampler import</span>
+    <span class="c1"># sampler = PoFBoTorchSampler(</span>
+    <span class="c1">#     n_startup_trials=5,</span>
+    <span class="c1">#     seed=42,</span>
+    <span class="c1">#     constraints_func=self._constraint,</span>
+    <span class="c1">#     pof_config=PoFConfig(</span>
+    <span class="c1">#         # consider_pof=False,</span>
+    <span class="c1">#         # feasibility_cdf_threshold=&#39;mean&#39;,</span>
+    <span class="c1">#     ),</span>
+    <span class="c1">#     partial_optimize_acqf_kwargs=PartialOptimizeACQFConfig(</span>
+    <span class="c1">#         # gen_candidates=&#39;scipy&#39;,</span>
+    <span class="c1">#         timeout_sec=5.,</span>
+    <span class="c1">#         # method=&#39;SLSQP&#39;  # &#39;COBYLA, COBYQA, SLSQP or trust-constr</span>
+    <span class="c1">#         tol=0.1,</span>
+    <span class="c1">#         # scipy_minimize_kwargs=dict(),</span>
+    <span class="c1">#     ),</span>
+    <span class="c1"># )</span>
+    <span class="c1"># from optuna_integration import BoTorchSampler</span>
+    <span class="c1"># sampler = BoTorchSampler(n_startup_trials=5)</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parabola</span><span class="p">(</span><span class="n">_fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">_opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_opt</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;x1&#39;</span><span class="p">]</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;x2&#39;</span><span class="p">]</span>
+        <span class="c1"># if _cns(_fem, _opt) &lt; 0:</span>
+        <span class="c1">#     raise PostProcessError</span>
+        <span class="k">return</span> <span class="n">x1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parabola2</span><span class="p">(</span><span class="n">_fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">_opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">_opt</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cns</span><span class="p">(</span><span class="n">_fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">_opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">_opt</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">_fem</span> <span class="o">=</span> <span class="n">NoFEM</span><span class="p">()</span>
+    <span class="n">_opt</span> <span class="o">=</span> <span class="n">OptunaOptimizer</span><span class="p">()</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">_fem</span>
+
+    <span class="c1"># _opt.sampler = optuna.samplers.RandomSampler(seed=42)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">sampler_class</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span>
+    <span class="c1"># _opt.sampler_class = optuna.samplers.RandomSampler</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">sampler_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">n_startup_trials</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;x1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;x2&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_categorical_parameter</span><span class="p">(</span><span class="s1">&#39;x3&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">])</span>
+    <span class="c1"># _opt.add_constraint(&#39;cns&#39;, _cns, lower_bound=-0.9, args=(_opt,))</span>
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">,</span> <span class="n">_parabola</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">_opt</span><span class="p">,))</span>
+    <span class="c1"># _opt.add_objective(&#39;obj2&#39;, _parabola2, args=(_opt,))</span>
+
+    <span class="c1"># ===== sub-fidelity =====</span>
+    <span class="n">__fem</span> <span class="o">=</span> <span class="n">NoFEM</span><span class="p">()</span>
+    <span class="n">__opt</span> <span class="o">=</span> <span class="n">SubFidelityModel</span><span class="p">()</span>
+    <span class="n">__opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">__fem</span>
+    <span class="n">__opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">,</span> <span class="n">_parabola</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">__opt</span><span class="p">,))</span>
+    <span class="c1"># __opt.add_objective(&#39;obj2&#39;, _parabola2, args=(__opt,))</span>
+
+    <span class="n">_opt</span><span class="o">.</span><span class="n">add_sub_fidelity_model</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;low-fidelity&#39;</span><span class="p">,</span> <span class="n">sub_fidelity_model</span><span class="o">=</span><span class="n">__opt</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_solve_condition</span><span class="p">(</span><span class="n">_history</span><span class="p">:</span> <span class="n">History</span><span class="p">):</span>
+
+        <span class="n">sub_fidelity_df</span> <span class="o">=</span> <span class="n">_history</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span>
+            <span class="p">{</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">:</span> <span class="s1">&#39;low-fidelity&#39;</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">sub_fidelity_df</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">succeeded</span>
+        <span class="n">pdf</span> <span class="o">=</span> <span class="n">sub_fidelity_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="n">_opt</span><span class="o">.</span><span class="n">set_solve_condition</span><span class="p">(</span><span class="n">_solve_condition</span><span class="p">)</span>
 
     <span class="c1"># _opt.history.path = &#39;restart-test.csv&#39;</span>
     <span class="n">_opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -763,12 +878,15 @@
     <span class="n">opt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;substrate_d&quot;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">34</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
 
     <span class="n">opt</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">5</span>
-    <span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;femtet-test.csv&#39;</span><span class="p">)</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;femtet-test-2.csv&#39;</span><span class="p">)</span>
 
     <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">debug_1</span><span class="p">()</span>
+    <span class="n">debug_1s</span><span class="p">()</span>
+    <span class="n">debug_2</span><span class="p">()</span>
     <span class="n">debug_3</span><span class="p">()</span>
 </pre></div>
 

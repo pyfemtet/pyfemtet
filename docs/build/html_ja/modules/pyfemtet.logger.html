@@ -58,10 +58,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../pages/api.html#most-major-classes">Most Major Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pages/api.html#other-major-classes">Other Major Classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../pages/api.html#entire-reference">Entire Reference</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">Module contents</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pyfemtet.html">pyfemtet パッケージ</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyfemtet.html#subpackages">サブパッケージ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#submodules">サブモジュール</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyfemtet.html#module-pyfemtet">モジュール内容</a></li>
 </ul>
 </li>
 </ul>
@@ -86,7 +86,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../pages/api.html">API Reference</a></li>
-          <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet package</a></li>
+          <li class="breadcrumb-item"><a href="pyfemtet.html">pyfemtet パッケージ</a></li>
       <li class="breadcrumb-item active">pyfemtet.logger package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/modules/pyfemtet.logger.rst.txt" rel="nofollow"> View page source</a>
@@ -100,7 +100,7 @@
   <section id="pyfemtet-logger-package">
 <h1>pyfemtet.logger package<a class="headerlink" href="#pyfemtet-logger-package" title="Link to this heading"></a></h1>
 <section id="module-pyfemtet.logger">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfemtet.logger" title="Link to this heading"></a></h2>
+<span id="module-contents"></span><h2>モジュール内容<a class="headerlink" href="#module-pyfemtet.logger" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyfemtet.logger.get_dash_logger">
 <span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_dash_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger.html#get_dash_logger"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_dash_logger" title="Link to this definition"></a></dt>
@@ -114,19 +114,17 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="pyfemtet.logger.get_module_logger">
 <span class="sig-prename descclassname"><span class="pre">pyfemtet.logger.</span></span><span class="sig-name descname"><span class="pre">get_module_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/logger/_impl.html#get_module_logger"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.logger.get_module_logger" title="Link to this definition"></a></dt>
-<dd><p>Return the module-level logger.</p>
-<p>The format is defined in the package_root_logger.</p>
+<dd><p>モジュールレベルのロガーを返します。</p>
+<p>フォーマットは package_root_logger で定義されています。</p>
 <dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The logger name to want.</p></li>
-<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Output DEBUG level message or not.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – ロガーの名前。</p></li>
+<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – DEBUG レベルのメッセージを出力するかどうか。</p></li>
 </ul>
 </dd>
 <dt class="field-even">戻り値<span class="colon">:</span></dt>
-<dd class="field-even"><p>The logger its name is <code class="docutils literal notranslate"><span class="pre">root_package.subpackage.module</span></code>.
-child level logger’s signal propagates to the parent logger
-and is shown in the parent(s)』s handler(s).</p>
+<dd class="field-even"><p>ロガーの名前は <code class="docutils literal notranslate"><span class="pre">root_package.subpackage.module</span></code> です。子レベルのロガーのシグナルは親ロガーに伝播し、親のハンドラーで表示されます。</p>
 </dd>
 <dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)">logging.Logger</a></p>

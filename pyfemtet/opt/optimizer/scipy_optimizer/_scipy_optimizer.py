@@ -36,6 +36,25 @@ class _ScipyCallback:
 
 
 class ScipyOptimizer(AbstractOptimizer):
+    """
+    Optimizer class that utilizes SciPy optimization methods.
+
+    This class serves as a wrapper around SciPy's optimization routines,
+    allowing customization of the optimization method, tolerance, and options.
+    It also provides mechanisms for handling constraints with enhancement and scaling.
+
+    Attributes:
+        method (str): The optimization method to use (e.g., 'BFGS', 'Nelder-Mead').
+        tol (float or None): Tolerance for termination.
+        options (dict): Additional options to pass to the SciPy optimizer.
+        constraint_enhancement (float): Small value added to enhance constraint handling.
+        constraint_scaling (float): Scaling factor applied to constraints.
+
+    Args:
+        method (str): The optimization method to use (e.g., 'BFGS', 'Nelder-Mead').
+        tol (float or None): Tolerance for termination.
+        
+    """
 
     _timeout: None = None
     _n_trials: None = None

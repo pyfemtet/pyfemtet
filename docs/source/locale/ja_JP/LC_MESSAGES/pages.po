@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-19 11:18+0900\n"
+"POT-Creation-Date: 2025-06-04 16:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -551,6 +551,14 @@ msgstr "第一引数として何が与えられるかは、お使いのインタ
 msgid "For details, please refer to the `API Reference of Latest version <https://pyfemtet.readthedocs.io/en/latest/pages/api.html>`__ of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
 msgstr "より詳しくは、 `開発中最新バージョンの API リファレンス <https://pyfemtet.readthedocs.io/ja/latest/pages/api.html>`__ の ``~Interface.object_pass_to_fun`` 項目を参照してください。もしインターフェースクラスの項目に ``object_pass_to_fun`` の項目がなければ、継承元クラスの項目をご覧ください。"
 
+#: ../source/pages/migration_to_v1.rst:114
+msgid "``opt.variables.get_variables()`` method"
+msgstr "``opt.variables.get_variables()`` メソッド"
+
+#: ../source/pages/migration_to_v1.rst:116
+msgid "The ``opt.variables.get_variables()`` will be deprecated. Use ``opt.get_variables()`` instead."
+msgstr "``opt.variables.get_variables()`` メソッドは廃止されます. 代わりに ``opt.get_variables()`` をお使いください。"
+
 #: ../source/pages/script_builder.rst:2
 msgid "GUI"
 msgstr ""
@@ -1079,3 +1087,4 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 
 #~ msgid "***Security Warning:*** This .bat file contains a command that ***relaxes security requirements*** to run a .ps1 file named `pyfemtet-installer`. Before executing this .bat file, please ensure that the .ps1 file located in the same folder is the one downloaded from the above source. Do not use this .bat file for anything other than running the `pyfemtet-installer.ps1`."
 #~ msgstr "***セキュリティに関する警告:*** この .bat ファイルには、`pyfemtet-installer` というファイル名の .ps1 ファイルをセキュリティ要件を緩和して実行するコマンドが含まれています。この .bat ファイルの実行前に、同じフォルダに存在する .ps1 ファイルが上記からダウンロードした .ps1 ファイルであることを確認してください。この .bat ファイルは、 pyfemtet-installer.ps1 ファイルの実行以外に使用せず、使用後は削除してください。"
+

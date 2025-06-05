@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-from contextlib import closing
 
 import pytest
 
@@ -11,6 +10,7 @@ from pyfemtet.opt.optimizer import OptunaOptimizer
 from pyfemtet.opt.femopt import FEMOpt
 
 from tests import get
+from tests.utils.closing import closing
 
 
 def _run(fun_name):
@@ -29,8 +29,7 @@ def _run(fun_name):
         f'"',
         cwd=os.path.abspath(here),
         shell=True,
-    )
-
+    ).check_returncode()
 
 
 # subprocess 経由で呼ばないと windows fatal exception が起こる

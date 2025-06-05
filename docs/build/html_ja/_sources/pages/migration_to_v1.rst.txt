@@ -108,3 +108,24 @@ and its derived classes (such as FemtetWithNXInterface).
    If the concrete class’s API reference does not include
    an object_pass_to_fun section, please refer to the
    corresponding section in its parent class.
+
+
+``opt.variables.get_variables()`` method
+----------------------------------------
+
+The ``opt.variables.get_variables()`` will be deprecated.
+Use ``opt.get_variables()`` instead.
+
+.. code-block:: python
+
+   # < 1.0.0
+   def constraint(_, opt: AbstractOptimizer):
+      d = opt.variables.get_variables()  # d is dict[str, float]
+      ...
+
+   # >= 1.0.0
+   def constraint(_, opt: AbstractOptimizer):
+      d: dict[str, float]  = opt.get_variables()  # d is dict[str, float]
+      ...
+
+

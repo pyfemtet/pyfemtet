@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-20 14:40+0900\n"
+"POT-Creation-Date: 2025-06-04 16:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgid "PyFemtet allows parametric optimization even for analysis models created 
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:8
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:15
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:17
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:9
 #: ../source/examples/gau_ex08/gau_ex08.rst:8
 #: ../source/examples/her_ex40/her_ex40.rst:8
@@ -40,26 +40,32 @@ msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_NX.
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:22
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:27
 msgid "Details as a FEM Problem"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:27
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:32
 msgid "Appearance of the Model (and Analysis Conditions)"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:29
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:34
 msgid "fix ... Fully Fixed"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:30
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:35
 msgid "load ... Load in the -Z direction (1N)"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:31
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:36
 msgid "mirror ... Symmetrical to the XZ plane"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:35
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:41
 #: ../source/examples/gau_ex08/gau_ex08.rst:21
 #: ../source/examples/her_ex40/her_ex40.rst:21
 #: ../source/examples/wat_ex14/wat_ex14.rst:21
@@ -68,10 +74,12 @@ msgid "Design Variables"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:40
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:46
 msgid "Appearance of the Model Section (and Design Variables)"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:49
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
@@ -83,6 +91,7 @@ msgid "Variable Name"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:43
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:49
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:25
 #: ../source/examples/gau_ex08/gau_ex08.rst:28
 #: ../source/examples/her_ex40/her_ex40.rst:28
@@ -94,26 +103,32 @@ msgid "Description"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:45
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:51
 msgid "A"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:45
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:51
 msgid "Web Tickness"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:46
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:52
 msgid "B"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:46
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:52
 msgid "Flange Tickness"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:47
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:53
 msgid "C"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:47
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:53
 msgid "Flange Bending"
 msgstr ""
 
@@ -137,7 +152,7 @@ msgid "Volume (minimize)"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:59
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:25
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:59
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:39
 #: ../source/examples/gau_ex08/gau_ex08.rst:43
 #: ../source/examples/her_ex40/her_ex40.rst:43
@@ -153,7 +168,7 @@ msgid "cad_ex01_NX.py"
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:68
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:34
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:68
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:48
 #: ../source/examples/gau_ex08/gau_ex08.rst:52
 #: ../source/examples/her_ex40/her_ex40.rst:52
@@ -173,7 +188,7 @@ msgid "After the 20 trials, a Pareto set of von Mises stress and mass is obtaine
 msgstr ""
 
 #: ../source/examples/NX_ex01/NX_ex01.rst:80
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:46
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:80
 #: ../source/examples/constrained_pipe/constrained_pipe.rst:59
 #: ../source/examples/gau_ex08/gau_ex08.rst:63
 #: ../source/examples/her_ex40/her_ex40.rst:63
@@ -197,22 +212,22 @@ msgid "An example will be explained using an H-shaped steel that was parametrica
 msgstr ""
 
 #: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:10
-msgid "Other than the sample code and execution results, the items are the same as in :doc:`../NX_ex01/NX_ex01`."
+msgid "Other than the sample code and execution results, the items are similar as in :doc:`../NX_ex01/NX_ex01`."
 msgstr ""
 
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:18
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:20
 msgid "Place the :download:`sample model<../_temporary_sample_files/cad_ex01_SW.SLDPRT>` and :download:`sample project<../_temporary_sample_files/cad_ex01_SW.femprj>` in the same folder, keep the project open in Femtet, and double-click on :download:`sample code<../_temporary_sample_files/cad_ex01_SW.py>` to execute."
 msgstr ""
 
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:27
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:61
 msgid "cad_ex01_SW.py"
 msgstr ""
 
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:39
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:73
 msgid "Execution result of Sldworks_ex01.py. The horizontal axis is von Mises stress, and the vertical axis is mass."
 msgstr ""
 
-#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:41
+#: ../source/examples/Sldworks_ex01/Sldworks_ex01.rst:75
 msgid "After 20 trials, a Pareto set of von Mises stress and mass is obtained."
 msgstr ""
 

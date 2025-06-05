@@ -20,6 +20,26 @@ if TYPE_CHECKING:
 
 
 class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, AbstractFEMInterface):
+    """
+    Interface class integrating Femtet and SolidWorks operations.
+
+    This class combines the capabilities of both Femtet and SolidWorks interfaces, allowing
+    coordinated operation between simulation (Femtet) and CAD manipulation (SolidWorks).
+
+    Args:
+        sldprt_path (str): Path to the SolidWorks part file (.sldprt).
+        femprj_path (str, optional): Path to the Femtet project file (.femprj). Defaults to None.
+        model_name (str, optional): Name of the model in the project. Defaults to None.
+        connect_method (str, optional): Connection method for Femtet. Defaults to "auto".
+        save_pdt (str, optional): Specifies which data to save. Defaults to "all".
+        strictly_pid_specify (bool, optional): Whether to strictly specify parameter IDs. Defaults to True.
+        allow_without_project (bool, optional): If True, allows operation without a project file. Defaults to False.
+        open_result_with_gui (bool, optional): If True, open results with GUI. Defaults to True.
+        parametric_output_indexes_use_as_objective (dict[int, str | float], optional): Indexes for parametric output used as objectives. Defaults to None.
+        always_open_copy (bool, optional): If True, always open a copy of the project. Defaults to False.
+        close_solidworks_on_terminate (bool, optional): If True, SolidWorks will close when this object is destroyed. Defaults to False.
+        solidworks_visible (bool, optional): If True, SolidWorks will be started in visible mode. Defaults to True.
+    """
 
     def __init__(
             self,
@@ -31,7 +51,7 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
             strictly_pid_specify: bool = True,
             allow_without_project: bool = False,
             open_result_with_gui: bool = True,
-            parametric_output_indexes_use_as_objective: dict[int, str or float] = None,
+            parametric_output_indexes_use_as_objective: dict[int, str | float] = None,
             always_open_copy=False,
             close_solidworks_on_terminate=False,
             solidworks_visible=True,
