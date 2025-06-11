@@ -31,13 +31,10 @@ if __name__ == '__main__':
         sampler_class=RandomSampler,
     )
 
-    # We will set up the FEMOpt object. To refer to
-    # history_path in the optimization script, we will
-    # specify a clear CSV file name.
+    # We will set up the FEMOpt object. 
     femopt = FEMOpt(
         fem=fem,
         opt=opt,
-        history_path='training_data.csv'
     )
 
     # Set the design variables.
@@ -54,7 +51,10 @@ if __name__ == '__main__':
     # If no termination condition is specified,
     # it will continue creating training data until
     # manually stopped.
+    # To refer to history_path in the optimization script, we will
+    # specify a clear CSV file name.
     femopt.set_random_seed(42)
     femopt.optimize(
+        history_path='training_data.csv',
         # n_trials=100
     )

@@ -265,41 +265,59 @@
             <span class="c1"># fun を持つ場合</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ExpressionFromFunction</span><span class="p">):</span>
 
-                <span class="c1"># pop するので list をコピーしておく</span>
-                <span class="n">user_def_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+                <span class="c1"># 関数に渡す引数の初期化</span>
+                <span class="n">final_args</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">final_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-                <span class="c1"># 位置引数を揃え、残りをキーワード引数にする</span>
-                <span class="n">pos_args</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">kw_args</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+                <span class="c1"># 関数のシグネチャを取得</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
 
-                <span class="c1"># 引数順に調べる</span>
-                <span class="n">required_arg_names</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">required_arg_names</span><span class="p">:</span>
+                <span class="c1"># 用意された引数をコピー</span>
+                <span class="n">user_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+                <span class="n">user_kwargs</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-                    <span class="c1"># 位置引数であ（りう）る</span>
+                <span class="c1"># 関数に定義されている順に組み立て</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+                    <span class="c1"># def sample(a, /, b, *c, d=None, **e):</span>
+                    <span class="c1">#     ...</span>
+                    <span class="c1"># a: POSITIONAL_OR_KEYWORD</span>
+                    <span class="c1"># b: POSITIONAL_OR_KEYWORD</span>
+                    <span class="c1"># c: VAR_POSITIONAL</span>
+                    <span class="c1"># d: KEYWORD_ONLY</span>
+                    <span class="c1"># e: VAR_KEYWORD</span>
+
+                    <span class="c1"># 位置引数で定義されているもの</span>
                     <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="o">&lt;=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">:</span>
 
                         <span class="c1"># 変数である</span>
                         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
                             <span class="c1"># order 順に見ているのですでに value が正しいはず</span>
-                            <span class="n">pos_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                            <span class="n">final_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
-                        <span class="c1"># ユーザー定義位置引数である</span>
+                        <span class="c1"># ユーザーが供給する変数である</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">pos_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_def_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-                            <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pop from empty list</span>
+                            <span class="c1"># user kwargs にあるかまず確認する</span>
+                            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">user_kwargs</span><span class="p">:</span>
+                                <span class="c1"># 該当物を抜き出して args に追加</span>
+                                <span class="n">final_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                            <span class="c1"># user args がまだある</span>
+                            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="c1"># 先頭を抜き出して args に追加</span>
+                                <span class="n">final_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+                            <span class="c1"># pos args が空であり、kwargs の中にもない</span>
+                            <span class="k">else</span><span class="p">:</span>
                                 <span class="n">msg</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="k">for</span> <span class="n">p_</span> <span class="ow">in</span> <span class="n">required_arg_names</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">p_</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                                     <span class="k">if</span> <span class="n">p_</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
                                         <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*</span><span class="si">{</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                                     <span class="k">elif</span> <span class="n">p_</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
                                         <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;**</span><span class="si">{</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                                     <span class="k">else</span><span class="p">:</span>
                                         <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                                <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span>
-                                    <span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
-                                    <span class="n">_</span><span class="p">(</span>
+                                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
                                         <span class="s1">&#39;Missing arguments! &#39;</span>
                                         <span class="s1">&#39;The arguments specified by `args`: </span><span class="si">{var_args}</span><span class="s1"> / &#39;</span>
                                         <span class="s1">&#39;The arguments specified by `kwargs`: </span><span class="si">{var_kwargs}</span><span class="s1"> / &#39;</span>
@@ -307,8 +325,7 @@
                                         <span class="n">var_args</span><span class="o">=</span><span class="n">var</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
                                         <span class="n">var_kwargs</span><span class="o">=</span><span class="n">var</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
                                         <span class="n">msg</span><span class="o">=</span><span class="n">msg</span>
-                                    <span class="p">),</span>
-                                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+                                <span class="p">))</span>
 
                     <span class="c1"># *args である</span>
                     <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
@@ -316,25 +333,64 @@
                         <span class="c1"># ユーザー定義位置引数でないとおかしい</span>
                         <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Extra positional argument name cannot be duplicated with a variable name.&#39;</span><span class="p">)</span>
 
-                        <span class="c1"># *args なので残り全部を pos_args に入れる</span>
-                        <span class="n">pos_args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">user_def_args</span><span class="p">)</span>
+                        <span class="c1"># *args なので残り全部を抜いて pos_args に入れる</span>
+                        <span class="n">final_args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">user_args</span><span class="p">)</span>
+                        <span class="n">user_args</span> <span class="o">=</span> <span class="p">[]</span>
 
-                    <span class="c1"># キーワード引数である</span>
+                    <span class="c1"># キーワード引数で定義されているもの</span>
                     <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">KEYWORD_ONLY</span><span class="p">:</span>
 
                         <span class="c1"># 変数である</span>
                         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
                             <span class="c1"># order 順に見ているのですでに value が正しいはず</span>
-                            <span class="n">kw_args</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">})</span>
+                            <span class="n">final_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">})</span>
+
+                        <span class="c1"># ユーザーが供給する変数である</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># user kwargs にあるかまず確認する</span>
+                            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">user_kwargs</span><span class="p">:</span>
+                                <span class="c1"># 該当物を抜き出して kwargs に追加</span>
+                                <span class="n">final_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">user_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)})</span>
+
+                            <span class="c1"># user args がまだある</span>
+                            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="c1"># 先頭を抜き出して args に追加</span>
+                                <span class="n">final_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">user_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)})</span>
+
+                            <span class="c1"># pos args が空であり、kwargs の中にもない</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="p">[]</span>
+                                <span class="k">for</span> <span class="n">p_</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                                    <span class="k">if</span> <span class="n">p_</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
+                                        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*</span><span class="si">{</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                                    <span class="k">elif</span> <span class="n">p_</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
+                                        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;**</span><span class="si">{</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p_</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                                        <span class="s1">&#39;Missing arguments! &#39;</span>
+                                        <span class="s1">&#39;The arguments specified by `args`: </span><span class="si">{var_args}</span><span class="s1"> / &#39;</span>
+                                        <span class="s1">&#39;The arguments specified by `kwargs`: </span><span class="si">{var_kwargs}</span><span class="s1"> / &#39;</span>
+                                        <span class="s1">&#39;Required arguments: </span><span class="si">{msg}</span><span class="s1">&#39;</span><span class="p">,</span>
+                                        <span class="n">var_args</span><span class="o">=</span><span class="n">var</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+                                        <span class="n">var_kwargs</span><span class="o">=</span><span class="n">var</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
+                                        <span class="n">msg</span><span class="o">=</span><span class="n">msg</span>
+                                <span class="p">))</span>
 
                     <span class="c1"># **kwargs である</span>
-                    <span class="k">else</span><span class="p">:</span>
-
-                        <span class="c1"># kw_args にユーザー定義キーワード引数を入れているので何もしなくてよい</span>
+                    <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
+                        <span class="c1"># 変数であってはいけない</span>
                         <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Extra keyword argument name cannot be duplicated with a variable name.&#39;</span><span class="p">)</span>
 
+                        <span class="c1"># 残りの kwargs を移す</span>
+                        <span class="n">final_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">user_kwargs</span><span class="p">)</span>
+                        <span class="n">user_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown argument type: </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">kind</span><span class="si">=}</span><span class="s1">&#39;</span><span class="p">)</span>
+
                 <span class="c1"># fun を実行する</span>
-                <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">pos_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">final_args</span><span class="p">,</span> <span class="o">**</span><span class="n">final_kwargs</span><span class="p">)</span>
 
             <span class="c1"># string expression の場合</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ExpressionFromString</span><span class="p">):</span>
