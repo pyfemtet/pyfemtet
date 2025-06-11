@@ -100,6 +100,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyfemtet</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_random_id</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.df_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.dask_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.str_enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
@@ -214,9 +215,10 @@
 
     <span class="n">__df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
     <span class="n">_lock_name</span> <span class="o">=</span> <span class="s1">&#39;edit-df&#39;</span>
-    <span class="n">_dataset_name</span> <span class="o">=</span> <span class="s1">&#39;df&#39;</span>
+    <span class="n">_dataset_name</span><span class="p">:</span> <span class="nb">str</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_name</span> <span class="o">=</span> <span class="s1">&#39;df-&#39;</span> <span class="o">+</span> <span class="n">generate_random_id</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
