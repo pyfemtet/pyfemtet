@@ -7,6 +7,7 @@ from dash import Output, Input, State, callback_context, no_update
 from dash.exceptions import PreventUpdate
 
 from pyfemtet.opt.history import History
+from pyfemtet.opt.problem.variable_manager import Variable
 
 from pyfemtet.opt.visualization.history_viewer._wrapped_components import dcc, dbc, html
 from pyfemtet.opt.visualization.history_viewer._base_application import *
@@ -326,9 +327,14 @@ class HomePage(AbstractPage):
                 row = df[df['trial'] == trial]
                 prm_names = self.application.history.prm_names
                 prm_values = row[prm_names].values.ravel()
-                x = {name: value for name, value in zip(prm_names, prm_values)}
 
-                self.femtet_control.fem.update_parameter(x)
+                pass_to_fem = {}
+                for name, value in zip(prm_names, prm_values):
+                    v = Variable()
+                    v.name = name
+                    v.value = value
+                    pass_to_fem.update({name: v})
+                self.femtet_control.fem.update_parameter(pass_to_fem)
                 self.femtet_control.fem.update_model()
 
                 Femtet.SaveProject(Femtet.Project, True)

@@ -8,6 +8,7 @@ from pyfemtet.opt.interface._solidworks_interface import SolidworksInterface
 from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 from pyfemtet.opt.optimizer import OptunaOptimizer
 from pyfemtet.opt.femopt import FEMOpt
+from pyfemtet.opt.problem.variable_manager import *
 
 from tests import get
 from tests.utils.closing import closing
@@ -41,9 +42,14 @@ def _impl_solidworks_interface_update():
     )
 
     with closing(fem):
+
+        x = Variable()
+        x.name = 'x'
+        x.value = 20
+
         fem._setup_before_parallel()
         fem._setup_after_parallel()
-        fem.update_parameter({'x': 20})
+        fem.update_parameter({'x': x})
         fem.update_model()
 
 
@@ -60,9 +66,14 @@ def _impl_femtet_with_solidworks_interface():
     )
 
     with closing(fem):
+
+        x = Variable()
+        x.name = 'x'
+        x.value = 20
+
         fem._setup_before_parallel()
         fem._setup_after_parallel()
-        fem.update_parameter({'x': 20})
+        fem.update_parameter(dict(x=x))
         fem.update_model()
 
 

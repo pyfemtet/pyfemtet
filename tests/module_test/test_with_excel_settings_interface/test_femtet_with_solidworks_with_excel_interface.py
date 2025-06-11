@@ -6,6 +6,7 @@ import pytest
 
 from pyfemtet.opt.interface import FemtetWithSolidworksWithExcelSettingsInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
+from pyfemtet.opt.problem.variable_manager import *
 
 from tests import get
 from tests.utils.closing import closing
@@ -55,7 +56,11 @@ def impl_load_femtet_with_sw_with_excel_settings():
         fem._setup_before_parallel()
         fem._setup_after_parallel(opt)
 
-        fem.update_parameter(dict(x=20))
+        variable = Variable()
+        variable.name = 'x'
+        variable.value = 20
+
+        fem.update_parameter(dict(x=variable))
         fem.update()
 
         for obj_name, obj in opt.objectives.items():

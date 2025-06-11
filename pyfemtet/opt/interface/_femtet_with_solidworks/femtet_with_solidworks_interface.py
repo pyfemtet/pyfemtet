@@ -9,7 +9,7 @@ from pywintypes import com_error
 
 from pyfemtet._i18n import _
 
-from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface
 from pyfemtet.opt.interface._solidworks_interface import SolidworksInterface
@@ -89,7 +89,7 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
         SolidworksInterface._setup_after_parallel(self, opt)
         FemtetInterface._setup_after_parallel(self, opt)
 
-    def update_parameter(self, x: dict[str, SupportedVariableTypes], with_warning=False) -> None:
+    def update_parameter(self, x: TrialInput, with_warning=False) -> None:
         SolidworksInterface.update_parameter(self, x)
         FemtetInterface.update_parameter(self, x, with_warning)
 

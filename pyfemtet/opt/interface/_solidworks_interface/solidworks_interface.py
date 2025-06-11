@@ -14,7 +14,7 @@ from pyfemtet._util.dask_util import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.interface._base_interface import COMInterface
 from pyfemtet._i18n import _
-from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.problem import *
 from pyfemtet.logger import get_module_logger
 
 if TYPE_CHECKING:
@@ -125,7 +125,7 @@ class SolidworksInterface(COMInterface):
     def update(self) -> None:
         raise NotImplementedError
 
-    def update_parameter(self, x: dict[str, SupportedVariableTypes]) -> None:
+    def update_parameter(self, x: TrialInput) -> None:
 
         COMInterface.update_parameter(self, x)
 
@@ -154,7 +154,7 @@ class SolidworksInterface(COMInterface):
                 prm_name = _get_name_from_equation(eq)
                 # 対象なら処理
                 if prm_name in self.current_prm_values:
-                    new_equation = f'"{prm_name}" = {self.current_prm_values[prm_name]}'
+                    new_equation = f'"{prm_name}" = {self.current_prm_values[prm_name].value}'
                     swEqnMgr.Equation(i, new_equation)
 
             # 式の計算
