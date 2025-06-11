@@ -149,41 +149,59 @@ class VariableManager:
             # fun を持つ場合
             if isinstance(var, ExpressionFromFunction):
 
-                # pop するので list をコピーしておく
-                user_def_args = list(var.args)
+                # 関数に渡す引数の初期化
+                final_args = []
+                final_kwargs = {}
 
-                # 位置引数を揃え、残りをキーワード引数にする
-                pos_args = []
-                kw_args = var.kwargs or {}
+                # 関数のシグネチャを取得
+                params = inspect.signature(var.fun).parameters
 
-                # 引数順に調べる
-                required_arg_names = inspect.signature(var.fun).parameters.values()
-                for p in required_arg_names:
+                # 用意された引数をコピー
+                user_args = list(var.args)
+                user_kwargs = var.kwargs.copy()
 
-                    # 位置引数であ（りう）る
+                # 関数に定義されている順に組み立て
+                for p in params.values():
+
+                    # def sample(a, /, b, *c, d=None, **e):
+                    #     ...
+                    # a: POSITIONAL_OR_KEYWORD
+                    # b: POSITIONAL_OR_KEYWORD
+                    # c: VAR_POSITIONAL
+                    # d: KEYWORD_ONLY
+                    # e: VAR_KEYWORD
+
+                    # 位置引数で定義されているもの
                     if p.kind <= inspect.Parameter.POSITIONAL_OR_KEYWORD:
 
                         # 変数である
                         if p.name in self.variables:
                             # order 順に見ているのですでに value が正しいはず
-                            pos_args.append(self.variables[p.name].value)
+                            final_args.append(self.variables[p.name].value)
 
-                        # ユーザー定義位置引数である
+                        # ユーザーが供給する変数である
                         else:
-                            try:
-                                pos_args.append(user_def_args.pop(0))
-                            except IndexError as e:  # pop from empty list
+                            # user kwargs にあるかまず確認する
+                            if p.name in user_kwargs:
+                                # 該当物を抜き出して args に追加
+                                final_args.append(user_kwargs.pop(p.name))
+
+                            # user args がまだある
+                            elif len(user_args) > 0:
+                                # 先頭を抜き出して args に追加
+                                final_args.append(user_args.pop(0))
+
+                            # pos args が空であり、kwargs の中にもない
+                            else:
                                 msg = []
-                                for p_ in required_arg_names:
+                                for p_ in params.values():
                                     if p_.kind == inspect.Parameter.VAR_POSITIONAL:
                                         msg.append(f'*{p_.name}')
                                     elif p_.kind == inspect.Parameter.VAR_KEYWORD:
                                         msg.append(f'**{p_.name}')
                                     else:
                                         msg.append(p_.name)
-                                raise type(e)(
-                                    *e.args,
-                                    _(
+                                raise RuntimeError(_(
                                         'Missing arguments! '
                                         'The arguments specified by `args`: {var_args} / '
                                         'The arguments specified by `kwargs`: {var_kwargs} / '
@@ -191,8 +209,7 @@ class VariableManager:
                                         var_args=var.args,
                                         var_kwargs=var.kwargs,
                                         msg=msg
-                                    ),
-                                ) from None
+                                ))
 
                     # *args である
                     elif p.kind == inspect.Parameter.VAR_POSITIONAL:
@@ -200,25 +217,64 @@ class VariableManager:
                         # ユーザー定義位置引数でないとおかしい
                         assert p.name not in self.variables, _('Extra positional argument name cannot be duplicated with a variable name.')
 
-                        # *args なので残り全部を pos_args に入れる
-                        pos_args.extend(user_def_args)
+                        # *args なので残り全部を抜いて pos_args に入れる
+                        final_args.extend(user_args)
+                        user_args = []
 
-                    # キーワード引数である
+                    # キーワード引数で定義されているもの
                     elif p.kind == inspect.Parameter.KEYWORD_ONLY:
 
                         # 変数である
                         if p.name in self.variables:
                             # order 順に見ているのですでに value が正しいはず
-                            kw_args.update({p.name: self.variables[p.name].value})
+                            final_kwargs.update({p.name: self.variables[p.name].value})
+
+                        # ユーザーが供給する変数である
+                        else:
+                            # user kwargs にあるかまず確認する
+                            if p.name in user_kwargs:
+                                # 該当物を抜き出して kwargs に追加
+                                final_kwargs.update({p.name: user_kwargs.pop(p.name)})
+
+                            # user args がまだある
+                            elif len(user_args) > 0:
+                                # 先頭を抜き出して args に追加
+                                final_kwargs.update({p.name: user_args.pop(0)})
+
+                            # pos args が空であり、kwargs の中にもない
+                            else:
+                                msg = []
+                                for p_ in params.values():
+                                    if p_.kind == inspect.Parameter.VAR_POSITIONAL:
+                                        msg.append(f'*{p_.name}')
+                                    elif p_.kind == inspect.Parameter.VAR_KEYWORD:
+                                        msg.append(f'**{p_.name}')
+                                    else:
+                                        msg.append(p_.name)
+                                raise RuntimeError(_(
+                                        'Missing arguments! '
+                                        'The arguments specified by `args`: {var_args} / '
+                                        'The arguments specified by `kwargs`: {var_kwargs} / '
+                                        'Required arguments: {msg}',
+                                        var_args=var.args,
+                                        var_kwargs=var.kwargs,
+                                        msg=msg
+                                ))
 
                     # **kwargs である
-                    else:
-
-                        # kw_args にユーザー定義キーワード引数を入れているので何もしなくてよい
+                    elif p.kind == inspect.Parameter.VAR_KEYWORD:
+                        # 変数であってはいけない
                         assert p.name not in self.variables, _('Extra keyword argument name cannot be duplicated with a variable name.')
 
+                        # 残りの kwargs を移す
+                        final_kwargs.update(user_kwargs)
+                        user_kwargs = {}
+
+                    else:
+                        raise NotImplementedError(f'Unknown argument type: {p.kind=}')
+
                 # fun を実行する
-                var.value = var.fun(*pos_args, **kw_args)
+                var.value = var.fun(*final_args, **final_kwargs)
 
             # string expression の場合
             elif isinstance(var, ExpressionFromString):

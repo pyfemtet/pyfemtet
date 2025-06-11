@@ -18,6 +18,7 @@ import pandas as pd
 import pyfemtet
 
 from pyfemtet._i18n import *
+from pyfemtet._util.helper import generate_random_id
 from pyfemtet._util.df_util import *
 from pyfemtet._util.dask_util import *
 from pyfemtet._util.str_enum import StrEnum
@@ -129,9 +130,10 @@ class DataFrameWrapper:
 
     __df: pd.DataFrame
     _lock_name = 'edit-df'
-    _dataset_name = 'df'
+    _dataset_name: str
 
     def __init__(self, df: pd.DataFrame):
+        self._dataset_name = 'df-' + generate_random_id()
         self.set_df(df)
 
     def __len__(self):
