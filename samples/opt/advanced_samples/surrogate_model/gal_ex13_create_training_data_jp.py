@@ -32,12 +32,9 @@ if __name__ == '__main__':
     )
 
     # FEMOpt オブジェクトを設定します。
-    # 最適化スクリプトで history_path を参照するため、
-    # わかりやすい csv ファイル名を指定します。
     femopt = FEMOpt(
         fem=fem,
         opt=opt,
-        history_path='training_data.csv'
     )
 
     # 設計変数を設定します。
@@ -51,7 +48,10 @@ if __name__ == '__main__':
     # 学習データ作成を行います。
     # 終了条件を指定しない場合、手動で停止するまで
     # 学習データ作成を続けます。
+    # 最適化スクリプトで history_path を参照するため、
+    # わかりやすい csv ファイル名を指定します。
     femopt.set_random_seed(42)
     femopt.optimize(
+        history_path='training_data.csv',
         # n_trials=100
     )

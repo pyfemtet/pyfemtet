@@ -27,7 +27,6 @@ def main(target):
     femopt = FEMOpt(
         fem=fem,
         opt=opt,
-        history_path=f'optimized_result_target_{target}.csv'
     )
 
     # Set up the design variables.
@@ -58,6 +57,7 @@ def main(target):
     obj_name = 'First Resonant Frequency (Hz)'
     femopt.add_objective(
         name=obj_name,
+        fun=None,
         direction=target,
     )
 
@@ -65,14 +65,15 @@ def main(target):
     femopt.set_random_seed(42)
     df = femopt.optimize(
         n_trials=50,
-        confirm_before_exit=False
+        confirm_before_exit=False,
+        history_path=f'optimized_result_target_{target}.csv'
     )
 
     # Display the optimal solution.
-    prm_names = femopt.history.prm_names
-    obj_names = femopt.history.obj_names
-    prm_values = df[df['non_domi'] == True][prm_names].values[0]
-    obj_values = df[df['non_domi'] == True][obj_names].values[0]
+    prm_names = femopt.opt.history.prm_names
+    obj_names = femopt.opt.history.obj_names
+    prm_values = df[df['optimality'] == True][prm_names].values[0]
+    obj_values = df[df['optimality'] == True][obj_names].values[0]
 
     message = f'''
 ===== Optimization Results =====
