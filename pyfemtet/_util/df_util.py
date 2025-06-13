@@ -9,6 +9,9 @@ __all__ = [
 
 
 def get_index(df, equality_filters):
+    # 値渡しに変換
+    equality_filters = equality_filters.copy()
+
     # フィルタ条件に一致する行のインデックスを取得
 
     # na との == での比較は常に False なので別処理するために別リストを作る
