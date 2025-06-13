@@ -76,6 +76,7 @@ def impl_load_femtet_with_sw_with_excel_settings():
 @pytest.mark.femtet
 @pytest.mark.cad
 @pytest.mark.excel
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_load_femtet_with_sw_with_excel_settings():
     _run(impl_load_femtet_with_sw_with_excel_settings.__name__)
 

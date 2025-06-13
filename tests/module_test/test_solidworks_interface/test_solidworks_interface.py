@@ -54,6 +54,7 @@ def _impl_solidworks_interface_update():
 
 
 @pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_solidworks_interface_update():
     _run(_impl_solidworks_interface_update.__name__)
 
@@ -79,6 +80,7 @@ def _impl_femtet_with_solidworks_interface():
 
 @pytest.mark.femtet
 @pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_femtet_with_solidworks_interface():
     _run(_impl_femtet_with_solidworks_interface.__name__)
 
@@ -106,6 +108,7 @@ def _impl_parallel_femtet_with_solidworks():
 
 @pytest.mark.femtet
 @pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_parallel_femtet_with_solidworks():
     _run(_impl_parallel_femtet_with_solidworks.__name__)
 

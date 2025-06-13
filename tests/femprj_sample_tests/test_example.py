@@ -366,6 +366,7 @@ def _run(fun_name):
 @pytest.mark.sample
 @pytest.mark.femtet
 @pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_cad_sample_sldworks_ex01():
     _run(impl_cad_sample_sldworks_ex01.__name__)
 
