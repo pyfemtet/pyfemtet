@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 
 from pyfemtet._util.dask_util import *
 from pyfemtet.logger import get_module_logger
-from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.problem import *
 
 logger = get_module_logger('opt.interface', False)
 
@@ -39,12 +39,12 @@ class AbstractFEMInterface:
 
     kwargs: dict = {}
     _load_problem_from_fem: bool = False
-    current_prm_values: dict[str, SupportedVariableTypes]
+    current_prm_values: TrialInput
     _tmp_dir: tempfile.TemporaryDirectory
 
     # ===== update =====
 
-    def update_parameter(self, x: dict[str, SupportedVariableTypes]) -> None:
+    def update_parameter(self, x: TrialInput) -> None:
         # FEM オブジェクトに与えられた変数を設定する。
         #   目的は Function 内でユーザーが FEM オブジェクト経由で
         #   変数を取得できるようにするためなので、各具象クラスでは

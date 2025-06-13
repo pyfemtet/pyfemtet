@@ -33,7 +33,7 @@ from pyfemtet._util.femtet_access_inspection import *
 from pyfemtet.dispatch_extensions import *
 from pyfemtet.opt.interface._base_interface import COMInterface
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.problem import *
 
 from ._femtet_parametric import *
 
@@ -803,7 +803,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
-    def update_parameter(self, x: dict[str, SupportedVariableTypes], with_warning=False) -> None | list[str]:
+    def update_parameter(self, x: TrialInput, with_warning=False) -> None | list[str]:
         """Update parameter of femprj."""
         COMInterface.update_parameter(self, x)
 
@@ -844,7 +844,7 @@ class FemtetInterface(COMInterface):
 
             # 変数を更新
             warning_messages = []
-            for name, value in self.current_prm_values.items():
+            for name, variable in self.current_prm_values.items():
 
                 # 渡された変数がちゃんと Femtet に定義されている
                 if name in existing_variable_names:
@@ -855,9 +855,9 @@ class FemtetInterface(COMInterface):
                         return_value_if_failed=False,
                         if_error=ModelError,  # 生きてるのに失敗した場合
                         error_message=Msg.ERR_FAILED_TO_UPDATE_VARIABLE
-                        + f"{value} -> {name}",
+                        + f"{variable.value} -> {name}",
                         is_Gaudi_method=True,
-                        args=(name, value),
+                        args=(name, variable.value),
                     )
 
                 # 渡された変数が Femtet で定義されていない
@@ -875,15 +875,15 @@ class FemtetInterface(COMInterface):
 
             # update without parameter check
             warning_messages = []
-            for name, value in self.current_prm_values.items():
+            for name, variable in self.current_prm_values.items():
                 self._call_femtet_api(
                     fun=self.Femtet.UpdateVariable,
                     return_value_if_failed=False,
                     if_error=ModelError,  # 生きてるのに失敗した場合
                     error_message=Msg.ERR_FAILED_TO_UPDATE_VARIABLE
-                    + f"{value} -> {name}",
+                    + f"{variable.value} -> {name}",
                     is_Gaudi_method=True,
-                    args=(name, value),
+                    args=(name, variable.value),
                 )
 
         # ここでは ReExecute しない

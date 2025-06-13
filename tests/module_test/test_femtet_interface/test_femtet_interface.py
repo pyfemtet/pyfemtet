@@ -5,6 +5,7 @@ from femtetutils.util import execute_femtet
 from tests import get
 from pyfemtet.opt.interface import FemtetInterface
 from pyfemtet.opt.optimizer import AbstractOptimizer
+from pyfemtet.opt.problem.variable_manager import *
 
 import pytest
 
@@ -19,7 +20,12 @@ def test_femtet_interface():
     )
 
     with closing(fem):
-        fem.update_parameter({'y': 2})
+
+        y = Variable()
+        y.name = 'y'
+        y.value = 2
+
+        fem.update_parameter(dict(y=y))
         fem.update()
 
 
@@ -37,7 +43,11 @@ def test_run_femtet_interface():
         opt._load_problem_from_fem()
         assert ([name for name, obj in opt.objectives.items()] == ['0: 定常解析 / 温度[deg] / 最大値 / 全てのボディ属性'])
 
-        fem.update_parameter({'y': 2})
+        y = Variable()
+        y.name = 'y'
+        y.value = 2
+
+        fem.update_parameter(dict(y=y))
         fem.update()
         assert np.allclose(
             [obj.eval(fem) for obj in opt.objectives.values()],

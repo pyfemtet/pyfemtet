@@ -75,7 +75,9 @@ def _evaluate_pyfemtet_cns(
                        'アクセスは著しく時間がかかりますので'
                        'ご注意ください。'
         ))
-        pass_to_fem = opt.variable_manager.get_variables(filter='pass_to_fem')
+        pass_to_fem = opt.variable_manager.get_variables(
+            filter='pass_to_fem', format='raw'
+        )
         opt.fem.update_parameter(pass_to_fem)
 
     # eval

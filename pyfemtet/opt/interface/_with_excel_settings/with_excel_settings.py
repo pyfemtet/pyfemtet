@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import re
 
-from pyfemtet.opt.problem.problem import SupportedVariableTypes
+from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
 from pyfemtet.opt.interface._excel_interface import ExcelInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface
@@ -116,7 +116,7 @@ def _class_factory(FEMClass: type[AbstractFEMInterface]) -> type[AbstractFEMInte
             ExcelInterface.load_constraints(self, opt, raise_if_no_keyword)
             FEMClass.load_constraints(self, opt)
 
-        def update_parameter(self, x: SupportedVariableTypes) -> None:
+        def update_parameter(self, x: TrialInput) -> None:
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'
             ExcelInterface.update_parameter(self, x)
             FEMClass.update_parameter(self, x)

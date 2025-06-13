@@ -195,7 +195,9 @@ class ScipyOptimizer(AbstractOptimizer):
         # update fem (very slow!)
         if cns.using_fem:
             logger.warning(Msg.WARN_USING_FEM_IN_NLC)
-            pass_to_fem = self.variable_manager.get_variables(filter='pass_to_fem')
+            pass_to_fem = self.variable_manager.get_variables(
+                filter='pass_to_fem', format='raw'
+            )
             self.fem.update_parameter(pass_to_fem)
 
         return cns.eval(self.fem)
@@ -345,12 +347,10 @@ class ScipyOptimizer(AbstractOptimizer):
 
             # construct TrialInput
             x = vm.get_variables(filter='parameter')
-            x_pass_to_fem: dict[str, SupportedVariableTypes] = vm.get_variables(
-                filter='pass_to_fem', format='dict')
 
             # process main fidelity model
             solve_set = self._get_solve_set()
-            f_return = solve_set.solve(x, x_pass_to_fem)
+            f_return = solve_set.solve(x)
             assert f_return is not None
             dict_y_internal = f_return[1]
             y_internal: float = tuple(dict_y_internal.values())[0]  # type: ignore
