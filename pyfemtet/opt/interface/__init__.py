@@ -9,6 +9,16 @@ if platform.system() == 'Windows':
     from ._excel_interface import ExcelInterface
     from ._with_excel_settings import *
     from ._with_excel_settings import __all__ as _with_excel_settings__all__
+else:
+    class DummyInterface:
+        def __init__(self, args, kwargs):
+            raise RuntimeError(f'{type(self).__name__} is only for Windows OS.')
+
+    class FemtetInterface(DummyInterface, AbstractFEMInterface): pass
+    class FemtetWithNXInterface(DummyInterface, AbstractFEMInterface): pass
+    class FemtetWithSolidworksInterface(DummyInterface, AbstractFEMInterface): pass
+    class ExcelInterface(DummyInterface, AbstractFEMInterface): pass
+
 
 from ._surrogate_model_interface import AbstractSurrogateModelInterfaceBase
 from ._surrogate_model_interface import BoTorchInterface
@@ -27,4 +37,5 @@ __all__ = [
     'PoFBoTorchInterface',
 ]
 
-__all__.extend(_with_excel_settings__all__)
+if platform.system() == 'Windows':
+    __all__.extend(_with_excel_settings__all__)
