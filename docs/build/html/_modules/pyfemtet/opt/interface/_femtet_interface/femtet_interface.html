@@ -115,7 +115,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.dispatch_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">COMInterface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SupportedVariableTypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">._femtet_parametric</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
@@ -907,7 +907,7 @@
 
 <div class="viewcode-block" id="FemtetInterface.update_parameter">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.update_parameter">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update parameter of femprj.&quot;&quot;&quot;</span>
         <span class="n">COMInterface</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
@@ -948,7 +948,7 @@
 
             <span class="c1"># 変数を更新</span>
             <span class="n">warning_messages</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
                 <span class="c1"># 渡された変数がちゃんと Femtet に定義されている</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">existing_variable_names</span><span class="p">:</span>
@@ -959,9 +959,9 @@
                         <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">if_error</span><span class="o">=</span><span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
                         <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_UPDATE_VARIABLE</span>
-                        <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                         <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
+                        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
                     <span class="p">)</span>
 
                 <span class="c1"># 渡された変数が Femtet で定義されていない</span>
@@ -979,15 +979,15 @@
 
             <span class="c1"># update without parameter check</span>
             <span class="n">warning_messages</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_call_femtet_api</span><span class="p">(</span>
                     <span class="n">fun</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">UpdateVariable</span><span class="p">,</span>
                     <span class="n">return_value_if_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">if_error</span><span class="o">=</span><span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
                     <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_FAILED_TO_UPDATE_VARIABLE</span>
-                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                     <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
                 <span class="p">)</span>
 
         <span class="c1"># ここでは ReExecute しない</span>

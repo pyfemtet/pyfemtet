@@ -91,10 +91,11 @@
 <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pywintypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">com_error</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span><span class="p">,</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._femtet_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">FemtetInterface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span>
@@ -160,7 +161,9 @@
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">xt_path</span><span class="p">)</span>
 
         <span class="c1"># 変数の json 文字列を作る</span>
-        <span class="n">str_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="p">)</span>
+        <span class="n">str_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">variable</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">variable</span>
+             <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 
         <span class="c1"># create dumped json of export settings</span>
         <span class="n">tmp_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -304,13 +307,17 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_debug_1</span><span class="p">():</span>
 
+    <span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">()</span>
+    <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span>
+    <span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">20</span>
+
     <span class="n">fem</span> <span class="o">=</span> <span class="n">_NXInterface</span><span class="p">(</span>
         <span class="n">prt_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;model1.prt&#39;</span><span class="p">),</span>
         <span class="n">export_solids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">fem</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
     <span class="n">fem</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">()</span>
-    <span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
+    <span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">))</span>
     <span class="n">fem</span><span class="o">.</span><span class="n">_export_xt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;model1.x_t&#39;</span><span class="p">))</span>
 
 

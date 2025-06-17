@@ -581,7 +581,6 @@
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">,</span>
                 <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
-                <span class="n">variables_pass_to_fem</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span>
                 <span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">datetime_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">trial_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -632,8 +631,12 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
                 <span class="c1"># ===== update FEM parameter =====</span>
+                <span class="n">pass_to_fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
+                    <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span>
+                    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;updating variables...&#39;</span><span class="p">))</span>
-                <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">variables_pass_to_fem</span><span class="p">)</span>
+                <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">pass_to_fem</span><span class="p">)</span>
                 <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
 
                 <span class="c1"># ===== evaluate hard constraint =====</span>
@@ -755,7 +758,6 @@
         <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
-                <span class="n">x_pass_to_fem_</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span>
                 <span class="n">opt_</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">trial_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FReturnValue</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -792,7 +794,7 @@
                 <span class="n">datetime_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">f_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_or_raise</span><span class="p">(</span>
-                        <span class="n">opt_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+                        <span class="n">opt_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
                         <span class="n">datetime_start</span><span class="p">,</span> <span class="n">trial_id</span>
                     <span class="p">)</span>
 

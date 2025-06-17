@@ -279,7 +279,9 @@
         <span class="c1"># update fem (very slow!)</span>
         <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">using_fem</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">Msg</span><span class="o">.</span><span class="n">WARN_USING_FEM_IN_NLC</span><span class="p">)</span>
-            <span class="n">pass_to_fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">)</span>
+            <span class="n">pass_to_fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">pass_to_fem</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">cns</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
@@ -429,12 +431,10 @@
 
             <span class="c1"># construct TrialInput</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span>
-            <span class="n">x_pass_to_fem</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
-                <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
 
             <span class="c1"># process main fidelity model</span>
             <span class="n">solve_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_solve_set</span><span class="p">()</span>
-            <span class="n">f_return</span> <span class="o">=</span> <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem</span><span class="p">)</span>
+            <span class="n">f_return</span> <span class="o">=</span> <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">f_return</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">dict_y_internal</span> <span class="o">=</span> <span class="n">f_return</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">y_internal</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dict_y_internal</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: ignore</span>

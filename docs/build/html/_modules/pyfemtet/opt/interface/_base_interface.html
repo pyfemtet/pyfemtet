@@ -104,7 +104,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.dask_util</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SupportedVariableTypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.interface&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -123,14 +123,14 @@
 
     <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">_load_problem_from_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">current_prm_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span>
+    <span class="n">current_prm_values</span><span class="p">:</span> <span class="n">TrialInput</span>
     <span class="n">_tmp_dir</span><span class="p">:</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span>
 
     <span class="c1"># ===== update =====</span>
 
 <div class="viewcode-block" id="AbstractFEMInterface.update_parameter">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.update_parameter">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># FEM オブジェクトに与えられた変数を設定する。</span>
         <span class="c1">#   目的は Function 内でユーザーが FEM オブジェクト経由で</span>
         <span class="c1">#   変数を取得できるようにするためなので、各具象クラスでは</span>
