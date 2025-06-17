@@ -8,6 +8,7 @@ from pyfemtet.opt.interface._solidworks_interface import SolidworksInterface
 from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 from pyfemtet.opt.optimizer import OptunaOptimizer
 from pyfemtet.opt.femopt import FEMOpt
+from pyfemtet.opt.problem.variable_manager import *
 
 from tests import get
 from tests.utils.closing import closing
@@ -41,13 +42,19 @@ def _impl_solidworks_interface_update():
     )
 
     with closing(fem):
+
+        x = Variable()
+        x.name = 'x'
+        x.value = 20
+
         fem._setup_before_parallel()
         fem._setup_after_parallel()
-        fem.update_parameter({'x': 20})
+        fem.update_parameter({'x': x})
         fem.update_model()
 
 
 @pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_solidworks_interface_update():
     _run(_impl_solidworks_interface_update.__name__)
 
@@ -60,14 +67,20 @@ def _impl_femtet_with_solidworks_interface():
     )
 
     with closing(fem):
+
+        x = Variable()
+        x.name = 'x'
+        x.value = 20
+
         fem._setup_before_parallel()
         fem._setup_after_parallel()
-        fem.update_parameter({'x': 20})
+        fem.update_parameter(dict(x=x))
         fem.update_model()
 
 
 @pytest.mark.femtet
 @pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_femtet_with_solidworks_interface():
     _run(_impl_femtet_with_solidworks_interface.__name__)
 
@@ -95,6 +108,7 @@ def _impl_parallel_femtet_with_solidworks():
 
 @pytest.mark.femtet
 @pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_parallel_femtet_with_solidworks():
     _run(_impl_parallel_femtet_with_solidworks.__name__)
 

@@ -114,5 +114,5 @@ def test_surrogate_optimize_normal():
 
 if __name__ == '__main__':
     # test_output_directions()
-    # test_surrogate_optimize_output_directions()
+    test_surrogate_optimize_output_directions()
     test_surrogate_optimize_normal()

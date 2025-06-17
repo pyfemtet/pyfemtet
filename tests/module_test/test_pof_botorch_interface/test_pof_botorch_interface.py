@@ -1,4 +1,5 @@
 from pyfemtet.opt.interface._surrogate_model_interface.botorch_interface import PoFBoTorchInterface
+from pyfemtet.opt.problem.variable_manager import *
 
 from tests import get
 
@@ -16,7 +17,28 @@ def debug_pof_botorch_pof():
     )
     print(fem.calc_pof())
     fem._debug = False
-    fem.update_parameter(dict(x=50, y=0, zA=1, zB=0, zC=0))
+
+    x = Variable()
+    x.name = 'x'
+    x.value = 50
+
+    y = Variable()
+    y.name = 'y'
+    y.value = 0
+
+    za = Variable()
+    za.name = 'zA'
+    za.value = 1
+
+    zb = Variable()
+    zb.name = 'zB'
+    zb.value = 0
+
+    zc = Variable()
+    zc.name = 'zC'
+    zc.value = 0
+
+    fem.update_parameter(dict(x=x, y=y, zA=za, zB=zb, zC=zc))
     print(fem.calc_pof())
 
 
@@ -33,19 +55,58 @@ def test_pof_botorch_pof():
     fem = PoFBoTorchInterface(
         history_path=get(__file__, 'test_history_3.reccsv')
     )
-    fem.update_parameter(dict(x=50, y=0, z='A'))
+
+    x = Variable()
+    x.name = 'x'
+    x.value = 50
+
+    y = Variable()
+    y.name = 'y'
+    y.value = 0
+
+    z = Variable()
+    z.name = 'z'
+    z.value = 'A'
+
+    fem.update_parameter(dict(x=x, y=y, z=z))
     print(fem.calc_pof())
     # assert abs(fem.calc_pof() - 0.18713788252574215) < 0.05
-    fem.update_parameter(dict(x=75, y=1, z='B'))
+
+    x = Variable()
+    x.name = 'x'
+    x.value = 75
+
+    y = Variable()
+    y.name = 'y'
+    y.value = 1
+
+    z = Variable()
+    z.name = 'z'
+    z.value = 'B'
+
+    fem.update_parameter(dict(x=x, y=y, z=z))
     print(fem.calc_pof())
     # assert abs(fem.calc_pof() - 0.3386818792532815) < 0.05
-    fem.update_parameter(dict(x=75, y=0.5, z='C'))
+
+    x = Variable()
+    x.name = 'x'
+    x.value = 75
+
+    y = Variable()
+    y.name = 'y'
+    y.value = 0.5
+
+    z = Variable()
+    z.name = 'z'
+    z.value = 'C'
+
+    fem.update_parameter(dict(x=x, y=y, z=z))
     print(fem.calc_pof())
     # assert abs(fem.calc_pof() - 0.9940278367170938) < 0.05
 
 
 if __name__ == '__main__':
     # test_pof_botorch_load()
-    # test_pof_botorch_pof()
+    test_pof_botorch_pof()
     # debug_pof_botorch_pof()
-    debug_pof_botorch_pof_2()
+    # debug_pof_botorch_pof_2()

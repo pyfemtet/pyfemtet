@@ -318,13 +318,12 @@
 
             <span class="c1"># construct TrialInput</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span>
-            <span class="n">x_pass_to_fem</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
 
             <span class="c1"># prepare solve</span>
             <span class="n">solve_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_solve_set</span><span class="p">()</span>
 
             <span class="c1"># process main fidelity model</span>
-            <span class="n">f_return</span> <span class="o">=</span> <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem</span><span class="p">)</span>
+            <span class="n">f_return</span> <span class="o">=</span> <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">f_return</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">y_internal</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
@@ -334,7 +333,7 @@
             <span class="k">for</span> <span class="n">sub_fidelity_name</span><span class="p">,</span> <span class="n">sub_opt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="c1"># _SolveSet に特殊な初期化を入れていないので</span>
                 <span class="c1"># sub fidelity でも初期化せず使用可能</span>
-                <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pass_to_fem</span><span class="p">,</span> <span class="n">sub_opt</span><span class="p">)</span>
+                <span class="n">solve_set</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sub_opt</span><span class="p">)</span>
 
             <span class="c1"># check interruption</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>

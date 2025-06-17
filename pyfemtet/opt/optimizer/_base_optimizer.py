@@ -458,7 +458,6 @@ class AbstractOptimizer:
                 self,
                 opt_: AbstractOptimizer,
                 parameters: TrialInput,
-                variables_pass_to_fem: dict[str, SupportedVariableTypes],
                 history: History = None,
                 datetime_start=None,
                 trial_id=None,
@@ -509,8 +508,12 @@ class AbstractOptimizer:
                 logger.info(parameters)
 
                 # ===== update FEM parameter =====
+                pass_to_fem = self.opt.variable_manager.get_variables(
+                    filter='pass_to_fem',
+                    format='raw',
+                )
                 logger.info(_('updating variables...'))
-                opt_.fem.update_parameter(variables_pass_to_fem)
+                opt_.fem.update_parameter(pass_to_fem)
                 opt_._check_and_raise_interruption()
 
                 # ===== evaluate hard constraint =====
@@ -632,7 +635,6 @@ class AbstractOptimizer:
         def solve(
                 self,
                 x: TrialInput,
-                x_pass_to_fem_: dict[str, SupportedVariableTypes],
                 opt_: AbstractOptimizer | None = None,
                 trial_id: str =None,
         ) -> _FReturnValue | None:
@@ -669,7 +671,7 @@ class AbstractOptimizer:
                 datetime_start = datetime.datetime.now()
                 try:
                     f_return = self._solve_or_raise(
-                        opt_, x, x_pass_to_fem_, self.opt.history,
+                        opt_, x, self.opt.history,
                         datetime_start, trial_id
                     )
 

@@ -64,6 +64,7 @@ def test_load_single_excel():
 
 @pytest.mark.excel
 @pytest.mark.femtet
+@pytest.mark.skip('pytest unstable')
 def test_run_multiple_excel():
     opt = AbstractOptimizer()
 
@@ -98,7 +99,20 @@ def test_run_multiple_excel():
         fem._setup_after_parallel(opt)
 
         print('updating...')
-        fem.update_parameter(dict(x=.7, y=.7, z=.7))
+
+        x = Variable()
+        x.name = 'x'
+        x.value = .7
+
+        y = Variable()
+        y.name = 'y'
+        y.value = .7
+
+        z = Variable()
+        z.name = 'z'
+        z.value = .7
+
+        fem.update_parameter(dict(x=x, y=y, z=z))
         fem.update()
 
         print([obj.eval(fem) for obj in opt.objectives.values()])

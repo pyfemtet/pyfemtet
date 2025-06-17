@@ -26,7 +26,7 @@ from pyfemtet._util.femtet_autosave import *
 from pyfemtet._i18n import _
 
 from pyfemtet.opt.exceptions import *
-from pyfemtet.opt.problem.variable_manager import SupportedVariableTypes
+from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.interface._base_interface import COMInterface
 
 from pyfemtet.logger import get_module_logger
@@ -797,15 +797,15 @@ class ExcelInterface(COMInterface):
         return self._get_wb(self.teardown_xlsm_path)
 
     # ===== update =====
-    def update_parameter(self, x: dict[str, SupportedVariableTypes]) -> None:
+    def update_parameter(self, x: TrialInput) -> None:
 
         COMInterface.update_parameter(self, x)
 
         # excel シートの変数更新
         if self.use_named_range:
-            for key, value in self.current_prm_values.items():
+            for key, variable in self.current_prm_values.items():
                 try:
-                    self.sh_input.Range(key).value = value
+                    self.sh_input.Range(key).value = variable.value
                 except com_error:
                     logger.warning(
                         _(
@@ -819,10 +819,10 @@ class ExcelInterface(COMInterface):
                     break
 
         if not self.use_named_range:  # else にしないこと
-            for name, value in self.current_prm_values.items():
+            for name, variable in self.current_prm_values.items():
                 r = 1 + search_r(self.input_xlsm_path, self.input_sheet_name, name)
                 c = 1 + search_c(self.input_xlsm_path, self.input_sheet_name, ParseAsParameter.value)
-                self.sh_input.Cells(r, c).value = value
+                self.sh_input.Cells(r, c).value = variable.value
 
         # 再計算
         self.excel.CalculateFull()

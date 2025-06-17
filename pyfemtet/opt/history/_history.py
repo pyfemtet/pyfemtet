@@ -1115,8 +1115,6 @@ class History:
     when the optimization process starts.
     """
 
-    MAIN_FILTER = MAIN_FILTER
-
     def __init__(self):
         self._records = Records()
         self.path: str | None = None
@@ -1275,7 +1273,7 @@ class History:
                 #   フィデリティの話は現在解析を実行している opt が
                 #   必要なので、recording メソッドの引数に
                 #   それを追加する
-                df = self.get_df(equality_filters=self.MAIN_FILTER)
+                df = self.get_df(equality_filters=MAIN_FILTER)
 
                 if client is not None:
                     client.run_on_scheduler(

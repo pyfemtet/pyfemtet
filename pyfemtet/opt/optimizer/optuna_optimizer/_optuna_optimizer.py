@@ -228,13 +228,12 @@ class OptunaOptimizer(AbstractOptimizer):
 
             # construct TrialInput
             x = vm.get_variables(filter='parameter')
-            x_pass_to_fem: dict[str, SupportedVariableTypes] = vm.get_variables(filter='pass_to_fem', format='dict')
 
             # prepare solve
             solve_set = self._get_solve_set()
 
             # process main fidelity model
-            f_return = solve_set.solve(x, x_pass_to_fem)
+            f_return = solve_set.solve(x)
             if f_return is None:
                 y_internal: None = None
             else:
@@ -244,7 +243,7 @@ class OptunaOptimizer(AbstractOptimizer):
             for sub_fidelity_name, sub_opt in self.sub_fidelity_models.items():
                 # _SolveSet に特殊な初期化を入れていないので
                 # sub fidelity でも初期化せず使用可能
-                solve_set.solve(x, x_pass_to_fem, sub_opt)
+                solve_set.solve(x, sub_opt)
 
             # check interruption
             self._check_and_raise_interruption()

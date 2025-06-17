@@ -108,7 +108,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SupportedVariableTypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">COMInterface</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
@@ -910,15 +910,15 @@
     <span class="c1"># ===== update =====</span>
 <div class="viewcode-block" id="ExcelInterface.update_parameter">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.ExcelInterface.update_parameter">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="n">COMInterface</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
         <span class="c1"># excel シートの変数更新</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">value</span>
                 <span class="k">except</span> <span class="n">com_error</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                         <span class="n">_</span><span class="p">(</span>
@@ -932,10 +932,10 @@
                     <span class="k">break</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_named_range</span><span class="p">:</span>  <span class="c1"># else にしないこと</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                 <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">search_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_xlsm_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet_name</span><span class="p">,</span> <span class="n">ParseAsParameter</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span><span class="o">.</span><span class="n">Cells</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sh_input</span><span class="o">.</span><span class="n">Cells</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">value</span>
 
         <span class="c1"># 再計算</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">CalculateFull</span><span class="p">()</span></div>

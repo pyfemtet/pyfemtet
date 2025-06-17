@@ -9,10 +9,11 @@ import subprocess
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error
 
-from pyfemtet._i18n import Msg, _
+from pyfemtet._i18n import _
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface
 from pyfemtet.opt.exceptions import *
+from pyfemtet.opt.problem.variable_manager import *
 
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
@@ -78,7 +79,9 @@ class _NXInterface(AbstractFEMInterface):
             os.remove(xt_path)
 
         # 変数の json 文字列を作る
-        str_json = json.dumps(self.current_prm_values)
+        str_json = json.dumps(
+            {name: variable.value for name, variable
+             in self.current_prm_values.items()})
 
         # create dumped json of export settings
         tmp_dict = dict(
@@ -216,13 +219,17 @@ class FemtetWithNXInterface(FemtetInterface, _NXInterface):
 
 def _debug_1():
 
+    x = Variable()
+    x.name = 'x'
+    x.value = 20
+
     fem = _NXInterface(
         prt_path=os.path.join(os.path.dirname(__file__), 'model1.prt'),
         export_solids=True,
     )
     fem._setup_before_parallel()
     fem._setup_after_parallel()
-    fem.update_parameter({'x': 20})
+    fem.update_parameter(dict(x=x))
     fem._export_xt(os.path.join(os.path.dirname(__file__), 'model1.x_t'))
 
 

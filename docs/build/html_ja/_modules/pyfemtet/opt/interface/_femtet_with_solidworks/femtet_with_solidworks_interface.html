@@ -91,7 +91,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SupportedVariableTypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._femtet_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">FemtetInterface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._solidworks_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolidworksInterface</span>
@@ -175,7 +175,7 @@
 
 <div class="viewcode-block" id="FemtetWithSolidworksInterface.update_parameter">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetWithSolidworksInterface.update_parameter">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">SolidworksInterface</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
         <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">with_warning</span><span class="p">)</span></div>
 

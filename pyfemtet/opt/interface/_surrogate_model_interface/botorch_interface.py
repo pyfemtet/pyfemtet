@@ -62,7 +62,7 @@ class BoTorchInterface(AbstractSurrogateModelInterfaceBase):
 
     def update(self) -> None:
         # update current objective values
-        x = np.array([self.current_prm_values.values()])
+        x = np.array([[variable.value for variable in self.current_prm_values.values()]])
 
         y, _ = self.pyfemtet_model.predict(x)
         y = y[0]
@@ -255,7 +255,7 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
 
             return
 
-        x = np.array([self.current_prm_values.values()])
+        x = np.array([[variable.value for variable in self.current_prm_values.values()]])
 
         f_mean, f_std = self.pyfemtet_model_c.predict(x)
         f_mean, f_std = f_mean[0][0], f_std[0][0]

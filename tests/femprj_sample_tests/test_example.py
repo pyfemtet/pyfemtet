@@ -156,11 +156,11 @@ class SampleTest:
             True  # bForce
         )
 
-        try:
-            # カレントディレクトリの変更（一応）
-            _buff = os.getcwd()
-            os.chdir(here)
+        # カレントディレクトリの変更（一応）
+        _buff = os.getcwd()
+        os.chdir(here)
 
+        try:
             # スクリプトの編集実行
             script = self.load_script(jp)
             mod_script = self.modify_script(script, jp)
@@ -191,7 +191,7 @@ class SampleTest:
             os.chdir(_buff)
         
             # 起動した Femtet を終了
-            Femtet.Exit(force := True)
+            Femtet.Exit(True)  # force
 
         # record_mode なら、extra_data を削除する
         if self.record_mode:
@@ -226,8 +226,11 @@ def _get_simplified_df_values(csv_path):
 
     try:
         df = pd.read_csv(csv_path, encoding=ENCODING, header=2)
-    except Exception:
-        df = pd.read_csv(csv_path, encoding='utf-8', header=2)
+    except Exception as e:
+        try:
+            df = pd.read_csv(csv_path, encoding='utf-8', header=2)
+        except Exception as e2:
+            raise e2 from e
 
     prm_names = []
     for meta_data, col in zip(meta_header, df.columns):
@@ -330,7 +333,6 @@ def test_sample_parametric_if(record_mode=False):
     sample_test.run(jp=True)
 
 
-
 def impl_cad_sample_sldworks_ex01(record_mode=False):
     sample_test = SampleTest(
         rf'{sample_root}\cad_ex01_SW.py',
@@ -341,10 +343,9 @@ def impl_cad_sample_sldworks_ex01(record_mode=False):
     sample_test.run(jp=True)
 
 
-
 # pytest 特有の windows fatal exception 対策
 def _run(fun_name):
-    here, filename = os.path.split(__file__)
+    here_, filename = os.path.split(__file__)
     module_name = filename.removesuffix('.py')
 
     subprocess.run(
@@ -357,7 +358,7 @@ def _run(fun_name):
         f'import {module_name} as tst;'
         f'tst.{fun_name}()'
         f'"',
-        cwd=os.path.abspath(here),
+        cwd=os.path.abspath(here_),
         shell=True,
     ).check_returncode()
 
@@ -365,7 +366,8 @@ def _run(fun_name):
 @pytest.mark.sample
 @pytest.mark.femtet
 @pytest.mark.cad
-def test_cad_sample_sldworks_ex01(record_mode=False):
+@pytest.mark.skip('pytest with Solidworks is unstable')
+def test_cad_sample_sldworks_ex01():
     _run(impl_cad_sample_sldworks_ex01.__name__)
 
 
@@ -384,11 +386,13 @@ def test_cad_sample_nx_ex01(record_mode=False):
 
 if __name__ == '__main__':
     # test_constrained_pipe(record_mode=True)
-    test_sample_gau_ex08_parametric(record_mode=True)
+    # test_sample_gau_ex08_parametric(record_mode=True)
     # test_sample_her_ex40_parametric(record_mode=True)
     # test_sample_wat_ex14_parametric(record_mode=True)
     # test_sample_paswat_ex1_parametric(record_mode=True)
     # test_sample_gal_ex58_parametric(record_mode=True)
     # test_sample_parametric_if(record_mode=True)
-    # test_cad_sample_sldworks_ex01(record_mode=True)
+    test_cad_sample_sldworks_ex01()
     # test_cad_sample_nx_ex01(record_mode=True)
+
+    test_sample_gau_ex08_parametric(record_mode=False)
