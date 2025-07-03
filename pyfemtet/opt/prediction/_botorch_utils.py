@@ -3,15 +3,17 @@ from __future__ import annotations
 
 from packaging import version
 
+from tqdm import tqdm
 import torch
 
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.kernels import MaternKernel, ScaleKernel  # , RBFKernel
 from gpytorch.priors.torch_priors import GammaPrior  # , LogNormalPrior
-# from gpytorch.constraints.constraints import GreaterThan
+from gpytorch.constraints.constraints import GreaterThan
 
 from botorch.models import SingleTaskGP
 from botorch.models.transforms import Standardize, Normalize
+from botorch.exceptions import ModelFittingError
 
 # import fit_gpytorch_mll
 import botorch.version
@@ -22,6 +24,9 @@ if version.parse(botorch.version.version) < version.parse("0.8.0"):
 else:
     from botorch.fit import fit_gpytorch_mll
 
+from pyfemtet.logger import get_module_logger
+
+logger = get_module_logger('opt.botorch_util')
 
 __all__ = [
     'get_standardizer_and_no_noise_train_yvar',
@@ -128,6 +133,58 @@ def setup_gp(X, Y, bounds, observation_noise, lh_class=None, covar_module=None):
     )
 
     mll_ = lh_class(model_.likelihood, model_)
-    fit_gpytorch_mll(mll_)
+
+    try:
+        fit_gpytorch_mll(mll_)
+
+    except ModelFittingError as e:
+        logger.warning(f'{type(e).__name__} is raised '
+                       f'during fit_gpytorch_mll()! '
+                       f'The original message is: `{",".join(e.args)}`.')
+
+        # retry with noise level setting
+        try:
+            logger.info('Attempt to retrying...')
+
+            # noinspection PyBroadException
+            try:
+                model_.likelihood.noise_covar.register_constraint(
+                    "raw_noise", GreaterThan(1e-5))
+                logger.warning('Set the raw_noise constraint to 1e-5.')
+            except Exception:
+                logger.info('Failed to set the raw_noise constraint. '
+                            'Retrying simply.')
+
+            fit_gpytorch_mll(mll_)
+
+        except ModelFittingError:
+            logger.warning(f'{type(e).__name__} is raised '
+                           f'during *second* fit_gpytorch_mll()! '
+                           f'The original message is: `{",".join(e.args)}`.')
+
+            # retry with another way
+            logger.warning('Attempt to retrying.')
+            logger.warning('Try to use SGD algorithm...')
+
+            from torch.optim import SGD
+
+            NUM_EPOCHS = 150
+
+            optimizer = SGD([{"params": model_.parameters()}], lr=0.025)
+
+            model_.train()
+
+            for epoch in tqdm(range(NUM_EPOCHS), desc='fit with SGD'):
+                # clear gradients
+                optimizer.zero_grad()
+                # forward pass through the model to obtain the output MultivariateNormal
+                output = model_(X)
+                # Compute negative marginal log likelihood
+                loss = -mll_(output, model_.train_targets)
+                # back prop gradients
+                loss.backward()
+                optimizer.step()
+
+            model_.eval()
 
     return model_

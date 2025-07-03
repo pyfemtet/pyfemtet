@@ -73,8 +73,8 @@ class SingleTaskGPModel(AbstractModel):
         X = torch.tensor(x, **self.KWARGS)
         post = self.gp.posterior(X)
         with torch.no_grad():
-            mean = post.mean.numpy()
-            std = post.variance.sqrt().numpy()
+            mean = post.mean.cpu().numpy()
+            std = post.variance.sqrt().cpu().numpy()
         return mean, std
 
 

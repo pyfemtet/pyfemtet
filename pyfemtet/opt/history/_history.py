@@ -262,6 +262,14 @@ class CorrespondingColumnNameRuler:
     """:meta private:"""
 
     @staticmethod
+    def cns_lower_bound_name(cns_name):
+        return cns_name + '_lower_bound'
+
+    @staticmethod
+    def cns_upper_bound_name(cns_name):
+        return cns_name + '_upper_bound'
+
+    @staticmethod
     def direction_name(obj_name):
         return obj_name + '_direction'
 
@@ -453,7 +461,7 @@ class ColumnManager:
 
                     # later
                     target_cds.update({f(name): object})  # str | float
-                    target_mcs.append(f('obj'))
+                    target_mcs.append('obj.direction')
 
                 for name in extra_y_names:
                     # later
@@ -466,14 +474,33 @@ class ColumnManager:
 
             elif key == 'c':
 
+                f_lb = CorrespondingColumnNameRuler.cns_lower_bound_name
+                f_ub = CorrespondingColumnNameRuler.cns_upper_bound_name
+
                 for name in self.c_names:
                     # important
                     column_dtypes.update({name: float})
                     meta_columns.append('cns')
 
+                    # later
+                    target_cds.update({f_lb(name): float})
+                    target_mcs.append('cns.lower_bound')
+
+                    # later
+                    target_cds.update({f_ub(name): float})
+                    target_mcs.append('cns.upper_bound')
+
                 for name in extra_c_names:
                     # later
                     target_cds.update({name: float})
+                    target_mcs.append('')
+
+                    # later
+                    target_cds.update({f_lb(name): float})
+                    target_mcs.append('')
+
+                    # later
+                    target_cds.update({f_ub(name): float})
                     target_mcs.append('')
 
             # additional_data を入れる
@@ -682,10 +709,19 @@ class Record:
         # messages to str
         messages_str = _RECORD_MESSAGE_DELIMITER.join(d['messages'])
         d.update({'messages': messages_str})
-        
+
+        # obj
         d.update(**{k: v.value for k, v in y.items()})
-        d.update(**{f'{k}_direction': v.direction for k, v in y.items()})
+        d.update(**{f'{CorrespondingColumnNameRuler.direction_name(k)}': v.direction for k, v in y.items()})
+
+        # cns
         d.update(**{k: v.value for k, v in c.items()})
+        f_lb = CorrespondingColumnNameRuler.cns_lower_bound_name
+        d.update(**{f'{f_lb(k)}': v.lower_bound
+                    for k, v in c.items()})
+        f_ub = CorrespondingColumnNameRuler.cns_upper_bound_name
+        d.update(**{f'{f_ub(k)}': v.upper_bound
+                    for k, v in c.items()})
 
         df = pd.DataFrame(
             {k: [v] for k, v in d.items()},
@@ -1320,7 +1356,7 @@ class History:
                 if row is not None:
                     self_.postprocess_after_recording(row)
 
-                # save history
+                # save history if no FEMOpt
                 client = get_client()
                 if client is None:
                     self.save()
@@ -1332,6 +1368,16 @@ class History:
 
         The destination path is :class:`History.path`.
         """
+
+        # flask server 情報のように、最適化の途中で
+        # 書き換えられるケースがあるので
+        # additional data を再度ここで meta_columns に反映する
+        cm = self._records.column_manager
+        for i, column in enumerate(cm.column_dtypes.keys()):
+            # additional_data を入れる
+            if column == cm._get_additional_data_column():
+                cm.meta_columns[i] = json.dumps(self.additional_data or dict())
+
         self._records.save(self.path)
 
     def _create_optuna_study_for_visualization(self):
