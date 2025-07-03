@@ -26,8 +26,8 @@ dependencies = [
     "optuna>=3.4.0, <5.0.0",
     "optuna-integration>=3.6.0, <5.0.0",
     "botorch>=0.12.0, <0.15.0",
-    "torch",  # botorch specifies torch's version
-    "fire>=0.7",  # It probably has a strong backward compatibility.
+    "torch", # botorch specifies torch's version
+    "fire>=0.7", # It probably has a strong backward compatibility.
     "pyyaml>=6.0.2,<7",
 ]
 
@@ -56,15 +56,6 @@ dev = [
     "pytest-cov>=6.1.1",
     "pytest-reporter-html-dots>=0.11.0",
 ]
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
-[tool.uv.sources]
-# Defaults to installing CUDA without index-url specification only on linux
-torch = [{ index = "pytorch-cpu", marker = "sys_platform=='linux'" }]
 
 [tool.uv-dynamic-versioning]
 fallback-version = "0.0.0"

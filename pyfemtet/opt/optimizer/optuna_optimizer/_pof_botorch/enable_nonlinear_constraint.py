@@ -113,7 +113,7 @@ class _ConvertedConstraint:
 
         """
 
-        x = X.detach().numpy()
+        x = X.detach().cpu().numpy()
         cns_value = _evaluate_pyfemtet_cns(
             self.cns,
             self.opt,
@@ -124,6 +124,8 @@ class _ConvertedConstraint:
             return Tensor([cns_value - self.cns.lower_bound - self.ce])
         elif self.ub_or_lb == 'ub':
             return Tensor([self.cns.upper_bound - cns_value - self.ce])
+        else:
+            assert False
 
 
 # list[pyfemtet.opt.Constraint] について、正規化された入力に対し、 feasible or not を返す関数
@@ -184,7 +186,7 @@ class NonlinearInequalityConstraints:
         for each_num_restarts in ic_batch:
             feasible_q_list = []
             for each_q in each_num_restarts:
-                x: np.ndarray = each_q.detach().numpy()  # normalized parameters
+                x: np.ndarray = each_q.detach().cpu().numpy()  # normalized parameters
                 if _is_feasible(self.constraints, self.opt, self.trans, x, self.ce, self.cs):
                     feasible_q_list.append(each_q)  # Keep only feasible rows
 

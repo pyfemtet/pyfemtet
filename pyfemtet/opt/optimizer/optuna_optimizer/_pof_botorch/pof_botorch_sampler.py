@@ -1100,6 +1100,9 @@ class PoFBoTorchSampler(BoTorchSampler):
                         value *= -1
                     values[trial_idx, obj_idx] = value
                 if self._constraints_func is not None:
+
+                    # TODO: scipy constraint に入れているので
+                    #    hard constraint はここで除いてもよいかもしれない。
                     constraints = study._storage.get_trial_system_attrs(trial._trial_id).get(
                         _CONSTRAINTS_KEY
                     )
