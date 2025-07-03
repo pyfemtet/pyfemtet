@@ -84,9 +84,9 @@ def test_history_column_order():
         third_line = reader.__next__()
 
     print(first_line)
-    assert first_line == ['{}', 'prm.num.value', 'prm.num.value', 'prm.cat.value', 'obj', 'cns', '', '', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.lower_bound', 'prm.cat.choices', 'obj.direction', '', '', '', '']
+    assert first_line == ['{}', 'prm.num.value', 'prm.num.value', 'prm.cat.value', 'obj', 'cns', '', '', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.lower_bound', 'prm.cat.choices', 'obj.direction', 'cns.upper_bound', '', '', '', '']
     print(third_line)
-    assert third_line == ['trial', 'x', 'y', 'z', 'output', 'constraint', 'feasibility', 'optimality', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y_lower_bound', 'z_choices', 'output_direction', 'state', 'datetime_start', 'datetime_end', 'messages']
+    assert third_line == ['trial', 'x', 'y', 'z', 'output', 'constraint', 'feasibility', 'optimality', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y_lower_bound', 'z_choices', 'output_direction', 'constraint_upper_bound', 'state', 'datetime_start', 'datetime_end', 'messages']
 
     # ===== per_cat =====
     history = History()
@@ -104,10 +104,10 @@ def test_history_column_order():
         _second_line = reader.__next__()
         third_line = reader.__next__()
 
-    print(first_line)
-    assert first_line == ['{}', 'prm.num.value', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.value', 'prm.num.lower_bound', 'prm.cat.value', 'prm.cat.choices', 'obj', 'obj.direction', 'cns', '', '', '', '', '', '']
-    print(third_line)
-    assert third_line == ['trial', 'x', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y', 'y_lower_bound', 'z', 'z_choices', 'output', 'output_direction', 'constraint', 'state', 'datetime_start', 'datetime_end', 'messages', 'feasibility', 'optimality']
+    print(f'{first_line=}')
+    assert first_line == ['{}', 'prm.num.value', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.value', 'prm.num.lower_bound', 'prm.cat.value', 'prm.cat.choices', 'obj', 'obj.direction', 'cns', 'cns.upper_bound', '', '', '', '', '', '']
+    print(f'{third_line=}')
+    assert third_line == ['trial', 'x', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y', 'y_lower_bound', 'z', 'z_choices', 'output', 'output_direction', 'constraint', 'constraint_upper_bound', 'state', 'datetime_start', 'datetime_end', 'messages', 'feasibility', 'optimality']
 
 
 def test_history_duplicated_name():
@@ -127,8 +127,8 @@ def test_history_duplicated_name():
 
 
 if __name__ == '__main__':
-    test_standalone_history()
-    test_new_additional_data()
-    test_restart_additional_data()
+    # test_standalone_history()
+    # test_new_additional_data()
+    # test_restart_additional_data()
     test_history_column_order()
-    test_history_duplicated_name()
+    # test_history_duplicated_name()
