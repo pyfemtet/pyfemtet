@@ -841,6 +841,7 @@ class PoFConfig:
         )
     feasibility_cdf_threshold: float | str = 0.5  # or 'sample_mean'
     feasibility_noise: float | str | None = None  # 'no' to fixed minimum noise
+    remove_hard_constraints_from_gp: bool = False  # if consider_explicit_hard_constraint is False, no effect.
 
 
 # TODO:
@@ -1079,6 +1080,8 @@ class PoFBoTorchSampler(BoTorchSampler):
         if n_trials < self._n_startup_trials:
             return {}
 
+        # ===== ここまで変更なし =====
+
         trans = _SearchSpaceTransform(search_space)
         n_objectives = len(study.directions)
         values: numpy.ndarray | torch.Tensor = numpy.empty(
@@ -1099,26 +1102,48 @@ class PoFBoTorchSampler(BoTorchSampler):
                     ):  # BoTorch always assumes maximization.
                         value *= -1
                     values[trial_idx, obj_idx] = value
+
                 if self._constraints_func is not None:
 
-                    # TODO: scipy constraint に入れているので
-                    #    hard constraint はここで除いてもよいかもしれない。
+                    # get constraints
                     constraints = study._storage.get_trial_system_attrs(trial._trial_id).get(
                         _CONSTRAINTS_KEY
                     )
+
+                    # Explicit hard constraints を optimize_acqf で扱うならば
+                    # GP にはそれを渡さない (option)
+                    if (
+                            constraints is not None
+                            and self.pof_config.consider_explicit_hard_constraint
+                            and self.pof_config.remove_hard_constraints_from_gp
+                    ):
+                        constraints = filter_soft_constraints_only(
+                            constraints, self.pyfemtet_optimizer
+                        )
+
                     if constraints is not None:
+
                         n_constraints = len(constraints)
 
-                        if con is None:
-                            con = numpy.full(
-                                (n_completed_trials, n_constraints), numpy.nan, dtype=numpy.float64
-                            )
-                        elif n_constraints != con.shape[1]:
-                            raise RuntimeError(
-                                f"Expected {con.shape[1]} constraints "
-                                f"but received {n_constraints}."
-                            )
-                        con[trial_idx] = constraints
+                        # remove_hard_constraints_from_gp で
+                        # constraints がなくなった場合、
+                        # そもそも今後ここに来る必要がない
+                        if n_constraints == 0:
+                            self._constraints_func = None
+
+                        else:
+
+                            if con is None:
+                                con = numpy.full(
+                                    (n_completed_trials, n_constraints), numpy.nan, dtype=numpy.float64
+                                )
+                            elif n_constraints != con.shape[1]:
+                                raise RuntimeError(
+                                    f"Expected {con.shape[1]} constraints "
+                                    f"but received {n_constraints}."
+                                )
+                            con[trial_idx] = constraints
+
             elif trial.state == TrialState.RUNNING:
                 if all(p in trial.params for p in search_space):
                     params[trial_idx] = trans.transform(trial.params)
@@ -1165,7 +1190,6 @@ class PoFBoTorchSampler(BoTorchSampler):
         else:
             running_params = None
 
-        # ===== ここまで変更なし =====
 
         # TODO: ミーゼスなどの場合にこれらのシード固定法も試す
         # if self._seed is not None:
@@ -1250,3 +1274,28 @@ class PoFBoTorchSampler(BoTorchSampler):
         # ===== ここまで変更なし =====
 
         return trans.untransform(candidates.cpu().numpy())
+
+
+def filter_soft_constraints_only(
+        constraints: tuple[float],
+        opt: AbstractOptimizer,
+) -> list[float]:
+    # constraints を取得
+    # lb, ub の存在に応じて hard, soft を展開
+    is_soft_list = []
+    for cns in opt.constraints.values():
+        if cns.lower_bound is not None:
+            is_soft_list.append(not cns.hard)
+        if cns.upper_bound is not None:
+            is_soft_list.append(not cns.hard)
+
+    # constraints と比べる
+    assert len(constraints) == len(is_soft_list)
+
+    # soft に該当する要素のみで組立て返す
+    ret = []
+    for is_soft, value in zip(is_soft_list, constraints):
+        if is_soft:
+            ret.append(value)
+
+    return ret
