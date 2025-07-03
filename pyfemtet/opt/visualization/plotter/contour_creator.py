@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-def contour_creator(df: pd.DataFrame) -> go.Figure:
+def contour_creator(df: pd.DataFrame) -> go.Figure | str:
 
     logger = get_module_logger('opt.contour_creator')
 
@@ -37,10 +37,10 @@ def contour_creator(df: pd.DataFrame) -> go.Figure:
 
             if not ('float' in r_dtype.name or 'int' in r_dtype.name):
                 logger.error(f'dtype is {r_dtype}. Not implemented.')
-                continue
+                return 'Not implemented: including categorical parameters.'
             if not ('float' in c_dtype.name or 'int' in c_dtype.name):
                 logger.error(f'dtype is {c_dtype}. Not implemented.')
-                continue
+                return 'Not implemented: including categorical parameters.'
 
             x = df[c_key]
             y = df[r_key]
@@ -49,11 +49,16 @@ def contour_creator(df: pd.DataFrame) -> go.Figure:
             scatter = go.Scatter(
                 x=x, y=y, mode='markers',
                 marker=go.scatter.Marker(
-                    symbol='circle-dot',
+                    symbol='circle',
                     color='black',
+                    size=5,
+                    line=dict(
+                        color='white',
+                        width=1,
+                    )
                 ),
-                name='plot',
-                legendgroup='plot',
+                name='points (click to switch visibility)',
+                legendgroup='points (click to switch visibility)',
                 showlegend=is_first,
             )
 
@@ -68,11 +73,23 @@ def contour_creator(df: pd.DataFrame) -> go.Figure:
                     x=x, y=y, z=z,
                     connectgaps=True,
                     name=f'contour of\n{target_column}',
+                    colorscale='Turbo',
                 )
 
                 subplots.add_trace(contour, row=r + 1, col=c + 1)
 
             subplots.add_trace(scatter, row=r + 1, col=c + 1)
+            subplots.update_layout(
+                legend=dict(
+                    orientation='h',
+                    xanchor='center',
+                    x=0.5,
+                    yanchor='bottom',
+                    y=-0.2,
+                    bgcolor='rgba(0, 0, 0, 0.15)',
+                ),
+                # margin=dict(b=50),
+            )
 
     return subplots
 

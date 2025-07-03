@@ -341,18 +341,18 @@ def _plot(
         # layout
         fig.update_layout(
             title=_('Prediction Model'),
-            xaxis_title=prm_name1,
-            yaxis_title=obj_name,
+            scene=dict(
+                xaxis=dict(title=dict(text=prm_name1)),
+                yaxis=dict(title=dict(text=prm_name2)),
+                zaxis=dict(title=dict(text=obj_name)),
+            ),
         )
 
     else:
         fig.update_layout(
             title=_('Prediction Model'),
-            scene=dict(
-                xaxis_title=prm_name1,
-                yaxis_title=prm_name2,
-                zaxis_title=obj_name
-            ),
+            xaxis=dict(title=dict(text=prm_name1)),
+            yaxis=dict(title=dict(text=obj_name)),
             margin=dict(l=0, r=0, b=0, t=30),
         )
 

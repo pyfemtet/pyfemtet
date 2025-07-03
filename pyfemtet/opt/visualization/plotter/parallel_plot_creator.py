@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-def parallel_plot(df: pd.DataFrame) -> go.Figure:
+def parallel_plot(df: pd.DataFrame) -> go.Figure | str:
 
     logger = get_module_logger('opt.parallel_plot')
 
@@ -20,7 +20,7 @@ def parallel_plot(df: pd.DataFrame) -> go.Figure:
     ]):
         logger.error('Not implemented: including categorical parameters.')
         # fig = px.parallel_categories()
-        fig = go.Figure()
+        fig = 'Not implemented: including categorical parameters.'
 
     else:
         fig = px.parallel_coordinates(

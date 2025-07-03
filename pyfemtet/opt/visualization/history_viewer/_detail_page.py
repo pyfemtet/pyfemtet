@@ -8,11 +8,15 @@ from dash import Output, Input, callback_context
 from dash.exceptions import PreventUpdate
 
 from pyfemtet.logger import get_module_logger
+
 from pyfemtet.opt.history import MAIN_FILTER
 from pyfemtet.opt.visualization.history_viewer._base_application import AbstractPage
 from pyfemtet.opt.visualization.history_viewer._complex_components.detail_graphs import (
     ParallelPlot,
-    ContourPlot
+    ContourPlot,
+    ImportancePlot,
+    SlicePlot,
+    HistoryPlot,
 )
 
 
@@ -21,6 +25,9 @@ class DetailPage(AbstractPage):
     alerts: html.Div
     parallel_plot: ParallelPlot
     contour_plot: ContourPlot
+    importance_plot: ImportancePlot
+    slice_plot: SlicePlot
+    history_plot: HistoryPlot
 
     def setup_component(self):
 
@@ -30,10 +37,16 @@ class DetailPage(AbstractPage):
         self.alerts = html.Div(id='new-detail-alerts')
 
         # graphs
-        self.parallel_plot = ParallelPlot(self.location)
+        self.parallel_plot = ParallelPlot(location=self.location)
         self.add_subpage(self.parallel_plot)
-        self.contour_plot = ContourPlot(self.location)
+        self.contour_plot = ContourPlot(location=self.location)
         self.add_subpage(self.contour_plot)
+        self.importance_plot = ImportancePlot(location=self.location)
+        self.add_subpage(self.importance_plot)
+        self.slice_plot = SlicePlot(location=self.location)
+        self.add_subpage(self.slice_plot)
+        self.history_plot = HistoryPlot(location=self.location)
+        self.add_subpage(self.history_plot)
 
     def setup_layout(self):
 
@@ -44,9 +57,13 @@ class DetailPage(AbstractPage):
         self.layout = dbc.Container([
             dbc.Row([self.location]),
             dbc.Row([title]),
+            dbc.Row([html.Hr()]),
             dbc.Row([self.alerts]),
-            dbc.Row([self.parallel_plot.layout]),
+            dbc.Row([self.importance_plot.layout]),
+            dbc.Row([self.history_plot.layout]),
+            dbc.Row([self.slice_plot.layout]),
             dbc.Row([self.contour_plot.layout]),
+            dbc.Row([self.parallel_plot.layout]),
         ])
 
     def setup_callback(self):
@@ -63,7 +80,7 @@ class DetailPage(AbstractPage):
 
             logger = get_module_logger(
                 'opt.update_alerts_new_detail',
-                debug=True,
+                debug=False,
             )
 
             # ----- preconditions -----
