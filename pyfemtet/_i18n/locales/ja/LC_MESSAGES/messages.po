@@ -976,11 +976,11 @@ msgstr "解析モデル互換性チェックで不明なエラーが発生しま
 
 #: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:146
 msgid "Upper of pred. std-dev"
-msgstr "予測標準偏差の上限"
+msgstr "予測の標準偏差(+)"
 
 #: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:150
 msgid "Lower of pred. std-dev"
-msgstr "予測標準偏差の小さい方"
+msgstr "予測の標準偏差(-)"
 
 #: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:183
 msgid "Std-dev of pred."
