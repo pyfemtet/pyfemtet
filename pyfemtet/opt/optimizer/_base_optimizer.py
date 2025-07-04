@@ -352,12 +352,12 @@ class AbstractOptimizer:
         _duplicated_name_check(name, self.sub_fidelity_models.keys())
         self.sub_fidelity_models._update(name, sub_fidelity_model, fidelity)
 
-    def get_variables(self, format='dict'):
+    def get_variables(self, format: Literal['dict', 'values', 'raw'] = 'dict'):
         return self.variable_manager.get_variables(
             format=format,
         )
 
-    def get_parameter(self, format='dict'):
+    def get_parameter(self, format: Literal['dict', 'values', 'raw'] = 'dict'):
         return self.variable_manager.get_variables(
             format=format, filter='parameter'
         )
