@@ -899,10 +899,11 @@ class AbstractOptimizer:
                 filter='parameter', format='raw'
             )
             self.history.finalize(
-                parameters,
-                list(self.objectives.keys()),
-                list(self.constraints.keys()),
-                [self.sub_fidelity_name] + list(self.sub_fidelity_models.keys()),
+                parameters=parameters,
+                obj_names=list(self.objectives.keys()),
+                cns_names=list(self.constraints.keys()),
+                other_output_names=list(self.other_funcs.keys()),
+                sub_fidelity_names=[self.sub_fidelity_name] + list(self.sub_fidelity_models.keys()),
                 additional_data=self._collect_additional_data()
             )
 

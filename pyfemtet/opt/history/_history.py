@@ -366,6 +366,7 @@ class ColumnManager:
         extra_parameters = extra_parameters or TrialInput()
         extra_y_names = extra_y_names or []
         extra_c_names = extra_c_names or []
+        extra_other_output_names = extra_other_output_names or []
 
         # column name になるので重複は許されない
         column_dtypes: dict = NoDuplicateDict()
