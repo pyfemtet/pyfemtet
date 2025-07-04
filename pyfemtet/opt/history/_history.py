@@ -1417,6 +1417,8 @@ class History:
         self._records.save(self.path)
 
     def _create_optuna_study_for_visualization(self):
+        """出力は internal ではない値で、objective は出力という意味であり cns を含む。"""
+
         import optuna
 
         # create study
@@ -1424,10 +1426,10 @@ class History:
             # storage='sqlite:///' + os.path.basename(self.path) + '_dummy.db',
             sampler=None, pruner=None, study_name='dummy',
         )
-        if len(self.obj_names) == 1:
+        if len(self.obj_names + self.cns_names) == 1:
             kwargs.update(dict(direction='minimize'))
         else:
-            kwargs.update(dict(directions=['minimize']*len(self.obj_names)))
+            kwargs.update(dict(directions=['minimize']*len((self.obj_names + self.cns_names))))
         study = optuna.create_study(**kwargs)
 
         # add trial to study
@@ -1477,11 +1479,18 @@ class History:
                 )
             trial_kwargs.update(dict(distributions=distributions))
 
-            # objective
-            if len(self.obj_names) == 1:
-                trial_kwargs.update(dict(value=row[self.obj_names].values[0]))
+            # objective (+ constraints as objective)
+            if len(self.obj_names + self.cns_names) == 1:
+                if len(self.obj_names) == 1:
+                    trial_kwargs.update(dict(value=row[self.obj_names].values[0]))
+                else:
+                    trial_kwargs.update(dict(value=row[self.cns_names].values[0]))
             else:
-                trial_kwargs.update(dict(values=row[self.obj_names].values))
+                values = np.concat([
+                    row[self.obj_names].values,
+                    row[self.cns_names].values,
+                ])
+                trial_kwargs.update(dict(values=values))
 
             # add to study
             trial = optuna.create_trial(**trial_kwargs)
