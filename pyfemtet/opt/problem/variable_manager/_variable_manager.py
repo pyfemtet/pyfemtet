@@ -304,7 +304,7 @@ class VariableManager:
             filter: (Literal['pass_to_fem', 'parameter']
                      | tuple[Literal['pass_to_fem', 'parameter']]
                      | None) = None,  # 'pass_to_fem' and 'parameter' (OR filter)
-            format: str = None,  # None, 'dict' and 'values'
+            format: Literal['dict', 'values', 'raw'] | None = None,  # Defaults to 'raw'
     ) -> (
         dict[str, Variable]
         | dict[str, Parameter]
