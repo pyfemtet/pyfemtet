@@ -1,9 +1,9 @@
-,prm.num.value,prm.num.lower_bound,prm.num.upper_bound,prm_step,prm.num.value,prm.num.lower_bound,prm.cat.value,prm.cat.choices,obj,obj_direction,cns,cns_upper_bound,,,,,
+,prm.num.value,prm.num.lower_bound,prm.num.upper_bound,prm_step,prm.num.value,prm.num.lower_bound,prm.cat.value,prm.cat.choices,obj,obj_direction,cns,cns.upper_bound,other_output.value,,,,,
 ,,,,,,,,,,,,,,,,,
-trial,x,x_lower_bound,x_upper_bound,x_step,y,y_lower_bound,z,z_choices,output,output_direction,constraint,constraint_upper_bound,state,datetime_start,datetime_end,feasibility,optimality
-1,10,0,100,10,6,0,A,"['A', 'B', 'C']",101,maximize,8,10,Succeeded,2025/3/26 14:40,2025/3/26 14:40,TRUE,TRUE
-2,20,0,100,10,5,0,B,"['A', 'B', 'C']",102,minimize,9,10,Succeeded,2025/3/26 14:40,2025/3/26 14:40,TRUE,FALSE
-3,30,0,100,10,4,0,C,"['A', 'B', 'C']",103,100,10,10,Succeeded,2025/3/26 14:40,2025/3/26 14:40,TRUE,FALSE
-4,40,0,100,10,3,0,A,"['A', 'B', 'C']",104,100,11,10,Hidden constraint violation,2025/3/26 14:40,2025/3/26 14:40,FALSE,FALSE
-5,50,0,100,10,2,0,B,"['A', 'B', 'C']",105,minimize,12,10,Hidden constraint violation,2025/3/26 14:40,2025/3/26 14:40,FALSE,FALSE
-6,60,0,100,10,1,0,C,"['A', 'B', 'C']",106,maximize,13,10,Hidden constraint violation,2025/3/26 14:40,2025/3/26 14:40,FALSE,FALSE
+trial,x,x_lower_bound,x_upper_bound,x_step,y,y_lower_bound,z,z_choices,output,output_direction,constraint,constraint_upper_bound,other_output_name,state,datetime_start,datetime_end,feasibility,optimality
+1,10,0,100,10,6,0,A,"['A', 'B', 'C']",101,maximize,8,10,0,Succeeded,2025/3/26 14:40,2025/3/26 14:40,TRUE,TRUE
+2,20,0,100,10,5,0,B,"['A', 'B', 'C']",102,minimize,9,10,0,Succeeded,2025/3/26 14:40,2025/3/26 14:40,TRUE,FALSE
+3,30,0,100,10,4,0,C,"['A', 'B', 'C']",103,100,10,10,0,Succeeded,2025/3/26 14:40,2025/3/26 14:40,TRUE,FALSE
+4,40,0,100,10,3,0,A,"['A', 'B', 'C']",104,100,11,10,0,Hidden constraint violation,2025/3/26 14:40,2025/3/26 14:40,FALSE,FALSE
+5,50,0,100,10,2,0,B,"['A', 'B', 'C']",105,minimize,12,10,0,Hidden constraint violation,2025/3/26 14:40,2025/3/26 14:40,FALSE,FALSE
+6,60,0,100,10,1,0,C,"['A', 'B', 'C']",106,maximize,13,10,0,Hidden constraint violation,2025/3/26 14:40,2025/3/26 14:40,FALSE,FALSE

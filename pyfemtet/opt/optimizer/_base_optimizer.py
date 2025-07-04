@@ -99,7 +99,7 @@ class AbstractOptimizer:
         self.variable_manager = VariableManager()
         self.objectives = Objectives()
         self.constraints = Constraints()
-        self.other_funcs = Functions()
+        self.other_outputs = Functions()
 
         # multi-fidelity
         self.fidelity = None
@@ -352,8 +352,8 @@ class AbstractOptimizer:
         other_func.fun = fun
         other_func.args = args or ()
         other_func.kwargs = kwargs or {}
-        _duplicated_name_check(name, self.other_funcs.keys())
-        self.other_funcs.update({name: other_func})
+        _duplicated_name_check(name, self.other_outputs.keys())
+        self.other_outputs.update({name: other_func})
 
     def add_sub_fidelity_model(
             self,
@@ -416,7 +416,7 @@ class AbstractOptimizer:
         return out
 
     def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
-        for name, other_func in self.other_funcs.items():
+        for name, other_func in self.other_outputs.items():
             other_func_result = FunctionResult(other_func, self.fem)
             out.update({name: other_func_result})
         return out
@@ -902,7 +902,7 @@ class AbstractOptimizer:
                 parameters=parameters,
                 obj_names=list(self.objectives.keys()),
                 cns_names=list(self.constraints.keys()),
-                other_output_names=list(self.other_funcs.keys()),
+                other_output_names=list(self.other_outputs.keys()),
                 sub_fidelity_names=[self.sub_fidelity_name] + list(self.sub_fidelity_models.keys()),
                 additional_data=self._collect_additional_data()
             )
