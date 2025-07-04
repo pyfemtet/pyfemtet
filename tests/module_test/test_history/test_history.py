@@ -6,6 +6,7 @@ from pyfemtet.opt.history._history import DuplicatedColumnNameError
 from pyfemtet.opt.optimizer import AbstractOptimizer
 from pyfemtet.opt.interface import NoFEM
 from pyfemtet._i18n import ENCODING
+import pytest
 from tests import get
 
 
@@ -22,9 +23,11 @@ def test_standalone_history():
     print(f'{history.prm_names=}')
     print(f'{history.obj_names=}')
     print(f'{history.cns_names=}')
+    print(f'{history.other_output_names=}')
     assert history.prm_names == ['x', 'y', 'z']
     assert history.obj_names == ['output']
     assert history.cns_names == ['constraint']
+    assert history.other_output_names == ['other_output_name']
 
     df = history.get_df()
     df.to_csv(os.path.join(os.path.dirname(__file__), 'loaded_internal_df.csv'))
@@ -84,9 +87,9 @@ def test_history_column_order():
         third_line = reader.__next__()
 
     print(first_line)
-    assert first_line == ['{}', 'prm.num.value', 'prm.num.value', 'prm.cat.value', 'obj', 'cns', '', '', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.lower_bound', 'prm.cat.choices', 'obj.direction', 'cns.upper_bound', '', '', '', '']
+    assert first_line == ['{}', 'prm.num.value', 'prm.num.value', 'prm.cat.value', 'obj', 'cns', 'other_output.value', '', '', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.lower_bound', 'prm.cat.choices', 'obj.direction', 'cns.upper_bound', '', '', '', '']
     print(third_line)
-    assert third_line == ['trial', 'x', 'y', 'z', 'output', 'constraint', 'feasibility', 'optimality', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y_lower_bound', 'z_choices', 'output_direction', 'constraint_upper_bound', 'state', 'datetime_start', 'datetime_end', 'messages']
+    assert third_line == ['trial', 'x', 'y', 'z', 'output', 'constraint', 'other_output_name', 'feasibility', 'optimality', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y_lower_bound', 'z_choices', 'output_direction', 'constraint_upper_bound', 'state', 'datetime_start', 'datetime_end', 'messages']
 
     # ===== per_cat =====
     history = History()
@@ -105,18 +108,16 @@ def test_history_column_order():
         third_line = reader.__next__()
 
     print(f'{first_line=}')
-    assert first_line == ['{}', 'prm.num.value', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.value', 'prm.num.lower_bound', 'prm.cat.value', 'prm.cat.choices', 'obj', 'obj.direction', 'cns', 'cns.upper_bound', '', '', '', '', '', '']
+    assert first_line == ['{}', 'prm.num.value', 'prm.num.lower_bound', 'prm.num.upper_bound', 'prm.num.step', 'prm.num.value', 'prm.num.lower_bound', 'prm.cat.value', 'prm.cat.choices', 'obj', 'obj.direction', 'cns', 'cns.upper_bound', 'other_output.value', '', '', '', '', '', '']
     print(f'{third_line=}')
-    assert third_line == ['trial', 'x', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y', 'y_lower_bound', 'z', 'z_choices', 'output', 'output_direction', 'constraint', 'constraint_upper_bound', 'state', 'datetime_start', 'datetime_end', 'messages', 'feasibility', 'optimality']
+    assert third_line == ['trial', 'x', 'x_lower_bound', 'x_upper_bound', 'x_step', 'y', 'y_lower_bound', 'z', 'z_choices', 'output', 'output_direction', 'constraint', 'constraint_upper_bound', 'other_output_name', 'state', 'datetime_start', 'datetime_end', 'messages', 'feasibility', 'optimality']
 
 
 def test_history_duplicated_name():
     opt = AbstractOptimizer()
     opt.fem = NoFEM()
     opt.add_parameter('a', 0, 0, 1)
-    opt.add_parameter('a', 0, 0, 1)
     opt.add_objective('a', lambda: 1)
-    print('Please check console output to certify logger.warning is successfully output.')
     try:
         opt._finalize()
     except DuplicatedColumnNameError:
@@ -126,9 +127,21 @@ def test_history_duplicated_name():
         assert False
 
 
+@pytest.mark.manual
+def test_history_duplicated_name_other_output():
+    opt = AbstractOptimizer()
+    opt.fem = NoFEM()
+    opt.add_other_output('a', lambda: 1)
+    opt.add_other_output('a', lambda: 1)
+    print('Please check console output to certify logger.warning is successfully output.')
+    if input('Press "NG" to set test failed.').lower() == 'ng':
+        assert False
+
+
 if __name__ == '__main__':
-    # test_standalone_history()
-    # test_new_additional_data()
-    # test_restart_additional_data()
+    test_standalone_history()
+    test_new_additional_data()
+    test_restart_additional_data()
     test_history_column_order()
-    # test_history_duplicated_name()
+    test_history_duplicated_name()
+    test_history_duplicated_name_other_output()

@@ -99,6 +99,7 @@ class AbstractOptimizer:
         self.variable_manager = VariableManager()
         self.objectives = Objectives()
         self.constraints = Constraints()
+        self.other_outputs = Functions()
 
         # multi-fidelity
         self.fidelity = None
@@ -339,6 +340,21 @@ class AbstractOptimizer:
         _duplicated_name_check(name, self.constraints.keys())
         self.constraints.update({name: cns})
 
+    def add_other_output(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+
+        other_func = Function()
+        other_func.fun = fun
+        other_func.args = args or ()
+        other_func.kwargs = kwargs or {}
+        _duplicated_name_check(name, self.other_outputs.keys())
+        self.other_outputs.update({name: other_func})
+
     def add_sub_fidelity_model(
             self,
             name: str,
@@ -352,12 +368,12 @@ class AbstractOptimizer:
         _duplicated_name_check(name, self.sub_fidelity_models.keys())
         self.sub_fidelity_models._update(name, sub_fidelity_model, fidelity)
 
-    def get_variables(self, format='dict'):
+    def get_variables(self, format: Literal['dict', 'values', 'raw'] = 'dict'):
         return self.variable_manager.get_variables(
             format=format,
         )
 
-    def get_parameter(self, format='dict'):
+    def get_parameter(self, format: Literal['dict', 'values', 'raw'] = 'dict'):
         return self.variable_manager.get_variables(
             format=format, filter='parameter'
         )
@@ -397,6 +413,12 @@ class AbstractOptimizer:
             if not cns.hard:
                 cns_result = ConstraintResult(cns, self.fem)
                 out.update({name: cns_result})
+        return out
+
+    def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
+        for name, other_func in self.other_outputs.items():
+            other_func_result = FunctionResult(other_func, self.fem)
+            out.update({name: other_func_result})
         return out
 
     def _get_hard_constraint_violation_names(self, hard_c: TrialConstraintOutput) -> list[str]:
@@ -573,6 +595,7 @@ class AbstractOptimizer:
 
                 try:
                     y: TrialOutput = opt_._y()
+                    record.y = y
                     opt_._check_and_raise_interruption()
 
                 # if intentional error (by user)
@@ -604,7 +627,6 @@ class AbstractOptimizer:
                     _c.update(soft_c)
                     _c.update(hard_c)
 
-                    record.y = y
                     record.c = _c
                     record.state = TrialState.get_corresponding_state_from_exception(e)
                     record.messages.append(
@@ -619,12 +641,31 @@ class AbstractOptimizer:
                 c.update(soft_c)
                 c.update(hard_c)
 
+                # ===== evaluate other functions =====
+                logger.info(_('evaluating other functions...'))
+
+                other_outputs = TrialFunctionOutput()
+                try:
+                    opt_._other_outputs(other_outputs)
+
+                # if intentional error (by user)
+                except _HiddenConstraintViolation as e:
+                    _log_hidden_constraint(e)
+
+                    record.other_outputs = other_outputs
+                    record.state = TrialState.get_corresponding_state_from_exception(e)
+                    record.messages.append(
+                            _('Hidden constraint violation during '
+                              'another output function evaluation: ')
+                            + create_err_msg_from_exception(e))
+
+                    raise e
+
                 # get values as minimize
                 y_internal: dict = opt_._convert_y(y)
 
                 logger.info(_('output:'))
                 logger.info(y)
-                record.y = y
                 record.c = c
                 record.state = TrialState.succeeded
 
@@ -858,10 +899,11 @@ class AbstractOptimizer:
                 filter='parameter', format='raw'
             )
             self.history.finalize(
-                parameters,
-                list(self.objectives.keys()),
-                list(self.constraints.keys()),
-                [self.sub_fidelity_name] + list(self.sub_fidelity_models.keys()),
+                parameters=parameters,
+                obj_names=list(self.objectives.keys()),
+                cns_names=list(self.constraints.keys()),
+                other_output_names=list(self.other_outputs.keys()),
+                sub_fidelity_names=[self.sub_fidelity_name] + list(self.sub_fidelity_models.keys()),
                 additional_data=self._collect_additional_data()
             )
 

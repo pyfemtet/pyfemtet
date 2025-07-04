@@ -722,6 +722,7 @@ class Tutorial(AbstractPage):
                 parameters=history._records.column_manager.parameters,
                 obj_names=history.obj_names,
                 cns_names=history.cns_names,
+                other_output_names=history.other_output_names,
                 sub_fidelity_names=history.sub_fidelity_names,
                 additional_data=additional_data,
             )

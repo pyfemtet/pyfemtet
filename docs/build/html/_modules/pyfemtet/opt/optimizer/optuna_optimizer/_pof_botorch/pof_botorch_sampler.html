@@ -927,7 +927,8 @@
             <span class="p">]</span>
         <span class="p">)</span>
     <span class="n">feasibility_cdf_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># or &#39;sample_mean&#39;</span>
-    <span class="n">feasibility_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &#39;no&#39; to fixed minimum noise</span></div>
+    <span class="n">feasibility_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &#39;no&#39; to fixed minimum noise</span>
+    <span class="n">remove_hard_constraints_from_gp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># if consider_explicit_hard_constraint is False, no effect.</span></div>
 
 
 
@@ -1174,6 +1175,8 @@
         <span class="k">if</span> <span class="n">n_trials</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_startup_trials</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
 
+        <span class="c1"># ===== ここまで変更なし =====</span>
+
         <span class="n">trans</span> <span class="o">=</span> <span class="n">_SearchSpaceTransform</span><span class="p">(</span><span class="n">search_space</span><span class="p">)</span>
         <span class="n">n_objectives</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">study</span><span class="o">.</span><span class="n">directions</span><span class="p">)</span>
         <span class="n">values</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
@@ -1194,23 +1197,48 @@
                     <span class="p">):</span>  <span class="c1"># BoTorch always assumes maximization.</span>
                         <span class="n">value</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
                     <span class="n">values</span><span class="p">[</span><span class="n">trial_idx</span><span class="p">,</span> <span class="n">obj_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                    <span class="c1"># get constraints</span>
                     <span class="n">constraints</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">get_trial_system_attrs</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">_trial_id</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                         <span class="n">_CONSTRAINTS_KEY</span>
                     <span class="p">)</span>
+
+                    <span class="c1"># Explicit hard constraints を optimize_acqf で扱うならば</span>
+                    <span class="c1"># GP にはそれを渡さない (option)</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                            <span class="n">constraints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pof_config</span><span class="o">.</span><span class="n">consider_explicit_hard_constraint</span>
+                            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pof_config</span><span class="o">.</span><span class="n">remove_hard_constraints_from_gp</span>
+                    <span class="p">):</span>
+                        <span class="n">constraints</span> <span class="o">=</span> <span class="n">filter_soft_constraints_only</span><span class="p">(</span>
+                            <span class="n">constraints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyfemtet_optimizer</span>
+                        <span class="p">)</span>
+
                     <span class="k">if</span> <span class="n">constraints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
                         <span class="n">n_constraints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span>
 
-                        <span class="k">if</span> <span class="n">con</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">con</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
-                                <span class="p">(</span><span class="n">n_completed_trials</span><span class="p">,</span> <span class="n">n_constraints</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span>
-                            <span class="p">)</span>
-                        <span class="k">elif</span> <span class="n">n_constraints</span> <span class="o">!=</span> <span class="n">con</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-                            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">con</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> constraints &quot;</span>
-                                <span class="sa">f</span><span class="s2">&quot;but received </span><span class="si">{</span><span class="n">n_constraints</span><span class="si">}</span><span class="s2">.&quot;</span>
-                            <span class="p">)</span>
-                        <span class="n">con</span><span class="p">[</span><span class="n">trial_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">constraints</span>
+                        <span class="c1"># remove_hard_constraints_from_gp で</span>
+                        <span class="c1"># constraints がなくなった場合、</span>
+                        <span class="c1"># そもそも今後ここに来る必要がない</span>
+                        <span class="k">if</span> <span class="n">n_constraints</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_constraints_func</span> <span class="o">=</span> <span class="kc">None</span>
+
+                        <span class="k">else</span><span class="p">:</span>
+
+                            <span class="k">if</span> <span class="n">con</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">con</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+                                    <span class="p">(</span><span class="n">n_completed_trials</span><span class="p">,</span> <span class="n">n_constraints</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span>
+                                <span class="p">)</span>
+                            <span class="k">elif</span> <span class="n">n_constraints</span> <span class="o">!=</span> <span class="n">con</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                                    <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">con</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> constraints &quot;</span>
+                                    <span class="sa">f</span><span class="s2">&quot;but received </span><span class="si">{</span><span class="n">n_constraints</span><span class="si">}</span><span class="s2">.&quot;</span>
+                                <span class="p">)</span>
+                            <span class="n">con</span><span class="p">[</span><span class="n">trial_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">constraints</span>
+
             <span class="k">elif</span> <span class="n">trial</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">p</span> <span class="ow">in</span> <span class="n">trial</span><span class="o">.</span><span class="n">params</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">search_space</span><span class="p">):</span>
                     <span class="n">params</span><span class="p">[</span><span class="n">trial_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
@@ -1257,7 +1285,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">running_params</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># ===== ここまで変更なし =====</span>
 
         <span class="c1"># TODO: ミーゼスなどの場合にこれらのシード固定法も試す</span>
         <span class="c1"># if self._seed is not None:</span>
@@ -1344,6 +1371,31 @@
         <span class="k">return</span> <span class="n">trans</span><span class="o">.</span><span class="n">untransform</span><span class="p">(</span><span class="n">candidates</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span></div>
 </div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">filter_soft_constraints_only</span><span class="p">(</span>
+        <span class="n">constraints</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="c1"># constraints を取得</span>
+    <span class="c1"># lb, ub の存在に応じて hard, soft を展開</span>
+    <span class="n">is_soft_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cns</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">is_soft_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="ow">not</span> <span class="n">cns</span><span class="o">.</span><span class="n">hard</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cns</span><span class="o">.</span><span class="n">upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">is_soft_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="ow">not</span> <span class="n">cns</span><span class="o">.</span><span class="n">hard</span><span class="p">)</span>
+
+    <span class="c1"># constraints と比べる</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">is_soft_list</span><span class="p">)</span>
+
+    <span class="c1"># soft に該当する要素のみで組立て返す</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">is_soft</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">is_soft_list</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_soft</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
            </div>
