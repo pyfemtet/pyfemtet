@@ -1183,6 +1183,10 @@ class History:
     when the optimization process starts.
     """
 
+    @property
+    def all_output_names(self) -> list[str]:
+        return self.obj_names + self.cns_names + self.other_output_names
+
     def __init__(self):
         self._records = Records()
         self.path: str | None = None
@@ -1418,7 +1422,7 @@ class History:
         self._records.save(self.path)
 
     def _create_optuna_study_for_visualization(self):
-        """出力は internal ではない値で、objective は出力という意味であり cns を含む。"""
+        """出力は internal ではない値で、objective は出力という意味であり cns, other_output を含む。"""
 
         import optuna
 
@@ -1427,10 +1431,10 @@ class History:
             # storage='sqlite:///' + os.path.basename(self.path) + '_dummy.db',
             sampler=None, pruner=None, study_name='dummy',
         )
-        if len(self.obj_names + self.cns_names) == 1:
+        if len(self.all_output_names) == 1:
             kwargs.update(dict(direction='minimize'))
         else:
-            kwargs.update(dict(directions=['minimize']*len((self.obj_names + self.cns_names))))
+            kwargs.update(dict(directions=['minimize']*len(self.all_output_names)))
         study = optuna.create_study(**kwargs)
 
         # add trial to study
@@ -1480,17 +1484,18 @@ class History:
                 )
             trial_kwargs.update(dict(distributions=distributions))
 
-            # objective (+ constraints as objective)
-            if len(self.obj_names + self.cns_names) == 1:
+            # objective (+ constraints + other_outputs as objective)
+            if len(self.all_output_names) == 1:
                 if len(self.obj_names) == 1:
                     trial_kwargs.update(dict(value=row[self.obj_names].values[0]))
-                else:
+                elif len(self.cns_names) == 1:
                     trial_kwargs.update(dict(value=row[self.cns_names].values[0]))
+                elif len(self.other_output_names) == 1:
+                    trial_kwargs.update(dict(value=row[self.other_output_names].values[0]))
+                else:
+                    assert False
             else:
-                values = np.concat([
-                    row[self.obj_names].values,
-                    row[self.cns_names].values,
-                ])
+                values = row[self.all_output_names].values
                 trial_kwargs.update(dict(values=values))
 
             # add to study

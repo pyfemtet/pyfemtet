@@ -275,7 +275,7 @@ class SelectablePlot(AbstractPage):
         # NotImplementedError でもいいが、汎用的なので
 
         columns = [
-            col for col in history.prm_names + history.obj_names + history.cns_names
+            col for col in history.prm_names + history.all_output_names
             if col in selected_input_values + selected_output_values
         ]
 
@@ -388,7 +388,7 @@ class SelectableOptunaPlot(SelectablePlot):
                 history._create_optuna_study_for_visualization(),
                 selected_input_values,
                 selected_output_values,
-                [(history.obj_names + history.cns_names).index(v) for v in selected_output_values],
+                [history.all_output_names.index(v) for v in selected_output_values],
             )
 
             return fig, []
@@ -446,7 +446,7 @@ class SelectableOptunaPlotAllInput(SelectablePlot):
             fig = self.create_optuna_plot(
                 history._create_optuna_study_for_visualization(),
                 selected_output_value,
-                (history.obj_names + history.cns_names).index(selected_output_value)
+                history.all_output_names.index(selected_output_value)
             )
 
             return fig, []
