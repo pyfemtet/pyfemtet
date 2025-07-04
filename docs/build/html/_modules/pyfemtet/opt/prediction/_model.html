@@ -171,8 +171,8 @@
         <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KWARGS</span><span class="p">)</span>
         <span class="n">post</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">posterior</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="n">mean</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-            <span class="n">std</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">variance</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">std</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">variance</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span></div>
 </div>
 

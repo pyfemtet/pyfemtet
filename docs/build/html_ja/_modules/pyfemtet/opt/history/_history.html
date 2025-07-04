@@ -347,6 +347,14 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
 
     <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cns_lower_bound_name</span><span class="p">(</span><span class="n">cns_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cns_name</span> <span class="o">+</span> <span class="s1">&#39;_lower_bound&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cns_upper_bound_name</span><span class="p">(</span><span class="n">cns_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cns_name</span> <span class="o">+</span> <span class="s1">&#39;_upper_bound&#39;</span>
+
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">direction_name</span><span class="p">(</span><span class="n">obj_name</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">obj_name</span> <span class="o">+</span> <span class="s1">&#39;_direction&#39;</span>
 
@@ -406,6 +414,7 @@
     <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span>
     <span class="n">y_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">c_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">other_output_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">column_dtypes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span>
     <span class="n">meta_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 
@@ -420,12 +429,14 @@
             <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
             <span class="n">y_names</span><span class="p">,</span>
             <span class="n">c_names</span><span class="p">,</span>
+            <span class="n">other_output_names</span><span class="p">,</span>
             <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
             <span class="n">column_order_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y_names</span> <span class="o">=</span> <span class="n">y_names</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">c_names</span> <span class="o">=</span> <span class="n">c_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span><span class="o">=</span><span class="n">other_output_names</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_full_sorted_column_information</span><span class="p">(</span>
             <span class="n">additional_data</span><span class="o">=</span><span class="n">additional_data</span><span class="p">,</span>
             <span class="n">column_order_mode</span><span class="o">=</span><span class="n">column_order_mode</span><span class="p">,</span>
@@ -436,12 +447,14 @@
             <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">extra_y_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">extra_c_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">extra_other_output_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">column_order_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">extra_parameters</span> <span class="o">=</span> <span class="n">extra_parameters</span> <span class="ow">or</span> <span class="n">TrialInput</span><span class="p">()</span>
         <span class="n">extra_y_names</span> <span class="o">=</span> <span class="n">extra_y_names</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="n">extra_c_names</span> <span class="o">=</span> <span class="n">extra_c_names</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">extra_other_output_names</span> <span class="o">=</span> <span class="n">extra_other_output_names</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="c1"># column name になるので重複は許されない</span>
         <span class="n">column_dtypes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">NoDuplicateDict</span><span class="p">()</span>
@@ -541,7 +554,7 @@
 
                     <span class="c1"># later</span>
                     <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="nb">object</span><span class="p">})</span>  <span class="c1"># str | float</span>
-                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">))</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obj.direction&#39;</span><span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">extra_y_names</span><span class="p">:</span>
                     <span class="c1"># later</span>
@@ -554,12 +567,42 @@
 
             <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>
 
+                <span class="n">f_lb</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">cns_lower_bound_name</span>
+                <span class="n">f_ub</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">cns_upper_bound_name</span>
+
                 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_names</span><span class="p">:</span>
                     <span class="c1"># important</span>
                     <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
                     <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">)</span>
 
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f_lb</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns.lower_bound&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f_ub</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cns.upper_bound&#39;</span><span class="p">)</span>
+
                 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">extra_c_names</span><span class="p">:</span>
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f_lb</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># later</span>
+                    <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f_ub</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;other_outputs&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span><span class="p">:</span>
+                    <span class="c1"># important</span>
+                    <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+                    <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;other_output.value&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">extra_other_output_names</span><span class="p">:</span>
                     <span class="c1"># later</span>
                     <span class="n">target_cds</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
                     <span class="n">target_mcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -638,6 +681,9 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_cns_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_columns</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_other_output_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_columns</span><span class="p">(</span><span class="s1">&#39;other_output&#39;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
@@ -733,6 +779,7 @@
     <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrialInput</span><span class="p">)</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">TrialOutput</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrialOutput</span><span class="p">)</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">TrialConstraintOutput</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrialConstraintOutput</span><span class="p">)</span>
+    <span class="n">other_outputs</span><span class="p">:</span> <span class="n">TrialFunctionOutput</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrialFunctionOutput</span><span class="p">)</span>
     <span class="n">state</span><span class="p">:</span> <span class="n">TrialState</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">undefined</span>
     <span class="n">datetime_start</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
     <span class="n">datetime_end</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
@@ -750,6 +797,7 @@
         <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
         <span class="n">y</span><span class="p">:</span> <span class="n">TrialOutput</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
         <span class="n">c</span><span class="p">:</span> <span class="n">TrialConstraintOutput</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="n">other_outputs</span><span class="p">:</span> <span class="n">TrialFunctionOutput</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;other_outputs&#39;</span><span class="p">)</span>
 
         <span class="c1"># prm</span>
         <span class="k">for</span> <span class="n">prm_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -770,10 +818,22 @@
         <span class="c1"># messages to str</span>
         <span class="n">messages_str</span> <span class="o">=</span> <span class="n">_RECORD_MESSAGE_DELIMITER</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;messages&#39;</span><span class="p">])</span>
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;messages&#39;</span><span class="p">:</span> <span class="n">messages_str</span><span class="p">})</span>
-        
+
+        <span class="c1"># obj</span>
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
-        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">_direction&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">direction</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">direction_name</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">direction</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+        <span class="c1"># cns</span>
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="n">f_lb</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">cns_lower_bound_name</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f_lb</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">lower_bound</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="n">f_ub</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">cns_upper_bound_name</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f_ub</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">upper_bound</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+        <span class="c1"># function</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">other_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
             <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
@@ -969,11 +1029,13 @@
         <span class="n">loaded_prm_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_prm_names</span><span class="p">(</span><span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
         <span class="n">loaded_obj_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">,</span> <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
         <span class="n">loaded_cns_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">,</span> <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
+        <span class="n">loaded_other_output_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;other_output.value&#39;</span><span class="p">,</span> <span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">))</span>
 
         <span class="c1"># loaded df に存在するが Record に存在しないカラムを Record に追加</span>
         <span class="n">extra_parameters</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">extra_y_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">extra_c_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">extra_oo_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">l_col</span><span class="p">,</span> <span class="n">l_meta</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">):</span>
 
             <span class="c1"># 現在の Record に含まれないならば</span>
@@ -1010,6 +1072,10 @@
                 <span class="k">elif</span> <span class="n">l_col</span> <span class="ow">in</span> <span class="n">loaded_cns_names</span><span class="p">:</span>
                     <span class="n">extra_c_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_col</span><span class="p">)</span>
 
+                <span class="c1"># other_output_name ならば</span>
+                <span class="k">elif</span> <span class="n">l_col</span> <span class="ow">in</span> <span class="n">loaded_other_output_names</span><span class="p">:</span>
+                    <span class="n">extra_oo_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_col</span><span class="p">)</span>
+
         <span class="c1"># additional data を取得</span>
         <span class="n">a_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">(</span><span class="n">loaded_columns</span><span class="p">,</span> <span class="n">loaded_meta_columns</span><span class="p">)</span>
 
@@ -1017,6 +1083,7 @@
             <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
             <span class="n">extra_y_names</span><span class="o">=</span><span class="n">extra_y_names</span><span class="p">,</span>
             <span class="n">extra_c_names</span><span class="o">=</span><span class="n">extra_c_names</span><span class="p">,</span>
+            <span class="n">extra_other_output_names</span><span class="o">=</span><span class="n">extra_oo_names</span><span class="p">,</span>
             <span class="n">additional_data</span><span class="o">=</span><span class="n">a_data</span><span class="p">,</span>
             <span class="n">column_order_mode</span><span class="o">=</span><span class="n">column_order_mode</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1193,6 +1260,7 @@
     <span class="n">prm_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">obj_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">cns_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">other_output_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">sub_fidelity_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">is_restart</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span>
@@ -1205,7 +1273,9 @@
 <span class="sd">    when the optimization process starts.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">MAIN_FILTER</span> <span class="o">=</span> <span class="n">MAIN_FILTER</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_output_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">()</span>
@@ -1245,6 +1315,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_filter_prm_names</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;obj&#39;</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;cns&#39;</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_filter_columns</span><span class="p">(</span><span class="s1">&#39;other_output.value&#39;</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_names</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_get_sub_fidelity_names</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
 
@@ -1257,6 +1328,7 @@
                 <span class="n">parameters</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_names</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1266,6 +1338,7 @@
             <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span>
             <span class="n">obj_names</span><span class="p">,</span>
             <span class="n">cns_names</span><span class="p">,</span>
+            <span class="n">other_output_names</span><span class="p">,</span>
             <span class="n">sub_fidelity_names</span><span class="p">,</span>
             <span class="n">additional_data</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1274,13 +1347,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">obj_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cns_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">other_output_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sub_fidelity_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finalized</span><span class="p">:</span>
             <span class="c1"># ここで column_dtypes が決定する</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span>
-                <span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span>
+                <span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span>
             <span class="p">)</span>
 
             <span class="c1"># initialize</span>
@@ -1371,7 +1446,7 @@
                 <span class="c1">#   フィデリティの話は現在解析を実行している opt が</span>
                 <span class="c1">#   必要なので、recording メソッドの引数に</span>
                 <span class="c1">#   それを追加する</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="o">=</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">client</span><span class="o">.</span><span class="n">run_on_scheduler</span><span class="p">(</span>
@@ -1418,7 +1493,7 @@
                 <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">self_</span><span class="o">.</span><span class="n">postprocess_after_recording</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
-                <span class="c1"># save history</span>
+                <span class="c1"># save history if no FEMOpt</span>
                 <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -1432,10 +1507,22 @@
 
 <span class="sd">        The destination path is :class:`History.path`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># flask server 情報のように、最適化の途中で</span>
+        <span class="c1"># 書き換えられるケースがあるので</span>
+        <span class="c1"># additional data を再度ここで meta_columns に反映する</span>
+        <span class="n">cm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="c1"># additional_data を入れる</span>
+            <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="n">cm</span><span class="o">.</span><span class="n">_get_additional_data_column</span><span class="p">():</span>
+                <span class="n">cm</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">())</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_optuna_study_for_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;出力は internal ではない値で、objective は出力という意味であり cns, other_output を含む。&quot;&quot;&quot;</span>
+
         <span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
 
         <span class="c1"># create study</span>
@@ -1443,10 +1530,10 @@
             <span class="c1"># storage=&#39;sqlite:///&#39; + os.path.basename(self.path) + &#39;_dummy.db&#39;,</span>
             <span class="n">sampler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pruner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">study_name</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_output_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)))</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_output_names</span><span class="p">)))</span>
         <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># add trial to study</span>
@@ -1496,11 +1583,19 @@
                 <span class="p">)</span>
             <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">distributions</span><span class="o">=</span><span class="n">distributions</span><span class="p">))</span>
 
-            <span class="c1"># objective</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="c1"># objective (+ constraints + other_outputs as objective)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_output_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cns_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">other_output_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="kc">False</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">all_output_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">trial_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">))</span>
 
             <span class="c1"># add to study</span>
             <span class="n">trial</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_trial</span><span class="p">(</span><span class="o">**</span><span class="n">trial_kwargs</span><span class="p">)</span>

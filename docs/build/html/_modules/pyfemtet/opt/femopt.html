@@ -268,6 +268,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">using_fem</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="FEMOpt.add_other_output">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.femopt.html#pyfemtet.opt.FEMOpt.add_other_output">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_other_output</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">add_other_output</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="FEMOpt.add_sub_fidelity_model">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.femopt.html#pyfemtet.opt.FEMOpt.add_sub_fidelity_model">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_sub_fidelity_model</span><span class="p">(</span>

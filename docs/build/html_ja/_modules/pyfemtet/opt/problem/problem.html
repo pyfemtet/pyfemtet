@@ -110,7 +110,9 @@
     <span class="s1">&#39;TrialInput&#39;</span><span class="p">,</span>
     <span class="s1">&#39;TrialOutput&#39;</span><span class="p">,</span>
     <span class="s1">&#39;TrialConstraintOutput&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TrialFunctionOutput&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Function&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FunctionResult&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Functions&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Objective&#39;</span><span class="p">,</span>
     <span class="s1">&#39;ObjectiveResult&#39;</span><span class="p">,</span>
@@ -232,6 +234,15 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span></div>
 </div>
+
+
+
+<div class="viewcode-block" id="FunctionResult">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.problem.problem.html#pyfemtet.opt.problem.problem.FunctionResult">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FunctionResult</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Function</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span></div>
 
 
 
@@ -426,6 +437,7 @@
 <span class="n">TrialInput</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Variable</span><span class="p">]</span>
 <span class="n">TrialOutput</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ObjectiveResult</span><span class="p">]</span>
 <span class="n">TrialConstraintOutput</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ConstraintResult</span><span class="p">]</span>
+<span class="n">TrialFunctionOutput</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FunctionResult</span><span class="p">]</span>
 </pre></div>
 
            </div>

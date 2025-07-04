@@ -262,6 +262,21 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.add_other_output">
+<span class="sig-name descname"><span class="pre">add_other_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base_optimizer.html#AbstractOptimizer.add_other_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer.add_other_output" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>fun</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><em>Callable</em></a><em>[</em><em>[</em><em>...</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – </p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.add_parameter">
 <span class="sig-name descname"><span class="pre">add_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_to_fem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base_optimizer.html#AbstractOptimizer.add_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer.add_parameter" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -320,12 +335,22 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.get_parameter">
 <span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dict'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base_optimizer.html#AbstractOptimizer.get_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer.get_parameter" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><em>Literal</em></a><em>[</em><em>'dict'</em><em>, </em><em>'values'</em><em>, </em><em>'raw'</em><em>]</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.get_variables">
 <span class="sig-name descname"><span class="pre">get_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dict'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/_base_optimizer.html#AbstractOptimizer.get_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.AbstractOptimizer.get_variables" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><em>Literal</em></a><em>[</em><em>'dict'</em><em>, </em><em>'values'</em><em>, </em><em>'raw'</em><em>]</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.AbstractOptimizer.history">
@@ -804,7 +829,7 @@ Take a copy before modifying this object.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">PoFConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consider_pof:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_explicit_hard_constraint:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_states_to_consider_pof:</span> <span class="pre">'list[PFTrialState]'</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feasibility_cdf_threshold:</span> <span class="pre">'float</span> <span class="pre">|</span> <span class="pre">str'</span> <span class="pre">=</span> <span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feasibility_noise:</span> <span class="pre">'float</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None'</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.html#PoFConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.</span></span><span class="sig-name descname"><span class="pre">PoFConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consider_pof:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_explicit_hard_constraint:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_states_to_consider_pof:</span> <span class="pre">'list[PFTrialState]'</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feasibility_cdf_threshold:</span> <span class="pre">'float</span> <span class="pre">|</span> <span class="pre">str'</span> <span class="pre">=</span> <span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feasibility_noise:</span> <span class="pre">'float</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None'</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_hard_constraints_from_gp:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.html#PoFConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -814,6 +839,7 @@ Take a copy before modifying this object.</p></li>
 <li><p><strong>_states_to_consider_pof</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.TrialState" title="pyfemtet.opt.history._history.TrialState"><em>TrialState</em></a><em>]</em>) – </p></li>
 <li><p><strong>feasibility_cdf_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
 <li><p><strong>feasibility_noise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>remove_hard_constraints_from_gp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -835,6 +861,11 @@ Take a copy before modifying this object.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.feasibility_noise">
 <span class="sig-name descname"><span class="pre">feasibility_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.feasibility_noise" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyfemtet.opt.optimizer.PoFConfig.remove_hard_constraints_from_gp">
+<span class="sig-name descname"><span class="pre">remove_hard_constraints_from_gp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.PoFConfig.remove_hard_constraints_from_gp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
