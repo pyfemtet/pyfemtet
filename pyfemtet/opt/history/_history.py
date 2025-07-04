@@ -326,6 +326,7 @@ class ColumnManager:
     parameters: TrialInput
     y_names: list[str]
     c_names: list[str]
+    other_output_names: list[str]
     column_dtypes: dict[str, type]
     meta_columns: list[str]
 
@@ -340,12 +341,14 @@ class ColumnManager:
             parameters: TrialInput,
             y_names,
             c_names,
+            other_output_names,
             additional_data: dict,
             column_order_mode: str = ColumnOrderMode.per_category,
     ):
         self.parameters = parameters
         self.y_names = y_names
         self.c_names = c_names
+        self.other_output_names=other_output_names
         self.set_full_sorted_column_information(
             additional_data=additional_data,
             column_order_mode=column_order_mode,
@@ -356,12 +359,14 @@ class ColumnManager:
             extra_parameters: TrialInput = None,
             extra_y_names: list[str] = None,
             extra_c_names: list[str] = None,
+            extra_other_output_names: list[str] = None,
             additional_data: dict = None,
             column_order_mode: str = ColumnOrderMode.per_category,
     ):
         extra_parameters = extra_parameters or TrialInput()
         extra_y_names = extra_y_names or []
         extra_c_names = extra_c_names or []
+        extra_other_output_names = extra_other_output_names or []
 
         # column name になるので重複は許されない
         column_dtypes: dict = NoDuplicateDict()
@@ -503,6 +508,17 @@ class ColumnManager:
                     target_cds.update({f_ub(name): float})
                     target_mcs.append('')
 
+            elif key == 'other_outputs':
+                for name in self.other_output_names:
+                    # important
+                    column_dtypes.update({name: float})
+                    meta_columns.append('other_output.value')
+
+                for name in extra_other_output_names:
+                    # later
+                    target_cds.update({name: float})
+                    target_mcs.append('')
+
             # additional_data を入れる
             elif key == self._get_additional_data_column():
                 # important
@@ -577,6 +593,9 @@ class ColumnManager:
 
     def get_cns_names(self) -> list[str]:
         return self.filter_columns('cns')
+
+    def get_other_output_names(self) -> list[str]:
+        return self.filter_columns('other_output')
 
     @staticmethod
     def _is_numerical_parameter(prm_name, columns):
@@ -672,6 +691,7 @@ class Record:
     x: TrialInput = dataclasses.field(default_factory=TrialInput)
     y: TrialOutput = dataclasses.field(default_factory=TrialOutput)
     c: TrialConstraintOutput = dataclasses.field(default_factory=TrialConstraintOutput)
+    other_outputs: TrialFunctionOutput = dataclasses.field(default_factory=TrialFunctionOutput)
     state: TrialState = TrialState.undefined
     datetime_start: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
     datetime_end: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.now)
@@ -689,6 +709,7 @@ class Record:
         x: TrialInput = d.pop('x')
         y: TrialOutput = d.pop('y')
         c: TrialConstraintOutput = d.pop('c')
+        other_outputs: TrialFunctionOutput = d.pop('other_outputs')
 
         # prm
         for prm_name, param in x.items():
@@ -722,6 +743,9 @@ class Record:
         f_ub = CorrespondingColumnNameRuler.cns_upper_bound_name
         d.update(**{f'{f_ub(k)}': v.upper_bound
                     for k, v in c.items()})
+
+        # function
+        d.update(**{k: v.value for k, v in other_outputs.items()})
 
         df = pd.DataFrame(
             {k: [v] for k, v in d.items()},
@@ -917,11 +941,13 @@ class Records:
         loaded_prm_names = set(self.column_manager._filter_prm_names(loaded_columns, loaded_meta_columns))
         loaded_obj_names = set(self.column_manager._filter_columns('obj', loaded_columns, loaded_meta_columns))
         loaded_cns_names = set(self.column_manager._filter_columns('cns', loaded_columns, loaded_meta_columns))
+        loaded_other_output_names = set(self.column_manager._filter_columns('other_output.value', loaded_columns, loaded_meta_columns))
 
         # loaded df に存在するが Record に存在しないカラムを Record に追加
         extra_parameters = {}
         extra_y_names = []
         extra_c_names = []
+        extra_oo_names = []
         for l_col, l_meta in zip(loaded_columns, loaded_meta_columns):
 
             # 現在の Record に含まれないならば
@@ -958,6 +984,10 @@ class Records:
                 elif l_col in loaded_cns_names:
                     extra_c_names.append(l_col)
 
+                # other_output_name ならば
+                elif l_col in loaded_other_output_names:
+                    extra_oo_names.append(l_col)
+
         # additional data を取得
         a_data = self.column_manager._get_additional_data(loaded_columns, loaded_meta_columns)
 
@@ -965,6 +995,7 @@ class Records:
             extra_parameters=extra_parameters,
             extra_y_names=extra_y_names,
             extra_c_names=extra_c_names,
+            extra_other_output_names=extra_oo_names,
             additional_data=a_data,
             column_order_mode=column_order_mode,
         )
@@ -1139,6 +1170,7 @@ class History:
     prm_names: list[str]
     obj_names: list[str]
     cns_names: list[str]
+    other_output_names: list[str]
     sub_fidelity_names: list[str]
     is_restart: bool
     additional_data: dict
@@ -1150,6 +1182,10 @@ class History:
     "pyfemtet.opt_%Y%m%d_%H%M%S.csv"
     when the optimization process starts.
     """
+
+    @property
+    def all_output_names(self) -> list[str]:
+        return self.obj_names + self.cns_names + self.other_output_names
 
     def __init__(self):
         self._records = Records()
@@ -1189,6 +1225,7 @@ class History:
             self.prm_names = ColumnManager._filter_prm_names(df.columns, meta_columns)
             self.obj_names = ColumnManager._filter_columns('obj', df.columns, meta_columns)
             self.cns_names = ColumnManager._filter_columns('cns', df.columns, meta_columns)
+            self.other_output_names = ColumnManager._filter_columns('other_output.value', df.columns, meta_columns)
             self.sub_fidelity_names = ColumnManager._get_sub_fidelity_names(df)
             self.additional_data = ColumnManager._get_additional_data(df.columns, meta_columns)
 
@@ -1201,6 +1238,7 @@ class History:
                 parameters,
                 self.obj_names,
                 self.cns_names,
+                self.other_output_names,
                 self.sub_fidelity_names,
                 self.additional_data,
             )
@@ -1210,6 +1248,7 @@ class History:
             parameters: TrialInput,
             obj_names,
             cns_names,
+            other_output_names,
             sub_fidelity_names,
             additional_data,
     ):
@@ -1218,13 +1257,15 @@ class History:
         self.prm_names = list(parameters.keys())
         self.obj_names = list(obj_names)
         self.cns_names = list(cns_names)
+        self.other_output_names = list(other_output_names)
         self.sub_fidelity_names = list(sub_fidelity_names)
         self.additional_data.update(additional_data)
 
         if not self._finalized:
             # ここで column_dtypes が決定する
             self._records.column_manager.initialize(
-                parameters, self.obj_names, self.cns_names, self.additional_data, self.column_order_mode
+                parameters, self.obj_names, self.cns_names, self.other_output_names,
+                self.additional_data, self.column_order_mode
             )
 
             # initialize
@@ -1381,6 +1422,8 @@ class History:
         self._records.save(self.path)
 
     def _create_optuna_study_for_visualization(self):
+        """出力は internal ではない値で、objective は出力という意味であり cns, other_output を含む。"""
+
         import optuna
 
         # create study
@@ -1388,10 +1431,10 @@ class History:
             # storage='sqlite:///' + os.path.basename(self.path) + '_dummy.db',
             sampler=None, pruner=None, study_name='dummy',
         )
-        if len(self.obj_names) == 1:
+        if len(self.all_output_names) == 1:
             kwargs.update(dict(direction='minimize'))
         else:
-            kwargs.update(dict(directions=['minimize']*len(self.obj_names)))
+            kwargs.update(dict(directions=['minimize']*len(self.all_output_names)))
         study = optuna.create_study(**kwargs)
 
         # add trial to study
@@ -1441,11 +1484,19 @@ class History:
                 )
             trial_kwargs.update(dict(distributions=distributions))
 
-            # objective
-            if len(self.obj_names) == 1:
-                trial_kwargs.update(dict(value=row[self.obj_names].values[0]))
+            # objective (+ constraints + other_outputs as objective)
+            if len(self.all_output_names) == 1:
+                if len(self.obj_names) == 1:
+                    trial_kwargs.update(dict(value=row[self.obj_names].values[0]))
+                elif len(self.cns_names) == 1:
+                    trial_kwargs.update(dict(value=row[self.cns_names].values[0]))
+                elif len(self.other_output_names) == 1:
+                    trial_kwargs.update(dict(value=row[self.other_output_names].values[0]))
+                else:
+                    assert False
             else:
-                trial_kwargs.update(dict(values=row[self.obj_names].values))
+                values = row[self.all_output_names].values
+                trial_kwargs.update(dict(values=values))
 
             # add to study
             trial = optuna.create_trial(**trial_kwargs)

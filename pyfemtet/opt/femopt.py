@@ -157,6 +157,15 @@ class FEMOpt:
     ):
         self.opt.add_constraint(name, fun, lower_bound, upper_bound, args, kwargs, strict, using_fem)
 
+    def add_other_output(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+        self.opt.add_other_output(name, fun, args, kwargs)
+
     def add_sub_fidelity_model(
             self,
             name: str,

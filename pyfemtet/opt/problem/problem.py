@@ -28,7 +28,9 @@ __all__ = [
     'TrialInput',
     'TrialOutput',
     'TrialConstraintOutput',
+    'TrialFunctionOutput',
     'Function',
+    'FunctionResult',
     'Functions',
     'Objective',
     'ObjectiveResult',
@@ -136,6 +138,12 @@ class Objective(Function):
 
     def convert(self, value) -> float:
         return self._convert(value, self.direction)
+
+
+class FunctionResult:
+
+    def __init__(self, func: Function, fem: AbstractFEMInterface):
+        self.value: float = func.eval(fem)
 
 
 class ObjectiveResult:
@@ -302,3 +310,4 @@ SubSampling: TypeAlias = int
 TrialInput: TypeAlias = dict[str, Variable]
 TrialOutput: TypeAlias = dict[str, ObjectiveResult]
 TrialConstraintOutput: TypeAlias = dict[str, ConstraintResult]
+TrialFunctionOutput: TypeAlias = dict[str, FunctionResult]
