@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, TypeAlias
 
 import pandas as pd
 import optuna
@@ -21,6 +21,9 @@ from pyfemtet.opt.visualization.plotter.parallel_plot_creator import parallel_pl
 from pyfemtet.opt.visualization.plotter.contour_creator import contour_creator
 
 
+ItemKind: TypeAlias = Literal['prm', 'all_output', 'obj', 'cns', 'other_output']
+
+
 class SelectablePlot(AbstractPage):
     location: dcc.Location
     graph: dcc.Graph
@@ -29,8 +32,8 @@ class SelectablePlot(AbstractPage):
     InputItemsClass = dcc.Checklist
     OutputItemsClass = dcc.Checklist
     alerts: html.Div
-    input_item_kind: set[Literal['all', 'prm', 'obj', 'cns']] = {'prm'}
-    output_item_kind: set[Literal['all', 'prm', 'obj', 'cns']] = {'obj', 'cns'}
+    input_item_kind: set[ItemKind] = {'prm'}
+    output_item_kind: set[ItemKind] = {'all_output'}
     description_markdown: str = ''
 
     def __init__(self, title='base-page', rel_url='/', application=None,
@@ -109,21 +112,23 @@ class SelectablePlot(AbstractPage):
         return history, df, main_df
 
     @staticmethod
-    def _return_checklist_options_and_value(history, types) -> tuple[list[dict], list[str]]:
+    def _return_checklist_options_and_value(history, types: set[Literal]) -> tuple[list[dict], list[str]]:
 
         keys = []
 
-        if 'all' in types:
-            keys.extend(history.prm_names)
-            keys.extend(history.obj_names)
-            keys.extend(history.cns_names)
-
         if 'prm' in types:
             keys.extend(history.prm_names)
-        if 'obj' in types:
-            keys.extend(history.obj_names)
-        if 'cns' in types:
-            keys.extend(history.cns_names)
+
+        if 'all_output' in types:
+            keys.extend(history.all_output_names)
+
+        else:
+            if 'obj' in types:
+                keys.extend(history.obj_names)
+            if 'cns' in types:
+                keys.extend(history.cns_names)
+            if 'other_output' in types:
+                keys.extend(history.other_output_names)
 
         return [dict(label=key, value=key) for key in keys], keys
 
