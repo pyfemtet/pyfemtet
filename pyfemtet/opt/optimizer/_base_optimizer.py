@@ -647,6 +647,7 @@ class AbstractOptimizer:
                 other_outputs = TrialFunctionOutput()
                 try:
                     opt_._other_outputs(other_outputs)
+                    record.other_outputs = other_outputs
 
                 # if intentional error (by user)
                 except _HiddenConstraintViolation as e:
