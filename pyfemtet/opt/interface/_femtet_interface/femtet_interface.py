@@ -224,8 +224,23 @@ class FemtetInterface(COMInterface):
         # femprj を開く
         self.open(self.femprj_path, self.model_name)
 
-    def close(self, timeout=15, force=True):  # 12 秒程度
+    def quit(self, timeout=15, force=True):
         """Force to terminate connected Femtet."""
+        logger.info(_('Closing Femtet (pid = {pid}) ...', pid=self.femtet_pid))
+        succeeded = _exit_or_force_terminate(
+            timeout=timeout, Femtet=self.Femtet, force=force)
+        if succeeded:
+            logger.info(_('Femtet is closed.'))
+        else:
+            logger.warning(_('Failed to close Femtet.'))
+
+    def close(self, timeout=15, force=True):  # 12 秒程度
+        """Destructor.
+
+        May not quit Femtet. If you want to quit certainly,
+        Please use `quit()` method.
+
+        """
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
@@ -236,13 +251,7 @@ class FemtetInterface(COMInterface):
             return
 
         if self.quit_when_destruct:
-            logger.info(_('Closing Femtet (pid = {pid}) ...', pid=self.femtet_pid))
-            succeeded = _exit_or_force_terminate(
-                timeout=timeout, Femtet=self.Femtet, force=force)
-            if succeeded:
-                logger.info(_('Femtet is closed.'))
-            else:
-                logger.warning(_('Failed to close Femtet.'))
+            self.quit(timeout, force)
 
     def use_parametric_output_as_objective(
             self, number: int, direction: str | float = "minimize"
