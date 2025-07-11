@@ -718,8 +718,21 @@ class FemtetInterface(COMInterface):
             if self.femtet_is_alive():
                 # 生きていてもここにきているなら
                 # 指定された Exception を送出する
-                logger.debug(" " * print_indent + error_message)
-                raise if_error(error_message)
+
+                try:
+                    last_err = self.Femtet.LastErrorMsg
+                except Exception:
+                    last_err = ''
+
+                logger.debug(
+                    " " * print_indent
+                    + error_message
+                    + f' / Femtet.LastErrorMsg: {last_err}'
+                )
+                raise if_error(
+                    error_message
+                    + f' / Femtet.LastErrorMsg: {last_err}'
+                )
 
             # 死んでいるなら再起動
             else:
