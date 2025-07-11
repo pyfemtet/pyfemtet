@@ -53,6 +53,11 @@ MAIN_FILTER: dict = {
 logger = get_module_logger('opt.history', False)
 
 
+class MetaColumnNames(StrEnum):
+    prm_num_value = 'prm.num.value'
+    prm_cat_value = 'prm.cat.value'
+
+
 def create_err_msg_from_exception(e: Exception):
     """:meta private:"""
     additional = ' '.join(map(str, e.args))
@@ -403,7 +408,7 @@ class ColumnManager:
                     if isinstance(param, NumericParameter):
                         # important
                         column_dtypes.update({prm_name: float})
-                        meta_columns.append('prm.num.value')
+                        meta_columns.append(MetaColumnNames.prm_num_value)
 
                         # later
                         f = CorrespondingColumnNameRuler.prm_lower_bound_name
@@ -421,7 +426,7 @@ class ColumnManager:
                     elif isinstance(param, CategoricalParameter):
                         # important
                         column_dtypes.update({prm_name: object})
-                        meta_columns.append('prm.cat.value')
+                        meta_columns.append(MetaColumnNames.prm_cat_value)
 
                         # later
                         f = CorrespondingColumnNameRuler.prm_choices_name
@@ -598,24 +603,26 @@ class ColumnManager:
         return self.filter_columns('other_output')
 
     @staticmethod
-    def _is_numerical_parameter(prm_name, columns):
-        prm_lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
-        return prm_lb_name in columns
+    def _is_numerical_parameter(prm_name, columns, meta_columns):
+        col_index = tuple(columns).index(prm_name)
+        meta_column = meta_columns[col_index]
+        return meta_column == MetaColumnNames.prm_num_value
 
     @staticmethod
-    def _is_categorical_parameter(prm_name, columns):
-        prm_choices_name = CorrespondingColumnNameRuler.prm_choices_name(prm_name)
-        return prm_choices_name in columns
+    def _is_categorical_parameter(prm_name, columns, meta_columns):
+        col_index = tuple(columns).index(prm_name)
+        meta_column = meta_columns[col_index]
+        return meta_column == MetaColumnNames.prm_cat_value
 
     def is_numerical_parameter(self, prm_name) -> bool:
-        return self._is_numerical_parameter(prm_name, tuple(self.column_dtypes.keys()))
+        return self._is_numerical_parameter(prm_name, tuple(self.column_dtypes.keys()), self.meta_columns)
 
     def is_categorical_parameter(self, prm_name) -> bool:
-        return self._is_categorical_parameter(prm_name, tuple(self.column_dtypes.keys()))
+        return self._is_categorical_parameter(prm_name, tuple(self.column_dtypes.keys()), self.meta_columns)
 
     @staticmethod
-    def _get_parameter(prm_name: str, df: pd.DataFrame) -> Parameter:
-        if ColumnManager._is_numerical_parameter(prm_name, df.columns):
+    def _get_parameter(prm_name: str, df: pd.DataFrame, meta_columns) -> Parameter:
+        if ColumnManager._is_numerical_parameter(prm_name, df.columns, meta_columns):
             out = NumericParameter()
             out.name = prm_name
             out.value = float(df[prm_name].dropna().values[-1])
@@ -1231,7 +1238,7 @@ class History:
 
             parameters: TrialInput = {}
             for prm_name in self.prm_names:
-                param = ColumnManager._get_parameter(prm_name, df)
+                param = ColumnManager._get_parameter(prm_name, df, meta_columns)
                 parameters.update({prm_name: param})
 
             self.finalize(
@@ -1462,11 +1469,22 @@ class History:
 
                 # float
                 if self._records.column_manager.is_numerical_parameter(prm_name):
+
                     lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
                     ub_name = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
+
+                    if np.isnan(row[lb_name]):
+                        low = df[prm_name].dropna().values.min()
+                    else:
+                        low = row[lb_name]
+
+                    if np.isnan(row[ub_name]):
+                        high = df[prm_name].dropna().values.max()
+                    else:
+                        high = row[ub_name]
+
                     dist = optuna.distributions.FloatDistribution(
-                        low=row[lb_name],
-                        high=row[ub_name],
+                        low=low, high=high
                     )
 
                 # categorical
