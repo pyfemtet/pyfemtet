@@ -138,11 +138,11 @@ if ((-not (test-path $femtet_macro_dll_path_64bit)) -or (-not (test-path $femtet
     [System.Windows.Forms.MessageBox]::Show($message, $title)
     throw $message
 } else {
-    write-host "Register typelib will be OK. Please check regsvr32 dialog to certify."
+    write-host "Register typelib will be OK."
 }
 # regsvr
-regsvr32 $femtet_macro_dll_path_64bit  # returns nothing, dialog only.
-regsvr32 $femtet_macro_dll_path_32bit  # returns nothing, dialog only. No require to run on WOW64 dir
+regsvr32 /s $femtet_macro_dll_path_64bit  # returns nothing, disable dialog by /s.
+regsvr32 /s $femtet_macro_dll_path_32bit  # returns nothing, disable dialog by /s.
 
 
 write-host
