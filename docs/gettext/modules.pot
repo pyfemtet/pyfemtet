@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 16:01+0900\n"
+"POT-Creation-Date: 2025-07-11 15:43+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgstr ""
 #: ../source/modules/pyfemtet.opt.rst:46
 #: ../source/modules/pyfemtet.opt.visualization.history_viewer.result_viewer.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:13
-#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:24
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:40
 #: ../source/modules/pyfemtet.opt.visualization.rst:14
 #: ../source/modules/pyfemtet.rst:26
 msgid "Module contents"
@@ -96,6 +96,7 @@ msgstr ""
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_expression_sympy:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_objective:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_objectives:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_other_output:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_parameter:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_sub_fidelity_model:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.optimize:0
@@ -136,8 +137,11 @@ msgstr ""
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_sympy:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objective:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objectives:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_other_output:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_sub_fidelity_model:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_parameter:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_variables:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.set_solve_condition:0
 #: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer:0
 #: ../../pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_categorical_parameter:0
@@ -157,11 +161,14 @@ msgstr ""
 #: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.SingleTaskGPModel.predict:0
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ConstraintResult:0
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Function.eval:0
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.FunctionResult:0
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectiveResult:0
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectivesFunc:0
 #: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables:0
+#: ../../pyfemtet/opt/visualization/plotter/contour_creator.py:docstring of pyfemtet.opt.visualization.plotter.contour_creator.contour_creator:0
 #: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot:0
 #: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot:0
+#: ../../pyfemtet/opt/visualization/plotter/parallel_plot_creator.py:docstring of pyfemtet.opt.visualization.plotter.parallel_plot_creator.parallel_plot:0
 #: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot2d:0
 #: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot3d:0
 #: ../../pyfemtet/opt/worker_status.py:docstring of pyfemtet.opt.worker_status.WorkerStatus:0
@@ -252,9 +259,11 @@ msgstr ""
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Function.eval:0
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Objective.convert:0
 #: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables:0
+#: ../../pyfemtet/opt/visualization/plotter/contour_creator.py:docstring of pyfemtet.opt.visualization.plotter.contour_creator.contour_creator:0
 #: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_default_figure:0
 #: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot:0
 #: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot:0
+#: ../../pyfemtet/opt/visualization/plotter/parallel_plot_creator.py:docstring of pyfemtet.opt.visualization.plotter.parallel_plot_creator.parallel_plot:0
 #: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot2d:0
 #: ../../pyfemtet/opt/visualization/plotter/pm_graph_creator.py:docstring of pyfemtet.opt.visualization.plotter.pm_graph_creator.plot3d:0
 msgid "Return type"
@@ -327,6 +336,7 @@ msgstr ""
 #: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.PyFemtetModel:1
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ConstraintResult:1
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.Function:1
+#: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.FunctionResult:1
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectiveResult:1
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectivesFunc:1
 #: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.Variable:1
@@ -465,7 +475,12 @@ msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.close:1
 #: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.close:1
-msgid "Force to terminate connected Femtet."
+msgid "Destructor."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.close:3
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.close:3
+msgid "May not quit Femtet. If you want to quit certainly, Please use `quit()` method."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:1
@@ -526,6 +541,10 @@ msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:3
 msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.quit:1
+msgid "Force to terminate connected Femtet."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:1
@@ -1159,9 +1178,17 @@ msgid "pyfemtet.opt.visualization.plotter package"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.plotter.rst:8
-msgid "pyfemtet.opt.visualization.plotter.main\\_figure\\_creator module"
+msgid "pyfemtet.opt.visualization.plotter.contour\\_creator module"
 msgstr ""
 
 #: ../source/modules/pyfemtet.opt.visualization.plotter.rst:16
+msgid "pyfemtet.opt.visualization.plotter.main\\_figure\\_creator module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:24
+msgid "pyfemtet.opt.visualization.plotter.parallel\\_plot\\_creator module"
+msgstr ""
+
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:32
 msgid "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 msgstr ""

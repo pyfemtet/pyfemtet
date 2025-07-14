@@ -29,51 +29,49 @@ $python_command = "py"  # Comment out this line if you don't use py launcher
 
 $python_command_parts = $python_command.Split()
 $py = $python_command_parts[0]
-$py_base_args = $python_command_parts[1..($python_command_parts.Length - 1)]
+$py_base_args = $python_command_parts[1..($python_command_parts.Length)]
 
 
-
-# ===== pre-requirement =====
+# ===== Admin check =====
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) {
-    # check Femtet, Excel and Python process existing
-    $excel_exists = $null -ne (Get-Process Excel -ErrorAction SilentlyContinue)
-    $femtet_exists = $null -ne (Get-Process Femtet -ErrorAction SilentlyContinue)
-    $python_exists = $null -ne (Get-Process Python -ErrorAction SilentlyContinue)
-
-    if ($excel_exists -or $femtet_exists) {
-        $msg = "Femtet 又は Excel のプロセスが存在します。PyFemtet にインストールおよびセットアップ前にそれらのプロセスを停止してください。`r`n`r`nインストールはキャンセルされます。"
-        $res = [System.Windows.Forms.MessageBox]::Show(
-            $msg,
-            "error"
-        )
-        throw 'Cancel the process.'
-    }
-
-    if (-not $python_exists) {
-        # OK
-        $msg = "Femtet (2023.0 or later) と Python (3.11 or later, less than 3.13) が必要です。続行する前にこれらがインストールされていることを確認してください。"
-    } elseif ($excel_exists -or $femtet_exists) {
-        # NG
-        $msg = "Python プロセスが存在します。"
-        $msg += "Python プロセスが COM 機能（典型的には、Femtet マクロや Excel マクロ）を使用していないことを確認してください。"
-    }
-    $msg += "`r`n`r`nインストールを続行しますか？?"
-
-    $res = [System.Windows.Forms.MessageBox]::Show(
-        $msg,
-        "pre-request",
-        [System.Windows.Forms.MessageBoxButtons]::YesNo
-    )
-    if ($res -eq [System.Windows.Forms.DialogResult]::No) {
-        throw 'Cancel the process.'
-    }
+    [System.Windows.Forms.MessageBox]::Show("Please run as administrator", "pre-request")
+    throw 'Please run as administrator'
 }
 
 
-# --runas (reload after prerequest)
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Administrators")) {
-    Start-Process powershell.exe "-File `"$PSCommandPath`"" -Verb RunAs
-    exit
+# ===== pre-requirement =====
+# check Femtet, Excel and Python process existing
+$excel_exists = $null -ne (Get-Process Excel -ErrorAction SilentlyContinue)
+$femtet_exists = $null -ne (Get-Process Femtet -ErrorAction SilentlyContinue)
+$python_exists = $null -ne (Get-Process Python -ErrorAction SilentlyContinue)
+
+if ($excel_exists -or $femtet_exists) {
+    # Unable to continue
+    $msg = "Femtet or Excel processes exist. Please terminate them before install.`r`n`r`nInstallation canceled."
+    $res = [System.Windows.Forms.MessageBox]::Show(
+        $msg,
+        "error"
+    )
+    throw 'Cancel the process.'
+}
+elseif ($python_exists) {
+    # May be unable to continue
+    $msg = "Python processes exist. "
+    $msg += "Please certify that no Python processes are using COM (Typically, Femtet Macro or Office Macro)."
+}
+else {
+    # No problem
+    $msg = "Femtet and Python are required. Please make sure they are installed before continuing."
+}
+$msg += "`r`n`r`nDo you continue installation?"
+
+$res = [System.Windows.Forms.MessageBox]::Show(
+    $msg,
+    "pre-request",
+    [System.Windows.Forms.MessageBoxButtons]::YesNo
+)
+if ($res -eq [System.Windows.Forms.DialogResult]::No) {
+    throw 'Cancel the process.'
 }
 
 
@@ -83,7 +81,7 @@ write-host "======================"
 write-host "installing pyfemtet..."
 write-host "======================"
 # install pyfemtet-opt-gui
-$python_args = "-m pip install pyfemtet-opt-gui -U --no-warn-script-location"
+$python_args = "-m pip install pyfemtet pyfemtet-opt-gui -U --no-warn-script-location"
 $py_args = $py_base_args + $python_args.Split()
 & $py @py_args
 
@@ -93,7 +91,7 @@ $py_args = $py_base_args + $python_args.Split()
 $installed_packages = & $py @py_args
 if (-not ($installed_packages | Select-String -Pattern 'pyfemtet-opt-gui')) {
     $title = "Error!"
-    $message = "PyFemtet のインストールに失敗しました。"
+    $message = "PyFemtet installation failed."
     [System.Windows.Forms.MessageBox]::Show($message, $title)
     throw $message
 } else {
@@ -119,7 +117,7 @@ foreach ($femtet in $femtet_list_sorted) {
 if (-not (test-path $femtet_exe_path)) {
     # existing Femtet.exe not found
     $title = "Error!"
-    $message = "Femtet.exe がインストールされていることを検出できませんでした。処理を中断します。"
+    $message = "Installed Femtet.exe is not found."
     [System.Windows.Forms.MessageBox]::Show($message, $title)
     throw $message
 }
@@ -135,21 +133,22 @@ $femtet_macro_dll_path_64bit = $femtet_exe_path.replace("Femtet.exe", "FemtetMac
 $femtet_macro_dll_path_32bit = $femtet_exe_path.replace("Femtet.exe", (join-path "Macro32" "FemtetMacro.dll"))
 if ((-not (test-path $femtet_macro_dll_path_64bit)) -or (-not (test-path $femtet_macro_dll_path_32bit))) {
     $title = "Error!"
-    $message = "Femtet マクロ有効化設定に失敗しました。Femtet マクロヘルプを参照し「マクロの有効化」手順を実行してください。"
+    $message = "Femtet macro interface configuration failed. Please refer to Femtet macro help and follow the Enable macros procedure."
     [System.Windows.Forms.MessageBox]::Show($message, $title)
     throw $message
 } else {
-    write-host "Register typelib will be OK. Please check regsvr32 dialog to certify."
+    write-host "Register typelib will be OK."
 }
 # regsvr
-regsvr32 $femtet_macro_dll_path_64bit  # returns nothing, dialog only.
-regsvr32 $femtet_macro_dll_path_32bit  # returns nothing, dialog only. No require to run on WOW64 dir
+regsvr32 /s $femtet_macro_dll_path_64bit  # returns nothing, disable dialog by /s.
+regsvr32 /s $femtet_macro_dll_path_32bit  # returns nothing, disable dialog by /s.
 
 
 write-host
 write-host "========================"
 write-host "COM constants setting..."
 write-host "========================"
+
 # win32com.client.makepy
 $python_args = "-m win32com.client.makepy FemtetMacro"
 $py_args = $py_base_args + $python_args.Split()
@@ -162,8 +161,8 @@ if ($SOLVER_NON_C -eq "0") {
     write-host "COM constants setting: OK"
 } else{
     $title = "warning"
-    $message = "PyFmetet のインストールは完了しましたが、COM 定数設定に失敗しました。"
-    $message += "コマンドプロンプトで下記のコマンドを実行してください。"
+    $message = "PyFmetet installation completed, but COM constant setting failed."
+    $message += "Please execute the following command at the command prompt."
     $message += "`r`n`r`n py -m win32com.client.makepy FemtetMacro"
     [System.Windows.Forms.MessageBox]::Show($message, $title)
 }
@@ -178,7 +177,6 @@ $pyfemtet_package_path = & $py @py_args
 $pyfemtet_opt_script_builder_path = $pyfemtet_package_path.replace("Lib\site-packages\pyfemtet\__init__.py", "Scripts\pyfemtet-opt.exe")
 $pyfemtet_opt_result_viewer_path = $pyfemtet_package_path.replace("Lib\site-packages\pyfemtet\__init__.py", "Scripts\pyfemtet-opt-result-viewer.exe")
 
-$succeed = $true
 $succeed = (test-path $pyfemtet_opt_script_builder_path) -and (test-path $pyfemtet_opt_result_viewer_path)
 
 if ($succeed) {
@@ -208,10 +206,9 @@ if ($succeed) {
 }
 
 if ($succeed) {
-    [System.Windows.Forms.MessageBox]::Show("PyFemtet インストールとセットアップが完了しました。", "Complete!")
+    [System.Windows.Forms.MessageBox]::Show("PyFemtet installation and setup is complete.", "Complete!")
 } else {
     $title = "warning"
-    $message = "PyFmetet のインストールは完了しましたが、デスクトップにショートカットを作成できませんでした。Python 実行環境の Scripts フォルダ内の pyfemtet-opt.exe が見つかりません。"
+    $message = "PyFmetet installation completed, but creation of desktop shortcut failed. pyfemtet-opt.exe does not exist in the Scripts folder of the Python execution environment."
     [System.Windows.Forms.MessageBox]::Show($message, $title)
-
 }

@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PyFemtet Project package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 16:01+0900\n"
+"POT-Creation-Date: 2025-07-11 16:07+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -19,22 +18,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
+# no-translate
 #: ../source/pages/LICENSE.rst:2
 msgid "License"
 msgstr ""
 
+# no-translate
 #: ../../LICENSE:1
 msgid "Copyright 2025 Kazuma NAITO"
 msgstr ""
 
+# no-translate
 #: ../../LICENSE:3
 msgid "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:"
 msgstr ""
 
+# no-translate
 #: ../../LICENSE:5
 msgid "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software."
 msgstr ""
 
+# no-translate
 #: ../../LICENSE:7
 msgid "THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 msgstr ""
@@ -67,6 +71,7 @@ msgstr "最適化を続きから実行"
 msgid "Restarts an optimization that was interrupted."
 msgstr "中断又は終了した最適化を再開します。"
 
+# no-translate
 #: ../source/pages/api.rst:2
 msgid "API Reference"
 msgstr ""
@@ -77,11 +82,15 @@ msgstr "リポジトリはこちらです: `https://github.com/pyfemtet/pyfemtet
 
 #: ../source/pages/api.rst:8
 msgid "Most Major Classes"
-msgstr ""
+msgstr "主なクラス"
 
 #: ../source/pages/api.rst:16:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.FEMOpt <pyfemtet.opt.FEMOpt>`\\ \\(\\[fem\\, opt\\]\\)"
 msgstr ""
+
+#: ../source/pages/api.rst:16:<autosummary>:1
+msgid "A class to manage finite element method (FEM) optimization using a specified optimizer and FEM interface."
+msgstr "有限要素法（FEM）最適化を、指定したオプティマイザとFEMインターフェースを用いて管理するクラスです。"
 
 #: ../source/pages/api.rst:16:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.FemtetInterface <pyfemtet.opt.FemtetInterface>`\\ \\(\\[femprj\\_path\\, ...\\]\\)"
@@ -90,19 +99,24 @@ msgstr ""
 #: ../source/pages/api.rst:16:<autosummary>:1
 #: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Control Femtet from optimizer."
-msgstr ""
+msgstr "オプティマイザから Femtet を制御します。"
 
 #: ../source/pages/api.rst:16:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.OptunaOptimizer <pyfemtet.opt.OptunaOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
+#: ../source/pages/api.rst:16:<autosummary>:1
+#: ../source/pages/api.rst:40:<autosummary>:1
+msgid "An optimizer class utilizing Optuna for hyperparameter optimization."
+msgstr "Optuna を用いたハイパーパラメータ最適化のためのオプティマイザクラスです。"
+
 #: ../source/pages/api.rst:18
 msgid "Other Major Classes"
-msgstr ""
+msgstr "その他の主なクラス"
 
 #: ../source/pages/api.rst:22
 msgid "FEM Interfaces"
-msgstr ""
+msgstr "FEM インターフェース"
 
 #: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.NoFEM <pyfemtet.opt.interface.NoFEM>`\\ \\(\\)"
@@ -117,16 +131,20 @@ msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithSolidworksInterface <pyfemtet.o
 msgstr ""
 
 #: ../source/pages/api.rst:31:<autosummary>:1
+msgid "Interface class integrating Femtet and SolidWorks operations."
+msgstr "Femtet と SolidWorks 操作を統合するインターフェースクラスです。"
+
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithNXInterface <pyfemtet.opt.interface.FemtetWithNXInterface>`\\ \\(...\\)"
 msgstr ""
 
 #: ../source/pages/api.rst:31:<autosummary>:1
 msgid "Control Femtet and NX."
-msgstr ""
+msgstr "Femtet と NX を制御します。"
 
 #: ../source/pages/api.rst:33
 msgid "Optimizers"
-msgstr ""
+msgstr "最適化手法"
 
 #: ../source/pages/api.rst:40:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.OptunaOptimizer <pyfemtet.opt.optimizer.OptunaOptimizer>`\\ \\(\\[...\\]\\)"
@@ -136,9 +154,13 @@ msgstr ""
 msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyOptimizer <pyfemtet.opt.optimizer.ScipyOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
+#: ../source/pages/api.rst:40:<autosummary>:1
+msgid "Optimizer class that utilizes SciPy optimization methods."
+msgstr "SciPy の最適化手法を利用するオプティマイザクラスです。"
+
 #: ../source/pages/api.rst:42
 msgid "Entire Reference"
-msgstr ""
+msgstr "全体のリファレンス"
 
 #: ../source/pages/examples.rst:2
 msgid "Examples"
@@ -258,8 +280,8 @@ msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr "femtet 2023.1 以降 (2024.0 以降を推奨)"
 
 #: ../source/pages/installation.rst:8
-msgid "python >= 3.10, <=3.12 (3.11 or 3.12 recommended)"
-msgstr "python >= 3.10, <=3.12 (3.11 または 3.12 を推奨)"
+msgid "python >= 3.10 (>=3.11 is recommended)"
+msgstr "python 3.10 以上 (3.11 以上を推奨)"
 
 #: ../source/pages/installation.rst:11
 msgid "**See below for installation and setup instructions.**"
@@ -293,7 +315,20 @@ msgstr ""
 msgid "a3. :doc:`installation_pages/setup_com_constants`"
 msgstr ""
 
-#: ../source/pages/installation.rst:37
+#: ../source/pages/installation.rst:25
+msgid "If you want to check the installation, please follow the steps below."
+msgstr "インストールを確認したい場合は、以下の手順に従ってください。"
+
+#: ../source/pages/installation.rst:27
+msgid ":ref:`Check the installation of Python <check-the-installation-python-section>`"
+msgstr ":ref:`Python がインストールできているか確認する <check-the-installation-python-section>`"
+
+#: ../source/pages/installation.rst:28
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:52
+msgid ":ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`"
+msgstr ":ref:`PyFemtet がインストールできているか確認する <check-the-installation-pyfemtet-section>`"
+
+#: ../source/pages/installation.rst:43
 msgid "For verification, we recommend that you first view the samples in :doc:`examples`."
 msgstr "PyFemtet の動作確認には、:doc:`examples` の確認をお勧めします。"
 
@@ -327,54 +362,76 @@ msgid "This step requires administrator privileges."
 msgstr "この手順には管理者権限が必要です。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:8
-msgid "This procedure requires Python 3.11 or 3.12. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
-msgstr "この手順には Python 3.11 または 3.12 が必要です。別のバージョンの Python に PyFemtet をインストールする場合は、このページの最後にある手動の手順に従ってください。"
+msgid "This procedure requires Python 3.11, 3.12 or 3.13. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
+msgstr "この手順には Python 3.11、3.12、または 3.13 が必要です。これ以外のバージョンの Python に PyFemtet をインストールする場合は、このページの末尾に記載の手動手順に従ってください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:13
-msgid "Please download and run the script below."
-msgstr "以下のスクリプトをダウンロードして実行してください。"
+msgid "Please download the following **both** files."
+msgstr "両方のファイルをダウンロードしてください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:15
-msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
+msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>` :download:`pyfemtet-installer-runner.bat <../../pyfemtet-installer-runner.bat>`"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:17
-msgid "To run the .ps1 file, right click and select \"run with powershell\"."
-msgstr ".ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:18
+msgid "Place them on the same folder."
+msgstr "同じフォルダに配置してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:21
-msgid "This script will show some dialogs even if the installation fails. If a command prompt window disappears immediately and no dialog shown, you may fail to run .ps1 script itself."
-msgstr "この .ps1 スクリプトはインストールに失敗した場合でも何らかのダイアログを表示します。もしコマンドプロンプトのウィンドウが開いた後すぐに閉じた場合、 .ps1 スクリプトの実行自体がうまくいっていないかもしれません。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:19
+msgid "Right click ``pyfemtet-installer-runner.bat`` and select \"Run as administrator\","
+msgstr "「pyfemtet-installer-runner.bat」を右クリックし、「管理者として実行」を選択してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:25
-msgid "In such case, the following step and command may help to launch .ps1 script correctly."
-msgstr "そのような場合は、以下のステップで .ps1 スクリプトを正しく実行できる場合があります。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:24
+msgid "If you can not download the .bat file for security reasons, you can use the following command on **administrative** ``CMD`` alternatively. ::"
+msgstr "セキュリティ上の理由で .bat ファイルがダウンロードできない場合は、**管理者権限** のある コマンドプロンプト を起動して下記のコマンドを代わりに使用できます。 ::"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:28
-msgid "Press Windows key, enter `cmd` and `Run as administrator`."
-msgstr "ウィンドウズキーを押し、 `cmd` と入力し、 `管理者として実行` を選択"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:29
+msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **shift+right-clicking** the file and select \"Copy as a path\"."
+msgstr "``<path/to/your/downloaded/.ps1>`` はダウンロードした ``pyfemtet-installer.ps1`` ファイルのパスに置き換えてください。パスはファイルを **shift + 右クリック** して「パスとしてコピー」を選択すると取得できます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:30
-msgid "Run the following command::"
-msgstr "下記のコマンドを実行::"
-
-#: ../source/pages/installation_pages/install_pyfemtet.rst:34
+#: ../source/pages/installation_pages/install_pyfemtet.rst:37
 msgid "***Security Warnings***"
 msgstr "***セキュリティに関する警告***"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:36
+#: ../source/pages/installation_pages/install_pyfemtet.rst:39
 msgid "This command temporarily relaxes the security requirements to run powershell script. Before executing this command, please ensure that the .ps1 file you specifying is the one downloaded from the above source."
 msgstr "このコマンドは一時的にセキュリティを緩和して powershell スクリプトを実行します。このコマンドを実行する前に、コマンドで指定した .ps1 ファイルがこのページからダウンロードしたファイルであることを確認してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:43
+#: ../source/pages/installation_pages/install_pyfemtet.rst:46
 msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
 msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、 **そのインストール構成に `py launcher` が含まれていることを確認してください。**"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:50
+#: ../source/pages/installation_pages/install_pyfemtet.rst:53
 msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 24 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:57
+#: ../source/pages/installation_pages/install_pyfemtet.rst:63
+msgid "Check the Installation of PyFemtet"
+msgstr "PyFemtet がインストールできているか確認する"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:65
+#: ../source/pages/installation_pages/install_python.rst:45
+msgid "If you want to check the installation later, please follow the steps below."
+msgstr "インストールを後から確認したい場合は、以下の手順に従ってください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:67
+#: ../source/pages/installation_pages/install_python.rst:47
+msgid "Press the Windows key and open the Command Prompt."
+msgstr "Windows キーを押してコマンドプロンプトを開きます。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:71
+msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for GUI tool)"
+msgstr "「py -m pip show pyfemtet」と入力して Enter キーを押してください。（GUI ツールの場合は「py -m pip show pyfemtet-opt-gui」）"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:74
+msgid "If you get the following result, the setup was successful. ( If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python is not installed."
+msgstr "以下の結果が表示されれば、セットアップは成功しています。（ ``'py' は、内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。`` というメッセージが表示された場合は、Python がインストールされていません。）"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:80
+msgid "If you see the message ``WARNING: Package(s) not found: pyfemtet`` (or ``pyfemtet-opt-gui``), PyFemtet (or its GUI tool) is not installed. )"
+msgstr "``WARNING: Package(s) not found: pyfemtet`` （または ``pyfemtet-opt-gui`` ）というメッセージが表示された場合、PyFemtet（またはその GUI ツール）がインストールされていません。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:87
 msgid "If this step fails, try the following steps manually:"
 msgstr "この手順が失敗した場合は、次の手順を手動で試してください。"
 
@@ -396,11 +453,11 @@ msgstr "下記のコマンドを実行します。"
 
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:16
 msgid "(Only PyFemtet core library:)::"
-msgstr "(PyFemtet コア機能のみ:)"
+msgstr "(PyFemtet コア機能のみ:)::"
 
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:21
 msgid "(With GUI tool to build script:)::"
-msgstr "(最適化機能のための GUI ツールもインストール:)"
+msgstr "(最適化機能のための GUI ツールもインストール:)::"
 
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:31
 #: ../source/pages/script_builder.rst:11
@@ -422,6 +479,10 @@ msgstr "インストール画面"
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:45
 msgid "Wait until the \"Installed successfully...\" message appears on the screen."
 msgstr "画面に \"Installed successfully...\" というメッセージが表示されるまでお待ちください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:50
+msgid "If you want to check the installation, please check the section below."
+msgstr "インストールを確認したい場合は、下記のセクションをご確認ください。"
 
 #: ../source/pages/installation_pages/install_python.rst:7
 msgid "Install Python"
@@ -450,6 +511,18 @@ msgstr "このスクリーンショットは、64 ビット Windows 用の Pytho
 #: ../source/pages/installation_pages/install_python.rst:37
 msgid "Installer screen."
 msgstr "インストーラ画面"
+
+#: ../source/pages/installation_pages/install_python.rst:43
+msgid "Check the Installation of Python"
+msgstr "Python がインストールできているか確認する"
+
+#: ../source/pages/installation_pages/install_python.rst:51
+msgid "Type ``py`` and press Enter."
+msgstr "「py」と入力して Enter キーを押してください。"
+
+#: ../source/pages/installation_pages/install_python.rst:53
+msgid "If Python starts, the setup was successful. (If you see the message \"'py' is not recognized as an internal or external command, operable program or batch file.\", it is possible that Python is not installed.)"
+msgstr "Python が起動すればセットアップは成功です。 (もし 「”py” は内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。」というメッセージが表示される場合、Python がインストールされていない可能性があります。)"
 
 #: ../source/pages/installation_pages/setup_com_constants.rst:2
 msgid "Manually Set COM Constants"
@@ -561,7 +634,7 @@ msgstr "``opt.variables.get_variables()`` メソッドは廃止されます. 代
 
 #: ../source/pages/script_builder.rst:2
 msgid "GUI"
-msgstr ""
+msgstr "GUI（グラフィカルユーザインターフェース）"
 
 #: ../source/pages/script_builder.rst:4
 msgid "``pyfemtet.opt`` has a GUI tool for script builder to run optimization: ``pyfemtet-opt-gui``."
@@ -781,7 +854,7 @@ msgstr "上記で定義した設計変数と目的関数とを用い、メイン
 
 #: ../source/pages/usage_pages/how_to_optimize_your_project.rst:70
 msgid "For this script to actually work, you need a Femtet stress analysis project with variables ``w`` and ``d``."
-msgstr ""
+msgstr "このスクリプトを実際に動作させるには、変数 ``w`` と ``d`` を持つ Femtet の応力解析プロジェクトが必要です。"
 
 #: ../source/pages/usage_pages/how_to_optimize_your_project.rst:75
 msgid "**The objective function must take a Femtet instance as the first argument,** since the ``FEMOpt`` instance intarcreates it internally."
@@ -807,6 +880,7 @@ msgstr "列名"
 msgid "Meaning"
 msgstr "意味"
 
+# no-translate
 #: ../source/pages/usage_pages/how_to_optimize_your_project.rst:90
 msgid "trial"
 msgstr ""
@@ -863,6 +937,7 @@ msgstr "<拘束名>_ub"
 msgid "The upper bound of the constraint function specified in the script"
 msgstr "スクリプトで指定した拘束関数の上限"
 
+# no-translate
 #: ../source/pages/usage_pages/how_to_optimize_your_project.rst:97
 msgid "feasible"
 msgstr ""
@@ -871,6 +946,7 @@ msgstr ""
 msgid "Whether the attempt satisfies all constraints"
 msgstr "その試行がすべての拘束を満たすか"
 
+# no-translate
 #: ../source/pages/usage_pages/how_to_optimize_your_project.rst:98
 msgid "hypervolume"
 msgstr ""
@@ -879,6 +955,7 @@ msgstr ""
 msgid "The hypervolume up to that attempt (only when the objective function is 2 or more)"
 msgstr "（目的関数が2以上の場合のみ）その試行までの hypervolume"
 
+# no-translate
 #: ../source/pages/usage_pages/how_to_optimize_your_project.rst:99
 msgid "message"
 msgstr ""
@@ -887,6 +964,7 @@ msgstr ""
 msgid "Special notes from the optimization process"
 msgstr "最適化プロセスによる特記事項"
 
+# no-translate
 #: ../source/pages/usage_pages/how_to_optimize_your_project.rst:100
 msgid "time"
 msgstr ""
@@ -1088,3 +1166,26 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 #~ msgid "***Security Warning:*** This .bat file contains a command that ***relaxes security requirements*** to run a .ps1 file named `pyfemtet-installer`. Before executing this .bat file, please ensure that the .ps1 file located in the same folder is the one downloaded from the above source. Do not use this .bat file for anything other than running the `pyfemtet-installer.ps1`."
 #~ msgstr "***セキュリティに関する警告:*** この .bat ファイルには、`pyfemtet-installer` というファイル名の .ps1 ファイルをセキュリティ要件を緩和して実行するコマンドが含まれています。この .bat ファイルの実行前に、同じフォルダに存在する .ps1 ファイルが上記からダウンロードした .ps1 ファイルであることを確認してください。この .bat ファイルは、 pyfemtet-installer.ps1 ファイルの実行以外に使用せず、使用後は削除してください。"
 
+#~ msgid "Please download and run the script below."
+#~ msgstr "以下のスクリプトをダウンロードして実行してください。"
+
+#~ msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
+#~ msgstr ""
+
+#~ msgid "To run the .ps1 file, right click and select \"run with powershell\"."
+#~ msgstr ".ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。"
+
+#~ msgid "This script will show some dialogs even if the installation fails. If a command prompt window disappears immediately and no dialog shown, you may fail to run .ps1 script itself."
+#~ msgstr "この .ps1 スクリプトはインストールに失敗した場合でも何らかのダイアログを表示します。もしコマンドプロンプトのウィンドウが開いた後すぐに閉じた場合、 .ps1 スクリプトの実行自体がうまくいっていないかもしれません。"
+
+#~ msgid "In such case, the following step and command may help to launch .ps1 script correctly."
+#~ msgstr "そのような場合は、以下のステップで .ps1 スクリプトを正しく実行できる場合があります。"
+
+#~ msgid "Press Windows key, enter `cmd` and `Run as administrator`."
+#~ msgstr "ウィンドウズキーを押し、 `cmd` と入力し、 `管理者として実行` を選択"
+
+#~ msgid "Run the following command::"
+#~ msgstr "下記のコマンドを実行::"
+
+#~ msgid "Please download the following both files."
+#~ msgstr ""

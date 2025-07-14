@@ -35,3 +35,25 @@ Download the installer for windows 64-bit and run it.
 .. figure:: python_install.png
 
     Installer screen.
+
+
+.. _check-the-installation-python-section:
+
+Check the Installation of Python
+--------------------------------
+
+If you want to check the installation later, please follow the steps below.
+
+1. Press the Windows key and open the Command Prompt.
+
+    .. figure:: launch_cmd.png
+
+2. Type ``py`` and press Enter.
+
+3. If Python starts, the setup was successful.
+   (If you see the message
+   "'py' is not recognized as an internal or external command,
+   operable program or batch file.",
+   it is possible that Python is not installed.)
+
+    .. figure:: py_installed.png
