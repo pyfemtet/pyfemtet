@@ -14,7 +14,7 @@ $SAMPLES_SOURCE_JP = ".\samples\opt\femprj_samples_jp"
 $INSTALLER = ".\docs\installer\pyfemtet-installer.ps1"
 $INSTALLER_JP = ".\docs\installer\pyfemtet-installer-jp.ps1"
 $INSTALLER_RUNNER = ".\docs\installer\pyfemtet-installer-runner.bat"
-$INSTALLER_RUNNER_JP = ".\docs\installer\pyfemtet-installer-runner-jp.ps1"
+$INSTALLER_RUNNER_JP = ".\docs\installer\pyfemtet-installer-runner-jp.bat"
 $INSTALLER_ON_DOC_SOURCE = ".\docs\source\pyfemtet-installer.ps1"
 $INSTALLER_RUNNER_ON_DOC_SOURCE = ".\docs\source\pyfemtet-installer-runner.bat"
 
