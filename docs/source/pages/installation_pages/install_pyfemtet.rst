@@ -5,31 +5,34 @@ This step requires administrator privileges.
 
 .. note::
     
-    This procedure requires Python 3.11 or 3.12. If you are installing
+    This procedure requires Python 3.11, 3.12 or 3.13. If you are installing
     PyFemtet on a different version of Python, follow the manual
     instructions at the end of this page.
 
 
-Please download and run the script below. 
+1. Please download the following **both** files.
 
-:download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>` 
+    :download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`
+    :download:`pyfemtet-installer-runner.bat <../../pyfemtet-installer-runner.bat>`
 
-To run the .ps1 file, right click and select "run with powershell".
+2. Place them on the same folder.
+3. Right click ``pyfemtet-installer-runner.bat`` and select "Run as administrator",
+
 
 .. note::
 
-    This script will show some dialogs even if the installation fails.
-    If a command prompt window disappears immediately and no dialog shown,
-    you may fail to run .ps1 script itself.
+    If you can not download the .bat file for security reasons,
+    you can use the following command on **administrative** ``CMD`` alternatively. ::
 
-    In such case, the following step and command may help to launch .ps1
-    script correctly.
+        powershell -ExecutionPolicy Bypass -File <path/to/your/downloaded/.ps1>
 
-    1. Press Windows key, enter `cmd` and `Run as administrator`.
+    Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to
+    the path of the ``pyfemtet-installer.ps1`` file you downloaded.
+    You can acquire the path by **shift+right-clicking** the file and
+    select "Copy as a path".
 
-    2. Run the following command::
 
-        powershell -ExecutionPolicy ByPass <path\to\downloaded\pyfemtet-installer.ps1>
+.. warning::
 
     ***Security Warnings***
 
@@ -53,6 +56,36 @@ To run the .ps1 file, right click and select "run with powershell".
 
         $python_command = "python"
 
+
+.. _check-the-installation-pyfemtet-section:
+
+Check the Installation of PyFemtet
+----------------------------------
+
+If you want to check the installation later, please follow the steps below.
+
+1. Press the Windows key and open the Command Prompt.
+
+    .. figure:: launch_cmd.png
+
+2. Type ``py -m pip show pyfemtet`` and press Enter.
+   (``py -m pip show pyfemtet-opt-gui`` for GUI tool)
+
+3. If you get the following result, the setup was successful.
+   (
+   If you see the message
+   ``'py' is not recognized as an internal or external command, operable program or batch file.``,
+   Python is not installed.
+   
+   If you see the message ``WARNING: Package(s) not found: pyfemtet`` (or ``pyfemtet-opt-gui``),
+   PyFemtet (or its GUI tool) is not installed.
+   )
+
+    .. figure:: pyfemtet_installed.png
+
+
+Manual Installation
+-------------------
 
 If this step fails, try the following steps manually:
 

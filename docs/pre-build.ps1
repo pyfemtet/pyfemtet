@@ -11,9 +11,12 @@ $DOCTREE_DIR_JA = ".\docs\build\doctrees_ja"
 $SAMPLES_ON_DOC_SOURCE = ".\docs\source\examples\_temporary_sample_files"
 $SAMPLES_SOURCE = ".\samples\opt\femprj_samples"
 $SAMPLES_SOURCE_JP = ".\samples\opt\femprj_samples_jp"
-$INSTALLER = ".\pyfemtet-installer.ps1"
-$INSTALLER_JP = ".\pyfemtet-installer-jp.ps1"
+$INSTALLER = ".\docs\installer\pyfemtet-installer.ps1"
+$INSTALLER_JP = ".\docs\installer\pyfemtet-installer-jp.ps1"
+$INSTALLER_RUNNER = ".\docs\installer\pyfemtet-installer-runner.bat"
+$INSTALLER_RUNNER_JP = ".\docs\installer\pyfemtet-installer-runner-jp.bat"
 $INSTALLER_ON_DOC_SOURCE = ".\docs\source\pyfemtet-installer.ps1"
+$INSTALLER_RUNNER_ON_DOC_SOURCE = ".\docs\source\pyfemtet-installer-runner.bat"
 
 if (test-path $BUILD_DIR) {
     remove-item $BUILD_DIR -recurse
@@ -27,6 +30,7 @@ Copy-Item -Path "$SAMPLES_SOURCE\*" -Destination $SAMPLES_ON_DOC_SOURCE -Recurse
 
 # copy English installer to doc_source
 Copy-Item -Path $INSTALLER -Destination $INSTALLER_ON_DOC_SOURCE -Force
+Copy-Item -Path $INSTALLER_RUNNER -Destination $INSTALLER_RUNNER_ON_DOC_SOURCE -Force
 
 # update api references
 if (Test-Path "docs/source/modules") {Remove-Item "docs/source/modules" -Force -Recurse}
@@ -56,6 +60,7 @@ foreach ($file in $files) {
 
 # copy Japanese installer to doc_source
 Copy-Item -Path $INSTALLER_JP -Destination $INSTALLER_ON_DOC_SOURCE -Force
+Copy-Item -Path $INSTALLER_RUNNER_JP -Destination $INSTALLER_RUNNER_ON_DOC_SOURCE -Force
 
 # update api references
 uv run --no-sync sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o="docs/source/modules" pyfemtet

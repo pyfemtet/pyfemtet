@@ -45,3 +45,8 @@ Wait for installation
 - Wait until the "Installed successfully..." message appears on the screen.
 
 .. figure:: pip_complete_install.png    
+
+
+If you want to check the installation, please check the section below.
+
+- :ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`

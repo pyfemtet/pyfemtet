@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 16:01+0900\n"
+"POT-Creation-Date: 2025-07-11 16:07+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,6 +81,10 @@ msgid ":py:obj:`pyfemtet.opt.FEMOpt <pyfemtet.opt.FEMOpt>`\\ \\(\\[fem\\, opt\\]
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
+msgid "A class to manage finite element method (FEM) optimization using a specified optimizer and FEM interface."
+msgstr ""
+
+#: ../source/pages/api.rst:16:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.FemtetInterface <pyfemtet.opt.FemtetInterface>`\\ \\(\\[femprj\\_path\\, ...\\]\\)"
 msgstr ""
 
@@ -91,6 +95,11 @@ msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.OptunaOptimizer <pyfemtet.opt.OptunaOptimizer>`\\ \\(\\[...\\]\\)"
+msgstr ""
+
+#: ../source/pages/api.rst:16:<autosummary>:1
+#: ../source/pages/api.rst:40:<autosummary>:1
+msgid "An optimizer class utilizing Optuna for hyperparameter optimization."
 msgstr ""
 
 #: ../source/pages/api.rst:18
@@ -114,6 +123,10 @@ msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithSolidworksInterface <pyfemtet.o
 msgstr ""
 
 #: ../source/pages/api.rst:31:<autosummary>:1
+msgid "Interface class integrating Femtet and SolidWorks operations."
+msgstr ""
+
+#: ../source/pages/api.rst:31:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithNXInterface <pyfemtet.opt.interface.FemtetWithNXInterface>`\\ \\(...\\)"
 msgstr ""
 
@@ -131,6 +144,10 @@ msgstr ""
 
 #: ../source/pages/api.rst:40:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyOptimizer <pyfemtet.opt.optimizer.ScipyOptimizer>`\\ \\(\\[...\\]\\)"
+msgstr ""
+
+#: ../source/pages/api.rst:40:<autosummary>:1
+msgid "Optimizer class that utilizes SciPy optimization methods."
 msgstr ""
 
 #: ../source/pages/api.rst:42
@@ -256,7 +273,7 @@ msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:8
-msgid "python >= 3.10, <=3.12 (3.11 or 3.12 recommended)"
+msgid "python >= 3.10 (>=3.11 is recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:11
@@ -291,7 +308,20 @@ msgstr ""
 msgid "a3. :doc:`installation_pages/setup_com_constants`"
 msgstr ""
 
-#: ../source/pages/installation.rst:37
+#: ../source/pages/installation.rst:25
+msgid "If you want to check the installation, please follow the steps below."
+msgstr ""
+
+#: ../source/pages/installation.rst:27
+msgid ":ref:`Check the installation of Python <check-the-installation-python-section>`"
+msgstr ""
+
+#: ../source/pages/installation.rst:28
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:52
+msgid ":ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`"
+msgstr ""
+
+#: ../source/pages/installation.rst:43
 msgid "For verification, we recommend that you first view the samples in :doc:`examples`."
 msgstr ""
 
@@ -325,54 +355,76 @@ msgid "This step requires administrator privileges."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:8
-msgid "This procedure requires Python 3.11 or 3.12. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
+msgid "This procedure requires Python 3.11, 3.12 or 3.13. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:13
-msgid "Please download and run the script below."
+msgid "Please download the following **both** files."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:15
-msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
+msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>` :download:`pyfemtet-installer-runner.bat <../../pyfemtet-installer-runner.bat>`"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:17
-msgid "To run the .ps1 file, right click and select \"run with powershell\"."
+#: ../source/pages/installation_pages/install_pyfemtet.rst:18
+msgid "Place them on the same folder."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:21
-msgid "This script will show some dialogs even if the installation fails. If a command prompt window disappears immediately and no dialog shown, you may fail to run .ps1 script itself."
+#: ../source/pages/installation_pages/install_pyfemtet.rst:19
+msgid "Right click ``pyfemtet-installer-runner.bat`` and select \"Run as administrator\","
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:25
-msgid "In such case, the following step and command may help to launch .ps1 script correctly."
+#: ../source/pages/installation_pages/install_pyfemtet.rst:24
+msgid "If you can not download the .bat file for security reasons, you can use the following command on **administrative** ``CMD`` alternatively. ::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:28
-msgid "Press Windows key, enter `cmd` and `Run as administrator`."
+#: ../source/pages/installation_pages/install_pyfemtet.rst:29
+msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **shift+right-clicking** the file and select \"Copy as a path\"."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:30
-msgid "Run the following command::"
-msgstr ""
-
-#: ../source/pages/installation_pages/install_pyfemtet.rst:34
+#: ../source/pages/installation_pages/install_pyfemtet.rst:37
 msgid "***Security Warnings***"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:36
+#: ../source/pages/installation_pages/install_pyfemtet.rst:39
 msgid "This command temporarily relaxes the security requirements to run powershell script. Before executing this command, please ensure that the .ps1 file you specifying is the one downloaded from the above source."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:43
+#: ../source/pages/installation_pages/install_pyfemtet.rst:46
 msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:50
+#: ../source/pages/installation_pages/install_pyfemtet.rst:53
 msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:57
+#: ../source/pages/installation_pages/install_pyfemtet.rst:63
+msgid "Check the Installation of PyFemtet"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:65
+#: ../source/pages/installation_pages/install_python.rst:45
+msgid "If you want to check the installation later, please follow the steps below."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:67
+#: ../source/pages/installation_pages/install_python.rst:47
+msgid "Press the Windows key and open the Command Prompt."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:71
+msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for GUI tool)"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:74
+msgid "If you get the following result, the setup was successful. ( If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python is not installed."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:80
+msgid "If you see the message ``WARNING: Package(s) not found: pyfemtet`` (or ``pyfemtet-opt-gui``), PyFemtet (or its GUI tool) is not installed. )"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:87
 msgid "If this step fails, try the following steps manually:"
 msgstr ""
 
@@ -421,6 +473,10 @@ msgstr ""
 msgid "Wait until the \"Installed successfully...\" message appears on the screen."
 msgstr ""
 
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:50
+msgid "If you want to check the installation, please check the section below."
+msgstr ""
+
 #: ../source/pages/installation_pages/install_python.rst:7
 msgid "Install Python"
 msgstr ""
@@ -447,6 +503,18 @@ msgstr ""
 
 #: ../source/pages/installation_pages/install_python.rst:37
 msgid "Installer screen."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_python.rst:43
+msgid "Check the Installation of Python"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_python.rst:51
+msgid "Type ``py`` and press Enter."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_python.rst:53
+msgid "If Python starts, the setup was successful. (If you see the message \"'py' is not recognized as an internal or external command, operable program or batch file.\", it is possible that Python is not installed.)"
 msgstr ""
 
 #: ../source/pages/installation_pages/setup_com_constants.rst:2

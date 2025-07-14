@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 16:01+0900\n"
+"POT-Creation-Date: 2025-07-11 15:43+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -61,7 +61,7 @@ msgstr "pyfemtet.core module"
 #: ../source/modules/pyfemtet.opt.rst:46
 #: ../source/modules/pyfemtet.opt.visualization.history_viewer.result_viewer.rst:5
 #: ../source/modules/pyfemtet.opt.visualization.history_viewer.rst:13
-#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:24
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:40
 #: ../source/modules/pyfemtet.opt.visualization.rst:14
 #: ../source/modules/pyfemtet.rst:26
 msgid "Module contents"
@@ -98,6 +98,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.femopt.FEMOpt.add_expression_sympy
 #: pyfemtet.opt.femopt.FEMOpt.add_objective
 #: pyfemtet.opt.femopt.FEMOpt.add_objectives
+#: pyfemtet.opt.femopt.FEMOpt.add_other_output
 #: pyfemtet.opt.femopt.FEMOpt.add_parameter
 #: pyfemtet.opt.femopt.FEMOpt.add_sub_fidelity_model
 #: pyfemtet.opt.femopt.FEMOpt.optimize
@@ -138,8 +139,11 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_sympy
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objective
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objectives
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_other_output
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_sub_fidelity_model
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_parameter
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_variables
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.set_solve_condition
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_categorical_parameter
@@ -159,11 +163,14 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.prediction._model.SingleTaskGPModel.predict
 #: pyfemtet.opt.problem.problem.ConstraintResult
 #: pyfemtet.opt.problem.problem.Function.eval
+#: pyfemtet.opt.problem.problem.FunctionResult
 #: pyfemtet.opt.problem.problem.ObjectiveResult
 #: pyfemtet.opt.problem.problem.ObjectivesFunc
 #: pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables
+#: pyfemtet.opt.visualization.plotter.contour_creator.contour_creator
 #: pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot
 #: pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot
+#: pyfemtet.opt.visualization.plotter.parallel_plot_creator.parallel_plot
 #: pyfemtet.opt.visualization.plotter.pm_graph_creator.plot2d
 #: pyfemtet.opt.visualization.plotter.pm_graph_creator.plot3d
 #: pyfemtet.opt.worker_status.WorkerStatus
@@ -254,9 +261,11 @@ msgstr "Femtetと制御対象のFemtetのPIDを制御するためのオブジェ
 #: pyfemtet.opt.problem.problem.Function.eval
 #: pyfemtet.opt.problem.problem.Objective.convert
 #: pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables
+#: pyfemtet.opt.visualization.plotter.contour_creator.contour_creator
 #: pyfemtet.opt.visualization.plotter.main_figure_creator.get_default_figure
 #: pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot
 #: pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot
+#: pyfemtet.opt.visualization.plotter.parallel_plot_creator.parallel_plot
 #: pyfemtet.opt.visualization.plotter.pm_graph_creator.plot2d
 #: pyfemtet.opt.visualization.plotter.pm_graph_creator.plot3d
 msgid "Return type"
@@ -327,6 +336,7 @@ msgstr "pyfemtet.opt.femopt module"
 #: pyfemtet.opt.prediction._model.PyFemtetModel:1
 #: pyfemtet.opt.problem.problem.ConstraintResult:1
 #: pyfemtet.opt.problem.problem.Function:1
+#: pyfemtet.opt.problem.problem.FunctionResult:1
 #: pyfemtet.opt.problem.problem.ObjectiveResult:1
 #: pyfemtet.opt.problem.problem.ObjectivesFunc:1
 #: pyfemtet.opt.problem.variable_manager._variable_manager.Variable:1
@@ -480,8 +490,14 @@ msgstr "Python と Femtet を接続する方法についての情報を探して
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.close:1
 #: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.close:1
-msgid "Force to terminate connected Femtet."
-msgstr "接続された Femtet を強制終了します。"
+msgid "Destructor."
+msgstr ""
+
+#: of
+#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.close:3
+#: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.close:3
+msgid "May not quit Femtet. If you want to quit certainly, Please use `quit()` method."
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:1
@@ -554,6 +570,11 @@ msgstr ":func:`solve` の直前に呼び出されるメソッドです。"
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:3
 msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
 msgstr "このメソッドは solve の直前に呼び出されます。Interface クラスを継承し、このメソッドをオーバーライドすることで、モデルの更新後かつソルブ前に任意の前処理を実行することが可能です。"
+
+#: of
+#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.quit:1
+msgid "Force to terminate connected Femtet."
+msgstr "接続された Femtet を強制終了します。"
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:1
@@ -1267,10 +1288,20 @@ msgid "pyfemtet.opt.visualization.plotter package"
 msgstr "pyfemtet.opt.visualization.plotter package"
 
 #: ../source/modules/pyfemtet.opt.visualization.plotter.rst:8
-msgid "pyfemtet.opt.visualization.plotter.main\\_figure\\_creator module"
+#, fuzzy
+msgid "pyfemtet.opt.visualization.plotter.contour\\_creator module"
 msgstr "pyfemtet.opt.visualization.plotter.main\\_figure\\_creator module"
 
 #: ../source/modules/pyfemtet.opt.visualization.plotter.rst:16
+msgid "pyfemtet.opt.visualization.plotter.main\\_figure\\_creator module"
+msgstr "pyfemtet.opt.visualization.plotter.main\\_figure\\_creator module"
+
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:24
+#, fuzzy
+msgid "pyfemtet.opt.visualization.plotter.parallel\\_plot\\_creator module"
+msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
+
+#: ../source/modules/pyfemtet.opt.visualization.plotter.rst:32
 msgid "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 
