@@ -11,8 +11,8 @@ $DOCTREE_DIR_JA = ".\docs\build\doctrees_ja"
 $SAMPLES_ON_DOC_SOURCE = ".\docs\source\examples\_temporary_sample_files"
 $SAMPLES_SOURCE = ".\samples\opt\femprj_samples"
 $SAMPLES_SOURCE_JP = ".\samples\opt\femprj_samples_jp"
-$INSTALLER = ".\pyfemtet-installer.ps1"
-$INSTALLER_JP = ".\pyfemtet-installer-jp.ps1"
+$INSTALLER = ".\docs\installer\pyfemtet-installer.ps1"
+$INSTALLER_JP = ".\docs\installer\pyfemtet-installer-jp.ps1"
 $INSTALLER_ON_DOC_SOURCE = ".\docs\source\pyfemtet-installer.ps1"
 
 if (test-path $BUILD_DIR) {

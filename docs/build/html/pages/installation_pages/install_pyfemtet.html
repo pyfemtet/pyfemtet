@@ -52,9 +52,13 @@
 <li class="toctree-l2"><a class="reference internal" href="install_femtet.html">Install Femtet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install_python.html">Install Python</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Install PyFemtet</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="install_pyfemtet_manually.html">Manually Install PyFemtet</a></li>
-<li class="toctree-l3"><a class="reference internal" href="setup_femtet_macro.html">Manually Enable Femtet Macro</a></li>
-<li class="toctree-l3"><a class="reference internal" href="setup_com_constants.html">Manually Set COM Constants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-the-installation-of-pyfemtet">Check the Installation of PyFemtet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manual-installation">Manual Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="install_pyfemtet_manually.html">Manually Install PyFemtet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="setup_femtet_macro.html">Manually Enable Femtet Macro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="setup_com_constants.html">Manually Set COM Constants</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -98,28 +102,34 @@
 <p>This step requires administrator privileges.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This procedure requires Python 3.11 or 3.12. If you are installing
+<p>This procedure requires Python 3.11, 3.12 or 3.13. If you are installing
 PyFemtet on a different version of Python, follow the manual
 instructions at the end of this page.</p>
 </div>
-<p>Please download and run the script below.</p>
-<p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a></p>
-<p>To run the .ps1 file, right click and select “run with powershell”.</p>
+<ol class="arabic">
+<li><p>Please download the following <strong>both</strong> files.</p>
+<blockquote>
+<div><p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a>
+<a class="reference download internal" download="" href="../../_downloads/93bc64daafbd79de102c19aa16a20c68/pyfemtet-installer-runner.bat"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer-runner.bat</span></code></a></p>
+</div></blockquote>
+</li>
+<li><p>Place them on the same folder.</p></li>
+<li><p>Right click <code class="docutils literal notranslate"><span class="pre">pyfemtet-installer-runner.bat</span></code> and select “Run as administrator”,</p></li>
+</ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This script will show some dialogs even if the installation fails.
-If a command prompt window disappears immediately and no dialog shown,
-you may fail to run .ps1 script itself.</p>
-<p>In such case, the following step and command may help to launch .ps1
-script correctly.</p>
-<ol class="arabic">
-<li><p>Press Windows key, enter <cite>cmd</cite> and <cite>Run as administrator</cite>.</p></li>
-<li><p>Run the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="o">-</span><span class="n">ExecutionPolicy</span> <span class="n">ByPass</span> <span class="o">&lt;</span><span class="n">path</span>\<span class="n">to</span>\<span class="n">downloaded</span>\<span class="n">pyfemtet</span><span class="o">-</span><span class="n">installer</span><span class="o">.</span><span class="n">ps1</span><span class="o">&gt;</span>
+<p>If you can not download the .bat file for security reasons,
+you can use the following command on <strong>administrative</strong> <code class="docutils literal notranslate"><span class="pre">CMD</span></code> alternatively.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="o">-</span><span class="n">ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-</span><span class="n">File</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">downloaded</span><span class="o">/.</span><span class="n">ps1</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-</li>
-</ol>
+<p>Please don’t forget to replace <code class="docutils literal notranslate"><span class="pre">&lt;path/to/your/downloaded/.ps1&gt;</span></code> to
+the path of the <code class="docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code> file you downloaded.
+You can acquire the path by <strong>shift+right-clicking</strong> the file and
+select “Copy as a path”.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
 <p><strong>*Security Warnings*</strong></p>
 <p>This command temporarily relaxes the security requirements to run powershell script.
 Before executing this command, please ensure that the .ps1 file you specifying
@@ -140,6 +150,37 @@ virtual environment, and run the script from the command line:</p>
 </pre></div>
 </div>
 </div>
+<section id="check-the-installation-of-pyfemtet">
+<span id="check-the-installation-pyfemtet-section"></span><h2>Check the Installation of PyFemtet<a class="headerlink" href="#check-the-installation-of-pyfemtet" title="Link to this heading"></a></h2>
+<p>If you want to check the installation later, please follow the steps below.</p>
+<ol class="arabic">
+<li><p>Press the Windows key and open the Command Prompt.</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/launch_cmd.png" src="../../_images/launch_cmd.png" />
+</figure>
+</div></blockquote>
+</li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">show</span> <span class="pre">pyfemtet</span></code> and press Enter.
+(<code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">show</span> <span class="pre">pyfemtet-opt-gui</span></code> for GUI tool)</p></li>
+<li><p>If you get the following result, the setup was successful.
+(
+If you see the message
+<code class="docutils literal notranslate"><span class="pre">'py'</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">recognized</span> <span class="pre">as</span> <span class="pre">an</span> <span class="pre">internal</span> <span class="pre">or</span> <span class="pre">external</span> <span class="pre">command,</span> <span class="pre">operable</span> <span class="pre">program</span> <span class="pre">or</span> <span class="pre">batch</span> <span class="pre">file.</span></code>,
+Python is not installed.</p>
+<p>If you see the message <code class="docutils literal notranslate"><span class="pre">WARNING:</span> <span class="pre">Package(s)</span> <span class="pre">not</span> <span class="pre">found:</span> <span class="pre">pyfemtet</span></code> (or <code class="docutils literal notranslate"><span class="pre">pyfemtet-opt-gui</span></code>),
+PyFemtet (or its GUI tool) is not installed.
+)</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/pyfemtet_installed.png" src="../../_images/pyfemtet_installed.png" />
+</figure>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section id="manual-installation">
+<h2>Manual Installation<a class="headerlink" href="#manual-installation" title="Link to this heading"></a></h2>
 <p>If this step fails, try the following steps manually:</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -148,6 +189,7 @@ virtual environment, and run the script from the command line:</p>
 <li class="toctree-l1"><a class="reference internal" href="setup_com_constants.html">Manually Set COM Constants</a></li>
 </ul>
 </div>
+</section>
 </section>
 
 

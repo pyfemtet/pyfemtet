@@ -105,7 +105,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">AbstractFEMInterface</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.close">
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.close" title="Link to this definition"></a></dt>
@@ -113,12 +113,12 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.current_prm_values">
-<span class="sig-name descname"><span class="pre">current_prm_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><span class="pre">Variable</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.current_prm_values" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">current_prm_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><span class="pre">Variable</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.current_prm_values" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.kwargs">
-<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.kwargs" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.kwargs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -177,7 +177,7 @@
 <span class="sig-name descname"><span class="pre">update_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.update_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.update_parameter" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>x</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -194,15 +194,15 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>history_path</strong> (<em>str</em>) – </p></li>
 <li><p><strong>train_history</strong> (<a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.History" title="pyfemtet.opt.history._history.History"><em>History</em></a>) – </p></li>
-<li><p><strong>_output_directions</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – </p></li>
+<li><p><strong>_output_directions</strong> (<em>Sequence</em><em>[</em><em>str</em><em> | </em><em>float</em><em>] </em><em>| </em><em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em> | </em><em>float</em><em>] </em><em>| </em><em>dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em> | </em><em>float</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.current_obj_values">
-<span class="sig-name descname"><span class="pre">current_obj_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.current_obj_values" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">current_obj_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.current_obj_values" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -239,9 +239,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>history_path</strong> (<em>str</em>) – </p></li>
 <li><p><strong>train_history</strong> (<a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.History" title="pyfemtet.opt.history._history.History"><em>History</em></a>) – </p></li>
-<li><p><strong>_output_directions</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.13)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – </p></li>
+<li><p><strong>_output_directions</strong> (<em>Sequence</em><em>[</em><em>str</em><em> | </em><em>float</em><em>] </em><em>| </em><em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em> | </em><em>float</em><em>] </em><em>| </em><em>dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em> | </em><em>float</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -279,59 +279,59 @@ PyFemtet を用いた最適化を
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>input_xlsm_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em>) – 設計変数の定義を含む Excel ファイルのパスを指定
+<li><p><strong>input_xlsm_path</strong> (<em>str</em><em> or </em><em>Path</em>) – 設計変数の定義を含む Excel ファイルのパスを指定
 します。</p></li>
-<li><p><strong>input_sheet_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – 設計変数の定義を含むシートの名前を指定します。</p></li>
-<li><p><strong>output_xlsm_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em><em>, </em><em>optional</em>) – 目的関数の定義を含む Excel ファイルのパスを指定
+<li><p><strong>input_sheet_name</strong> (<em>str</em>) – 設計変数の定義を含むシートの名前を指定します。</p></li>
+<li><p><strong>output_xlsm_path</strong> (<em>str</em><em> or </em><em>Path</em><em>, </em><em>optional</em>) – 目的関数の定義を含む Excel ファイルのパスを指定
 します。指定しない場合は <code class="docutils literal notranslate"><span class="pre">input_xlsm_path</span></code> と
 同じと見做します。</p></li>
-<li><p><strong>output_sheet_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – 目的関数の定義を含む含むシートの名前を指定します。
+<li><p><strong>output_sheet_name</strong> (<em>str</em><em>, </em><em>optional</em>) – 目的関数の定義を含む含むシートの名前を指定します。
 指定しない場合は <code class="docutils literal notranslate"><span class="pre">input_sheet_name</span></code> と同じと見
 做します。</p></li>
-<li><p><strong>procedure_xlsm_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – 最適化ループ中に呼ぶ Excel マクロ関数を
+<li><p><strong>procedure_xlsm_path</strong> (<em>str</em><em>, </em><em>optional</em>) – 最適化ループ中に呼ぶ Excel マクロ関数を
 含む xlsm のパスです。
 指定しない場合は <code class="docutils literal notranslate"><span class="pre">input_xlsm_path</span></code> と
 同じと見做します。</p></li>
-<li><p><strong>procedure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Excel マクロ関数名を指定します。指定しない場合は
+<li><p><strong>procedure_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Excel マクロ関数名を指定します。指定しない場合は
 <code class="docutils literal notranslate"><span class="pre">FemtetMacro.FemtetMain</span></code> と見做します。</p></li>
-<li><p><strong>procedure_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><em>optional</em>) – Excel マクロ関数に渡す引数をリストまたはタプルで
+<li><p><strong>procedure_args</strong> (<em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Excel マクロ関数に渡す引数をリストまたはタプルで
 指定します。</p></li>
-<li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Excel との接続方法を指定します。 ‘auto’ または
+<li><p><strong>connect_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Excel との接続方法を指定します。 ‘auto’ または
 ‘new’ が利用可能です。デフォルトは ‘auto’ です。</p></li>
-<li><p><strong>procedure_timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Excel マクロ関数のタイムアウト時間を秒単位で指定
+<li><p><strong>procedure_timeout</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Excel マクロ関数のタイムアウト時間を秒単位で指定
 します。 None の場合はタイムアウトなしとなります。</p></li>
-<li><p><strong>setup_xlsm_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em><em>, </em><em>optional</em>) – セットアップ時に呼ぶ関数を含む xlsm のパスです。
+<li><p><strong>setup_xlsm_path</strong> (<em>str</em><em> or </em><em>Path</em><em>, </em><em>optional</em>) – セットアップ時に呼ぶ関数を含む xlsm のパスです。
 指定しない場合は <code class="docutils literal notranslate"><span class="pre">input_xlsm_path</span></code> と
 同じと見做します。</p></li>
-<li><p><strong>setup_procedure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – セットアップ時に呼ぶマクロ関数名です。
+<li><p><strong>setup_procedure_name</strong> (<em>str</em><em>, </em><em>optional</em>) – セットアップ時に呼ぶマクロ関数名です。
 指定しない場合、セットアップ時に何もしません。</p></li>
-<li><p><strong>setup_procedure_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><em>optional</em>) – セットアップ時に呼ぶマクロ関数の引数です。</p></li>
-<li><p><strong>teardown_xlsm_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em><em>, </em><em>optional</em>) – 終了時に呼ぶ関数を含む xlsm のパスです。
+<li><p><strong>setup_procedure_args</strong> (<em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – セットアップ時に呼ぶマクロ関数の引数です。</p></li>
+<li><p><strong>teardown_xlsm_path</strong> (<em>str</em><em> or </em><em>Path</em><em>, </em><em>optional</em>) – 終了時に呼ぶ関数を含む xlsm のパスです。
 指定しない場合は <code class="docutils literal notranslate"><span class="pre">input_xlsm_path</span></code> と
 同じと見做します。</p></li>
-<li><p><strong>teardown_procedure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – 終了時に呼ぶマクロ関数名です。
+<li><p><strong>teardown_procedure_name</strong> (<em>str</em><em>, </em><em>optional</em>) – 終了時に呼ぶマクロ関数名です。
 指定しない場合、終了時に何もしません。</p></li>
-<li><p><strong>teardown_procedure_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><em>optional</em>) – 終了時に呼ぶマクロ関数の引数です。</p></li>
-<li><p><strong>visible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – excel を可視化するかどうかです。
+<li><p><strong>teardown_procedure_args</strong> (<em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – 終了時に呼ぶマクロ関数の引数です。</p></li>
+<li><p><strong>visible</strong> (<em>bool</em>) – excel を可視化するかどうかです。
 ただし、 True を指定した場合でもマクロの実行中は
 不可視になります。
 デフォルトは False です。</p></li>
-<li><p><strong>display_alerts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – excel ダイアログを表示するかどうかです。
+<li><p><strong>display_alerts</strong> (<em>bool</em>) – excel ダイアログを表示するかどうかです。
 デバッグ目的の場合以外は True にしないでください。
 デフォルトは False です。</p></li>
-<li><p><strong>terminate_excel_when_quit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – 終了時に Excel を終了するかどうかです。
+<li><p><strong>terminate_excel_when_quit</strong> (<em>bool</em>) – 終了時に Excel を終了するかどうかです。
 指定しない場合、 connect_method が ‘new’ の場合
 True とふるまい ‘auto’ の場合 False と振舞います。</p></li>
-<li><p><strong>interactive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – excel を対話モードにするかどうかです。
+<li><p><strong>interactive</strong> (<em>bool</em>) – excel を対話モードにするかどうかです。
 False にすると、 visible == True であっても
 自動化プロセス中にユーザーが誤って
 Excel 本体を操作できないようにします。
 デフォルトは True です。</p></li>
-<li><p><strong>constraint_xlsm_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>constraint_sheet_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>related_file_paths</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>) – </p></li>
-<li><p><strong>use_named_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
-<li><p><strong>force_override_when_load</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
+<li><p><strong>constraint_xlsm_path</strong> (<em>str</em>) – </p></li>
+<li><p><strong>constraint_sheet_name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>related_file_paths</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>use_named_range</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>force_override_when_load</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -352,7 +352,7 @@ Excel 本体を操作できないようにします。
 <dd><p>設計変数の定義を含むシートの名前。</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -374,7 +374,7 @@ Excel 本体を操作できないようにします。
 <dd><p>目的関数の定義を含む含むシートの名前。</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -385,7 +385,7 @@ Excel 本体を操作できないようにします。
 <dd><p>実行する Excel マクロ関数名。</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -396,7 +396,7 @@ Excel 本体を操作できないようにします。
 <dd><p>Excel マクロ関数に渡す引数のリストまたはタプル。</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a> or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
+<dd class="field-odd"><p>list or tuple</p>
 </dd>
 </dl>
 </dd></dl>
@@ -407,7 +407,7 @@ Excel 本体を操作できないようにします。
 <dd><p>接続方法。’new’ または ‘auto’。</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -419,7 +419,7 @@ Excel 本体を操作できないようにします。
 Noneの場合は無制限。</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> or None</p>
+<dd class="field-odd"><p>float or None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -432,7 +432,7 @@ connect_method が ‘new’ の場合 True,
 ‘auto’ の場合 False。</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -473,24 +473,24 @@ connect_method が ‘new’ の場合 True,
 <span class="sig-name descname"><span class="pre">constraint_from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface/excel_interface.html#ExcelInterface.constraint_from_excel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.constraint_from_excel" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.constraint_sheet_name">
-<span class="sig-name descname"><span class="pre">constraint_sheet_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.constraint_sheet_name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">constraint_sheet_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.constraint_sheet_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.constraint_xlsm_path">
-<span class="sig-name descname"><span class="pre">constraint_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.constraint_xlsm_path" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">constraint_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.constraint_xlsm_path" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.display_alerts">
-<span class="sig-name descname"><span class="pre">display_alerts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.display_alerts" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">display_alerts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.display_alerts" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -500,22 +500,22 @@ connect_method が ‘new’ の場合 True,
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.force_override_when_load">
-<span class="sig-name descname"><span class="pre">force_override_when_load</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.force_override_when_load" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">force_override_when_load</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.force_override_when_load" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">input_sheet_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">input_sheet_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">input_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">input_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.interactive">
-<span class="sig-name descname"><span class="pre">interactive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.interactive" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">interactive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.interactive" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -570,7 +570,7 @@ connect_method が ‘new’ の場合 True,
 <span class="sig-name descname"><span class="pre">objective_from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface/excel_interface.html#ExcelInterface.objective_from_excel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.objective_from_excel" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -582,27 +582,27 @@ connect_method が ‘new’ の場合 True,
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">output_sheet_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">output_sheet_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">output_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">output_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id5">
-<span class="sig-name descname"><span class="pre">procedure_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">procedure_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id6">
-<span class="sig-name descname"><span class="pre">procedure_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">procedure_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.related_file_paths">
-<span class="sig-name descname"><span class="pre">related_file_paths</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.related_file_paths" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">related_file_paths</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.related_file_paths" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -612,17 +612,17 @@ connect_method が ‘new’ の場合 True,
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.setup_procedure_args">
-<span class="sig-name descname"><span class="pre">setup_procedure_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.setup_procedure_args" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setup_procedure_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.setup_procedure_args" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.setup_procedure_name">
-<span class="sig-name descname"><span class="pre">setup_procedure_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.setup_procedure_name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setup_procedure_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.setup_procedure_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.setup_xlsm_path">
-<span class="sig-name descname"><span class="pre">setup_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.setup_xlsm_path" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setup_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.setup_xlsm_path" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -642,22 +642,22 @@ connect_method が ‘new’ の場合 True,
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.teardown_procedure_args">
-<span class="sig-name descname"><span class="pre">teardown_procedure_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.teardown_procedure_args" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">teardown_procedure_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.teardown_procedure_args" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.teardown_procedure_name">
-<span class="sig-name descname"><span class="pre">teardown_procedure_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.teardown_procedure_name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">teardown_procedure_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.teardown_procedure_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.teardown_xlsm_path">
-<span class="sig-name descname"><span class="pre">teardown_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.teardown_xlsm_path" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">teardown_xlsm_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.teardown_xlsm_path" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id7">
-<span class="sig-name descname"><span class="pre">terminate_excel_when_quit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">terminate_excel_when_quit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -675,7 +675,7 @@ connect_method が ‘new’ の場合 True,
 <span class="sig-name descname"><span class="pre">update_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_excel_interface/excel_interface.html#ExcelInterface.update_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.update_parameter" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>x</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -685,12 +685,12 @@ connect_method が ‘new’ の場合 True,
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.use_named_range">
-<span class="sig-name descname"><span class="pre">use_named_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.use_named_range" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">use_named_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.use_named_range" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.ExcelInterface.visible">
-<span class="sig-name descname"><span class="pre">visible</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.visible" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">visible</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyfemtet.opt.interface.ExcelInterface.visible" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -733,21 +733,21 @@ connect_method が ‘new’ の場合 True,
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>femprj_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The path to the project file.
+<li><p><strong>femprj_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to the project file.
 If not specified, get it from connected Femtet.</p></li>
-<li><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The name of the model.
+<li><p><strong>model_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the model.
 If not specified, get it from connected Femtet or the
 first model when Femtet open the project file.</p></li>
-<li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The connection method.
+<li><p><strong>connect_method</strong> (<em>str</em><em>, </em><em>optional</em>) – The connection method.
 Default is ‘auto’. Other valid values are ‘new’ or ‘existing’.</p></li>
-<li><p><strong>save_pdt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The type to save result file.
+<li><p><strong>save_pdt</strong> (<em>str</em><em>, </em><em>optional</em>) – The type to save result file.
 Valid values are ‘all’, ‘none’ or ‘optimal’.
 Default is ‘all’.</p></li>
-<li><p><strong>strictly_pid_specify</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to strictly specify the PID in Femtet connection.
+<li><p><strong>strictly_pid_specify</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to strictly specify the PID in Femtet connection.
 Default is True.</p></li>
-<li><p><strong>allow_without_project</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to allow without a project. Default is False.</p></li>
-<li><p><strong>open_result_with_gui</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to open the result with GUI. Default is True.</p></li>
-<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – <p>A list of parametric output indexes and its direction
+<li><p><strong>allow_without_project</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to allow without a project. Default is False.</p></li>
+<li><p><strong>open_result_with_gui</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to open the result with GUI. Default is True.</p></li>
+<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<em>dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em> or </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – <p>A list of parametric output indexes and its direction
 to use as the objective function. If not specified,
 it will be None and no parametric outputs are used
 as objectives.</p>
@@ -799,9 +799,9 @@ connect python and Femtet, see <a class="reference internal" href="#pyfemtet.opt
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The connection method.
+<li><p><strong>connect_method</strong> (<em>str</em><em>, </em><em>optional</em>) – The connection method.
 Can be ‘new’, ‘existing’, or ‘auto’. Defaults to ‘auto’.</p></li>
-<li><p><strong>pid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – The process ID of an existing Femtet process and wanted to connect.</p></li>
+<li><p><strong>pid</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The process ID of an existing Femtet process and wanted to connect.</p></li>
 </ul>
 </dd>
 </dl>
@@ -836,7 +836,7 @@ it will not try existing another Femtet process.</p>
 <dd><p>Returns connected femtet process is existing or not.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -872,8 +872,8 @@ it will not try existing another Femtet process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>femprj_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>femprj_path</strong> (<em>str</em>) – </p></li>
+<li><p><strong>model_name</strong> (<em>str</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -943,10 +943,10 @@ the model update and before solving.</p>
 <dd><p>Update parameter of femprj.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>x</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]</p>
+<dd class="field-even"><p>None | list[str]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -958,8 +958,8 @@ the model update and before solving.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The index of output settings tab in parametric analysis dialog of Femtet. Starts at 1.</p></li>
-<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Objective direction.
+<li><p><strong>number</strong> (<em>int</em>) – The index of output settings tab in parametric analysis dialog of Femtet. Starts at 1.</p></li>
+<li><p><strong>direction</strong> (<em>str</em><em> | </em><em>float</em>) – Objective direction.
 Valid input is one of ‘minimize’, ‘maximize’ or a specific value.
 Defaults to ‘minimize’.</p></li>
 </ul>
@@ -994,20 +994,20 @@ perform analysis using the updated model in Femtet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prt_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The path to .prt file containing the
+<li><p><strong>prt_path</strong> (<em>str</em>) – The path to .prt file containing the
 CAD data from which the import is made.</p></li>
-<li><p><strong>export_curves</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
-<li><p><strong>export_surfaces</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
-<li><p><strong>export_solids</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
-<li><p><strong>export_flattened_assembly</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
-<li><p><strong>femprj_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>save_pdt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>strictly_pid_specify</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
-<li><p><strong>allow_without_project</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
-<li><p><strong>open_result_with_gui</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – </p></li>
-<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – </p></li>
+<li><p><strong>export_curves</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
+<li><p><strong>export_surfaces</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
+<li><p><strong>export_solids</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
+<li><p><strong>export_flattened_assembly</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Defaults to None.</p></li>
+<li><p><strong>femprj_path</strong> (<em>str</em>) – </p></li>
+<li><p><strong>model_name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>connect_method</strong> (<em>str</em>) – </p></li>
+<li><p><strong>save_pdt</strong> (<em>str</em>) – </p></li>
+<li><p><strong>strictly_pid_specify</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>allow_without_project</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>open_result_with_gui</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<em>dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em> | </em><em>float</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -1043,18 +1043,18 @@ coordinated operation between simulation (Femtet) and CAD manipulation (SolidWor
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sldprt_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the SolidWorks part file (.sldprt).</p></li>
-<li><p><strong>femprj_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Path to the Femtet project file (.femprj). Defaults to None.</p></li>
-<li><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Name of the model in the project. Defaults to None.</p></li>
-<li><p><strong>connect_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Connection method for Femtet. Defaults to “auto”.</p></li>
-<li><p><strong>save_pdt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specifies which data to save. Defaults to “all”.</p></li>
-<li><p><strong>strictly_pid_specify</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to strictly specify parameter IDs. Defaults to True.</p></li>
-<li><p><strong>allow_without_project</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, allows operation without a project file. Defaults to False.</p></li>
-<li><p><strong>open_result_with_gui</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, open results with GUI. Defaults to True.</p></li>
-<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – Indexes for parametric output used as objectives. Defaults to None.</p></li>
-<li><p><strong>always_open_copy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, always open a copy of the project. Defaults to False.</p></li>
-<li><p><strong>close_solidworks_on_terminate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, SolidWorks will close when this object is destroyed. Defaults to False.</p></li>
-<li><p><strong>solidworks_visible</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, SolidWorks will be started in visible mode. Defaults to True.</p></li>
+<li><p><strong>sldprt_path</strong> (<em>str</em>) – Path to the SolidWorks part file (.sldprt).</p></li>
+<li><p><strong>femprj_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to the Femtet project file (.femprj). Defaults to None.</p></li>
+<li><p><strong>model_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model in the project. Defaults to None.</p></li>
+<li><p><strong>connect_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Connection method for Femtet. Defaults to “auto”.</p></li>
+<li><p><strong>save_pdt</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies which data to save. Defaults to “all”.</p></li>
+<li><p><strong>strictly_pid_specify</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to strictly specify parameter IDs. Defaults to True.</p></li>
+<li><p><strong>allow_without_project</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, allows operation without a project file. Defaults to False.</p></li>
+<li><p><strong>open_result_with_gui</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, open results with GUI. Defaults to True.</p></li>
+<li><p><strong>parametric_output_indexes_use_as_objective</strong> (<em>dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em> | </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Indexes for parametric output used as objectives. Defaults to None.</p></li>
+<li><p><strong>always_open_copy</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, always open a copy of the project. Defaults to False.</p></li>
+<li><p><strong>close_solidworks_on_terminate</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, SolidWorks will close when this object is destroyed. Defaults to False.</p></li>
+<li><p><strong>solidworks_visible</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, SolidWorks will be started in visible mode. Defaults to True.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1076,7 +1076,7 @@ coordinated operation between simulation (Femtet) and CAD manipulation (SolidWor
 <dd><p>Update parameter of femprj.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>x</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -1115,12 +1115,12 @@ coordinated operation between simulation (Femtet) and CAD manipulation (SolidWor
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>history_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>history_path</strong> (<em>str</em>) – </p></li>
 <li><p><strong>train_history</strong> (<a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.History" title="pyfemtet.opt.history._history.History"><em>History</em></a>) – </p></li>
-<li><p><strong>observation_noise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>feasibility_noise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>feasibility_cdf_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
-<li><p><strong>_output_directions</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.13)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – </p></li>
+<li><p><strong>observation_noise</strong> (<em>float</em><em> | </em><em>str</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>feasibility_noise</strong> (<em>float</em><em> | </em><em>str</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>feasibility_cdf_threshold</strong> (<em>float</em><em> | </em><em>str</em>) – </p></li>
+<li><p><strong>_output_directions</strong> (<em>Sequence</em><em>[</em><em>str</em><em> | </em><em>float</em><em>] </em><em>| </em><em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em> | </em><em>float</em><em>] </em><em>| </em><em>dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em> | </em><em>float</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 </dl>

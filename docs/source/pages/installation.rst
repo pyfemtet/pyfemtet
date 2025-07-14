@@ -5,7 +5,7 @@ PyFemtet supports the following requirements:
 
 - windows only
 - femtet 2023.0 or later (2024.0 or later recommended)
-- python >= 3.10, <=3.12 (3.11 or 3.12 recommended)
+- python >= 3.10 (>=3.11 is recommended)
 
 
 **See below for installation and setup instructions.**
@@ -20,6 +20,12 @@ If step 3 fails, try the following additional steps:
 - a1. :doc:`installation_pages/install_pyfemtet_manually` 
 - a2. :doc:`installation_pages/setup_femtet_macro` 
 - a3. :doc:`installation_pages/setup_com_constants` 
+
+
+If you want to check the installation, please follow the steps below.
+
+- :ref:`Check the installation of Python <check-the-installation-python-section>`
+- :ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`
 
 
 .. toctree::

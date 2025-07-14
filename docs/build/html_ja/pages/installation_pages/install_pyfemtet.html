@@ -52,9 +52,13 @@
 <li class="toctree-l2"><a class="reference internal" href="install_femtet.html">Femtet のインストール</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install_python.html">Python のインストール</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">PyFemtet のインストール</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="install_pyfemtet_manually.html">手動で PyFemtet をインストールする</a></li>
-<li class="toctree-l3"><a class="reference internal" href="setup_femtet_macro.html">手動で Femtet Python マクロを有効化する</a></li>
-<li class="toctree-l3"><a class="reference internal" href="setup_com_constants.html">手動で COM 定数の設定を行う</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-the-installation-of-pyfemtet">PyFemtet がインストールできているか確認する</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manual-installation">手動インストール</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="install_pyfemtet_manually.html">手動で PyFemtet をインストールする</a></li>
+<li class="toctree-l4"><a class="reference internal" href="setup_femtet_macro.html">手動で Femtet Python マクロを有効化する</a></li>
+<li class="toctree-l4"><a class="reference internal" href="setup_com_constants.html">手動で COM 定数の設定を行う</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -62,7 +66,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../migration_to_v1.html">バージョン 1 への移行</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">例題</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_examples.html">発展的な例題</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../script_builder.html">GUI（グラフィカルユーザインターフェース）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../LICENSE.html">License</a></li>
@@ -98,23 +102,28 @@
 <p>この手順には管理者権限が必要です。</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>この手順には Python 3.11 または 3.12 が必要です。別のバージョンの Python に PyFemtet をインストールする場合は、このページの最後にある手動の手順に従ってください。</p>
+<p>この手順には Python 3.11、3.12、または 3.13 が必要です。これ以外のバージョンの Python に PyFemtet をインストールする場合は、このページの末尾に記載の手動手順に従ってください。</p>
 </div>
-<p>以下のスクリプトをダウンロードして実行してください。</p>
-<p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a></p>
-<p>.ps1 ファイルを実行するには、右クリックして「PowerShell で実行」を選択します。</p>
+<ol class="arabic">
+<li><p>両方のファイルをダウンロードしてください。</p>
+<blockquote>
+<div><p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a>
+<a class="reference download internal" download="" href="../../_downloads/93bc64daafbd79de102c19aa16a20c68/pyfemtet-installer-runner.bat"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer-runner.bat</span></code></a></p>
+</div></blockquote>
+</li>
+<li><p>同じフォルダに配置してください。</p></li>
+<li><p>「pyfemtet-installer-runner.bat」を右クリックし、「管理者として実行」を選択してください。</p></li>
+</ol>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>この .ps1 スクリプトはインストールに失敗した場合でも何らかのダイアログを表示します。もしコマンドプロンプトのウィンドウが開いた後すぐに閉じた場合、 .ps1 スクリプトの実行自体がうまくいっていないかもしれません。</p>
-<p>そのような場合は、以下のステップで .ps1 スクリプトを正しく実行できる場合があります。</p>
-<ol class="arabic">
-<li><p>ウィンドウズキーを押し、 <cite>cmd</cite> と入力し、 <cite>管理者として実行</cite> を選択</p></li>
-<li><p>下記のコマンドを実行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="o">-</span><span class="n">ExecutionPolicy</span> <span class="n">ByPass</span> <span class="o">&lt;</span><span class="n">path</span>\<span class="n">to</span>\<span class="n">downloaded</span>\<span class="n">pyfemtet</span><span class="o">-</span><span class="n">installer</span><span class="o">.</span><span class="n">ps1</span><span class="o">&gt;</span>
+<p>セキュリティ上の理由で .bat ファイルがダウンロードできない場合は、<strong>管理者権限</strong> のある コマンドプロンプト を起動して下記のコマンドを代わりに使用できます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="o">-</span><span class="n">ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-</span><span class="n">File</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">downloaded</span><span class="o">/.</span><span class="n">ps1</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-</li>
-</ol>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;path/to/your/downloaded/.ps1&gt;</span></code> はダウンロードした <code class="docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code> ファイルのパスに置き換えてください。パスはファイルを <strong>shift + 右クリック</strong> して「パスとしてコピー」を選択すると取得できます。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
 <p><strong>*セキュリティに関する警告*</strong></p>
 <p>このコマンドは一時的にセキュリティを緩和して powershell スクリプトを実行します。このコマンドを実行する前に、コマンドで指定した .ps1 ファイルがこのページからダウンロードしたファイルであることを確認してください。</p>
 </div>
@@ -129,6 +138,30 @@
 </pre></div>
 </div>
 </div>
+<section id="check-the-installation-of-pyfemtet">
+<span id="check-the-installation-pyfemtet-section"></span><h2>PyFemtet がインストールできているか確認する<a class="headerlink" href="#check-the-installation-of-pyfemtet" title="Link to this heading"></a></h2>
+<p>インストールを後から確認したい場合は、以下の手順に従ってください。</p>
+<ol class="arabic">
+<li><p>Windows キーを押してコマンドプロンプトを開きます。</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/launch_cmd.png" src="../../_images/launch_cmd.png" />
+</figure>
+</div></blockquote>
+</li>
+<li><p>「py -m pip show pyfemtet」と入力して Enter キーを押してください。（GUI ツールの場合は「py -m pip show pyfemtet-opt-gui」）</p></li>
+<li><p>以下の結果が表示されれば、セットアップは成功しています。（ <code class="docutils literal notranslate"><span class="pre">'py'</span> <span class="pre">は、内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ</span> <span class="pre">ファイルとして認識されていません。</span></code> というメッセージが表示された場合は、Python がインストールされていません。）</p>
+<p><code class="docutils literal notranslate"><span class="pre">WARNING:</span> <span class="pre">Package(s)</span> <span class="pre">not</span> <span class="pre">found:</span> <span class="pre">pyfemtet</span></code> （または <code class="docutils literal notranslate"><span class="pre">pyfemtet-opt-gui</span></code> ）というメッセージが表示された場合、PyFemtet（またはその GUI ツール）がインストールされていません。</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/pyfemtet_installed.png" src="../../_images/pyfemtet_installed.png" />
+</figure>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section id="manual-installation">
+<h2>手動インストール<a class="headerlink" href="#manual-installation" title="Link to this heading"></a></h2>
 <p>この手順が失敗した場合は、次の手順を手動で試してください。</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -137,6 +170,7 @@
 <li class="toctree-l1"><a class="reference internal" href="setup_com_constants.html">手動で COM 定数の設定を行う</a></li>
 </ul>
 </div>
+</section>
 </section>
 
 
