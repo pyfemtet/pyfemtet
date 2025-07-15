@@ -408,7 +408,7 @@ class ColumnManager:
                     if isinstance(param, NumericParameter):
                         # important
                         column_dtypes.update({prm_name: float})
-                        meta_columns.append(MetaColumnNames.prm_num_value)
+                        meta_columns.append(MetaColumnNames.prm_num_value.value)
 
                         # later
                         f = CorrespondingColumnNameRuler.prm_lower_bound_name
@@ -426,7 +426,7 @@ class ColumnManager:
                     elif isinstance(param, CategoricalParameter):
                         # important
                         column_dtypes.update({prm_name: object})
-                        meta_columns.append(MetaColumnNames.prm_cat_value)
+                        meta_columns.append(MetaColumnNames.prm_cat_value.value)
 
                         # later
                         f = CorrespondingColumnNameRuler.prm_choices_name
