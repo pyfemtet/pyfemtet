@@ -61,6 +61,8 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
                 # 新しく追加した model を使わない目的関数と見做して何もしない
                 if obj_name in self.train_history.obj_names:
                     obj.fun = lambda _, obj_name_=obj_name: self.current_obj_values[obj_name_]
+                    obj.args = tuple()
+                    obj.kwargs = dict()
 
         # dict で与えられた場合
         elif isinstance(self._output_directions, dict):
