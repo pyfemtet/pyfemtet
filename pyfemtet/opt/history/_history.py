@@ -648,7 +648,7 @@ class ColumnManager:
             else:
                 out.step = None
 
-        elif ColumnManager._is_categorical_parameter(prm_name, df.columns):
+        elif ColumnManager._is_categorical_parameter(prm_name, df.columns, meta_columns):
             out = CategoricalParameter()
             out.name = prm_name
             out.value = str(df[prm_name].dropna().values[-1])
