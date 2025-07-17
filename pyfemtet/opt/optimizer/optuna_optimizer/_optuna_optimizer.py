@@ -117,8 +117,8 @@ class OptunaOptimizer(AbstractOptimizer):
     def add_categorical_parameter(
             self,
             name: str,
-            initial_value: str,
-            choices: list[str],
+            initial_value: SupportedVariableTypes,
+            choices: list[SupportedVariableTypes],
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
