@@ -18,6 +18,7 @@ def objective(_, opt_: OptunaOptimizer):
 def _generate_new_history():
     if os.path.isfile(history_path):
         os.remove(history_path)
+    if os.path.isfile(history_path + '.db'):
         os.remove(history_path + '.db')
 
     opt = OptunaOptimizer(
@@ -83,6 +84,7 @@ def test_show_surrogate_model():
 def test_using_surrogate_model_interface():
     if os.path.isfile(optimize_history_path):
         os.remove(optimize_history_path)
+    if os.path.isfile(optimize_history_path + '.db'):
         os.remove(optimize_history_path + '.db')
 
     opt = OptunaOptimizer(
