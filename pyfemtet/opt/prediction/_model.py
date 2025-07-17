@@ -102,6 +102,7 @@ class PyFemtetModel:
         self.current_trans = get_transform_0_1(df, history)
 
         # transform all values
+        # trans を作るときの search_space に含まれない prm_name はここで無視される
         transformed_x = get_transformed_params(df, history, self.current_trans)
 
         # bounds as setup maximum range

@@ -163,10 +163,10 @@ class HomePage(AbstractPage):
 
         # ===== open pdt =====
         @app.callback(
-            Output(self.alert_region.alert_region.id, 'children', allow_duplicate=True),
+            Output(self.alert_region.alert_region, 'children', allow_duplicate=True),
             Input(self.open_pdt_button.id, self.open_pdt_button.Prop.n_clicks),
             State(self.main_graph.selection_data.id, self.main_graph.selection_data_property),
-            State(self.alert_region.alert_region.id, 'children'),
+            State(self.alert_region.alert_region, 'children'),
             prevent_initial_call=True,
         )
         def open_pdt(_1, selection_data, current_alerts):
@@ -247,10 +247,10 @@ class HomePage(AbstractPage):
 
         # ===== reconstruct model with updating parameter =====
         @app.callback(
-            Output(self.alert_region.alert_region.id, 'children', allow_duplicate=True),
+            Output(self.alert_region.alert_region, 'children', allow_duplicate=True),
             Input(self.update_parameter_button.id, self.update_parameter_button.Prop.n_clicks),
             State(self.main_graph.selection_data.id, self.main_graph.selection_data_property),
-            State(self.alert_region.alert_region.id, 'children'),
+            State(self.alert_region.alert_region, 'children'),
             prevent_initial_call=True,
         )
         def update_parameter(_1, selection_data, current_alerts):
@@ -350,9 +350,9 @@ class HomePage(AbstractPage):
 
         # ===== update alert (chained from launch femtet) =====
         @app.callback(
-            Output(self.alert_region.alert_region.id, 'children', allow_duplicate=True),
+            Output(self.alert_region.alert_region, 'children', allow_duplicate=True),
             Input(self.femtet_control.femtet_state.id, self.femtet_control.femtet_state_prop),
-            State(self.alert_region.alert_region.id, 'children'),
+            State(self.alert_region.alert_region, 'children'),
             prevent_initial_call=True,
         )
         def add_alert_by_connect_femtet(femtet_state_data, current_alerts):
@@ -369,9 +369,9 @@ class HomePage(AbstractPage):
 
         # ===== update alert (chained from read history) =====
         @app.callback(
-            Output(self.alert_region.alert_region.id, 'children', allow_duplicate=True),
+            Output(self.alert_region.alert_region, 'children', allow_duplicate=True),
             Input(self.file_picker_button.id, self.file_picker_button.Prop.children),
-            State(self.alert_region.alert_region.id, 'children'),
+            State(self.alert_region.alert_region, 'children'),
             prevent_initial_call=True,
         )
         def add_alert_on_history_set(_, current_alerts):
