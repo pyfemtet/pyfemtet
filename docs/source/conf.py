@@ -15,8 +15,9 @@ import sys
 import subprocess
 import shutil
 import logging
-project_root_path = os.path.abspath('..')
-sys.path.insert(0, project_root_path)
+project_root_path = os.path.abspath('../..')
+docs_root_path = os.path.abspath('..')
+sys.path.insert(0, docs_root_path)
 
 # -- Supress specific warnings --
 
@@ -80,7 +81,7 @@ autodoc_typehints = "description"
 autodoc_default_options = {
     "members": True,
     "inherited-members": False,
-    "exclude-members": "with_traceback",
+    "exclude-members": "with_traceback, ",
 }
 
 
@@ -90,7 +91,13 @@ epub_show_urls = "footnote"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store",
+                    os.path.join(project_root_path, "pyfemtet", "core.py")]
+
+# core.py を import する代わりにモック化する
+# これにより pyfemtet.core モジュールの import は実際のモジュールではなく
+# 空のモックオブジェクトになり、import時のエラーを回避できます。
+autodoc_mock_imports = ["pyfemtet.core"]
 
 # -- Options for HTML output -------------------------------------------------
 
