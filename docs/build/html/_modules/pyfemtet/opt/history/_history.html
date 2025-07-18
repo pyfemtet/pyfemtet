@@ -135,6 +135,11 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
 
+<span class="k">class</span><span class="w"> </span><span class="nc">MetaColumnNames</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">prm_num_value</span> <span class="o">=</span> <span class="s1">&#39;prm.num.value&#39;</span>
+    <span class="n">prm_cat_value</span> <span class="o">=</span> <span class="s1">&#39;prm.cat.value&#39;</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">create_err_msg_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
     <span class="n">additional</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
@@ -491,7 +496,7 @@
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">NumericParameter</span><span class="p">):</span>
                         <span class="c1"># important</span>
                         <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">prm_name</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
-                        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.num.value&#39;</span><span class="p">)</span>
+                        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MetaColumnNames</span><span class="o">.</span><span class="n">prm_num_value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
                         <span class="c1"># later</span>
                         <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span>
@@ -509,7 +514,7 @@
                     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">CategoricalParameter</span><span class="p">):</span>
                         <span class="c1"># important</span>
                         <span class="n">column_dtypes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">prm_name</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
-                        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prm.cat.value&#39;</span><span class="p">)</span>
+                        <span class="n">meta_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MetaColumnNames</span><span class="o">.</span><span class="n">prm_cat_value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
                         <span class="c1"># later</span>
                         <span class="n">f</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span>
@@ -686,24 +691,26 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_columns</span><span class="p">(</span><span class="s1">&#39;other_output&#39;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-        <span class="n">prm_lb_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">prm_lb_name</span> <span class="ow">in</span> <span class="n">columns</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">):</span>
+        <span class="n">col_index</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+        <span class="n">meta_column</span> <span class="o">=</span> <span class="n">meta_columns</span><span class="p">[</span><span class="n">col_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">meta_column</span> <span class="o">==</span> <span class="n">MetaColumnNames</span><span class="o">.</span><span class="n">prm_num_value</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-        <span class="n">prm_choices_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_choices_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">prm_choices_name</span> <span class="ow">in</span> <span class="n">columns</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">):</span>
+        <span class="n">col_index</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+        <span class="n">meta_column</span> <span class="o">=</span> <span class="n">meta_columns</span><span class="p">[</span><span class="n">col_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">meta_column</span> <span class="o">==</span> <span class="n">MetaColumnNames</span><span class="o">.</span><span class="n">prm_cat_value</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_numerical_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_categorical_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_dtypes</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_columns</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">):</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">NumericParameter</span><span class="p">()</span>
             <span class="n">out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">prm_name</span>
             <span class="n">out</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -729,7 +736,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">out</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">elif</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_is_categorical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">):</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">CategoricalParameter</span><span class="p">()</span>
             <span class="n">out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">prm_name</span>
             <span class="n">out</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -1321,7 +1328,7 @@
 
             <span class="n">parameters</span><span class="p">:</span> <span class="n">TrialInput</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">prm_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prm_names</span><span class="p">:</span>
-                <span class="n">param</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_get_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">ColumnManager</span><span class="o">.</span><span class="n">_get_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">meta_columns</span><span class="p">)</span>
                 <span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">prm_name</span><span class="p">:</span> <span class="n">param</span><span class="p">})</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span>
@@ -1561,11 +1568,22 @@
 
                 <span class="c1"># float</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">is_numerical_parameter</span><span class="p">(</span><span class="n">prm_name</span><span class="p">):</span>
+
                     <span class="n">lb_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_lower_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
                     <span class="n">ub_name</span> <span class="o">=</span> <span class="n">CorrespondingColumnNameRuler</span><span class="o">.</span><span class="n">prm_upper_bound_name</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">lb_name</span><span class="p">]):</span>
+                        <span class="n">low</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">low</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">lb_name</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ub_name</span><span class="p">]):</span>
+                        <span class="n">high</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">prm_name</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">high</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">ub_name</span><span class="p">]</span>
+
                     <span class="n">dist</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">FloatDistribution</span><span class="p">(</span>
-                        <span class="n">low</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="n">lb_name</span><span class="p">],</span>
-                        <span class="n">high</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="n">ub_name</span><span class="p">],</span>
+                        <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">high</span>
                     <span class="p">)</span>
 
                 <span class="c1"># categorical</span>

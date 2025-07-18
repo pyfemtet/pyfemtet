@@ -308,10 +308,28 @@
         <span class="c1"># femprj を開く</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span>
 
+<div class="viewcode-block" id="FemtetInterface.quit">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.quit">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Force to terminate connected Femtet.&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Closing Femtet (pid = </span><span class="si">{pid}</span><span class="s1">) ...&#39;</span><span class="p">,</span> <span class="n">pid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_pid</span><span class="p">))</span>
+        <span class="n">succeeded</span> <span class="o">=</span> <span class="n">_exit_or_force_terminate</span><span class="p">(</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">Femtet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">succeeded</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Femtet is closed.&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to close Femtet.&#39;</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="FemtetInterface.close">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.close">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  <span class="c1"># 12 秒程度</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Force to terminate connected Femtet.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destructor.</span>
+
+<span class="sd">        May not quit Femtet. If you want to quit certainly,</span>
+<span class="sd">        Please use `quit()` method.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span><span class="p">)</span>
 
@@ -322,13 +340,7 @@
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Closing Femtet (pid = </span><span class="si">{pid}</span><span class="s1">) ...&#39;</span><span class="p">,</span> <span class="n">pid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">femtet_pid</span><span class="p">))</span>
-            <span class="n">succeeded</span> <span class="o">=</span> <span class="n">_exit_or_force_terminate</span><span class="p">(</span>
-                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">Femtet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">succeeded</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Femtet is closed.&#39;</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed to close Femtet.&#39;</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">force</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FemtetInterface.use_parametric_output_as_objective">
@@ -808,8 +820,21 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_is_alive</span><span class="p">():</span>
                 <span class="c1"># 生きていてもここにきているなら</span>
                 <span class="c1"># 指定された Exception を送出する</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">print_indent</span> <span class="o">+</span> <span class="n">error_message</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="n">if_error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">last_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">LastErrorMsg</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">last_err</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">print_indent</span>
+                    <span class="o">+</span> <span class="n">error_message</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; / Femtet.LastErrorMsg: </span><span class="si">{</span><span class="n">last_err</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">if_error</span><span class="p">(</span>
+                    <span class="n">error_message</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; / Femtet.LastErrorMsg: </span><span class="si">{</span><span class="n">last_err</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
 
             <span class="c1"># 死んでいるなら再起動</span>
             <span class="k">else</span><span class="p">:</span>

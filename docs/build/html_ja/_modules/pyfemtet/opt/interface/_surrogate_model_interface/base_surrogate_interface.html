@@ -147,6 +147,8 @@
                 <span class="c1"># 新しく追加した model を使わない目的関数と見做して何もしない</span>
                 <span class="k">if</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
                     <span class="n">obj</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">,</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">]</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
         <span class="c1"># dict で与えられた場合</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
