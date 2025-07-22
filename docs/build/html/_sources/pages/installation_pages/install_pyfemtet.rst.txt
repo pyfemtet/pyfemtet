@@ -10,21 +10,16 @@ This step requires administrator privileges.
     instructions at the end of this page.
 
 
-1. Please download the following **both** files.
+1. Please download the following file.
 
     :download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`
-    :download:`pyfemtet-installer-runner.bat <../../pyfemtet-installer-runner.bat>`
 
-2. Place them on the same folder.
-3. Right click ``pyfemtet-installer-runner.bat`` and select "Run as administrator",
+2. Run the following command on **administrative** ``Command Prompt``. ::
+
+    powershell -ExecutionPolicy Bypass -File <path/to/your/downloaded/.ps1>
 
 
 .. note::
-
-    If you can not download the .bat file for security reasons,
-    you can use the following command on **administrative** ``CMD`` alternatively. ::
-
-        powershell -ExecutionPolicy Bypass -File <path/to/your/downloaded/.ps1>
 
     Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to
     the path of the ``pyfemtet-installer.ps1`` file you downloaded.

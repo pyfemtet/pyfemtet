@@ -105,21 +105,19 @@
 <p>この手順には Python 3.11、3.12、または 3.13 が必要です。これ以外のバージョンの Python に PyFemtet をインストールする場合は、このページの末尾に記載の手動手順に従ってください。</p>
 </div>
 <ol class="arabic">
-<li><p>両方のファイルをダウンロードしてください。</p>
+<li><p>以下のファイルをダウンロードしてください。</p>
 <blockquote>
-<div><p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a>
-<a class="reference download internal" download="" href="../../_downloads/93bc64daafbd79de102c19aa16a20c68/pyfemtet-installer-runner.bat"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer-runner.bat</span></code></a></p>
+<div><p><a class="reference download internal" download="" href="../../_downloads/a0990d27d71e2e977696311177f43b49/pyfemtet-installer.ps1"><code class="xref download docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code></a></p>
 </div></blockquote>
 </li>
-<li><p>同じフォルダに配置してください。</p></li>
-<li><p>「pyfemtet-installer-runner.bat」を右クリックし、「管理者として実行」を選択してください。</p></li>
-</ol>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
-<p>セキュリティ上の理由で .bat ファイルがダウンロードできない場合は、<strong>管理者権限</strong> のある コマンドプロンプト を起動して下記のコマンドを代わりに使用できます。</p>
+<li><p><strong>管理者権限</strong> のコマンドプロンプトを開き、下記コマンドを実行してください。</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="o">-</span><span class="n">ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-</span><span class="n">File</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">downloaded</span><span class="o">/.</span><span class="n">ps1</span><span class="o">&gt;</span>
 </pre></div>
 </div>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
 <p><code class="docutils literal notranslate"><span class="pre">&lt;path/to/your/downloaded/.ps1&gt;</span></code> はダウンロードした <code class="docutils literal notranslate"><span class="pre">pyfemtet-installer.ps1</span></code> ファイルのパスに置き換えてください。パスはファイルを <strong>shift + 右クリック</strong> して「パスとしてコピー」を選択すると取得できます。</p>
 </div>
 <div class="admonition warning">

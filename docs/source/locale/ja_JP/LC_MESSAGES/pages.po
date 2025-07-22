@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-11 16:07+0900\n"
+"POT-Creation-Date: 2025-07-22 11:27+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -366,72 +366,69 @@ msgid "This procedure requires Python 3.11, 3.12 or 3.13. If you are installing 
 msgstr "この手順には Python 3.11、3.12、または 3.13 が必要です。これ以外のバージョンの Python に PyFemtet をインストールする場合は、このページの末尾に記載の手動手順に従ってください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:13
-msgid "Please download the following **both** files."
-msgstr "両方のファイルをダウンロードしてください。"
+msgid "Please download the following file."
+msgstr "以下のファイルをダウンロードしてください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:15
-msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>` :download:`pyfemtet-installer-runner.bat <../../pyfemtet-installer-runner.bat>`"
+msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:18
-msgid "Place them on the same folder."
-msgstr "同じフォルダに配置してください。"
-
-#: ../source/pages/installation_pages/install_pyfemtet.rst:19
-msgid "Right click ``pyfemtet-installer-runner.bat`` and select \"Run as administrator\","
-msgstr "「pyfemtet-installer-runner.bat」を右クリックし、「管理者として実行」を選択してください。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:17
+msgid "Run the following command on **administrative** ``Command Prompt``. ::"
+msgstr "**管理者権限** のコマンドプロンプトを開き、下記コマンドを実行してください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:24
-msgid "If you can not download the .bat file for security reasons, you can use the following command on **administrative** ``CMD`` alternatively. ::"
-msgstr "セキュリティ上の理由で .bat ファイルがダウンロードできない場合は、**管理者権限** のある コマンドプロンプト を起動して下記のコマンドを代わりに使用できます。 ::"
-
-#: ../source/pages/installation_pages/install_pyfemtet.rst:29
 msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **shift+right-clicking** the file and select \"Copy as a path\"."
 msgstr "``<path/to/your/downloaded/.ps1>`` はダウンロードした ``pyfemtet-installer.ps1`` ファイルのパスに置き換えてください。パスはファイルを **shift + 右クリック** して「パスとしてコピー」を選択すると取得できます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:37
+#: ../source/pages/installation_pages/install_pyfemtet.rst:32
 msgid "***Security Warnings***"
 msgstr "***セキュリティに関する警告***"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:39
+#: ../source/pages/installation_pages/install_pyfemtet.rst:34
 msgid "This command temporarily relaxes the security requirements to run powershell script. Before executing this command, please ensure that the .ps1 file you specifying is the one downloaded from the above source."
 msgstr "このコマンドは一時的にセキュリティを緩和して powershell スクリプトを実行します。このコマンドを実行する前に、コマンドで指定した .ps1 ファイルがこのページからダウンロードしたファイルであることを確認してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:46
+#: ../source/pages/installation_pages/install_pyfemtet.rst:41
 msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
 msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、 **そのインストール構成に `py launcher` が含まれていることを確認してください。**"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:53
+#: ../source/pages/installation_pages/install_pyfemtet.rst:48
 msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 24 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:63
+#: ../source/pages/installation_pages/install_pyfemtet.rst:58
 msgid "Check the Installation of PyFemtet"
 msgstr "PyFemtet がインストールできているか確認する"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:65
-#: ../source/pages/installation_pages/install_python.rst:45
+#: ../source/pages/installation_pages/install_pyfemtet.rst:60
+#: ../source/pages/installation_pages/install_python.rst:39
 msgid "If you want to check the installation later, please follow the steps below."
 msgstr "インストールを後から確認したい場合は、以下の手順に従ってください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:67
-#: ../source/pages/installation_pages/install_python.rst:47
+#: ../source/pages/installation_pages/install_pyfemtet.rst:62
+#: ../source/pages/installation_pages/install_python.rst:41
 msgid "Press the Windows key and open the Command Prompt."
 msgstr "Windows キーを押してコマンドプロンプトを開きます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:71
+#: ../source/pages/installation_pages/install_pyfemtet.rst:66
 msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for GUI tool)"
 msgstr "「py -m pip show pyfemtet」と入力して Enter キーを押してください。（GUI ツールの場合は「py -m pip show pyfemtet-opt-gui」）"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:74
+#: ../source/pages/installation_pages/install_pyfemtet.rst:69
 msgid "If you get the following result, the setup was successful. ( If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python is not installed."
 msgstr "以下の結果が表示されれば、セットアップは成功しています。（ ``'py' は、内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。`` というメッセージが表示された場合は、Python がインストールされていません。）"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:80
+#: ../source/pages/installation_pages/install_pyfemtet.rst:75
 msgid "If you see the message ``WARNING: Package(s) not found: pyfemtet`` (or ``pyfemtet-opt-gui``), PyFemtet (or its GUI tool) is not installed. )"
 msgstr "``WARNING: Package(s) not found: pyfemtet`` （または ``pyfemtet-opt-gui`` ）というメッセージが表示された場合、PyFemtet（またはその GUI ツール）がインストールされていません。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:87
+#: ../source/pages/installation_pages/install_pyfemtet.rst:83
+#: ../source/pages/script_builder.rst:49
+msgid "Manual Installation"
+msgstr "手動インストール"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:85
 msgid "If this step fails, try the following steps manually:"
 msgstr "この手順が失敗した場合は、次の手順を手動で試してください。"
 
@@ -497,30 +494,26 @@ msgid "|Python|"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_python.rst:16
-msgid "**If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.** PyFemtet itself supports Python 3.10 and above."
-msgstr "**GUI最適化設定機能を使用する場合は、3.11または3.12が必要です。** PyFemtet自体はPython 3.10以上をサポートしています。"
-
-#: ../source/pages/installation_pages/install_python.rst:22
 msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
 msgstr "最新ではないバージョンの Python をダウンロードする場合は、以下のスクリーンショットを参照して、環境に適したインストーラーをダウンロードしてください。"
 
-#: ../source/pages/installation_pages/install_python.rst:32
+#: ../source/pages/installation_pages/install_python.rst:26
 msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
 msgstr "このスクリーンショットは、64 ビット Windows 用の Python 3.11.7 インストーラーへのリンクの場所の例を示しています。"
 
-#: ../source/pages/installation_pages/install_python.rst:37
+#: ../source/pages/installation_pages/install_python.rst:31
 msgid "Installer screen."
 msgstr "インストーラ画面"
 
-#: ../source/pages/installation_pages/install_python.rst:43
+#: ../source/pages/installation_pages/install_python.rst:37
 msgid "Check the Installation of Python"
 msgstr "Python がインストールできているか確認する"
 
-#: ../source/pages/installation_pages/install_python.rst:51
+#: ../source/pages/installation_pages/install_python.rst:45
 msgid "Type ``py`` and press Enter."
 msgstr "「py」と入力して Enter キーを押してください。"
 
-#: ../source/pages/installation_pages/install_python.rst:53
+#: ../source/pages/installation_pages/install_python.rst:47
 msgid "If Python starts, the setup was successful. (If you see the message \"'py' is not recognized as an internal or external command, operable program or batch file.\", it is possible that Python is not installed.)"
 msgstr "Python が起動すればセットアップは成功です。 (もし 「”py” は内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。」というメッセージが表示される場合、Python がインストールされていない可能性があります。)"
 
@@ -679,10 +672,6 @@ msgstr "次にツールを起動し、画面の説明に従って最適化問題
 #: ../source/pages/script_builder.rst:43
 msgid "Finally, you will get a ``.py`` script to run optimization with your ``.femprj`` file."
 msgstr "最終的に ``.femprj`` ファイルで最適化を実行するための ``.py`` ファイルが生成されます。"
-
-#: ../source/pages/script_builder.rst:49
-msgid "Manual Installation"
-msgstr "手動インストール"
 
 #: ../source/pages/script_builder.rst:51
 msgid "If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::"
@@ -1189,3 +1178,19 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 
 #~ msgid "Please download the following both files."
 #~ msgstr ""
+
+#~ msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>` :download:`pyfemtet-installer-runner.bat <../../pyfemtet-installer-runner.bat>`"
+#~ msgstr ""
+
+#~ msgid "Place them on the same folder."
+#~ msgstr "同じフォルダに配置してください。"
+
+#~ msgid "Right click ``pyfemtet-installer-runner.bat`` and select \"Run as administrator\","
+#~ msgstr "「pyfemtet-installer-runner.bat」を右クリックし、「管理者として実行」を選択してください。"
+
+#~ msgid "If you can not download the .bat file for security reasons, you can use the following command on **administrative** ``CMD`` alternatively. ::"
+#~ msgstr "セキュリティ上の理由で .bat ファイルがダウンロードできない場合は、**管理者権限** のある コマンドプロンプト を起動して下記のコマンドを代わりに使用できます。 ::"
+
+#~ msgid "**If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.** PyFemtet itself supports Python 3.10 and above."
+#~ msgstr "**GUI最適化設定機能を使用する場合は、3.11または3.12が必要です。** PyFemtet自体はPython 3.10以上をサポートしています。"
+
