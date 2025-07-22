@@ -209,6 +209,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_trans</span> <span class="o">=</span> <span class="n">get_transform_0_1</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">history</span><span class="p">)</span>
 
         <span class="c1"># transform all values</span>
+        <span class="c1"># trans を作るときの search_space に含まれない prm_name はここで無視される</span>
         <span class="n">transformed_x</span> <span class="o">=</span> <span class="n">get_transformed_params</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_trans</span><span class="p">)</span>
 
         <span class="c1"># bounds as setup maximum range</span>
