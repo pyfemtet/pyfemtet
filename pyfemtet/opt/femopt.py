@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import platform
 from typing import Callable, Sequence
 
 import os
@@ -114,8 +116,8 @@ class FEMOpt:
     def add_categorical_parameter(
             self,
             name: str,
-            initial_value: str | None = None,
-            choices: list[str] | None = None,
+            initial_value: SupportedVariableTypes | None = None,
+            choices: list[SupportedVariableTypes] | None = None,
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
@@ -464,21 +466,22 @@ class FEMOpt:
                                'using the result viewer.\n'
                                'The result viewer can be launched by '
                                'performing one of the following actions:\n'
-                               '- (Windows only) Launch the `pyfemtet-opt-result-viewer` '
+                               '- {windows_only}Launch the `pyfemtet-opt-result-viewer` '
                                'shortcut on your desktop if exists.\n'
-                               '- (Windows only) Launch {path}.\n'
+                               '- {windows_only}Launch {path}.\n'
                                '- Execute "py -m pyfemtet.opt.visualization.history_viewer" '
                                'in the command line',
                     jp_message='プログラム終了後も、結果ビューワを使って最適化結果を'
                                '確認することができます。'
                                '結果ビューワは以下のいずれかを実施すると起動できます。\n'
-                               '- （Windows のみ）デスクトップの pyfemtet-opt-result-viewer '
+                               '- {windows_only}デスクトップの pyfemtet-opt-result-viewer '
                                'ショートカットを起動する\n'
-                               '- （Windows のみ）{dir} にある {filename} を起動する\n'
+                               '- {windows_only}{dir} にある {filename} を起動する\n'
                                '- コマンドラインで「py -m pyfemtet.opt.visualization.history_viewer」'
                                'を実行する',
                     dir=os.path.abspath(os.path.dirname(sys.executable)),
                     filename='pyfemtet-opt-result-viewer.exe (or .cmd)',
+                    windows_only='(Windows only) ' if platform.system() != 'Windows' else '',
                 )
                 print("====================")
                 print(confirm_msg)

@@ -317,7 +317,10 @@ def _plot(
             target_points = df[prm_names_for_distances]
             hyper_plane = np.array(prm_values_for_distances)
             distances_to_hyper_plane = np.linalg.norm(target_points - hyper_plane, axis=1, keepdims=False)
-            opacity = 1 - (distances_to_hyper_plane / distances_to_hyper_plane.max())
+            if distances_to_hyper_plane.max() == 0:
+                opacity = np.ones_like(distances_to_hyper_plane)
+            else:
+                opacity = 1 - (distances_to_hyper_plane / distances_to_hyper_plane.max())
         else:
             opacity = np.ones(len(df))
 
@@ -328,7 +331,7 @@ def _plot(
         count = (target_points == hyper_plane).astype(float).sum(axis=1)
         count = count + 1  # 0 になると困る
         # noinspection PyUnusedLocal
-        opacity = opacity * (count / count.max())  # FIXME: 0 除算エラーが取り切れていない場合がある
+        opacity = opacity * (count / count.max())
 
     def set_opacity(trace):
         if isinstance(trace, go.Scatter3d) or isinstance(trace, go.Scatter):

@@ -72,5 +72,3 @@ powershell "$SOURCE_DIR\advanced_examples\restart\copy_files.ps1" 1  # is_JP
 
 # build Japanese document
 uv run --no-sync python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
-
-pause

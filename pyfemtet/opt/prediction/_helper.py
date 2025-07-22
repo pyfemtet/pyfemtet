@@ -22,7 +22,9 @@ __all__ = [
 ]
 
 
-def get_bounds_containing_entire_bounds(df: pd.DataFrame, prm_name) -> tuple[float, float]:
+def get_bounds_containing_entire_bounds(
+        df: pd.DataFrame, prm_name
+) -> tuple[float | None, float | None]:
     """Get param bounds with all bounds"""
 
     lb_name = CorrespondingColumnNameRuler.prm_lower_bound_name(prm_name)
@@ -31,7 +33,15 @@ def get_bounds_containing_entire_bounds(df: pd.DataFrame, prm_name) -> tuple[flo
     ub_name = CorrespondingColumnNameRuler.prm_upper_bound_name(prm_name)
     ub = df[ub_name].dropna().max()
 
-    return float(lb), float(ub)
+    lb = float(lb)
+    ub = float(ub)
+
+    if np.isnan(lb):
+        lb = None
+    if np.isnan(ub):
+        ub = None
+
+    return lb, ub
 
 
 def get_choices_containing_entire_bounds(df: pd.DataFrame, prm_name) -> set[CategoricalChoiceType]:
@@ -90,17 +100,31 @@ def get_params_list_from_ndarray(x: np.ndarray, history: History) -> list[dict[s
     return params_list
 
 
-def get_search_space(df: pd.DataFrame, history: History) -> dict[str, BaseDistribution]:
+def get_search_space(
+        df: pd.DataFrame, history: History
+) -> dict[str, BaseDistribution | None]:
     # get search_space
     search_space = dict()
     for prm_name in history.prm_names:
         if history._records.column_manager.is_numerical_parameter(prm_name):
             lb, ub = get_bounds_containing_entire_bounds(df, prm_name)
-            search_space.update({
-                prm_name: FloatDistribution(
-                    low=lb, high=ub,
-                )
-            })
+
+            if lb is None:
+                lb = df[prm_name].dropna().min()
+            if ub is None:
+                ub = df[prm_name].dropna().max()
+
+            if lb == ub:
+                # 固定値は search_space に含めない
+                pass
+
+            else:
+                search_space.update({
+                    prm_name: FloatDistribution(
+                        low=lb, high=ub,
+                    )
+                })
+
         elif history._records.column_manager.is_categorical_parameter(prm_name):
             choices: set = get_choices_containing_entire_bounds(df, prm_name)
             search_space.update({
@@ -145,6 +169,9 @@ def get_transformed_params(
 
     # calc transformed value
     for params in params_list:
+
+        # search_space に含まれない params の key は
+        # trans.transform() で無視される
         trans_prm_values: np.ndarray = trans.transform(params)
         out = np.concatenate(
             [out, [trans_prm_values]],

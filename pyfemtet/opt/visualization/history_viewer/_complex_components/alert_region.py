@@ -21,13 +21,12 @@ class AlertRegion(AbstractPage):
     def setup_component(self):
         # alert
         # noinspection PyAttributeOutsideInit
-        self.alert_region = dbc.CardBody(children=[], id='alerts-card-body')
+        self.alert_region = dbc.CardBody(children=[])
 
         # clear alert
         # noinspection PyAttributeOutsideInit
         self.clear_alert_button = dbc.Button(
             children='Clear messages',
-            id='clear-messages-button',
             color='secondary',
             outline=True,
             className="position-relative",
@@ -50,8 +49,8 @@ class AlertRegion(AbstractPage):
 
         # ===== clear alerts ==-==
         @app.callback(
-            Output(self.alert_region.id, 'children', allow_duplicate=True),
-            Input(self.clear_alert_button.id, self.clear_alert_button.Prop.n_clicks),
+            Output(self.alert_region, 'children', allow_duplicate=True),
+            Input(self.clear_alert_button, self.clear_alert_button.Prop.n_clicks),
             prevent_initial_call=True,  # required if allow_duplicate=True
         )
         def clear_alerts(_):

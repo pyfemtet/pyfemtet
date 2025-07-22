@@ -228,8 +228,8 @@ class AbstractOptimizer:
     def add_categorical_parameter(
             self,
             name: str,
-            initial_value: str | None = None,
-            choices: list[str] | None = None,
+            initial_value: SupportedVariableTypes | None = None,
+            choices: list[SupportedVariableTypes] | None = None,
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,

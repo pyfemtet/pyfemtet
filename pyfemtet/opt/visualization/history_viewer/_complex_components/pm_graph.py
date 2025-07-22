@@ -5,6 +5,7 @@ from dash.exceptions import PreventUpdate
 # components
 from pyfemtet.opt.visualization.history_viewer._wrapped_components import html
 from pyfemtet.opt.visualization.history_viewer._wrapped_components import dcc, dbc
+from pyfemtet.opt.visualization.history_viewer._complex_components.alert_region import *
 
 # graph
 import plotly.graph_objs as go
@@ -16,7 +17,8 @@ from pyfemtet.opt.prediction._model import *
 from pyfemtet.opt.prediction._helper import *
 from pyfemtet.opt.visualization.plotter.pm_graph_creator import plot2d, plot3d
 from pyfemtet.opt.visualization.history_viewer._base_application import AbstractPage, logger
-from pyfemtet._i18n import Msg
+from pyfemtet.opt.visualization.history_viewer._helper import has_full_bound
+from pyfemtet._i18n import Msg, _
 
 
 __all__ = [
@@ -142,11 +144,18 @@ class PredictionModelGraph(AbstractPage):
             value=[],
         )
 
+        # alert region subpage
+        self.alert_region: AlertRegion = AlertRegion()
+        self.add_subpage(self.alert_region)
+
     def setup_layout(self):
         self.card_header = dbc.CardHeader(self.tabs)
 
         self.card_body = dbc.CardBody(
-            children=html.Div([self.loading]),  # children=html.Div([self.loading, self.tooltip]),
+            children=html.Div([
+                self.loading,
+                self.alert_region.layout,
+            ]),  # children=html.Div([self.loading, self.tooltip]),
         )
 
         dropdown_rows = [
@@ -301,6 +310,7 @@ class PredictionModelGraph(AbstractPage):
         @app.callback(
             Output(self.graph, 'figure'),
             Output(self.command_manager, self.command_manager_prop),
+            Output(self.alert_region.alert_region, 'children', allow_duplicate=True),
             # To determine whether Process Monitor should update
             # the graph, the main graph remembers the current
             # amount of data.
@@ -340,18 +350,54 @@ class PredictionModelGraph(AbstractPage):
             # load history
             if self.application.history is None:
                 logger.error(Msg.ERR_NO_HISTORY_SELECTED)
-                return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
+                # to re-enable buttons, fire callback chain
+                return (
+                    no_update,
+                    self.CommandState.ready.value,
+                    self.alert_region.create_alerts(Msg.ERR_NO_HISTORY_SELECTED),
+                )
             # prm_names = self.application.history.prm_names
 
             # check history
             if len(self.application.get_df()) == 0:
                 logger.error(Msg.ERR_NO_FEM_RESULT)
-                return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
+                # to re-enable buttons, fire callback chain
+                return (
+                    no_update,
+                    self.CommandState.ready.value,
+                    self.alert_region.create_alerts(Msg.ERR_NO_FEM_RESULT, color='danger'),
+                )
 
             # check fit
             if not hasattr(self.pyfemtet_model, 'current_model'):
                 logger.error(Msg.ERR_NO_PREDICTION_MODEL)
-                return no_update, self.CommandState.ready.value  # to re-enable buttons, fire callback chain
+                # to re-enable buttons, fire callback chain
+                return (
+                    no_update,
+                    self.CommandState.ready.value,
+                    self.alert_region.create_alerts(Msg.ERR_NO_PREDICTION_MODEL, color='danger'),
+                )
+
+            # check fixed and no-boundary parameter,
+            # cancel to write graph.
+            if (
+                    not has_full_bound(self.application.history, axis1_label)
+                    or (is_3d and not has_full_bound(self.application.history, axis2_label))
+            ):
+                # to re-enable buttons, fire callback chain
+                return (
+                    go.Figure(),
+                    self.CommandState.ready.value,
+                    self.alert_region.create_alerts(
+                        _(
+                            en_message='Cannot draw the graph because the selected parameter '
+                                       'is a fixed and its bounds are not given.',
+                            jp_message='選択された変数は固定値で上下限も与えられていないため、'
+                                       'グラフを描画できません。',
+                        ),
+                        color='danger',
+                    ),
+                )
 
             # create params
             params = dict()
@@ -394,7 +440,7 @@ class PredictionModelGraph(AbstractPage):
                     n=200,
                 )
 
-            return fig, self.CommandState.ready.value
+            return fig, self.CommandState.ready.value, []
 
         # ===== re-enable buttons when the graph is updated,  =====
         @app.callback(
@@ -442,20 +488,25 @@ class PredictionModelGraph(AbstractPage):
                 logger.error(Msg.ERR_NO_HISTORY_SELECTED)
                 raise PreventUpdate
 
-            # add dropdown item to dropdown
+            # add dropdown item to dropdown 1, 2 (input)
             axis1_dropdown_items, axis2_dropdown_items = [], []
             for i, prm_name in enumerate(self.application.history.prm_names):
+
+                # dropdown1 (x)
                 dm_item_1 = dbc.DropdownMenuItem(
                     children=prm_name,
                     id={'type': 'axis1-dropdown-menu-item', 'index': prm_name},
                 )
                 axis1_dropdown_items.append(dm_item_1)
 
+                # dropdown2 (y)
                 dm_item_2 = dbc.DropdownMenuItem(
                     children=prm_name,
                     id={'type': 'axis2-dropdown-menu-item', 'index': prm_name},
                 )
                 axis2_dropdown_items.append(dm_item_2)
+
+            # add dropdown item to dropdown 3 (output)
             axis3_dropdown_items = []
             for i, obj_name in enumerate(self.application.history.obj_names):
                 dm_item = dbc.DropdownMenuItem(
@@ -463,6 +514,8 @@ class PredictionModelGraph(AbstractPage):
                     id={'type': 'axis3-dropdown-menu-item', 'index': obj_name},
                 )
                 axis3_dropdown_items.append(dm_item)
+
+            df = self.application.get_df()
 
             # add sliders
             sliders = []
@@ -474,6 +527,11 @@ class PredictionModelGraph(AbstractPage):
                         self.application.get_df(),
                         prm_name,
                     )
+
+                    if lb is None:
+                        lb = df[prm_name].dropna().min()
+                    if ub is None:
+                        ub = df[prm_name].dropna().max()
 
                     # create slider
                     value = (lb + ub) / 2
@@ -580,8 +638,23 @@ class PredictionModelGraph(AbstractPage):
 
             # by callback chain on loaded after setup_dropdown_and_sliders()
             if callback_context.triggered_id == self.axis1_prm_dropdown.id:
-                ret[ax1_label_key] = prm_names[0]
-                ret[ax2_label_key] = prm_names[1] if len(prm_names) >= 2 else ''
+
+                # avoid unable choice
+                index = None
+                for i in range(len(prm_names)):
+                    if has_full_bound(self.application.history, prm_names[i]):
+                        ret[ax1_label_key] = prm_names[i]
+                        index = i
+                        break
+
+                ret[ax2_label_key] = ''
+                if index is not None:
+                    for j in range(index + 1, len(prm_names)):
+                        # ret[ax2_label_key] = prm_names[1] if len(prm_names) >= 2 else ''
+                        if has_full_bound(self.application.history, prm_names[j]):
+                            ret[ax2_label_key] = prm_names[j]
+                            break
+
                 ret[ax3_label_key] = obj_names[0]
 
             # by dropdown clicked
