@@ -1,6 +1,9 @@
 Manually Install PyFemtet
 =========================
 
+This page shows you how to install/update
+``pyfemtet`` manually.
+
 
 Launch command prompt
 ---------------------
@@ -11,19 +14,36 @@ Launch command prompt
 Input install command
 ---------------------
 
-Run following command.
+Run following command to install or update.
+The both are the same command.
 
     (Only PyFemtet core library:)::
 
-        py -m pip install pyfemtet --no-warn-script-location
+        py -m pip install pyfemtet -U --no-warn-script-location
 
 
     (With GUI tool to build script:)::
 
-        py -m pip install pyfemtet-opt-gui --no-warn-script-location
+        py -m pip install pyfemtet pyfemtet-opt-gui -U --no-warn-script-location
 
 
 .. figure:: pip_on_cmd.png
+
+
+.. note::
+
+    If you failed to this process
+    and the warning or error message constaints
+    ``ConnectionError``, ``EnvironmentError`` and so on,
+    the proxy may be a problem.
+
+    Please try to set the environment variable
+    before running the install command.
+    For example, ::
+
+        set HTTP_PROXY=http://<user>:<password>@<host>:<port>
+        set HTTPS_PROXY=http://<user>:<password>@<host>:<port>
+        py -m pip install pyfemtet -U --no-warn-script-location
 
 
 .. note::
