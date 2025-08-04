@@ -100,6 +100,8 @@
              
   <section id="manually-install-pyfemtet">
 <h1>Manually Install PyFemtet<a class="headerlink" href="#manually-install-pyfemtet" title="Link to this heading"></a></h1>
+<p>This page shows you how to install/update
+<code class="docutils literal notranslate"><span class="pre">pyfemtet</span></code> manually.</p>
 <section id="launch-command-prompt">
 <h2>Launch command prompt<a class="headerlink" href="#launch-command-prompt" title="Link to this heading"></a></h2>
 <figure class="align-default">
@@ -108,20 +110,36 @@
 </section>
 <section id="input-install-command">
 <h2>Input install command<a class="headerlink" href="#input-install-command" title="Link to this heading"></a></h2>
-<p>Run following command.</p>
+<p>Run following command to install or update.
+The both are the same command.</p>
 <blockquote>
 <div><p>(Only PyFemtet core library:):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyfemtet</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">warn</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">location</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyfemtet</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">warn</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">location</span>
 </pre></div>
 </div>
 <p>(With GUI tool to build script:):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyfemtet</span><span class="o">-</span><span class="n">opt</span><span class="o">-</span><span class="n">gui</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">warn</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">location</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyfemtet</span> <span class="n">pyfemtet</span><span class="o">-</span><span class="n">opt</span><span class="o">-</span><span class="n">gui</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">warn</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">location</span>
 </pre></div>
 </div>
 </div></blockquote>
 <figure class="align-default">
 <img alt="../../_images/pip_on_cmd.png" src="../../_images/pip_on_cmd.png" />
 </figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you failed to this process
+and the warning or error message constaints
+<code class="docutils literal notranslate"><span class="pre">ConnectionError</span></code>, <code class="docutils literal notranslate"><span class="pre">EnvironmentError</span></code> and so on,
+the proxy may be a problem.</p>
+<p>Please try to set the environment variable
+before running the install command.
+For example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span> <span class="n">HTTP_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//&lt;</span><span class="n">user</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">password</span><span class="o">&gt;@&lt;</span><span class="n">host</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">port</span><span class="o">&gt;</span>
+<span class="nb">set</span> <span class="n">HTTPS_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//&lt;</span><span class="n">user</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">password</span><span class="o">&gt;@&lt;</span><span class="n">host</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">port</span><span class="o">&gt;</span>
+<span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyfemtet</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">warn</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">location</span>
+</pre></div>
+</div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>PyFemtet core library is published under MIT,

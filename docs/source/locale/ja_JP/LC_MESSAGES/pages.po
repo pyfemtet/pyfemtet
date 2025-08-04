@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-22 11:27+0900\n"
+"POT-Creation-Date: 2025-07-30 22:22+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -287,14 +287,17 @@ msgstr "python 3.10 以上 (3.11 以上を推奨)"
 msgid "**See below for installation and setup instructions.**"
 msgstr "**インストールとセットアップの手順については以下を参照してください。**"
 
+# no-translate
 #: ../source/pages/installation.rst:13
 msgid ":doc:`installation_pages/install_femtet`"
 msgstr ""
 
+# no-translate
 #: ../source/pages/installation.rst:14
 msgid ":doc:`installation_pages/install_python`"
 msgstr ""
 
+# no-translate
 #: ../source/pages/installation.rst:15
 msgid ":doc:`installation_pages/install_pyfemtet`"
 msgstr ""
@@ -303,14 +306,17 @@ msgstr ""
 msgid "If step 3 fails, try the following additional steps:"
 msgstr "手順 3 が失敗した場合は、次の操作を試してください。"
 
+# no-translate
 #: ../source/pages/installation.rst:20
 msgid "a1. :doc:`installation_pages/install_pyfemtet_manually`"
 msgstr ""
 
+# no-translate
 #: ../source/pages/installation.rst:21
 msgid "a2. :doc:`installation_pages/setup_femtet_macro`"
 msgstr ""
 
+# no-translate
 #: ../source/pages/installation.rst:22
 msgid "a3. :doc:`installation_pages/setup_com_constants`"
 msgstr ""
@@ -324,7 +330,7 @@ msgid ":ref:`Check the installation of Python <check-the-installation-python-sec
 msgstr ":ref:`Python がインストールできているか確認する <check-the-installation-python-section>`"
 
 #: ../source/pages/installation.rst:28
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:52
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:72
 msgid ":ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`"
 msgstr ":ref:`PyFemtet がインストールできているか確認する <check-the-installation-pyfemtet-section>`"
 
@@ -340,6 +346,7 @@ msgstr "Femtet のインストール"
 msgid "Femtet is CAE software produced and sold by Murata Software. Get a quote and purchase a license, then install Femtet."
 msgstr "Femtet はムラタソフトウェアが製作・販売するCAEソフトウェアです。見積もりを取得してライセンスを購入し、Femtet をインストールしてください。"
 
+# no-translate
 #: ../source/pages/installation_pages/install_femtet.rst:12
 msgid "|Femtet|"
 msgstr ""
@@ -357,78 +364,83 @@ msgid "Install PyFemtet"
 msgstr "PyFemtet のインストール"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:4
+msgid "This page shows how to install/update ``pyfemtet``. The both are the same procedure."
+msgstr "このページでは ``pyfemtet`` のインストール／アップデート方法を紹介します。どちらも同じ手順です。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:7
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:4
 msgid "This step requires administrator privileges."
 msgstr "この手順には管理者権限が必要です。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:8
+#: ../source/pages/installation_pages/install_pyfemtet.rst:11
 msgid "This procedure requires Python 3.11, 3.12 or 3.13. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
 msgstr "この手順には Python 3.11、3.12、または 3.13 が必要です。これ以外のバージョンの Python に PyFemtet をインストールする場合は、このページの末尾に記載の手動手順に従ってください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:13
+#: ../source/pages/installation_pages/install_pyfemtet.rst:16
 msgid "Please download the following file."
 msgstr "以下のファイルをダウンロードしてください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:15
+# no-translate
+#: ../source/pages/installation_pages/install_pyfemtet.rst:18
 msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:17
+#: ../source/pages/installation_pages/install_pyfemtet.rst:20
 msgid "Run the following command on **administrative** ``Command Prompt``. ::"
 msgstr "**管理者権限** のコマンドプロンプトを開き、下記コマンドを実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:24
-msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **shift+right-clicking** the file and select \"Copy as a path\"."
-msgstr "``<path/to/your/downloaded/.ps1>`` はダウンロードした ``pyfemtet-installer.ps1`` ファイルのパスに置き換えてください。パスはファイルを **shift + 右クリック** して「パスとしてコピー」を選択すると取得できます。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:27
+msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **Shift+Right-clicking** the file and select \"Copy as a path\"."
+msgstr "``pyfemtet-installer.ps1`` ファイルのパスは、必ず ``<path/to/your/downloaded/.ps1>`` の部分にダウンロードしたファイルのパスに置き換えてください。パスは、対象ファイルを **Shift キーを押しながら右クリック** し、「パスとしてコピー」を選択すると取得できます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:32
+#: ../source/pages/installation_pages/install_pyfemtet.rst:35
 msgid "***Security Warnings***"
 msgstr "***セキュリティに関する警告***"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:34
+#: ../source/pages/installation_pages/install_pyfemtet.rst:37
 msgid "This command temporarily relaxes the security requirements to run powershell script. Before executing this command, please ensure that the .ps1 file you specifying is the one downloaded from the above source."
 msgstr "このコマンドは一時的にセキュリティを緩和して powershell スクリプトを実行します。このコマンドを実行する前に、コマンドで指定した .ps1 ファイルがこのページからダウンロードしたファイルであることを確認してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:41
+#: ../source/pages/installation_pages/install_pyfemtet.rst:44
 msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
 msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、 **そのインストール構成に `py launcher` が含まれていることを確認してください。**"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:48
+#: ../source/pages/installation_pages/install_pyfemtet.rst:51
 msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 24 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:58
+#: ../source/pages/installation_pages/install_pyfemtet.rst:61
 msgid "Check the Installation of PyFemtet"
 msgstr "PyFemtet がインストールできているか確認する"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:60
+#: ../source/pages/installation_pages/install_pyfemtet.rst:63
 #: ../source/pages/installation_pages/install_python.rst:39
 msgid "If you want to check the installation later, please follow the steps below."
 msgstr "インストールを後から確認したい場合は、以下の手順に従ってください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:62
+#: ../source/pages/installation_pages/install_pyfemtet.rst:65
 #: ../source/pages/installation_pages/install_python.rst:41
 msgid "Press the Windows key and open the Command Prompt."
 msgstr "Windows キーを押してコマンドプロンプトを開きます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:66
+#: ../source/pages/installation_pages/install_pyfemtet.rst:69
 msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for GUI tool)"
 msgstr "「py -m pip show pyfemtet」と入力して Enter キーを押してください。（GUI ツールの場合は「py -m pip show pyfemtet-opt-gui」）"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:69
+#: ../source/pages/installation_pages/install_pyfemtet.rst:72
 msgid "If you get the following result, the setup was successful. ( If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python is not installed."
 msgstr "以下の結果が表示されれば、セットアップは成功しています。（ ``'py' は、内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。`` というメッセージが表示された場合は、Python がインストールされていません。）"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:75
+#: ../source/pages/installation_pages/install_pyfemtet.rst:78
 msgid "If you see the message ``WARNING: Package(s) not found: pyfemtet`` (or ``pyfemtet-opt-gui``), PyFemtet (or its GUI tool) is not installed. )"
 msgstr "``WARNING: Package(s) not found: pyfemtet`` （または ``pyfemtet-opt-gui`` ）というメッセージが表示された場合、PyFemtet（またはその GUI ツール）がインストールされていません。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:83
+#: ../source/pages/installation_pages/install_pyfemtet.rst:86
 #: ../source/pages/script_builder.rst:49
 msgid "Manual Installation"
 msgstr "手動インストール"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:85
+#: ../source/pages/installation_pages/install_pyfemtet.rst:88
 msgid "If this step fails, try the following steps manually:"
 msgstr "この手順が失敗した場合は、次の手順を手動で試してください。"
 
@@ -436,48 +448,60 @@ msgstr "この手順が失敗した場合は、次の手順を手動で試して
 msgid "Manually Install PyFemtet"
 msgstr "手動で PyFemtet をインストールする"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:6
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:4
+msgid "This page shows you how to install/update ``pyfemtet`` manually."
+msgstr "このページでは、``pyfemtet`` を手動でインストール・アップデートする方法を説明します。"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:9
 msgid "Launch command prompt"
 msgstr "コマンドプロンプトの起動"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:12
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:15
 msgid "Input install command"
 msgstr "インストールコマンドの入力"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:14
-msgid "Run following command."
-msgstr "下記のコマンドを実行します。"
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:17
+msgid "Run following command to install or update. The both are the same command."
+msgstr "インストールまたはアップデートするには、以下のコマンドを実行してください。どちらの場合も同じコマンドです。"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:16
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:20
 msgid "(Only PyFemtet core library:)::"
 msgstr "(PyFemtet コア機能のみ:)::"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:21
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:25
 msgid "(With GUI tool to build script:)::"
 msgstr "(最適化機能のための GUI ツールもインストール:)::"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:31
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:35
+msgid "If you failed to this process and the warning or error message constaints ``ConnectionError``, ``EnvironmentError`` and so on, the proxy may be a problem."
+msgstr "この手順で失敗し、警告やエラーメッセージに ``ConnectionError`` や ``EnvironmentError`` などが含まれる場合は、プロキシが原因の可能性があります。"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:40
+msgid "Please try to set the environment variable before running the install command. For example, ::"
+msgstr "インストールコマンドを実行する前に、環境変数を設定してみてください。例えば、::"
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:51
 #: ../source/pages/script_builder.rst:11
 msgid "PyFemtet core library is published under MIT, but the GUI tool is published under LGPL-v3."
 msgstr "PyFemtet のコア機能は MIT ライセンスで公開されていますが、GUI ツールは LGPL-v3 ライセンスで公開されています。"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:36
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:56
 msgid "Wait for installation"
 msgstr "インストールの待機"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:38
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:58
 msgid "Depending on the environment, the following installation screen may be displayed and may not change for several minutes or even several tens of minutes."
 msgstr "環境によっては、以下のインストール画面が表示され、数分から数十分程度変化しない場合があります。"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:42
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:62
 msgid "Installation Screen"
 msgstr "インストール画面"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:45
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:65
 msgid "Wait until the \"Installed successfully...\" message appears on the screen."
 msgstr "画面に \"Installed successfully...\" というメッセージが表示されるまでお待ちください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:50
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:70
 msgid "If you want to check the installation, please check the section below."
 msgstr "インストールを確認したい場合は、下記のセクションをご確認ください。"
 
@@ -489,6 +513,7 @@ msgstr "Python のインストール"
 msgid "Download the installer for windows 64-bit and run it."
 msgstr "64-bit 版 windows 用インストーラをダウンロードして実行します。"
 
+# no-translate
 #: ../source/pages/installation_pages/install_python.rst:11
 msgid "|Python|"
 msgstr ""
@@ -549,81 +574,109 @@ msgstr "この手順により、Femtet ヘルプ ウィンドウが開きます�
 msgid "migration_to_v1"
 msgstr "バージョン 1 への移行"
 
-#: ../source/pages/migration_to_v1.rst:4
-msgid "**To Users of PyFemtet 0.x**"
-msgstr "**PyFemtet 0.x をお使いの皆様へ**"
-
 #: ../source/pages/migration_to_v1.rst:6
-msgid "In PyFemtet v1, many functions and arguments have been changed to improve user-friendliness and development efficiency."
-msgstr "PyFemtet バージョン 1 では、ユーザーの使いやすさや保守性の向上のため関数や引数に変更が予定されています。"
+msgid "This page is the migration guide for **your code written in pyfemtet 0.x to adapt 1.x**."
+msgstr "このページは、**pyfemtet 0.x で書かれたあなたのコードを 1.x 用に移行するためのガイド**です。"
 
 #: ../source/pages/migration_to_v1.rst:9
-msgid "Versions 0.9 and later serve as transition versions to v1, where legacy functions and arguments are still fully available; however, features that have been changed or removed will issue warnings."
-msgstr "バージョン 0.9 以降はバージョン 1 への移行バージョンで、旧来の関数・引数が完全に利用可能ですが、変更・削除される機能は警告を発します。"
+msgid "Please run the following command to detect your ``pyfemtet`` version: ::"
+msgstr "``pyfemtet`` のバージョンを確認するには、下記のコマンドを実行してください。 ::"
 
-#: ../source/pages/migration_to_v1.rst:13
+#: ../source/pages/migration_to_v1.rst:14
+msgid "If you use virtual environment and so on, the command is: ::"
+msgstr "仮想環境などを使用している場合、コマンドは以下の通りです。::"
+
+#: ../source/pages/migration_to_v1.rst:18
+msgid "If the version is already 1.x and your code is written in 1.x, you do not have to read this page."
+msgstr "すでにバージョン 1.x であり、あなたのコードも 1.x で書かれている場合、このページを読む必要はありません。"
+
+#: ../source/pages/migration_to_v1.rst:22
+msgid "Even if the version is 0.x, in case that you will not update ``pyfemtet``, you have not to read this page."
+msgstr "バージョンが 0.x であっても、 ``pyfemtet`` をアップデートしない場合はこのページを読む必要はありません。"
+
+#: ../source/pages/migration_to_v1.rst:29
+msgid "If you want to update ``pyfemtet``, see :doc:`installation_pages/install_pyfemtet` or :doc:`installation_pages/install_pyfemtet_manually`"
+msgstr "``pyfemtet`` をアップデートしたい場合は、:doc:`installation_pages/install_pyfemtet` または :doc:`installation_pages/install_pyfemtet_manually` をご覧ください。"
+
+#: ../source/pages/migration_to_v1.rst:35
+msgid "In PyFemtet v1, many functions and arguments have been changed to improve usability and development efficiency."
+msgstr "PyFemtet バージョン 1 では、操作性や開発効率の向上のため多くの関数や引数が変更されています。"
+
+#: ../source/pages/migration_to_v1.rst:38
+msgid "Versions 0.9 serves as transition versions to v1, where legacy functions and arguments are still fully available; however, features that have been changed or removed will issue warnings."
+msgstr "バージョン 0.9 は v1 への移行バージョンとして、従来の関数や引数も引き続き利用できますが、変更・削除された機能については警告が表示されます。"
+
+#: ../source/pages/migration_to_v1.rst:42
 msgid "The main changes in version 1 are listed on this page along with usage examples. If you need to modify your existing scripts, please refer to the examples below."
 msgstr "バージョン 1 での主要な変更点はこのページに実装例とともに掲載しています。あなたの運用しているスクリプトの変更が必要な場合、以下の例を参考にしてください。"
 
-#: ../source/pages/migration_to_v1.rst:19
+#: ../source/pages/migration_to_v1.rst:48
 msgid "Index of this page"
 msgstr "このページの目次"
 
-#: ../source/pages/migration_to_v1.rst:22
+#: ../source/pages/migration_to_v1.rst:51
 msgid "How to import exceptions like ModelError"
 msgstr "ModelError などの例外のインポート"
 
-#: ../source/pages/migration_to_v1.rst:24
+#: ../source/pages/migration_to_v1.rst:53
 msgid "They will be moved to ``pyfemtet.opt.exceptions`` module."
 msgstr "これらの例外クラスは ``pyfemtet.opt.exceptions`` モジュールに移動されます。"
 
-#: ../source/pages/migration_to_v1.rst:36
+#: ../source/pages/migration_to_v1.rst:65
 msgid "add_objective() and add_constraints()"
 msgstr "add_objective() と add_constraints()"
 
-#: ../source/pages/migration_to_v1.rst:39
+#: ../source/pages/migration_to_v1.rst:68
 msgid "``name`` argument"
 msgstr "引数 ``name``"
 
-#: ../source/pages/migration_to_v1.rst:41
+#: ../source/pages/migration_to_v1.rst:70
 msgid "The ``name`` argument will be the first argument and required."
 msgstr "引数 ``name`` は第一位置引数になり、必須になります。"
 
-#: ../source/pages/migration_to_v1.rst:60
+#: ../source/pages/migration_to_v1.rst:89
 msgid "``args`` argument"
 msgstr "引数 ``args``"
 
-#: ../source/pages/migration_to_v1.rst:62
+#: ../source/pages/migration_to_v1.rst:91
 msgid "The ``args`` will be recognized as a sequence."
 msgstr "引数 ``args`` は配列として認識されます。"
 
-#: ../source/pages/migration_to_v1.rst:76
+#: ../source/pages/migration_to_v1.rst:105
 msgid "Arguments of User-Defined Functions in cases other than FemtetInterface"
 msgstr "FemtetInterface 以外を使っている場合のユーザー定義関数の引数"
 
-#: ../source/pages/migration_to_v1.rst:78
+#: ../source/pages/migration_to_v1.rst:107
 msgid "In cases other than ``FemtetInterface`` (for example, ``ExcelInterface``), the first argument of user-defined functions is given by PyFemtet."
 msgstr "``FemtetInterface`` 以外のインターフェース（例えば、 ``ExcelInterface`` ）を使っている場合、ユーザー定義関数の第一引数は PyFemtet から自動的に与えられるようになります。"
 
-#: ../source/pages/migration_to_v1.rst:82
+#: ../source/pages/migration_to_v1.rst:111
 msgid "This item is not relevant when using the FemtetInterface and its derived classes (such as FemtetWithNXInterface)."
 msgstr "この項目は、FemtetInterface とその派生クラス（例えば FemtetWithNXInterface ）を使っている方には影響がありません。"
 
-#: ../source/pages/migration_to_v1.rst:102
+#: ../source/pages/migration_to_v1.rst:131
 msgid "What is passed to the first argument varies depending on the FEMInterface you using. For example, ``ExcelInterface`` passes COM object of Excel(R) to your function."
 msgstr "第一引数として何が与えられるかは、お使いのインターフェースによって異なります。例えば、 ``ExcelInterface`` の場合 Excel(R) の COM オブジェクトが与えられます。"
 
-#: ../source/pages/migration_to_v1.rst:106
+#: ../source/pages/migration_to_v1.rst:135
 msgid "For details, please refer to the `API Reference of Latest version <https://pyfemtet.readthedocs.io/en/latest/pages/api.html>`__ of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
 msgstr "より詳しくは、 `開発中最新バージョンの API リファレンス <https://pyfemtet.readthedocs.io/ja/latest/pages/api.html>`__ の ``~Interface.object_pass_to_fun`` 項目を参照してください。もしインターフェースクラスの項目に ``object_pass_to_fun`` の項目がなければ、継承元クラスの項目をご覧ください。"
 
-#: ../source/pages/migration_to_v1.rst:114
+#: ../source/pages/migration_to_v1.rst:143
 msgid "``opt.variables.get_variables()`` method"
 msgstr "``opt.variables.get_variables()`` メソッド"
 
-#: ../source/pages/migration_to_v1.rst:116
+#: ../source/pages/migration_to_v1.rst:145
 msgid "The ``opt.variables.get_variables()`` will be deprecated. Use ``opt.get_variables()`` instead."
 msgstr "``opt.variables.get_variables()`` メソッドは廃止されます. 代わりに ``opt.get_variables()`` をお使いください。"
+
+#: ../source/pages/migration_to_v1.rst:162
+msgid "``history_path`` argument"
+msgstr "``history_path`` 引数"
+
+#: ../source/pages/migration_to_v1.rst:164
+msgid "The ``history_path`` argument is now in ``femopt.oprimize``."
+msgstr "``history_path`` 引数は現在 ``femopt.oprimize`` にあります。"
 
 #: ../source/pages/script_builder.rst:2
 msgid "GUI"
@@ -765,6 +818,7 @@ msgstr "ここで表示される tcp://~~~:~~~ という数字を記録してく
 msgid "If communication ports are restricted due to firewalls or other constraints,"
 msgstr "ファイアウォール等の制約により通信できるポートが決まっている場合は、"
 
+# no-translate
 #: ../source/pages/usage_pages/how_to_deploy_cluster.rst
 msgid "``dask scheduler --port your_port``"
 msgstr ""
@@ -998,6 +1052,7 @@ msgstr "このファイルに対してショートカットを作成してくだ
 msgid "The path to the folder containing python.exe can be found by opening the command prompt and executing the following command:"
 msgstr "python.exe のあるフォルダのパスは、コマンドプロンプトを開いて以下のコマンドを実行すると調べられます:"
 
+# no-translate
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:34
 msgid "```py -c \"import sys;print(sys.executable)\"```"
 msgstr ""
@@ -1193,4 +1248,10 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 
 #~ msgid "**If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.** PyFemtet itself supports Python 3.10 and above."
 #~ msgstr "**GUI最適化設定機能を使用する場合は、3.11または3.12が必要です。** PyFemtet自体はPython 3.10以上をサポートしています。"
+
+#~ msgid "Run following command."
+#~ msgstr "下記のコマンドを実行します。"
+
+#~ msgid "**To Users of PyFemtet 0.x**"
+#~ msgstr "**PyFemtet 0.x をお使いの皆様へ**"
 

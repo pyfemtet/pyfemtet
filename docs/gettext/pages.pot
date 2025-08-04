@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-22 11:27+0900\n"
+"POT-Creation-Date: 2025-07-30 22:22+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -317,7 +317,7 @@ msgid ":ref:`Check the installation of Python <check-the-installation-python-sec
 msgstr ""
 
 #: ../source/pages/installation.rst:28
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:52
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:72
 msgid ":ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`"
 msgstr ""
 
@@ -350,78 +350,82 @@ msgid "Install PyFemtet"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:4
+msgid "This page shows how to install/update ``pyfemtet``. The both are the same procedure."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:7
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:4
 msgid "This step requires administrator privileges."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:8
+#: ../source/pages/installation_pages/install_pyfemtet.rst:11
 msgid "This procedure requires Python 3.11, 3.12 or 3.13. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:13
+#: ../source/pages/installation_pages/install_pyfemtet.rst:16
 msgid "Please download the following file."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:15
+#: ../source/pages/installation_pages/install_pyfemtet.rst:18
 msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:17
+#: ../source/pages/installation_pages/install_pyfemtet.rst:20
 msgid "Run the following command on **administrative** ``Command Prompt``. ::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:24
-msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **shift+right-clicking** the file and select \"Copy as a path\"."
+#: ../source/pages/installation_pages/install_pyfemtet.rst:27
+msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **Shift+Right-clicking** the file and select \"Copy as a path\"."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:32
+#: ../source/pages/installation_pages/install_pyfemtet.rst:35
 msgid "***Security Warnings***"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:34
+#: ../source/pages/installation_pages/install_pyfemtet.rst:37
 msgid "This command temporarily relaxes the security requirements to run powershell script. Before executing this command, please ensure that the .ps1 file you specifying is the one downloaded from the above source."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:41
+#: ../source/pages/installation_pages/install_pyfemtet.rst:44
 msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:48
+#: ../source/pages/installation_pages/install_pyfemtet.rst:51
 msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:58
+#: ../source/pages/installation_pages/install_pyfemtet.rst:61
 msgid "Check the Installation of PyFemtet"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:60
+#: ../source/pages/installation_pages/install_pyfemtet.rst:63
 #: ../source/pages/installation_pages/install_python.rst:39
 msgid "If you want to check the installation later, please follow the steps below."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:62
+#: ../source/pages/installation_pages/install_pyfemtet.rst:65
 #: ../source/pages/installation_pages/install_python.rst:41
 msgid "Press the Windows key and open the Command Prompt."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:66
+#: ../source/pages/installation_pages/install_pyfemtet.rst:69
 msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for GUI tool)"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:69
+#: ../source/pages/installation_pages/install_pyfemtet.rst:72
 msgid "If you get the following result, the setup was successful. ( If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python is not installed."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:75
+#: ../source/pages/installation_pages/install_pyfemtet.rst:78
 msgid "If you see the message ``WARNING: Package(s) not found: pyfemtet`` (or ``pyfemtet-opt-gui``), PyFemtet (or its GUI tool) is not installed. )"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:83
+#: ../source/pages/installation_pages/install_pyfemtet.rst:86
 #: ../source/pages/script_builder.rst:49
 msgid "Manual Installation"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:85
+#: ../source/pages/installation_pages/install_pyfemtet.rst:88
 msgid "If this step fails, try the following steps manually:"
 msgstr ""
 
@@ -429,48 +433,60 @@ msgstr ""
 msgid "Manually Install PyFemtet"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:6
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:4
+msgid "This page shows you how to install/update ``pyfemtet`` manually."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:9
 msgid "Launch command prompt"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:12
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:15
 msgid "Input install command"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:14
-msgid "Run following command."
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:17
+msgid "Run following command to install or update. The both are the same command."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:16
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:20
 msgid "(Only PyFemtet core library:)::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:21
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:25
 msgid "(With GUI tool to build script:)::"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:31
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:35
+msgid "If you failed to this process and the warning or error message constaints ``ConnectionError``, ``EnvironmentError`` and so on, the proxy may be a problem."
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:40
+msgid "Please try to set the environment variable before running the install command. For example, ::"
+msgstr ""
+
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:51
 #: ../source/pages/script_builder.rst:11
 msgid "PyFemtet core library is published under MIT, but the GUI tool is published under LGPL-v3."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:36
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:56
 msgid "Wait for installation"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:38
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:58
 msgid "Depending on the environment, the following installation screen may be displayed and may not change for several minutes or even several tens of minutes."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:42
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:62
 msgid "Installation Screen"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:45
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:65
 msgid "Wait until the \"Installed successfully...\" message appears on the screen."
 msgstr ""
 
-#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:50
+#: ../source/pages/installation_pages/install_pyfemtet_manually.rst:70
 msgid "If you want to check the installation, please check the section below."
 msgstr ""
 
@@ -542,80 +558,108 @@ msgstr ""
 msgid "migration_to_v1"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:4
-msgid "**To Users of PyFemtet 0.x**"
-msgstr ""
-
 #: ../source/pages/migration_to_v1.rst:6
-msgid "In PyFemtet v1, many functions and arguments have been changed to improve user-friendliness and development efficiency."
+msgid "This page is the migration guide for **your code written in pyfemtet 0.x to adapt 1.x**."
 msgstr ""
 
 #: ../source/pages/migration_to_v1.rst:9
-msgid "Versions 0.9 and later serve as transition versions to v1, where legacy functions and arguments are still fully available; however, features that have been changed or removed will issue warnings."
+msgid "Please run the following command to detect your ``pyfemtet`` version: ::"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:13
-msgid "The main changes in version 1 are listed on this page along with usage examples. If you need to modify your existing scripts, please refer to the examples below."
+#: ../source/pages/migration_to_v1.rst:14
+msgid "If you use virtual environment and so on, the command is: ::"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:19
-msgid "Index of this page"
+#: ../source/pages/migration_to_v1.rst:18
+msgid "If the version is already 1.x and your code is written in 1.x, you do not have to read this page."
 msgstr ""
 
 #: ../source/pages/migration_to_v1.rst:22
+msgid "Even if the version is 0.x, in case that you will not update ``pyfemtet``, you have not to read this page."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:29
+msgid "If you want to update ``pyfemtet``, see :doc:`installation_pages/install_pyfemtet` or :doc:`installation_pages/install_pyfemtet_manually`"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:35
+msgid "In PyFemtet v1, many functions and arguments have been changed to improve usability and development efficiency."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:38
+msgid "Versions 0.9 serves as transition versions to v1, where legacy functions and arguments are still fully available; however, features that have been changed or removed will issue warnings."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:42
+msgid "The main changes in version 1 are listed on this page along with usage examples. If you need to modify your existing scripts, please refer to the examples below."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:48
+msgid "Index of this page"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:51
 msgid "How to import exceptions like ModelError"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:24
+#: ../source/pages/migration_to_v1.rst:53
 msgid "They will be moved to ``pyfemtet.opt.exceptions`` module."
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:36
+#: ../source/pages/migration_to_v1.rst:65
 msgid "add_objective() and add_constraints()"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:39
+#: ../source/pages/migration_to_v1.rst:68
 msgid "``name`` argument"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:41
+#: ../source/pages/migration_to_v1.rst:70
 msgid "The ``name`` argument will be the first argument and required."
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:60
+#: ../source/pages/migration_to_v1.rst:89
 msgid "``args`` argument"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:62
+#: ../source/pages/migration_to_v1.rst:91
 msgid "The ``args`` will be recognized as a sequence."
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:76
+#: ../source/pages/migration_to_v1.rst:105
 msgid "Arguments of User-Defined Functions in cases other than FemtetInterface"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:78
+#: ../source/pages/migration_to_v1.rst:107
 msgid "In cases other than ``FemtetInterface`` (for example, ``ExcelInterface``), the first argument of user-defined functions is given by PyFemtet."
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:82
+#: ../source/pages/migration_to_v1.rst:111
 msgid "This item is not relevant when using the FemtetInterface and its derived classes (such as FemtetWithNXInterface)."
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:102
+#: ../source/pages/migration_to_v1.rst:131
 msgid "What is passed to the first argument varies depending on the FEMInterface you using. For example, ``ExcelInterface`` passes COM object of Excel(R) to your function."
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:106
+#: ../source/pages/migration_to_v1.rst:135
 msgid "For details, please refer to the `API Reference of Latest version <https://pyfemtet.readthedocs.io/en/latest/pages/api.html>`__ of each class. If the concrete class’s API reference does not include an object_pass_to_fun section, please refer to the corresponding section in its parent class."
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:114
+#: ../source/pages/migration_to_v1.rst:143
 msgid "``opt.variables.get_variables()`` method"
 msgstr ""
 
-#: ../source/pages/migration_to_v1.rst:116
+#: ../source/pages/migration_to_v1.rst:145
 msgid "The ``opt.variables.get_variables()`` will be deprecated. Use ``opt.get_variables()`` instead."
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:162
+msgid "``history_path`` argument"
+msgstr ""
+
+#: ../source/pages/migration_to_v1.rst:164
+msgid "The ``history_path`` argument is now in ``femopt.oprimize``."
 msgstr ""
 
 #: ../source/pages/script_builder.rst:2
