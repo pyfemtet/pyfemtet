@@ -32,3 +32,4 @@ docs/result.txt
 /.python-version
 desktop.ini
 /tools
+.env
