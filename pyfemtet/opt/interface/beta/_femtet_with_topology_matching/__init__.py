@@ -1,5 +1,9 @@
-from .femtet_with_topology_matching import FemtetWithTopologyMatching
+from .femtet_with_topology_matching import (
+    FemtetWithTopologyMatching,
+    FemtetWithSolidworksInterfaceWithTopologyMatching,
+)
 
 __all__ = [
-    'FemtetWithTopologyMatching'
+    'FemtetWithTopologyMatching',
+    'FemtetWithSolidworksInterfaceWithTopologyMatching',
 ]

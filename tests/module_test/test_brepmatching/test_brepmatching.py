@@ -2,8 +2,10 @@ import os
 import subprocess
 from time import time, sleep
 from dotenv import load_dotenv
+from contextlib import closing
 from win32com.client import Dispatch
 from pyfemtet.opt.problem.problem import TrialInput, Variable
+from pyfemtet.opt.optimizer import AbstractOptimizer
 
 # topology_matching 関係機能を import する前に
 # テスト用環境変数の設定が必要
@@ -12,9 +14,14 @@ load_dotenv(dotenv_path=os.path.join(here, ".env"))
 
 from pyfemtet.beta.topology_matching import reexecute_model_with_topology_matching
 from pyfemtet.opt.interface.beta import FemtetWithTopologyMatching
+from pyfemtet.opt.interface.beta import FemtetWithSolidworksInterfaceWithTopologyMatching
+from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 
 
 class FemtetForTest:
+    def __init__(self, force_close=True):
+        self.force_close = force_close
+
     def __enter__(self):
         self.popen = subprocess.Popen(
             os.path.join(os.environ.get("FEMTET_ROOT_DIR"), "Femtet_d.exe")
@@ -29,9 +36,10 @@ class FemtetForTest:
         return self.Femtet
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        succeeded = self.Femtet.Exit(True)
-        if not succeeded:
-            self.popen.kill()
+        if self.force_close:
+            succeeded = self.Femtet.Exit(True)
+            if not succeeded:
+                self.popen.kill()
 
 
 def update_model(Femtet):
@@ -95,5 +103,70 @@ def test_interface_topology_matching():
 
         sleep(1)
 
+
+def test_sw_interface_topology_matching():
+    femprj_path = os.path.join(here, 'cad_ex01_SW_fillet.femprj')
+    sldprt_path = os.path.join(here, "cad_ex01_SW_fillet.sldprt")
+
+    with FemtetForTest(False) as Femtet:
+
+        sleep(1)
+
+        print(f"{Femtet.hWnd=}")
+
+        fem = FemtetWithSolidworksInterfaceWithTopologyMatching(
+            # fem = FemtetWithSolidworksInterface(
+            femprj_path=femprj_path,
+            sldprt_path=sldprt_path,
+            connect_method="existing",
+        )
+
+        with closing(fem):
+
+            fem.quit_when_destruct = True
+            fem._setup_before_parallel()
+            fem._setup_after_parallel(AbstractOptimizer())
+
+            x = Variable()
+            x.name = 'A'
+            x.value = 40
+            y = Variable()
+            y.name = 'B'
+            y.value = 10
+            z = Variable()
+            z.name = 'C'
+            z.value = 25
+            trial_input = TrialInput(
+                A=x, B=y, C=z
+            )
+
+            sleep(1)
+
+            fem.update_parameter(trial_input)
+            fem.update()
+
+            sleep(1)
+
+            x = Variable()
+            x.name = 'A'
+            x.value = 10
+            y = Variable()
+            y.name = 'B'
+            y.value = 20
+            z = Variable()
+            z.name = 'C'
+            z.value = 50
+            trial_input = TrialInput(
+                A=x, B=y, C=z
+            )
+
+            sleep(1)
+
+            fem.update_parameter(trial_input)
+            fem.update()
+
+            sleep(1)
+
+
 if __name__ == '__main__':
-    test_interface_topology_matching()
+    test_sw_interface_topology_matching()
