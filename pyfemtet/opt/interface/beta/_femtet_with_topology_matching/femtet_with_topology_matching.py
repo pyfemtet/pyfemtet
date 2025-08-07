@@ -1,7 +1,7 @@
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface
 from pyfemtet.opt.problem.problem import TrialInput
-from pyfemtet.topology_matching import reexecute_model_with_topology_matching
+from pyfemtet.beta.topology_matching import reexecute_model_with_topology_matching
 
 
 class FemtetWithTopologyMatching(FemtetInterface, AbstractFEMInterface):

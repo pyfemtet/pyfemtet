@@ -10,8 +10,8 @@ from pyfemtet.opt.problem.problem import TrialInput, Variable
 here = os.path.dirname(__file__)
 load_dotenv(dotenv_path=os.path.join(here, ".env"))
 
-from pyfemtet.topology_matching import reexecute_model_with_topology_matching
-from pyfemtet.opt.interface._femtet_with_topology_matching.femtet_with_topology_matching import FemtetWithTopologyMatching
+from pyfemtet.beta.topology_matching import reexecute_model_with_topology_matching
+from pyfemtet.opt.interface.beta import FemtetWithTopologyMatching
 
 
 class FemtetForTest:
