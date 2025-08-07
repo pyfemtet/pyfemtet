@@ -11,7 +11,7 @@ from contextlib import nullcontext
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error, error
 # noinspection PyUnresolvedReferences
-from pythoncom import CoInitialize, CoUninitialize
+from pythoncom import CoInitialize
 # noinspection PyUnresolvedReferences
 from win32com.client import constants
 import win32con

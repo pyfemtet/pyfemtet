@@ -3,11 +3,15 @@ import subprocess
 from time import time, sleep
 from dotenv import load_dotenv
 from win32com.client import Dispatch
+from pyfemtet.opt.problem.problem import TrialInput, Variable
 
+# topology_matching 関係機能を import する前に
+# テスト用環境変数の設定が必要
 here = os.path.dirname(__file__)
 load_dotenv(dotenv_path=os.path.join(here, ".env"))
 
 from pyfemtet.topology_matching import reexecute_model_with_topology_matching
+from pyfemtet.opt.interface._femtet_with_topology_matching.femtet_with_topology_matching import FemtetWithTopologyMatching
 
 
 class FemtetForTest:
@@ -44,11 +48,52 @@ def update_model(Femtet):
 def test_brepmatching():
     femprj_path = __file__.removesuffix("py") + "femprj"
     with FemtetForTest() as Femtet:
+
+        sleep(1)
+
         print(f"{Femtet.hWnd=}")
         Femtet.LoadProject(femprj_path, True)
 
+        sleep(1)
+
         reexecute_model_with_topology_matching(
-            Femtet=Femtet,
-            rebuild_fun=update_model,
-            args=(Femtet,)
+            Femtet=Femtet, rebuild_fun=update_model, args=(Femtet,)
         )
+
+        sleep(1)
+
+
+def test_interface_topology_matching():
+    femprj_path = __file__.removesuffix("py") + "femprj"
+    with FemtetForTest() as Femtet:
+
+        sleep(1)
+
+        print(f"{Femtet.hWnd=}")
+        fem = FemtetWithTopologyMatching(
+            femprj_path=femprj_path,
+            connect_method='existing',
+        )
+
+        x = Variable()
+        x.name = 'x'
+        x.value = 4
+        y = Variable()
+        y.name = 'y'
+        y.value = 4
+        z = Variable()
+        z.name = 'z'
+        z.value = 4
+        trial_input = TrialInput(
+            x=x, y=y, z=z
+        )
+
+        sleep(1)
+
+        fem.update_parameter(trial_input)
+        fem.update()
+
+        sleep(1)
+
+if __name__ == '__main__':
+    test_interface_topology_matching()

@@ -303,8 +303,6 @@ def reexecute_model_with_topology_matching(
                 succeed = topo.SetBoundary(boundary)
                 if not succeed:
                     Femtet.ShowLastError()
-            mesh_size = topo_id_vs_mesh_var[topo.ID]
-            topo.MeshSize = mesh_size
         if topo.ID in topo_id_vs_mesh_var.keys():
             mesh_size = topo_id_vs_mesh_var[topo.ID]
             topo.MeshSize = mesh_size
