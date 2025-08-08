@@ -29,6 +29,7 @@ dependencies = [
     "torch", # botorch specifies torch's version
     "fire>=0.7", # It probably has a strong backward compatibility.
     "pyyaml>=6.0.2,<7",
+    "frozendict>=2.4.6",
 ]
 
 #[project.optional-dependencies]
