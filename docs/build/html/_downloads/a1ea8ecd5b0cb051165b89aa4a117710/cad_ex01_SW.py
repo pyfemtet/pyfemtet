@@ -102,7 +102,7 @@ def C_minus_B(Femtet, opt):
 
 if __name__ == '__main__':
 
-    # Initialize NX-Femtet integration object.
+    # Initialize SW-Femtet integration object.
     # At this point, Python is connected to the Femtet.
     fem = FemtetWithSolidworksInterface(
         sldprt_path='cad_ex01_SW.SLDPRT',
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     femopt = FEMOpt(fem=fem)
 
     # Add design variables to the optimization problem.
-    # (Specify the variables registered in the femprj file.)
+    # (Specify the variables registered in the .SLDPRT file.)
     femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
     femopt.add_parameter('B', 10, lower_bound=1, upper_bound=40)
     femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)

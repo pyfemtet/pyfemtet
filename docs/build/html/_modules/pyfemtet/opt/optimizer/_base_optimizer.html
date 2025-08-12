@@ -96,6 +96,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.worker_status</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._trial_queue</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -152,6 +153,7 @@
     <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">include_queued_in_n_trials</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="c1"># problem</span>
     <span class="n">variable_manager</span><span class="p">:</span> <span class="n">VariableManager</span>
@@ -178,6 +180,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_queued_in_n_trials</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># Problem</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span> <span class="o">=</span> <span class="n">VariableManager</span><span class="p">()</span>
@@ -197,6 +200,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="p">:</span> <span class="n">WorkerStatus</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="p">(</span><span class="n">ENTIRE_PROCESS_STATUS_KEY</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="p">:</span> <span class="n">WorkerStatus</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="p">(</span><span class="s1">&#39;worker-status&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WorkerStatus</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_queue</span><span class="p">:</span> <span class="n">TrialQueue</span> <span class="o">=</span> <span class="n">TrialQueue</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_done_setup_before_parallel</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_done_load_problem_from_fem</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -485,6 +489,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sub_fidelity_model</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="AbstractOptimizer.add_trial">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_trial">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_trial</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_queue</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="AbstractOptimizer.get_variables">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.get_variables">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="s1">&#39;raw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;dict&#39;</span><span class="p">):</span>
@@ -508,6 +521,21 @@
 
 
     <span class="c1"># ===== private =====</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_enqueued_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Insert initial trial</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_queue</span><span class="o">.</span><span class="n">enqueue_first</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="p">{</span><span class="n">_IS_INITIAL_TRIAL_FLAG_KEY</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="c1"># Remove trials included in history</span>
+        <span class="n">tried</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_tried_list_from_history</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">equality_filters</span><span class="o">=</span><span class="n">MAIN_FILTER</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_queue</span><span class="o">.</span><span class="n">remove_tried</span><span class="p">(</span><span class="n">tried</span><span class="p">)</span>
+
+        <span class="c1"># Remove duplicated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_queue</span><span class="o">.</span><span class="n">remove_duplicated</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_should_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve_condition</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
@@ -1049,6 +1077,61 @@
 
             <span class="c1"># resolve evaluation order</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+            <span class="c1"># check the enqueued trials is</span>
+            <span class="c1"># compatible with current optimization</span>
+            <span class="c1"># problem setup</span>
+            <span class="n">history_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">prm_names</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_queue</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span>
+                <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">d</span>
+                <span class="n">enqueued_set</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+                <span class="c1"># Warning if over</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enqueued_set</span> <span class="o">-</span> <span class="n">history_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="n">_</span><span class="p">(</span>
+                            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;Enqueued parameter set contains &#39;</span>
+                                       <span class="s1">&#39;more parameters than the optimization &#39;</span>
+                                       <span class="s1">&#39;problem setup. The extra parameters &#39;</span>
+                                       <span class="s1">&#39;will be ignored.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;Enqueued set: </span><span class="si">{enqueued_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;Setup set: </span><span class="si">{history_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;Parameters ignored: </span><span class="si">{over_set}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;予約された入力変数セットは&#39;</span>
+                                       <span class="s1">&#39;最適化のセットアップで指定されたよりも&#39;</span>
+                                       <span class="s1">&#39;多くの変数を含んでいます。&#39;</span>
+                                       <span class="s1">&#39;そのような変数は無視されます。</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;予約された入力変数: </span><span class="si">{enqueued_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;最適化する変数: </span><span class="si">{history_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;無視される変数: </span><span class="si">{over_set}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">enqueued_set</span><span class="o">=</span><span class="n">enqueued_set</span><span class="p">,</span>
+                            <span class="n">history_set</span><span class="o">=</span><span class="n">history_set</span><span class="p">,</span>
+                            <span class="n">over_set</span><span class="o">=</span><span class="n">enqueued_set</span> <span class="o">-</span> <span class="n">history_set</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Error if not enough</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">history_set</span> <span class="o">-</span> <span class="n">enqueued_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="n">_</span><span class="p">(</span>
+                            <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The enqueued parameter set lacks &#39;</span>
+                                       <span class="s1">&#39;some parameters to be optimized.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;Enqueued set: </span><span class="si">{enqueued_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;Parameters to optimize: </span><span class="si">{history_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;Lacked set: </span><span class="si">{lacked_set}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;予約された入力変数セットに&#39;</span>
+                                       <span class="s1">&#39;変数が不足しています。</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;予約された変数: </span><span class="si">{enqueued_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;最適化する変数: </span><span class="si">{history_set}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                       <span class="s1">&#39;足りない変数: </span><span class="si">{lacked_set}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">enqueued_set</span><span class="o">=</span><span class="n">enqueued_set</span><span class="p">,</span>
+                            <span class="n">history_set</span><span class="o">=</span><span class="n">history_set</span><span class="p">,</span>
+                            <span class="n">lacked_set</span><span class="o">=</span><span class="n">history_set</span> <span class="o">-</span> <span class="n">enqueued_set</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># remove duplicated enqueued trials</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setup_enqueued_trials</span><span class="p">()</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_done_setup_before_parallel</span> <span class="o">=</span> <span class="kc">True</span>
 
