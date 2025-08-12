@@ -116,9 +116,9 @@ class TrialState(StrEnum):
         elif state == TrialState.unknown_error:
             e = Exception()
         elif state == TrialState.hard_constraint_violation:
-            e = HardConstraintViolation
+            e = HardConstraintViolation()
         elif state == TrialState.skipped:
-            e = SkipSolve
+            e = SkipSolve()
         else:
             e = None
         return e
