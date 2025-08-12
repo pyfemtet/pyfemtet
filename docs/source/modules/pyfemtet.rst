@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
+   pyfemtet.beta
    pyfemtet.dispatch_extensions
    pyfemtet.logger
    pyfemtet.opt

@@ -1,6 +1,9 @@
 Advanced Examples
 ==========================================
 
+Advanced Features
+-------------------------------
+
 .. grid:: 2
 
     .. grid-item-card:: Surrogate Model
@@ -36,7 +39,6 @@ Advanced Examples
         +++
         Restarts an optimization that was interrupted.
 
-
 .. toctree::
     :titlesonly:
     :hidden:
@@ -44,3 +46,27 @@ Advanced Examples
     ../advanced_examples/surrogate_model/surrogate_model
     ../advanced_examples/excel_ui/excel_ui
     ../advanced_examples/restart/restart
+
+
+Experimental Features
+-------------------------------
+
+.. grid:: 2
+
+    .. grid-item-card:: Topology Matching
+        :link: ../advanced_examples/topology_matching/topology_matching
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ../advanced_examples/topology_matching/thumbnail.png
+            :scale: 50
+        +++
+        Keeps the consistency of the boundary condition assignments
+        when the topology of the model changes.
+
+
+.. toctree::
+    :titlesonly:
+    :hidden:
+
+    ../advanced_examples/topology_matching/topology_matching

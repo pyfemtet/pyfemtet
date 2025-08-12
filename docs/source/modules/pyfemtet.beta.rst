@@ -1,5 +1,5 @@
-pyfemtet.opt.interface package
-==============================
+pyfemtet.beta package
+=====================
 
 Subpackages
 -----------
@@ -7,12 +7,12 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
-   pyfemtet.opt.interface.beta
+   pyfemtet.beta.topology_matching
 
 Module contents
 ---------------
 
-.. automodule:: pyfemtet.opt.interface
+.. automodule:: pyfemtet.beta
    :members:
    :undoc-members:
    :show-inheritance:
