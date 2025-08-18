@@ -34,20 +34,6 @@ Topology Matching を用いて最適化を行うデモを行います。
 
     py -m pip install -U brepmatching
 
-
-3. 事前準備として、下記の手順を実行してください。
-- SOLIDWORKS のインストール
-- C:\temp フォルダを作成する
-- 以下のファイルを同じフォルダに配置
-    - topology_matching.py (このファイル)
-    - cad_ex01_SW_fillet.SLDPRT
-    - cad_ex01_SW_fillet.femprj
-
-
-Solidworks 連携機能の詳細については下記ページもご覧ください。
-https://pyfemtet.readthedocs.io/ja/stable/examples/Sldworks_ex01/Sldworks_ex01.html
-
-
 [1]
 Benjamin Jones, James Noeckel, Milin Kodnongbua, Ilya Baran, and Adriana Schulz. 2023.
 B-rep Matching for Collaborating Across CAD Systems.
@@ -56,68 +42,87 @@ https://doi.org/10.1145/3592125
 
 """
 import os
-from dotenv import load_dotenv
-here = os.path.dirname(__file__)
-load_dotenv(dotenv_path=os.path.join(here, ".env"))
-
-import os
-from win32com.client import constants
+from time import sleep
+import numpy as np
+from optuna.samplers import BruteForceSampler
+from win32com.client import Dispatch, constants
 from pyfemtet.opt import FEMOpt
-from pyfemtet.opt.interface import FemtetWithSolidworksInterface
-from pyfemtet.opt.interface.beta import FemtetWithSolidworksInterfaceWithTopologyMatching
+from pyfemtet.opt.optimizer import OptunaOptimizer
+
+# Topology matching を行いながら Femtet で
+# 最適化を行う為の機能のインポート
+from pyfemtet.opt.interface.beta import FemtetWithTopologyMatching
 
 
-here, me = os.path.split(__file__)
-os.chdir(here)
+here = os.path.dirname(__file__)
 
 
-def von_mises(Femtet):
-    """モデルの最大フォン・ミーゼス応力を取得します。"""
-    # ミーゼス応力計算
-    Gogh = Femtet.Gogh
-    Gogh.Galileo.Potential = constants.GALILEO_VON_MISES_C
-    succeed, (x, y, z), mises = Gogh.Galileo.GetMAXPotentialPoint_py(constants.CMPX_REAL_C)
-    return mises
+def calc_angle(Femtet):
+    """Femtet の解析結果から金型プレートの傾きを計算する関数"""
 
+    cx = Femtet.GetVariableValue('cx')
+    cy = Femtet.GetVariableValue('cy')
+    cl2 = Femtet.GetVariableValue('cl2')
 
-def mass(Femtet):
-    """モデルの質量を取得します。"""
-    return Femtet.Gogh.Galileo.GetMass('H_beam')
+    Femtet = Dispatch('FemtetMacro.Femtet')
+    Femtet.OpenCurrentResult(True)
+    Femtet.Gogh.Activate()
 
+    point1 = Dispatch('FemtetMacro.GaudiPoint')
+    point1.X = cx
+    point1.Y = cy
+    point1.Z = cl2
+    point2 = Dispatch('FemtetMacro.GaudiPoint')
+    point2.X = 0.
+    point2.Y = 0.
+    point2.Z = cl2
 
-def C_minus_B(Femtet, opt):
-    """C 寸法と B 寸法の差を計算します。"""
-    A, B, C = opt.get_parameter('values')
-    return C - B
+    Femtet.Gogh.Galileo.Vector = constants.GALILEO_DISPLACEMENT_C
+    Femtet.Gogh.Galileo.Part = constants.PART_VEC_C
+    sleep(0.1)
+    succeeded, ret = Femtet.Gogh.Galileo.MultiGetVectorAtPoint_py((point1, point2,))
+
+    (cmplx_x1, cmplx_y1, cmplx_z1), (cmplx_x2, cmplx_y2, cmplx_z2) = ret
+    x1 = cmplx_x1.Real
+    y1 = cmplx_y1.Real
+    z1 = cmplx_z1.Real
+    x2 = cmplx_x2.Real
+    y2 = cmplx_y2.Real
+    z2 = cmplx_z2.Real
+
+    dz = (point2.Z + z2) - (point1.Z + z1)
+    dxy = np.sqrt(((point2.X + x2) - (point1.X + x1)) ** 2 + ((point2.Y + y2) - (point1.Y + y1)) ** 2)
+
+    angle = dz / dxy
+
+    return angle * 1000000
 
 
 def main():
-    # SW-Femtet 連携オブジェクトの初期化
-    # この処理により、Python プロセスは Femtet に接続を試みます。
-    fem = FemtetWithSolidworksInterfaceWithTopologyMatching(
-        femprj_path='cad_ex01_SW_fillet.femprj',
-        sldprt_path='cad_ex01_SW_fillet.SLDPRT',
-        open_result_with_gui=False,
+    # Topology matching を行いながら Femtet で
+    # 最適化を行う為の機能の初期化
+    fem = FemtetWithTopologyMatching(
+        femprj_path=os.path.join(here, 'topology_matching.femprj'),
+        model_name='model quarter',
     )
 
-    # FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)
-    femopt = FEMOpt(fem=fem)
+    # 以下、最適化問題のセットアップ
+    opt = OptunaOptimizer(
+        sampler_class=BruteForceSampler
+    )
 
-    # 設計変数を最適化問題に追加
-    femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
-    femopt.add_parameter('B', 10, lower_bound=1, upper_bound=40)
-    femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)
+    femopt = FEMOpt(fem=fem, opt=opt,)
 
-    # 拘束関数を最適化問題に追加
-    femopt.add_constraint(fun=C_minus_B, name='C>B', lower_bound=1, args=(femopt.opt,))
+    femopt.add_parameter('w', 80, 70, 90, step=10)
+    femopt.add_parameter('d', 65, 60, 70, step=5)
 
-    # 目的関数を最適化問題に追加
-    femopt.add_objective(fun=von_mises, name='von Mises (Pa)')
-    femopt.add_objective(fun=mass, name='mass (kg)')
+    femopt.add_objective('angle', calc_angle)
 
-    # 最適化を実行
     femopt.set_random_seed(42)
-    femopt.optimize(n_trials=20)
+
+    femopt.optimize(
+        confirm_before_exit=False,
+    )
 
 
 if __name__ == '__main__':
