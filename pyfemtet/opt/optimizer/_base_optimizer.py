@@ -14,6 +14,7 @@ from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.worker_status import *
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.problem.variable_manager import *
+from pyfemtet.opt.optimizer._trial_queue import *
 from pyfemtet.logger import get_module_logger
 
 __all__ = [
@@ -68,6 +69,7 @@ class AbstractOptimizer:
     n_trials: int | None
     timeout: float | None
     seed: int | None
+    include_queued_in_n_trials: bool
 
     # problem
     variable_manager: VariableManager
@@ -94,6 +96,7 @@ class AbstractOptimizer:
         self.seed = None
         self.n_trials = None
         self.timeout = None
+        self.include_queued_in_n_trials = False
 
         # Problem
         self.variable_manager = VariableManager()
@@ -113,6 +116,7 @@ class AbstractOptimizer:
         self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
         self.worker_status: WorkerStatus = WorkerStatus('worker-status')
         self.worker_status_list: list[WorkerStatus] = [self.worker_status]
+        self.trial_queue: TrialQueue = TrialQueue()
         self._done_setup_before_parallel = False
         self._done_load_problem_from_fem = False
         self._worker_index: int | str | None = None
@@ -368,6 +372,12 @@ class AbstractOptimizer:
         _duplicated_name_check(name, self.sub_fidelity_models.keys())
         self.sub_fidelity_models._update(name, sub_fidelity_model, fidelity)
 
+    def add_trial(
+            self,
+            parameters: dict[str, SupportedVariableTypes],
+    ):
+        self.trial_queue.enqueue(parameters)
+
     def get_variables(self, format: Literal['dict', 'values', 'raw'] = 'dict'):
         return self.variable_manager.get_variables(
             format=format,
@@ -382,6 +392,21 @@ class AbstractOptimizer:
         self.solve_condition = fun
 
     # ===== private =====
+
+    def _setup_enqueued_trials(self):
+        # Insert initial trial
+        params: dict = self.variable_manager.get_variables(format='dict', filter='parameter')
+        self.trial_queue.enqueue_first(params, flags={_IS_INITIAL_TRIAL_FLAG_KEY: True})
+
+        # Remove trials included in history
+        tried: list[dict] = get_tried_list_from_history(
+            self.history,
+            equality_filters=MAIN_FILTER,
+        )
+        self.trial_queue.remove_tried(tried)
+
+        # Remove duplicated
+        self.trial_queue.remove_duplicated()
 
     def _should_solve(self, history):
         return self.solve_condition(history)
@@ -920,6 +945,61 @@ class AbstractOptimizer:
 
             # resolve evaluation order
             self.variable_manager.resolve()
+
+            # check the enqueued trials is
+            # compatible with current optimization
+            # problem setup
+            history_set = set(self.history.prm_names)
+            for t in self.trial_queue.queue:
+                params: dict = t.d
+                enqueued_set: set = set(params.keys())
+
+                # Warning if over
+                if len(enqueued_set - history_set) > 0:
+                    logger.warning(
+                        _(
+                            en_message='Enqueued parameter set contains '
+                                       'more parameters than the optimization '
+                                       'problem setup. The extra parameters '
+                                       'will be ignored.\n'
+                                       'Enqueued set: {enqueued_set}\n'
+                                       'Setup set: {history_set}\n'
+                                       'Parameters ignored: {over_set}',
+                            jp_message='予約された入力変数セットは'
+                                       '最適化のセットアップで指定されたよりも'
+                                       '多くの変数を含んでいます。'
+                                       'そのような変数は無視されます。\n'
+                                       '予約された入力変数: {enqueued_set}\n'
+                                       '最適化する変数: {history_set}\n'
+                                       '無視される変数: {over_set}',
+                            enqueued_set=enqueued_set,
+                            history_set=history_set,
+                            over_set=enqueued_set - history_set,
+                        )
+                    )
+
+                # Error if not enough
+                if len(history_set - enqueued_set) > 0:
+                    raise ValueError(
+                        _(
+                            en_message='The enqueued parameter set lacks '
+                                       'some parameters to be optimized.\n'
+                                       'Enqueued set: {enqueued_set}\n'
+                                       'Parameters to optimize: {history_set}\n'
+                                       'Lacked set: {lacked_set}',
+                            jp_message='予約された入力変数セットに'
+                                       '変数が不足しています。\n'
+                                       '予約された変数: {enqueued_set}\n'
+                                       '最適化する変数: {history_set}\n'
+                                       '足りない変数: {lacked_set}',
+                            enqueued_set=enqueued_set,
+                            history_set=history_set,
+                            lacked_set=history_set - enqueued_set,
+                        )
+                    )
+
+            # remove duplicated enqueued trials
+            self._setup_enqueued_trials()
 
             self._done_setup_before_parallel = True
 

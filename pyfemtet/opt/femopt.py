@@ -168,6 +168,12 @@ class FEMOpt:
     ):
         self.opt.add_other_output(name, fun, args, kwargs)
 
+    def add_trial(
+            self,
+            parameters: dict[str, SupportedVariableTypes],
+    ):
+        self.opt.add_trial(parameters)
+
     def add_sub_fidelity_model(
             self,
             name: str,

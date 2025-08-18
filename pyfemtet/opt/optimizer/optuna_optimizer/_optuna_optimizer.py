@@ -12,7 +12,8 @@ import numpy as np
 
 import optuna
 from optuna.samplers import TPESampler
-from optuna.study import MaxTrialsCallback
+from optuna.study import Study, MaxTrialsCallback
+from optuna.trial import FrozenTrial, TrialState as OptunaTrialState
 from optuna_integration.dask import DaskStorage
 
 from pyfemtet._i18n import _
@@ -28,14 +29,78 @@ from pyfemtet.opt.optimizer._base_optimizer import *
 from pyfemtet.opt.optimizer.optuna_optimizer._optuna_attribute import OptunaAttribute
 from pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler import PoFBoTorchSampler
 from pyfemtet.opt.worker_status import WorkerStatus
+from pyfemtet.opt.optimizer._trial_queue import _IS_INITIAL_TRIAL_FLAG_KEY
 
-logger = get_module_logger('opt.optimizer', False)
+logger = get_module_logger('opt.optimizer', True)
 
 remove_all_output(get_optuna_logger())
 
 warnings.filterwarnings('ignore', 'set_metric_names', optuna.exceptions.ExperimentalWarning)
 warnings.filterwarnings('ignore', 'Argument ``constraints_func`` is an experimental feature.',
                         optuna.exceptions.ExperimentalWarning)
+
+
+_MESSAGE_ENQUEUED = 'Enqueued trial.'
+
+
+class MaxTrialsCallbackExcludingEnqueued(MaxTrialsCallback):
+    def __call__(self, study: Study, trial: FrozenTrial) -> None:
+        """
+        queue を考慮して終了条件を決定する
+
+        if n_trials <= 0:
+            -q_wait >= n_trials
+
+            ```
+            q_comp q_wait
+               |    |
+               v    v
+             f=====....0.............
+            ------|----+------------->
+                  n_trials=-4 (<=0)
+            ```
+
+        else:
+            (s_comp := comp - q_comp) >= n_trials
+
+            ```
+              q_comp    s_comp
+                 |       |
+                 v       v
+              f========0===..........
+            -----------+--|---------->
+                          n_trials=4 (>0)
+            ```
+
+        """
+
+        # 与えられた state (=COMPLETE) の trials を取得
+        trials = study.get_trials(deepcopy=False, states=self._states)
+
+        # n_trials が負か 0 なら残り WAITING 数と比較
+        if self._n_trials <= 0:
+            waiting_trials = study.get_trials(deepcopy=False, states=(OptunaTrialState.WAITING,))
+            enqueued_trials = [trial for trial in waiting_trials if trial.user_attrs.get('enqueued')]
+
+            if -len(enqueued_trials) >= self._n_trials:
+                study.stop()
+
+        # 正なら (初回を除く enqueued trial) を除く
+        # COMPLETE 数 (=初回 + sampled_complete) と比較
+        else:
+
+            n_complete = len(trials)
+            n_enqueued_complete = len([
+                trial for trial in trials
+                if (
+                    trial.user_attrs.get('enqueued', False)
+                    and not trial.user_attrs.get(_IS_INITIAL_TRIAL_FLAG_KEY, False)
+                )
+            ])
+            n_sampled_complete = n_complete - n_enqueued_complete
+
+            if n_sampled_complete >= self._n_trials:
+                study.stop()
 
 
 class OptunaOptimizer(AbstractOptimizer):
@@ -274,13 +339,40 @@ class OptunaOptimizer(AbstractOptimizer):
 
     def _get_callback(self, n_trials: int):
 
+        states = (optuna.trial.TrialState.COMPLETE,)
+
         # restart である場合、追加 N 回と見做す
         if self.history.is_restart:
-            df = self.history.get_df(equality_filters=MAIN_FILTER)
-            n_existing_succeeded_trials = len(df[df['state'] == TrialState.succeeded])
-            n_trials = n_trials + n_existing_succeeded_trials
 
-        return MaxTrialsCallback(n_trials, states=(optuna.trial.TrialState.COMPLETE,))
+            study = optuna.load_study(
+                study_name=self.study_name,
+                storage=self.storage,
+            )
+            trials = study.get_trials(deepcopy=False, states=states)
+            n_complete = len(trials)
+
+            if self.include_queued_in_n_trials:
+                # 追加 n_trials 回と見做す
+                n_trials = n_trials + n_complete
+
+            else:
+                if n_trials > 0:
+                    # 追加 n_trials 回と見做すが、
+                    # Callback で n_enqueued_complete を足しているので
+                    # そのぶんを引かなければならない
+                    n_enqueued_complete = len([trial for trial in trials if trial.user_attrs.get('enqueued')])
+                    n_trials = n_trials + n_complete - n_enqueued_complete
+
+                else:
+                    # queue_wait と比較するので
+                    # 何も補正しなくていい
+                    pass
+
+        if self.include_queued_in_n_trials:
+            Class = MaxTrialsCallback
+        else:
+            Class = MaxTrialsCallbackExcludingEnqueued
+        return Class(n_trials, states=states)
 
     def _setup_before_parallel(self):
 
@@ -321,30 +413,44 @@ class OptunaOptimizer(AbstractOptimizer):
         # if TPESampler and re-starting,
         # create temporary study to avoid error
         # with many pruned trials.
-        if issubclass(self.sampler_class, optuna.samplers.TPESampler) \
-                and self.history.is_restart:
-            # get unique tmp file
-            tmp_storage_path = tempfile.mktemp(suffix='.db')
-            self._existing_storage_path = self.storage_path
-            self.storage_path = tmp_storage_path
+        if (
+                issubclass(self.sampler_class, optuna.samplers.TPESampler)
+                and self.history.is_restart
+        ):
+
+            # If there is a WAITING trial in queue,
+            # do nothing (because the callback cannot
+            # update the WAITING trial in the existing
+            # study.)
 
             # load existing study
             existing_study = optuna.load_study(
                 study_name=self.study_name,
-                storage=f'sqlite:///{self._existing_storage_path}',
-            )
-
-            # create new study
-            tmp_study = optuna.create_study(
-                study_name=self.study_name,
                 storage=f'sqlite:///{self.storage_path}',
-                load_if_exists=True,
-                directions=['minimize'] * len(self.objectives),
             )
 
-            # Copy COMPLETE trials to temporary study.
-            existing_trials = existing_study.get_trials(states=(optuna.trial.TrialState.COMPLETE,))
-            tmp_study.add_trials(existing_trials)
+            if len(existing_study.get_trials(deepcopy=False, states=(OptunaTrialState.WAITING,))) == 0:
+
+                # get unique tmp file
+                tmp_storage_path = tempfile.mktemp(suffix='.db')
+                self._existing_storage_path = self.storage_path
+                self.storage_path = tmp_storage_path
+
+                # create new study
+                tmp_study = optuna.create_study(
+                    study_name=self.study_name,
+                    storage=f'sqlite:///{self.storage_path}',
+                    load_if_exists=True,
+                    directions=['minimize'] * len(self.objectives),
+                )
+
+                # Copy COMPLETE trials to temporary study.
+                existing_trials = existing_study.get_trials(
+                    states=(
+                        optuna.trial.TrialState.COMPLETE,
+                    )
+                )
+                tmp_study.add_trials(existing_trials)
 
         # setup storage
         client = get_client()
@@ -368,9 +474,18 @@ class OptunaOptimizer(AbstractOptimizer):
             # set objective names
             study.set_metric_names(list(self.objectives.keys()))
 
-            # initial trial
-            params = self.variable_manager.get_variables(format='dict', filter='parameter')
-            study.enqueue_trial(params, user_attrs={"message": "Initial values"})
+            # Add enqueued trials
+            for t in self.trial_queue.queue:
+                is_initial_step = t.flags.get(_IS_INITIAL_TRIAL_FLAG_KEY, False)
+                params: dict[str, SupportedVariableTypes] = t.d
+                study.enqueue_trial(
+                    params,
+                    user_attrs={
+                        'message': _MESSAGE_ENQUEUED,
+                        'enqueued': True,
+                        _IS_INITIAL_TRIAL_FLAG_KEY: is_initial_step,
+                    },
+                )
 
     def _setup_after_parallel(self):
         # reseed
@@ -539,6 +654,9 @@ class OptunaOptimizer(AbstractOptimizer):
                     # and add callback to copy-back
                     # from processing study to existing one.
                     def copy_back(_, trial):
+                        # ここで existing_study 内の WAITING を
+                        # 更新したり削除したりできないので
+                        # tpe_addressing は WAITING がない状態でしか使わない
                         existing_study.add_trial(trial)
 
                     self.callbacks.append(copy_back)

@@ -1,12 +1,41 @@
 migration_to_v1
 ===============
 
-**To Users of PyFemtet 0.x**
+.. note::
+
+   This page is the migration guide for
+   **your code written in pyfemtet 0.x to adapt 1.x**.
+   
+   Please run the following command
+   to detect your ``pyfemtet`` version: ::
+
+      py -m pip show pyfemtet
+
+   If you use virtual environment and so on, the command is: ::
+
+      python -m pip show pyfemtet
+
+   If the version is already 1.x and
+   your code is written in 1.x,
+   you do not have to read this page.
+
+   Even if the version is 0.x,
+   in case that you will not update ``pyfemtet``,
+   you have not to read this page.
+
+
+.. note::
+
+   If you want to update ``pyfemtet``, see
+   :doc:`installation_pages/install_pyfemtet`
+   or
+   :doc:`installation_pages/install_pyfemtet_manually`
+
 
 In PyFemtet v1, many functions and arguments have been changed
-to improve user-friendliness and development efficiency.
+to improve usability and development efficiency.
 
-Versions 0.9 and later serve as transition versions to v1,
+Versions 0.9 serves as transition versions to v1,
 where legacy functions and arguments are still fully available;
 however, features that have been changed or removed will issue warnings.
 
@@ -129,3 +158,23 @@ Use ``opt.get_variables()`` instead.
       ...
 
 
+``history_path`` argument
+-------------------------
+
+The ``history_path`` argument is now in ``femopt.oprimize``.
+
+.. code-block:: python
+
+   # < 1.0.0
+   femopt = FEMOpt(
+      history_path'sample.csv',
+   )
+   ...
+   femopt.optimize()
+
+   # >= 1.0.0
+   femopt = FEMOpt()
+   ...
+   femopt.optimize(
+      history_path='sample.csv'
+   )

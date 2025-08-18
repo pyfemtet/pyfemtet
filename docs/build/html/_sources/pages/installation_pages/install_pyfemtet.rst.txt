@@ -1,6 +1,9 @@
 Install PyFemtet
 ================
 
+This page shows how to install/update ``pyfemtet``.
+The both are the same procedure.
+
 This step requires administrator privileges.
 
 .. note::
@@ -23,7 +26,7 @@ This step requires administrator privileges.
 
     Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to
     the path of the ``pyfemtet-installer.ps1`` file you downloaded.
-    You can acquire the path by **shift+right-clicking** the file and
+    You can acquire the path by **Shift+Right-clicking** the file and
     select "Copy as a path".
 
 

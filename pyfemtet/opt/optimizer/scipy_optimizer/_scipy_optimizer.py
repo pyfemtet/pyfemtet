@@ -92,6 +92,12 @@ class ScipyOptimizer(AbstractOptimizer):
                 jp_message='`ScipyOptimizer` では n_trials は指定できません。'
             ))
 
+    def add_trial(self, parameters: dict[str, SupportedVariableTypes]):
+        raise NotImplementedError(_(
+            en_message='You cannot use `add_trial()` in `ScipyOptimizer`.',
+            jp_message='`ScipyOptimizer` では `add_trial()` は使えません。',
+        ))
+
     def _get_x0(self) -> np.ndarray:
 
         # params を取得

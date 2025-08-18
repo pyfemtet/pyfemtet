@@ -94,7 +94,8 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">optuna.samplers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TPESampler</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.study</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxTrialsCallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.study</span><span class="w"> </span><span class="kn">import</span> <span class="n">Study</span><span class="p">,</span> <span class="n">MaxTrialsCallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.trial</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrozenTrial</span><span class="p">,</span> <span class="n">TrialState</span> <span class="k">as</span> <span class="n">OptunaTrialState</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">optuna_integration.dask</span><span class="w"> </span><span class="kn">import</span> <span class="n">DaskStorage</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
@@ -110,14 +111,78 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer.optuna_optimizer._optuna_attribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptunaAttribute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">PoFBoTorchSampler</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.worker_status</span><span class="w"> </span><span class="kn">import</span> <span class="n">WorkerStatus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._trial_queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">_IS_INITIAL_TRIAL_FLAG_KEY</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.optimizer&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.optimizer&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 <span class="n">remove_all_output</span><span class="p">(</span><span class="n">get_optuna_logger</span><span class="p">())</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;set_metric_names&#39;</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ExperimentalWarning</span><span class="p">)</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;Argument ``constraints_func`` is an experimental feature.&#39;</span><span class="p">,</span>
                         <span class="n">optuna</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ExperimentalWarning</span><span class="p">)</span>
+
+
+<span class="n">_MESSAGE_ENQUEUED</span> <span class="o">=</span> <span class="s1">&#39;Enqueued trial.&#39;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MaxTrialsCallbackExcludingEnqueued</span><span class="p">(</span><span class="n">MaxTrialsCallback</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        queue を考慮して終了条件を決定する</span>
+
+<span class="sd">        if n_trials &lt;= 0:</span>
+<span class="sd">            -q_wait &gt;= n_trials</span>
+
+<span class="sd">            ```</span>
+<span class="sd">            q_comp q_wait</span>
+<span class="sd">               |    |</span>
+<span class="sd">               v    v</span>
+<span class="sd">             f=====....0.............</span>
+<span class="sd">            ------|----+-------------&gt;</span>
+<span class="sd">                  n_trials=-4 (&lt;=0)</span>
+<span class="sd">            ```</span>
+
+<span class="sd">        else:</span>
+<span class="sd">            (s_comp := comp - q_comp) &gt;= n_trials</span>
+
+<span class="sd">            ```</span>
+<span class="sd">              q_comp    s_comp</span>
+<span class="sd">                 |       |</span>
+<span class="sd">                 v       v</span>
+<span class="sd">              f========0===..........</span>
+<span class="sd">            -----------+--|----------&gt;</span>
+<span class="sd">                          n_trials=4 (&gt;0)</span>
+<span class="sd">            ```</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># 与えられた state (=COMPLETE) の trials を取得</span>
+        <span class="n">trials</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">deepcopy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_states</span><span class="p">)</span>
+
+        <span class="c1"># n_trials が負か 0 なら残り WAITING 数と比較</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_trials</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">waiting_trials</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">deepcopy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">OptunaTrialState</span><span class="o">.</span><span class="n">WAITING</span><span class="p">,))</span>
+            <span class="n">enqueued_trials</span> <span class="o">=</span> <span class="p">[</span><span class="n">trial</span> <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="n">waiting_trials</span> <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enqueued&#39;</span><span class="p">)]</span>
+
+            <span class="k">if</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">enqueued_trials</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_trials</span><span class="p">:</span>
+                <span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c1"># 正なら (初回を除く enqueued trial) を除く</span>
+        <span class="c1"># COMPLETE 数 (=初回 + sampled_complete) と比較</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">n_complete</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trials</span><span class="p">)</span>
+            <span class="n">n_enqueued_complete</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span>
+                <span class="n">trial</span> <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="n">trials</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enqueued&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_IS_INITIAL_TRIAL_FLAG_KEY</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">])</span>
+            <span class="n">n_sampled_complete</span> <span class="o">=</span> <span class="n">n_complete</span> <span class="o">-</span> <span class="n">n_enqueued_complete</span>
+
+            <span class="k">if</span> <span class="n">n_sampled_complete</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_trials</span><span class="p">:</span>
+                <span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="OptunaOptimizer">
@@ -364,13 +429,40 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 
+        <span class="n">states</span> <span class="o">=</span> <span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,)</span>
+
         <span class="c1"># restart である場合、追加 N 回と見做す</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">equality_filters</span><span class="o">=</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
-            <span class="n">n_existing_succeeded_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">succeeded</span><span class="p">])</span>
-            <span class="n">n_trials</span> <span class="o">=</span> <span class="n">n_trials</span> <span class="o">+</span> <span class="n">n_existing_succeeded_trials</span>
 
-        <span class="k">return</span> <span class="n">MaxTrialsCallback</span><span class="p">(</span><span class="n">n_trials</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,))</span>
+            <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">load_study</span><span class="p">(</span>
+                <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">trials</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">deepcopy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">)</span>
+            <span class="n">n_complete</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trials</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_queued_in_n_trials</span><span class="p">:</span>
+                <span class="c1"># 追加 n_trials 回と見做す</span>
+                <span class="n">n_trials</span> <span class="o">=</span> <span class="n">n_trials</span> <span class="o">+</span> <span class="n">n_complete</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n_trials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># 追加 n_trials 回と見做すが、</span>
+                    <span class="c1"># Callback で n_enqueued_complete を足しているので</span>
+                    <span class="c1"># そのぶんを引かなければならない</span>
+                    <span class="n">n_enqueued_complete</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">trial</span> <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="n">trials</span> <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enqueued&#39;</span><span class="p">)])</span>
+                    <span class="n">n_trials</span> <span class="o">=</span> <span class="n">n_trials</span> <span class="o">+</span> <span class="n">n_complete</span> <span class="o">-</span> <span class="n">n_enqueued_complete</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># queue_wait と比較するので</span>
+                    <span class="c1"># 何も補正しなくていい</span>
+                    <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_queued_in_n_trials</span><span class="p">:</span>
+            <span class="n">Class</span> <span class="o">=</span> <span class="n">MaxTrialsCallback</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Class</span> <span class="o">=</span> <span class="n">MaxTrialsCallbackExcludingEnqueued</span>
+        <span class="k">return</span> <span class="n">Class</span><span class="p">(</span><span class="n">n_trials</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -411,30 +503,44 @@
         <span class="c1"># if TPESampler and re-starting,</span>
         <span class="c1"># create temporary study to avoid error</span>
         <span class="c1"># with many pruned trials.</span>
-        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span><span class="p">)</span> \
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span><span class="p">:</span>
-            <span class="c1"># get unique tmp file</span>
-            <span class="n">tmp_storage_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mktemp</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.db&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span> <span class="o">=</span> <span class="n">tmp_storage_path</span>
+        <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_class</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">is_restart</span>
+        <span class="p">):</span>
+
+            <span class="c1"># If there is a WAITING trial in queue,</span>
+            <span class="c1"># do nothing (because the callback cannot</span>
+            <span class="c1"># update the WAITING trial in the existing</span>
+            <span class="c1"># study.)</span>
 
             <span class="c1"># load existing study</span>
             <span class="n">existing_study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">load_study</span><span class="p">(</span>
                 <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
-                <span class="n">storage</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="c1"># create new study</span>
-            <span class="n">tmp_study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span>
-                <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
                 <span class="n">storage</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-                <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">),</span>
             <span class="p">)</span>
 
-            <span class="c1"># Copy COMPLETE trials to temporary study.</span>
-            <span class="n">existing_trials</span> <span class="o">=</span> <span class="n">existing_study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,))</span>
-            <span class="n">tmp_study</span><span class="o">.</span><span class="n">add_trials</span><span class="p">(</span><span class="n">existing_trials</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">existing_study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">deepcopy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">OptunaTrialState</span><span class="o">.</span><span class="n">WAITING</span><span class="p">,)))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+                <span class="c1"># get unique tmp file</span>
+                <span class="n">tmp_storage_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mktemp</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.db&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_existing_storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span> <span class="o">=</span> <span class="n">tmp_storage_path</span>
+
+                <span class="c1"># create new study</span>
+                <span class="n">tmp_study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span>
+                    <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">study_name</span><span class="p">,</span>
+                    <span class="n">storage</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;sqlite:///</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minimize&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">),</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Copy COMPLETE trials to temporary study.</span>
+                <span class="n">existing_trials</span> <span class="o">=</span> <span class="n">existing_study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span>
+                    <span class="n">states</span><span class="o">=</span><span class="p">(</span>
+                        <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">tmp_study</span><span class="o">.</span><span class="n">add_trials</span><span class="p">(</span><span class="n">existing_trials</span><span class="p">)</span>
 
         <span class="c1"># setup storage</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
@@ -458,9 +564,18 @@
             <span class="c1"># set objective names</span>
             <span class="n">study</span><span class="o">.</span><span class="n">set_metric_names</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
-            <span class="c1"># initial trial</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span>
-            <span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">user_attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Initial values&quot;</span><span class="p">})</span>
+            <span class="c1"># Add enqueued trials</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_queue</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span>
+                <span class="n">is_initial_step</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_IS_INITIAL_TRIAL_FLAG_KEY</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">d</span>
+                <span class="n">study</span><span class="o">.</span><span class="n">enqueue_trial</span><span class="p">(</span>
+                    <span class="n">params</span><span class="p">,</span>
+                    <span class="n">user_attrs</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">_MESSAGE_ENQUEUED</span><span class="p">,</span>
+                        <span class="s1">&#39;enqueued&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">_IS_INITIAL_TRIAL_FLAG_KEY</span><span class="p">:</span> <span class="n">is_initial_step</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># reseed</span>
@@ -631,6 +746,9 @@
                     <span class="c1"># and add callback to copy-back</span>
                     <span class="c1"># from processing study to existing one.</span>
                     <span class="k">def</span><span class="w"> </span><span class="nf">copy_back</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+                        <span class="c1"># ここで existing_study 内の WAITING を</span>
+                        <span class="c1"># 更新したり削除したりできないので</span>
+                        <span class="c1"># tpe_addressing は WAITING がない状態でしか使わない</span>
                         <span class="n">existing_study</span><span class="o">.</span><span class="n">add_trial</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy_back</span><span class="p">)</span>

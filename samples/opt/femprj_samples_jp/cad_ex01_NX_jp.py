@@ -112,7 +112,7 @@ if __name__ == '__main__':
     # FEMOpt オブジェクトの初期化 (最適化問題とFemtetとの接続を行います)
     femopt = FEMOpt(fem=fem)
 
-    # 設計変数を最適化問題に追加 (femprj ファイルに登録されている変数を指定してください)
+    # 設計変数を最適化問題に追加 (.prt ファイルに登録されている変数を指定してください)
     femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
     femopt.add_parameter('B', 10, lower_bound=1, upper_bound=40)
     femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)

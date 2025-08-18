@@ -118,7 +118,7 @@ if __name__ == '__main__':
     femopt = FEMOpt(fem=fem)
 
     # Add design variables to the optimization problem.
-    # (Specify the variables registered in the femprj file.)
+    # (Specify the variables registered in the .prt file.)
     femopt.add_parameter('A', 10, lower_bound=1, upper_bound=59)
     femopt.add_parameter('B', 10, lower_bound=1, upper_bound=40)
     femopt.add_parameter('C', 20, lower_bound=5, upper_bound=59)

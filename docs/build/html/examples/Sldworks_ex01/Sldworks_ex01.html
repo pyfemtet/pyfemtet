@@ -270,7 +270,7 @@ and double-click on <a class="reference download internal" download="" href="../
 <span class="linenos">102</span>
 <span class="linenos">103</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 <span class="linenos">104</span>
-<span class="linenos">105</span>    <span class="c1"># Initialize NX-Femtet integration object.</span>
+<span class="linenos">105</span>    <span class="c1"># Initialize SW-Femtet integration object.</span>
 <span class="linenos">106</span>    <span class="c1"># At this point, Python is connected to the Femtet.</span>
 <span class="linenos">107</span>    <span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetWithSolidworksInterface</span><span class="p">(</span>
 <span class="linenos">108</span>        <span class="n">sldprt_path</span><span class="o">=</span><span class="s1">&#39;cad_ex01_SW.SLDPRT&#39;</span><span class="p">,</span>
@@ -282,7 +282,7 @@ and double-click on <a class="reference download internal" download="" href="../
 <span class="linenos">114</span>    <span class="n">femopt</span> <span class="o">=</span> <span class="n">FEMOpt</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
 <span class="linenos">115</span>
 <span class="linenos">116</span>    <span class="c1"># Add design variables to the optimization problem.</span>
-<span class="linenos">117</span>    <span class="c1"># (Specify the variables registered in the femprj file.)</span>
+<span class="linenos">117</span>    <span class="c1"># (Specify the variables registered in the .SLDPRT file.)</span>
 <span class="linenos">118</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
 <span class="linenos">119</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
 <span class="linenos">120</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
