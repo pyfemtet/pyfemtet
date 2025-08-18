@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
@@ -6,7 +8,7 @@ import plotly.express as px
 from pyfemtet._util.df_util import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.problem.problem import MAIN_FIDELITY_NAME
-from pyfemtet._i18n import Msg
+from pyfemtet._i18n import Msg, _
 
 
 __all__ = [
@@ -15,51 +17,83 @@ __all__ = [
     'get_objective_plot',
 ]
 
-
-class _ColorSet:
-    non_domi = {True: '#007bff', False: '#6c757d'}  # color
-
-
-class _SymbolSet:
-    feasible = {True: 'circle', False: 'circle-open'}  # style
+# ===== i18n =====
+def _i18n_not_defined_default():
+    return _('Not included in the evaluation.',
+             '評価対象外')
 
 
-class _LanguageSet:
-
-    feasible = {'label': 'feasibility', True: True, False: False}
-    non_domi = {'label': 'optimality', True: True, False: False}
-
-    def __init__(self):
-        self.feasible = {
-            'label': Msg.LEGEND_LABEL_CONSTRAINT,
-            True: Msg.LEGEND_LABEL_FEASIBLE,
-            False: Msg.LEGEND_LABEL_INFEASIBLE,
-        }
-        self.non_domi = {
-            'label': Msg.LEGEND_LABEL_OPTIMAL,
-            True: Msg.LEGEND_LABEL_NON_DOMI,
-            False: Msg.LEGEND_LABEL_DOMI,
-        }
-
-    def localize(self, df):
-        # 元のオブジェクトを変更しないようにコピー
-        cdf = df.copy()
-
-        # feasible, non_domi の localize
-        cdf[self.feasible['label']] = [self.feasible[v] for v in cdf['feasibility']]
-        cdf[self.non_domi['label']] = [self.non_domi[v] for v in cdf['optimality']]
-
-        return cdf
+# optimality
+_LOCALIZED_OPTIMALITY = _('Optimality', '最適かどうか')
 
 
-_ls = _LanguageSet()
-_cs = _ColorSet()
-_ss = _SymbolSet()
+def _i18n_optimality(value, is_single_objective) -> str:
+    if value is True:
+        if is_single_objective:
+            return _('optimal', '最適解')
+        else:
+            return _('non dominated', '非劣解')
+    elif value is False:
+        if is_single_objective:
+            return _('not optimal', '最適でない解')
+        else:
+            return _('dominated', '劣解')
+    else:
+        return _i18n_not_defined_default()
 
+
+(_color_mapping_single_objective := defaultdict(lambda: '#888888')).update({
+    _i18n_optimality(True, True): "#007bff",
+    _i18n_optimality(False, True): "#6c757d",
+})
+(_color_mapping_multi_objective := defaultdict(lambda: '#888888')).update({
+    _i18n_optimality(True, False): "#007bff",
+    _i18n_optimality(False, False): "#6c757d",
+})
+
+
+# feasibility
+_LOCALIZED_FEASIBILITY = _('Feasibility', '実行可能性')
+
+
+def _i18n_feasibility(value) -> str:
+    if value is True:
+        return _('feasible', '実行可能')
+    elif value is False:
+        return _('infeasible', '実行不可能')
+    else:
+        return _i18n_not_defined_default()
+
+
+(_symbol_mapping := defaultdict(lambda: 'square-open')).update({
+    _i18n_feasibility(True): 'circle',
+    _i18n_feasibility(False): 'circle-open',
+})
+
+
+# common
+def _i18n_df(df, is_single_objective):
+    # 元の df を変更しないようにコピー
+    df = df.copy()
+
+    # feasibility 列のデータに対し、
+    # <翻訳された列名>: <グラフに表示するデータ> に
+    # 変換した df を作る。
+    df[_LOCALIZED_FEASIBILITY] = [_i18n_feasibility(v)
+                                 for v in df['feasibility']]
+
+    # optimality も同様
+    df[_LOCALIZED_OPTIMALITY] = [_i18n_optimality(v, is_single_objective)
+                                 for v in df['optimality']]
+
+    return df
+
+
+# ===== main =====
 
 def get_hypervolume_plot(_: History, df: pd.DataFrame) -> go.Figure:
 
-    df = _ls.localize(df)
+    df = _i18n_df(df, is_single_objective=False)
 
     # メインデータを抽出
     df = get_partial_df(df, equality_filters=MAIN_FILTER)
@@ -113,7 +147,7 @@ def get_default_figure(history, df) -> go.Figure:
 
 def _get_single_objective_plot(history: History, df: pd.DataFrame):
 
-    df: pd.DataFrame = _ls.localize(df)
+    df: pd.DataFrame = _i18n_df(df, is_single_objective=True)
     obj_name = history.obj_names[0]
 
     # 「成功した試行数」を表示するために
@@ -275,7 +309,7 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
 
 def _get_multi_objective_pairplot(history: History, df: pd.DataFrame):
 
-    df = _ls.localize(df)
+    df = _i18n_df(df, is_single_objective=False)
     df_main = get_partial_df(df, equality_filters=MAIN_FILTER)
 
     obj_names = history.obj_names
@@ -289,21 +323,27 @@ def _get_multi_objective_pairplot(history: History, df: pd.DataFrame):
         history.obj_names for _ in sub_fidelity_names
     ]
 
+    print('===== _color_mapping_multi_objective =====')
+    print(df_main)
+    print(f'{_color_mapping_multi_objective=}')
+
     common_kwargs = dict(
-        color=_ls.non_domi['label'],
-        color_discrete_map={
-            _ls.non_domi[True]: _cs.non_domi[True],
-            _ls.non_domi[False]: _cs.non_domi[False],
-        },
-        symbol=_ls.feasible['label'],
-        symbol_map={
-            _ls.feasible[True]: _ss.feasible[True],
-            _ls.feasible[False]: _ss.feasible[False],
-        },
+        color=_LOCALIZED_OPTIMALITY,
+        color_discrete_map=_color_mapping_multi_objective,
+        symbol=_LOCALIZED_FEASIBILITY,
+        symbol_map=_symbol_mapping,
         custom_data=['trial'],
         category_orders={
-            _ls.feasible['label']: (_ls.feasible[False], _ls.feasible[True]),
-            _ls.non_domi['label']: (_ls.non_domi[False], _ls.non_domi[True]),
+            _LOCALIZED_FEASIBILITY: (
+                _i18n_feasibility(None),  # True, False でなければなんでもよい
+                _i18n_feasibility(False),
+                _i18n_feasibility(True),
+            ),
+            _LOCALIZED_OPTIMALITY: (
+                _i18n_optimality(None, False),
+                _i18n_optimality(False, False),
+                _i18n_optimality(True, False),
+            ),
         },
     )
 
@@ -404,7 +444,7 @@ def _get_multi_objective_pairplot(history: History, df: pd.DataFrame):
 
 def get_objective_plot(history: History, df: pd.DataFrame, obj_names: list[str]) -> go.Figure:
 
-    df = _ls.localize(df)
+    df = _i18n_df(df, is_single_objective=False)
 
     df_main = get_partial_df(df, equality_filters=MAIN_FILTER)
 
@@ -418,20 +458,22 @@ def get_objective_plot(history: History, df: pd.DataFrame, obj_names: list[str])
     ]
 
     common_kwargs = dict(
-        color=_ls.non_domi['label'],
-        color_discrete_map={
-            _ls.non_domi[True]: _cs.non_domi[True],
-            _ls.non_domi[False]: _cs.non_domi[False],
-        },
-        symbol=_ls.feasible['label'],
-        symbol_map={
-            _ls.feasible[True]: _ss.feasible[True],
-            _ls.feasible[False]: _ss.feasible[False],
-        },
+        color=_LOCALIZED_OPTIMALITY,
+        color_discrete_map=_color_mapping_multi_objective,
+        symbol=_LOCALIZED_FEASIBILITY,
+        symbol_map=_symbol_mapping,
         custom_data=['trial'],
         category_orders={
-            _ls.feasible['label']: (_ls.feasible[False], _ls.feasible[True]),
-            _ls.non_domi['label']: (_ls.non_domi[False], _ls.non_domi[True]),
+            _LOCALIZED_FEASIBILITY: (
+                _i18n_feasibility(None),  # True, False でなければなんでもよい
+                _i18n_feasibility(False),
+                _i18n_feasibility(True),
+            ),
+            _LOCALIZED_OPTIMALITY: (
+                _i18n_optimality(None, False),
+                _i18n_optimality(False, False),
+                _i18n_optimality(True, False),
+            ),
         },
     )
 
