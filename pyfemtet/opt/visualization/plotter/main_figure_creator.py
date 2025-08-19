@@ -323,10 +323,6 @@ def _get_multi_objective_pairplot(history: History, df: pd.DataFrame):
         history.obj_names for _ in sub_fidelity_names
     ]
 
-    print('===== _color_mapping_multi_objective =====')
-    print(df_main)
-    print(f'{_color_mapping_multi_objective=}')
-
     common_kwargs = dict(
         color=_LOCALIZED_OPTIMALITY,
         color_discrete_map=_color_mapping_multi_objective,
