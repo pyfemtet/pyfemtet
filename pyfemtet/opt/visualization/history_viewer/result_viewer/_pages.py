@@ -14,6 +14,7 @@ from pyfemtet.opt.visualization.history_viewer._base_application import *
 from pyfemtet.opt.visualization.history_viewer._complex_components.main_graph import *
 from pyfemtet.opt.visualization.history_viewer._complex_components.control_femtet import *
 from pyfemtet.opt.visualization.history_viewer._complex_components.alert_region import *
+from pyfemtet.opt.visualization.history_viewer._helper import control_visibility_by_style
 
 from pyfemtet._i18n import Msg, _
 
@@ -752,13 +753,4 @@ class Tutorial(AbstractPage):
 
     @staticmethod
     def control_visibility_by_style(visible: bool, current_style: dict):
-
-        visibility = 'inline' if visible else 'none'
-        part = {'display': visibility}
-
-        if current_style is None:
-            return part
-
-        else:
-            current_style.update(part)
-            return current_style
+        return control_visibility_by_style(visible, current_style)

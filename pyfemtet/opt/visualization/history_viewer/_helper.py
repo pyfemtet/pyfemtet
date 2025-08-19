@@ -26,3 +26,16 @@ def has_full_bound(history: History, prm_name, df: pd.DataFrame = None) -> bool:
         return False
 
     return True
+
+
+def control_visibility_by_style(visible: bool, current_style: dict):
+
+    visibility = 'inline' if visible else 'none'
+    part = {'display': visibility}
+
+    if current_style is None:
+        return part
+
+    else:
+        current_style.update(part)
+        return current_style
