@@ -6,6 +6,7 @@ from pyfemtet._util.df_util import *
 from pyfemtet.opt.history import *
 from pyfemtet.opt.prediction._model import *
 from pyfemtet.opt.prediction._helper import *
+from pyfemtet.opt.problem.problem import MAIN_FIDELITY_NAME
 
 
 __all__ = [
@@ -217,6 +218,32 @@ def _plot(
             name='trial',
         ))
 
+        # sub sampling
+        buff = get_partial_df(
+            df,
+            {'sub_fidelity_name': MAIN_FIDELITY_NAME},
+        )
+        df_main_sub_sampling = get_partial_df(
+            buff,
+            {'sub_sampling': float('nan')},
+            method='all-exclude',
+        )
+        fig.add_trace(go.Scatter3d(
+            x=df_main_sub_sampling[prm_name1],
+            y=df_main_sub_sampling[prm_name2],
+            z=df_main_sub_sampling[obj_name],
+            mode='markers',
+            marker=dict(
+                size=3,
+                line=dict(
+                    width=1,
+                    color='gray',
+                ),
+                symbol='square-open'
+            ),
+            name='trial (sub sampling)',
+        ))
+
         # sub fidelity
         for (
                 sub_fidelity_name,
@@ -228,7 +255,7 @@ def _plot(
             # px.colors.qualitative.G10[::-1]
         ):
 
-            if sub_fidelity_name == MAIN_FILTER:
+            if sub_fidelity_name == MAIN_FIDELITY_NAME:
                 continue
             df_sub = get_partial_df(df, equality_filters=dict(sub_fidelity_name=sub_fidelity_name))
 
@@ -239,7 +266,7 @@ def _plot(
                     size=3,
                     line=dict(
                         width=1,
-                        color='white',
+                        color='green',
                     ),
                     symbol='square-open',  # TODO: sequence 化
                 ),

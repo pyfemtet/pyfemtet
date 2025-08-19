@@ -17,8 +17,9 @@ from pyfemtet.opt.prediction._model import *
 from pyfemtet.opt.prediction._helper import *
 from pyfemtet.opt.visualization.plotter.pm_graph_creator import plot2d, plot3d
 from pyfemtet.opt.visualization.history_viewer._base_application import AbstractPage, logger
-from pyfemtet.opt.visualization.history_viewer._helper import has_full_bound
+from pyfemtet.opt.visualization.history_viewer._helper import has_full_bound, control_visibility_by_style
 from pyfemtet._i18n import Msg, _
+from pyfemtet._util.df_util import *
 
 
 __all__ = [
@@ -144,6 +145,22 @@ class PredictionModelGraph(AbstractPage):
             value=[],
         )
 
+        # consider sub sampling or not
+        self.SUB_SAMPLING_CHECKED = 'sub_sampling_checked'
+        self.switch_about_sub_sampling = dbc.Checklist(
+            options=[
+                dict(
+                    label=_('Consider sub sampling when the model re-calc', 'モデル再計算時にサブサンプリングのみを考慮'),
+                    value=self.SUB_SAMPLING_CHECKED,  # チェックされたら value (list) の要素に "sub_sampling_checked" が入る
+                )
+            ],
+            switch=True,
+            value=[],  # 初期状態ではチェックされている値なし
+            style=control_visibility_by_style(
+                visible=False, current_style={}
+            ),
+        )
+
         # alert region subpage
         self.alert_region: AlertRegion = AlertRegion()
         self.add_subpage(self.alert_region)
@@ -200,7 +217,10 @@ class PredictionModelGraph(AbstractPage):
                         self.command_manager
                     ],
                     direction='horizontal', gap=2),
-                self.switch_3d,
+                dbc.Row((
+                    dbc.Col(self.switch_3d),
+                    dbc.Col(self.switch_about_sub_sampling)
+                )),
                 *dropdown_rows,
                 self.slider_container,
                 self.slider_stack_data,
@@ -276,9 +296,10 @@ class PredictionModelGraph(AbstractPage):
             Output(self.command_manager, self.command_manager_prop, allow_duplicate=True),
             Output(self.graph, 'figure', allow_duplicate=True),  # for show spinner during calculation
             Input(self.command_manager, self.command_manager_prop),
+            State(self.switch_about_sub_sampling, 'value'),
             prevent_initial_call=True,
         )
-        def recalculate_rsm(command):
+        def recalculate_rsm(command, is_sub_sampling):
             # just in case
             if callback_context.triggered_id is None:
                 raise PreventUpdate
@@ -295,12 +316,29 @@ class PredictionModelGraph(AbstractPage):
             if len(self.application.get_df()) == 0:
                 return self.CommandState.redraw.value, no_update  # error handling in the next `redraw_graph()` callback
 
+            # switch the consideration of sub_sampling
+            df = self.application.get_df()
+            equality_filters = {'sub_sampling': float('nan')}
+
+            if self.SUB_SAMPLING_CHECKED in is_sub_sampling:
+                df = get_partial_df(
+                    df,
+                    equality_filters=equality_filters,
+                    method='all-exclude',  # nan 以外 = sampling のみ
+                )
+            else:
+                df = get_partial_df(
+                    df,
+                    equality_filters=equality_filters,
+                    method='all',  # nan のみ全て
+                )
+
             # create model
             model = SingleTaskGPModel()
             self.pyfemtet_model.update_model(model)
             self.pyfemtet_model.fit(
                 self.application.history,
-                self.application.get_df(),
+                df,
                 **{}
             )
 
@@ -475,10 +513,12 @@ class PredictionModelGraph(AbstractPage):
             Output(self.axis3_obj_dropdown, 'children'),
             Output(self.slider_container, 'children'),
             Output(self.slider_stack_data, self.slider_stack_data_prop, allow_duplicate=True),
+            Output(self.switch_about_sub_sampling, 'style'),
             Input(self.location, self.location.Prop.pathname),
+            State(self.switch_about_sub_sampling, 'style'),
             prevent_initial_call=True,
         )
-        def setup_dropdown_and_sliders(*_):
+        def setup_dropdown_and_sliders(_, current_style):
             # just in case
             if callback_context.triggered_id is None:
                 raise PreventUpdate
@@ -578,7 +618,20 @@ class PredictionModelGraph(AbstractPage):
                 )
                 sliders.append(stack)
 
-            return axis1_dropdown_items, axis2_dropdown_items, axis3_dropdown_items, sliders, slider_values
+            # ひとつでも sub sampling があれば visible=True
+            visible = (~df['sub_sampling'].isna()).any()
+            switch_style = control_visibility_by_style(
+                visible, current_style
+            )
+
+            return (
+                axis1_dropdown_items,
+                axis2_dropdown_items,
+                axis3_dropdown_items,
+                sliders,
+                slider_values,
+                switch_style,
+            )
 
         # ===== control dropdown and slider visibility =====
         @app.callback(
