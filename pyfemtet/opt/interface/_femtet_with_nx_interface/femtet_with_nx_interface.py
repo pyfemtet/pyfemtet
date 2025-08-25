@@ -58,12 +58,12 @@ class _NXInterface(AbstractFEMInterface):
         self.export_solids = export_solids
         self.export_flattened_assembly = export_flattened_assembly
 
-    def _setup_before_parallel(self) -> None:
-        self._distribute_files([self.prt_path])
+    def _setup_before_parallel(self, scheduler_address=None) -> None:
+        self._distribute_files([self.prt_path], scheduler_address)
 
     def _setup_after_parallel(self, opt: AbstractOptimizer = None) -> None:
         # get suffix
-        suffix = self._get_worker_index_from_optimizer(opt)
+        suffix = self._get_file_suffix(opt)
 
         # rename and get worker path
         self.prt_path = self._rename_and_get_path_on_worker_space(
@@ -189,9 +189,9 @@ class FemtetWithNXInterface(FemtetInterface, _NXInterface):
             export_flattened_assembly=export_flattened_assembly,
         )
 
-    def _setup_before_parallel(self):
-        FemtetInterface._setup_before_parallel(self)
-        _NXInterface._setup_before_parallel(self)
+    def _setup_before_parallel(self, scheduler_address=None):
+        FemtetInterface._setup_before_parallel(self, scheduler_address)
+        _NXInterface._setup_before_parallel(self, scheduler_address)
 
     def _setup_after_parallel(self, opt: AbstractOptimizer = None):
         FemtetInterface._setup_after_parallel(self, opt)

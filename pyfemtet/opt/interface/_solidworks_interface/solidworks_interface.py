@@ -96,13 +96,13 @@ class SolidworksInterface(COMInterface):
                            'Solidworks マクロが有効であることを確認してください。'))
         self.swApp.Visible = self.solidworks_visible
 
-    def _setup_before_parallel(self):
-        self._distribute_files([self.sldprt_path])
+    def _setup_before_parallel(self, scheduler_address=None):
+        self._distribute_files([self.sldprt_path], scheduler_address)
 
     def _setup_after_parallel(self, opt: AbstractOptimizer = None):
 
         # get suffix
-        suffix = self._get_worker_index_from_optimizer(opt)
+        suffix = self._get_file_suffix(opt)
 
         # rename and get worker path
         self.sldprt_path = self._rename_and_get_path_on_worker_space(

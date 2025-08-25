@@ -60,10 +60,10 @@ def _class_factory(FEMClass: type[AbstractFEMInterface]) -> type[AbstractFEMInte
             self._excel_initialized = True
             self._load_problem_from_fem = True
 
-        def _setup_before_parallel(self):
+        def _setup_before_parallel(self, scheduler_address=None):
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'
-            ExcelInterface._setup_before_parallel(self)
-            FEMClass._setup_before_parallel(self)
+            ExcelInterface._setup_before_parallel(self, scheduler_address)
+            FEMClass._setup_before_parallel(self, scheduler_address)
 
         def _setup_after_parallel(self, opt: AbstractOptimizer):
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'

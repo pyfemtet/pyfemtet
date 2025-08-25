@@ -199,8 +199,8 @@ class FemtetInterface(COMInterface):
         """
         return self.Femtet
 
-    def _setup_before_parallel(self):
-        self._distribute_files([self.femprj_path])
+    def _setup_before_parallel(self, scheduler_address=None):
+        self._distribute_files([self.femprj_path], scheduler_address)
 
     def _setup_after_parallel(self, opt: AbstractOptimizer = None):
 
@@ -211,7 +211,7 @@ class FemtetInterface(COMInterface):
 
         # worker space の femprj に切り替える
         else:
-            suffix = self._get_worker_index_from_optimizer(opt)
+            suffix = self._get_file_suffix(opt)
             self.femprj_path = self._rename_and_get_path_on_worker_space(self._original_femprj_path, suffix)
 
         # dask process ならば Femtet を起動

@@ -136,9 +136,11 @@ class DataFrameWrapper:
     __df: pd.DataFrame
     _lock_name = 'edit-df'
     _dataset_name: str
+    _scheduler_address: str
 
     def __init__(self, df: pd.DataFrame):
         self._dataset_name = 'df-' + generate_random_id()
+        self._scheduler_address = None
         self.set_df(df)
 
     def __len__(self):
@@ -173,7 +175,7 @@ class DataFrameWrapper:
 
         """
 
-        client = get_client()
+        client = get_client(self._scheduler_address)
 
         # dask クラスターがある場合
         if client is not None:
@@ -185,6 +187,8 @@ class DataFrameWrapper:
             # 健在の場合
             else:
 
+                self._scheduler_address = client.scheduler.address
+
                 df = None
 
                 with Lock('access_dataset_df'):
@@ -192,9 +196,11 @@ class DataFrameWrapper:
                     if self._dataset_name in client.list_datasets():
                         df = client.get_dataset(self._dataset_name)
 
-                    # set の前に get されることはあってはならない
+                    # 存在しない場合は publish する
                     else:
-                        raise RuntimeError
+                        df = self.__df
+                        client.publish_dataset(**{self._dataset_name: df})
+                        sleep(0.1)
 
                 assert df is not None
 
@@ -235,10 +241,13 @@ class DataFrameWrapper:
             apply_partial_df(df, partial_df, equality_filters)
 
         # dask クラスター上のデータを更新
-        client = get_client()
+        client = get_client(self._scheduler_address)
         if client is not None:
             if client.scheduler is not None:
-                with Lock('access_dataset_df'):
+
+                self._scheduler_address = client.scheduler.address
+
+                with Lock('access_dataset_df', client):
 
                     # datasets 上に存在する場合は削除（上書きができない）
                     if self._dataset_name in client.list_datasets():
@@ -1347,7 +1356,7 @@ class History:
             @staticmethod
             def postprocess_after_recording(row):
 
-                client = get_client()
+                client = get_client(self._records.df_wrapper._scheduler_address)
 
                 trial_name = self.get_trial_name(row=row)
 
@@ -1405,7 +1414,7 @@ class History:
                     self_.postprocess_after_recording(row)
 
                 # save history if no FEMOpt
-                client = get_client()
+                client = get_client(self._records.df_wrapper._scheduler_address)
                 if client is None:
                     self.save()
 

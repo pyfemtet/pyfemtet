@@ -41,6 +41,7 @@ class AbstractFEMInterface:
     _load_problem_from_fem: bool = False
     current_prm_values: TrialInput
     _tmp_dir: tempfile.TemporaryDirectory
+    _file_suffix: str
 
     # ===== update =====
 
@@ -70,13 +71,19 @@ class AbstractFEMInterface:
 
     # ===== dask util =====
 
-    @staticmethod
-    def _get_worker_index_from_optimizer(opt: AbstractOptimizer | None) -> str:
-        if opt is None:
-            worker_index = 'copy'
-        else:
-            worker_index = f'copy_{opt._worker_index}' if opt._worker_index is not None else 'copy'
-        return worker_index
+    def _get_file_suffix(self, opt: AbstractOptimizer | None) -> str:
+
+        file_suffix = 'copy'
+
+        if opt is not None:
+            if opt._worker_index is not None:
+                file_suffix = file_suffix + f'_{opt._worker_index}'
+
+        if hasattr(self, '_file_suffix'):
+            if self._file_suffix is not None:
+                file_suffix = file_suffix + f'_{self._file_suffix}'
+
+        return file_suffix
 
     def _rename_and_get_path_on_worker_space(self, orig_path, suffix, ignore_no_exist=False) -> str:
         # 与えられた path と同名のファイルを
@@ -106,13 +113,13 @@ class AbstractFEMInterface:
         else:
             return worker.local_directory
 
-    def _distribute_files(self, paths: list[str]) -> None:
+    def _distribute_files(self, paths: list[str], scheduler_address=None) -> None:
 
         # executor 向け
         self._copy_to_temp_space(paths)
 
         # dask worker 向け
-        client = get_client()
+        client = get_client(scheduler_address)
         if client is not None:
             for path in paths:
                 if not os.path.exists(path):
@@ -147,7 +154,7 @@ class AbstractFEMInterface:
 
     # ===== setup =====
 
-    def _setup_before_parallel(self) -> None:
+    def _setup_before_parallel(self, scheduler_address=None) -> None:
         pass
 
     def _setup_after_parallel(self, opt: AbstractOptimizer) -> None:
