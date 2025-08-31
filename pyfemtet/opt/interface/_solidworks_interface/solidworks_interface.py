@@ -154,7 +154,9 @@ class SolidworksInterface(COMInterface):
                 prm_name = _get_name_from_equation(eq)
                 # 対象なら処理
                 if prm_name in self.current_prm_values:
-                    new_equation = f'"{prm_name}" = {self.current_prm_values[prm_name].value}'
+                    prm = self.current_prm_values[prm_name]
+                    right = str(prm.value) + prm.properties.get('unit', '')
+                    new_equation = f'"{prm_name}" = {right}'
                     swEqnMgr.Equation(i, new_equation)
 
             # 式の計算
