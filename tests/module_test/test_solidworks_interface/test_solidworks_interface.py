@@ -46,11 +46,14 @@ def _impl_solidworks_interface_update():
         x = Variable()
         x.name = 'x'
         x.value = 20
+        x.properties = {'unit': 'mm'}
 
         fem._setup_before_parallel()
         fem._setup_after_parallel()
         fem.update_parameter({'x': x})
         fem.update_model()
+
+        input('Enter to quit...')
 
 
 @pytest.mark.cad
@@ -115,5 +118,5 @@ def test_parallel_femtet_with_solidworks():
 
 if __name__ == '__main__':
     test_solidworks_interface_update()
-    test_femtet_with_solidworks_interface()
-    test_parallel_femtet_with_solidworks()
+    # test_femtet_with_solidworks_interface()
+    # test_parallel_femtet_with_solidworks()
