@@ -322,7 +322,7 @@ class ExcelInterface(COMInterface):
         return self.excel
 
     # ===== setup =====
-    def _setup_before_parallel(self) -> None:
+    def _setup_before_parallel(self, scheduler_address=None) -> None:
         # メインプロセスで、並列プロセスを開始する前に行う前処理
 
         related_files = [self._original_input_xlsm_path]
@@ -345,7 +345,7 @@ class ExcelInterface(COMInterface):
         related_files.extend(self._original_related_file_paths)
 
         # dask worker 向け
-        self._distribute_files(related_files)
+        self._distribute_files(related_files, scheduler_address)
 
     def _re_register_paths(self, suffix):
         # self.hoge_path を dask worker space のファイルに変える
@@ -381,7 +381,7 @@ class ExcelInterface(COMInterface):
         CoInitialize()
 
         # 元のファイルを保護するため space のファイルを使用
-        suffix = self._get_worker_index_from_optimizer(opt)
+        suffix = self._get_file_suffix(opt)
         self._re_register_paths(suffix)
 
         # excel に繋ぐ

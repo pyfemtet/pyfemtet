@@ -40,9 +40,9 @@ __all__ = [
 _lock_pool = {}
 
 
-def get_client():
+def get_client(scheduler_address=None):
     try:
-        return _get_client()
+        return _get_client(scheduler_address)
     except ValueError:
         return None
 

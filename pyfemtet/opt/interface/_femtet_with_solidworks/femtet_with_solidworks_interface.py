@@ -81,9 +81,9 @@ class FemtetWithSolidworksInterface(FemtetInterface, SolidworksInterface, Abstra
     def _check_param_and_raise(self, param_name) -> None:
         pass
 
-    def _setup_before_parallel(self):
-        SolidworksInterface._setup_before_parallel(self)
-        FemtetInterface._setup_before_parallel(self)
+    def _setup_before_parallel(self, scheduler_address=None):
+        SolidworksInterface._setup_before_parallel(self, scheduler_address)
+        FemtetInterface._setup_before_parallel(self, scheduler_address)
 
     def _setup_after_parallel(self, opt: AbstractOptimizer = None):
         SolidworksInterface._setup_after_parallel(self, opt)

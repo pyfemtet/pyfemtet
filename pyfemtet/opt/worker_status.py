@@ -71,6 +71,7 @@ class WorkerStatus:
     terminated = worker_status_from_float(float('inf'))
 
     def __init__(self, dataset_name: str):
+        self._scheduler_address = None
         self._dataset_name = dataset_name
         self.__value: _WorkerStatus
         self.value = WorkerStatus.undefined
@@ -80,9 +81,10 @@ class WorkerStatus:
 
         out = None
 
-        client = get_client()
+        client = get_client(self._scheduler_address)
         if client is not None:
             if client.scheduler is not None:
+                self._scheduler_address = client.scheduler.address
                 key = self._dataset_name
                 value: float | None = client.get_metadata(key, default=None)
 
@@ -111,9 +113,10 @@ class WorkerStatus:
 
     @value.setter
     def value(self, value: _WorkerStatus):
-        client = get_client()
+        client = get_client(self._scheduler_address)
         if client is not None:
             if client.scheduler is not None:
+                self._scheduler_address = client.scheduler.address
                 key = self._dataset_name
                 client.set_metadata(key, value)
                 # sleep(0.1)
