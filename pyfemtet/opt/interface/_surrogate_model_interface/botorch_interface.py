@@ -26,6 +26,8 @@ __all__ = [
 
 class BoTorchInterface(AbstractSurrogateModelInterfaceBase):
 
+    current_obj_std_values: dict[str, float]
+
     def __init__(
             self,
             history_path: str = None,
@@ -45,6 +47,7 @@ class BoTorchInterface(AbstractSurrogateModelInterfaceBase):
 
         self.model = SingleTaskGPModel()
         self.pyfemtet_model = PyFemtetModel()
+        self.current_obj_std_values = {}
 
         # get main only
         df = self.train_history.get_df(MAIN_FILTER)
@@ -64,11 +67,13 @@ class BoTorchInterface(AbstractSurrogateModelInterfaceBase):
         # update current objective values
         x = np.array([[variable.value for variable in self.current_prm_values.values()]])
 
-        y, _ = self.pyfemtet_model.predict(x)
+        y, s = self.pyfemtet_model.predict(x)
         y = y[0]
+        s = s[0]
 
-        for obj_name, obj_value in zip(self.train_history.obj_names, y):
+        for obj_name, obj_value, obj_std in zip(self.train_history.obj_names, y, s):
             self.current_obj_values.update({obj_name: obj_value})
+            self.current_obj_std_values.update({obj_name: obj_std})
 
 
 class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase):
@@ -103,6 +108,7 @@ class PoFBoTorchInterface(BoTorchInterface, AbstractSurrogateModelInterfaceBase)
         self.train_history_c.load_csv(history_path, with_finalize=True)
         self.pof_threshold = 0.5
         self.feasibility_cdf_threshold = feasibility_cdf_threshold
+        self.current_obj_std_values = {}
 
         # use feasibility as a single objective
         self.train_history_c.obj_names = ['feasibility']
