@@ -81,6 +81,7 @@ def __create_formatter(colored=True):
 # ===== handler config =====
 
 STDOUT_HANDLER_NAME = 'stdout-handler'
+STDERR_HANDLER_NAME = 'stderr-handler'
 
 
 def __get_stdout_handler():
@@ -94,6 +95,17 @@ def __has_stdout_handler(logger):
     return any([handler.get_name() != STDOUT_HANDLER_NAME for handler in logger.handlers])
 
 
+def __get_stderr_handler():
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.set_name(STDERR_HANDLER_NAME)
+    stderr_handler.setFormatter(__create_formatter(colored=True))
+    return stderr_handler
+
+
+def __has_stderr_handler(logger):
+    return any([handler.get_name() != STDERR_HANDLER_NAME for handler in logger.handlers])
+
+
 def set_stdout_output(logger, level=logging.INFO):
 
     if not __has_stdout_handler(logger):
@@ -105,6 +117,19 @@ def set_stdout_output(logger, level=logging.INFO):
 def remove_stdout_output(logger):
     if __has_stdout_handler(logger):
         logger.removeHandler(__get_stdout_handler())
+
+
+def set_stderr_output(logger, level=logging.INFO):
+
+    if not __has_stderr_handler(logger):
+        logger.addHandler(__get_stderr_handler())
+
+    logger.setLevel(level)
+
+
+def remove_stderr_output(logger):
+    if __has_stderr_handler(logger):
+        logger.removeHandler(__get_stderr_handler())
 
 
 def add_file_output(logger, filepath=None, level=logging.INFO) -> str:
@@ -165,7 +190,7 @@ def setup_package_root_logger(package_name):
         with __lock:
             logger = logging.getLogger(package_name)
             logger.propagate = True
-            set_stdout_output(logger)
+            set_stderr_output(logger)
             logger.setLevel(logging.INFO)
             __initialized_root_packages.append(package_name)
     else:
