@@ -43,6 +43,20 @@ warnings.filterwarnings('ignore', 'Argument ``constraints_func`` is an experimen
 _MESSAGE_ENQUEUED = 'Enqueued trial.'
 
 
+def check_float_and_raise(value, check_target):
+    if isinstance(value, int | float):
+        if np.isnan(value):
+            raise ValueError(_(
+                en_message=f'{check_target} is NaN.',
+                jp_message=f'{check_target} は NaN です。',
+            ))
+    else:
+        raise ValueError(_(
+            en_message=f'{check_target} should be a number, but {value} ({type(value)}) passed.',
+            jp_message=f'{check_target} は数値でなくてはなりませんが、{value} ({type(value)}) が与えられました。',
+        ))
+
+
 class MaxTrialsCallbackExcludingEnqueued(MaxTrialsCallback):
     def __call__(self, study: Study, trial: FrozenTrial) -> None:
         """
@@ -167,14 +181,31 @@ class OptunaOptimizer(AbstractOptimizer):
             self,
             name: str,
             initial_value: float,
-            lower_bound: float,
-            upper_bound: float,
+            lower_bound: float | None = None,
+            upper_bound: float | None = None,
             step: float | None = None,
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
     ) -> None:
+
+        if lower_bound is None or upper_bound is None:
+            properties = properties or {}
+            if properties.get('dynamic_bounds_fun') is None:
+                raise ValueError(_(
+                    en_message='When using `OptunaOptimizer`, you must either specify `lower_bound` and `upper_bound`, ' \
+                               'or include `dynamic_bounds_fun` (Callable[[AbstractOptimizer], float]) in `properties`.',
+                    jp_message='OptunaOptimizer では、lower_bound と upper_bound を両方指定するか、' \
+                               'または properties に dynamic_bounds_fun (Callable[[AbstractOptimizer], float]) ' \
+                               'を含めなければなりません。'
+                ))
+            else:
+                logger.warning(_(
+                    en_message='`dynamic_bounds_fun` is under development. The functionally can be changed without any announcement.',
+                    jp_message='dynamic_bounds_fun は開発中の機能です。機能は予告なく変更されることがあります。',
+                ))
+
         AbstractOptimizer.add_parameter(self, name, initial_value, lower_bound, upper_bound, step, properties,
                                         pass_to_fem=pass_to_fem, fix=fix)
 
@@ -271,6 +302,13 @@ class OptunaOptimizer(AbstractOptimizer):
                     continue
 
                 if isinstance(prm, NumericParameter):
+                    dynamic_bounds_fun = prm.properties.get('dynamic_bounds_fun')
+                    if dynamic_bounds_fun:
+                        lb, ub = dynamic_bounds_fun(self)
+                        check_float_and_raise(lb, _(f'lower_bound of {prm.name}', f'{prm.name} の lower_bound'))
+                        check_float_and_raise(ub, _(f'upper_bound of {prm.name}', f'{prm.name} の upper_bound'))
+                        prm.lower_bound = lb
+                        prm.upper_bound = ub
                     prm.value = trial.suggest_float(
                         name,
                         prm.lower_bound,

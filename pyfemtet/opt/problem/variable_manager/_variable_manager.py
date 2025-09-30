@@ -311,6 +311,7 @@ class VariableManager:
         | dict[str, SupportedVariableTypes]
         | np.ndarray
     ):
+        # 参照を返す仕様を dynamic bounds で利用
 
         raw = {}
 
