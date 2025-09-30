@@ -428,9 +428,10 @@ class PredictionModelGraph(AbstractPage):
                     self.CommandState.ready.value,
                     self.alert_region.create_alerts(
                         _(
-                            en_message='Cannot draw the graph because the selected parameter '
-                                       'is a fixed and its bounds are not given.',
-                            jp_message='選択された変数は固定値で上下限も与えられていないため、'
+                            en_message='Cannot draw the graph because '
+                                       'the bounds of selected parameter '
+                                       'are not given.',
+                            jp_message='選択された変数は上下限が与えられていないため、'
                                        'グラフを描画できません。',
                         ),
                         color='danger',
