@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Any
 
 import os
 import tempfile
@@ -105,7 +105,7 @@ class AbstractFEMInterface:
 
         return dst_path_
 
-    def _get_worker_space(self) -> str | None:
+    def _get_worker_space(self) -> str:
         worker = get_worker()
         if worker is None:
             assert hasattr(self, '_tmp_dir'), 'Internal Error! Run _distribute_files() first!'
@@ -176,12 +176,12 @@ class AbstractFEMInterface:
         pass
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def _check_using_fem(self, fun: callable) -> bool:
+    def _check_using_fem(self, fun: Callable) -> bool:
         return False
 
     # ===== postprocessing after recording =====
 
-    def _create_postprocess_args(self) -> dict[str, ...]:
+    def _create_postprocess_args(self) -> dict[str, Any]:
         return {}
 
     @staticmethod
@@ -212,15 +212,16 @@ class COMInterface(AbstractFEMInterface):
         return state
 
     def __setstate__(self, state):
-        """UnPickle 時に COM を再構築する
+        # """UnPickle 時に COM を再構築する
 
-        ただしメインプロセスでしか呼ばれない模様
-        dask のバージョン依存？
-        """
-        CoInitialize()
-        for key, value in self.com_members.items():
-            state.update({key: Dispatch(value)})
-        self.__dict__.update(state)
+        # ただしメインプロセスでしか呼ばれない模様
+        # dask のバージョン依存？
+        # """
+        # CoInitialize()
+        # for key, value in self.com_members.items():
+        #     state.update({key: Dispatch(value)})
+        # self.__dict__.update(state)
+        pass
 
 
 class NoFEM(AbstractFEMInterface):

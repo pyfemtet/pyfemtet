@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 from time import sleep
-from typing import TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Any
 import os
-import re
 
-from win32com.client import DispatchEx, CDispatch
-# noinspection PyUnresolvedReferences
-from pythoncom import CoInitialize, CoUninitialize, com_error
+from win32com.client import Dispatch, DispatchEx
+from pythoncom import com_error, CoInitialize
 
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.exceptions import *
@@ -20,9 +17,8 @@ from pyfemtet.logger import get_module_logger
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
 
-
 logger = get_module_logger('opt.interface', False)
-
+asm_logger = get_module_logger('opt.interface.sldasm', True)
 
 # 定数の宣言
 swThisConfiguration = 1  # https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swInConfigurationOpts_e.html
@@ -33,10 +29,48 @@ swSaveAsOptions_Copy = 2  #
 swSaveAsOptions_Silent = 1  # https://help.solidworks.com/2021/english/api/swconst/solidworks.interop.swconst~solidworks.interop.swconst.swsaveasoptions_e.html
 swSaveWithReferencesOptions_None = 0  # https://help-solidworks-com.translate.goog/2023/english/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swSaveWithReferencesOptions_e.html?_x_tr_sl=auto&_x_tr_tl=ja&_x_tr_hl=ja&_x_tr_pto=wapp
 swDocPART = 1  # https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swDocumentTypes_e.html
+swDocASSEMBLY = 2
 
 
 class FileNotOpenedError(Exception):
     pass
+
+
+class EquationContext:
+    def __init__(self, swModel) -> None:
+        self.swModel = swModel
+        self.swEqnMgr = None
+
+    def __enter__(self):
+        # プロパティを退避
+        self.swEqnMgr = self.swModel.GetEquationMgr
+        self.buffer_aso = self.swEqnMgr.AutomaticSolveOrder
+        self.buffer_ar = self.swEqnMgr.AutomaticRebuild
+        self.swEqnMgr.AutomaticSolveOrder = False
+        self.swEqnMgr.AutomaticRebuild = False
+        return self.swEqnMgr
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # プロパティをもとに戻す
+        assert self.swEqnMgr is not None
+        self.swEqnMgr.AutomaticSolveOrder = self.buffer_aso
+        self.swEqnMgr.AutomaticRebuild = self.buffer_ar
+
+
+class EditPartContext:
+    def __init__(self, swModel, component) -> None:
+        self.swModel = swModel
+        self.component = component
+
+    def __enter__(self):
+        swSelMgr = self.swModel.SelectionManager
+        swSelData = swSelMgr.CreateSelectData
+        swSelMgr.AddSelectionListObject(self.component, swSelData)
+        # self.swModel.EditPart()  # 対象がアセンブリの場合動作しない
+        self.swModel.AssemblyPartToggle()  # Obsolete だが代わりにこれを使う
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.swModel.EditAssembly()
 
 
 # noinspection PyPep8Naming
@@ -63,7 +97,7 @@ class SolidworksInterface(COMInterface):
         AssertionError: If the specified part file does not exist.
     """
 
-    swApp: CDispatch
+    swApp: Any
     com_members = {'swApp': 'SLDWORKS.Application'}
     _access_sw_lock_name = 'access_sw'
 
@@ -77,7 +111,8 @@ class SolidworksInterface(COMInterface):
         self.quit_solidworks_on_terminate = close_solidworks_on_terminate
         self.solidworks_visible = visible
 
-        assert os.path.isfile(self.sldprt_path)
+        if not os.path.isfile(self.sldprt_path):
+            raise FileNotFoundError(self.sldprt_path)
         self._original_sldprt_path = self.sldprt_path
 
     def connect_sw(self):
@@ -86,9 +121,9 @@ class SolidworksInterface(COMInterface):
             jp_message='Solidworks に接続しています...'
         ))
         try:
-            self.swApp = DispatchEx('SLDWORKS.Application')
+            self.swApp = Dispatch('SLDWORKS.Application')
         except com_error:
-            raise Exception(_(
+            raise RuntimeError(_(
                 en_message='Failed to instantiate Solidworks. '
                            'Please check installation and enabling macro.',
                 jp_message='Solidworks のインスタンス化に失敗しました。'
@@ -97,18 +132,32 @@ class SolidworksInterface(COMInterface):
         self.swApp.Visible = self.solidworks_visible
 
     def _setup_before_parallel(self, scheduler_address=None):
-        self._distribute_files([self.sldprt_path], scheduler_address)
+        if not _is_assembly(self.sldprt_path):
+            self._distribute_files([self.sldprt_path], scheduler_address)
 
-    def _setup_after_parallel(self, opt: AbstractOptimizer = None):
+    def _setup_after_parallel(self, opt: AbstractOptimizer):
 
-        # get suffix
-        suffix = self._get_file_suffix(opt)
+        # validation
+        if _is_assembly(self.sldprt_path) and get_worker() is not None:
+            # 現在の仕様だと sldprt_path だけが
+            # worker_space に保存される。
+            # 並列処理に対応するためには
+            # すべてのファイルを distribute したうえで
+            # 構成部品の置換を実行する必要がある。
+            raise RuntimeError(_(
+                en_message='Parallel processing is not supported when handling assembly parts with SolidworksInterface.',
+                jp_message='SolidworksInterfaceでアセンブリパーツを対象とする場合、並列処理はサポートされていません。'
+            ))
 
-        # rename and get worker path
-        self.sldprt_path = self._rename_and_get_path_on_worker_space(
-            self._original_sldprt_path,
-            suffix,
-        )
+        if not _is_assembly(self.sldprt_path):
+            # get suffix
+            suffix = self._get_file_suffix(opt)
+
+            # rename and get worker path
+            self.sldprt_path = self._rename_and_get_path_on_worker_space(
+                self._original_sldprt_path,
+                suffix,
+            )
 
         # connect solidworks
         CoInitialize()
@@ -116,10 +165,13 @@ class SolidworksInterface(COMInterface):
             self.connect_sw()
 
             # open it
-            self.swApp.OpenDoc(self.sldprt_path, swDocPART)
+            if _is_assembly(self.sldprt_path):
+                self.swApp.OpenDoc(self.sldprt_path, swDocASSEMBLY)
+            else:
+                self.swApp.OpenDoc(self.sldprt_path, swDocPART)
 
     @property
-    def swModel(self) -> CDispatch:
+    def swModel(self):
         return _get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
 
     def update(self) -> None:
@@ -131,54 +183,19 @@ class SolidworksInterface(COMInterface):
 
         # sw はプロセスが一つなので Lock
         with Lock(self._access_sw_lock_name):
-
             sleep(0.2)
-
-            # ===== model を取得 =====
             swModel = self.swModel
-
-            # ===== equation manager を取得 =====
-            swEqnMgr = swModel.GetEquationMgr
-            nEquation = swEqnMgr.GetCount
-
-            # プロパティを退避
-            buffer_aso = swEqnMgr.AutomaticSolveOrder
-            buffer_ar = swEqnMgr.AutomaticRebuild
-            swEqnMgr.AutomaticSolveOrder = False
-            swEqnMgr.AutomaticRebuild = False
-
-            # 値を更新
-            for i in range(nEquation):
-                # name, equation の取得
-                eq = swEqnMgr.Equation(i)
-                prm_name = _get_name_from_equation(eq)
-                # 対象なら処理
-                if prm_name in self.current_prm_values:
-                    prm = self.current_prm_values[prm_name]
-                    right = str(prm.value) + prm.properties.get('unit', '')
-                    new_equation = f'"{prm_name}" = {right}'
-                    swEqnMgr.Equation(i, new_equation)
-
-            # 式の計算
-            # noinspection PyStatementEffect
-            swEqnMgr.EvaluateAll  # always returns -1
-
-            # プロパティをもとに戻す
-            swEqnMgr.AutomaticSolveOrder = buffer_aso
-            swEqnMgr.AutomaticRebuild = buffer_ar
+            mgr = _UpdateVariableManager()
+            mgr._update_global_variables(swModel, self.current_prm_values)
 
     def update_model(self):
         """Update .sldprt"""
 
         # sw はプロセスが一つなので Lock
         with Lock(self._access_sw_lock_name):
-
             sleep(0.2)
 
-            # ===== model を取得 =====
             swModel = self.swModel
-
-            # モデル再構築
             result = swModel.EditRebuild3  # モデル再構築
             if not result:
                 raise ModelError(_(
@@ -212,18 +229,124 @@ class SolidworksInterface(COMInterface):
             sleep(3)
 
 
+def _is_assembly(swModel_or_name):
+    if isinstance(swModel_or_name, str):
+        return swModel_or_name.lower().endswith('.sldasm')
+    else:
+        return swModel_or_name.GetPathName.lower().endswith('.sldasm')
+
+
+def _iter_parts(swModel):
+    components = swModel.GetComponents(
+        False  # TopOnly
+    )
+    return components
+
+
+class _UpdateVariableManager:
+
+    def __init__(self):
+        self.updated_variables = set()
+
+    def _update_global_variables(self, swModel, x: TrialInput):
+        # まず自身のパラメータを更新
+        asm_logger.debug(f'Processing `{swModel.GetPathName}`')
+        self._update_global_variables_core(swModel, x)
+
+        # アセンブリならば、構成部品のパラメータを更新
+        if _is_assembly(swModel):
+            components = _iter_parts(swModel)
+            for component in components:
+                swPartModel = component.GetModelDoc2
+                asm_logger.debug(f'Checking `{swPartModel.GetPathName}`')
+                if swPartModel.GetPathName.lower() not in self.updated_variables:
+                    asm_logger.debug(f'Processing `{swPartModel.GetPathName}`')
+                    with EditPartContext(swModel, component):
+                        self._update_global_variables_core(swPartModel, x)
+                    self.updated_variables.add(swPartModel.GetPathName.lower())
+
+    def _update_global_variables_core(self, swModel, x: TrialInput):
+        with EquationContext(swModel) as swEqnMgr:
+            # txt にリンクされている場合は txt を更新
+            if swEqnMgr.LinkToFile:
+                self._update_global_variables_linked_txt(swEqnMgr, x)
+            self._update_global_variables_simple(swEqnMgr, x)
+            # noinspection PyStatementEffect
+            swEqnMgr.EvaluateAll
+
+    def _update_global_variables_linked_txt(self, swEqnMgr, x: TrialInput):
+        txt_path = swEqnMgr.FilePath
+        if txt_path in self.updated_variables:
+            return
+        with open(txt_path, 'r', encoding='utf_8_sig') as f:
+            equations = [line.strip() for line in f.readlines() if line.strip() != '']
+        for i, eq in enumerate(equations):
+            equations[i] = self._update_equation(eq, x)
+        with open(txt_path, 'w', encoding='utf_8_sig') as f:
+            f.writelines([eq + '\n' for eq in equations])
+        asm_logger.debug(f'`{txt_path}` is updated.')
+        self.updated_variables.add(txt_path)
+
+    def _update_global_variables_simple(self, swEqnMgr, x: TrialInput):
+        nEquation = swEqnMgr.GetCount
+
+        # equation を列挙
+        asm_logger.debug(f'{nEquation} equations detected.')
+        for i in range(nEquation):
+            # name, equation の取得
+            eq = swEqnMgr.Equation(i)
+            prm_name = self._get_left(eq)
+            # COM 経由なので必要な時以外は触らない
+            asm_logger.debug(f'Checking `{prm_name}`')
+            if (prm_name in x) and (prm_name not in self.updated_variables):
+                asm_logger.debug(f'Processing `{prm_name}`')
+                # 特定の Equation がテキストリンク有効か
+                # どうかを判定する術がないので、一旦更新する
+                new_eq = self._update_equation(eq, x)
+                swEqnMgr.Equation(i, new_eq)
+                # テキストリンクの場合、COM インスタンスに
+                # 更新された値が残ってしまうのでテキストを再読み込み
+                if swEqnMgr.LinkToFile:
+                    # noinspection PyStatementEffect
+                    swEqnMgr.UpdateValuesFromExternalEquationFile
+                self.updated_variables.add(prm_name)
+
+    def _update_equation(self, equation: str, x: TrialInput):
+        prm_name = self._get_left(equation)
+        if prm_name not in x:
+            return equation
+        prm = x[prm_name]
+        right = str(prm.value) + prm.properties.get('unit', '')
+        new_eq = f'"{prm_name}" = {right}'
+        asm_logger.debug(f'New eq.: `{new_eq}`')
+        return new_eq
+
+    @staticmethod
+    def _get_left(equation: str):
+        return equation.split('=')[0].strip('" ')
+
+    @staticmethod
+    def _load(swModel):
+        # テスト用関数
+        out = set()
+        swEqnMgr = swModel.GetEquationMgr
+        for i in range(swEqnMgr.GetCount):
+            eq = swEqnMgr.Equation(i)
+            out.add(eq)
+        if _is_assembly(swModel):
+            components = _iter_parts(swModel)
+            for component in components:
+                swPartModel = component.GetModelDoc2
+                swEqnMgr = swPartModel.GetEquationMgr
+                for i in range(swEqnMgr.GetCount):
+                    eq = swEqnMgr.Equation(i)
+                    out.add(eq)
+        return out
+
+
 # noinspection PyPep8Naming
 def _get_model_by_basename(swApp, basename):
     swModel = swApp.ActivateDoc(basename)
     if swModel is None:
         raise FileNotOpenedError(f'Model {basename} is not opened.')
     return swModel
-
-
-def _get_name_from_equation(equation: str):
-    pattern = r'^\s*"(.+?)"\s*$'
-    matched = re.match(pattern, equation.split('=')[0])
-    if matched:
-        return matched.group(1)
-    else:
-        return None
