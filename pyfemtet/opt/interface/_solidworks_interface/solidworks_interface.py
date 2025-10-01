@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from pyfemtet.opt.optimizer import AbstractOptimizer
 
 logger = get_module_logger('opt.interface', False)
-asm_logger = get_module_logger('opt.interface.sldasm', True)
+asm_logger = get_module_logger('opt.interface.sldasm', False)
 
 # 定数の宣言
 swThisConfiguration = 1  # https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swInConfigurationOpts_e.html
