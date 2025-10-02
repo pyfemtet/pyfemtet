@@ -2,6 +2,7 @@ from pathlib import Path
 import webbrowser
 import os
 import urllib.parse
+from time import sleep
 
 import pyfemtet
 import subprocess
@@ -31,6 +32,7 @@ def test_check_documents():
     
     # Windows用にスラッシュに変換
     try:
+        sleep(1)
         abs_path = str(os.path.abspath(ja_index_path))
         abs_path = abs_path.replace('\\', '/')
         url = 'file:///' + urllib.parse.quote(abs_path)
