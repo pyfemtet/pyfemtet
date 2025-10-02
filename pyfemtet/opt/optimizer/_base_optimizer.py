@@ -4,6 +4,7 @@ import datetime
 from typing import Callable, TypeAlias, Sequence, Literal
 from numbers import Real  # マイナーなので型ヒントでは使わず、isinstance で使う
 from time import sleep
+import os
 
 import sympy
 
@@ -795,6 +796,10 @@ class AbstractOptimizer:
             worker_status_list: list[WorkerStatus],
             wait_other_process_setup: bool,
     ) -> None:
+
+        if os.environ.get('DEBUG_FEMOPT_PARALLEL'):
+            if isinstance(worker_idx, int):
+                sleep(worker_idx+1)
 
         self.history = history
         self.entire_status = entire_status
