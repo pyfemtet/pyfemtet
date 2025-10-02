@@ -4,7 +4,7 @@ import subprocess
 
 import pytest
 
-from opt.optimizer import AbstractOptimizer
+from pyfemtet.opt.optimizer import AbstractOptimizer
 from pyfemtet.opt.interface._solidworks_interface import SolidworksInterface
 from pyfemtet.opt.interface import FemtetWithSolidworksInterface
 from pyfemtet.opt.optimizer import OptunaOptimizer
@@ -54,7 +54,7 @@ def _impl_solidworks_interface_update():
         fem.update_parameter({'x': x})
         fem.update_model()
 
-        input('Enter to quit...')
+        # input('Enter to quit...')
 
 
 @pytest.mark.cad
@@ -169,8 +169,8 @@ def _impl_sldasm():
     out = mgr._load(fem.swModel)
     print(out)
 
-    # fem.close()
-    #
+    fem.close()
+
     reference = {'"D1@ﾎﾞｽ - 押し出し1"="base_thickness"', '"D1@ｽｹｯﾁ1"= "cylinder_diameter"', '"common_variable" = 2',
                  '"D3@ﾛｰｶﾙ直線ﾊﾟﾀｰﾝ1"= "array_gap" + "D2@ｽｹｯﾁ2@base-1.Part@Assem1-2.Assembly"',
                  '"D4@ｽｹｯﾁ2"="base_size" / 2', '"D1@ｽｹｯﾁ2"="base_size"', '"cylinder_diameter" = 3',
@@ -188,5 +188,5 @@ def test_sldasm():
 if __name__ == '__main__':
     # test_solidworks_interface_update()
     # test_femtet_with_solidworks_interface()
-    # test_parallel_femtet_with_solidworks()
+    _impl_parallel_femtet_with_solidworks()
     _impl_sldasm()
