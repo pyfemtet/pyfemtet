@@ -797,10 +797,6 @@ class AbstractOptimizer:
             wait_other_process_setup: bool,
     ) -> None:
 
-        if os.environ.get('DEBUG_FEMOPT_PARALLEL'):
-            if isinstance(worker_idx, int):
-                sleep(worker_idx+1)
-
         self.history = history
         self.entire_status = entire_status
         self.worker_status = worker_status
@@ -875,6 +871,10 @@ class AbstractOptimizer:
                     sleep(1)
 
             self.worker_status.value = WorkerStatus.running
+
+            if os.environ.get('DEBUG_FEMOPT_PARALLEL'):
+                if isinstance(worker_idx, int):
+                    sleep(worker_idx + 1)
 
             self.run()
 
