@@ -874,7 +874,7 @@ class AbstractOptimizer:
 
             if os.environ.get('DEBUG_FEMOPT_PARALLEL'):
                 if isinstance(worker_idx, int):
-                    sleep(worker_idx + 1)
+                    sleep(worker_idx)
 
             self.run()
 

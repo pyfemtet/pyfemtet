@@ -78,5 +78,5 @@ def test_parallel_femtet(record=False):
 
 
 if __name__ == '__main__':
-    # test_parallel_nofem(record=False)
-    test_parallel_femtet(record=True)
+    test_parallel_nofem(record=False)
+    test_parallel_femtet(record=False)
