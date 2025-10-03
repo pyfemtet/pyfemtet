@@ -163,10 +163,10 @@ def _impl_sldasm():
     )
     fem.update_model()
 
-    from pyfemtet.opt.interface._solidworks_interface.solidworks_interface import _UpdateVariableManager
-    mgr = _UpdateVariableManager()
+    from pyfemtet.opt.interface._solidworks_interface.solidworks_interface import SolidworksVariableManager
+    mgr = SolidworksVariableManager()
 
-    out = mgr._load(fem.swModel)
+    out = mgr.get_equations_recourse(fem.swModel)
     print(out)
 
     fem.close()
