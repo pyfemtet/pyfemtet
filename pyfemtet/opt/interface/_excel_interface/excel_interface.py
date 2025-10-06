@@ -505,8 +505,10 @@ class ExcelInterface(COMInterface):
         if not os.path.exists(xla_file_path):
             raise FileNotFoundError(
                 _(
-                    en_message='Femtet XLA file not found: {xla_file_path}',
-                    jp_message='Femtet XLA ファイルが見つかりません: {xla_file_path}',
+                    en_message='Femtet XLA file ({xla_file_path}) not found. '
+                               'Please run `Enable Macros` command.',
+                    jp_message='Femtet XLA ファイル ({xla_file_path}) が見つかりません。'
+                               '「マクロ機能の有効化」を実行してください。',
                     xla_file_path=xla_file_path
                 )
             )
