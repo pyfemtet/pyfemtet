@@ -133,6 +133,8 @@ class AbstractOptimizer:
             *,
             pass_to_fem: bool = True,
     ):
+        var: Variable
+        # noinspection PyUnreachableCode
         if isinstance(value, Real):
             var = NumericVariable()
         elif isinstance(value, str):
@@ -284,6 +286,7 @@ class AbstractOptimizer:
             kwargs: dict | None = None,
     ):
         # argument processing
+        # noinspection PyUnreachableCode
         if isinstance(names, str):
             names = [f'{names}_{i}' for i in range(n_return)]
         elif isinstance(names, Sequence):
@@ -470,7 +473,7 @@ class AbstractOptimizer:
                     raise NotImplementedError
         return violation_names
 
-    def _check_and_raise_interruption(self) -> ...:
+    def _check_and_raise_interruption(self):
         # raise Interrupt
         interrupted = self.entire_status.value >= WorkerStatus.interrupting
         if interrupted:
@@ -708,7 +711,7 @@ class AbstractOptimizer:
                 self,
                 x: TrialInput,
                 opt_: AbstractOptimizer | None = None,
-                trial_id: str =None,
+                trial_id: str = None,
         ) -> _FReturnValue | None:
             """Nothing will be raised even if infeasible."""
 
