@@ -178,7 +178,7 @@ def _impl_sldasm():
                  '"base_size" = 15', '"base_thickness" = 0.5',
                  '"D5@ｽｹｯﾁ2@base-1.Part"= "D1@ｽｹｯﾁ1@cylinder-1.Part" + "gap"'}
 
-    assert out == reference
+    assert set(out) == reference
 
 
 def test_sldasm():

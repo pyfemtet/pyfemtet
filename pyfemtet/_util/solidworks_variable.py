@@ -148,14 +148,14 @@ class SolidworksVariableManager:
 
     # Used by pyfemtet-opt-gui
     @staticmethod
-    def get_equations_recourse(swModel, global_variables_only=False) -> set[str]:
-        out = set()
+    def get_equations_recourse(swModel, global_variables_only=False) -> list[str]:
+        out = list()
         swEqnMgr = swModel.GetEquationMgr
         for i in range(swEqnMgr.GetCount):
             if global_variables_only and not swEqnMgr.GlobalVariable(i):
                 continue
             eq = swEqnMgr.Equation(i)
-            out.add(eq)
+            out.append(eq)
         if is_assembly(swModel):
             components = _iter_parts(swModel)
             for component in components:
@@ -165,5 +165,5 @@ class SolidworksVariableManager:
                     if global_variables_only and not swEqnMgr.GlobalVariable(i):
                         continue
                     eq = swEqnMgr.Equation(i)
-                    out.add(eq)
+                    out.append(eq)
         return out
