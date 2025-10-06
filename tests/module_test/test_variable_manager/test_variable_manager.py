@@ -260,7 +260,7 @@ def test_eval_expressions_chained_mean():
 
 
 def test_atmark_support():
-    # 基本
+    # @ は内部的に _at_ として扱われ、区別されない。
     vm = VariableManager()
 
     v = NumericVariable()
@@ -308,7 +308,7 @@ def test_atmark_support():
     )
     vm.set_variable(e)
     assert e.name == 's_at_1'
-    assert 'original_name' not in vm.variables[e.name].properties
+    assert vm.variables[e.name].properties['original_name'] == 's_at_1'
 
     vm.resolve()
     vm.eval_expressions()
@@ -316,7 +316,7 @@ def test_atmark_support():
 
     d = vm.get_variables()
     print(d)
-    assert str(d) == "{'a@1': 1, 'b@plus2': 3.0, 'c@sum': 4.0, 'e': 1, 's_at_1': 5.0}"
+    assert str(d) == "{'a_at_1': 1, 'b@plus2': 3.0, 'c@sum': 4.0, 'e': 1, 's_at_1': 5.0}"
 
 
 if __name__ == '__main__':
