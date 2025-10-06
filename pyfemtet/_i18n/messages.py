@@ -59,7 +59,6 @@ class Message:
     ERR_RUN_JOURNAL_NOT_FOUND = _(r'"%UGII_BASE_DIR%\NXBIN\run_journal.exe" is not found. Make sure you have NX installed and the environment variable UGII_BASE_DIR is set.')
     ERR_MODEL_RECONSTRUCTION_FAILED = _('Model reconstruction failed.')
     ERR_MODEL_UPDATE_FAILED = _('Model update failed.')
-    ERR_NO_MAKEPY = _('It was detected that the configuration of Femtet python macro constants has not been completed. The configuration was done automatically (python -m win32com.client.makepy FemtetMacro). Please restart the program. If the error persists, please run "py -m win32com.client.makepy FemtetMacro" or "python -m win32com.client.makepy FemtetMacro" on the command prompt.')
     ERR_FEMTET_CONNECTION_FAILED = _('Failed to connect to Femtet.')
 
     @staticmethod
