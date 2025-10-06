@@ -86,6 +86,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.core.sympify</span><span class="w"> </span><span class="kn">import</span> <span class="n">SympifyError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Min</span><span class="p">,</span> <span class="n">Max</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">Basic</span>  <span class="c1"># TODO: Add sqrt, pow</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.atmark_support_for_param_name</span><span class="w"> </span><span class="kn">import</span> <span class="n">at</span><span class="p">,</span> <span class="n">AT</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;_ExpressionFromString&#39;</span><span class="p">,</span> <span class="s1">&#39;InvalidExpression&#39;</span><span class="p">,</span> <span class="s1">&#39;SympifyError&#39;</span>
 <span class="p">]</span>
@@ -112,7 +114,12 @@
     <span class="n">_expr_str</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">_sympy_expr</span><span class="p">:</span> <span class="n">Expr</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Number</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sympy_expr</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">expression_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Number</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">sympy_expr</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">_disable_matmul_operator</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># @ を文字式で使えるように文字列中の @ を AT に変換する</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Raises:</span>
 <span class="sd">            SympifyError: Sympy が認識できない場合</span>
@@ -151,6 +158,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">expression_string</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">_disable_matmul_operator</span><span class="p">:</span>
+                <span class="n">expression_string</span> <span class="o">=</span> <span class="n">expression_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">AT</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_expr_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">expression_string</span><span class="p">)</span>
 
             <span class="c1"># max(name1, name2) など関数を入れる際に問題になるので</span>

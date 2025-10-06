@@ -503,19 +503,20 @@
             <span class="k">def</span><span class="w"> </span><span class="nf">save_history</span><span class="p">():</span>
                 <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;History saved!&#39;</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Cannot save history. &#39;</span>
-                              <span class="s1">&#39;The most common reason is &#39;</span>
-                              <span class="s1">&#39;that the csv is opened by &#39;</span>
-                              <span class="s1">&#39;another program (such as Excel). &#39;</span>
-                              <span class="s1">&#39;Please free </span><span class="si">{path}</span><span class="s1"> or lost the &#39;</span>
-                              <span class="s1">&#39;optimization history.&#39;</span><span class="p">,</span>
-                              <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">get_df</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;History saved!&#39;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Cannot save history. &#39;</span>
+                                  <span class="s1">&#39;The most common reason is &#39;</span>
+                                  <span class="s1">&#39;that the csv is opened by &#39;</span>
+                                  <span class="s1">&#39;another program (such as Excel). &#39;</span>
+                                  <span class="s1">&#39;Please free </span><span class="si">{path}</span><span class="s1"> or lost the &#39;</span>
+                                  <span class="s1">&#39;optimization history.&#39;</span><span class="p">,</span>
+                                  <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                            <span class="p">)</span>
                     <span class="k">if</span> <span class="n">entire_status</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">finished</span><span class="p">:</span>
                         <span class="k">break</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;History save thread finished!&#39;</span><span class="p">)</span>

@@ -375,19 +375,20 @@ class FEMOpt:
             def save_history():
                 while True:
                     sleep(2)
-                    try:
-                        self.opt.history.save()
-                        logger.debug('History saved!')
-                    except PermissionError:
-                        logger.error(
-                            _('Cannot save history. '
-                              'The most common reason is '
-                              'that the csv is opened by '
-                              'another program (such as Excel). '
-                              'Please free {path} or lost the '
-                              'optimization history.',
-                              path=self.opt.history.path)
-                        )
+                    if len(self.opt.history.get_df()) > 0:
+                        try:
+                            self.opt.history.save()
+                            logger.debug('History saved!')
+                        except PermissionError:
+                            logger.error(
+                                _('Cannot save history. '
+                                  'The most common reason is '
+                                  'that the csv is opened by '
+                                  'another program (such as Excel). '
+                                  'Please free {path} or lost the '
+                                  'optimization history.',
+                                  path=self.opt.history.path)
+                            )
                     if entire_status.value >= WorkerStatus.finished:
                         break
                 logger.debug('History save thread finished!')

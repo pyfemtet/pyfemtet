@@ -2,19 +2,17 @@ from pyfemtet.opt.problem.variable_manager._string_as_expression import _Express
 from pyfemtet.opt.problem.variable_manager import *
 import pytest
 from sympy import sympify
-# from numbers import Number
-# from yourmodule._variable_manager import VariableManager, ExpressionFromString, NumericVariable
 
 
 def test_internal_ExpressionFromString():
     import sympy
     from pyfemtet.opt.problem.variable_manager._variable_manager import Variable
 
-    a = Variable();
-    a.name = 'a';
+    a = Variable()
+    a.name = 'a'
     a.value = 1
-    b = Variable();
-    b.name = 'b';
+    b = Variable()
+    b.name = 'b'
     b.value = 3
     c = _ExpressionFromString('a + b')
     print(c.dependency)
@@ -261,7 +259,68 @@ def test_eval_expressions_chained_mean():
     assert vm.variables['triple_avg'].value == 12.0
 
 
+def test_atmark_support():
+    # @ は内部的に _at_ として扱われ、区別されない。
+    vm = VariableManager()
+
+    v = NumericVariable()
+    v.name = 'a@1'
+    v.value = 1
+    vm.set_variable(v)
+
+    e = ExpressionFromString()
+    e.name = 'b@plus2'
+    e._expr = e.InternalClass(f'{v.name} + 2')
+    vm.set_variable(e)
+    assert e.name == 'b_at_plus2'
+    assert vm.variables[e.name].properties['original_name'] == 'b@plus2'
+
+    e2 = ExpressionFromFunction()
+    e2.name = 'c@sum'
+    e2.fun = lambda a_at_1, b_at_plus2: a_at_1 + b_at_plus2
+    e2.args = tuple()
+    e2.kwargs = dict()
+    vm.set_variable(e2)
+
+    vm.resolve()
+    vm.eval_expressions()
+    assert vm.variables[e2.name].value == 4
+
+    v.name = 'a_at_1'
+    v.value = 1
+    vm.set_variable(v)
+
+    e = ExpressionFromFunction()
+    e.name = 'e'
+    e.fun = lambda a_at_1: a_at_1
+    e.args = tuple()
+    e.kwargs = dict()
+    vm.set_variable(e)
+
+    vm.resolve()
+    vm.eval_expressions()
+    assert vm.variables[e.name].value == 1
+
+    e = ExpressionFromString()
+    e.name = 's_at_1'
+    e._expr = ExpressionFromString.InternalClass(
+        expression_string='a@1 + c_at_sum',
+    )
+    vm.set_variable(e)
+    assert e.name == 's_at_1'
+    assert vm.variables[e.name].properties['original_name'] == 's_at_1'
+
+    vm.resolve()
+    vm.eval_expressions()
+    assert vm.variables[e.name].value == 5
+
+    d = vm.get_variables()
+    print(d)
+    assert str(d) == "{'a_at_1': 1, 'b@plus2': 3.0, 'c@sum': 4.0, 'e': 1, 's_at_1': 5.0}"
+
+
 if __name__ == '__main__':
     # test_internal_ExpressionFromString()
     # test_VariableManager()
-    test_variable_manager_expression()
+    # test_variable_manager_expression()
+    test_atmark_support()

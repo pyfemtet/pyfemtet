@@ -4,6 +4,8 @@ from sympy import sympify
 from sympy.core.sympify import SympifyError
 from sympy import Min, Max, Add, Symbol, Expr, Basic  # TODO: Add sqrt, pow
 
+from pyfemtet._util.atmark_support_for_param_name import at, AT
+
 __all__ = [
     '_ExpressionFromString', 'InvalidExpression', 'SympifyError'
 ]
@@ -27,7 +29,12 @@ class _ExpressionFromString:
     _expr_str: str
     _sympy_expr: Expr
 
-    def __init__(self, expression_string: str | Number = None, sympy_expr: Expr = None):
+    def __init__(
+            self,
+            expression_string: str | Number = None,
+            sympy_expr: Expr = None,
+            _disable_matmul_operator: bool = True,  # @ を文字式で使えるように文字列中の @ を AT に変換する
+    ):
         """
         Raises:
             SympifyError: Sympy が認識できない場合
@@ -66,6 +73,8 @@ class _ExpressionFromString:
 
         else:
             assert expression_string is not None
+            if _disable_matmul_operator:
+                expression_string = expression_string.replace(at, AT)
             self._expr_str: str = str(expression_string)
 
             # max(name1, name2) など関数を入れる際に問題になるので

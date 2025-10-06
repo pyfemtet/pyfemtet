@@ -3,12 +3,14 @@ from typing import Callable, TypeAlias, Literal
 import inspect
 from numbers import Real  # マイナーなので型ヒントには使わず isinstance で使う
 from graphlib import TopologicalSorter
+import unicodedata
 
 import numpy as np
 
 from ._string_as_expression import _ExpressionFromString
 
 from pyfemtet._i18n import _
+from pyfemtet._util.atmark_support_for_param_name import at, AT
 
 __all__ = [
     'SupportedVariableTypes',
@@ -320,13 +322,16 @@ class VariableManager:
             if filter is not None:
                 if 'pass_to_fem' in filter:
                     if var.pass_to_fem:
+                        name = var.properties.get('original_name', name)
                         raw.update({name: var})
 
                 if 'parameter' in filter:
                     if isinstance(var, Parameter):
+                        name = var.properties.get('original_name', name)
                         raw.update({name: var})
 
             else:
+                name = var.properties.get('original_name', name)
                 raw.update({name: var})
 
         if format is None:
@@ -350,3 +355,14 @@ class VariableManager:
                     format=format,
                 )
             )
+
+    def set_variable(self, variable: Variable):
+        original_name = variable.name
+        variable.properties.update(
+            {'original_name': original_name}
+        )
+        if at in variable.name:
+            variable.name = variable.name.replace(at, AT)
+        if not unicodedata.is_normalized('NFKC', variable.name):
+            variable.name = unicodedata.normalize('NFKC', variable.name)
+        self.variables.update({variable.name: variable})

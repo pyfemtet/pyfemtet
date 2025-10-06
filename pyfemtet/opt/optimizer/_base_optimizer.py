@@ -133,6 +133,8 @@ class AbstractOptimizer:
             *,
             pass_to_fem: bool = True,
     ):
+        var: Variable
+        # noinspection PyUnreachableCode
         if isinstance(value, Real):
             var = NumericVariable()
         elif isinstance(value, str):
@@ -148,7 +150,7 @@ class AbstractOptimizer:
         var.pass_to_fem = pass_to_fem
         var.properties = properties if properties is not None else {}
         _duplicated_name_check(name, self.variable_manager.variables.keys())
-        self.variable_manager.variables.update({name: var})
+        self.variable_manager.set_variable(var)
 
     def add_parameter(
             self,
@@ -176,7 +178,7 @@ class AbstractOptimizer:
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
-        self.variable_manager.variables.update({name: prm})
+        self.variable_manager.set_variable(prm)
 
     def add_expression_string(
             self,
@@ -185,14 +187,18 @@ class AbstractOptimizer:
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
+            _disable_matmul_operator: bool = True
     ) -> None:
         var = ExpressionFromString()
         var.name = name
-        var._expr = ExpressionFromString.InternalClass(expression_string=expression_string)
+        var._expr = ExpressionFromString.InternalClass(
+            expression_string=expression_string,
+            _disable_matmul_operator=_disable_matmul_operator,
+        )
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
-        self.variable_manager.variables.update({name: var})
+        self.variable_manager.set_variable(var)
 
     def add_expression_sympy(
             self,
@@ -208,7 +214,7 @@ class AbstractOptimizer:
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
-        self.variable_manager.variables.update({name: var})
+        self.variable_manager.set_variable(var)
 
     def add_expression(
             self,
@@ -228,7 +234,7 @@ class AbstractOptimizer:
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
-        self.variable_manager.variables.update({name: var})
+        self.variable_manager.set_variable(var)
 
     def add_categorical_parameter(
             self,
@@ -252,7 +258,7 @@ class AbstractOptimizer:
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
-        self.variable_manager.variables.update({name: prm})
+        self.variable_manager.set_variable(prm)
 
     def add_objective(
             self,
@@ -280,6 +286,7 @@ class AbstractOptimizer:
             kwargs: dict | None = None,
     ):
         # argument processing
+        # noinspection PyUnreachableCode
         if isinstance(names, str):
             names = [f'{names}_{i}' for i in range(n_return)]
         elif isinstance(names, Sequence):
@@ -466,7 +473,7 @@ class AbstractOptimizer:
                     raise NotImplementedError
         return violation_names
 
-    def _check_and_raise_interruption(self) -> ...:
+    def _check_and_raise_interruption(self):
         # raise Interrupt
         interrupted = self.entire_status.value >= WorkerStatus.interrupting
         if interrupted:
@@ -704,7 +711,7 @@ class AbstractOptimizer:
                 self,
                 x: TrialInput,
                 opt_: AbstractOptimizer | None = None,
-                trial_id: str =None,
+                trial_id: str = None,
         ) -> _FReturnValue | None:
             """Nothing will be raised even if infeasible."""
 

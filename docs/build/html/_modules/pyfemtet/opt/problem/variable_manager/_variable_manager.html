@@ -85,12 +85,14 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>  <span class="c1"># マイナーなので型ヒントには使わず isinstance で使う</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">graphlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">TopologicalSorter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">unicodedata</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">._string_as_expression</span><span class="w"> </span><span class="kn">import</span> <span class="n">_ExpressionFromString</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.atmark_support_for_param_name</span><span class="w"> </span><span class="kn">import</span> <span class="n">at</span><span class="p">,</span> <span class="n">AT</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;SupportedVariableTypes&#39;</span><span class="p">,</span>
@@ -430,6 +432,7 @@
         <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SupportedVariableTypes</span><span class="p">]</span>
         <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="p">):</span>
+        <span class="c1"># 参照を返す仕様を dynamic bounds で利用</span>
 
         <span class="n">raw</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -438,13 +441,16 @@
             <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;pass_to_fem&#39;</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span><span class="p">:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;original_name&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                         <span class="n">raw</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
 
                 <span class="k">if</span> <span class="s1">&#39;parameter&#39;</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;original_name&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                         <span class="n">raw</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
 
             <span class="k">else</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;original_name&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                 <span class="n">raw</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -468,6 +474,20 @@
                     <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariableManager.set_variable">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.VariableManager.set_variable">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">:</span> <span class="n">Variable</span><span class="p">):</span>
+        <span class="n">original_name</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">variable</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span><span class="s1">&#39;original_name&#39;</span><span class="p">:</span> <span class="n">original_name</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">variable</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">AT</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">is_normalized</span><span class="p">(</span><span class="s1">&#39;NFKC&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">variable</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;NFKC&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">variable</span><span class="p">})</span></div>
 </div>
 
 </pre></div>

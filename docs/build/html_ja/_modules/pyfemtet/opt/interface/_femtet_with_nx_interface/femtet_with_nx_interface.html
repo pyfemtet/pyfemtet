@@ -140,12 +140,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">export_solids</span> <span class="o">=</span> <span class="n">export_solids</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">export_flattened_assembly</span> <span class="o">=</span> <span class="n">export_flattened_assembly</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_distribute_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">])</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distribute_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span><span class="p">],</span> <span class="n">scheduler_address</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># get suffix</span>
-        <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_index_from_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_suffix</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
 
         <span class="c1"># rename and get worker path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prt_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_and_get_path_on_worker_space</span><span class="p">(</span>
@@ -273,9 +273,9 @@
             <span class="n">export_flattened_assembly</span><span class="o">=</span><span class="n">export_flattened_assembly</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">_NXInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="p">)</span>
+        <span class="n">_NXInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>

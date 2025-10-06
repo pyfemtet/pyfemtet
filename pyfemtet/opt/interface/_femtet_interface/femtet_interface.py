@@ -7,13 +7,13 @@ import sys
 import subprocess
 from time import sleep
 from contextlib import nullcontext
+import importlib
 
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error, error
 # noinspection PyUnresolvedReferences
 from pythoncom import CoInitialize, CoUninitialize
-# noinspection PyUnresolvedReferences
-from win32com.client import constants
+from win32com.client import constants, Dispatch
 import win32con
 import win32gui
 
@@ -353,6 +353,8 @@ class FemtetInterface(COMInterface):
             it will not try existing another Femtet process.
 
         """
+        # noinspection PyGlobalUndefined
+        global constants
 
         if connect_method == "new":
             self._connect_new_femtet()
@@ -373,32 +375,39 @@ class FemtetInterface(COMInterface):
         if not hasattr(constants, "STATIC_C"):
             cmd = f"{sys.executable} -m win32com.client.makepy FemtetMacro"
             subprocess.run(cmd, shell=True)
+            sleep(1)
 
-            message = _(
-                en_message='It was detected that the configuration of '
-                           'Femtet python macro constants has not been '
-                           'completed. The configuration was done '
-                           'automatically '
-                           '(python -m win32com.client.makepy FemtetMacro). '
-                           'Please restart the program. '
-                           'If the error persists, please run '
-                           '"py -m win32com.client.makepy FemtetMacro" '
-                           'or "python -m win32com.client.makepy FemtetMacro" '
-                           'on the command prompt.',
-                jp_message='Femtet Pythonマクロ定数の設定が完了していない'
-                           'ことが検出されました。設定は自動で行われました'
-                           '(py -m win32com.client.makepy FemtetMacro)。 '
-                           'プログラムを再起動してください。'
-                           'エラーが解消されない場合は、'
-                           '"py -m win32com.client.makepy FemtetMacro" か '
-                           '"python -m win32com.client.makepy FemtetMacro" '
-                           'コマンドをコマンドプロンプトで実行してください。'
-            )
+            import win32com.client
+            importlib.reload(win32com.client)
+            from win32com.client import Dispatch, constants
+            Dispatch('FemtetMacro.Femtet')
 
-            logger.error("================")
-            logger.error(message)
-            logger.error("================")
-            raise RuntimeError(message)
+            if not hasattr(constants, "STATIC_C"):
+                message = _(
+                    en_message='It was detected that the configuration of '
+                               'Femtet python macro constants has not been '
+                               'completed. The configuration was done '
+                               'automatically '
+                               '(python -m win32com.client.makepy FemtetMacro). '
+                               'Please restart the program. '
+                               'If the error persists, please run '
+                               '"py -m win32com.client.makepy FemtetMacro" '
+                               'or "python -m win32com.client.makepy FemtetMacro" '
+                               'on the command prompt.',
+                    jp_message='Femtet Pythonマクロ定数の設定が完了していない'
+                               'ことが検出されました。設定は自動で行われました'
+                               '(py -m win32com.client.makepy FemtetMacro)。 '
+                               'プログラムを再起動してください。'
+                               'エラーが解消されない場合は、'
+                               '"py -m win32com.client.makepy FemtetMacro" か '
+                               '"python -m win32com.client.makepy FemtetMacro" '
+                               'コマンドをコマンドプロンプトで実行してください。'
+                )
+
+                logger.error("================")
+                logger.error(message)
+                logger.error("================")
+                raise RuntimeError(message)
 
         if self.Femtet is None:
             raise RuntimeError(_(
