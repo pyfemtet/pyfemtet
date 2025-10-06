@@ -110,6 +110,8 @@
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.BoTorchInterface">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BoTorchInterface</span><span class="p">(</span><span class="n">AbstractSurrogateModelInterfaceBase</span><span class="p">):</span>
 
+    <span class="n">current_obj_std_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">history_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -129,6 +131,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">SingleTaskGPModel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pyfemtet_model</span> <span class="o">=</span> <span class="n">PyFemtetModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_std_values</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># get main only</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
@@ -150,11 +153,13 @@
         <span class="c1"># update current objective values</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">variable</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_prm_values</span><span class="o">.</span><span class="n">values</span><span class="p">()]])</span>
 
-        <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyfemtet_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyfemtet_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj_value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">obj_value</span><span class="p">})</span></div>
+        <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj_value</span><span class="p">,</span> <span class="n">obj_std</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">obj_value</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_std_values</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">obj_std</span><span class="p">})</span></div>
 </div>
 
 
@@ -193,6 +198,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">train_history_c</span><span class="o">.</span><span class="n">load_csv</span><span class="p">(</span><span class="n">history_path</span><span class="p">,</span> <span class="n">with_finalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pof_threshold</span> <span class="o">=</span> <span class="mf">0.5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feasibility_cdf_threshold</span> <span class="o">=</span> <span class="n">feasibility_cdf_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_std_values</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># use feasibility as a single objective</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_history_c</span><span class="o">.</span><span class="n">obj_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;feasibility&#39;</span><span class="p">]</span>

@@ -125,6 +125,20 @@
 <span class="n">_MESSAGE_ENQUEUED</span> <span class="o">=</span> <span class="s1">&#39;Enqueued trial.&#39;</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">check_float_and_raise</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">check_target</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="n">en_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">check_target</span><span class="si">}</span><span class="s1"> is NaN.&#39;</span><span class="p">,</span>
+                <span class="n">jp_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">check_target</span><span class="si">}</span><span class="s1"> は NaN です。&#39;</span><span class="p">,</span>
+            <span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+            <span class="n">en_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">check_target</span><span class="si">}</span><span class="s1"> should be a number, but </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s1">) passed.&#39;</span><span class="p">,</span>
+            <span class="n">jp_message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">check_target</span><span class="si">}</span><span class="s1"> は数値でなくてはなりませんが、</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s1">) が与えられました。&#39;</span><span class="p">,</span>
+        <span class="p">))</span>
+
+
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxTrialsCallbackExcludingEnqueued</span><span class="p">(</span><span class="n">MaxTrialsCallback</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">:</span> <span class="n">Study</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">FrozenTrial</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -253,14 +267,31 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">initial_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">lower_bound</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">upper_bound</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dynamic_bounds_fun&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;When using `OptunaOptimizer`, you must either specify `lower_bound` and `upper_bound`, &#39;</span> \
+                               <span class="s1">&#39;or include `dynamic_bounds_fun` (Callable[[AbstractOptimizer], float]) in `properties`.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;OptunaOptimizer では、lower_bound と upper_bound を両方指定するか、&#39;</span> \
+                               <span class="s1">&#39;または properties に dynamic_bounds_fun (Callable[[AbstractOptimizer], float]) &#39;</span> \
+                               <span class="s1">&#39;を含めなければなりません。&#39;</span>
+                <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;`dynamic_bounds_fun` is under development. The functionally can be changed without any announcement.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;dynamic_bounds_fun は開発中の機能です。機能は予告なく変更されることがあります。&#39;</span><span class="p">,</span>
+                <span class="p">))</span>
+
         <span class="n">AbstractOptimizer</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">initial_value</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span>
                                         <span class="n">pass_to_fem</span><span class="o">=</span><span class="n">pass_to_fem</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="n">fix</span><span class="p">)</span></div>
 
@@ -361,6 +392,13 @@
                     <span class="k">continue</span>
 
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prm</span><span class="p">,</span> <span class="n">NumericParameter</span><span class="p">):</span>
+                    <span class="n">dynamic_bounds_fun</span> <span class="o">=</span> <span class="n">prm</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dynamic_bounds_fun&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dynamic_bounds_fun</span><span class="p">:</span>
+                        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">dynamic_bounds_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                        <span class="n">check_float_and_raise</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;lower_bound of </span><span class="si">{</span><span class="n">prm</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prm</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> の lower_bound&#39;</span><span class="p">))</span>
+                        <span class="n">check_float_and_raise</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;upper_bound of </span><span class="si">{</span><span class="n">prm</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prm</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> の upper_bound&#39;</span><span class="p">))</span>
+                        <span class="n">prm</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="n">lb</span>
+                        <span class="n">prm</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="n">ub</span>
                     <span class="n">prm</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span>
                         <span class="n">name</span><span class="p">,</span>
                         <span class="n">prm</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span>

@@ -89,13 +89,13 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
 
 <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pywintypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">com_error</span><span class="p">,</span> <span class="n">error</span>
 <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pythoncom</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoInitialize</span><span class="p">,</span> <span class="n">CoUninitialize</span>
-<span class="c1"># noinspection PyUnresolvedReferences</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">Dispatch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">win32con</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">win32gui</span>
 
@@ -283,8 +283,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_distribute_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">])</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distribute_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">],</span> <span class="n">scheduler_address</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
@@ -295,7 +295,7 @@
 
         <span class="c1"># worker space の femprj に切り替える</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_index_from_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_suffix</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_and_get_path_on_worker_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_femprj_path</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
 
         <span class="c1"># dask process ならば Femtet を起動</span>
@@ -451,6 +451,8 @@
 <span class="sd">            it will not try existing another Femtet process.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># noinspection PyGlobalUndefined</span>
+        <span class="k">global</span> <span class="n">constants</span>
 
         <span class="k">if</span> <span class="n">connect_method</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_connect_new_femtet</span><span class="p">()</span>
@@ -471,32 +473,39 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">constants</span><span class="p">,</span> <span class="s2">&quot;STATIC_C&quot;</span><span class="p">):</span>
             <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s2"> -m win32com.client.makepy FemtetMacro&quot;</span>
             <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-            <span class="n">message</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span>
-                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;It was detected that the configuration of &#39;</span>
-                           <span class="s1">&#39;Femtet python macro constants has not been &#39;</span>
-                           <span class="s1">&#39;completed. The configuration was done &#39;</span>
-                           <span class="s1">&#39;automatically &#39;</span>
-                           <span class="s1">&#39;(python -m win32com.client.makepy FemtetMacro). &#39;</span>
-                           <span class="s1">&#39;Please restart the program. &#39;</span>
-                           <span class="s1">&#39;If the error persists, please run &#39;</span>
-                           <span class="s1">&#39;&quot;py -m win32com.client.makepy FemtetMacro&quot; &#39;</span>
-                           <span class="s1">&#39;or &quot;python -m win32com.client.makepy FemtetMacro&quot; &#39;</span>
-                           <span class="s1">&#39;on the command prompt.&#39;</span><span class="p">,</span>
-                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Femtet Pythonマクロ定数の設定が完了していない&#39;</span>
-                           <span class="s1">&#39;ことが検出されました。設定は自動で行われました&#39;</span>
-                           <span class="s1">&#39;(py -m win32com.client.makepy FemtetMacro)。 &#39;</span>
-                           <span class="s1">&#39;プログラムを再起動してください。&#39;</span>
-                           <span class="s1">&#39;エラーが解消されない場合は、&#39;</span>
-                           <span class="s1">&#39;&quot;py -m win32com.client.makepy FemtetMacro&quot; か &#39;</span>
-                           <span class="s1">&#39;&quot;python -m win32com.client.makepy FemtetMacro&quot; &#39;</span>
-                           <span class="s1">&#39;コマンドをコマンドプロンプトで実行してください。&#39;</span>
-            <span class="p">)</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">win32com.client</span>
+            <span class="n">importlib</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dispatch</span><span class="p">,</span> <span class="n">constants</span>
+            <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">)</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;================&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;================&quot;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">constants</span><span class="p">,</span> <span class="s2">&quot;STATIC_C&quot;</span><span class="p">):</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;It was detected that the configuration of &#39;</span>
+                               <span class="s1">&#39;Femtet python macro constants has not been &#39;</span>
+                               <span class="s1">&#39;completed. The configuration was done &#39;</span>
+                               <span class="s1">&#39;automatically &#39;</span>
+                               <span class="s1">&#39;(python -m win32com.client.makepy FemtetMacro). &#39;</span>
+                               <span class="s1">&#39;Please restart the program. &#39;</span>
+                               <span class="s1">&#39;If the error persists, please run &#39;</span>
+                               <span class="s1">&#39;&quot;py -m win32com.client.makepy FemtetMacro&quot; &#39;</span>
+                               <span class="s1">&#39;or &quot;python -m win32com.client.makepy FemtetMacro&quot; &#39;</span>
+                               <span class="s1">&#39;on the command prompt.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;Femtet Pythonマクロ定数の設定が完了していない&#39;</span>
+                               <span class="s1">&#39;ことが検出されました。設定は自動で行われました&#39;</span>
+                               <span class="s1">&#39;(py -m win32com.client.makepy FemtetMacro)。 &#39;</span>
+                               <span class="s1">&#39;プログラムを再起動してください。&#39;</span>
+                               <span class="s1">&#39;エラーが解消されない場合は、&#39;</span>
+                               <span class="s1">&#39;&quot;py -m win32com.client.makepy FemtetMacro&quot; か &#39;</span>
+                               <span class="s1">&#39;&quot;python -m win32com.client.makepy FemtetMacro&quot; &#39;</span>
+                               <span class="s1">&#39;コマンドをコマンドプロンプトで実行してください。&#39;</span>
+                <span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;================&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;================&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>

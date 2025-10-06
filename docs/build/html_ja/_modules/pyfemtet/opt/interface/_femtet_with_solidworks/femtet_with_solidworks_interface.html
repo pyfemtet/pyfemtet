@@ -165,9 +165,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_param_and_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">SolidworksInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">SolidworksInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="p">)</span>
+        <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">SolidworksInterface</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
