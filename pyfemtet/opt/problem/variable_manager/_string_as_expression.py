@@ -1,14 +1,30 @@
+import re
 from numbers import Number
 
 from sympy import sympify
 from sympy.core.sympify import SympifyError
 from sympy import Min, Max, Add, Symbol, Expr, Basic  # TODO: Add sqrt, pow
 
-from pyfemtet._util.atmark_support_for_param_name import at, AT
+from pyfemtet._util.symbol_support_for_param_name import convert_symbols
 
 __all__ = [
     '_ExpressionFromString', 'InvalidExpression', 'SympifyError'
 ]
+
+
+def _convert(expr_str):
+    """ \" で囲まれた部分があれば記号を置き換える """
+
+    def repl(m: re.Match) -> str:
+        inner = m.group(1)
+        return f'"{convert_symbols(inner)}"'
+
+    # 非貪欲で " 内だけを拾う
+    expr_str = re.sub(r'"(.+?)"', repl, expr_str)
+    # " を消す
+    expr_str = expr_str.replace('"', '')
+
+    return expr_str
 
 
 class InvalidExpression(Exception):
@@ -33,7 +49,6 @@ class _ExpressionFromString:
             self,
             expression_string: str | Number = None,
             sympy_expr: Expr = None,
-            _disable_matmul_operator: bool = True,  # @ を文字式で使えるように文字列中の @ を AT に変換する
     ):
         """
         Raises:
@@ -61,6 +76,10 @@ class _ExpressionFromString:
             e.expr  # '1.0'
             e.value  # 1.0
 
+            # To use "-", "@" and "." for name
+            e = Expression('"Sample-1.0@Part1" * 2')
+            e.expr  # 'Sample_hyphen_1_dot_0_at_Part1 * 2'
+
         """
 
         # check
@@ -73,9 +92,7 @@ class _ExpressionFromString:
 
         else:
             assert expression_string is not None
-            if _disable_matmul_operator:
-                expression_string = expression_string.replace(at, AT)
-            self._expr_str: str = str(expression_string)
+            self._expr_str: str = _convert(str(expression_string))
 
             # max(name1, name2) など関数を入れる際に問題になるので
             # 下記の仕様は廃止、使い方として数値桁区切り , を入れてはいけない
@@ -83,7 +100,7 @@ class _ExpressionFromString:
             # # 日本人が数値に , を使うとき Python では _ を意味する
             # # expression に _ が入っていても構わない
             # tmp_expr = str(self._expr_str).replace(',', '_')
-            self._sympy_expr = sympify(self._expr_str, locals=get_valid_functions())
+            self._sympy_expr = sympify(self._expr_str, locals=get_valid_functions())  # noqa
 
         if not isinstance(self._sympy_expr, Basic):
             raise InvalidExpression(f'{self._expr_str} は数式ではありません。')
@@ -110,12 +127,12 @@ class _ExpressionFromString:
                     in dependency_values.values()]), \
             'ExpressionFromString では数値変数のみをサポートしています。'
 
-        re_sympy_expr = sympify(
+        re_sympy_expr = sympify(  # noqa
             self.expression_string,
             locals=get_valid_functions(dependency_values),
         )
 
-        evaluated_sympy_obj = re_sympy_expr.subs(dependency_values)
+        evaluated_sympy_obj = re_sympy_expr.subs(dependency_values)  # noqa
         try:
             evaluated_value = float(evaluated_sympy_obj)
         except (ValueError, TypeError) as e:
