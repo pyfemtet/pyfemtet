@@ -10,7 +10,7 @@ import numpy as np
 from ._string_as_expression import _ExpressionFromString
 
 from pyfemtet._i18n import _
-from pyfemtet._util.atmark_support_for_param_name import at, AT
+from pyfemtet._util.symbol_support_for_param_name import convert_symbols
 
 __all__ = [
     'SupportedVariableTypes',
@@ -361,8 +361,7 @@ class VariableManager:
         variable.properties.update(
             {'original_name': original_name}
         )
-        if at in variable.name:
-            variable.name = variable.name.replace(at, AT)
+        variable.name = convert_symbols(variable.name)
         if not unicodedata.is_normalized('NFKC', variable.name):
             variable.name = unicodedata.normalize('NFKC', variable.name)
         self.variables.update({variable.name: variable})

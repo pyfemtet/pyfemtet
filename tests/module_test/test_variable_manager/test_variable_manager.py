@@ -304,7 +304,7 @@ def test_atmark_support():
     e = ExpressionFromString()
     e.name = 's_at_1'
     e._expr = ExpressionFromString.InternalClass(
-        expression_string='a@1 + c_at_sum',
+        expression_string='"a@1" + c_at_sum',
     )
     vm.set_variable(e)
     assert e.name == 's_at_1'
@@ -317,6 +317,35 @@ def test_atmark_support():
     d = vm.get_variables()
     print(d)
     assert str(d) == "{'a_at_1': 1, 'b@plus2': 3.0, 'c@sum': 4.0, 'e': 1, 's_at_1': 5.0}"
+
+    f = ExpressionFromString()
+    f.name = 'Param-1.0@Sample'
+    f._expr = ExpressionFromString.InternalClass(
+        expression_string='"a@1" + c_at_sum',
+    )
+    vm.set_variable(f)
+
+    g = ExpressionFromString()
+    g.name = 'Param-1.1@Sample'
+    g._expr = ExpressionFromString.InternalClass(
+        expression_string='"Param-1.0@Sample" + "a@1"',
+    )
+    vm.set_variable(g)
+
+    h = ExpressionFromFunction()
+    h.name = 'h'
+    h.fun = lambda Param_hyphen_1_dot_1_at_Sample: Param_hyphen_1_dot_1_at_Sample * 2
+    h.args = tuple()
+    h.kwargs = dict()
+    vm.set_variable(h)
+
+    vm.resolve()
+    vm.eval_expressions()
+
+    d = vm.get_variables()
+    print(d)
+    assert str(d) == ("{'a_at_1': 1, 'b@plus2': 3.0, 'c@sum': 4.0, 'e': 1, 's_at_1': 5.0, "
+                      "'Param-1.0@Sample': 5.0, 'Param-1.1@Sample': 6.0, 'h': 12.0}")
 
 
 if __name__ == '__main__':
