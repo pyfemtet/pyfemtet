@@ -110,44 +110,69 @@ class ParametricResultCSVProcessor:
         df['row_num'] = range(2, len(df) + 2)  # row=0 は header, excel は 1 始まり
 
         # 「結果出力設定番号」カラムが存在するか
-        if '結果出力設定番号' in df.columns:  # TODO: 英語版対応
+        key = '結果出力設定番号'
+        key_en = ' Output setting Number'
 
-            # 与えられた output_number に関連する行だけ抜き出し
-            # エラーがあるかどうかチェックする
-            idx = df['結果出力設定番号'] == parametric_output_index + 1
-            pdf = df[idx]
+        def get_pdf(key_, key_en_):
+            if key_ in df.columns:
 
-        # 結果出力設定番号 カラムが存在しない
-        else:
-            # output_number に関係なくエラーがあればエラーにする
-            pdf = df
+                # 与えられた output_number に関連する行だけ抜き出し
+                # エラーがあるかどうかチェックする
+                idx = df[key_] == parametric_output_index + 1
+                pdf_ = df[idx]
+
+            elif key_en_ in df.columns:
+                idx = df[key_en_] == parametric_output_index + 1
+                pdf_ = df[idx]
+
+            # 結果出力設定番号 カラムが存在しない
+            else:
+                # output_number に関係なくエラーがあればエラーにする
+                pdf_ = df
+
+            return pdf_
+
+        pdf = get_pdf(key, key_en)
 
         # エラーの有無を確認
-        if 'エラー' in pdf.columns:  # TODO: 英語版対応
-            is_no_error = np.all(pdf['エラー'].isna().values)
+        key = 'エラー'
 
-            if not is_no_error:
-                error_message_row_numbers = pdf['row_num'][~pdf['エラー'].isna()].values.astype(str)
-                error_messages = pdf['エラー'][~pdf['エラー'].isna()].values.astype(str)
+        def handle_error(key_):
+            if key_ in pdf.columns:
+                is_no_error_ = np.all(pdf[key_].isna().values)
 
-                def add_st_or_nd_or_th(n_: int):
-                    if n_ == 1:
-                        return f'{n_}st'
-                    elif n_ == 2:
-                        return f'{n_}nd'
-                    elif n_ == 3:
-                        return f'{n_}rd'
-                    else:
-                        return f'{n_}th'
+                if not is_no_error_:
+                    error_message_row_numbers = pdf['row_num'][~pdf[key_].isna()].values.astype(str)
+                    error_messages = pdf[key_][~pdf[key_].isna()].values.astype(str)
 
-                error_msg = f'Error message(s) from {os.path.basename(table_csv_path)}: ' + ', '.join(
-                    [f'({add_st_or_nd_or_th(row)} row) {message}'
-                     for row, message in zip(error_message_row_numbers, error_messages)])
+                    def add_st_or_nd_or_th(n_: int):
+                        if n_ == 1:
+                            return f'{n_}st'
+                        elif n_ == 2:
+                            return f'{n_}nd'
+                        elif n_ == 3:
+                            return f'{n_}rd'
+                        else:
+                            return f'{n_}th'
+
+                    error_msg_ = f'Error message(s) from {os.path.basename(table_csv_path)}: ' + ', '.join(
+                        [f'({add_st_or_nd_or_th(row)} row) {message}'
+                         for row, message in zip(error_message_row_numbers, error_messages)])
+                else:
+                    error_msg_ = None
+
+                return is_no_error_, error_msg_
+
             else:
-                error_msg = None
+                return None, 'NO_KEY'
 
-        else:
-            raise RuntimeError('Internal Error! Parametric Analysis '
+        is_no_error, error_msg = handle_error(key)
+
+        if error_msg == 'NO_KEY':
+            key = ' Error'
+            is_no_error, error_msg = handle_error(key)
+            if error_msg == 'NO_KEY':
+                assert False, ('Internal Error! Parametric Analysis '
                                'output csv has no error column.')
 
         return is_no_error, error_msg
