@@ -23,6 +23,7 @@ remove_all_output(get_dask_logger())
 warnings.filterwarnings('ignore', category=RuntimeWarning, message="Couldn't detect a suitable IP address")
 
 cfg.set({'distributed.scheduler.worker-ttl': None})
+cfg.set({"distributed.scheduler.locks.lease-timeout": "inf"})
 
 logger = get_module_logger('opt.dask', False)
 
@@ -62,9 +63,7 @@ def Lock(name, client=None):
 
     if client is not None:
         # import inspect
-        # logger.debug(f'{name}, {[stack.function for stack in inspect.stack()[1:]]}')
-        with cfg.set({"distributed.scheduler.locks.lease-timeout": "inf"}):
-            _lock = _DaskLock(name)
+        _lock = _DaskLock(name)
 
     else:
         if name in _lock_pool:

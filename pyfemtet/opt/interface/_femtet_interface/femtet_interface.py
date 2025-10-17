@@ -354,7 +354,7 @@ class FemtetInterface(COMInterface):
 
         """
         # noinspection PyGlobalUndefined
-        global constants
+        global constants, Dispatch
 
         if connect_method == "new":
             self._connect_new_femtet()
@@ -379,8 +379,9 @@ class FemtetInterface(COMInterface):
 
             import win32com.client
             importlib.reload(win32com.client)
-            from win32com.client import Dispatch, constants
+            Dispatch = win32com.client.Dispatch
             Dispatch('FemtetMacro.Femtet')
+            constants = win32com.client.constants
 
             if not hasattr(constants, "STATIC_C"):
                 message = _(
