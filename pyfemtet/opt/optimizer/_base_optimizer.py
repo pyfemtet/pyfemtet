@@ -187,13 +187,11 @@ class AbstractOptimizer:
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
-            _disable_matmul_operator: bool = True
     ) -> None:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(
             expression_string=expression_string,
-            _disable_matmul_operator=_disable_matmul_operator,
         )
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
