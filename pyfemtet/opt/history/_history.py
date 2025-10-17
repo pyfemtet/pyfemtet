@@ -9,8 +9,7 @@ import math
 import json
 import datetime
 import dataclasses
-from time import sleep
-from contextlib import nullcontext
+from time import sleep, time
 
 import numpy as np
 import pandas as pd
@@ -51,6 +50,16 @@ MAIN_FILTER: dict = {
 
 
 logger = get_module_logger('opt.history', False)
+logger_dask = get_module_logger('opt.dask', False)
+
+
+def _assert_locked_with_timeout(lock, assertion_message=None, timeout=10.):
+    start = time()
+    while not lock.locked():
+        sleep(0.5)
+        if time() - start > timeout:
+            assert False, assertion_message or "Lock is not acquired."
+        logger_dask.debug("Lock is not acquired. Retry to check locked.")
 
 
 class MetaColumnNames(StrEnum):
@@ -153,13 +162,6 @@ class DataFrameWrapper:
     def lock(self):
         return Lock(self._lock_name)
 
-    @property
-    def lock_if_not_locked(self):
-        if self.lock.locked():
-            return nullcontext()
-        else:
-            return self.lock
-
     def get_df(self, equality_filters: dict = None) -> pd.DataFrame:
         """
 
@@ -235,7 +237,7 @@ class DataFrameWrapper:
         # partial_df を get_df した時点のものから
         # 変わっていたらエラーになる
         if equality_filters is not None:
-            assert self.lock.locked(), 'set_df() with equality_filters must be called with locking.'
+            _assert_locked_with_timeout(self.lock, 'set_df() with equality_filters must be called with locking.')
             partial_df = df
             df = self.get_df()
             apply_partial_df(df, partial_df, equality_filters)
@@ -796,7 +798,7 @@ class EntireDependentValuesCalculator:
         self.entire_df: pd.DataFrame = entire_df
         self.partial_df: pd.DataFrame = get_partial_df(entire_df, equality_filters)
 
-        assert self.records.df_wrapper.lock.locked()
+        _assert_locked_with_timeout(self.records.df_wrapper.lock)
 
         # get column names
         obj_names = self.records.column_manager.get_obj_names()
@@ -826,7 +828,7 @@ class EntireDependentValuesCalculator:
 
     def update_optimality(self):
 
-        assert self.records.df_wrapper.lock.locked()
+        _assert_locked_with_timeout(self.records.df_wrapper.lock)
 
         # calc optimality
         optimality = calc_optimality(
@@ -839,7 +841,7 @@ class EntireDependentValuesCalculator:
 
     def update_hypervolume(self):
 
-        assert self.records.df_wrapper.lock.locked()
+        _assert_locked_with_timeout(self.records.df_wrapper.lock)
 
         # calc hypervolume
         hv_values = calc_hypervolume(
@@ -853,7 +855,7 @@ class EntireDependentValuesCalculator:
 
     def update_trial_number(self):
 
-        assert self.records.df_wrapper.lock.locked()
+        _assert_locked_with_timeout(self.records.df_wrapper.lock)
 
         # calc trial
         trial_number = 1 + np.arange(len(self.partial_df)).astype(int)
@@ -1139,45 +1141,45 @@ class Records:
 
     def update_entire_dependent_values(self, processing_df: pd.DataFrame):
 
-        with self.df_wrapper.lock_if_not_locked:
+        _assert_locked_with_timeout(self.df_wrapper.lock)
 
-            # check trial_id is filled
-            trial_processed = False
-            if processing_df['trial_id'].notna().all():
-                id_to_n: dict = {tid: i + 1 for i, tid
-                                 in enumerate(processing_df['trial_id'].unique())}
-                processing_df['trial'] = processing_df['trial_id'].map(id_to_n)
-                trial_processed = True
+        # check trial_id is filled
+        trial_processed = False
+        if processing_df['trial_id'].notna().all():
+            id_to_n: dict = {tid: i + 1 for i, tid
+                             in enumerate(processing_df['trial_id'].unique())}
+            processing_df['trial'] = processing_df['trial_id'].map(id_to_n)
+            trial_processed = True
 
-            # update main fidelity
-            equality_filters = MAIN_FILTER
+        # update main fidelity
+        equality_filters = MAIN_FILTER
+        mgr = EntireDependentValuesCalculator(
+            self,
+            equality_filters,
+            processing_df,
+        )
+        mgr.update_optimality()
+        mgr.update_hypervolume()
+        if not trial_processed:
+            mgr.update_trial_number()  # per_fidelity
+        pdf = mgr.partial_df
+        apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
+
+        # update sub fidelity
+        sub_fidelity_names: list = np.unique(processing_df['sub_fidelity_name']).tolist()
+        if MAIN_FIDELITY_NAME in sub_fidelity_names:
+            sub_fidelity_names.remove(MAIN_FIDELITY_NAME)
+        for sub_fidelity_name in sub_fidelity_names:
+            equality_filters = {'sub_fidelity_name': sub_fidelity_name}
             mgr = EntireDependentValuesCalculator(
                 self,
                 equality_filters,
-                processing_df,
+                processing_df
             )
-            mgr.update_optimality()
-            mgr.update_hypervolume()
             if not trial_processed:
                 mgr.update_trial_number()  # per_fidelity
-            pdf = mgr.partial_df
-            apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
-
-            # update sub fidelity
-            sub_fidelity_names: list = np.unique(processing_df['sub_fidelity_name']).tolist()
-            if MAIN_FIDELITY_NAME in sub_fidelity_names:
-                sub_fidelity_names.remove(MAIN_FIDELITY_NAME)
-            for sub_fidelity_name in sub_fidelity_names:
-                equality_filters = {'sub_fidelity_name': sub_fidelity_name}
-                mgr = EntireDependentValuesCalculator(
-                    self,
-                    equality_filters,
-                    processing_df
-                )
-                if not trial_processed:
-                    mgr.update_trial_number()  # per_fidelity
-            pdf = mgr.partial_df
-            apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
+        pdf = mgr.partial_df
+        apply_partial_df(df=processing_df, partial_df=pdf, equality_filters=equality_filters)
 
 
 class History:
