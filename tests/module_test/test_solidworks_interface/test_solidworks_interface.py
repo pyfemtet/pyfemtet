@@ -171,14 +171,9 @@ def _impl_sldasm():
 
     fem.close()
 
-    reference = {'"D1@ﾎﾞｽ - 押し出し1"="base_thickness"', '"D1@ｽｹｯﾁ1"= "cylinder_diameter"', '"common_variable" = 2',
-                 '"D3@ﾛｰｶﾙ直線ﾊﾟﾀｰﾝ1"= "array_gap" + "D2@ｽｹｯﾁ2@base-1.Part@Assem1-2.Assembly"',
-                 '"D4@ｽｹｯﾁ2"="base_size" / 2', '"D1@ｽｹｯﾁ2"="base_size"', '"cylinder_diameter" = 3',
-                 '"D3@ｽｹｯﾁ2"="base_size" / 2', '"array_gap" = 10', '"gap" = 0.25', '"D2@ｽｹｯﾁ2"="base_size"',
-                 '"base_size" = 15', '"base_thickness" = 0.5',
-                 '"D5@ｽｹｯﾁ2@base-1.Part"= "D1@ｽｹｯﾁ1@cylinder-1.Part" + "gap"'}
+    reference = ['"array_gap" = 10', '"D3@ﾛｰｶﾙ直線ﾊﾟﾀｰﾝ1"= "array_gap" + "D2@ｽｹｯﾁ2@base-1.Part@Assem1-2.Assembly"', '"common_variable" = 2', '"test"= "D3@ﾛｰｶﾙ直線ﾊﾟﾀｰﾝ1"', '"trtr.3"= "D2@ｽｹｯﾁ2@base-1.Part@Assem1-2.Assembly"', '"gap" = 0.25', '"D5@ｽｹｯﾁ2@base-1.Part"= "D1@ｽｹｯﾁ1@cylinder-1.Part" + "gap"', '"ret"= "D5@ｽｹｯﾁ2@base-1.Part"', '"D1@ｽｹｯﾁ1@cylinder-1.Part" = 0.5', '"cylinder_diameter" = 3', '"common_variable" = 2', '"D1@ｽｹｯﾁ1"= "cylinder_diameter"', '"base_size" = 15', '"D1@ｽｹｯﾁ2"="base_size"', '"D2@ｽｹｯﾁ2"="base_size"', '"D3@ｽｹｯﾁ2"="base_size" / 2', '"D4@ｽｹｯﾁ2"="base_size" / 2', '"base_thickness" = 0.5', '"D1@ﾎﾞｽ - 押し出し1"="base_thickness"', '"common_variable" = 2', '"gap" = 0.25', '"D5@ｽｹｯﾁ2@base-1.Part"= "D1@ｽｹｯﾁ1@cylinder-1.Part" + "gap"', '"ret"= "D5@ｽｹｯﾁ2@base-1.Part"', '"D1@ｽｹｯﾁ1@cylinder-1.Part" = 0.5', '"cylinder_diameter" = 3', '"common_variable" = 2', '"D1@ｽｹｯﾁ1"= "cylinder_diameter"', '"base_size" = 15', '"D1@ｽｹｯﾁ2"="base_size"', '"D2@ｽｹｯﾁ2"="base_size"', '"D3@ｽｹｯﾁ2"="base_size" / 2', '"D4@ｽｹｯﾁ2"="base_size" / 2', '"base_thickness" = 0.5', '"D1@ﾎﾞｽ - 押し出し1"="base_thickness"', '"common_variable" = 2', '"gap" = 0.25', '"D5@ｽｹｯﾁ2@base-1.Part"= "D1@ｽｹｯﾁ1@cylinder-1.Part" + "gap"', '"ret"= "D5@ｽｹｯﾁ2@base-1.Part"', '"D1@ｽｹｯﾁ1@cylinder-1.Part" = 0.5', '"cylinder_diameter" = 3', '"common_variable" = 2', '"D1@ｽｹｯﾁ1"= "cylinder_diameter"', '"base_size" = 15', '"D1@ｽｹｯﾁ2"="base_size"', '"D2@ｽｹｯﾁ2"="base_size"', '"D3@ｽｹｯﾁ2"="base_size" / 2', '"D4@ｽｹｯﾁ2"="base_size" / 2', '"base_thickness" = 0.5', '"D1@ﾎﾞｽ - 押し出し1"="base_thickness"', '"common_variable" = 2']
 
-    assert set(out) == reference
+    assert sorted(out) == sorted(reference)
 
 
 def test_sldasm():
@@ -186,7 +181,7 @@ def test_sldasm():
 
 
 if __name__ == '__main__':
-    # test_solidworks_interface_update()
-    # test_femtet_with_solidworks_interface()
+    _impl_solidworks_interface_update()
+    _impl_femtet_with_solidworks_interface()
     _impl_parallel_femtet_with_solidworks()
     _impl_sldasm()
