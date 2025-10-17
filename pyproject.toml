@@ -22,7 +22,7 @@ dependencies = [
     "pandas>=2.2.3,<3",
     "openpyxl>=3.1.2,<4",
     "scipy>=1.11.4,<2",
-    "optuna>=3.4.0, <5.0.0",
+    "optuna~=4.5.0",
     "optuna-integration>=3.6.0, <5.0.0",
     "botorch>=0.12.0, <0.15.0",
     "torch", # botorch specifies torch's version

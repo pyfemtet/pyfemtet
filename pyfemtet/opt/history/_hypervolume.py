@@ -12,7 +12,13 @@ else:
     from optuna._hypervolume import wfg
     compute_hypervolume = wfg.compute_hypervolume
 
-from ._optimality import *
+import datetime
+from optuna.visualization._hypervolume_history import _get_hypervolume_history_info, _get_hypervolume_history_plot
+
+try:
+    from ._optimality import *
+except ImportError:
+    from _optimality import *
 
 
 __all__ = [
@@ -23,7 +29,7 @@ __all__ = [
 def calc_hypervolume(
         y_internal: np.ndarray,
         feasibility: np.ndarray,
-        ref_point: str | np.ndarray = 'nadir-up-to-the-point'
+        ref_point: str | np.ndarray = 'optuna-nadir'
 ) -> np.ndarray:
     """
 
@@ -57,6 +63,8 @@ def calc_hypervolume(
         elif ref_point.lower() == 'worst':
             hv = calc_hypervolume_worst(y_internal, feasibility)
             hv_values = hv * np.ones(len(y_internal)).astype(float)
+        elif ref_point.lower() == 'optuna-nadir':
+            hv_values = calc_hypervolume_by_optuna(y_internal, feasibility)
         else:
             raise NotImplementedError
 
@@ -80,12 +88,13 @@ def get_pareto_set(
     return non_dominated_solutions
 
 
-def calc_hypervolume_nadir(y, feasibility) -> float:
+def calc_hypervolume_nadir(y, feasibility, ref_point=None) -> float:
     """Use Nadir point as the ref_point.
 
     Args:
         y: (n, m) shaped 2d-array. float.
         feasibility (np.ndarray): n shaped 1d-array. bool.
+        ref_point: (m) shaped array. float.
 
     Returns: float.
 
@@ -95,8 +104,10 @@ def calc_hypervolume_nadir(y, feasibility) -> float:
     if len(pareto_set) == 0:
         return 0.
 
-    nadir_point = pareto_set.max(axis=0)
-    ref_point = nadir_point + 1e-8
+    if ref_point is None:
+        nadir_point = pareto_set.max(axis=0)
+        ref_point = nadir_point + 1e-8
+
     hv = compute_hypervolume(pareto_set, ref_point)
 
     return hv
@@ -116,10 +127,26 @@ def calc_hypervolume_nadir_up_to_the_point(y, feasibility) -> np.ndarray:
     out = []
 
     assert len(y) == len(feasibility)
+
+    nadir_points = []
     for n in range(len(y)):
         y_up = y[:n]
         f_up = feasibility[:n]
-        out.append(calc_hypervolume_nadir(y_up, f_up))
+        pareto_set = get_pareto_set(y_up, f_up)
+        if len(pareto_set) == 0:
+            continue
+        nadir_points.append(pareto_set.max(axis=0))
+
+    if len(nadir_points) == 0:
+        return np.zeros(len(y))
+
+    nadir_point = np.array(nadir_points).max(axis=0)
+    ref_point = nadir_point + 1e-8
+
+    for n in range(len(y)):
+        y_up = y[:n]
+        f_up = feasibility[:n]
+        out.append(calc_hypervolume_nadir(y_up, f_up, ref_point=ref_point))
 
     return np.array(out).astype(float)
 
@@ -167,3 +194,34 @@ def calc_hypervolume_fixed_point(y, feasibility, ref_point) -> float:
     hv = compute_hypervolume(feasible_solutions, ref_point)
 
     return hv
+
+
+def calc_hypervolume_by_optuna(y, f):
+    study = optuna.create_study(
+        directions=['minimize'] * y.shape[-1]
+    )
+    number = 0
+    for y_ in y:
+        system_attrs = {}
+        if np.isnan(y_).any():
+            system_attrs.update({"constraints": [1.]})
+            y_ = y[0]
+        trial = optuna.trial.FrozenTrial(
+            number=number,
+            value=None,
+            values=y_,
+            state=optuna.trial.TrialState.COMPLETE,
+            datetime_start=datetime.datetime.now(),
+            datetime_complete=datetime.datetime.now(),
+            params={},
+            distributions={},
+            user_attrs={},
+            system_attrs=system_attrs,
+            intermediate_values={},
+            trial_id=number,
+        )
+        study.add_trial(trial)
+        number += 1
+    ref_point = get_pareto_set(y, f).max(axis=0) + 1e-8
+    info = _get_hypervolume_history_info(study, reference_point=ref_point)
+    return np.array(info.values)

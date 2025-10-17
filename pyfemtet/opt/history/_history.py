@@ -847,7 +847,7 @@ class EntireDependentValuesCalculator:
         hv_values = calc_hypervolume(
             self.partial_y_internal,
             self.partial_feasibility,
-            ref_point='nadir-up-to-the-point',
+            ref_point='optuna-nadir',
         )
 
         # update
