@@ -452,7 +452,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># noinspection PyGlobalUndefined</span>
-        <span class="k">global</span> <span class="n">constants</span>
+        <span class="k">global</span> <span class="n">constants</span><span class="p">,</span> <span class="n">Dispatch</span>
 
         <span class="k">if</span> <span class="n">connect_method</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_connect_new_femtet</span><span class="p">()</span>
@@ -477,8 +477,9 @@
 
             <span class="kn">import</span><span class="w"> </span><span class="nn">win32com.client</span>
             <span class="n">importlib</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">win32com.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dispatch</span><span class="p">,</span> <span class="n">constants</span>
+            <span class="n">Dispatch</span> <span class="o">=</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">Dispatch</span>
             <span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;FemtetMacro.Femtet&#39;</span><span class="p">)</span>
+            <span class="n">constants</span> <span class="o">=</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">constants</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">constants</span><span class="p">,</span> <span class="s2">&quot;STATIC_C&quot;</span><span class="p">):</span>
                 <span class="n">message</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span>

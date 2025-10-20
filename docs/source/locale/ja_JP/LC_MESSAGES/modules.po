@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-11 15:43+0900\n"
+"POT-Creation-Date: 2025-10-20 10:39+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -101,7 +101,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.femopt.FEMOpt.add_other_output
 #: pyfemtet.opt.femopt.FEMOpt.add_parameter
 #: pyfemtet.opt.femopt.FEMOpt.add_sub_fidelity_model
-#: pyfemtet.opt.femopt.FEMOpt.optimize
+#: pyfemtet.opt.femopt.FEMOpt.add_trial pyfemtet.opt.femopt.FEMOpt.optimize
 #: pyfemtet.opt.femopt.FEMOpt.set_monitor_host
 #: pyfemtet.opt.femopt.FEMOpt.set_random_seed
 #: pyfemtet.opt.history._history.History.get_df
@@ -142,6 +142,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_other_output
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_sub_fidelity_model
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_trial
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_parameter
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_variables
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.set_solve_condition
@@ -154,6 +155,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.train_model_c
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFConfig
 #: pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer
+#: pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer.add_trial
 #: pyfemtet.opt.prediction._model.AbstractModel.fit
 #: pyfemtet.opt.prediction._model.AbstractModel.predict
 #: pyfemtet.opt.prediction._model.PyFemtetModel.fit
@@ -167,6 +169,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.problem.problem.ObjectiveResult
 #: pyfemtet.opt.problem.problem.ObjectivesFunc
 #: pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables
+#: pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.set_variable
 #: pyfemtet.opt.visualization.plotter.contour_creator.contour_creator
 #: pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot
 #: pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot
@@ -954,6 +957,10 @@ msgstr "最適化履歴をエクスポートします。"
 #: of pyfemtet.opt.history._history.History.save:3
 msgid "The destination path is :class:`History.path`."
 msgstr "保存先パスは :class:`History.path` です。"
+
+#: of pyfemtet.opt.history._history.TrialState:1
+msgid "An enumeration."
+msgstr ""
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"

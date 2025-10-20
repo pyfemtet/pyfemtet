@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-30 22:22+0900\n"
+"POT-Creation-Date: 2025-10-20 10:39+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -267,74 +267,74 @@ msgstr "設計変数の組合せを拘束します。"
 msgid "Installation"
 msgstr "インストール"
 
-#: ../source/pages/installation.rst:4
+#: ../source/pages/installation.rst:5
 msgid "PyFemtet supports the following requirements:"
 msgstr "PyFemtet は次の要件をサポートします:"
 
-#: ../source/pages/installation.rst:6
+#: ../source/pages/installation.rst:7
 msgid "windows only"
 msgstr "Windows のみ"
 
-#: ../source/pages/installation.rst:7
+#: ../source/pages/installation.rst:8
 msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr "femtet 2023.1 以降 (2024.0 以降を推奨)"
 
-#: ../source/pages/installation.rst:8
-msgid "python >= 3.10 (>=3.11 is recommended)"
-msgstr "python 3.10 以上 (3.11 以上を推奨)"
+#: ../source/pages/installation.rst:9
+msgid "python 3.10 ~ 3.13 (3.14 is not supported)"
+msgstr "python 3.10 〜 3.13（3.14は対象外、3.11以上を推奨）"
 
-#: ../source/pages/installation.rst:11
+#: ../source/pages/installation.rst:12
 msgid "**See below for installation and setup instructions.**"
 msgstr "**インストールとセットアップの手順については以下を参照してください。**"
 
 # no-translate
-#: ../source/pages/installation.rst:13
+#: ../source/pages/installation.rst:14
 msgid ":doc:`installation_pages/install_femtet`"
 msgstr ""
 
 # no-translate
-#: ../source/pages/installation.rst:14
+#: ../source/pages/installation.rst:15
 msgid ":doc:`installation_pages/install_python`"
 msgstr ""
 
 # no-translate
-#: ../source/pages/installation.rst:15
+#: ../source/pages/installation.rst:16
 msgid ":doc:`installation_pages/install_pyfemtet`"
 msgstr ""
 
-#: ../source/pages/installation.rst:18
+#: ../source/pages/installation.rst:19
 msgid "If step 3 fails, try the following additional steps:"
 msgstr "手順 3 が失敗した場合は、次の操作を試してください。"
 
 # no-translate
-#: ../source/pages/installation.rst:20
+#: ../source/pages/installation.rst:21
 msgid "a1. :doc:`installation_pages/install_pyfemtet_manually`"
 msgstr ""
 
 # no-translate
-#: ../source/pages/installation.rst:21
+#: ../source/pages/installation.rst:22
 msgid "a2. :doc:`installation_pages/setup_femtet_macro`"
 msgstr ""
 
 # no-translate
-#: ../source/pages/installation.rst:22
+#: ../source/pages/installation.rst:23
 msgid "a3. :doc:`installation_pages/setup_com_constants`"
 msgstr ""
 
-#: ../source/pages/installation.rst:25
+#: ../source/pages/installation.rst:26
 msgid "If you want to check the installation, please follow the steps below."
 msgstr "インストールを確認したい場合は、以下の手順に従ってください。"
 
-#: ../source/pages/installation.rst:27
+#: ../source/pages/installation.rst:28
 msgid ":ref:`Check the installation of Python <check-the-installation-python-section>`"
 msgstr ":ref:`Python がインストールできているか確認する <check-the-installation-python-section>`"
 
-#: ../source/pages/installation.rst:28
+#: ../source/pages/installation.rst:29
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:72
 msgid ":ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`"
 msgstr ":ref:`PyFemtet がインストールできているか確認する <check-the-installation-pyfemtet-section>`"
 
-#: ../source/pages/installation.rst:43
+#: ../source/pages/installation.rst:44
 msgid "For verification, we recommend that you first view the samples in :doc:`examples`."
 msgstr "PyFemtet の動作確認には、:doc:`examples` の確認をお勧めします。"
 
@@ -1247,7 +1247,7 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 #~ msgstr "セキュリティ上の理由で .bat ファイルがダウンロードできない場合は、**管理者権限** のある コマンドプロンプト を起動して下記のコマンドを代わりに使用できます。 ::"
 
 #~ msgid "**If you want to use the GUI optimization settings feature, 3.11 or 3.12 is required.** PyFemtet itself supports Python 3.10 and above."
-#~ msgstr "**GUI最適化設定機能を使用する場合は、3.11または3.12が必要です。** PyFemtet自体はPython 3.10以上をサポートしています。"
+#~ msgstr "**GUI最適化設定機能を使用する場合は、3.11または3.12が必要です。** PyFemtet自体はPython 3.10〜3.13（3.14は対象外）をサポートしています。"
 
 #~ msgid "Run following command."
 #~ msgstr "下記のコマンドを実行します。"

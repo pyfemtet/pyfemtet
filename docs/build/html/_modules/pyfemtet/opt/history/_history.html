@@ -91,8 +91,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -133,6 +132,16 @@
 
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">logger_dask</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.dask&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_assert_locked_with_timeout</span><span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="n">assertion_message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">10.</span><span class="p">):</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">():</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">assertion_message</span> <span class="ow">or</span> <span class="s2">&quot;Lock is not acquired.&quot;</span>
+        <span class="n">logger_dask</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Lock is not acquired. Retry to check locked.&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MetaColumnNames</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
@@ -238,13 +247,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Lock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lock_name</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">lock_if_not_locked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">nullcontext</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -320,7 +322,7 @@
         <span class="c1"># partial_df を get_df した時点のものから</span>
         <span class="c1"># 変わっていたらエラーになる</span>
         <span class="k">if</span> <span class="n">equality_filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">(),</span> <span class="s1">&#39;set_df() with equality_filters must be called with locking.&#39;</span>
+            <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">,</span> <span class="s1">&#39;set_df() with equality_filters must be called with locking.&#39;</span><span class="p">)</span>
             <span class="n">partial_df</span> <span class="o">=</span> <span class="n">df</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
             <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">partial_df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">)</span>
@@ -884,7 +886,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">entire_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">entire_df</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">entire_df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="p">)</span>
 
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+        <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
 
         <span class="c1"># get column names</span>
         <span class="n">obj_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">get_obj_names</span><span class="p">()</span>
@@ -914,7 +916,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">update_optimality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+        <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
 
         <span class="c1"># calc optimality</span>
         <span class="n">optimality</span> <span class="o">=</span> <span class="n">calc_optimality</span><span class="p">(</span>
@@ -927,13 +929,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">update_hypervolume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+        <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
 
         <span class="c1"># calc hypervolume</span>
         <span class="n">hv_values</span> <span class="o">=</span> <span class="n">calc_hypervolume</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_y_internal</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_feasibility</span><span class="p">,</span>
-            <span class="n">ref_point</span><span class="o">=</span><span class="s1">&#39;nadir-up-to-the-point&#39;</span><span class="p">,</span>
+            <span class="n">ref_point</span><span class="o">=</span><span class="s1">&#39;optuna-nadir&#39;</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># update</span>
@@ -941,7 +943,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">update_trial_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">locked</span><span class="p">()</span>
+        <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
 
         <span class="c1"># calc trial</span>
         <span class="n">trial_number</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -1227,45 +1229,45 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">update_entire_dependent_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
 
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock_if_not_locked</span><span class="p">:</span>
+        <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
 
-            <span class="c1"># check trial_id is filled</span>
-            <span class="n">trial_processed</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-                <span class="n">id_to_n</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">tid</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tid</span>
-                                 <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())}</span>
-                <span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">id_to_n</span><span class="p">)</span>
-                <span class="n">trial_processed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># check trial_id is filled</span>
+        <span class="n">trial_processed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">id_to_n</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">tid</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tid</span>
+                             <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())}</span>
+            <span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;trial_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">id_to_n</span><span class="p">)</span>
+            <span class="n">trial_processed</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="c1"># update main fidelity</span>
-            <span class="n">equality_filters</span> <span class="o">=</span> <span class="n">MAIN_FILTER</span>
+        <span class="c1"># update main fidelity</span>
+        <span class="n">equality_filters</span> <span class="o">=</span> <span class="n">MAIN_FILTER</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">EntireDependentValuesCalculator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">equality_filters</span><span class="p">,</span>
+            <span class="n">processing_df</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">update_optimality</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">update_hypervolume</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">trial_processed</span><span class="p">:</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">update_trial_number</span><span class="p">()</span>  <span class="c1"># per_fidelity</span>
+        <span class="n">pdf</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">partial_df</span>
+        <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">processing_df</span><span class="p">,</span> <span class="n">partial_df</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="n">equality_filters</span><span class="p">)</span>
+
+        <span class="c1"># update sub fidelity</span>
+        <span class="n">sub_fidelity_names</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">MAIN_FIDELITY_NAME</span> <span class="ow">in</span> <span class="n">sub_fidelity_names</span><span class="p">:</span>
+            <span class="n">sub_fidelity_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">MAIN_FIDELITY_NAME</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sub_fidelity_name</span> <span class="ow">in</span> <span class="n">sub_fidelity_names</span><span class="p">:</span>
+            <span class="n">equality_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">:</span> <span class="n">sub_fidelity_name</span><span class="p">}</span>
             <span class="n">mgr</span> <span class="o">=</span> <span class="n">EntireDependentValuesCalculator</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="n">equality_filters</span><span class="p">,</span>
-                <span class="n">processing_df</span><span class="p">,</span>
+                <span class="n">processing_df</span>
             <span class="p">)</span>
-            <span class="n">mgr</span><span class="o">.</span><span class="n">update_optimality</span><span class="p">()</span>
-            <span class="n">mgr</span><span class="o">.</span><span class="n">update_hypervolume</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">trial_processed</span><span class="p">:</span>
                 <span class="n">mgr</span><span class="o">.</span><span class="n">update_trial_number</span><span class="p">()</span>  <span class="c1"># per_fidelity</span>
-            <span class="n">pdf</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">partial_df</span>
-            <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">processing_df</span><span class="p">,</span> <span class="n">partial_df</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="n">equality_filters</span><span class="p">)</span>
-
-            <span class="c1"># update sub fidelity</span>
-            <span class="n">sub_fidelity_names</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">processing_df</span><span class="p">[</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">MAIN_FIDELITY_NAME</span> <span class="ow">in</span> <span class="n">sub_fidelity_names</span><span class="p">:</span>
-                <span class="n">sub_fidelity_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">MAIN_FIDELITY_NAME</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">sub_fidelity_name</span> <span class="ow">in</span> <span class="n">sub_fidelity_names</span><span class="p">:</span>
-                <span class="n">equality_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sub_fidelity_name&#39;</span><span class="p">:</span> <span class="n">sub_fidelity_name</span><span class="p">}</span>
-                <span class="n">mgr</span> <span class="o">=</span> <span class="n">EntireDependentValuesCalculator</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="p">,</span>
-                    <span class="n">equality_filters</span><span class="p">,</span>
-                    <span class="n">processing_df</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">trial_processed</span><span class="p">:</span>
-                    <span class="n">mgr</span><span class="o">.</span><span class="n">update_trial_number</span><span class="p">()</span>  <span class="c1"># per_fidelity</span>
-            <span class="n">pdf</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">partial_df</span>
-            <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">processing_df</span><span class="p">,</span> <span class="n">partial_df</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="n">equality_filters</span><span class="p">)</span>
+        <span class="n">pdf</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">partial_df</span>
+        <span class="n">apply_partial_df</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">processing_df</span><span class="p">,</span> <span class="n">partial_df</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="n">equality_filters</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="History">

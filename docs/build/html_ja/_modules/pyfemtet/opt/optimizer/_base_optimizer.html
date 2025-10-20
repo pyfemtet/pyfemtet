@@ -279,13 +279,11 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">_disable_matmul_operator</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="n">var</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="o">.</span><span class="n">InternalClass</span><span class="p">(</span>
             <span class="n">expression_string</span><span class="o">=</span><span class="n">expression_string</span><span class="p">,</span>
-            <span class="n">_disable_matmul_operator</span><span class="o">=</span><span class="n">_disable_matmul_operator</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-30 22:22+0900\n"
+"POT-Creation-Date: 2025-10-20 10:39+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,6 +99,7 @@ msgstr ""
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_other_output:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_parameter:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_sub_fidelity_model:0
+#: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.add_trial:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.optimize:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:0
 #: ../../pyfemtet/opt/femopt.py:docstring of pyfemtet.opt.femopt.FEMOpt.set_random_seed:0
@@ -140,6 +141,7 @@ msgstr ""
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_other_output:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_sub_fidelity_model:0
+#: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_trial:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_parameter:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_variables:0
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.set_solve_condition:0
@@ -152,6 +154,7 @@ msgstr ""
 #: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.train_model_c:0
 #: ../../pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.py:docstring of pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFConfig:0
 #: ../../pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:docstring of pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer:0
+#: ../../pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:docstring of pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer.add_trial:0
 #: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.AbstractModel.fit:0
 #: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.AbstractModel.predict:0
 #: ../../pyfemtet/opt/prediction/_model.py:docstring of pyfemtet.opt.prediction._model.PyFemtetModel.fit:0
@@ -165,6 +168,7 @@ msgstr ""
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectiveResult:0
 #: ../../pyfemtet/opt/problem/problem.py:docstring of pyfemtet.opt.problem.problem.ObjectivesFunc:0
 #: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.get_variables:0
+#: ../../pyfemtet/opt/problem/variable_manager/_variable_manager.py:docstring of pyfemtet.opt.problem.variable_manager._variable_manager.VariableManager.set_variable:0
 #: ../../pyfemtet/opt/visualization/plotter/contour_creator.py:docstring of pyfemtet.opt.visualization.plotter.contour_creator.contour_creator:0
 #: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_hypervolume_plot:0
 #: ../../pyfemtet/opt/visualization/plotter/main_figure_creator.py:docstring of pyfemtet.opt.visualization.plotter.main_figure_creator.get_objective_plot:0
@@ -871,6 +875,10 @@ msgstr ""
 msgid "The destination path is :class:`History.path`."
 msgstr ""
 
+#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.TrialState:1
+msgid "An enumeration."
+msgstr ""
+
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
 msgstr ""
@@ -1157,7 +1165,7 @@ msgstr ""
 msgid "Bases: :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.NumericVariable`, :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.Parameter`"
 msgstr ""
 
-#: ../../.venv/Lib/site-packages/sympy/core/sympify.py:docstring of sympy.core.sympify.SympifyError:1
+#: ../../.venv/lib/site-packages/sympy/core/sympify.py:docstring of sympy.core.sympify.SympifyError:1
 msgid "Bases: :py:class:`ValueError`"
 msgstr ""
 

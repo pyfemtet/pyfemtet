@@ -92,7 +92,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">._string_as_expression</span><span class="w"> </span><span class="kn">import</span> <span class="n">_ExpressionFromString</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.atmark_support_for_param_name</span><span class="w"> </span><span class="kn">import</span> <span class="n">at</span><span class="p">,</span> <span class="n">AT</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.symbol_support_for_param_name</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_symbols</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;SupportedVariableTypes&#39;</span><span class="p">,</span>
@@ -483,8 +483,7 @@
         <span class="n">variable</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span><span class="s1">&#39;original_name&#39;</span><span class="p">:</span> <span class="n">original_name</span><span class="p">}</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-            <span class="n">variable</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">AT</span><span class="p">)</span>
+        <span class="n">variable</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">convert_symbols</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">is_normalized</span><span class="p">(</span><span class="s1">&#39;NFKC&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
             <span class="n">variable</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;NFKC&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">variable</span><span class="p">})</span></div>

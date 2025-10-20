@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-30 22:22+0900\n"
+"POT-Creation-Date: 2025-10-20 10:39+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -260,68 +260,68 @@ msgstr ""
 msgid "Installation"
 msgstr ""
 
-#: ../source/pages/installation.rst:4
+#: ../source/pages/installation.rst:5
 msgid "PyFemtet supports the following requirements:"
 msgstr ""
 
-#: ../source/pages/installation.rst:6
+#: ../source/pages/installation.rst:7
 msgid "windows only"
 msgstr ""
 
-#: ../source/pages/installation.rst:7
+#: ../source/pages/installation.rst:8
 msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr ""
 
-#: ../source/pages/installation.rst:8
-msgid "python >= 3.10 (>=3.11 is recommended)"
+#: ../source/pages/installation.rst:9
+msgid "python 3.10 ~ 3.13 (3.14 is not supported)"
 msgstr ""
 
-#: ../source/pages/installation.rst:11
+#: ../source/pages/installation.rst:12
 msgid "**See below for installation and setup instructions.**"
 msgstr ""
 
-#: ../source/pages/installation.rst:13
+#: ../source/pages/installation.rst:14
 msgid ":doc:`installation_pages/install_femtet`"
 msgstr ""
 
-#: ../source/pages/installation.rst:14
+#: ../source/pages/installation.rst:15
 msgid ":doc:`installation_pages/install_python`"
 msgstr ""
 
-#: ../source/pages/installation.rst:15
+#: ../source/pages/installation.rst:16
 msgid ":doc:`installation_pages/install_pyfemtet`"
 msgstr ""
 
-#: ../source/pages/installation.rst:18
+#: ../source/pages/installation.rst:19
 msgid "If step 3 fails, try the following additional steps:"
 msgstr ""
 
-#: ../source/pages/installation.rst:20
+#: ../source/pages/installation.rst:21
 msgid "a1. :doc:`installation_pages/install_pyfemtet_manually`"
 msgstr ""
 
-#: ../source/pages/installation.rst:21
+#: ../source/pages/installation.rst:22
 msgid "a2. :doc:`installation_pages/setup_femtet_macro`"
 msgstr ""
 
-#: ../source/pages/installation.rst:22
+#: ../source/pages/installation.rst:23
 msgid "a3. :doc:`installation_pages/setup_com_constants`"
 msgstr ""
 
-#: ../source/pages/installation.rst:25
+#: ../source/pages/installation.rst:26
 msgid "If you want to check the installation, please follow the steps below."
 msgstr ""
 
-#: ../source/pages/installation.rst:27
+#: ../source/pages/installation.rst:28
 msgid ":ref:`Check the installation of Python <check-the-installation-python-section>`"
 msgstr ""
 
-#: ../source/pages/installation.rst:28
+#: ../source/pages/installation.rst:29
 #: ../source/pages/installation_pages/install_pyfemtet_manually.rst:72
 msgid ":ref:`Check the installation of PyFemtet <check-the-installation-pyfemtet-section>`"
 msgstr ""
 
-#: ../source/pages/installation.rst:43
+#: ../source/pages/installation.rst:44
 msgid "For verification, we recommend that you first view the samples in :doc:`examples`."
 msgstr ""
 
