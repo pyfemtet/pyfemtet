@@ -425,12 +425,18 @@ class FemtetInterface(COMInterface):
         # 開く
         if self.model_name is None:
             result = self.Femtet.LoadProject(self.femprj_path, True)
+            if not result:
+                self.Femtet.ShowLastError()
         else:
+            result = self.Femtet.LoadProject(self.femprj_path, True)
+            if not result:
+                self.Femtet.ShowLastError()
+
             result = self.Femtet.LoadProjectAndAnalysisModel(
                 self.femprj_path, self.model_name, True
             )
-        if not result:
-            self.Femtet.ShowLastError()
+            if not result:
+                self.Femtet.ShowLastError()
 
     def _connect_and_open_femtet(self):
         """Connects to a Femtet process and open the femprj.
