@@ -41,6 +41,9 @@ powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1"
 powershell "$SOURCE_DIR\advanced_examples\excel_ui\copy_files.ps1"
 powershell "$SOURCE_DIR\advanced_examples\restart\copy_files.ps1"
 
+# copy English image
+powershell "$SOURCE_DIR\pages\images\apply_locale.ps1" en
+
 # build English document
 uv run --no-sync python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
 
@@ -69,6 +72,9 @@ uv run --no-sync sphinx-apidoc --force --no-toc --no-headings --separate -d=1 -o
 powershell "$SOURCE_DIR\advanced_examples\surrogate_model\copy_files.ps1" 1  # is_JP
 powershell "$SOURCE_DIR\advanced_examples\excel_ui\copy_files.ps1" 1  # is_JP
 powershell "$SOURCE_DIR\advanced_examples\restart\copy_files.ps1" 1  # is_JP
+
+# copy English image
+powershell "$SOURCE_DIR\pages\images\apply_locale.ps1" ja
 
 # build Japanese document
 uv run --no-sync python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
