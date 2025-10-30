@@ -3,7 +3,7 @@ name = "pyfemtet"
 dynamic = ["version"]
 description = "Design parameter optimization using Femtet."
 authors = [{ name = "pyfemtet", email = "148934231+pyfemtet@users.noreply.github.com" }]
-requires-python = ">= 3.10, <= 3.14"
+requires-python = ">= 3.10, < 3.14"
 readme = "README.md"
 license = "MIT"
 dependencies = [
@@ -55,6 +55,7 @@ dev = [
     "pytest-dashboard>=2.0.0",
     "pytest-cov>=6.1.1",
     "pytest-reporter-html-dots>=0.11.0",
+    "esbonio>=0.12.0",
 ]
 
 [tool.uv-dynamic-versioning]
