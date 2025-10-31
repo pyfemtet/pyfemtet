@@ -122,6 +122,7 @@ def _impl_sldasm():
 
     fem = SolidworksInterface(
         sldprt_path=os.path.join(here, "sldasm", "Assem2.SLDASM"),
+        close_solidworks_on_terminate=True,
     )
 
     fem.connect_sw()
