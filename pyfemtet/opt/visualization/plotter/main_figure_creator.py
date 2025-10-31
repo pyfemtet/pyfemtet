@@ -98,6 +98,12 @@ def get_hypervolume_plot(_: History, df: pd.DataFrame) -> go.Figure:
     # メインデータを抽出
     df = get_partial_df(df, equality_filters=MAIN_FILTER)
 
+    # 成功した試行のみを抽出
+    df = df[df['feasibility']]
+
+    # 番号を振り直し
+    df['trial'] = range(1, len(df) + 1)
+
     # create figure
     fig = px.line(
         df,
