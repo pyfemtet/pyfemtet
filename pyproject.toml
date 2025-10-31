@@ -3,7 +3,7 @@ name = "pyfemtet"
 dynamic = ["version"]
 description = "Design parameter optimization using Femtet."
 authors = [{ name = "pyfemtet", email = "148934231+pyfemtet@users.noreply.github.com" }]
-requires-python = ">= 3.10, < 3.14"
+requires-python = ">= 3.10, < 3.15"
 readme = "README.md"
 license = "MIT"
 dependencies = [
