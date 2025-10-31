@@ -103,6 +103,88 @@ def test_scipy_optimizer_1():
     scipy_optimizer_var('BFGS')
 
 
+def test_scipy_n_trials():
+    opt = ScipyOptimizer('SLSQP')
+    opt.fem = NoFEM()
+    opt.add_parameter('x1', -1, -1, 1)
+    opt.add_parameter('x2', -1, -1, 1)
+    opt.add_objective('norm', lambda _, opt_: np.linalg.norm(opt_.get_variables(format='values')), args=(opt,))
+    opt.n_trials = 3
+    opt.run()
+    df = opt.history.get_df()
+    assert len(df) == 3
+
+
+def test_scipy_timeout():
+    from time import sleep
+
+    def obj(_, opt_):
+        sleep(1)
+        return np.linalg.norm(opt_.get_variables(format='values'))
+
+    opt = ScipyOptimizer('SLSQP')
+    opt.fem = NoFEM()
+    opt.add_parameter('x1', -1, -1, 1)
+    opt.add_parameter('x2', -1, -1, 1)
+    opt.add_objective('norm', obj, args=(opt,))
+    opt.timeout = 5
+    opt.run()
+    df = opt.history.get_df()
+    assert len(df) <= 5
+
+
+def test_scipy_restart():
+    csv_path = 'test_scipy_restart.csv'
+    if os.path.isfile(csv_path):
+        os.remove(csv_path)
+
+    # 1st
+    opt = ScipyOptimizer('SLSQP')
+    opt.options = {'eps': 0.2}
+    opt.fem = NoFEM()
+    opt.add_parameter('x1', -1, -1, 1)
+    opt.add_parameter('x2', -1, -1, 1)
+    opt.add_objective('norm', lambda _, opt_: np.linalg.norm(opt_.get_variables(format='values')), args=(opt,))
+    opt.n_trials = 3
+    opt.history.path = csv_path
+    opt.run()
+    df = opt.history.get_df()
+    optimal = df[df['optimality']].iloc[-1]
+    assert len(df) == 3, len(df)
+
+    # 2nd
+    opt.run()
+    df = opt.history.get_df()
+    assert len(df) == 6, len(df)
+    optimal = optimal[opt.history.prm_names]
+    df = df[opt.history.prm_names]
+    print('optimal is:')
+    print(optimal)
+    print('df.iloc[3] is:')
+    print(df.iloc[3])
+    assert (df.iloc[3] == optimal).all(), df.iloc[3] == optimal  # noqa
+
+    # 3rd
+    opt = ScipyOptimizer('SLSQP')
+    opt.options = {'eps': 0.2}
+    opt.fem = NoFEM()
+    opt.add_parameter('x1', -1, -1, 1)
+    opt.add_parameter('x2', -1, -1, 1)
+    opt.add_objective(
+        "norm",
+        lambda _, opt_: np.linalg.norm(opt_.get_variables(format="values")),
+        args=(opt,),
+    )
+    opt.n_trials = 3
+    opt.history.path = csv_path
+    opt.run()
+    df = opt.history.get_df()
+    assert len(df) == 9, len(df)
+
+
 if __name__ == '__main__':
     test_scipy_optimizer()
-    # test_scipy_optimizer_1()
+    test_scipy_optimizer_1()
+    test_scipy_n_trials()
+    test_scipy_timeout()
+    test_scipy_restart()

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Callable
 
-from contextlib import suppress
+from contextlib import suppress, contextmanager
+from time import time
 
 import numpy as np
 from scipy.optimize import minimize, OptimizeResult
@@ -10,9 +11,11 @@ from scipy.optimize import NonlinearConstraint
 
 from pyfemtet._i18n import Msg, _
 from pyfemtet._util.closing import closing
+from pyfemtet._util.dask_util import get_client, Lock
 from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.exceptions import *
+from pyfemtet.opt.history import MAIN_FILTER
 from pyfemtet.logger import get_module_logger
 
 from pyfemtet.opt.optimizer._base_optimizer import *
@@ -24,6 +27,10 @@ __all__ = [
 
 
 logger = get_module_logger('opt.optimizer', False)
+
+
+class InterruptScipyMinimize(Exception):
+    pass
 
 
 class _ScipyCallback:
@@ -56,9 +63,6 @@ class ScipyOptimizer(AbstractOptimizer):
         
     """
 
-    _timeout: None = None
-    _n_trials: None = None
-
     def __init__(self, method: str = None, tol=None):
         super().__init__()
 
@@ -67,30 +71,42 @@ class ScipyOptimizer(AbstractOptimizer):
         self.options = {}
         self.constraint_enhancement = 0.001
         self.constraint_scaling = 1.
+        self._scheduler_address: str | None = None
+        self.timeout = None
+        self._time_start = None
+        self.__n_succeeded_trials = None
 
     @property
-    def timeout(self):
-        return self._timeout
+    def _n_succeeded_trials_in_current_optimization(self) -> int | None:  # オーバーライド不可
+        out = None
+        client = get_client(self._scheduler_address)
+        if client is not None:
+            raise NotImplementedError(
+                "ScipyOptimizer does not support parallel computing."
+            )
+        if self.__n_succeeded_trials is None:
+            self.__n_succeeded_trials = 0
+        return self.__n_succeeded_trials
 
-    @timeout.setter
-    def timeout(self, value):
-        if value is not None:
-            raise NotImplementedError(_(
-                en_message='`ScipyOptimizer` cannot use timeout.',
-                jp_message='`ScipyOptimizer` では timeout は指定できません。'
-            ))
+    @_n_succeeded_trials_in_current_optimization.setter
+    def _n_succeeded_trials_in_current_optimization(self, value: int | None):  # オーバーライド不可
+        client = get_client(self._scheduler_address)
+        with Lock('scipy_n_succeeded_trials'):
+            if client is not None:
+                raise NotImplementedError('ScipyOptimizer does not support parallel computing.')
+            self.__n_succeeded_trials = value
 
-    @property
-    def n_trials(self):
-        return self._n_trials
-
-    @n_trials.setter
-    def n_trials(self, value):
-        if value is not None:
-            raise NotImplementedError(_(
-                en_message='`ScipyOptimizer` cannot use n_trials.',
-                jp_message='`ScipyOptimizer` では n_trials は指定できません。'
-            ))
+    def _per_solve_callback(self):
+        df = self.history.get_df(equality_filters=MAIN_FILTER)
+        self._n_succeeded_trials_in_current_optimization = (
+            1 + self._n_succeeded_trials_in_current_optimization
+        )
+        if self.n_trials is not None:
+            if self._n_succeeded_trials_in_current_optimization >= self.n_trials:
+                raise InterruptScipyMinimize
+        if self.timeout is not None:
+            if time() - self._time_start >= self.timeout:
+                raise InterruptScipyMinimize
 
     def add_trial(self, parameters: dict[str, SupportedVariableTypes]):
         raise NotImplementedError(_(
@@ -98,8 +114,7 @@ class ScipyOptimizer(AbstractOptimizer):
             jp_message='`ScipyOptimizer` では `add_trial()` は使えません。',
         ))
 
-    def _get_x0(self) -> np.ndarray:
-
+    def _get_x0(self, after_finalizing_history=False) -> np.ndarray:
         # params を取得
         params: dict[str, Parameter] = self.variable_manager.get_variables(
             filter='parameter', format='raw'
@@ -112,7 +127,17 @@ class ScipyOptimizer(AbstractOptimizer):
                     jp_message='Scipy では数値パラメータのみ最適化できます。'
                 ))
 
-        # params のうち fix == True のものを除く
+        # リスタートならば最適値で初期値を上書きする
+        if after_finalizing_history:
+            df = self.history.get_df()
+            optimal_trials = df[df["optimality"]]
+            if len(optimal_trials) > 0:
+                optimal_trial = optimal_trials.iloc[-1]
+                for prm_name in params.keys():
+                    if prm_name in optimal_trial:
+                        params[prm_name].value = optimal_trial[prm_name]
+
+        # fix == True のものを除いて初期値を作成
         x0 = np.array([p.value for p in params.values() if not p.properties.get('fix', False)])
 
         return x0
@@ -133,8 +158,13 @@ class ScipyOptimizer(AbstractOptimizer):
             logger.warning(Msg.WARN_SCIPY_NELDER_MEAD_BOUND)
 
     def _setup_before_parallel(self):
-
         if not self._done_setup_before_parallel:
+            # 並列プロセスは起動のラグがあるので
+            # すべての並列プロセスで起算時刻を同じにしたい
+            self._time_start = time()
+            # 別のプロセスが計算を始めてから自分のプロセスが上書きし内容
+            # ここで初期化
+            self._n_succeeded_trials_in_current_optimization = 0
 
             super()._setup_before_parallel()  # flag inside
 
@@ -343,9 +373,7 @@ class ScipyOptimizer(AbstractOptimizer):
             ) from e
 
     def _objective(self, xk: np.ndarray) -> float:
-
         with self._logging():
-
             vm = self.variable_manager
 
             # parameter suggestion
@@ -357,6 +385,7 @@ class ScipyOptimizer(AbstractOptimizer):
             # process main fidelity model
             solve_set = self._get_solve_set()
             f_return = solve_set.solve(x)
+            self._per_solve_callback()
             assert f_return is not None
             dict_y_internal = f_return[1]
             y_internal: float = tuple(dict_y_internal.values())[0]  # type: ignore
@@ -364,26 +393,38 @@ class ScipyOptimizer(AbstractOptimizer):
             return y_internal
 
     def run(self):
-
         # ===== finalize =====
         self._finalize()
 
         # ===== construct x0 =====
-        x0 = self._get_x0()
+        x0 = self._get_x0(after_finalizing_history=True)
+
+        # ===== 終了条件 =====
+        # In case that setup_before_parallel is not called
+        if self._time_start is None:
+            self._time_start = time()
+        if self._n_succeeded_trials_in_current_optimization is None:
+            self._n_succeeded_trials_in_current_optimization = 0
 
         # ===== run =====
         with closing(self.fem):
 
-            with self._setting_status(), suppress(InterruptOptimization):
+            with self._setting_status(), \
+                    suppress(InterruptOptimization), \
+                    suppress(InterruptScipyMinimize):
 
-                minimize(
-                    self._objective,
-                    x0,
-                    args=(),
-                    method=self.method,
-                    bounds=self._get_scipy_bounds(),
-                    constraints=self._get_scipy_constraints(),
-                    tol=self.tol,
-                    callback=self._get_scipy_callback(),
-                    options=self.options,
-                )
+                try:
+                    minimize(
+                        self._objective,
+                        x0,
+                        args=(),
+                        method=self.method,
+                        bounds=self._get_scipy_bounds(),
+                        constraints=self._get_scipy_constraints(),
+                        tol=self.tol,
+                        callback=self._get_scipy_callback(),
+                        options=self.options,
+                    )
+                finally:
+                    self._time_start = None
+                    self._n_succeeded_trials_in_current_optimization = None
