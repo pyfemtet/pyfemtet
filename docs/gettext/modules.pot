@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 10:39+0900\n"
+"POT-Creation-Date: 2025-10-31 10:46+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -875,10 +875,6 @@ msgstr ""
 msgid "The destination path is :class:`History.path`."
 msgstr ""
 
-#: ../../pyfemtet/opt/history/_history.py:docstring of pyfemtet.opt.history._history.TrialState:1
-msgid "An enumeration."
-msgstr ""
-
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
 msgstr ""
@@ -1165,7 +1161,7 @@ msgstr ""
 msgid "Bases: :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.NumericVariable`, :py:class:`~pyfemtet.opt.problem.variable_manager._variable_manager.Parameter`"
 msgstr ""
 
-#: ../../.venv/lib/site-packages/sympy/core/sympify.py:docstring of sympy.core.sympify.SympifyError:1
+#: ../../.venv/Lib/site-packages/sympy/core/sympify.py:docstring of sympy.core.sympify.SympifyError:1
 msgid "Bases: :py:class:`ValueError`"
 msgstr ""
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 10:39+0900\n"
+"POT-Creation-Date: 2025-10-31 10:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -273,7 +273,7 @@ msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:9
-msgid "python 3.10 ~ 3.13 (3.14 is not supported)"
+msgid "python 3.10 ~ 3.14 (3.11 or later recommended)"
 msgstr ""
 
 #: ../source/pages/installation.rst:12

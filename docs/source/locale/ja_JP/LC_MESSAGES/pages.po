@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 10:39+0900\n"
+"POT-Creation-Date: 2025-10-31 10:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -280,8 +280,8 @@ msgid "femtet 2023.0 or later (2024.0 or later recommended)"
 msgstr "femtet 2023.1 以降 (2024.0 以降を推奨)"
 
 #: ../source/pages/installation.rst:9
-msgid "python 3.10 ~ 3.13 (3.14 is not supported)"
-msgstr "python 3.10 〜 3.13（3.14は対象外、3.11以上を推奨）"
+msgid "python 3.10 ~ 3.14 (3.11 or later recommended)"
+msgstr "python 3.10 ~ 3.14 (3.11 以降を推奨)"
 
 #: ../source/pages/installation.rst:12
 msgid "**See below for installation and setup instructions.**"
@@ -1254,4 +1254,7 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 
 #~ msgid "**To Users of PyFemtet 0.x**"
 #~ msgstr "**PyFemtet 0.x をお使いの皆様へ**"
+
+#~ msgid "python 3.10 ~ 3.14"
+#~ msgstr "python 3.10 〜 3.14"
 

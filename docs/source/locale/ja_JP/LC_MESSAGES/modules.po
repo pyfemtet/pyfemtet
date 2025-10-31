@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 10:39+0900\n"
+"POT-Creation-Date: 2025-10-31 10:46+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -957,10 +957,6 @@ msgstr "最適化履歴をエクスポートします。"
 #: of pyfemtet.opt.history._history.History.save:3
 msgid "The destination path is :class:`History.path`."
 msgstr "保存先パスは :class:`History.path` です。"
-
-#: of pyfemtet.opt.history._history.TrialState:1
-msgid "An enumeration."
-msgstr ""
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
@@ -2064,4 +2060,7 @@ msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 
 #~ msgid "Additional arguments from inherited classes."
 #~ msgstr "継承されたクラスからの追加引数です。"
+
+#~ msgid "An enumeration."
+#~ msgstr ""
 
