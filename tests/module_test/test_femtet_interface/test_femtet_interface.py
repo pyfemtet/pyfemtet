@@ -60,7 +60,7 @@ def test_run_femtet_interface():
 @pytest.mark.manual
 def test_femtet_interface_api_calling():
 
-    fem = FemtetInterface(allow_without_project=True)
+    fem = FemtetInterface(connect_method='new', allow_without_project=True)
 
     # Femtet で新しいプロジェクトを開き、
     # ダイアログが出るようなマクロ実行を行う
@@ -73,7 +73,7 @@ def test_femtet_interface_api_calling():
 
     print('保存するかどうかのダイアログが Femtet に出て、タイムアウト警告が出るか？')
     try:
-        fem.close(force=False, timeout=3)
+        fem.quit(force=False, timeout=3)
     except Exception as e:
         print(e)
     result = input('ダイアログか警告が出なかったら NG と入力\n>>> ') or ''

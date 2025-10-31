@@ -11,7 +11,7 @@ here = os.path.dirname(__file__)
 
 
 def obj(_, opt: OptunaOptimizer):
-    sleep(3)
+    sleep(7)
     x = opt.get_variables('values')
     return (x ** 2).sum()
 
