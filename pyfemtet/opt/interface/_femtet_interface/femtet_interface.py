@@ -1153,6 +1153,11 @@ class FemtetInterface(COMInterface):
         self.Femtet.Redraw()  # 再描画
         succeed = self.Femtet.SavePicture(jpg_path, 600, 600, 80)
 
+        # モデルを全画面表示に
+        if self._version >= Version('2025.1.0'):
+            self.Femtet.SetWindowMaximize()
+            self.Femtet.Redraw()
+
         self.Femtet.RedrawMode = True  # 逐一の描画をオン
 
         if not succeed:
@@ -1174,5 +1179,5 @@ class FemtetInterface(COMInterface):
             model_name=self.model_name,
         )
 
-    def _version(self):
+    def _version(self) -> Version:
         return _version(Femtet=self.Femtet)

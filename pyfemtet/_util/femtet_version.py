@@ -10,7 +10,7 @@ def _version(
         major=None,
         minor=None,
         Femtet=None,
-):
+) -> Version:
     if Femtet is not None:
         assert (main is None) and (major is None) and (minor is None), 'バージョンを指定しないでください'
         main, major, minor = Femtet.Version.split('.')[:3]
