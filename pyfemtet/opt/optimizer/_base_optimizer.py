@@ -17,6 +17,7 @@ from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.optimizer._trial_queue import *
 from pyfemtet.logger import get_module_logger
+from pyfemtet.opt.exceptions import show_experimental_warning
 
 __all__ = [
     'AbstractOptimizer',
@@ -114,6 +115,7 @@ class AbstractOptimizer:
         self.fem: AbstractFEMInterface | None = None
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
+        self.termination_condition: Callable[[History], bool] = lambda _: False
         self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
         self.worker_status: WorkerStatus = WorkerStatus('worker-status')
         self.worker_status_list: list[WorkerStatus] = [self.worker_status]
@@ -397,6 +399,13 @@ class AbstractOptimizer:
     def set_solve_condition(self, fun: Callable[[History], bool]):
         self.solve_condition = fun
 
+    def set_termination_condition(self, fun: Callable[[History], bool] | None):
+        if fun is None:
+            self.termination_condition = lambda _: False
+        else:
+            self.termination_condition = fun
+        show_experimental_warning('set_termination_condition', logger)
+
     # ===== private =====
 
     def _setup_enqueued_trials(self):
@@ -505,7 +514,8 @@ class AbstractOptimizer:
             pass
 
         def _postprocess(self):
-            pass
+            if self.opt.termination_condition(self.opt.history):
+                self.opt.entire_status.value = WorkerStatus.interrupting
 
         def _solve_or_raise(
                 self,

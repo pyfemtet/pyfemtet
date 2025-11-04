@@ -20,6 +20,7 @@ from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.interface import *
 from pyfemtet.opt.optimizer import *
 from pyfemtet.opt.optimizer._base_optimizer import DIRECTION
+from pyfemtet.opt.history import History
 from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.visualization.history_viewer._process_monitor._application import (
     process_monitor_main,
@@ -181,6 +182,12 @@ class FEMOpt:
             fidelity: Fidelity,
     ):
         self.opt.add_sub_fidelity_model(name, sub_fidelity_model, fidelity)
+
+    def set_termination_condition(
+            self,
+            func: Callable[[History], bool] | None,
+    ):
+        self.opt.set_termination_condition(func)
 
     def set_monitor_host(self, host: str = None, port: int = None):
         """Sets the host IP address and the port of the process monitor.
