@@ -29,6 +29,7 @@ dependencies = [
     "fire>=0.7", # It probably has a strong backward compatibility.
     "pyyaml>=6.0.2,<7",
     "frozendict>=2.4.6",
+    "packaging>=25.0",
 ]
 
 #[project.optional-dependencies]
