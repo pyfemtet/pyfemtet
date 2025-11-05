@@ -56,6 +56,7 @@ dev = [
     "pytest-cov>=6.1.1",
     "pytest-reporter-html-dots>=0.11.0",
     "esbonio>=0.12.0",
+    "packaging",
 ]
 
 [tool.uv-dynamic-versioning]
