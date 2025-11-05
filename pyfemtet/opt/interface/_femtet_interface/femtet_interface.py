@@ -173,20 +173,9 @@ class FemtetInterface(COMInterface):
         self._connect_and_open_femtet()
         assert self.connected_method != 'unconnected'
 
-        if self._always_open_copy:
-            # 現時点でFemtet に model を close する機能がない
-            #   + executor でも CAD 連携等でモデルに
-            #   わかりにくい変更が入らないように
-            #   _tmp_dir のファイルを開くようにしたため
-            #   _tmp_dir 削除時の permission error を
-            #   避けるために Femtet を強制 close する
-            # Femtet で model が close できるようになれば
-            #   この条件分岐は不要になる
+        self.quit_when_destruct = False
+        if self.connected_method == 'new':
             self.quit_when_destruct = True
-
-        else:
-            # 接続した Femtet の種類に応じて del 時に quit するかどうか決める
-            self.quit_when_destruct = self.connected_method == "new"
 
     # ===== system =====
 
@@ -244,7 +233,7 @@ class FemtetInterface(COMInterface):
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
-        if not hasattr(self, 'Femtet'):
+        if not hasattr(self, "Femtet"):
             return
 
         if self.Femtet is None:
@@ -252,6 +241,13 @@ class FemtetInterface(COMInterface):
 
         if self.quit_when_destruct:
             self.quit(timeout, force)
+
+        else:
+            if self.femprj_path != self._original_femprj_path:
+                self.open(
+                    femprj_path=self._original_femprj_path,
+                    model_name=self.model_name,
+                )
 
     def use_parametric_output_as_objective(
             self, number: int, direction: str | float = "minimize"
