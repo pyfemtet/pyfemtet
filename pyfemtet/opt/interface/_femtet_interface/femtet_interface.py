@@ -34,6 +34,7 @@ from pyfemtet.dispatch_extensions import *
 from pyfemtet.opt.interface._base_interface import COMInterface
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.problem.problem import *
+from pyfemtet.opt.history import get_trial_name
 
 from ._femtet_parametric import *
 
@@ -1111,9 +1112,9 @@ class FemtetInterface(COMInterface):
         if save_results.lower() == 'optimal':
             for i, row in df.iterrows():
                 if not bool(row['optimality']):
-                    trial_to_remove = int(row['trial'])
+                    trial_name_to_remove = get_trial_name(row=row)
                     pdt_path_to_remove = FemtetInterface._create_path(
-                        original_femprj_path, model_name, trial_to_remove, ext='pdt')
+                        original_femprj_path, model_name, trial_name_to_remove, ext='pdt')
                     if os.path.isfile(pdt_path_to_remove):
                         os.remove(pdt_path_to_remove)
 

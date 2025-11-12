@@ -8,4 +8,5 @@ __all__ = [
     'create_err_msg_from_exception',
     'CorrespondingColumnNameRuler',
     'MAIN_FILTER',
+    'get_trial_name',
 ]
