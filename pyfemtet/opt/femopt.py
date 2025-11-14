@@ -482,7 +482,7 @@ class FEMOpt:
                                'performing one of the following actions:\n'
                                '- {windows_only}Launch the `pyfemtet-opt-result-viewer` '
                                'shortcut on your desktop if exists.\n'
-                               '- {windows_only}Launch {path}.\n'
+                               '- {windows_only}Launch {dir}.\n'
                                '- Execute "py -m pyfemtet.opt.visualization.history_viewer" '
                                'in the command line',
                     jp_message='プログラム終了後も、結果ビューワを使って最適化結果を'
