@@ -90,8 +90,14 @@ class AbstractFEMInterface:
         # worker_space から探し
         # suffix を付与して rename し
         # その renamed path を返す関数
+        # ただし distribute_files を実行せずこれを実行して
+        # worker_space が取得できなかった場合は
+        # 元の path をそのまま返す
 
         worker_space = self._get_worker_space()
+
+        if worker_space is None:
+            return orig_path
 
         src_path = os.path.join(worker_space, os.path.basename(orig_path))
         p1_, p2_ = os.path.splitext(src_path)
@@ -105,13 +111,17 @@ class AbstractFEMInterface:
 
         return dst_path_
 
-    def _get_worker_space(self) -> str:
+    def _get_worker_space(self) -> str | None:
         worker = get_worker()
         if worker is None:
-            assert hasattr(self, '_tmp_dir'), 'Internal Error! Run _distribute_files() first!'
-            return self._tmp_dir.name
+            if hasattr(self, '_tmp_dir'):
+                return self._tmp_dir.name
+            else:
+                return None
         else:
-            return worker.local_directory
+            out = worker.local_directory
+            assert out is not None, 'Internal Error: worker.local_directory is None'
+            return out
 
     def _distribute_files(self, paths: list[str], scheduler_address=None) -> None:
 
