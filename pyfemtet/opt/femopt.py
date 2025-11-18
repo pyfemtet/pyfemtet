@@ -229,6 +229,7 @@ class FEMOpt:
             history_path: str = None,
             with_monitor: bool = True,
             scheduler_address: str = None,
+            seed: int | None = None,
     ):
 
         # ===== show initialize info =====
@@ -244,6 +245,8 @@ class FEMOpt:
         self.opt.n_trials = n_trials or self.opt.n_trials
         self.opt.timeout = timeout or self.opt.timeout
         self.opt.history.path = history_path or self.opt.history.path
+        if seed is not None:
+            self.opt.seed = seed
 
         # construct opt workers
         n_using_cluster_workers = n_parallel  # workers excluding main
