@@ -201,7 +201,13 @@ class FemtetWithNXInterface(FemtetInterface, _NXInterface):
 
         # 競合しないよう保存先を temp にしておく
         worker_space = self._get_worker_space()
-        xt_path = os.path.join(worker_space, 'temp.x_t')
+        if worker_space is not None:
+            xt_path = os.path.join(worker_space, 'temp.x_t')
+
+        # worker_space が取得できなかった場合は
+        # カレントディレクトリに保存する
+        else:
+            xt_path = os.path.abspath('_temp.x_t')
 
         # export parasolid
         self._export_xt(xt_path)

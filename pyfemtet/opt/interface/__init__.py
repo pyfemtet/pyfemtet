@@ -12,7 +12,7 @@ from ._base_interface import AbstractFEMInterface, NoFEM
 # 実際の実装が参照されるようにした。
 # VSCode では TYPE_CHECKING が True となる節が優先される。
 if platform.system() != 'Windows' and not TYPE_CHECKING:
-    from _dummy_classes import (
+    from ._dummy_classes import (
         FemtetInterface,
         FemtetWithNXInterface,
         FemtetWithSolidworksInterface,

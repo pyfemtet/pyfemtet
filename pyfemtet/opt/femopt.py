@@ -20,6 +20,7 @@ from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.interface import *
 from pyfemtet.opt.optimizer import *
 from pyfemtet.opt.optimizer._base_optimizer import DIRECTION
+from pyfemtet.opt.history import History
 from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.visualization.history_viewer._process_monitor._application import (
     process_monitor_main,
@@ -182,6 +183,12 @@ class FEMOpt:
     ):
         self.opt.add_sub_fidelity_model(name, sub_fidelity_model, fidelity)
 
+    def set_termination_condition(
+            self,
+            func: Callable[[History], bool] | None,
+    ):
+        self.opt.set_termination_condition(func)
+
     def set_monitor_host(self, host: str = None, port: int = None):
         """Sets the host IP address and the port of the process monitor.
 
@@ -222,6 +229,7 @@ class FEMOpt:
             history_path: str = None,
             with_monitor: bool = True,
             scheduler_address: str = None,
+            seed: int | None = None,
     ):
 
         # ===== show initialize info =====
@@ -237,6 +245,8 @@ class FEMOpt:
         self.opt.n_trials = n_trials or self.opt.n_trials
         self.opt.timeout = timeout or self.opt.timeout
         self.opt.history.path = history_path or self.opt.history.path
+        if seed is not None:
+            self.opt.seed = seed
 
         # construct opt workers
         n_using_cluster_workers = n_parallel  # workers excluding main
@@ -475,7 +485,7 @@ class FEMOpt:
                                'performing one of the following actions:\n'
                                '- {windows_only}Launch the `pyfemtet-opt-result-viewer` '
                                'shortcut on your desktop if exists.\n'
-                               '- {windows_only}Launch {path}.\n'
+                               '- {windows_only}Launch {dir}.\n'
                                '- Execute "py -m pyfemtet.opt.visualization.history_viewer" '
                                'in the command line',
                     jp_message='プログラム終了後も、結果ビューワを使って最適化結果を'

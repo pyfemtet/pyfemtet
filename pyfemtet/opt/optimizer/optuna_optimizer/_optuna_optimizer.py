@@ -267,6 +267,7 @@ class OptunaOptimizer(AbstractOptimizer):
         def _postprocess(self):
             # update trial attribute
             self.optuna_attr.set_user_attr_to_trial(self.opt.current_trial)
+            super()._postprocess()
 
     def _create_infeasible_constraints(self, opt_: AbstractOptimizer = None) -> tuple:
         opt_ = opt_ if opt_ is not None else self

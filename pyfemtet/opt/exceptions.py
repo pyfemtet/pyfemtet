@@ -39,7 +39,17 @@ class InterruptOptimization(ExceptionDuringOptimization): ...
 class SkipSolve(ExceptionDuringOptimization): ...
 
 
-def show_experimental_warning(feature_name):
-    warnings.warn(f'{feature_name} は実験的機能です。将来 API 等が'
-                  f'大きく変更されるか、機能自体が削除される'
-                  f'可能性があります。')
+_shown = set()
+
+
+def show_experimental_warning(feature_name, logger=None):
+    global _shown
+    if feature_name not in _shown:
+        _shown.add(feature_name)
+        msg = (f'{feature_name} は実験的機能です。将来 API 等が'
+               '大きく変更されるか、機能自体が削除される'
+               '可能性があります。')
+        if logger is not None:
+            logger.warning(msg)
+        else:
+            warnings.warn(msg)

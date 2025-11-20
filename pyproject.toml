@@ -57,7 +57,8 @@ dev = [
     "pytest-cov>=6.1.1",
     "pytest-reporter-html-dots>=0.11.0",
     "esbonio>=0.12.0",
-    "packaging",
+    "pandas-stubs>=2.3.2.250926",
+    "scipy-stubs>=1.15.3.0",
 ]
 
 [tool.uv-dynamic-versioning]

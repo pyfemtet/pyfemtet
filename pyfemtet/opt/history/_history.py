@@ -41,6 +41,7 @@ __all__ = [
     'create_err_msg_from_exception',
     'CorrespondingColumnNameRuler',
     'MAIN_FILTER',
+    'get_trial_name'
 ]
 
 MAIN_FILTER: dict = {
@@ -50,7 +51,32 @@ MAIN_FILTER: dict = {
 
 
 logger = get_module_logger('opt.history', False)
-logger_dask = get_module_logger('opt.dask', False)
+logger_dask = get_module_logger("opt.dask", False)
+
+
+def get_trial_name(trial=None, fidelity=None, sub_sampling=None, row: pd.Series = None):
+    if row is not None:
+        assert not math.isnan(row["trial"])
+        trial = row["trial"]
+        fidelity = row["fidelity"] if not math.isnan(row["fidelity"]) else None
+        sub_sampling = (
+            row["sub_sampling"] if not math.isnan(row["sub_sampling"]) else None
+        )
+
+    name_parts = ["trial"]
+    if fidelity is not None:
+        fid = str(fidelity)
+        if fid != MAIN_FIDELITY_NAME:
+            name_parts.append(fid)
+
+    name_parts.append(str(trial))
+
+    if sub_sampling is not None:
+        name_parts.append(str(sub_sampling))
+
+    trial_name = '_'.join(name_parts)
+
+    return trial_name
 
 
 def _assert_locked_with_timeout(lock, assertion_message=None, timeout=10.):
@@ -1315,26 +1341,7 @@ class History:
 
     @staticmethod
     def get_trial_name(trial=None, fidelity=None, sub_sampling=None, row: pd.Series = None):
-        if row is not None:
-            assert not math.isnan(row['trial'])
-            trial = row['trial']
-            fidelity = row['fidelity'] if not math.isnan(row['fidelity']) else None
-            sub_sampling = row['sub_sampling'] if not math.isnan(row['sub_sampling']) else None
-
-        name_parts = ['trial']
-        if fidelity is not None:
-            fid = str(fidelity)
-            if fid != MAIN_FIDELITY_NAME:
-                name_parts.append(fid)
-
-        name_parts.append(str(trial))
-
-        if sub_sampling is not None:
-            name_parts.append(str(sub_sampling))
-
-        trial_name = '_'.join(name_parts)
-
-        return trial_name
+        return get_trial_name(trial, fidelity, sub_sampling, row)
 
     def recording(self, fem: AbstractFEMInterface):
         """:meta private:"""
