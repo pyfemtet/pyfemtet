@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import os
 import sys
@@ -8,6 +8,7 @@ import subprocess
 from time import sleep
 from contextlib import nullcontext
 import importlib
+from packaging.version import Version
 
 # noinspection PyUnresolvedReferences
 from pywintypes import com_error, error
@@ -168,6 +169,7 @@ class FemtetInterface(COMInterface):
         _set_autosave_enabled(False)
         self._warn_if_undefined_variable = True
         self.api_response_warning_time = 10  # mesh, solve, re-execute を除くマクロ実行警告時間
+        self.save_screenshot: Literal["result", "model", "none"] = "model"
 
         # connect to Femtet
         self._connect_and_open_femtet()
@@ -1141,11 +1143,42 @@ class FemtetInterface(COMInterface):
         result_dir = self.femprj_path.replace(".femprj", ".Results")
         jpg_path = os.path.join(result_dir, self.model_name + ".jpg")
 
+        # TODO: call_femtet_api 経由で実行する
+        
+        # スクリーンショットを保存する場合
+        # 目的や拘束の評価は終わっており
+        # 次の trial の最初で再度 Gaudi が Activate されるので
+        # ここでは Gogh を Activate しても Gaudi を Activate してもよい
+        if (self.save_screenshot.lower() == 'result') and self.open_result_with_gui:
+            # OpenPDT(bGUI=True) を実際に通っているかチェック
+            try:
+                self.Femtet.Gogh.Activate()
+            except com_error:
+                raise FailedToPostProcess('Failed to activate Gogh to get screenshot.')
+
+            # Gogh をアクティブ化したので
+            # Gogh の "Air_Auto" ボディ属性を探して非表示にする
+            GoghData = self.Femtet.Gogh.Data
+            for i in range(GoghData.nGoghBody):
+                GoghBody = GoghData.GoghBodyArray(i)
+                if GoghBody.BodyAttributeName.lower() == "air_auto":
+                    GoghBody.Visible = False
+
+        elif self.save_screenshot.lower() == 'model':
+            # 目的や拘束の評価は終わっており
+            # 次の trial の最初で再度 Gaudi が Activate されるので
+            # ここでは Gogh を Activate しても Gaudi を Activate してもよい
+            self.Femtet.Gaudi.Activate()
+        
+        else:
+            # 保存しない
+            return None
+
         # モデル表示画面の設定
         self.Femtet.SetWindowSize(600, 600)
         self.Femtet.Fit()
 
-        # ---モデルの画面を保存---
+        # モデルの画面を保存
         self.Femtet.Redraw()  # 再描画
         succeed = self.Femtet.SavePicture(jpg_path, 600, 600, 80)
 
