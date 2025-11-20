@@ -1184,7 +1184,7 @@ class FemtetInterface(COMInterface):
         succeed = self.Femtet.SavePicture(jpg_path, 600, 600, 80)
 
         # モデルを全画面表示に
-        if self._version >= Version('2025.1.0'):
+        if self._version() >= Version('2025.1.0'):
             self.Femtet.SetWindowMaximize()
             self.Femtet.Redraw()
 
