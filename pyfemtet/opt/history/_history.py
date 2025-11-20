@@ -834,7 +834,7 @@ class EntireDependentValuesCalculator:
         # get values
         all_obj_values = self.partial_df[obj_names].values
         all_obj_directions = self.partial_df[obj_direction_names].values
-        feasibility = self.partial_df['feasibility']
+        feasibility = self.partial_df["feasibility"]
 
         # convert values as minimization problem
         y_internal = np.empty(all_obj_values.shape)
@@ -852,7 +852,7 @@ class EntireDependentValuesCalculator:
         self.partial_y_internal = y_internal
         self.partial_feasibility = feasibility
 
-    def update_optimality(self):
+    def update_optimality(self, rtol=0.01):
 
         _assert_locked_with_timeout(self.records.df_wrapper.lock)
 
@@ -860,6 +860,7 @@ class EntireDependentValuesCalculator:
         optimality = calc_optimality(
             self.partial_y_internal,
             self.partial_feasibility,
+            rtol=rtol,
         )
 
         # update
@@ -1125,7 +1126,7 @@ class Records:
                 )
             )
 
-    def append(self, record: Record) -> pd.Series:
+    def append(self, record: Record, rtol=0.01) -> pd.Series:
 
         # get row
         row = record.as_df(dtypes=self.column_manager.column_dtypes)
@@ -1157,7 +1158,7 @@ class Records:
             # must be in with block to keep
             # the entire data compatibility
             # during processing.
-            self.update_entire_dependent_values(new_df)
+            self.update_entire_dependent_values(new_df, rtol=rtol)
 
             dfw.set_df(new_df)
 
@@ -1165,7 +1166,11 @@ class Records:
             # 計算済み最終行を返す
             return new_df.iloc[-1]
 
-    def update_entire_dependent_values(self, processing_df: pd.DataFrame):
+    def update_entire_dependent_values(
+            self,
+            processing_df: pd.DataFrame,
+            rtol=0.01,
+    ):
 
         _assert_locked_with_timeout(self.df_wrapper.lock)
 
@@ -1184,7 +1189,7 @@ class Records:
             equality_filters,
             processing_df,
         )
-        mgr.update_optimality()
+        mgr.update_optimality(rtol=rtol)
         mgr.update_hypervolume()
         if not trial_processed:
             mgr.update_trial_number()  # per_fidelity
@@ -1238,6 +1243,7 @@ class History:
         self.is_restart = False
         self.additional_data = dict(version=pyfemtet.__version__)
         self.column_order_mode: ColumnOrderMode | ColumnOrderModeStr = ColumnOrderMode.per_category
+        self._rtol_calc_optimality = 0.01
 
     def __str__(self):
         return self._records.__str__()
@@ -1360,7 +1366,7 @@ class History:
                 self_.record.datetime_end = self_.record.datetime_end \
                     if self_.record.datetime_end is not None \
                     else datetime.datetime.now()
-                return self._records.append(self_.record)
+                return self._records.append(self_.record, rtol=self._rtol_calc_optimality)
 
             @staticmethod
             def postprocess_after_recording(row):

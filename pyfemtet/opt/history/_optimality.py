@@ -4,12 +4,17 @@ import numpy as np
 __all__ = ['calc_optimality']
 
 
-def calc_optimality(y_internal: np.ndarray, feasibility: np.ndarray) -> np.ndarray:
+def calc_optimality(
+        y_internal: np.ndarray,
+        feasibility: np.ndarray,
+        rtol: float,
+) -> np.ndarray:
     """
 
     Args:
         y_internal (np.ndarray): n x m shaped 2d-array. Can contain np.nan. Minimum value is optimal.
         feasibility (np.ndarray): n shaped 1d-array. bool.
+        rtol (float): Relative tolerance for considering two values as equal.
 
     Returns:
         np.ndarray: Array if not optimal, dominated or Nan False, else True
@@ -23,10 +28,10 @@ def calc_optimality(y_internal: np.ndarray, feasibility: np.ndarray) -> np.ndarr
     y_values: np.ndarray
     another_y_values: np.ndarray
     optimality = []
+
     assert len(y_internal) == len(feasibility)
     for i, (y_values, feas) in enumerate(zip(y_internal, feasibility)):
         for j, (another_y_values, another_feas) in enumerate(zip(y_internal, feasibility)):
-
             # 自身が infeasible なら
             # 比較を終了して False
             if not feas:
@@ -43,7 +48,7 @@ def calc_optimality(y_internal: np.ndarray, feasibility: np.ndarray) -> np.ndarr
                 continue
 
             # 重複した解なら比較しない
-            elif np.allclose(y_values, another_y_values, atol=0, rtol=0.01):
+            elif np.allclose(y_values, another_y_values, atol=0.0, rtol=rtol):
                 assert np.all(~np.isnan(y_values))
                 assert np.all(~np.isnan(another_y_values))
                 continue
