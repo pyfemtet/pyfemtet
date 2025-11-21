@@ -211,7 +211,13 @@
 
         <span class="c1"># 競合しないよう保存先を temp にしておく</span>
         <span class="n">worker_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_space</span><span class="p">()</span>
-        <span class="n">xt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">worker_space</span><span class="p">,</span> <span class="s1">&#39;temp.x_t&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">worker_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">worker_space</span><span class="p">,</span> <span class="s1">&#39;temp.x_t&#39;</span><span class="p">)</span>
+
+        <span class="c1"># worker_space が取得できなかった場合は</span>
+        <span class="c1"># カレントディレクトリに保存する</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;_temp.x_t&#39;</span><span class="p">)</span>
 
         <span class="c1"># export parasolid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_export_xt</span><span class="p">(</span><span class="n">xt_path</span><span class="p">)</span>

@@ -82,7 +82,7 @@
   <h1>pyfemtet.opt.interface._femtet_interface.femtet_interface のソースコード</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -90,6 +90,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">Version</span>
 
 <span class="c1"># noinspection PyUnresolvedReferences</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pywintypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">com_error</span><span class="p">,</span> <span class="n">error</span>
@@ -116,6 +117,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">COMInterface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_trial_name</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">._femtet_parametric</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
@@ -252,25 +254,15 @@
         <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_warn_if_undefined_variable</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_response_warning_time</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># mesh, solve, re-execute を除くマクロ実行警告時間</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;model&quot;</span>
 
         <span class="c1"># connect to Femtet</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connect_and_open_femtet</span><span class="p">()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_method</span> <span class="o">!=</span> <span class="s1">&#39;unconnected&#39;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_always_open_copy</span><span class="p">:</span>
-            <span class="c1"># 現時点でFemtet に model を close する機能がない</span>
-            <span class="c1">#   + executor でも CAD 連携等でモデルに</span>
-            <span class="c1">#   わかりにくい変更が入らないように</span>
-            <span class="c1">#   _tmp_dir のファイルを開くようにしたため</span>
-            <span class="c1">#   _tmp_dir 削除時の permission error を</span>
-            <span class="c1">#   避けるために Femtet を強制 close する</span>
-            <span class="c1"># Femtet で model が close できるようになれば</span>
-            <span class="c1">#   この条件分岐は不要になる</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_method</span> <span class="o">==</span> <span class="s1">&#39;new&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># 接続した Femtet の種類に応じて del 時に quit するかどうか決める</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_method</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span>
 
     <span class="c1"># ===== system =====</span>
 
@@ -333,14 +325,21 @@
 
         <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Femtet&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Femtet&quot;</span><span class="p">):</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quit_when_destruct</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">force</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">force</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_femprj_path</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+                    <span class="n">femprj_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_femprj_path</span><span class="p">,</span>
+                    <span class="n">model_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
+                <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FemtetInterface.use_parametric_output_as_objective">
@@ -1234,9 +1233,9 @@
         <span class="k">if</span> <span class="n">save_results</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;optimal&#39;</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;optimality&#39;</span><span class="p">]):</span>
-                    <span class="n">trial_to_remove</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">])</span>
+                    <span class="n">trial_name_to_remove</span> <span class="o">=</span> <span class="n">get_trial_name</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">)</span>
                     <span class="n">pdt_path_to_remove</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="o">.</span><span class="n">_create_path</span><span class="p">(</span>
-                        <span class="n">original_femprj_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">trial_to_remove</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;pdt&#39;</span><span class="p">)</span>
+                        <span class="n">original_femprj_path</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">trial_name_to_remove</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;pdt&#39;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pdt_path_to_remove</span><span class="p">):</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pdt_path_to_remove</span><span class="p">)</span>
 
@@ -1268,13 +1267,49 @@
         <span class="n">result_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.femprj&quot;</span><span class="p">,</span> <span class="s2">&quot;.Results&quot;</span><span class="p">)</span>
         <span class="n">jpg_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>
 
+        <span class="c1"># TODO: call_femtet_api 経由で実行する</span>
+        
+        <span class="c1"># スクリーンショットを保存する場合</span>
+        <span class="c1"># 目的や拘束の評価は終わっており</span>
+        <span class="c1"># 次の trial の最初で再度 Gaudi が Activate されるので</span>
+        <span class="c1"># ここでは Gogh を Activate しても Gaudi を Activate してもよい</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_screenshot</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;result&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span><span class="p">:</span>
+            <span class="c1"># OpenPDT(bGUI=True) を実際に通っているかチェック</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Activate</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">com_error</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FailedToPostProcess</span><span class="p">(</span><span class="s1">&#39;Failed to activate Gogh to get screenshot.&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Gogh をアクティブ化したので</span>
+            <span class="c1"># Gogh の &quot;Air_Auto&quot; ボディ属性を探して非表示にする</span>
+            <span class="n">GoghData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span><span class="o">.</span><span class="n">Data</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">GoghData</span><span class="o">.</span><span class="n">nGoghBody</span><span class="p">):</span>
+                <span class="n">GoghBody</span> <span class="o">=</span> <span class="n">GoghData</span><span class="o">.</span><span class="n">GoghBodyArray</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">GoghBody</span><span class="o">.</span><span class="n">BodyAttributeName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;air_auto&quot;</span><span class="p">:</span>
+                    <span class="n">GoghBody</span><span class="o">.</span><span class="n">Visible</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_screenshot</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;model&#39;</span><span class="p">:</span>
+            <span class="c1"># 目的や拘束の評価は終わっており</span>
+            <span class="c1"># 次の trial の最初で再度 Gaudi が Activate されるので</span>
+            <span class="c1"># ここでは Gogh を Activate しても Gaudi を Activate してもよい</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Gaudi</span><span class="o">.</span><span class="n">Activate</span><span class="p">()</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 保存しない</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
         <span class="c1"># モデル表示画面の設定</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Fit</span><span class="p">()</span>
 
-        <span class="c1"># ---モデルの画面を保存---</span>
+        <span class="c1"># モデルの画面を保存</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Redraw</span><span class="p">()</span>  <span class="c1"># 再描画</span>
         <span class="n">succeed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SavePicture</span><span class="p">(</span><span class="n">jpg_path</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+
+        <span class="c1"># モデルを全画面表示に</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">Version</span><span class="p">(</span><span class="s1">&#39;2025.1.0&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SetWindowMaximize</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Redraw</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">RedrawMode</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># 逐一の描画をオン</span>
 
@@ -1297,7 +1332,7 @@
             <span class="n">model_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Version</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_version</span><span class="p">(</span><span class="n">Femtet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">)</span></div>
 
 </pre></div>

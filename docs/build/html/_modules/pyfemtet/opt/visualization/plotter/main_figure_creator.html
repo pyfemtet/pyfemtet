@@ -182,6 +182,12 @@
     <span class="c1"># メインデータを抽出</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">get_partial_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equality_filters</span><span class="o">=</span><span class="n">MAIN_FILTER</span><span class="p">)</span>
 
+    <span class="c1"># 成功した試行のみを抽出</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;feasibility&#39;</span><span class="p">]]</span>
+
+    <span class="c1"># 番号を振り直し</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
     <span class="c1"># create figure</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
         <span class="n">df</span><span class="p">,</span>

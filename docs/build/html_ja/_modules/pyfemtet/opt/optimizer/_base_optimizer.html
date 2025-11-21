@@ -99,6 +99,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._trial_queue</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_experimental_warning</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;AbstractOptimizer&#39;</span><span class="p">,</span>
@@ -198,6 +199,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solve_condition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">History</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">termination_condition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">History</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entire_status</span><span class="p">:</span> <span class="n">WorkerStatus</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="p">(</span><span class="n">ENTIRE_PROCESS_STATUS_KEY</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="p">:</span> <span class="n">WorkerStatus</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="p">(</span><span class="s1">&#39;worker-status&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_status_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WorkerStatus</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="p">]</span>
@@ -526,6 +528,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">solve_condition</span> <span class="o">=</span> <span class="n">fun</span></div>
 
 
+<div class="viewcode-block" id="AbstractOptimizer.set_termination_condition">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.set_termination_condition">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_termination_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">History</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fun</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">termination_condition</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">termination_condition</span> <span class="o">=</span> <span class="n">fun</span>
+        <span class="n">show_experimental_warning</span><span class="p">(</span><span class="s1">&#39;set_termination_condition&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span></div>
+
+
     <span class="c1"># ===== private =====</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_enqueued_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -634,7 +646,8 @@
             <span class="k">pass</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">pass</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">termination_condition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">history</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">entire_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">interrupting</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_solve_or_raise</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
@@ -1011,7 +1024,7 @@
 
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;DEBUG_FEMOPT_PARALLEL&#39;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">worker_idx</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                    <span class="n">sleep</span><span class="p">(</span><span class="n">worker_idx</span><span class="p">)</span>
+                    <span class="n">sleep</span><span class="p">((</span><span class="n">worker_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 

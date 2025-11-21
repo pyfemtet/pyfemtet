@@ -148,12 +148,22 @@
 
 
 
+<span class="n">_shown</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+
 <div class="viewcode-block" id="show_experimental_warning">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.exceptions.html#pyfemtet.opt.exceptions.show_experimental_warning">[ドキュメント]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">show_experimental_warning</span><span class="p">(</span><span class="n">feature_name</span><span class="p">):</span>
-    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s1"> は実験的機能です。将来 API 等が&#39;</span>
-                  <span class="sa">f</span><span class="s1">&#39;大きく変更されるか、機能自体が削除される&#39;</span>
-                  <span class="sa">f</span><span class="s1">&#39;可能性があります。&#39;</span><span class="p">)</span></div>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_experimental_warning</span><span class="p">(</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">_shown</span>
+    <span class="k">if</span> <span class="n">feature_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_shown</span><span class="p">:</span>
+        <span class="n">_shown</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s1"> は実験的機能です。将来 API 等が&#39;</span>
+               <span class="s1">&#39;大きく変更されるか、機能自体が削除される&#39;</span>
+               <span class="s1">&#39;可能性があります。&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 </pre></div>
 

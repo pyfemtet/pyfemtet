@@ -123,6 +123,7 @@
     <span class="s1">&#39;create_err_msg_from_exception&#39;</span><span class="p">,</span>
     <span class="s1">&#39;CorrespondingColumnNameRuler&#39;</span><span class="p">,</span>
     <span class="s1">&#39;MAIN_FILTER&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_trial_name&#39;</span>
 <span class="p">]</span>
 
 <span class="n">MAIN_FILTER</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -132,7 +133,35 @@
 
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-<span class="n">logger_dask</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.dask&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">logger_dask</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s2">&quot;opt.dask&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_trial_name">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.get_trial_name">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_trial_name</span><span class="p">(</span><span class="n">trial</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_sampling</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;trial&quot;</span><span class="p">])</span>
+        <span class="n">trial</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;trial&quot;</span><span class="p">]</span>
+        <span class="n">fidelity</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">sub_sampling</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;sub_sampling&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;sub_sampling&quot;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+    <span class="n">name_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;trial&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">fidelity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fid</span> <span class="o">!=</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">:</span>
+            <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+
+    <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">sub_sampling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sub_sampling</span><span class="p">))</span>
+
+    <span class="n">trial_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_parts</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">trial_name</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_assert_locked_with_timeout</span><span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="n">assertion_message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">10.</span><span class="p">):</span>
@@ -896,7 +925,7 @@
         <span class="c1"># get values</span>
         <span class="n">all_obj_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">[</span><span class="n">obj_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="n">all_obj_directions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">[</span><span class="n">obj_direction_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">feasibility</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">[</span><span class="s1">&#39;feasibility&#39;</span><span class="p">]</span>
+        <span class="n">feasibility</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_df</span><span class="p">[</span><span class="s2">&quot;feasibility&quot;</span><span class="p">]</span>
 
         <span class="c1"># convert values as minimization problem</span>
         <span class="n">y_internal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">all_obj_values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -914,7 +943,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">partial_y_internal</span> <span class="o">=</span> <span class="n">y_internal</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">partial_feasibility</span> <span class="o">=</span> <span class="n">feasibility</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_optimality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_optimality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 
         <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
 
@@ -922,6 +951,7 @@
         <span class="n">optimality</span> <span class="o">=</span> <span class="n">calc_optimality</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_y_internal</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_feasibility</span><span class="p">,</span>
+            <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># update</span>
@@ -1187,7 +1217,7 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 
         <span class="c1"># get row</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">as_df</span><span class="p">(</span><span class="n">dtypes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column_manager</span><span class="o">.</span><span class="n">column_dtypes</span><span class="p">)</span>
@@ -1219,7 +1249,7 @@
             <span class="c1"># must be in with block to keep</span>
             <span class="c1"># the entire data compatibility</span>
             <span class="c1"># during processing.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_entire_dependent_values</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_entire_dependent_values</span><span class="p">(</span><span class="n">new_df</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">)</span>
 
             <span class="n">dfw</span><span class="o">.</span><span class="n">set_df</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
 
@@ -1227,7 +1257,11 @@
             <span class="c1"># 計算済み最終行を返す</span>
             <span class="k">return</span> <span class="n">new_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_entire_dependent_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_entire_dependent_values</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">processing_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+            <span class="n">rtol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="p">):</span>
 
         <span class="n">_assert_locked_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_wrapper</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
 
@@ -1246,7 +1280,7 @@
             <span class="n">equality_filters</span><span class="p">,</span>
             <span class="n">processing_df</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">mgr</span><span class="o">.</span><span class="n">update_optimality</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">update_optimality</span><span class="p">(</span><span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">)</span>
         <span class="n">mgr</span><span class="o">.</span><span class="n">update_hypervolume</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">trial_processed</span><span class="p">:</span>
             <span class="n">mgr</span><span class="o">.</span><span class="n">update_trial_number</span><span class="p">()</span>  <span class="c1"># per_fidelity</span>
@@ -1302,6 +1336,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_restart</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additional_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">pyfemtet</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">column_order_mode</span><span class="p">:</span> <span class="n">ColumnOrderMode</span> <span class="o">|</span> <span class="n">ColumnOrderModeStr</span> <span class="o">=</span> <span class="n">ColumnOrderMode</span><span class="o">.</span><span class="n">per_category</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rtol_calc_optimality</span> <span class="o">=</span> <span class="mf">0.01</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
@@ -1410,26 +1445,7 @@
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.history.html#pyfemtet.opt.history.History.get_trial_name">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_trial_name</span><span class="p">(</span><span class="n">trial</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_sampling</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">])</span>
-            <span class="n">trial</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span>
-            <span class="n">fidelity</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="n">sub_sampling</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sub_sampling&#39;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
-
-        <span class="n">name_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">fidelity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">fid</span> <span class="o">!=</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">:</span>
-                <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
-
-        <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">sub_sampling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">name_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sub_sampling</span><span class="p">))</span>
-
-        <span class="n">trial_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_parts</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">trial_name</span></div>
+        <span class="k">return</span> <span class="n">get_trial_name</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">sub_sampling</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
@@ -1449,7 +1465,7 @@
                 <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">datetime_end</span> <span class="o">=</span> <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">datetime_end</span> \
                     <span class="k">if</span> <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">datetime_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
                     <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rtol_calc_optimality</span><span class="p">)</span>
 
             <span class="nd">@staticmethod</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">postprocess_after_recording</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
