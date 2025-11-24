@@ -177,6 +177,9 @@ def _impl_sldasm():
     assert sorted(out) == sorted(reference)
 
 
+@pytest.mark.femtet
+@pytest.mark.cad
+@pytest.mark.skip('pytest with Solidworks is unstable')
 def test_sldasm():
     _run(_impl_sldasm.__name__)
 
