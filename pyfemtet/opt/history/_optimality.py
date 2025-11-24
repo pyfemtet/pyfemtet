@@ -76,7 +76,8 @@ def calc_optimality(
 if __name__ == '__main__':
     _optimality = calc_optimality(
         (_y := np.random.rand(10, 2)),
-        (_feas := (np.random.rand(10) > 0.25).astype(bool))
+        (_feas := (np.random.rand(10) > 0.25).astype(bool)),
+        rtol=0.01,
     )
 
     print(_y)

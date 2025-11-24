@@ -29,7 +29,8 @@ __all__ = [
 def calc_hypervolume(
         y_internal: np.ndarray,
         feasibility: np.ndarray,
-        ref_point: str | np.ndarray = 'optuna-nadir'
+        ref_point: str | np.ndarray = 'optuna-nadir',
+        rtol=0.01,
 ) -> np.ndarray:
     """
 
@@ -42,6 +43,7 @@ def calc_hypervolume(
             'nadir',
             'worst',
             or the fixed reference point of y_internal.
+        rtol: Relative tolerance for optimality calculation. float.
 
     Returns: n shaped 1d-array. float.
 
@@ -54,7 +56,7 @@ def calc_hypervolume(
     # multi objective
     if isinstance(ref_point, str):
         if ref_point.lower() == 'nadir-up-to-the-point':
-            hv_values = calc_hypervolume_nadir_up_to_the_point(y_internal, feasibility)
+            hv_values = calc_hypervolume_nadir_up_to_the_point(y_internal, feasibility, rtol)
         elif ref_point.lower() == 'worst-up-to-the-point':
             hv_values = calc_hypervolume_worst_up_to_the_point(y_internal, feasibility)
         elif ref_point.lower() == 'nadir':
@@ -64,7 +66,7 @@ def calc_hypervolume(
             hv = calc_hypervolume_worst(y_internal, feasibility)
             hv_values = hv * np.ones(len(y_internal)).astype(float)
         elif ref_point.lower() == 'optuna-nadir':
-            hv_values = calc_hypervolume_by_optuna(y_internal, feasibility)
+            hv_values = calc_hypervolume_by_optuna(y_internal, feasibility, rtol)
         else:
             raise NotImplementedError
 
@@ -81,26 +83,28 @@ def calc_hypervolume(
 def get_pareto_set(
         y: np.ndarray,
         feasibility: np.ndarray,
+        rtol,
 ) -> np.ndarray:
-    optimality = calc_optimality(y, feasibility)
+    optimality = calc_optimality(y, feasibility, rtol)
     non_dominated_solutions = y[optimality]
     assert not np.any(np.isnan(non_dominated_solutions))
     return non_dominated_solutions
 
 
-def calc_hypervolume_nadir(y, feasibility, ref_point=None) -> float:
+def calc_hypervolume_nadir(y, feasibility, ref_point=None, rtol=0.01) -> float:
     """Use Nadir point as the ref_point.
 
     Args:
         y: (n, m) shaped 2d-array. float.
         feasibility (np.ndarray): n shaped 1d-array. bool.
         ref_point: (m) shaped array. float.
+        rtol: Relative tolerance for optimality calculation. float.
 
     Returns: float.
 
     """
 
-    pareto_set = get_pareto_set(y, feasibility)
+    pareto_set = get_pareto_set(y, feasibility, rtol)
     if len(pareto_set) == 0:
         return 0.
 
@@ -113,12 +117,13 @@ def calc_hypervolume_nadir(y, feasibility, ref_point=None) -> float:
     return hv
 
 
-def calc_hypervolume_nadir_up_to_the_point(y, feasibility) -> np.ndarray:
+def calc_hypervolume_nadir_up_to_the_point(y, feasibility, rtol) -> np.ndarray:
     """Use Nadir point up_to_the_point as the ref_point.
 
     Args:
         y: (n, m) shaped 2d-array. float.
         feasibility (np.ndarray): n shaped 1d-array. bool.
+        rtol: Relative tolerance for optimality calculation. float.
 
     Returns: (n) shaped 1d-array. float.
 
@@ -132,7 +137,7 @@ def calc_hypervolume_nadir_up_to_the_point(y, feasibility) -> np.ndarray:
     for n in range(len(y)):
         y_up = y[:n]
         f_up = feasibility[:n]
-        pareto_set = get_pareto_set(y_up, f_up)
+        pareto_set = get_pareto_set(y_up, f_up, rtol)
         if len(pareto_set) == 0:
             continue
         nadir_points.append(pareto_set.max(axis=0))
@@ -196,7 +201,7 @@ def calc_hypervolume_fixed_point(y, feasibility, ref_point) -> float:
     return hv
 
 
-def calc_hypervolume_by_optuna(y, f):
+def calc_hypervolume_by_optuna(y, f, rtol):
     study = optuna.create_study(
         directions=['minimize'] * y.shape[-1]
     )
@@ -222,6 +227,6 @@ def calc_hypervolume_by_optuna(y, f):
         )
         study.add_trial(trial)
         number += 1
-    ref_point = get_pareto_set(y, f).max(axis=0) + 1e-8
+    ref_point = get_pareto_set(y, f, rtol).max(axis=0) + 1e-8
     info = _get_hypervolume_history_info(study, reference_point=ref_point)
     return np.array(info.values)

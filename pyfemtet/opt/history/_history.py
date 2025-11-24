@@ -879,7 +879,7 @@ class EntireDependentValuesCalculator:
         # update
         self.partial_df.loc[:, "optimality"] = optimality
 
-    def update_hypervolume(self):
+    def update_hypervolume(self, rtol):
         _assert_locked_with_timeout(self.records.df_wrapper.lock)
 
         # calc hypervolume
@@ -887,6 +887,7 @@ class EntireDependentValuesCalculator:
             self.partial_y_internal,
             self.partial_feasibility,
             ref_point="optuna-nadir",
+            rtol=rtol,
         )
 
         # update
@@ -1242,7 +1243,7 @@ class Records:
             processing_df,
         )
         mgr.update_optimality(rtol=rtol)
-        mgr.update_hypervolume()
+        mgr.update_hypervolume(rtol=rtol)
         if not trial_processed:
             mgr.update_trial_number()  # per_fidelity
         pdf = mgr.partial_df
