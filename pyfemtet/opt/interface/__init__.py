@@ -30,6 +30,7 @@ else:
 from ._surrogate_model_interface import AbstractSurrogateModelInterfaceBase
 from ._surrogate_model_interface import BoTorchInterface
 from ._surrogate_model_interface import PoFBoTorchInterface
+from ._multiple_fem_interface import MultipleFEMInterface
 
 __all__ = [
     'AbstractFEMInterface',
@@ -41,6 +42,7 @@ __all__ = [
     'AbstractSurrogateModelInterfaceBase',
     'BoTorchInterface',
     'PoFBoTorchInterface',
+    'MultipleFEMInterface',
 ]
 
 if platform.system() == 'Windows':
