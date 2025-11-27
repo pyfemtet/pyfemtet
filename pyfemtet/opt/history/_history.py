@@ -30,8 +30,7 @@ from pyfemtet.opt.history._optimality import *
 from pyfemtet.opt.history._hypervolume import *
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.interface import AbstractFEMInterface
-
+    from pyfemtet.opt.interface import AbstractFEMInterface, MultipleFEMInterface
 
 __all__ = [
     "TrialState",
@@ -1424,7 +1423,7 @@ class History:
     ):
         return get_trial_name(trial, fidelity, sub_sampling, row)
 
-    def recording(self, fem: AbstractFEMInterface):
+    def recording(self, fems: MultipleFEMInterface):
         """:meta private:"""
 
         # noinspection PyMethodParameters
@@ -1434,6 +1433,7 @@ class History:
                 self_.record_as_df = None
 
             def __enter__(self_):
+                self_.record.datetime_start = datetime.datetime.now()
                 return self_.record
 
             def append(self_):
@@ -1461,22 +1461,26 @@ class History:
                 df = self.get_df(equality_filters=MAIN_FILTER)
 
                 if client is not None:
-                    client.run_on_scheduler(
-                        fem._postprocess_after_recording,
-                        trial_name=trial_name,
-                        df=df,
-                        **(fem._create_postprocess_args()),
-                    )
+                    for fem in fems:
+                        client.run_on_scheduler(
+                            fem._postprocess_after_recording,
+                            trial_name=trial_name,
+                            df=df,
+                            **(fem._create_postprocess_args()),
+                        )
 
                 else:
-                    fem._postprocess_after_recording(
-                        dask_scheduler=None,
-                        trial_name=trial_name,
-                        df=df,
-                        **(fem._create_postprocess_args()),
-                    )
+                    for fem in fems:
+                        fem._postprocess_after_recording(
+                            dask_scheduler=None,
+                            trial_name=trial_name,
+                            df=df,
+                            **(fem._create_postprocess_args()),
+                        )
 
             def __exit__(self_, exc_type, exc_val, exc_tb):
+                self_.record.datetime_end = datetime.datetime.now()
+
                 row: pd.Series | None = None
 
                 # record feasibility

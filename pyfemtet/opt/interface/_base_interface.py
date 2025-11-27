@@ -164,6 +164,16 @@ class AbstractFEMInterface:
 
     # ===== setup =====
 
+    @staticmethod
+    def _with_reopen(method):
+        def wrapper(self, *args, **kwargs):
+            self.reopen()
+            return method(self, *args, **kwargs)
+        return wrapper
+
+    def reopen(self):
+        pass
+
     def _setup_before_parallel(self, scheduler_address=None) -> None:
         pass
 

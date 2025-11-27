@@ -28,20 +28,18 @@ def test_multiple_fem_interface_basic_flow():
 
     # optimizer を作る
     opt = AbstractOptimizer()
-    opt.fem = fems
+    opt.fems = fems
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, -10, 10)
     opt.add_parameter('x2', 7, -10, 10)
 
     # objective を登録（fem オブジェクトを受け取って内部値を返す関数）
-    opt.add_objective('y1', lambda fems_: fems_._fems[0].internal_value, direction='minimize')
-    opt.add_objective('y2', lambda fems_: fems_._fems[1].internal_value, direction='minimize')
+    opt.add_objective('y1', lambda fems_: fems_[0].internal_value, direction='minimize')
+    opt.add_objective('y2', lambda fems_: fems_[1].internal_value, direction='minimize')
 
     # setup
     opt._finalize()
-    opt._setup_before_parallel()
-    opt._setup_after_parallel()
 
     # variable が追加されていること
     vm = opt.variable_manager.variables
@@ -55,11 +53,81 @@ def test_multiple_fem_interface_basic_flow():
     # solve
     x = opt.get_variables(format="raw")
     f_return = opt._get_solve_set().solve(x)
-    y: tuple[float, ...] = tuple(f_return[0].values())
+    y: tuple[float, ...] = [obj_res.value for obj_res in f_return[0].values()]
 
-    assert y[0] == 25.0
-    assert y[1] == 49.0
+    print(f'{y=}')
+    assert abs(y[0] - 25.0) < 0.001
+    assert abs(y[1] - 49.0) < 0.001
+
+
+def test_multiple_fem_interface_basic_femtet():
+    # 2 つの簡易 FEM を作る
+    fem1 = FemtetInterface(femprj_path=os.path.join(here, 'fem1.femprj'))
+    fem2 = FemtetInterface(femprj_path=os.path.join(here, 'fem2.femprj'))
+
+    # 目的関数の設定
+    fem1.use_parametric_output_as_objective(1)
+    fem2.use_parametric_output_as_objective(1)
+
+    def user_obj(_: MultipleFEMInterface):
+        return 1.
+
+    # MultipleFEMInterface に登録
+    fems = MultipleFEMInterface()
+    fems.add(fem1)
+    fems.add(fem2)
+
+    # optimizer を作る
+    opt = AbstractOptimizer()
+    opt.fems = fems
+
+    # parameter を登録（optimizer に注入される想定）
+    opt.add_parameter('x1', 5, 2, 10)
+    opt.add_parameter('x2', 7, 2, 10)
+
+    # objectives を登録
+    opt.add_objective('user_defined', user_obj)
+
+    # setup
+    opt._finalize()
+
+    # variable が追加されていること
+    vm = opt.variable_manager.variables
+    assert 'x1' in vm
+    assert 'x2' in vm
+
+    # objective が追加されていること
+    # opt.objectives にはユーザー定義の目的関数のみ含まれる
+    # FEM 由来の目的関数は各 FEMContext.objectives に含まれる
+    print(f'{tuple(opt.objectives)=}')
+    assert 'user_defined' in opt.objectives
+
+    # FEMContext の目的関数を確認
+    all_objectives = list(opt.objectives.keys())
+    for ctx in opt.fems.ordered_contexts:
+        all_objectives.extend(ctx.objectives.keys())
+    print(f'{all_objectives=}')
+    assert 'user_defined' in all_objectives
+    assert '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性' in all_objectives
+    assert '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性' in all_objectives
+
+    # solve
+    x = opt.get_variables(format="raw")
+    f_return = opt._get_solve_set().solve(x)
+    y_dict: dict[str, float] = {name: obj_res.value for name, obj_res in f_return[0].items()}
+
+    print(f'{y_dict=}')
+    # 期待される値:
+    # y_dict={
+    #   '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性': 1.0000026284781436,
+    #   '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性': 30.123154397344265,
+    #   'user_defined': 1.0
+    # }
+    assert abs(y_dict['user_defined'] - 1.0) < 0.001
+    assert abs(y_dict['応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性'] - 1.0000026284781436) < 0.001
+    assert abs(y_dict['0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性'] - 30.123154397344265) < 0.001
 
 
 if __name__ == '__main__':
-    test_multiple_fem_interface_basic_flow()
+    # test_multiple_fem_interface_basic_flow()
+    test_multiple_fem_interface_basic_femtet()

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Callable, TypeAlias, Sequence, Literal
+from typing import Callable, TypeAlias, Sequence, Literal, NamedTuple, final
 from numbers import Real  # マイナーなので型ヒントでは使わず、isinstance で使う
 from time import sleep
 import os
@@ -24,6 +24,7 @@ __all__ = [
     'SubFidelityModel',
     'SubFidelityModels',
     '_FReturnValue',
+    'FEMContext',
 ]
 
 
@@ -34,6 +35,12 @@ DIRECTION: TypeAlias = (
             'maximize',
         ]
 )
+
+
+class _UpdateMode(NamedTuple):
+    update_function: bool
+    update_fem: bool
+
 
 logger = get_module_logger('opt.optimizer', False)
 
@@ -83,7 +90,7 @@ class AbstractOptimizer:
 
     # system
     history: History
-    fem: AbstractFEMInterface
+    fems: MultipleFEMInterface
     entire_status: WorkerStatus
     worker_status: WorkerStatus
     worker_status_list: list[WorkerStatus]
@@ -112,7 +119,7 @@ class AbstractOptimizer:
         self.sub_fidelity_models = SubFidelityModels()
 
         # System
-        self.fem: AbstractFEMInterface | None = None
+        self.fems: MultipleFEMInterface = MultipleFEMInterface()
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.termination_condition: Callable[[History], bool] = lambda _: False
@@ -426,12 +433,15 @@ class AbstractOptimizer:
     def _should_solve(self, history):
         return self.solve_condition(history)
 
-    def _y(self) -> TrialOutput:
+    def _y_common(self, fem: AbstractFEMInterface) -> TrialOutput:
         out = TrialOutput()
         for name, obj in self.objectives.items():
-            obj_result = ObjectiveResult(obj, self.fem)
+            obj_result = ObjectiveResult(obj, fem)
             out.update({name: obj_result})
         return out
+
+    def _y(self) -> TrialOutput:
+        return self._y_common(self.fems)
 
     def _convert_y(self, y: TrialOutput) -> dict:
         out = dict()
@@ -441,26 +451,34 @@ class AbstractOptimizer:
             out.update({name: value_internal})
         return out
 
-    def _hard_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
+    def _c_common(
+            self,
+            out: TrialConstraintOutput,
+            fem: AbstractFEMInterface,
+            hard: bool,
+    ) -> TrialConstraintOutput:
         for name, cns in self.constraints.items():
-            if cns.hard:
-                cns_result = ConstraintResult(cns, self.fem)
+            if cns.hard == hard:
+                cns_result = ConstraintResult(cns, fem)
                 out.update({name: cns_result})
         return out
+
+    def _hard_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
+        return self._c_common(out, self.fems, hard=True)
 
     def _soft_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
-        for name, cns in self.constraints.items():
-            if not cns.hard:
-                cns_result = ConstraintResult(cns, self.fem)
-                out.update({name: cns_result})
-        return out
+        return self._c_common(out, self.fems, hard=False)
 
-    def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
+    def _other_outputs_common(self, out: TrialFunctionOutput, fem: AbstractFEMInterface) -> TrialFunctionOutput:
         for name, other_func in self.other_outputs.items():
-            other_func_result = FunctionResult(other_func, self.fem)
+            other_func_result = FunctionResult(other_func, fem)
             out.update({name: other_func_result})
         return out
 
+    def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
+        return self._other_outputs_common(out, self.fems)
+
+    @final
     def _get_hard_constraint_violation_names(self, hard_c: TrialConstraintOutput) -> list[str]:
         violation_names = []
         for name, result in hard_c.items():
@@ -518,18 +536,17 @@ class AbstractOptimizer:
                 self.opt.entire_status.value = WorkerStatus.interrupting
 
         def _solve_or_raise(
-                self,
-                opt_: AbstractOptimizer,
-                parameters: TrialInput,
-                history: History = None,
-                datetime_start=None,
-                trial_id=None,
+            self,
+            opt_: AbstractOptimizer,
+            parameters: TrialInput,
+            history: History = None,
+            trial_id=None,
         ) -> _FReturnValue:
-
             # create context
             if history is not None:
-                record_to_history = history.recording(opt_.fem)
+                record_to_history = history.recording(opt_.fems)
             else:
+
                 class DummyRecordContext:
                     def __enter__(self):
                         return Record()
@@ -541,20 +558,32 @@ class AbstractOptimizer:
 
             # processing with recording
             with record_to_history as record:
+                # output
+                empty_c: TrialConstraintOutput = TrialConstraintOutput()
+                empty_other_outputs: TrialFunctionOutput = TrialFunctionOutput()
+                empty_y = TrialOutput()
+                for ctx, __ in zip(*opt_._ordered_contexts):
+                    if isinstance(ctx, FEMContext):
+                        empty_y.update({
+                            obj_name: ObjectiveResult(obj, ctx.fem, float('nan'))
+                            for obj_name, obj in ctx.objectives.items()
+                        })
+                    else:
+                        empty_y.update({
+                            obj_name: ObjectiveResult(obj, ctx.fems, float('nan'))
+                            for obj_name, obj in ctx.objectives.items()
+                        })
+                y_internal: dict = {}
 
                 # record common result
-                # input
                 record.x = parameters
-                # output (the value is nan, required for direction recording to graph)
-                record.y = TrialOutput(
-                    {obj_name: ObjectiveResult(obj, opt_.fem, float('nan'))
-                     for obj_name, obj in opt_.objectives.items()}
-                )
+                record.y = empty_y  # (Required for direction recording to graph even if the value is nan)
+                record.c = empty_c
+                record.other_outputs = empty_other_outputs
                 record.sub_sampling = self.subsampling_idx
                 record.trial_id = trial_id
                 record.sub_fidelity_name = opt_.sub_fidelity_name
                 record.fidelity = opt_.fidelity
-                record.datetime_start = datetime_start
                 if self.opt._worker_name is not None:
                     record.messages.append(self.opt._worker_name)
 
@@ -563,157 +592,159 @@ class AbstractOptimizer:
                     record.state = TrialState.skipped
                     raise SkipSolve
 
-                # start solve
-                if opt_.sub_fidelity_name != MAIN_FIDELITY_NAME:
-                    logger.info('----------')
-                    logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
-                logger.info(_('input variables:'))
-                logger.info(parameters)
+                # start solve per FEM
+                for ctx, update_mode in zip(*opt_._ordered_contexts):
+                    if ctx.sub_fidelity_name != MAIN_FIDELITY_NAME:
+                        logger.info('----------')
+                        logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
+                    logger.info(_('input variables:'))
+                    logger.info(parameters)
 
-                # ===== update FEM parameter =====
-                pass_to_fem = self.opt.variable_manager.get_variables(
-                    filter='pass_to_fem',
-                    format='raw',
-                )
-                logger.info(_('updating variables...'))
-                opt_.fem.update_parameter(pass_to_fem)
-                opt_._check_and_raise_interruption()
+                    # ===== update FEM parameter =====
+                    if update_mode.update_fem:
+                        pass_to_fem = self.opt.variable_manager.get_variables(
+                            filter="pass_to_fem",
+                            format="raw",
+                        )
+                        logger.info(_('updating variables...'))
+                        ctx.fem.update_parameter(pass_to_fem)
+                        opt_._check_and_raise_interruption()
 
-                # ===== evaluate hard constraint =====
-                logger.info(_('evaluating constraint functions...'))
+                    # ===== evaluate hard constraint =====
+                    if update_mode.update_function:
+                        ctx_hard_c = TrialConstraintOutput()
+                        logger.info(_('evaluating constraint functions...'))
 
-                hard_c = TrialConstraintOutput()
-                try:
-                    opt_._hard_c(hard_c)
+                        try:
+                            ctx._hard_c(ctx_hard_c)
+                            record.c.update(ctx_hard_c)
 
-                except _HiddenConstraintViolation as e:
-                    _log_hidden_constraint(e)
-                    record.c = hard_c
-                    record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.messages.append(
-                            _('Hidden constraint violation '
-                              'during hard constraint function '
-                              'evaluation: ')
-                            + create_err_msg_from_exception(e)
-                    )
+                        except _HiddenConstraintViolation as e:
+                            _log_hidden_constraint(e)
+                            record.c.update(ctx_hard_c)
+                            record.state = (
+                                TrialState.get_corresponding_state_from_exception(e)
+                            )
+                            record.messages.append(
+                                    _('Hidden constraint violation '
+                                      'during hard constraint function '
+                                      'evaluation: ')
+                                    + create_err_msg_from_exception(e)
+                            )
 
-                    raise e
+                            raise e
 
-                # check hard constraint violation
-                violation_names = opt_._get_hard_constraint_violation_names(hard_c)
-                if len(violation_names) > 0:
-                    record.c = hard_c
-                    record.state = TrialState.hard_constraint_violation
-                    record.messages.append(
-                            _('Hard constraint violation: ')
-                            + ', '.join(violation_names))
+                        # check hard constraint violation
+                        violation_names = ctx._get_hard_constraint_violation_names(ctx_hard_c)
+                        if len(violation_names) > 0:
+                            record.state = TrialState.hard_constraint_violation
+                            record.messages.append(
+                                    _('Hard constraint violation: ')
+                                    + ', '.join(violation_names))
 
-                    raise HardConstraintViolation
+                            raise HardConstraintViolation
 
-                # ===== update FEM =====
-                logger.info(_('Solving FEM...'))
+                    # ===== update FEM =====
+                    if update_mode.update_fem:
+                        logger.info(_('Solving FEM...'))
 
-                try:
-                    opt_.fem.update()
-                    opt_._check_and_raise_interruption()
+                        try:
+                            ctx.fem.update()
+                            opt_._check_and_raise_interruption()
 
-                # if hidden constraint violation
-                except _HiddenConstraintViolation as e:
+                        # if hidden constraint violation
+                        except _HiddenConstraintViolation as e:
+                            opt_._check_and_raise_interruption()
 
-                    opt_._check_and_raise_interruption()
+                            _log_hidden_constraint(e)
+                            record.state = (
+                                TrialState.get_corresponding_state_from_exception(e)
+                            )
+                            record.messages.append(
+                                _("Hidden constraint violation in FEM update: ")
+                                + create_err_msg_from_exception(e)
+                            )
 
-                    _log_hidden_constraint(e)
-                    record.c = hard_c
-                    record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.messages.append(
-                            _('Hidden constraint violation in FEM update: ')
-                            + create_err_msg_from_exception(e))
+                            raise e
 
-                    raise e
+                    # ===== evaluate y =====
+                    if update_mode.update_function:
+                        logger.info(_('evaluating objective functions...'))
 
-                # ===== evaluate y =====
-                logger.info(_('evaluating objective functions...'))
+                        try:
+                            ctx_y: TrialOutput = ctx._y()
+                            record.y.update(ctx_y)
+                            y_internal.update(ctx._convert_y(ctx_y))
+                            opt_._check_and_raise_interruption()
 
-                try:
-                    y: TrialOutput = opt_._y()
-                    record.y = y
-                    opt_._check_and_raise_interruption()
+                        # if intentional error (by user)
+                        except _HiddenConstraintViolation as e:
+                            record.y.update(ctx_y)
+                            opt_._check_and_raise_interruption()
 
-                # if intentional error (by user)
-                except _HiddenConstraintViolation as e:
-                    opt_._check_and_raise_interruption()
+                            _log_hidden_constraint(e)
+                            record.state = TrialState.get_corresponding_state_from_exception(e)
+                            record.messages.append(
+                                    _('Hidden constraint violation during '
+                                      'objective function evaluation: ')
+                                    + create_err_msg_from_exception(e))
 
-                    _log_hidden_constraint(e)
-                    record.c = hard_c
-                    record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.messages.append(
-                            _('Hidden constraint violation during '
-                              'objective function evaluation: ')
-                            + create_err_msg_from_exception(e))
+                            raise e
 
-                    raise e
+                    # ===== evaluate soft constraint =====
+                    if update_mode.update_function:
+                        ctx_soft_c = TrialConstraintOutput()
+                        logger.info(_('evaluating remaining constraints...'))
 
-                # ===== evaluate soft constraint =====
-                logger.info(_('evaluating remaining constraints...'))
+                        try:
+                            ctx._soft_c(ctx_soft_c)
+                            record.c.update(ctx_soft_c)
 
-                soft_c = TrialConstraintOutput()
-                try:
-                    opt_._soft_c(soft_c)
+                        # if intentional error (by user)
+                        except _HiddenConstraintViolation as e:
+                            _log_hidden_constraint(e)
+                            record.c.update(ctx_soft_c)
+                            record.state = TrialState.get_corresponding_state_from_exception(e)
+                            record.messages.append(
+                                    _('Hidden constraint violation during '
+                                      'soft constraint function evaluation: ')
+                                    + create_err_msg_from_exception(e))
 
-                # if intentional error (by user)
-                except _HiddenConstraintViolation as e:
-                    _log_hidden_constraint(e)
+                            raise e
 
-                    _c = {}
-                    _c.update(soft_c)
-                    _c.update(hard_c)
+                    # ===== evaluate other functions =====
+                    if update_mode.update_function:
+                        logger.info(_('evaluating other functions...'))
 
-                    record.c = _c
-                    record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.messages.append(
-                            _('Hidden constraint violation during '
-                              'soft constraint function evaluation: ')
-                            + create_err_msg_from_exception(e))
+                        ctx_other_outputs = TrialFunctionOutput()
+                        try:
+                            ctx._other_outputs(ctx_other_outputs)
+                            record.other_outputs.update(ctx_other_outputs)
 
-                    raise e
+                        # if intentional error (by user)
+                        except _HiddenConstraintViolation as e:
+                            _log_hidden_constraint(e)
+                            record.other_outputs.update(ctx_other_outputs)
+                            record.state = (
+                                TrialState.get_corresponding_state_from_exception(e)
+                            )
+                            record.messages.append(
+                                _(
+                                    "Hidden constraint violation during "
+                                    "another output function evaluation: "
+                                )
+                                + create_err_msg_from_exception(e)
+                            )
 
-                # ===== merge and sort constraints =====
-                c = TrialConstraintOutput()
-                c.update(soft_c)
-                c.update(hard_c)
-
-                # ===== evaluate other functions =====
-                logger.info(_('evaluating other functions...'))
-
-                other_outputs = TrialFunctionOutput()
-                try:
-                    opt_._other_outputs(other_outputs)
-                    record.other_outputs = other_outputs
-
-                # if intentional error (by user)
-                except _HiddenConstraintViolation as e:
-                    _log_hidden_constraint(e)
-
-                    record.other_outputs = other_outputs
-                    record.state = TrialState.get_corresponding_state_from_exception(e)
-                    record.messages.append(
-                            _('Hidden constraint violation during '
-                              'another output function evaluation: ')
-                            + create_err_msg_from_exception(e))
-
-                    raise e
-
-                # get values as minimize
-                y_internal: dict = opt_._convert_y(y)
+                            raise e
 
                 logger.info(_('output:'))
-                logger.info(y)
-                record.c = c
+                logger.info(record.y)
                 record.state = TrialState.succeeded
 
                 opt_._check_and_raise_interruption()
 
-            return y, y_internal, c, record
+            return record.y, y_internal, record.c, record
 
         def solve(
                 self,
@@ -751,11 +782,12 @@ class AbstractOptimizer:
                 f_return = None
 
                 # start solve
-                datetime_start = datetime.datetime.now()
                 try:
                     f_return = self._solve_or_raise(
-                        opt_, x, self.opt.history,
-                        datetime_start, trial_id
+                        opt_=opt_,
+                        parameters=x,
+                        history=self.opt.history,
+                        trial_id=trial_id,
                     )
 
                 except HardConstraintViolation as e:
@@ -862,7 +894,7 @@ class AbstractOptimizer:
             self.worker_status.value = WorkerStatus.initializing
 
             self.worker_status.value = WorkerStatus.launching_fem
-            self.fem._setup_after_parallel(self)
+            self.fems._setup_after_parallel(self)
 
             if wait_other_process_setup:
                 self.worker_status.value = WorkerStatus.waiting
@@ -923,10 +955,18 @@ class AbstractOptimizer:
         return LoggingOutput()
 
     def _load_problem_from_fem(self):
-        if self.fem._load_problem_from_fem and not self._done_load_problem_from_fem:
-            self.fem.load_variables(self)
-            self.fem.load_objectives(self)
-            self.fem.load_constraints(self)
+        for ctx in self.fems.ordered_contexts:
+            ctx._load_problem_from_fem()
+
+            # これをアップデートすると、solve_or_raise の中で二重に評価される。
+            # self.objectives.update(ctx.objectives)
+            # self.constraints.update(ctx.constraints)
+            self.variable_manager.variables.update(ctx.variable_manager.variables)
+
+        # if self.fem._load_problem_from_fem and not self._done_load_problem_from_fem:
+        #     self.fem.load_variables(self)
+        #     self.fem.load_objectives(self)
+        #     self.fem.load_constraints(self)
         self._done_load_problem_from_fem = True
 
     # noinspection PyMethodMayBeStatic
@@ -936,7 +976,7 @@ class AbstractOptimizer:
     def _collect_additional_data(self) -> dict:
         additional_data = {}
         additional_data.update(self._get_additional_data())
-        additional_data.update(self.fem._get_additional_data())
+        additional_data.update(self.fems._get_additional_data())
         return additional_data
 
     def _finalize_history(self):
@@ -961,7 +1001,7 @@ class AbstractOptimizer:
             variables = self.variable_manager.get_variables()
             for var_name, variable in variables.items():
                 if variable.pass_to_fem:
-                    self.fem._check_param_and_raise(var_name)
+                    self.fems._check_param_and_raise(var_name)
 
             # resolve evaluation order
             self.variable_manager.resolve()
@@ -1043,6 +1083,30 @@ class AbstractOptimizer:
         self._setup_before_parallel()
         self._setup_after_parallel()
 
+    @property
+    def _ordered_contexts(self) -> tuple[list[AbstractOptimizer], list[_UpdateMode]]:
+        out1 = self.fems.ordered_contexts + [self]
+        out2: list[_UpdateMode] = [
+            _UpdateMode(update_function=True, update_fem=True)
+            for __ in self.fems.ordered_contexts
+        ] + [_UpdateMode(update_function=True, update_fem=False)]
+        return out1, out2
+
+    # @property
+    # def fem(self) -> AbstractFEMInterface:
+    #     if len(self.fems) == 0:
+    #         raise AttributeError('No FEM is registered in this optimizer.')
+    #     elif len(self.fems) == 1:
+    #         return self.fems[0]
+    #     else:
+    #         return self.fems
+
+    # @fem.setter
+    # def fem(self, value: AbstractFEMInterface):
+    #     fems = MultipleFEMInterface()
+    #     fems.add(value)
+    #     self.fems = fems
+
 
 class SubFidelityModel(AbstractOptimizer):
     pass
@@ -1054,3 +1118,48 @@ class SubFidelityModels(dict[str, SubFidelityModel]):
         model.sub_fidelity_name = name
         model.fidelity = fidelity
         self.update({name: model})
+
+
+class FEMContext(AbstractOptimizer):
+
+    _fem: AbstractFEMInterface
+
+    def __init__(self, fem: AbstractFEMInterface):
+        self.fem = fem
+        super().__init__()
+
+    @property
+    def fem(self) -> AbstractFEMInterface:
+        return self._fem
+
+    @fem.setter
+    def fem(self, value: AbstractFEMInterface):
+        self._fem = value
+
+    @property
+    def fems(self) -> MultipleFEMInterface:
+        raise AttributeError('`fems` is not available in FEMContext.')
+
+    @fems.setter
+    def fems(self, value):
+        pass
+
+    def _y(self) -> TrialOutput:
+        return self._y_common(self.fem)
+
+    def _hard_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
+        return self._c_common(out, self.fem, hard=True)
+
+    def _soft_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
+        return self._c_common(out, self.fem, hard=False)
+
+    def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
+        return self._other_outputs_common(out, self.fem)
+
+    def _load_problem_from_fem(self):
+        if self.fem._load_problem_from_fem and not self._done_load_problem_from_fem:
+            self.fem.load_variables(self)
+            self.fem.load_objectives(self)
+            self.fem.load_constraints(self)
+        self._done_load_problem_from_fem = True
+

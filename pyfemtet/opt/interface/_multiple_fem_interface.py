@@ -1,11 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from ._base_interface import AbstractFEMInterface
 from pyfemtet.opt.problem.problem import TrialInput
 
 
-class MultipleFEMInterface(AbstractFEMInterface):
+if TYPE_CHECKING:
+    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, FEMContext
 
-    # START = 'START'
-    # END = 'END'
+
+class MultipleFEMInterface(AbstractFEMInterface):
 
     def __init__(self):
         # TODO:
@@ -13,9 +18,27 @@ class MultipleFEMInterface(AbstractFEMInterface):
         #   そもそも AbstractFEMInterface が
         #   name を持ったほうがいいか？
         self._fems: list[AbstractFEMInterface] = []
+        self._ctxs: list[FEMContext] = []
 
-    def add(self, fem: AbstractFEMInterface):
+    def __iter__(self):
+        return iter(self._fems)
+
+    def __len__(self):
+        return len(self._fems)
+
+    def __getitem__(self, index: int) -> AbstractFEMInterface:
+        return self._fems[index]
+
+    @property
+    def ordered_contexts(self) -> list['FEMContext']:
+        return self._ctxs
+
+    def add(self, fem: AbstractFEMInterface) -> FEMContext:
+        from pyfemtet.opt.optimizer._base_optimizer import FEMContext
+        ctx = FEMContext(fem=fem)
         self._fems.append(fem)
+        self._ctxs.append(ctx)
+        return ctx
 
     def remove(self, fem: AbstractFEMInterface):
         self._fems.remove(fem)
@@ -35,3 +58,12 @@ class MultipleFEMInterface(AbstractFEMInterface):
     def update(self):
         for fem in self._fems:
             fem.update()
+
+    def _check_param_and_raise(self, prm_name) -> None:
+        # TODO: 後で
+        pass
+
+    def _get_additional_data(self) -> dict:
+        # TODO: 後で
+        return {}
+
