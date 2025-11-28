@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Any
 
 from ._base_interface import AbstractFEMInterface
 from pyfemtet.opt.problem.problem import TrialInput
 
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import FEMContext
+    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, FEMContext
 
 
 class MultipleFEMInterface(AbstractFEMInterface):
@@ -59,6 +59,25 @@ class MultipleFEMInterface(AbstractFEMInterface):
         for fem in self._fems:
             fem.update()
 
+    @property
+    def object_pass_to_fun(self):
+        if len(self) == 1:
+            return self._fems[0].object_pass_to_fun
+        else:
+            return [fem.object_pass_to_fun for fem in self._fems]
+
+    def reopen(self):
+        for fem in self._fems:
+            fem.reopen()
+
+    def _setup_before_parallel(self, scheduler_address=None) -> None:
+        for fem in self._fems:
+            fem._setup_before_parallel()
+
+    def _setup_after_parallel(self, opt: AbstractOptimizer) -> None:
+        for fem in self._fems:
+            fem._setup_after_parallel(opt)
+
     def _check_param_and_raise(self, prm_name) -> None:
         # TODO:
         #   - チェックする前に、与えられた prm_name が
@@ -72,6 +91,54 @@ class MultipleFEMInterface(AbstractFEMInterface):
         #     ctx のほうで prm_name をフィルタして呼び出す必要がある。
         #   - まずはこのケースを通るはずのテストを作成してから実装する。
         pass
+
+    def load_variables(self, opt: FEMContext):
+        for fem in self._fems:
+            fem.load_variables(opt)
+
+    def load_objectives(self, opt: FEMContext):
+        for fem in self._fems:
+            fem.load_objectives(opt)
+
+    def load_constraints(self, opt: FEMContext):
+        for fem in self._fems:
+            fem.load_constraints(opt)
+
+    def _contact_optimizer(self, opt: AbstractOptimizer):
+        for fem in self._fems:
+            fem._contact_optimizer(opt)
+
+    def close(self, *args, **kwargs):
+        # TODO: 引数の取り扱い
+        for fem in self._fems:
+            fem.close()
+
+    def _check_using_fem(self, fun: Callable) -> bool:
+        return any(fem._check_using_fem(fun) for fem in self._fems)
+
+    def _create_postprocess_args(self) -> dict[str, Any]:
+        out = {}
+        for i, fem in enumerate(self._fems):
+            kwargs = fem._create_postprocess_args()
+            kwargs.update(
+                {'__postprocess_fun__': type(fem)._postprocess_after_recording}
+            )
+            out.update({
+                f"fem{i}kwargs": kwargs
+            })
+        return out
+
+    @staticmethod
+    def _postprocess_after_recording(
+        dask_scheduler, trial_name: str, df: Any, **kwargs
+    ) -> ...:
+        for kwargs_per_fem in kwargs.values():
+            postprocess = kwargs_per_fem.pop('__postprocess_fun__', None)
+            if postprocess is None:
+                continue
+            postprocess(
+                dask_scheduler, trial_name, df, **kwargs_per_fem
+            )
 
     def _get_additional_data(self) -> dict:
         data = {}
