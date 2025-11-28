@@ -1239,6 +1239,7 @@ class AbstractOptimizer(OptimizationDataStore):
         # 自身に直接紐づく context を同期
         self.objectives.update(self.fem_global.objectives)
         self.constraints.update(self.fem_global.constraints)
+        self.other_outputs.update(self.fem_global.other_outputs)
         self.variable_manager.variables.update(
             self.fem_global.variable_manager.variables
         )
@@ -1251,6 +1252,7 @@ class AbstractOptimizer(OptimizationDataStore):
             # さらに、global な最適化問題設定にも反映させる
             self.objectives.update(ctx.objectives)
             self.constraints.update(ctx.constraints)
+            self.other_outputs.update(ctx.other_outputs)
             self.variable_manager.variables.update(ctx.variable_manager.variables)
 
     # noinspection PyMethodMayBeStatic
