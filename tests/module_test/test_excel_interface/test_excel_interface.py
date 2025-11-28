@@ -29,7 +29,7 @@ def test_load_single_excel():
 
         opt.fem = fem
 
-        opt._load_problem_from_fem_ctx()
+        opt._refresh_problem()
 
         for var in opt.get_variables(format='raw').values():
             print(f'----- {var.name} ----')
@@ -92,7 +92,7 @@ def test_run_multiple_excel():
         opt.fem = fem
 
         print('loading problems...')
-        opt._load_problem_from_fem_ctx()
+        opt._refresh_problem()
         print('setting up before parallel...')
         fem._setup_before_parallel()
         print('setting up after parallel...')
