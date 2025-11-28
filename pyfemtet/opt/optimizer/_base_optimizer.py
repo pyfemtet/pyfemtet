@@ -435,7 +435,7 @@ class AbstractOptimizer(OptimizationDataStore):
     worker_status: WorkerStatus
     worker_status_list: list[WorkerStatus]
     _done_setup_before_parallel: bool
-    _done_load_problem_from_fem: bool
+    _done_load_problem_from_fem_ctx: bool
     _worker_index: int | str | None
     _worker_name: str | None
 
@@ -464,7 +464,7 @@ class AbstractOptimizer(OptimizationDataStore):
         self.worker_status_list: list[WorkerStatus] = [self.worker_status]
         self.trial_queue: TrialQueue = TrialQueue()
         self._done_setup_before_parallel = False
-        self._done_load_problem_from_fem = False
+        self._done_load_problem_from_fem_ctx = False
         self._worker_index: int | str | None = None
         self._worker_name: str | None = None
 
@@ -1135,24 +1135,25 @@ class AbstractOptimizer(OptimizationDataStore):
 
         return LoggingOutput()
 
-    def _load_problem_from_fem(self):
-        for ctx in self.fem.ordered_contexts:
-            # 各 context の fem 特有の問題設定を
-            # 各 context に読み込ませる
-            ctx._load_problem_from_fem()
+    def _load_problem_from_fem_ctx(self):
+        if not self._done_load_problem_from_fem_ctx:
+            for ctx in self.fem.ordered_contexts:
+                # 各 context の fem 特有の問題設定を
+                # 各 context に読み込ませる
+                ctx._load_problem_from_fem()
 
-            # さらに、global な最適化問題設定にも反映させる
-            self.objectives.update(ctx.objectives)
-            self.constraints.update(ctx.constraints)
-            self.variable_manager.variables.update(ctx.variable_manager.variables)
+                # さらに、global な最適化問題設定にも反映させる
+                self.objectives.update(ctx.objectives)
+                self.constraints.update(ctx.constraints)
+                self.variable_manager.variables.update(ctx.variable_manager.variables)
 
-        # 自身に直接紐づく context のない設定を読み込む
-        self.objectives.update(self.fem_global.objectives)
-        self.constraints.update(self.fem_global.constraints)
-        self.variable_manager.variables.update(
-            self.fem_global.variable_manager.variables
-        )
-        self._done_load_problem_from_fem = True
+            # 自身に直接紐づく context のない設定を読み込む
+            self.objectives.update(self.fem_global.objectives)
+            self.constraints.update(self.fem_global.constraints)
+            self.variable_manager.variables.update(
+                self.fem_global.variable_manager.variables
+            )
+            self._done_load_problem_from_fem_ctx = True
 
     # noinspection PyMethodMayBeStatic
     def _get_additional_data(self) -> dict:
@@ -1261,7 +1262,7 @@ class AbstractOptimizer(OptimizationDataStore):
             assert sub_fidelity_model.constraints.keys() == self.constraints.keys()
 
         # finalize
-        self._load_problem_from_fem()
+        self._load_problem_from_fem_ctx()
         self._finalize_history()
 
         # setup if needed

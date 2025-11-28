@@ -294,7 +294,7 @@ class FEMOpt:
             logger.info(_('Setting up...'))
 
             # finalize history
-            self.opt._load_problem_from_fem()
+            self.opt._load_problem_from_fem_ctx()
             self.opt._finalize_history()
 
             # optimizer-specific setup after history finalized

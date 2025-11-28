@@ -40,7 +40,7 @@ def test_run_femtet_interface():
         opt = AbstractOptimizer()
         opt.fem = fem
         fem.use_parametric_output_as_objective(1, 'minimize')
-        opt._load_problem_from_fem()
+        opt._load_problem_from_fem_ctx()
         assert ([name for name, obj in opt.objectives.items()] == ['0: 定常解析 / 温度[deg] / 最大値 / 全てのボディ属性'])
 
         y = Variable()
