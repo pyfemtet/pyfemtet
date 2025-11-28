@@ -295,6 +295,7 @@ class FEMOpt:
 
             # finalize history
             self.opt._refresh_problem()
+            self.opt.variable_manager.resolve()
             self.opt._finalize_history()
 
             # optimizer-specific setup after history finalized

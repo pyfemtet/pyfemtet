@@ -1289,9 +1289,6 @@ class AbstractOptimizer(OptimizationDataStore):
                 if variable.pass_to_fem:
                     self.fem._check_param_and_raise(var_name)
 
-            # resolve evaluation order
-            self.variable_manager.resolve()
-
             # check the enqueued trials is
             # compatible with current optimization
             # problem setup
@@ -1363,6 +1360,7 @@ class AbstractOptimizer(OptimizationDataStore):
 
         # finalize
         self._refresh_problem()
+        self.variable_manager.resolve()
         self._finalize_history()
 
         # setup if needed
