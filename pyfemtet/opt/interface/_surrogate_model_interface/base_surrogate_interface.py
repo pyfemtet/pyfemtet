@@ -78,8 +78,8 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
 
             # index がキーである場合
             if isinstance(keys[0], int):
-
                 for index, direction in self._output_directions.items():
+                    assert isinstance(index, int)
                     obj_name = self.train_history.obj_names[index]
 
                     opt.add_objective(
@@ -138,10 +138,10 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
                     kwargs={},
                 )
 
-    def load_variables(self, opt: AbstractOptimizer):
-        # opt の変数が充分であるかのチェックのみ
-        parameters = opt.variable_manager.get_variables()
-        assert len(set(self.train_history.prm_names) - set(parameters.keys())) == 0
+    # def load_variables(self, opt: AbstractOptimizer):
+    #     # opt の変数が充分であるかのチェックのみ
+    #     parameters = opt.variable_manager.get_variables()
+    #     assert len(set(self.train_history.prm_names) - set(parameters.keys())) == 0
 
     def _check_using_fem(self, fun: callable) -> bool:
         return False
