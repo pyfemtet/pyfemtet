@@ -64,5 +64,7 @@ class MultipleFEMInterface(AbstractFEMInterface):
         pass
 
     def _get_additional_data(self) -> dict:
-        # TODO: 後で
-        return {}
+        data = {}
+        for i, fem in enumerate(self._fems):
+            data.update(fem._get_additional_data())
+        return data
