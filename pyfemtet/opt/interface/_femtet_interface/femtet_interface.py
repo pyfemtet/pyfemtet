@@ -191,11 +191,9 @@ class FemtetInterface(COMInterface):
         """
         return self.Femtet
 
-    @AbstractFEMInterface._with_reopen
     def _setup_before_parallel(self, scheduler_address=None):
         self._distribute_files([self.femprj_path], scheduler_address)
 
-    @AbstractFEMInterface._with_reopen
     def _setup_after_parallel(self, opt: AbstractOptimizer = None):
 
         # main worker かつ always_open_copy でないときのみ
@@ -219,6 +217,10 @@ class FemtetInterface(COMInterface):
         self.open(self.femprj_path, self.model_name)
 
     def reopen(self):
+        # ParametricIF は solve ~ GetResult の間に
+        # モデル切替が発生すると動作しないため
+        # optimizer の実装で ctx ごとに一気に処理する形にしており
+        # そのため reopen() の前に SaveProject しなくてよい
         if self.Femtet.Project != self.femprj_path:
             self.open(self.femprj_path, self.model_name)
 
