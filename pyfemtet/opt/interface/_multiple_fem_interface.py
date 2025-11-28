@@ -60,7 +60,17 @@ class MultipleFEMInterface(AbstractFEMInterface):
             fem.update()
 
     def _check_param_and_raise(self, prm_name) -> None:
-        # TODO: 後で
+        # TODO:
+        #   - チェックする前に、与えられた prm_name が
+        #     どの FEM に属するかを特定し、
+        #     その FEM に対してのみチェックを行うようにする。
+        #   - そのために 与えられた prm_name がどの FEM に属するかを
+        #     管理する仕組みが必要。
+        #   - 変数は ctx が管理しているから、その仕組みは ctx にしか持てない。
+        #   - なので _check_param_and_raise は
+        #     optimizer が直接呼び出してはならず、
+        #     ctx のほうで prm_name をフィルタして呼び出す必要がある。
+        #   - まずはこのケースを通るはずのテストを作成してから実装する。
         pass
 
     def _get_additional_data(self) -> dict:
