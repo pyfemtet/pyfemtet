@@ -1255,6 +1255,11 @@ class AbstractOptimizer(OptimizationDataStore):
             self.other_outputs.update(ctx.other_outputs)
             self.variable_manager.variables.update(ctx.variable_manager.variables)
 
+        # 問題の同期が終わったら optimizer の情報を
+        # 必要とする interface 向けの処理
+        for ctx in self.fem.ordered_contexts:
+            ctx.fem._contact_optimizer(self)
+
     # noinspection PyMethodMayBeStatic
     def _get_additional_data(self) -> dict:
         return dict()

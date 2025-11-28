@@ -8,7 +8,7 @@ from pyfemtet.opt.interface import AbstractFEMInterface
 from pyfemtet._i18n import _
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer import AbstractOptimizer
+    from pyfemtet.opt.optimizer._base_optimizer import FEMContext, AbstractOptimizer
 
 
 __all__ = [
@@ -45,7 +45,10 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
 
         self.current_obj_values = {}
 
-    def load_objectives(self, opt: AbstractOptimizer):
+    def _contact_optimizer(self, opt: AbstractOptimizer):
+        self.load_objectives(opt.fem_global)
+
+    def load_objectives(self, opt: FEMContext):
 
         # output directions が与えられない場合、
         # opt.add_objective との整合をチェックする
@@ -137,11 +140,6 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
                     args=(),
                     kwargs={},
                 )
-
-    # def load_variables(self, opt: AbstractOptimizer):
-    #     # opt の変数が充分であるかのチェックのみ
-    #     parameters = opt.variable_manager.get_variables()
-    #     assert len(set(self.train_history.prm_names) - set(parameters.keys())) == 0
 
     def _check_using_fem(self, fun: callable) -> bool:
         return False
