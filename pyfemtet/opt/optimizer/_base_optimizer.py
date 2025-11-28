@@ -344,8 +344,11 @@ class FEMContext(OptimizationDataStore):
 
     def __init__(self, fem: AbstractFEMInterface):
         self.fem = fem
-        self._done_load_problem_from_fem = False
         super().__init__()
+
+    def _initialize_problem(self):
+        super()._initialize_problem()
+        self._done_load_problem_from_fem = False
 
     @staticmethod
     def _with_add_fem_ctx(f):
@@ -1234,6 +1237,7 @@ class AbstractOptimizer(OptimizationDataStore):
         return LoggingOutput()
 
     def _refresh_problem(self):
+        # ctx の内容が減っている場合でも検出できるように初期化
         self._initialize_problem()
 
         # 自身に直接紐づく context を同期
@@ -1245,8 +1249,9 @@ class AbstractOptimizer(OptimizationDataStore):
         )
 
         for ctx in self.fem.ordered_contexts:
-            # 各 context の fem 特有の問題設定を
-            # 各 context に読み込ませる
+            # 各 context の fem 特有の問題設定は
+            # 各 context が読み込む必要がある。
+            # 直接 fem.load_... を呼んではいけない。
             ctx._load_problem_from_fem()
 
             # さらに、global な最適化問題設定にも反映させる
