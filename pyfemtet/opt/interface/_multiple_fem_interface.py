@@ -7,7 +7,7 @@ from pyfemtet.opt.problem.problem import TrialInput
 
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, FEMContext
+    from pyfemtet.opt.optimizer._base_optimizer import FEMContext
 
 
 class MultipleFEMInterface(AbstractFEMInterface):
@@ -66,4 +66,3 @@ class MultipleFEMInterface(AbstractFEMInterface):
     def _get_additional_data(self) -> dict:
         # TODO: 後で
         return {}
-

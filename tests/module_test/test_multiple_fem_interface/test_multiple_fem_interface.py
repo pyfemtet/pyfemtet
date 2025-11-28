@@ -21,14 +21,12 @@ def test_multiple_fem_interface_basic_flow():
     fem1 = _SimpleFEM(target="x1")
     fem2 = _SimpleFEM(target="x2")
 
-    # MultipleFEMInterface に登録
-    fems = MultipleFEMInterface()
-    fems.add(fem1)
-    fems.add(fem2)
-
     # optimizer を作る
     opt = AbstractOptimizer()
-    opt.fems = fems
+
+    # MultipleFEMInterface に登録
+    opt.fem.add(fem1)
+    opt.fem.add(fem2)
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, -10, 10)
@@ -53,7 +51,7 @@ def test_multiple_fem_interface_basic_flow():
     # solve
     x = opt.get_variables(format="raw")
     f_return = opt._get_solve_set().solve(x)
-    y: tuple[float, ...] = [obj_res.value for obj_res in f_return[0].values()]
+    y: tuple[float, ...] = [obj_res.value for obj_res in f_return[0].values()]  # type: ignore
 
     print(f'{y=}')
     assert abs(y[0] - 25.0) < 0.001
@@ -72,14 +70,12 @@ def test_multiple_fem_interface_basic_femtet():
     def user_obj(_: MultipleFEMInterface):
         return 1.
 
-    # MultipleFEMInterface に登録
-    fems = MultipleFEMInterface()
-    fems.add(fem1)
-    fems.add(fem2)
-
     # optimizer を作る
     opt = AbstractOptimizer()
-    opt.fems = fems
+
+    # MultipleFEMInterface に登録
+    opt.fem.add(fem1)
+    opt.fem.add(fem2)
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, 2, 10)
@@ -104,12 +100,15 @@ def test_multiple_fem_interface_basic_femtet():
 
     # FEMContext の目的関数を確認
     all_objectives = list(opt.objectives.keys())
-    for ctx in opt.fems.ordered_contexts:
-        all_objectives.extend(ctx.objectives.keys())
     print(f'{all_objectives=}')
-    assert 'user_defined' in all_objectives
-    assert '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性' in all_objectives
-    assert '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性' in all_objectives
+    # assert 'user_defined' in all_objectives
+    # assert '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性' in all_objectives
+    # assert '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性' in all_objectives
+    assert all_objectives == [
+        '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性',
+        '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性',
+        'user_defined',
+    ]
 
     # solve
     x = opt.get_variables(format="raw")
@@ -129,5 +128,5 @@ def test_multiple_fem_interface_basic_femtet():
 
 
 if __name__ == '__main__':
-    # test_multiple_fem_interface_basic_flow()
+    test_multiple_fem_interface_basic_flow()
     test_multiple_fem_interface_basic_femtet()

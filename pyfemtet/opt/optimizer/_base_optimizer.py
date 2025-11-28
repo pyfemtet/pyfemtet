@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import datetime
-from typing import Callable, TypeAlias, Sequence, Literal, NamedTuple, final
+from typing import Callable, TypeAlias, Sequence, Literal, NamedTuple, final, Any
 from numbers import Real  # マイナーなので型ヒントでは使わず、isinstance で使う
 from time import sleep
 import os
@@ -72,73 +71,19 @@ def _duplicated_name_check(name, names):
         )
 
 
-class AbstractOptimizer:
-
-    # optimize
-    n_trials: int | None
-    timeout: float | None
-    seed: int | None
-    include_queued_in_n_trials: bool
-
-    # problem
-    variable_manager: VariableManager
-    objectives: Objectives
-    constraints: Constraints
-    fidelity: Fidelity | None
-    sub_fidelity_name: str
-    sub_fidelity_models: SubFidelityModels | None
-
-    # system
-    history: History
-    fems: MultipleFEMInterface
-    entire_status: WorkerStatus
-    worker_status: WorkerStatus
-    worker_status_list: list[WorkerStatus]
-    _done_setup_before_parallel: bool
-    _done_load_problem_from_fem: bool
-    _worker_index: int | str | None
-    _worker_name: str | None
-
+# 最適化問題の情報をストアするクラス。
+class OptimizationDataStore:
     def __init__(self):
-
-        # optimization
-        self.seed = None
-        self.n_trials = None
-        self.timeout = None
-        self.include_queued_in_n_trials = False
-
-        # Problem
         self.variable_manager = VariableManager()
         self.objectives = Objectives()
         self.constraints = Constraints()
         self.other_outputs = Functions()
 
-        # multi-fidelity
-        self.fidelity = None
-        self.sub_fidelity_name = MAIN_FIDELITY_NAME
-        self.sub_fidelity_models = SubFidelityModels()
-
-        # System
-        self.fems: MultipleFEMInterface = MultipleFEMInterface()
-        self.history: History = History()
-        self.solve_condition: Callable[[History], bool] = lambda _: True
-        self.termination_condition: Callable[[History], bool] = lambda _: False
-        self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
-        self.worker_status: WorkerStatus = WorkerStatus('worker-status')
-        self.worker_status_list: list[WorkerStatus] = [self.worker_status]
-        self.trial_queue: TrialQueue = TrialQueue()
-        self._done_setup_before_parallel = False
-        self._done_load_problem_from_fem = False
-        self._worker_index: int | str | None = None
-        self._worker_name: str | None = None
-
-    # ===== public =====
-
     def add_constant_value(
             self,
             name: str,
             value: SupportedVariableTypes,
-            properties: dict[str, ...] | None = None,
+            properties: dict[str, Any] | None = None,
             *,
             pass_to_fem: bool = True,
     ):
@@ -338,7 +283,6 @@ class AbstractOptimizer:
             strict: bool = True,
             using_fem: bool | None = None,
     ):
-
         if lower_bound is None and upper_bound is None:
             raise ValueError(_(
                 en_message='One of `lower_bound` and `upper_bound` '
@@ -354,10 +298,11 @@ class AbstractOptimizer:
         cns.lower_bound = lower_bound
         cns.upper_bound = upper_bound
         cns.hard = strict
-        cns._opt = self
+        cns._fem_ctx = None
         cns.using_fem = using_fem
         _duplicated_name_check(name, self.constraints.keys())
         self.constraints.update({name: cns})
+        return cns  # Context で _fem_ctx をセットするために返す
 
     def add_other_output(
             self,
@@ -373,6 +318,290 @@ class AbstractOptimizer:
         other_func.kwargs = kwargs or {}
         _duplicated_name_check(name, self.other_outputs.keys())
         self.other_outputs.update({name: other_func})
+
+
+# 最適化問題の関数を FEM ごとに管理して
+# 実行制御とかを行うクラス
+class FEMContext(OptimizationDataStore):
+
+    fem: AbstractFEMInterface
+
+    def __init__(self, fem: AbstractFEMInterface):
+        self.fem = fem
+        self._done_load_problem_from_fem = False
+        super().__init__()
+
+    def add_constraint(
+        self,
+        name: str,
+        fun: Callable[..., float],
+        lower_bound: float | None = None,
+        upper_bound: float | None = None,
+        args: tuple | None = None,
+        kwargs: dict | None = None,
+        strict: bool = True,
+        using_fem: bool | None = None,
+    ):
+        cns = super().add_constraint(
+            name=name,
+            fun=fun,
+            lower_bound=lower_bound,
+            upper_bound=upper_bound,
+            args=args,
+            kwargs=kwargs,
+            strict=strict,
+            using_fem=using_fem,
+        )
+        cns._fem_ctx = self
+
+    def _y_common(self, fem: AbstractFEMInterface) -> TrialOutput:
+        out = TrialOutput()
+        for name, obj in self.objectives.items():
+            obj_result = ObjectiveResult(obj, fem)
+            out.update({name: obj_result})
+        return out
+
+    def _y(self) -> TrialOutput:
+        return self._y_common(self.fem)
+
+    def _convert_y(self, y: TrialOutput) -> dict:
+        out = dict()
+        for name, result in y.items():
+            obj = self.objectives[name]
+            value_internal = obj.convert(result.value)
+            out.update({name: value_internal})
+        return out
+
+    def _c_common(
+            self,
+            out: TrialConstraintOutput,
+            fem: AbstractFEMInterface,
+            hard: bool,
+    ) -> TrialConstraintOutput:
+        for name, cns in self.constraints.items():
+            if cns.hard == hard:
+                cns_result = ConstraintResult(cns, fem)
+                out.update({name: cns_result})
+        return out
+
+    def _hard_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
+        return self._c_common(out, self.fem, hard=True)
+
+    def _soft_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
+        return self._c_common(out, self.fem, hard=False)
+
+    def _other_outputs_common(self, out: TrialFunctionOutput, fem: AbstractFEMInterface) -> TrialFunctionOutput:
+        for name, other_func in self.other_outputs.items():
+            other_func_result = FunctionResult(other_func, fem)
+            out.update({name: other_func_result})
+        return out
+
+    def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
+        return self._other_outputs_common(out, self.fem)
+
+    def _load_problem_from_fem(self):
+        if self.fem._load_problem_from_fem and not self._done_load_problem_from_fem:
+            self.fem.load_variables(self)
+            self.fem.load_objectives(self)
+            self.fem.load_constraints(self)
+        self._done_load_problem_from_fem = True
+
+
+# クラス分けする必要はないが、AbstractOptimizer が
+# 使う前提の、意味的にわかりやすい、
+# fem が MultipleFEMInterface であることのみを
+# 特徴とするクラス
+class FEMGlobal(FEMContext):
+    fem: MultipleFEMInterface
+
+
+class AbstractOptimizer(OptimizationDataStore):
+
+    # optimize
+    n_trials: int | None
+    timeout: float | None
+    seed: int | None
+    include_queued_in_n_trials: bool
+
+    # problem
+    fidelity: Fidelity | None
+    sub_fidelity_name: str
+    sub_fidelity_models: SubFidelityModels | None
+
+    # system
+    history: History
+    fem: MultipleFEMInterface
+    entire_status: WorkerStatus
+    worker_status: WorkerStatus
+    worker_status_list: list[WorkerStatus]
+    _done_setup_before_parallel: bool
+    _done_load_problem_from_fem: bool
+    _worker_index: int | str | None
+    _worker_name: str | None
+
+    def __init__(self):
+        super().__init__()
+
+        # optimization
+        self.seed = None
+        self.n_trials = None
+        self.timeout = None
+        self.include_queued_in_n_trials = False
+
+        # multi-fidelity
+        self.fidelity = None
+        self.sub_fidelity_name = MAIN_FIDELITY_NAME
+        self.sub_fidelity_models = SubFidelityModels()
+
+        # System
+        self.fem: MultipleFEMInterface = MultipleFEMInterface()
+        self.fem_global = FEMGlobal(self.fem)
+        self.history: History = History()
+        self.solve_condition: Callable[[History], bool] = lambda _: True
+        self.termination_condition: Callable[[History], bool] = lambda _: False
+        self.entire_status: WorkerStatus = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)
+        self.worker_status: WorkerStatus = WorkerStatus('worker-status')
+        self.worker_status_list: list[WorkerStatus] = [self.worker_status]
+        self.trial_queue: TrialQueue = TrialQueue()
+        self._done_setup_before_parallel = False
+        self._done_load_problem_from_fem = False
+        self._worker_index: int | str | None = None
+        self._worker_name: str | None = None
+
+    # ===== public =====
+    @staticmethod
+    def _dispatch_no_fem_context_data_store_method(f):
+        def wrapper(self: AbstractOptimizer, *args, **kwargs):
+            instance: FEMGlobal = self.fem_global
+            method_name = f.__name__
+            method = getattr(
+                instance,
+                method_name,
+            )
+            return method(*args, **kwargs)
+
+        return wrapper
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_constant_value(
+            self,
+            name: str,
+            value: SupportedVariableTypes,
+            properties: dict[str, Any] | None = None,
+            *,
+            pass_to_fem: bool = True,
+    ):
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_parameter(
+            self,
+            name: str,
+            initial_value: float | None = None,
+            lower_bound: float | None = None,
+            upper_bound: float | None = None,
+            step: float | None = None,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+            fix: bool = False,
+    ) -> None:
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_expression_string(
+            self,
+            name: str,
+            expression_string: str,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+    ) -> None:
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_expression_sympy(
+            self,
+            name: str,
+            sympy_expr: sympy.Expr,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+    ) -> None:
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_expression(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            properties: dict[str, ...] | None = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+            *,
+            pass_to_fem: bool = True,
+    ) -> None:
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_categorical_parameter(
+            self,
+            name: str,
+            initial_value: SupportedVariableTypes | None = None,
+            choices: list[SupportedVariableTypes] | None = None,
+            properties: dict[str, ...] | None = None,
+            *,
+            pass_to_fem: bool = True,
+            fix: bool = False,
+    ) -> None:
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_objective(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            direction: DIRECTION = 'minimize',
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ) -> None:
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_objectives(
+            self,
+            names: str | list[str],
+            fun: Callable[..., Sequence[float]],
+            n_return: int,
+            directions: DIRECTION | Sequence[DIRECTION | None] | None = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_constraint(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            lower_bound: float | None = None,
+            upper_bound: float | None = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+            strict: bool = True,
+            using_fem: bool | None = None,
+    ):
+        pass
+
+    @_dispatch_no_fem_context_data_store_method
+    def add_other_output(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+        pass
 
     def add_sub_fidelity_model(
             self,
@@ -432,51 +661,6 @@ class AbstractOptimizer:
 
     def _should_solve(self, history):
         return self.solve_condition(history)
-
-    def _y_common(self, fem: AbstractFEMInterface) -> TrialOutput:
-        out = TrialOutput()
-        for name, obj in self.objectives.items():
-            obj_result = ObjectiveResult(obj, fem)
-            out.update({name: obj_result})
-        return out
-
-    def _y(self) -> TrialOutput:
-        return self._y_common(self.fems)
-
-    def _convert_y(self, y: TrialOutput) -> dict:
-        out = dict()
-        for name, result in y.items():
-            obj = self.objectives[name]
-            value_internal = obj.convert(result.value)
-            out.update({name: value_internal})
-        return out
-
-    def _c_common(
-            self,
-            out: TrialConstraintOutput,
-            fem: AbstractFEMInterface,
-            hard: bool,
-    ) -> TrialConstraintOutput:
-        for name, cns in self.constraints.items():
-            if cns.hard == hard:
-                cns_result = ConstraintResult(cns, fem)
-                out.update({name: cns_result})
-        return out
-
-    def _hard_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
-        return self._c_common(out, self.fems, hard=True)
-
-    def _soft_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
-        return self._c_common(out, self.fems, hard=False)
-
-    def _other_outputs_common(self, out: TrialFunctionOutput, fem: AbstractFEMInterface) -> TrialFunctionOutput:
-        for name, other_func in self.other_outputs.items():
-            other_func_result = FunctionResult(other_func, fem)
-            out.update({name: other_func_result})
-        return out
-
-    def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
-        return self._other_outputs_common(out, self.fems)
 
     @final
     def _get_hard_constraint_violation_names(self, hard_c: TrialConstraintOutput) -> list[str]:
@@ -544,7 +728,7 @@ class AbstractOptimizer:
         ) -> _FReturnValue:
             # create context
             if history is not None:
-                record_to_history = history.recording(opt_.fems)
+                record_to_history = history.recording(opt_.fem)
             else:
 
                 class DummyRecordContext:
@@ -562,22 +746,17 @@ class AbstractOptimizer:
                 empty_c: TrialConstraintOutput = TrialConstraintOutput()
                 empty_other_outputs: TrialFunctionOutput = TrialFunctionOutput()
                 empty_y = TrialOutput()
+                # (Required for direction recording to graph even if the value is nan)
                 for ctx, __ in zip(*opt_._ordered_contexts):
-                    if isinstance(ctx, FEMContext):
-                        empty_y.update({
-                            obj_name: ObjectiveResult(obj, ctx.fem, float('nan'))
-                            for obj_name, obj in ctx.objectives.items()
-                        })
-                    else:
-                        empty_y.update({
-                            obj_name: ObjectiveResult(obj, ctx.fems, float('nan'))
-                            for obj_name, obj in ctx.objectives.items()
-                        })
+                    empty_y.update({
+                        obj_name: ObjectiveResult(obj, ctx.fem, float('nan'))
+                        for obj_name, obj in ctx.objectives.items()
+                    })
                 y_internal: dict = {}
 
                 # record common result
                 record.x = parameters
-                record.y = empty_y  # (Required for direction recording to graph even if the value is nan)
+                record.y = empty_y
                 record.c = empty_c
                 record.other_outputs = empty_other_outputs
                 record.sub_sampling = self.subsampling_idx
@@ -593,10 +772,10 @@ class AbstractOptimizer:
                     raise SkipSolve
 
                 # start solve per FEM
+                if opt_.sub_fidelity_name != MAIN_FIDELITY_NAME:
+                    logger.info('----------')
+                    logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
                 for ctx, update_mode in zip(*opt_._ordered_contexts):
-                    if ctx.sub_fidelity_name != MAIN_FIDELITY_NAME:
-                        logger.info('----------')
-                        logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
                     logger.info(_('input variables:'))
                     logger.info(parameters)
 
@@ -635,7 +814,7 @@ class AbstractOptimizer:
                             raise e
 
                         # check hard constraint violation
-                        violation_names = ctx._get_hard_constraint_violation_names(ctx_hard_c)
+                        violation_names = opt_._get_hard_constraint_violation_names(ctx_hard_c)
                         if len(violation_names) > 0:
                             record.state = TrialState.hard_constraint_violation
                             record.messages.append(
@@ -894,7 +1073,7 @@ class AbstractOptimizer:
             self.worker_status.value = WorkerStatus.initializing
 
             self.worker_status.value = WorkerStatus.launching_fem
-            self.fems._setup_after_parallel(self)
+            self.fem._setup_after_parallel(self)
 
             if wait_other_process_setup:
                 self.worker_status.value = WorkerStatus.waiting
@@ -925,10 +1104,12 @@ class AbstractOptimizer:
 
             self.run()
 
-        logger.info(_(
-            en_message='worker `{worker}` successfully finished!',
-            worker=worker_name,
-        ))
+        logger.info(
+            _(
+                en_message="worker `{worker}` successfully finished!",
+                worker=worker_name,
+            )
+        )
 
     def _logging(self):
 
@@ -955,18 +1136,22 @@ class AbstractOptimizer:
         return LoggingOutput()
 
     def _load_problem_from_fem(self):
-        for ctx in self.fems.ordered_contexts:
+        for ctx in self.fem.ordered_contexts:
+            # 各 context の fem 特有の問題設定を
+            # 各 context に読み込ませる
             ctx._load_problem_from_fem()
 
-            # これをアップデートすると、solve_or_raise の中で二重に評価される。
-            # self.objectives.update(ctx.objectives)
-            # self.constraints.update(ctx.constraints)
+            # さらに、global な最適化問題設定にも反映させる
+            self.objectives.update(ctx.objectives)
+            self.constraints.update(ctx.constraints)
             self.variable_manager.variables.update(ctx.variable_manager.variables)
 
-        # if self.fem._load_problem_from_fem and not self._done_load_problem_from_fem:
-        #     self.fem.load_variables(self)
-        #     self.fem.load_objectives(self)
-        #     self.fem.load_constraints(self)
+        # 自身に直接紐づく context のない設定を読み込む
+        self.objectives.update(self.fem_global.objectives)
+        self.constraints.update(self.fem_global.constraints)
+        self.variable_manager.variables.update(
+            self.fem_global.variable_manager.variables
+        )
         self._done_load_problem_from_fem = True
 
     # noinspection PyMethodMayBeStatic
@@ -976,7 +1161,7 @@ class AbstractOptimizer:
     def _collect_additional_data(self) -> dict:
         additional_data = {}
         additional_data.update(self._get_additional_data())
-        additional_data.update(self.fems._get_additional_data())
+        additional_data.update(self.fem._get_additional_data())
         return additional_data
 
     def _finalize_history(self):
@@ -1001,7 +1186,7 @@ class AbstractOptimizer:
             variables = self.variable_manager.get_variables()
             for var_name, variable in variables.items():
                 if variable.pass_to_fem:
-                    self.fems._check_param_and_raise(var_name)
+                    self.fem._check_param_and_raise(var_name)
 
             # resolve evaluation order
             self.variable_manager.resolve()
@@ -1042,16 +1227,16 @@ class AbstractOptimizer:
                 if len(history_set - enqueued_set) > 0:
                     raise ValueError(
                         _(
-                            en_message='The enqueued parameter set lacks '
-                                       'some parameters to be optimized.\n'
-                                       'Enqueued set: {enqueued_set}\n'
-                                       'Parameters to optimize: {history_set}\n'
-                                       'Lacked set: {lacked_set}',
-                            jp_message='予約された入力変数セットに'
-                                       '変数が不足しています。\n'
-                                       '予約された変数: {enqueued_set}\n'
-                                       '最適化する変数: {history_set}\n'
-                                       '足りない変数: {lacked_set}',
+                            en_message="The enqueued parameter set lacks "
+                            "some parameters to be optimized.\n"
+                            "Enqueued set: {enqueued_set}\n"
+                            "Parameters to optimize: {history_set}\n"
+                            "Lacked set: {lacked_set}",
+                            jp_message="予約された入力変数セットに"
+                            "変数が不足しています。\n"
+                            "予約された変数: {enqueued_set}\n"
+                            "最適化する変数: {history_set}\n"
+                            "足りない変数: {lacked_set}",
                             enqueued_set=enqueued_set,
                             history_set=history_set,
                             lacked_set=history_set - enqueued_set,
@@ -1084,28 +1269,31 @@ class AbstractOptimizer:
         self._setup_after_parallel()
 
     @property
-    def _ordered_contexts(self) -> tuple[list[AbstractOptimizer], list[_UpdateMode]]:
-        out1 = self.fems.ordered_contexts + [self]
-        out2: list[_UpdateMode] = [
-            _UpdateMode(update_function=True, update_fem=True)
-            for __ in self.fems.ordered_contexts
-        ] + [_UpdateMode(update_function=True, update_fem=False)]
-        return out1, out2
+    def _ordered_contexts(self) -> tuple[
+        list[FEMContext], list[_UpdateMode]
+    ]:
+        """Usage: for ctx, update_mode in zip(*self._ordered_contexts)"""
+        contexts: list[FEMContext] = []
+        update_modes: list[_UpdateMode] = []
+        for ctx in self.fem.ordered_contexts:
+            contexts.append(ctx)
+            update_modes.append(
+                _UpdateMode(
+                    update_fem=True,
+                    update_function=True,
+                )
+            )
+        contexts.append(
+            self.fem_global
+        )
+        update_modes.append(
+            _UpdateMode(
+                update_fem=False,
+                update_function=True,
+            )
+        )
 
-    # @property
-    # def fem(self) -> AbstractFEMInterface:
-    #     if len(self.fems) == 0:
-    #         raise AttributeError('No FEM is registered in this optimizer.')
-    #     elif len(self.fems) == 1:
-    #         return self.fems[0]
-    #     else:
-    #         return self.fems
-
-    # @fem.setter
-    # def fem(self, value: AbstractFEMInterface):
-    #     fems = MultipleFEMInterface()
-    #     fems.add(value)
-    #     self.fems = fems
+        return contexts, update_modes
 
 
 class SubFidelityModel(AbstractOptimizer):
@@ -1118,48 +1306,3 @@ class SubFidelityModels(dict[str, SubFidelityModel]):
         model.sub_fidelity_name = name
         model.fidelity = fidelity
         self.update({name: model})
-
-
-class FEMContext(AbstractOptimizer):
-
-    _fem: AbstractFEMInterface
-
-    def __init__(self, fem: AbstractFEMInterface):
-        self.fem = fem
-        super().__init__()
-
-    @property
-    def fem(self) -> AbstractFEMInterface:
-        return self._fem
-
-    @fem.setter
-    def fem(self, value: AbstractFEMInterface):
-        self._fem = value
-
-    @property
-    def fems(self) -> MultipleFEMInterface:
-        raise AttributeError('`fems` is not available in FEMContext.')
-
-    @fems.setter
-    def fems(self, value):
-        pass
-
-    def _y(self) -> TrialOutput:
-        return self._y_common(self.fem)
-
-    def _hard_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
-        return self._c_common(out, self.fem, hard=True)
-
-    def _soft_c(self, out: TrialConstraintOutput) -> TrialConstraintOutput:
-        return self._c_common(out, self.fem, hard=False)
-
-    def _other_outputs(self, out: TrialFunctionOutput) -> TrialFunctionOutput:
-        return self._other_outputs_common(out, self.fem)
-
-    def _load_problem_from_fem(self):
-        if self.fem._load_problem_from_fem and not self._done_load_problem_from_fem:
-            self.fem.load_variables(self)
-            self.fem.load_objectives(self)
-            self.fem.load_constraints(self)
-        self._done_load_problem_from_fem = True
-
