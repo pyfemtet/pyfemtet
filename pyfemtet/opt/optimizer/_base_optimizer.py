@@ -74,6 +74,9 @@ def _duplicated_name_check(name, names):
 # 最適化問題の情報をストアするクラス。
 class OptimizationDataStore:
     def __init__(self):
+        self._initialize_problem()
+
+    def _initialize_problem(self):
         self.variable_manager = VariableManager()
         self.objectives = Objectives()
         self.constraints = Constraints()
@@ -86,7 +89,7 @@ class OptimizationDataStore:
             properties: dict[str, Any] | None = None,
             *,
             pass_to_fem: bool = True,
-    ):
+    ) -> Variable:
         var: Variable
         # noinspection PyUnreachableCode
         if isinstance(value, Real):
@@ -105,6 +108,7 @@ class OptimizationDataStore:
         var.properties = properties if properties is not None else {}
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
+        return var
 
     def add_parameter(
             self,
@@ -117,7 +121,7 @@ class OptimizationDataStore:
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
-    ) -> None:
+    ) -> NumericParameter:
         properties = properties if properties is not None else {}
 
         if fix:
@@ -133,6 +137,7 @@ class OptimizationDataStore:
         prm.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(prm)
+        return prm
 
     def add_expression_string(
             self,
@@ -141,7 +146,7 @@ class OptimizationDataStore:
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
-    ) -> None:
+    ) -> ExpressionFromString:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(
@@ -151,6 +156,7 @@ class OptimizationDataStore:
         var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
+        return var
 
     def add_expression_sympy(
             self,
@@ -159,7 +165,7 @@ class OptimizationDataStore:
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
-    ) -> None:
+    ) -> ExpressionFromString:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
@@ -167,6 +173,7 @@ class OptimizationDataStore:
         var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
+        return var
 
     def add_expression(
             self,
@@ -177,7 +184,7 @@ class OptimizationDataStore:
             kwargs: dict | None = None,
             *,
             pass_to_fem: bool = True,
-    ) -> None:
+    ) -> ExpressionFromFunction:
         var = ExpressionFromFunction()
         var.name = name
         var.fun = fun
@@ -187,6 +194,7 @@ class OptimizationDataStore:
         var.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
+        return var
 
     def add_categorical_parameter(
             self,
@@ -197,7 +205,7 @@ class OptimizationDataStore:
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
-    ) -> None:
+    ) -> CategoricalParameter:
         properties = properties if properties is not None else {}
 
         if fix:
@@ -211,6 +219,7 @@ class OptimizationDataStore:
         prm.pass_to_fem = pass_to_fem
         _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(prm)
+        return prm
 
     def add_objective(
             self,
@@ -219,14 +228,16 @@ class OptimizationDataStore:
             direction: DIRECTION = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
-    ) -> None:
+    ) -> Objective:
         obj = Objective()
         obj.fun = fun
         obj.args = args or ()
         obj.kwargs = kwargs or {}
         obj.direction = direction
+        obj.fem_ctx = None
         _duplicated_name_check(name, self.objectives.keys())
         self.objectives.update({name: obj})
+        return obj  # Context で fem_ctx をセットするために返す
 
     def add_objectives(
             self,
@@ -236,7 +247,7 @@ class OptimizationDataStore:
             directions: DIRECTION | Sequence[DIRECTION | None] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
-    ):
+    ) -> list[Objective]:
         # argument processing
         # noinspection PyUnreachableCode
         if isinstance(names, str):
@@ -261,16 +272,19 @@ class OptimizationDataStore:
 
         assert len(names) == len(directions) == n_return
 
+        out = []
         function_factory = ObjectivesFunc(fun, n_return)
         for i, (name, direction) in enumerate(zip(names, directions)):
             fun_i = function_factory.get_fun_that_returns_ith_value(i)
-            self.add_objective(
+            out.append(self.add_objective(
                 fun=fun_i,
                 name=name,
                 direction=direction,
                 args=args,
                 kwargs=kwargs,
-            )
+            ))
+
+        return out
 
     def add_constraint(
             self,
@@ -282,7 +296,7 @@ class OptimizationDataStore:
             kwargs: dict | None = None,
             strict: bool = True,
             using_fem: bool | None = None,
-    ):
+    ) -> Constraint:
         if lower_bound is None and upper_bound is None:
             raise ValueError(_(
                 en_message='One of `lower_bound` and `upper_bound` '
@@ -298,11 +312,11 @@ class OptimizationDataStore:
         cns.lower_bound = lower_bound
         cns.upper_bound = upper_bound
         cns.hard = strict
-        cns._fem_ctx = None
+        cns.fem_ctx = None
         cns.using_fem = using_fem
         _duplicated_name_check(name, self.constraints.keys())
         self.constraints.update({name: cns})
-        return cns  # Context で _fem_ctx をセットするために返す
+        return cns  # Context で fem_ctx をセットするために返す
 
     def add_other_output(
             self,
@@ -316,8 +330,10 @@ class OptimizationDataStore:
         other_func.fun = fun
         other_func.args = args or ()
         other_func.kwargs = kwargs or {}
+        other_func.fem_ctx = None
         _duplicated_name_check(name, self.other_outputs.keys())
         self.other_outputs.update({name: other_func})
+        return other_func
 
 
 # 最適化問題の関数を FEM ごとに管理して
@@ -331,6 +347,26 @@ class FEMContext(OptimizationDataStore):
         self._done_load_problem_from_fem = False
         super().__init__()
 
+    @staticmethod
+    def _with_add_fem_ctx(f):
+        def wrapper(self, *args, **kwargs):
+            def add_fem_ctx(something):
+                if isinstance(something, Function):
+                    something.fem_ctx = self
+                elif isinstance(something, Variable):
+                    something.properties['fem_ctx'] = self
+
+            out = f(self, *args, **kwargs)
+            if isinstance(out, Sequence):
+                for item in out:
+                    add_fem_ctx(item)
+            else:
+                add_fem_ctx(out)
+
+            return out
+        return wrapper
+
+    @_with_add_fem_ctx
     def add_constraint(
         self,
         name: str,
@@ -342,7 +378,7 @@ class FEMContext(OptimizationDataStore):
         strict: bool = True,
         using_fem: bool | None = None,
     ):
-        cns = super().add_constraint(
+        return super().add_constraint(
             name=name,
             fun=fun,
             lower_bound=lower_bound,
@@ -352,7 +388,57 @@ class FEMContext(OptimizationDataStore):
             strict=strict,
             using_fem=using_fem,
         )
-        cns._fem_ctx = self
+
+    @_with_add_fem_ctx
+    def add_objective(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            direction: DIRECTION = 'minimize',
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ) -> Objective:
+        return super().add_objective(
+            name=name,
+            fun=fun,
+            direction=direction,
+            args=args,
+            kwargs=kwargs,
+        )
+
+    @_with_add_fem_ctx
+    def add_objectives(
+            self,
+            names: str | list[str],
+            fun: Callable[..., Sequence[float]],
+            n_return: int,
+            directions: DIRECTION | Sequence[DIRECTION | None] | None = None,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ) -> list[Objective]:
+        return super().add_objectives(
+            names=names,
+            fun=fun,
+            n_return=n_return,
+            directions=directions,
+            args=args,
+            kwargs=kwargs,
+        )
+
+    @_with_add_fem_ctx
+    def add_other_output(
+            self,
+            name: str,
+            fun: Callable[..., float],
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+    ):
+        return super().add_other_output(
+            name=name,
+            fun=fun,
+            args=args,
+            kwargs=kwargs,
+        )
 
     def _y_common(self, fem: AbstractFEMInterface) -> TrialOutput:
         out = TrialOutput()
@@ -435,7 +521,6 @@ class AbstractOptimizer(OptimizationDataStore):
     worker_status: WorkerStatus
     worker_status_list: list[WorkerStatus]
     _done_setup_before_parallel: bool
-    _done_load_problem_from_fem_ctx: bool
     _worker_index: int | str | None
     _worker_name: str | None
 
@@ -464,7 +549,6 @@ class AbstractOptimizer(OptimizationDataStore):
         self.worker_status_list: list[WorkerStatus] = [self.worker_status]
         self.trial_queue: TrialQueue = TrialQueue()
         self._done_setup_before_parallel = False
-        self._done_load_problem_from_fem_ctx = False
         self._worker_index: int | str | None = None
         self._worker_name: str | None = None
 
@@ -490,7 +574,9 @@ class AbstractOptimizer(OptimizationDataStore):
                 instance,
                 method_name,
             )
-            return method(*args, **kwargs)
+            out = method(*args, **kwargs)
+            self._refresh_problem()
+            return out
 
         return wrapper
 
@@ -1147,25 +1233,25 @@ class AbstractOptimizer(OptimizationDataStore):
 
         return LoggingOutput()
 
-    def _load_problem_from_fem_ctx(self):
-        if not self._done_load_problem_from_fem_ctx:
-            for ctx in self.fem.ordered_contexts:
-                # 各 context の fem 特有の問題設定を
-                # 各 context に読み込ませる
-                ctx._load_problem_from_fem()
+    def _refresh_problem(self):
+        self._initialize_problem()
 
-                # さらに、global な最適化問題設定にも反映させる
-                self.objectives.update(ctx.objectives)
-                self.constraints.update(ctx.constraints)
-                self.variable_manager.variables.update(ctx.variable_manager.variables)
+        # 自身に直接紐づく context を同期
+        self.objectives.update(self.fem_global.objectives)
+        self.constraints.update(self.fem_global.constraints)
+        self.variable_manager.variables.update(
+            self.fem_global.variable_manager.variables
+        )
 
-            # 自身に直接紐づく context のない設定を読み込む
-            self.objectives.update(self.fem_global.objectives)
-            self.constraints.update(self.fem_global.constraints)
-            self.variable_manager.variables.update(
-                self.fem_global.variable_manager.variables
-            )
-            self._done_load_problem_from_fem_ctx = True
+        for ctx in self.fem.ordered_contexts:
+            # 各 context の fem 特有の問題設定を
+            # 各 context に読み込ませる
+            ctx._load_problem_from_fem()
+
+            # さらに、global な最適化問題設定にも反映させる
+            self.objectives.update(ctx.objectives)
+            self.constraints.update(ctx.constraints)
+            self.variable_manager.variables.update(ctx.variable_manager.variables)
 
     # noinspection PyMethodMayBeStatic
     def _get_additional_data(self) -> dict:
@@ -1274,7 +1360,7 @@ class AbstractOptimizer(OptimizationDataStore):
             assert sub_fidelity_model.constraints.keys() == self.constraints.keys()
 
         # finalize
-        self._load_problem_from_fem_ctx()
+        self._refresh_problem()
         self._finalize_history()
 
         # setup if needed
