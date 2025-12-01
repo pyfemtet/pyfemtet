@@ -519,7 +519,6 @@ class AbstractOptimizer(OptimizationDataStore):
 
     # system
     history: History
-    _fem: MultipleFEMInterface
     entire_status: WorkerStatus
     worker_status: WorkerStatus
     worker_status_list: list[WorkerStatus]
@@ -542,8 +541,7 @@ class AbstractOptimizer(OptimizationDataStore):
         self.sub_fidelity_models = SubFidelityModels()
 
         # System
-        self._fem: MultipleFEMInterface = MultipleFEMInterface()
-        self.fem_global = FEMGlobal(self.fem)
+        self.fem_global = FEMGlobal(MultipleFEMInterface())
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.termination_condition: Callable[[History], bool] = lambda _: False
@@ -557,15 +555,18 @@ class AbstractOptimizer(OptimizationDataStore):
 
     @property
     def fem(self) -> MultipleFEMInterface:
-        return self._fem
+        # 完全に互換性を持たせるなら
+        # pass_to_fem ではなく
+        # ここをいじったほうがいいのでは？
+        return self.fem_global.fem
 
     @fem.setter
     def fem(self, value: AbstractFEMInterface):
         if isinstance(value, MultipleFEMInterface):
-            self._fem = value
+            self.fem_global.fem = value
         else:
-            self._fem = MultipleFEMInterface()
-            self._fem.add(value)
+            self.fem_global.fem = MultipleFEMInterface()
+            self.fem_global.fem.add(value)
 
     # ===== public =====
     @staticmethod
