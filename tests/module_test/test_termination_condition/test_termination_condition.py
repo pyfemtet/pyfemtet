@@ -44,6 +44,10 @@ def test_termination_condition_optuna():
     手法は optuna の TPE とする。
     初期値は 10。
     """
+    # 1 秒以内にふたつの最適化が始まると
+    # csv 名が重複してエラーになる
+    sleep(2)
+
     opt = OptunaOptimizer()
     opt.fem = NoFEM()
 
@@ -63,6 +67,4 @@ def test_termination_condition_optuna():
 
 if __name__ == '__main__':
     test_termination_condition_scipy()
-    # 1 秒以内にふたつの最適化が始まるとエラーになると csv 名が重複する
-    sleep(1)
     test_termination_condition_optuna()
