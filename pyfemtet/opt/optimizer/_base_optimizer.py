@@ -1241,14 +1241,6 @@ class AbstractOptimizer(OptimizationDataStore):
         # ctx の内容が減っている場合でも検出できるように初期化
         self._initialize_problem()
 
-        # 自身に直接紐づく context を同期
-        self.objectives.update(self.fem_global.objectives)
-        self.constraints.update(self.fem_global.constraints)
-        self.other_outputs.update(self.fem_global.other_outputs)
-        self.variable_manager.variables.update(
-            self.fem_global.variable_manager.variables
-        )
-
         for ctx in self.fem.ordered_contexts:
             # 各 context の fem 特有の問題設定は
             # 各 context が読み込む必要がある。
@@ -1260,6 +1252,14 @@ class AbstractOptimizer(OptimizationDataStore):
             self.constraints.update(ctx.constraints)
             self.other_outputs.update(ctx.other_outputs)
             self.variable_manager.variables.update(ctx.variable_manager.variables)
+
+        # 自身に直接紐づく context を同期
+        self.objectives.update(self.fem_global.objectives)
+        self.constraints.update(self.fem_global.constraints)
+        self.other_outputs.update(self.fem_global.other_outputs)
+        self.variable_manager.variables.update(
+            self.fem_global.variable_manager.variables
+        )
 
         # 問題の同期が終わったら optimizer の情報を
         # 必要とする interface 向けの処理
