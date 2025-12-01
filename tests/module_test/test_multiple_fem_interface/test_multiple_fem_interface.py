@@ -1,4 +1,5 @@
 import os
+from contextlib import closing
 from pyfemtet.opt.optimizer import AbstractOptimizer
 from pyfemtet.opt.interface import FemtetInterface, NoFEM, MultipleFEMInterface
 
@@ -67,64 +68,66 @@ def test_multiple_fem_interface_basic_femtet():
     fem1.use_parametric_output_as_objective(1)
     fem2.use_parametric_output_as_objective(1)
 
-    def user_obj(_: MultipleFEMInterface):
-        return 1.
+    with closing(fem1), closing(fem2):
 
-    # optimizer を作る
-    opt = AbstractOptimizer()
+        def user_obj(_: MultipleFEMInterface):
+            return 1.
 
-    # MultipleFEMInterface に登録
-    opt.fem.add(fem1)
-    opt.fem.add(fem2)
+        # optimizer を作る
+        opt = AbstractOptimizer()
 
-    # parameter を登録（optimizer に注入される想定）
-    opt.add_parameter('x1', 5, 2, 10)
-    opt.add_parameter('x2', 7, 2, 10)
+        # MultipleFEMInterface に登録
+        opt.fem.add(fem1)
+        opt.fem.add(fem2)
 
-    # objectives を登録
-    opt.add_objective('user_defined', user_obj)
+        # parameter を登録（optimizer に注入される想定）
+        opt.add_parameter('x1', 5, 2, 10)
+        opt.add_parameter('x2', 7, 2, 10)
 
-    # setup
-    opt._finalize()
+        # objectives を登録
+        opt.add_objective('user_defined', user_obj)
 
-    # variable が追加されていること
-    vm = opt.variable_manager.variables
-    assert 'x1' in vm
-    assert 'x2' in vm
+        # setup
+        opt._finalize()
 
-    # objective が追加されていること
-    # opt.objectives にはユーザー定義の目的関数のみ含まれる
-    # FEM 由来の目的関数は各 FEMContext.objectives に含まれる
-    print(f'{tuple(opt.objectives)=}')
-    assert 'user_defined' in opt.objectives
+        # variable が追加されていること
+        vm = opt.variable_manager.variables
+        assert 'x1' in vm
+        assert 'x2' in vm
 
-    # FEMContext の目的関数を確認
-    all_objectives = list(opt.objectives.keys())
-    print(f'{all_objectives=}')
-    # assert 'user_defined' in all_objectives
-    # assert '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性' in all_objectives
-    # assert '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性' in all_objectives
-    assert all_objectives == [
-        '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性',
-        '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性',
-        'user_defined',
-    ]
+        # objective が追加されていること
+        # opt.objectives にはユーザー定義の目的関数のみ含まれる
+        # FEM 由来の目的関数は各 FEMContext.objectives に含まれる
+        print(f'{tuple(opt.objectives)=}')
+        assert 'user_defined' in opt.objectives
 
-    # solve
-    x = opt.get_variables(format="raw")
-    f_return = opt._get_solve_set().solve(x)
-    y_dict: dict[str, float] = {name: obj_res.value for name, obj_res in f_return[0].items()}
+        # FEMContext の目的関数を確認
+        all_objectives = list(opt.objectives.keys())
+        print(f'{all_objectives=}')
+        # assert 'user_defined' in all_objectives
+        # assert '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性' in all_objectives
+        # assert '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性' in all_objectives
+        assert all_objectives == [
+            '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性',
+            '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性',
+            'user_defined',
+        ]
 
-    print(f'{y_dict=}')
-    # 期待される値:
-    # y_dict={
-    #   '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性': 1.0000026284781436,
-    #   '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性': 30.123154397344265,
-    #   'user_defined': 1.0
-    # }
-    assert abs(y_dict['user_defined'] - 1.0) < 0.001
-    assert abs(y_dict['応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性'] - 1.0000026284781436) < 0.001
-    assert abs(y_dict['0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性'] - 30.123154397344265) < 0.001
+        # solve
+        x = opt.get_variables(format="raw")
+        f_return = opt._get_solve_set().solve(x)
+        y_dict: dict[str, float] = {name: obj_res.value for name, obj_res in f_return[0].items()}
+
+        print(f'{y_dict=}')
+        # 期待される値:
+        # y_dict={
+        #   '応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性': 1.0000026284781436,
+        #   '0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性': 30.123154397344265,
+        #   'user_defined': 1.0
+        # }
+        assert abs(y_dict['user_defined'] - 1.0) < 0.001
+        assert abs(y_dict['応力[Pa] / 静水圧 / 最大値 / 全てのボディ属性'] - 1.0000026284781436) < 0.001
+        assert abs(y_dict['0: 定常解析 / 温度[deg] / 最小値 / 全てのボディ属性'] - 30.123154397344265) < 0.001
 
 
 if __name__ == '__main__':

@@ -250,6 +250,9 @@ class FemtetInterface(COMInterface):
 
         """
 
+        if not self.femtet_is_alive():
+            return
+
         _set_autosave_enabled(self._original_autosave_enabled)
 
         if not hasattr(self, "Femtet"):
