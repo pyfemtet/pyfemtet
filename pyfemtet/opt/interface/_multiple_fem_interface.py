@@ -61,10 +61,7 @@ class MultipleFEMInterface(AbstractFEMInterface):
 
     @property
     def object_pass_to_fun(self):
-        if len(self) == 1:
-            return self._fems[0].object_pass_to_fun
-        else:
-            return [fem.object_pass_to_fun for fem in self._fems]
+        return [fem.object_pass_to_fun for fem in self._fems]
 
     def reopen(self):
         for fem in self._fems:

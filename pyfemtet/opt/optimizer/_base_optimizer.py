@@ -554,11 +554,11 @@ class AbstractOptimizer(OptimizationDataStore):
         self._worker_name: str | None = None
 
     @property
-    def fem(self) -> MultipleFEMInterface:
-        # 完全に互換性を持たせるなら
-        # pass_to_fem ではなく
-        # ここをいじったほうがいいのでは？
-        return self.fem_global.fem
+    def fem(self) -> AbstractFEMInterface:
+        if len(self.fem_global.fem) == 1:
+            return self.fem_global.fem[0]
+        else:
+            return self.fem_global.fem
 
     @fem.setter
     def fem(self, value: AbstractFEMInterface):
@@ -1241,7 +1241,7 @@ class AbstractOptimizer(OptimizationDataStore):
         # ctx の内容が減っている場合でも検出できるように初期化
         self._initialize_problem()
 
-        for ctx in self.fem.ordered_contexts:
+        for ctx in self.fem_global.fem.ordered_contexts:
             # 各 context の fem 特有の問題設定は
             # 各 context が読み込む必要がある。
             # 直接 fem.load_... を呼んではいけない。
@@ -1263,7 +1263,7 @@ class AbstractOptimizer(OptimizationDataStore):
 
         # 問題の同期が終わったら optimizer の情報を
         # 必要とする interface 向けの処理
-        for ctx in self.fem.ordered_contexts:
+        for ctx in self.fem_global.fem.ordered_contexts:
             ctx.fem._contact_optimizer(self)
 
     # noinspection PyMethodMayBeStatic
@@ -1385,7 +1385,7 @@ class AbstractOptimizer(OptimizationDataStore):
         """Usage: for ctx, update_mode in zip(*self._ordered_contexts)"""
         contexts: list[FEMContext] = []
         update_modes: list[_UpdateMode] = []
-        for ctx in self.fem.ordered_contexts:
+        for ctx in self.fem_global.fem.ordered_contexts:
             contexts.append(ctx)
             update_modes.append(
                 _UpdateMode(
