@@ -244,7 +244,7 @@ def _get_single_objective_plot(history: History, df: pd.DataFrame):
         go.Scatter(
             x=df_main[SUCCEEDED_TRIAL_COLUMN],
             y=df_main[obj_name],
-            customdata=df_main[SUCCEEDED_TRIAL_COLUMN].values.reshape((-1, 1)),
+            customdata=df_main['trial'].values.reshape((-1, 1)),
             mode="markers",
             marker=dict(color='#6c757d', size=6),
             name=Msg.LEGEND_LABEL_ALL_SOLUTIONS,
