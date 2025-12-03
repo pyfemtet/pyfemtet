@@ -496,12 +496,27 @@ class FEMContext(OptimizationDataStore):
         self._done_load_problem_from_fem = True
 
 
-# クラス分けする必要はないが、AbstractOptimizer が
-# 使う前提の、意味的にわかりやすい、
-# fem が MultipleFEMInterface であることのみを
+# AbstractOptimizer が使う前提の、意味的にわかりやすい、
+# 既存コードとの互換性を持った、
+# fem が MultipleFEMInterface であることを
 # 特徴とするクラス
 class FEMGlobal(FEMContext):
-    fem: MultipleFEMInterface
+    _fems: MultipleFEMInterface
+
+    @property
+    def fem(self) -> AbstractFEMInterface:
+        if len(self._fems) == 1:
+            return self._fems[0]
+        else:
+            return self._fems
+
+    @fem.setter
+    def fem(self, value: AbstractFEMInterface):
+        if isinstance(value, MultipleFEMInterface):
+            self._fems = value
+        else:
+            self._fems = MultipleFEMInterface()
+            self._fems.add(value)
 
 
 class AbstractOptimizer(OptimizationDataStore):
@@ -555,18 +570,15 @@ class AbstractOptimizer(OptimizationDataStore):
 
     @property
     def fem(self) -> AbstractFEMInterface:
-        if len(self.fem_global.fem) == 1:
-            return self.fem_global.fem[0]
-        else:
-            return self.fem_global.fem
+        return self.fem_global.fem
 
     @fem.setter
     def fem(self, value: AbstractFEMInterface):
-        if isinstance(value, MultipleFEMInterface):
-            self.fem_global.fem = value
-        else:
-            self.fem_global.fem = MultipleFEMInterface()
-            self.fem_global.fem.add(value)
+        self.fem_global.fem = value
+
+    def _append_fem(self, fem: AbstractFEMInterface):
+        show_experimental_warning('AbstractOptimizer._append_fem', logger)
+        self.fem_global._fems.add(fem)
 
     # ===== public =====
     @staticmethod
@@ -830,7 +842,7 @@ class AbstractOptimizer(OptimizationDataStore):
         ) -> _FReturnValue:
             # create context
             if history is not None:
-                record_to_history = history.recording(opt_.fem)
+                record_to_history = history.recording(opt_.fem_global._fems)
             else:
 
                 class DummyRecordContext:
@@ -1241,7 +1253,7 @@ class AbstractOptimizer(OptimizationDataStore):
         # ctx の内容が減っている場合でも検出できるように初期化
         self._initialize_problem()
 
-        for ctx in self.fem_global.fem.ordered_contexts:
+        for ctx in self.fem_global._fems.ordered_contexts:
             # 各 context の fem 特有の問題設定は
             # 各 context が読み込む必要がある。
             # 直接 fem.load_... を呼んではいけない。
@@ -1263,7 +1275,7 @@ class AbstractOptimizer(OptimizationDataStore):
 
         # 問題の同期が終わったら optimizer の情報を
         # 必要とする interface 向けの処理
-        for ctx in self.fem_global.fem.ordered_contexts:
+        for ctx in self.fem_global._fems.ordered_contexts:
             ctx.fem._contact_optimizer(self)
 
     # noinspection PyMethodMayBeStatic
@@ -1385,7 +1397,7 @@ class AbstractOptimizer(OptimizationDataStore):
         """Usage: for ctx, update_mode in zip(*self._ordered_contexts)"""
         contexts: list[FEMContext] = []
         update_modes: list[_UpdateMode] = []
-        for ctx in self.fem_global.fem.ordered_contexts:
+        for ctx in self.fem_global._fems.ordered_contexts:
             contexts.append(ctx)
             update_modes.append(
                 _UpdateMode(

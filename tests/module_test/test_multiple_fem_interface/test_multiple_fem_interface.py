@@ -26,8 +26,8 @@ def test_multiple_fem_interface_basic_flow():
     opt = AbstractOptimizer()
 
     # MultipleFEMInterface に登録
-    opt.fem.add(fem1)
-    opt.fem.add(fem2)
+    opt._append_fem(fem1)
+    opt._append_fem(fem2)
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, -10, 10)
@@ -77,8 +77,8 @@ def test_multiple_fem_interface_basic_femtet():
         opt = AbstractOptimizer()
 
         # MultipleFEMInterface に登録
-        opt.fem.add(fem1)
-        opt.fem.add(fem2)
+        opt._append_fem(fem1)
+        opt._append_fem(fem2)
 
         # parameter を登録（optimizer に注入される想定）
         opt.add_parameter('x1', 5, 2, 10)
