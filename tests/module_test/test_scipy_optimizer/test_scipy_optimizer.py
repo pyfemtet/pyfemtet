@@ -118,6 +118,8 @@ def test_scipy_n_trials():
 def test_scipy_timeout():
     from time import sleep
 
+    sleep(1)  # 他のテストと時間が被らないように少し待つ
+
     def obj(_, opt_):
         sleep(1)
         return np.linalg.norm(opt_.get_variables(format='values'))
@@ -183,8 +185,8 @@ def test_scipy_restart():
 
 
 if __name__ == '__main__':
-    test_scipy_optimizer()
-    test_scipy_optimizer_1()
+    # test_scipy_optimizer()
+    # test_scipy_optimizer_1()
     test_scipy_n_trials()
     test_scipy_timeout()
-    test_scipy_restart()
+    # test_scipy_restart()
