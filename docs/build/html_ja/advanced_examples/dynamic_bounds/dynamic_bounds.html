@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja-JP" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>関数を使った上下限指定 (dynamic_bounds) &mdash; PyFemtet Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=a3bca520"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">ホーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/migration_to_v1.html">バージョン 1 への移行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/examples.html">例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/advanced_examples.html">発展的な例題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI（グラフィカルユーザインターフェース）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">関数を使った上下限指定 (dynamic_bounds)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/advanced_examples/dynamic_bounds/dynamic_bounds.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="function-based-bounds-dynamic-bounds">
+<h1>関数を使った上下限指定 (dynamic_bounds)<a class="headerlink" href="#function-based-bounds-dynamic-bounds" title="Link to this heading"></a></h1>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>これは開発中の機能です。将来のバージョンでは動作と使い方が変更される可能性があります。</p>
+</div>
+<section id="sample-files">
+<h2>サンプルファイル<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>この機能を使ったサンプルは <a class="reference download internal" download="" href="../../_downloads/64ece49875dcb5498e9c22dedab661e5/pipe_dynamic_bounds.py"><code class="xref download docutils literal notranslate"><span class="pre">pipe_dynamic_bounds.py</span></code></a> です。 <a class="reference download internal" download="" href="../../_downloads/a82a585fd0c239f57cc2c4624330e8dd/pipe.femprj"><code class="xref download docutils literal notranslate"><span class="pre">pipe.femprj</span></code></a> を Femtet で開いた状態でお試しください。</p>
+</div>
+</section>
+<section id="what-is-dynamic-bounds">
+<h2>dynamic_bounds とは<a class="headerlink" href="#what-is-dynamic-bounds" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code> は、通常の拘束条件の代替として使える機能で、 <strong>「ある変数の上下限が他の変数の関数で表せる」</strong> 場合に利用できます。</p>
+<p>pyfemtet では、通常の拘束関数は以下の流れで処理されます:</p>
+<ul class="simple">
+<li><p>変数を提案</p></li>
+<li><p>拘束違反か判定</p></li>
+<li><p>違反していれば再提案</p></li>
+</ul>
+<p>拘束が厳しい場合は 2→3 が何度も繰り返されます。 <code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code> を使うと <strong>不可能な提案がそもそも出ない</strong> ため、この無駄が発生しません。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code> は拘束関数を高速化する機能ではなく、拘束関数が変数の上下限の形で書ける場合に限り、拘束そのものを置き換える機能です。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">initial_value</span></code> は常に上下限の範囲に入っている必要があります。</p>
+</div>
+</section>
+<section id="when-dynamic-bounds-can-be-used">
+<h2>dynamic_bounds を使うタイミング<a class="headerlink" href="#when-dynamic-bounds-can-be-used" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ある変数の下限・上限が他の変数の関数として書ける場合</p></li>
+<li><p>それ以外の拘束は通常通り <code class="docutils literal notranslate"><span class="pre">add_constraint</span></code> を使います（<code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code> と通常の拘束関数は併用可能）。</p></li>
+</ul>
+</section>
+<section id="example-where-dynamic-bounds-is-applicable">
+<h2>dynamic_bounds が利用可能な例<a class="headerlink" href="#example-where-dynamic-bounds-is-applicable" title="Link to this heading"></a></h2>
+<section id="problem">
+<h3>問題<a class="headerlink" href="#problem" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>変数 a: 下限 0, 上限 10</p></li>
+<li><p>変数 b: 下限 0, 上限 10</p></li>
+<li><p>拘束関数: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">10</span></code></p></li>
+</ul>
+<p>この拘束関数は次のように書けます:</p>
+<ul class="simple">
+<li><p>変数 a: 下限 0, 上限 10</p></li>
+<li><p>変数 b: 下限 0, 上限 <code class="docutils literal notranslate"><span class="pre">10</span> <span class="pre">-</span> <span class="pre">a</span></code></p></li>
+</ul>
+</section>
+<section id="defining-dynamic-bounds">
+<h3>dynamic_bounds の定義<a class="headerlink" href="#defining-dynamic-bounds" title="Link to this heading"></a></h3>
+<p>まず、上下限を計算する関数を定義します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">dynamic_bounds_of_b</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the dynamic lower and upper bounds of b.&quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">10.</span> <span class="o">-</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>動的な上下限を計算する関数は、引数として opt: <code class="docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code> を取り、戻り値として下限・上限を表す <strong>ふたつの数値</strong> を返さなければなりません。</p>
+</div>
+</section>
+<section id="registering-the-variable">
+<h3>変数登録<a class="headerlink" href="#registering-the-variable" title="Link to this heading"></a></h3>
+<p>次に、変数追加時にその関数を登録します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;dynamic_bounds_fun&#39;</span><span class="p">:</span> <span class="n">dynamic_bounds_of_b</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>これにより、b の上下限は常に (0, 10 - a) となり、 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">10</span></code> を満たさない組合せは最初から提案されなくなります。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>dynamic_boundsを計算する 関数の中では、その上下限を適用する変数より前に <code class="docutils literal notranslate"><span class="pre">add_parameter</span></code> された変数しか参照してはいけません。</p>
+<p>そうしない場合、エラーや警告なく前回の試行の変数値が参照されてしまいます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># OK:</span>
+<span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dynamic_bounds_fun&quot;</span><span class="p">:</span> <span class="n">fun_using_a</span><span class="p">})</span>
+
+<span class="c1"># NG:</span>
+<span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dynamic_bounds_fun&quot;</span><span class="p">:</span> <span class="n">fun_using_a</span><span class="p">})</span>
+<span class="n">add_parameter</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, pyfemtet.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
