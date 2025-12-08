@@ -97,7 +97,7 @@ Then register the function when adding the variable:
     femopt.add_parameter(
         name='b', initial_value=0,
         properties={
-            'dynamic_bounds': dynamic_bounds_of_b
+            'dynamic_bounds_fun': dynamic_bounds_of_b
         }
     )
 
@@ -119,8 +119,8 @@ and combinations that do not satisfy ``a + b < 10`` will never be proposed.
 
         # OK:
         add_parameter('a', ...)
-        add_parameter('b', properties={"dynamic_bounds": fun_using_a})
+        add_parameter('b', properties={"dynamic_bounds_fun": fun_using_a})
 
         # NG:
-        add_parameter('b', properties={"dynamic_bounds": fun_using_a})
+        add_parameter('b', properties={"dynamic_bounds_fun": fun_using_a})
         add_parameter('a', ...)

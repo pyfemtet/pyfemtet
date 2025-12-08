@@ -4,8 +4,8 @@ from pyfemtet.opt import FEMOpt, OptunaOptimizer
 from pyfemtet.opt.optimizer import PoFBoTorchSampler
 
 
-def mises_stress(Femtet):
-    """Calculate the von Mises stress as the objective function.
+def max_stress(Femtet):
+    """Calculate the max stress as the objective function.
 
     This function is called automatically by the FEMOpt
     object while the optimization is running.
@@ -23,7 +23,7 @@ def mises_stress(Femtet):
 
 def dynamic_bounds_of_internal_r(opt):
     params = opt.get_variables()
-    params['external_r']
+    return 0.1, params['external_r'] - 1
 
 
 def main():
@@ -37,11 +37,16 @@ def main():
     femopt = FEMOpt(opt=opt)
 
     # Add parameters
-    femopt.add_parameter("external_r", 10, lower_bound=0.1, upper_bound=10)
-    femopt.add_parameter("internal_r", 5, lower_bound=0.1, upper_bound=10)
+    femopt.add_parameter("external_r", 10, lower_bound=1.1, upper_bound=10)
+    femopt.add_parameter(
+        "internal_r", 5, lower_bound=None, upper_bound=None,
+        properties={
+            "dynamic_bounds_fun": dynamic_bounds_of_internal_r
+        }
+    )
 
     # Add the objective
-    femopt.add_objective(fun=mises_stress, name='Mises Stress')
+    femopt.add_objective(fun=max_stress, name='Max Stress')
 
     # Run optimization.
     femopt.set_random_seed(42)

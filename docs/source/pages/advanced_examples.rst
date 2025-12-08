@@ -42,8 +42,6 @@ Advanced Examples
         :link-type: doc
         :text-align: center
 
-        .. image:: ../advanced_examples/dynamic_bounds/thumbnail.png
-            :scale: 50
         +++
         Using function-based bounds.
 
