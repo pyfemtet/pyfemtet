@@ -584,7 +584,7 @@ msgstr "バージョン 1 への移行"
 
 #: ../source/pages/migration_to_v1.rst:6
 msgid "This page is the migration guide for **your code written in pyfemtet 0.x to adapt 1.x**."
-msgstr "このページは、**pyfemtet 0.x で書かれたあなたのコードを 1.x 用に移行するためのガイド**です。"
+msgstr "このページは、 **pyfemtet 0.x で書かれたあなたのコードを 1.x 用に移行するためのガイド** です。"
 
 #: ../source/pages/migration_to_v1.rst:9
 msgid "Please run the following command to detect your ``pyfemtet`` version: ::"

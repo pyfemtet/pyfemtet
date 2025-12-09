@@ -1074,7 +1074,7 @@ msgstr "Path of the Excel file including the definitions of design variables."
 #: of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:85
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:97
 msgid "Path"
-msgstr "パス"
+msgstr ""
 
 #: of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:89
 msgid "設計変数の定義を含むシートの名前。"
@@ -1102,7 +1102,7 @@ msgstr "List または tuple の形式で Excel マクロ関数に渡す引数�
 #: of
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:115
 msgid "list or tuple"
-msgstr "list または tuple"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:119

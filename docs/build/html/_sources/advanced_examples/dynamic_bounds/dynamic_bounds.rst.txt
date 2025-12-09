@@ -1,5 +1,5 @@
-Function-based Bounds (dynamic_bounds)
-======================================
+Function-based Bounds (``dynamic_bounds_fun``)
+==============================================
 
 .. warning::
 
@@ -12,17 +12,15 @@ Sample Files
 
 .. note::
 
-   Keep the
-   :download:`sample project<pipe.femprj>`
-   and
+   The full samples are here:
+   :download:`sample project<pipe.femprj>`,
    :download:`sample script<pipe_dynamic_bounds.py>`
-   on same folder.
 
 
-What is dynamic_bounds
-----------------------
+What is ``dynamic_bounds_fun``
+------------------------------
 
-``dynamic_bounds`` is a feature that can be used **as an alternative to regular constraints**,
+``dynamic_bounds_fun`` is a feature that can be used **as an alternative to regular constraints**,
 when **“the lower/upper bounds of a variable can be expressed as a function of other variables.”**
 
 In pyfemtet, regular constraints work as follows:
@@ -32,11 +30,11 @@ In pyfemtet, regular constraints work as follows:
 - if violated, propose again
 
 When constraints are tight, steps 2→3 may repeat many times.
-With ``dynamic_bounds``, **invalid proposals are never generated**, eliminating this overhead.
+With ``dynamic_bounds_fun``, **invalid proposals are never generated**, eliminating this overhead.
 
 .. note::
 
-    ``dynamic_bounds`` is *not* a feature for speeding up constraint evaluation.
+    ``dynamic_bounds_fun`` is *not* a feature for speeding up constraint evaluation.
     It replaces a regular constraint **only when the constraint can be rewritten as variable bounds**.
 
 .. note::
@@ -44,16 +42,16 @@ With ``dynamic_bounds``, **invalid proposals are never generated**, eliminating 
     ``initial_value`` must always lie within the (dynamic) lower and upper bounds.
 
 
-When dynamic_bounds can be used
--------------------------------
+When ``dynamic_bounds_fun`` can be used
+---------------------------------------
 
 - The constraint can be rewritten in the form “the lower/upper bound of a variable is a function of other variables.”
 - Other constraints should still be implemented using ``add_constraint``.
-  (``dynamic_bounds`` and regular constraints can be used together.)
+  (``dynamic_bounds_fun`` and regular constraints can be used together.)
 
 
-Example where dynamic_bounds is applicable
-------------------------------------------
+Example where ``dynamic_bounds_fun`` is applicable
+--------------------------------------------------
 
 Problem
 ^^^^^^^
@@ -68,8 +66,8 @@ This constraint can be rewritten as:
 - Variable b: lower 0, upper ``10 - a``
 
 
-Defining dynamic_bounds
-^^^^^^^^^^^^^^^^^^^^^^^
+Defining ``dynamic_bounds_fun``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 First, define a function that computes the bounds:
 

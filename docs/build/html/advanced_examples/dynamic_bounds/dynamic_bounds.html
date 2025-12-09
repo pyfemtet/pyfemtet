@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Function-based Bounds (dynamic_bounds) &mdash; PyFemtet Project  documentation</title>
+  <title>Function-based Bounds (dynamic_bounds_fun) &mdash; PyFemtet Project  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -22,7 +22,9 @@
         <script src="../../_static/design-tabs.js?v=36754332"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="GUI" href="../../pages/script_builder.html" />
+    <link rel="prev" title="Restarting Optimization" href="../restart/restart.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,12 +46,29 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/migration_to_v1.html">migration_to_v1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../pages/advanced_examples.html">Advanced Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../surrogate_model/surrogate_model.html">Optimization Using a Surrogate Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../excel_ui/excel_ui.html">Use pyfemtet.opt with Microsoft Excel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../restart/restart.html">Restarting Optimization</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Function-based Bounds (<code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample-files">Sample Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-is-dynamic-bounds-fun">What is <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#when-dynamic-bounds-fun-can-be-used">When <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code> can be used</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-where-dynamic-bounds-fun-is-applicable">Example where <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code> is applicable</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#problem">Problem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#defining-dynamic-bounds-fun">Defining <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#registering-the-variable">Registering the variable</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/script_builder.html">GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/api.html">API Reference</a></li>
@@ -70,7 +89,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Function-based Bounds (dynamic_bounds)</li>
+          <li class="breadcrumb-item"><a href="../../pages/advanced_examples.html">Advanced Examples</a></li>
+      <li class="breadcrumb-item active">Function-based Bounds (<code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code>)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/advanced_examples/dynamic_bounds/dynamic_bounds.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,8 +100,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="function-based-bounds-dynamic-bounds">
-<h1>Function-based Bounds (dynamic_bounds)<a class="headerlink" href="#function-based-bounds-dynamic-bounds" title="Link to this heading"></a></h1>
+  <section id="function-based-bounds-dynamic-bounds-fun">
+<h1>Function-based Bounds (<code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code>)<a class="headerlink" href="#function-based-bounds-dynamic-bounds-fun" title="Link to this heading"></a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This feature is currently under development.
@@ -91,16 +111,14 @@ Its behavior and usage may change in future versions.</p>
 <h2>Sample Files<a class="headerlink" href="#sample-files" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Keep the
-<a class="reference download internal" download="" href="../../_downloads/a82a585fd0c239f57cc2c4624330e8dd/pipe.femprj"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">project</span></code></a>
-and
-<a class="reference download internal" download="" href="../../_downloads/64ece49875dcb5498e9c22dedab661e5/pipe_dynamic_bounds.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">script</span></code></a>
-on same folder.</p>
+<p>The full samples are here:
+<a class="reference download internal" download="" href="../../_downloads/a82a585fd0c239f57cc2c4624330e8dd/pipe.femprj"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">project</span></code></a>,
+<a class="reference download internal" download="" href="../../_downloads/64ece49875dcb5498e9c22dedab661e5/pipe_dynamic_bounds.py"><code class="xref download docutils literal notranslate"><span class="pre">sample</span> <span class="pre">script</span></code></a></p>
 </div>
 </section>
-<section id="what-is-dynamic-bounds">
-<h2>What is dynamic_bounds<a class="headerlink" href="#what-is-dynamic-bounds" title="Link to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code> is a feature that can be used <strong>as an alternative to regular constraints</strong>,
+<section id="what-is-dynamic-bounds-fun">
+<h2>What is <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code><a class="headerlink" href="#what-is-dynamic-bounds-fun" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code> is a feature that can be used <strong>as an alternative to regular constraints</strong>,
 when <strong>“the lower/upper bounds of a variable can be expressed as a function of other variables.”</strong></p>
 <p>In pyfemtet, regular constraints work as follows:</p>
 <ul class="simple">
@@ -109,10 +127,10 @@ when <strong>“the lower/upper bounds of a variable can be expressed as a funct
 <li><p>if violated, propose again</p></li>
 </ul>
 <p>When constraints are tight, steps 2→3 may repeat many times.
-With <code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code>, <strong>invalid proposals are never generated</strong>, eliminating this overhead.</p>
+With <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code>, <strong>invalid proposals are never generated</strong>, eliminating this overhead.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code> is <em>not</em> a feature for speeding up constraint evaluation.
+<p><code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code> is <em>not</em> a feature for speeding up constraint evaluation.
 It replaces a regular constraint <strong>only when the constraint can be rewritten as variable bounds</strong>.</p>
 </div>
 <div class="admonition note">
@@ -120,16 +138,16 @@ It replaces a regular constraint <strong>only when the constraint can be rewritt
 <p><code class="docutils literal notranslate"><span class="pre">initial_value</span></code> must always lie within the (dynamic) lower and upper bounds.</p>
 </div>
 </section>
-<section id="when-dynamic-bounds-can-be-used">
-<h2>When dynamic_bounds can be used<a class="headerlink" href="#when-dynamic-bounds-can-be-used" title="Link to this heading"></a></h2>
+<section id="when-dynamic-bounds-fun-can-be-used">
+<h2>When <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code> can be used<a class="headerlink" href="#when-dynamic-bounds-fun-can-be-used" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>The constraint can be rewritten in the form “the lower/upper bound of a variable is a function of other variables.”</p></li>
 <li><p>Other constraints should still be implemented using <code class="docutils literal notranslate"><span class="pre">add_constraint</span></code>.
-(<code class="docutils literal notranslate"><span class="pre">dynamic_bounds</span></code> and regular constraints can be used together.)</p></li>
+(<code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code> and regular constraints can be used together.)</p></li>
 </ul>
 </section>
-<section id="example-where-dynamic-bounds-is-applicable">
-<h2>Example where dynamic_bounds is applicable<a class="headerlink" href="#example-where-dynamic-bounds-is-applicable" title="Link to this heading"></a></h2>
+<section id="example-where-dynamic-bounds-fun-is-applicable">
+<h2>Example where <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code> is applicable<a class="headerlink" href="#example-where-dynamic-bounds-fun-is-applicable" title="Link to this heading"></a></h2>
 <section id="problem">
 <h3>Problem<a class="headerlink" href="#problem" title="Link to this heading"></a></h3>
 <ul class="simple">
@@ -143,8 +161,8 @@ It replaces a regular constraint <strong>only when the constraint can be rewritt
 <li><p>Variable b: lower 0, upper <code class="docutils literal notranslate"><span class="pre">10</span> <span class="pre">-</span> <span class="pre">a</span></code></p></li>
 </ul>
 </section>
-<section id="defining-dynamic-bounds">
-<h3>Defining dynamic_bounds<a class="headerlink" href="#defining-dynamic-bounds" title="Link to this heading"></a></h3>
+<section id="defining-dynamic-bounds-fun">
+<h3>Defining <code class="docutils literal notranslate"><span class="pre">dynamic_bounds_fun</span></code><a class="headerlink" href="#defining-dynamic-bounds-fun" title="Link to this heading"></a></h3>
 <p>First, define a function that computes the bounds:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">dynamic_bounds_of_b</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the dynamic lower and upper bounds of b.&quot;&quot;&quot;</span>
@@ -197,7 +215,10 @@ will be used unintentionally.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../restart/restart.html" class="btn btn-neutral float-left" title="Restarting Optimization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../pages/script_builder.html" class="btn btn-neutral float-right" title="GUI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
