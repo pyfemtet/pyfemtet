@@ -42,6 +42,8 @@ Advanced Examples
         :link-type: doc
         :text-align: center
 
+        .. image:: ../advanced_examples/dynamic_bounds/thumbnail.png
+            :scale: 50
         +++
         Using function-based bounds.
 
@@ -53,3 +55,4 @@ Advanced Examples
     ../advanced_examples/surrogate_model/surrogate_model
     ../advanced_examples/excel_ui/excel_ui
     ../advanced_examples/restart/restart
+    ../advanced_examples/dynamic_bounds/dynamic_bounds
