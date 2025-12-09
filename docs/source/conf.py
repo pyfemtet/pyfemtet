@@ -44,8 +44,8 @@ logger.addFilter(FilterWarnings())
 # -- Project information -----------------------------------------------------
 
 project = "PyFemtet Project"
-copyright = "2023, Kazuma Naito"
-author = "Kazuma Naito"
+copyright = "2023, pyfemtet"
+author = "pyfemtet"
 
 
 # -- General configuration ---------------------------------------------------

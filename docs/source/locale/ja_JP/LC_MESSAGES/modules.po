@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-31 10:46+0900\n"
+"POT-Creation-Date: 2025-12-08 17:19+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -104,8 +104,10 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.femopt.FEMOpt.add_trial pyfemtet.opt.femopt.FEMOpt.optimize
 #: pyfemtet.opt.femopt.FEMOpt.set_monitor_host
 #: pyfemtet.opt.femopt.FEMOpt.set_random_seed
+#: pyfemtet.opt.femopt.FEMOpt.set_termination_condition
 #: pyfemtet.opt.history._history.History.get_df
 #: pyfemtet.opt.history._history.History.get_trial_name
+#: pyfemtet.opt.history._history.get_trial_name
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_constraints
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_objectives
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_variables
@@ -146,6 +148,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_parameter
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_variables
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.set_solve_condition
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.set_termination_condition
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_categorical_parameter
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_parameter
@@ -557,22 +560,22 @@ msgstr "接続された Femtet で特定の解析モデルを開きます。"
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:1
 msgid "A method called just after :func:`solve`."
-msgstr ":func:`solve` の直後に呼び出されるメソッドです。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:3
 msgid "This method is called just after solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired postprocessing after the solve and before evaluating objectives."
-msgstr "このメソッドは solve の直後に呼び出されます。Interface クラスを継承し、このメソッドをオーバーライドすることで、solve 後および目的の評価前に任意の後処理を実行することが可能です。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:1
 msgid "A method called just before :func:`solve`."
-msgstr ":func:`solve` の直前に呼び出されるメソッドです。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:3
 msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
-msgstr "このメソッドは solve の直前に呼び出されます。Interface クラスを継承し、このメソッドをオーバーライドすることで、モデルの更新後かつソルブ前に任意の前処理を実行することが可能です。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.quit:1
@@ -582,25 +585,25 @@ msgstr "接続された Femtet を強制終了します。"
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:1
 msgid "Execute FEM analysis."
-msgstr "FEM 解析を実行します。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update:1
 msgid "See :func:`FEMInterface.update`"
-msgstr ":func:`FEMInterface.update` を参照してください。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_model:1
 #: pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface.update_model:1
 #: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_model:1
 msgid "Updates the analysis model only."
-msgstr "解析モデルのみを更新します。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:1
 #: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter:1
 msgid "Update parameter of femprj."
-msgstr "femprj のパラメータを更新します。"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:1
@@ -916,10 +919,6 @@ msgstr "Bases: :py:class:`~pyfemtet._util.str_enum.StrEnum`"
 msgid "The order rule of the history csv columns."
 msgstr "履歴 csv 列の並び順。"
 
-#: ../../docstring of pyfemtet.opt.history.ColumnOrderMode.important_first:1
-msgid "The values of parameters and objectives first."
-msgstr "パラメータと目的関数の値を最初にします。"
-
 #: ../../docstring of pyfemtet.opt.history.ColumnOrderMode.per_category:1
 msgid "Sort per each object."
 msgstr "各オブジェクトごとに並べ替えます。"
@@ -957,6 +956,10 @@ msgstr "最適化履歴をエクスポートします。"
 #: of pyfemtet.opt.history._history.History.save:3
 msgid "The destination path is :class:`History.path`."
 msgstr "保存先パスは :class:`History.path` です。"
+
+#: of pyfemtet.opt.history._history.TrialState:1
+msgid "An enumeration."
+msgstr ""
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
@@ -1071,7 +1074,7 @@ msgstr "Path of the Excel file including the definitions of design variables."
 #: of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:85
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:97
 msgid "Path"
-msgstr "パス"
+msgstr ""
 
 #: of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:89
 msgid "設計変数の定義を含むシートの名前。"
@@ -1099,7 +1102,7 @@ msgstr "List または tuple の形式で Excel マクロ関数に渡す引数�
 #: of
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:115
 msgid "list or tuple"
-msgstr "list または tuple"
+msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface:119
@@ -1714,7 +1717,7 @@ msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 #~ msgstr "パラメータは .femprj だけでなく .SLDPRT にも登録できるため、何もしません。"
 
 #~ msgid "Update .sldprt"
-#~ msgstr ".sldprt を更新します。"
+#~ msgstr ""
 
 #~ msgid "Class for managing the history of optimization results."
 #~ msgstr "最適化ライブラリのインターフェースのための抽象基底クラスです。"
@@ -2063,4 +2066,34 @@ msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 
 #~ msgid "An enumeration."
 #~ msgstr ""
+
+#~ msgid "A method called just after :func:`solve`."
+#~ msgstr ":func:`solve` の直後に呼び出されるメソッドです。"
+
+#~ msgid "This method is called just after solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired postprocessing after the solve and before evaluating objectives."
+#~ msgstr "このメソッドは solve の直後に呼び出されます。Interface クラスを継承し、このメソッドをオーバーライドすることで、solve 後および目的の評価前に任意の後処理を実行することが可能です。"
+
+#~ msgid "A method called just before :func:`solve`."
+#~ msgstr ":func:`solve` の直前に呼び出されるメソッドです。"
+
+#~ msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
+#~ msgstr "このメソッドは solve の直前に呼び出されます。Interface クラスを継承し、このメソッドをオーバーライドすることで、モデルの更新後かつソルブ前に任意の前処理を実行することが可能です。"
+
+#~ msgid "Execute FEM analysis."
+#~ msgstr "FEM 解析を実行します。"
+
+#~ msgid "See :func:`FEMInterface.update`"
+#~ msgstr ":func:`FEMInterface.update` を参照してください。"
+
+#~ msgid "Updates the analysis model only."
+#~ msgstr "解析モデルのみを更新します。"
+
+#~ msgid "Update parameter of femprj."
+#~ msgstr "femprj のパラメータを更新します。"
+
+#~ msgid "The values of parameters and objectives first."
+#~ msgstr "パラメータと目的関数の値を最初にします。"
+
+#~ msgid "Bases: :py:class:`~pyfemtet.opt.optimizer._base_optimizer.OptimizationDataStore`"
+#~ msgstr "Bases: :py:class:`~pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer`"
 

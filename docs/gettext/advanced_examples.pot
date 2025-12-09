@@ -1,5 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2023, Kazuma Naito
+# Copyright (C) 2023, pyfemtet
 # This file is distributed under the same license as the PyFemtet Project package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 10:39+0900\n"
+"POT-Creation-Date: 2025-12-09 09:47+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,18 +16,140 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:2
+msgid "Function-based Bounds (``dynamic_bounds_fun``)"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:6
+msgid "This feature is currently under development. Its behavior and usage may change in future versions."
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:11
+#: ../source/advanced_examples/excel_ui/excel_ui.rst:9
+#: ../source/advanced_examples/restart/restart.rst:9
+#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
+msgid "Sample Files"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:15
+msgid "The full samples are here: :download:`sample project<pipe.femprj>`, :download:`sample script<pipe_dynamic_bounds.py>`"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:21
+msgid "What is ``dynamic_bounds_fun``"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:23
+msgid "``dynamic_bounds_fun`` is a feature that can be used **as an alternative to regular constraints**, when **“the lower/upper bounds of a variable can be expressed as a function of other variables.”**"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:26
+msgid "In pyfemtet, regular constraints work as follows:"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:28
+msgid "propose variables"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:29
+msgid "check whether the constraint is violated"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:30
+msgid "if violated, propose again"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:32
+msgid "When constraints are tight, steps 2→3 may repeat many times. With ``dynamic_bounds_fun``, **invalid proposals are never generated**, eliminating this overhead."
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:37
+msgid "``dynamic_bounds_fun`` is *not* a feature for speeding up constraint evaluation. It replaces a regular constraint **only when the constraint can be rewritten as variable bounds**."
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:42
+msgid "``initial_value`` must always lie within the (dynamic) lower and upper bounds."
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:46
+msgid "When ``dynamic_bounds_fun`` can be used"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:48
+msgid "The constraint can be rewritten in the form “the lower/upper bound of a variable is a function of other variables.”"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:49
+msgid "Other constraints should still be implemented using ``add_constraint``. (``dynamic_bounds_fun`` and regular constraints can be used together.)"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:54
+msgid "Example where ``dynamic_bounds_fun`` is applicable"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:57
+msgid "Problem"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:59
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:65
+msgid "Variable a: lower 0, upper 10"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:60
+msgid "Variable b: lower 0, upper 10"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:61
+msgid "Constraint: ``a + b < 10``"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:63
+msgid "This constraint can be rewritten as:"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:66
+msgid "Variable b: lower 0, upper ``10 - a``"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:70
+msgid "Defining ``dynamic_bounds_fun``"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:72
+msgid "First, define a function that computes the bounds:"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:83
+msgid "A dynamic-bounds function must accept ``opt: AbstractOptimizer`` and must return **two numeric values** representing the lower and upper bounds."
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:88
+msgid "Registering the variable"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:90
+msgid "Then register the function when adding the variable:"
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:102
+msgid "With this setup, the bounds of ``b`` are always ``(0, 10 - a)``, and combinations that do not satisfy ``a + b < 10`` will never be proposed."
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:108
+msgid "Only variables that have already been registered with ``add_parameter`` at the time the dynamic_bounds function is evaluated can be referenced inside that function."
+msgstr ""
+
+#: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:112
+msgid "If you reference a variable that has not yet been registered, no error is raised, and the value from the previous iteration will be used unintentionally."
+msgstr ""
+
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:2
 msgid "Use pyfemtet.opt with Microsoft Excel"
 msgstr ""
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:4
 msgid "This sample demonstrates how to use PyFemtet without migrating the existing Excel macro processes to Python."
-msgstr ""
-
-#: ../source/advanced_examples/excel_ui/excel_ui.rst:9
-#: ../source/advanced_examples/restart/restart.rst:9
-#: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
-msgid "Sample Files"
 msgstr ""
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:12

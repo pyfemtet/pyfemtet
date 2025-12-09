@@ -37,6 +37,17 @@ Advanced Examples
         Restarts an optimization that was interrupted.
 
 
+    .. grid-item-card:: Dynamic Bounds Function
+        :link: ../advanced_examples/dynamic_bounds/dynamic_bounds
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ../advanced_examples/dynamic_bounds/thumbnail.png
+            :scale: 50
+        +++
+        Using function-based bounds.
+
+
 .. toctree::
     :titlesonly:
     :hidden:
@@ -44,3 +55,4 @@ Advanced Examples
     ../advanced_examples/surrogate_model/surrogate_model
     ../advanced_examples/excel_ui/excel_ui
     ../advanced_examples/restart/restart
+    ../advanced_examples/dynamic_bounds/dynamic_bounds

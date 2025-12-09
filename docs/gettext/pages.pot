@@ -1,5 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2023, Kazuma Naito
+# Copyright (C) 2023, pyfemtet
 # This file is distributed under the same license as the PyFemtet Project package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-31 10:51+0900\n"
+"POT-Creation-Date: 2025-12-09 09:47+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,6 +62,14 @@ msgstr ""
 
 #: ../source/pages/advanced_examples.rst:37
 msgid "Restarts an optimization that was interrupted."
+msgstr ""
+
+#: ../source/pages/advanced_examples.rst:40
+msgid "Dynamic Bounds Function"
+msgstr ""
+
+#: ../source/pages/advanced_examples.rst:48
+msgid "Using function-based bounds."
 msgstr ""
 
 #: ../source/pages/api.rst:2
