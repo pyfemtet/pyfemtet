@@ -37,7 +37,7 @@ Advanced Examples
         Restarts an optimization that was interrupted.
 
 
-    .. grid-item-card:: Dynamic Bounds
+    .. grid-item-card:: Dynamic Bounds Function
         :link: ../advanced_examples/dynamic_bounds/dynamic_bounds
         :link-type: doc
         :text-align: center
