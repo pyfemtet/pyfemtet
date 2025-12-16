@@ -1,10 +1,16 @@
 import os
 from contextlib import closing
-from pyfemtet.opt.optimizer import AbstractOptimizer
+
+import pandas as pd
+
+from pyfemtet.opt import FEMOpt
+from pyfemtet.opt.optimizer import AbstractOptimizer, OptunaOptimizer
 from pyfemtet.opt.interface import FemtetInterface, NoFEM, MultipleFEMInterface
 from pyfemtet.opt.exceptions import SolveError
+from pyfemtet.logger import get_module_logger
 
 here = os.path.dirname(__file__)
+logger = get_module_logger('opt.test.multiple_fem_interface', debug=True)
 
 
 class _SimpleFEM(NoFEM):
@@ -19,6 +25,48 @@ class _SimpleFEM(NoFEM):
             self.internal_value = self.current_prm_values[self.target].value ** 2
         except KeyError:
             raise SolveError(f'Parameter "{self.target}" is not defined in current_prm_values.')
+
+
+class _SimpleFEMWithPrePost(_SimpleFEM):
+    name: str
+
+    def trial_preprocess(self) -> None:
+        # ダミーファイルがないことを確認
+        assert not os.path.exists("dummy_preprocess.txt")
+        logger.debug(f"✅ 【{self.name}】 dummy_preprocess.txt does not exist before preprocess.")
+
+    def update(self) -> None:
+        super().update()
+        # ダミーファイルを作成して追記
+        with open('dummy_preprocess.txt', 'a') as f:
+            f.write(f'Updated with target={self.target}\n')
+        logger.debug(f"📝 【{self.name}】 wrote to dummy_preprocess.txt.")
+
+    @staticmethod
+    def _postprocess_after_recording(
+            dask_scheduler,
+            trial_name: str,
+            df: pd.DataFrame,
+            **kwargs
+    ) -> None:
+        # ダミーファイルがまだ存在することを確認
+        assert os.path.exists('dummy_preprocess.txt')
+        logger.debug("✅ 【name not available】 dummy_preprocess.txt exists during postprocess.")
+
+        # ダミーファイルに 2 行書き込まれていることを確認
+        with open('dummy_preprocess.txt', 'r') as f:
+            lines = f.readlines()
+            logger.debug(lines)
+            assert len(lines) == 2
+        logger.debug("✅ 【name not available】 dummy_preprocess.txt has 2 lines during postprocess.")
+
+    def trial_postprocess(self) -> None:
+        # ダミーファイルがあったら削除
+        if os.path.exists("dummy_preprocess.txt"):
+            os.remove('dummy_preprocess.txt')
+            logger.debug(f"✅ 【{self.name}】 dummy_preprocess.txt has been removed.")
+        else:
+            logger.debug(f"✅ 【{self.name}】 dummy_preprocess.txt is not exists.")
 
 
 def test_multiple_fem_interface_basic_flow():
@@ -181,9 +229,45 @@ def test_multiple_fem_interface_on_error():
     else:
         print(f_return)
         assert False, "Expected an error but none was raised."
-    
+
+
+def test_multiple_fem_prepost():
+
+    femopt = FEMOpt(fem=NoFEM(), opt=AbstractOptimizer())
+
+    # 2 つの簡易 FEM を作る
+    fem1 = _SimpleFEMWithPrePost(target="x1")
+    fem2 = _SimpleFEMWithPrePost(target="x2")
+    fem1.name = "FEM1"
+    fem2.name = "FEM2"
+
+    # optimizer を作る
+    opt = OptunaOptimizer()
+
+    # MultipleFEMInterface に登録
+    opt._append_fem(fem1)
+    opt._append_fem(fem2)
+
+    # femopt に追加
+    femopt.opt = opt
+
+    # parameter を登録（optimizer に注入される想定）
+    opt.add_parameter('x1', 5, -10, 10)
+    opt.add_parameter('x2', 7, -10, 10)
+
+    # objective を登録（fem オブジェクトを受け取って内部値を返す関数）
+    opt.add_objective('y1', lambda fems_: fems_[0].internal_value, direction='minimize')
+    opt.add_objective('y2', lambda fems_: fems_[1].internal_value, direction='minimize')
+
+    # 実行。assertionError が出なければ成功
+    femopt.optimize(
+        n_trials=3,
+        confirm_before_exit=False,
+    )
+
 
 if __name__ == '__main__':
-    test_multiple_fem_interface_basic_flow()
-    test_multiple_fem_interface_basic_femtet()
-    test_multiple_fem_interface_on_error()
+    # test_multiple_fem_interface_basic_flow()
+    # test_multiple_fem_interface_basic_femtet()
+    # test_multiple_fem_interface_on_error()
+    test_multiple_fem_prepost()

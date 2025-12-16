@@ -59,6 +59,22 @@ class MultipleFEMInterface(AbstractFEMInterface):
         for fem in self._fems:
             fem.update()
 
+    def trial_preprocess(self) -> None:
+        for fem in self._fems:
+            fem.trial_preprocess()
+
+    def trial_postprocess(self) -> None:
+        for fem in self._fems:
+            fem.trial_postprocess()
+
+    def trial_preprocess_per_fidelity(self) -> None:
+        for fem in self._fems:
+            fem.trial_preprocess_per_fidelity()
+
+    def trial_postprocess_per_fidelity(self) -> None:
+        for fem in self._fems:
+            fem.trial_postprocess_per_fidelity()
+
     @property
     def object_pass_to_fun(self):
         return [fem.object_pass_to_fun for fem in self._fems]

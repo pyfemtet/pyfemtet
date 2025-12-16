@@ -58,6 +58,26 @@ class AbstractFEMInterface:
         # Objective が正しく値を計算できるようにする
         raise NotImplementedError
 
+    def trial_preprocess(self) -> None:
+        # trial の最初に呼ばれる前処理。
+        # 変数更新よりも先に呼ばれることを想定。
+        pass
+
+    def trial_postprocess(self) -> None:
+        # trial の最後に呼ばれる後処理
+        # postprocess_after_recording よりも後に呼ぶことを想定。
+        pass
+
+    def trial_preprocess_per_fidelity(self) -> None:
+        # fidelity ごとの処理に入ってから最初に呼ばれる前処理
+        # 変数更新よりも先に呼ばれることを想定。
+        pass
+
+    def trial_postprocess_per_fidelity(self) -> None:
+        # fidelity ごとの処理が終わった後に呼ばれる後処理
+        # postprocess_after_recording よりも後に呼ぶことを想定。
+        pass
+
     # ===== Function =====
 
     @property

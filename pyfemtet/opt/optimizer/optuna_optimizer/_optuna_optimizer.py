@@ -336,18 +336,27 @@ class OptunaOptimizer(AbstractOptimizer):
             # prepare solve
             solve_set = self._get_solve_set()
 
-            # process main fidelity model
-            f_return = solve_set.solve(x)
+            # # process main fidelity model
+            # f_return = solve_set.solve(x)
+            # if f_return is None:
+            #     y_internal: None = None
+            # else:
+            #     y_internal: tuple[float] = tuple(f_return[1].values())  # type: ignore
+            #
+            # # process sub_fidelity_models
+            # for sub_fidelity_name, sub_opt in self.sub_fidelity_models.items():
+            #     # _SolveSet に特殊な初期化を入れていないので
+            #     # sub fidelity でも初期化せず使用可能
+            #     solve_set.solve(x, sub_opt)
+
+            # TODO: これがあれば、OptunaOptimizer での
+            #    _SolveSet 継承が不要になるかも。
+            f_returns = solve_set.solve_all_fidelity(x)
+            f_return = f_returns[self.sub_fidelity_name]
             if f_return is None:
                 y_internal: None = None
             else:
                 y_internal: tuple[float] = tuple(f_return[1].values())  # type: ignore
-
-            # process sub_fidelity_models
-            for sub_fidelity_name, sub_opt in self.sub_fidelity_models.items():
-                # _SolveSet に特殊な初期化を入れていないので
-                # sub fidelity でも初期化せず使用可能
-                solve_set.solve(x, sub_opt)
 
             # check interruption
             self._check_and_raise_interruption()

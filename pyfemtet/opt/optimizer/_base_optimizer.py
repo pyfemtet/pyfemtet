@@ -576,6 +576,14 @@ class AbstractOptimizer(OptimizationDataStore):
     def fem(self, value: AbstractFEMInterface):
         self.fem_global.fem = value
 
+    @property
+    def fems(self) -> MultipleFEMInterface:
+        return self.fem_global._fems
+
+    @fems.setter
+    def fems(self, value: MultipleFEMInterface):
+        self.fem_global._fems = value
+
     def _append_fem(self, fem: AbstractFEMInterface):
         show_experimental_warning('AbstractOptimizer._append_fem', logger)
         self.fem_global._fems.add(fem)
@@ -854,8 +862,22 @@ class AbstractOptimizer(OptimizationDataStore):
 
                 record_to_history = DummyRecordContext()
 
+            # context manager for preprocessing and postprocessing
+            class AllFEMPrePostPerFidelity:
+
+                # noinspection PyMethodParameters
+                def __enter__(self_):
+                    opt_.fem.trial_preprocess_per_fidelity()
+                    return self_
+
+                # noinspection PyMethodParameters
+                def __exit__(self_, exc_type, exc_val, exc_tb):
+                    opt_.fem.trial_postprocess_per_fidelity()
+
             # processing with recording
-            with record_to_history as record:
+            # postprocess_after_recording より後に trial_postprocess を
+            # 実行するために、record_to_history の前に AllFEMPrePostPerFidelity を使う
+            with AllFEMPrePostPerFidelity(), record_to_history as record:
                 # output
                 empty_c: TrialConstraintOutput = TrialConstraintOutput()
                 empty_other_outputs: TrialFunctionOutput = TrialFunctionOutput()
@@ -1099,6 +1121,32 @@ class AbstractOptimizer(OptimizationDataStore):
             self.opt._check_and_raise_interruption()
 
             return f_return
+
+        def solve_all_fidelity(self, x: TrialInput) -> dict[str, _FReturnValue | None]:
+            out: dict[str, _FReturnValue | None] = dict()
+
+            class AllFEMPrePostPerTrial:
+
+                # noinspection PyMethodParameters
+                def __enter__(self_):
+                    self.opt.fems.trial_preprocess()
+                    return self_
+
+                # noinspection PyMethodParameters
+                def __exit__(self_, exc_type, exc_val, exc_tb):
+                    self.opt.fems.trial_postprocess()
+
+            with AllFEMPrePostPerTrial():
+
+                main_fidelity = self.opt
+                f_return = self.solve(x)
+                out[main_fidelity.sub_fidelity_name] = f_return
+
+                for sub_fidelity_name, sub_fidelity in main_fidelity.sub_fidelity_models.items():
+                    f_return = self.solve(x, sub_fidelity)
+                    out[sub_fidelity_name] = f_return
+
+            return out
 
     def _get_solve_set(self):
         return self._SolveSet(self)
