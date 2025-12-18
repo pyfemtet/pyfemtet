@@ -53,7 +53,23 @@ class FEMOpt:
             opt: AbstractOptimizer = None,
     ):
         self.opt: AbstractOptimizer = opt or OptunaOptimizer()
-        self.opt.fem = fem or FemtetInterface()
+        
+        # fem が与えられていれば opt にセット
+        if fem is not None:
+            self.opt.fem = fem
+
+        # この時点で opt に fem がセットされていなければ
+        # デフォルトをセット
+        if len(self.opt.fems) == 0:
+            self.opt.fem = FemtetInterface()
+        
+        # fem が正しくセットされているか確認
+        if len(self.opt.fems) == 0:
+            raise RuntimeError(
+                "FEM interface could not be initialized. "
+                "Please ensure that a valid FEM interface is provided or can be created."
+            )
+        
         self.monitor_info: dict[str, str | int | None] = dict(
             host=None, port=None,
         )
