@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyfemtet.opt.interface._multiple_fem_interface &mdash; PyFemtet Project  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PyFemtet Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/migration_to_v1.html">migration_to_v1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/advanced_examples.html">Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/script_builder.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/LICENSE.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyFemtet Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyfemtet.opt.interface._multiple_fem_interface</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyfemtet.opt.interface._multiple_fem_interface</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrialInput</span>
+
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">FEMContext</span>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultipleFEMInterface</span><span class="p">(</span><span class="n">AbstractFEMInterface</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO:</span>
+        <span class="c1">#   list ではなく dict のほうがいいか？</span>
+        <span class="c1">#   そもそも AbstractFEMInterface が</span>
+        <span class="c1">#   name を持ったほうがいいか？</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AbstractFEMInterface</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctxs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FEMContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFEMInterface</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ordered_contexts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s1">&#39;FEMContext&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctxs</span>
+
+<div class="viewcode-block" id="MultipleFEMInterface.add">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.add">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FEMContext</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMContext</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="n">FEMContext</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ctx</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.remove">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.remove">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.pop">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.pop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+
+    <span class="c1"># TODO: この属性がそもそも AbstractFEMInterface に必要か検討する。</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_problem_from_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">_load_problem_from_fem</span> <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultipleFEMInterface.update_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.update_parameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.update">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.trial_preprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">trial_preprocess</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.trial_postprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">trial_postprocess</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.trial_preprocess_per_fidelity">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess_per_fidelity">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_preprocess_per_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">trial_preprocess_per_fidelity</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.trial_postprocess_per_fidelity">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess_per_fidelity">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_postprocess_per_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">trial_postprocess_per_fidelity</span><span class="p">()</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_pass_to_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">object_pass_to_fun</span> <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">]</span>
+
+<div class="viewcode-block" id="MultipleFEMInterface.reopen">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.reopen">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reopen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">reopen</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_param_and_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO:</span>
+        <span class="c1">#   - チェックする前に、与えられた prm_name が</span>
+        <span class="c1">#     どの FEM に属するかを特定し、</span>
+        <span class="c1">#     その FEM に対してのみチェックを行うようにする。</span>
+        <span class="c1">#   - そのために 与えられた prm_name がどの FEM に属するかを</span>
+        <span class="c1">#     管理する仕組みが必要。</span>
+        <span class="c1">#   - 変数は ctx が管理しているから、その仕組みは ctx にしか持てない。</span>
+        <span class="c1">#   - なので _check_param_and_raise は</span>
+        <span class="c1">#     optimizer が直接呼び出してはならず、</span>
+        <span class="c1">#     ctx のほうで prm_name をフィルタして呼び出す必要がある。</span>
+        <span class="c1">#   - まずはこのケースを通るはずのテストを作成してから実装する。</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="MultipleFEMInterface.load_variables">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.load_variables">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">load_variables</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.load_objectives">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.load_objectives">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">load_objectives</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultipleFEMInterface.load_constraints">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.load_constraints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">load_constraints</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_contact_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">_contact_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultipleFEMInterface.close">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.close">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># TODO: 引数の取り扱い</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_using_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">_check_using_fem</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span> <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_postprocess_args</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">):</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">_create_postprocess_args</span><span class="p">()</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span><span class="s1">&#39;__postprocess_fun__&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span><span class="o">.</span><span class="n">_postprocess_after_recording</span><span class="p">}</span>
+            <span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="sa">f</span><span class="s2">&quot;fem</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">kwargs&quot;</span><span class="p">:</span> <span class="n">kwargs</span>
+            <span class="p">})</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_postprocess_after_recording</span><span class="p">(</span>
+        <span class="n">dask_scheduler</span><span class="p">,</span> <span class="n">trial_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="o">...</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">kwargs_per_fem</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">postprocess</span> <span class="o">=</span> <span class="n">kwargs_per_fem</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;__postprocess_fun__&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">postprocess</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">postprocess</span><span class="p">(</span>
+                <span class="n">dask_scheduler</span><span class="p">,</span> <span class="n">trial_name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_per_fem</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_additional_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">):</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

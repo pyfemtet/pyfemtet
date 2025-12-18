@@ -425,7 +425,8 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Setting up...&#39;</span><span class="p">))</span>
 
             <span class="c1"># finalize history</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_load_problem_from_fem</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_refresh_problem</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_finalize_history</span><span class="p">()</span>
 
             <span class="c1"># optimizer-specific setup after history finalized</span>
