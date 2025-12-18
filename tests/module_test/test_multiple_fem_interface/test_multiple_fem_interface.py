@@ -266,8 +266,118 @@ def test_multiple_fem_prepost():
     )
 
 
+class _FEMWithParamCheck(NoFEM):
+    """テスト用 FEM: _check_param_and_raise の呼び出しを記録する"""
+
+    def __init__(self, registered_params: list[str]):
+        super().__init__()
+        self.registered_params = registered_params
+        self.checked_params: list[str] = []
+
+    def _check_param_and_raise(self, prm_name) -> None:
+        self.checked_params.append(prm_name)
+        if prm_name not in self.registered_params:
+            raise RuntimeError(f'Parameter "{prm_name}" is not registered in this FEM.')
+
+
+def test_check_param_and_raise_with_ctx():
+    """ctx.add_parameter で追加した変数は対応する FEM でのみチェックされる"""
+
+    # 2 つの FEM を作る（それぞれ異なる変数を登録）
+    fem1 = _FEMWithParamCheck(registered_params=['x1'])
+    fem2 = _FEMWithParamCheck(registered_params=['x2'])
+
+    # optimizer を作る
+    opt = AbstractOptimizer()
+
+    # FEM を登録して FEMContext を取得
+    ctx1 = opt.fems.append(fem1)
+    ctx2 = opt.fems.append(fem2)
+
+    # 各 FEMContext に対応する変数を登録
+    ctx1.add_parameter('x1', 5, -10, 10)
+    ctx2.add_parameter('x2', 7, -10, 10)
+
+    # objective を登録
+    opt.add_objective('y', lambda fems_: fems_[0].internal_value + fems_[1].internal_value)
+
+    # setup（_check_param_and_raise が呼ばれる）
+    opt._finalize()
+
+    # fem1 は x1 のみチェックされる
+    assert fem1.checked_params == ['x1'], f"Expected ['x1'], got {fem1.checked_params}"
+    # fem2 は x2 のみチェックされる
+    assert fem2.checked_params == ['x2'], f"Expected ['x2'], got {fem2.checked_params}"
+
+    print("✅ test_check_param_and_raise_with_ctx passed")
+
+
+def test_check_param_and_raise_without_ctx():
+    """opt.add_parameter で追加した変数はチェックされない"""
+
+    # FEM を作る（変数は登録されていない）
+    fem1 = _FEMWithParamCheck(registered_params=[])
+    fem2 = _FEMWithParamCheck(registered_params=[])
+
+    # optimizer を作る
+    opt = AbstractOptimizer()
+
+    # FEM を登録
+    opt.fems.append(fem1)
+    opt.fems.append(fem2)
+
+    # opt 経由で変数を登録（FEMContext 経由ではない）
+    opt.add_parameter('x1', 5, -10, 10)
+    opt.add_parameter('x2', 7, -10, 10)
+
+    # objective を登録
+    opt.add_objective('y', lambda fems_: 1.0)
+
+    # setup（_check_param_and_raise が呼ばれるが、どの ctx にも属さないのでチェックされない）
+    opt._finalize()
+
+    # どの FEM もチェックされない
+    assert fem1.checked_params == [], f"Expected [], got {fem1.checked_params}"
+    assert fem2.checked_params == [], f"Expected [], got {fem2.checked_params}"
+
+    print("✅ test_check_param_and_raise_without_ctx passed")
+
+
+def test_check_param_and_raise_error():
+    """ctx に登録した変数が FEM に存在しない場合はエラーになる"""
+
+    # FEM を作る（x1 は登録されていない）
+    fem1 = _FEMWithParamCheck(registered_params=[])  # x1 が存在しない
+
+    # optimizer を作る
+    opt = AbstractOptimizer()
+
+    # FEM を登録して FEMContext を取得
+    ctx1 = opt.fems.append(fem1)
+
+    # ctx1 に x1 を登録（しかし fem1 には x1 が存在しない）
+    ctx1.add_parameter('x1', 5, -10, 10)
+
+    # objective を登録
+    opt.add_objective('y', lambda fems_: 1.0)
+
+    # setup でエラーが発生するはず
+    try:
+        opt._finalize()
+    except RuntimeError as e:
+        print(f'Caught expected error: {e}')
+        assert 'x1' in str(e)
+        print("✅ test_check_param_and_raise_error passed")
+        return
+
+    assert False, "Expected RuntimeError but none was raised"
+
+
 if __name__ == '__main__':
     # test_multiple_fem_interface_basic_flow()
     # test_multiple_fem_interface_basic_femtet()
     # test_multiple_fem_interface_on_error()
-    test_multiple_fem_prepost()
+    # test_multiple_fem_prepost()
+    test_check_param_and_raise_with_ctx()
+    test_check_param_and_raise_without_ctx()
+    test_check_param_and_raise_error()

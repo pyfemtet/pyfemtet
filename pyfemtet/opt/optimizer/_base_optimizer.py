@@ -356,8 +356,6 @@ class FEMContext(OptimizationDataStore):
             def add_fem_ctx(something):
                 if isinstance(something, Function):
                     something.fem_ctx = self
-                elif isinstance(something, Variable):
-                    something.properties['fem_ctx'] = self
 
             out = f(self, *args, **kwargs)
             if isinstance(out, Sequence):

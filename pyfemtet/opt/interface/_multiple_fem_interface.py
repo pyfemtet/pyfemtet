@@ -88,18 +88,19 @@ class FEMListInterface(AbstractFEMInterface):
             fem._setup_after_parallel(opt)
 
     def _check_param_and_raise(self, prm_name) -> None:
-        # TODO:
-        #   - チェックする前に、与えられた prm_name が
-        #     どの FEM に属するかを特定し、
-        #     その FEM に対してのみチェックを行うようにする。
-        #   - そのために 与えられた prm_name がどの FEM に属するかを
-        #     管理する仕組みが必要。
-        #   - 変数は ctx が管理しているから、その仕組みは ctx にしか持てない。
-        #   - なので _check_param_and_raise は
-        #     optimizer が直接呼び出してはならず、
-        #     ctx のほうで prm_name をフィルタして呼び出す必要がある。
-        #   - まずはこのケースを通るはずのテストを作成してから実装する。
-        pass
+        """Check if the parameter is registered in the corresponding FEM.
+
+        This method finds which FEMContext the parameter belongs to,
+        and calls _check_param_and_raise only on that FEM.
+        If the parameter does not belong to any FEMContext
+        (i.e., added via opt.add_parameter() instead of ctx.add_parameter()),
+        no check is performed.
+        """
+        for ctx, fem in zip(self._ctxs, self._fems):
+            if prm_name in ctx.variable_manager.variables:
+                fem._check_param_and_raise(prm_name)
+                return
+        # Parameter not found in any FEMContext - no check needed
 
     def load_variables(self, opt: FEMContext):
         for fem in self._fems:
