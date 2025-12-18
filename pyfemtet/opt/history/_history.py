@@ -30,7 +30,7 @@ from pyfemtet.opt.history._optimality import *
 from pyfemtet.opt.history._hypervolume import *
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.interface import AbstractFEMInterface, MultipleFEMInterface
+    from pyfemtet.opt.interface import AbstractFEMInterface, FEMListInterface
 
 __all__ = [
     "TrialState",
@@ -1423,7 +1423,7 @@ class History:
     ):
         return get_trial_name(trial, fidelity, sub_sampling, row)
 
-    def recording(self, fems: MultipleFEMInterface):
+    def recording(self, fems: FEMListInterface):
         """:meta private:"""
 
         # noinspection PyMethodParameters

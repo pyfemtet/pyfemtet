@@ -498,10 +498,10 @@ class FEMContext(OptimizationDataStore):
 
 # AbstractOptimizer が使う前提の、意味的にわかりやすい、
 # 既存コードとの互換性を持った、
-# fem が MultipleFEMInterface であることを
+# fem が FEMListInterface であることを
 # 特徴とするクラス
 class FEMGlobal(FEMContext):
-    _fems: MultipleFEMInterface
+    _fems: FEMListInterface
 
     @property
     def fem(self) -> AbstractFEMInterface:
@@ -512,11 +512,11 @@ class FEMGlobal(FEMContext):
 
     @fem.setter
     def fem(self, value: AbstractFEMInterface):
-        if isinstance(value, MultipleFEMInterface):
+        if isinstance(value, FEMListInterface):
             self._fems = value
         else:
-            self._fems = MultipleFEMInterface()
-            self._fems.add(value)
+            self._fems = FEMListInterface()
+            self._fems.append(value, _show_experimental_warning=False)
 
 
 class AbstractOptimizer(OptimizationDataStore):
@@ -556,7 +556,7 @@ class AbstractOptimizer(OptimizationDataStore):
         self.sub_fidelity_models = SubFidelityModels()
 
         # System
-        self.fem_global = FEMGlobal(MultipleFEMInterface())
+        self.fem_global = FEMGlobal(FEMListInterface())
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.termination_condition: Callable[[History], bool] = lambda _: False
@@ -577,16 +577,12 @@ class AbstractOptimizer(OptimizationDataStore):
         self.fem_global.fem = value
 
     @property
-    def fems(self) -> MultipleFEMInterface:
+    def fems(self) -> FEMListInterface:
         return self.fem_global._fems
 
     @fems.setter
-    def fems(self, value: MultipleFEMInterface):
+    def fems(self, value: FEMListInterface):
         self.fem_global._fems = value
-
-    def _append_fem(self, fem: AbstractFEMInterface):
-        show_experimental_warning('AbstractOptimizer._append_fem', logger)
-        self.fem_global._fems.add(fem)
 
     # ===== public =====
     @staticmethod
@@ -883,7 +879,7 @@ class AbstractOptimizer(OptimizationDataStore):
                 empty_other_outputs: TrialFunctionOutput = TrialFunctionOutput()
                 empty_y = TrialOutput()
                 # (Required for direction recording to graph even if the value is nan)
-                for ctx, __ in zip(*opt_._ordered_contexts):
+                for ctx, __ in zip(*opt_._contexts_and_update_modes):
                     empty_y.update({
                         obj_name: ObjectiveResult(obj, ctx.fem, float('nan'))
                         for obj_name, obj in ctx.objectives.items()
@@ -911,7 +907,7 @@ class AbstractOptimizer(OptimizationDataStore):
                 if opt_.sub_fidelity_name != MAIN_FIDELITY_NAME:
                     logger.info('----------')
                     logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
-                for ctx, update_mode in zip(*opt_._ordered_contexts):
+                for ctx, update_mode in zip(*opt_._contexts_and_update_modes):
                     logger.info(_('input variables:'))
                     logger.info(parameters)
 
@@ -1301,7 +1297,7 @@ class AbstractOptimizer(OptimizationDataStore):
         # ctx の内容が減っている場合でも検出できるように初期化
         self._initialize_problem()
 
-        for ctx in self.fem_global._fems.ordered_contexts:
+        for ctx in self.fems._ctxs:
             # 各 context の fem 特有の問題設定は
             # 各 context が読み込む必要がある。
             # 直接 fem.load_... を呼んではいけない。
@@ -1323,7 +1319,7 @@ class AbstractOptimizer(OptimizationDataStore):
 
         # 問題の同期が終わったら optimizer の情報を
         # 必要とする interface 向けの処理
-        for ctx in self.fem_global._fems.ordered_contexts:
+        for ctx in self.fems._ctxs:
             ctx.fem._contact_optimizer(self)
 
     # noinspection PyMethodMayBeStatic
@@ -1439,13 +1435,13 @@ class AbstractOptimizer(OptimizationDataStore):
         self._setup_after_parallel()
 
     @property
-    def _ordered_contexts(self) -> tuple[
+    def _contexts_and_update_modes(self) -> tuple[
         list[FEMContext], list[_UpdateMode]
     ]:
-        """Usage: for ctx, update_mode in zip(*self._ordered_contexts)"""
+        """Usage: for ctx, update_mode in zip(*self._contexts_and_update_modes)"""
         contexts: list[FEMContext] = []
         update_modes: list[_UpdateMode] = []
-        for ctx in self.fem_global._fems.ordered_contexts:
+        for ctx in self.fems._ctxs:
             contexts.append(ctx)
             update_modes.append(
                 _UpdateMode(

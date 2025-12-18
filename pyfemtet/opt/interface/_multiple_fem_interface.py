@@ -4,19 +4,16 @@ from typing import TYPE_CHECKING, Callable, Any
 
 from ._base_interface import AbstractFEMInterface
 from pyfemtet.opt.problem.problem import TrialInput
+from pyfemtet.opt.exceptions import show_experimental_warning
 
 
 if TYPE_CHECKING:
     from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, FEMContext
 
 
-class MultipleFEMInterface(AbstractFEMInterface):
+class FEMListInterface(AbstractFEMInterface):
 
     def __init__(self):
-        # TODO:
-        #   list ではなく dict のほうがいいか？
-        #   そもそも AbstractFEMInterface が
-        #   name を持ったほうがいいか？
         self._fems: list[AbstractFEMInterface] = []
         self._ctxs: list[FEMContext] = []
 
@@ -29,11 +26,10 @@ class MultipleFEMInterface(AbstractFEMInterface):
     def __getitem__(self, index: int) -> AbstractFEMInterface:
         return self._fems[index]
 
-    @property
-    def ordered_contexts(self) -> list['FEMContext']:
-        return self._ctxs
+    def append(self, fem: AbstractFEMInterface, _show_experimental_warning: bool = True) -> FEMContext:
+        if _show_experimental_warning:
+            show_experimental_warning(feature_name="Multiple FEM support")
 
-    def add(self, fem: AbstractFEMInterface) -> FEMContext:
         from pyfemtet.opt.optimizer._base_optimizer import FEMContext
         ctx = FEMContext(fem=fem)
         self._fems.append(fem)
@@ -43,8 +39,8 @@ class MultipleFEMInterface(AbstractFEMInterface):
     def remove(self, fem: AbstractFEMInterface):
         self._fems.remove(fem)
 
-    def pop(self, index: int):
-        self._fems.pop(index)
+    def pop(self, index: int) -> AbstractFEMInterface:
+        return self._fems.pop(index)
 
     # TODO: この属性がそもそも AbstractFEMInterface に必要か検討する。
     @property

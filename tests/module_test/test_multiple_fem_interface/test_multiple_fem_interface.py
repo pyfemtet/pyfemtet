@@ -5,7 +5,7 @@ import pandas as pd
 
 from pyfemtet.opt import FEMOpt
 from pyfemtet.opt.optimizer import AbstractOptimizer, OptunaOptimizer
-from pyfemtet.opt.interface import FemtetInterface, NoFEM, MultipleFEMInterface
+from pyfemtet.opt.interface import FemtetInterface, NoFEM, FEMListInterface
 from pyfemtet.opt.exceptions import SolveError
 from pyfemtet.logger import get_module_logger
 
@@ -78,8 +78,8 @@ def test_multiple_fem_interface_basic_flow():
     opt = AbstractOptimizer()
 
     # MultipleFEMInterface に登録
-    opt._append_fem(fem1)
-    opt._append_fem(fem2)
+    opt.fems.append(fem1)
+    opt.fems.append(fem2)
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, -10, 10)
@@ -122,15 +122,15 @@ def test_multiple_fem_interface_basic_femtet():
 
     with closing(fem1), closing(fem2):
 
-        def user_obj(_: MultipleFEMInterface):
+        def user_obj(_: FEMListInterface):
             return 1.
 
         # optimizer を作る
         opt = AbstractOptimizer()
 
         # MultipleFEMInterface に登録
-        opt._append_fem(fem1)
-        opt._append_fem(fem2)
+        opt.fems.append(fem1)
+        opt.fems.append(fem2)
 
         # parameter を登録（optimizer に注入される想定）
         opt.add_parameter('x1', 5, 2, 10)
@@ -191,8 +191,8 @@ def test_multiple_fem_interface_on_error():
     opt = AbstractOptimizer()
 
     # MultipleFEMInterface に登録
-    opt._append_fem(fem1)
-    opt._append_fem(fem2)
+    opt.fems.append(fem1)
+    opt.fems.append(fem2)
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, -10, 10)
@@ -245,8 +245,8 @@ def test_multiple_fem_prepost():
     opt = OptunaOptimizer()
 
     # MultipleFEMInterface に登録
-    opt._append_fem(fem1)
-    opt._append_fem(fem2)
+    opt.fems.append(fem1)
+    opt.fems.append(fem2)
 
     # femopt に追加
     femopt.opt = opt
