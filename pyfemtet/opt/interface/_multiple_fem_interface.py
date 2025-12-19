@@ -79,7 +79,8 @@ class FEMListInterface(AbstractFEMInterface):
             fem._setup_after_parallel(opt)
 
     def _check_param_and_raise(self, prm_name) -> None:
-        pass
+        for fem in self._fems:
+            fem._check_param_and_raise(prm_name)
 
     def load_variables(self, opt: FEMContext):
         for fem in self._fems:

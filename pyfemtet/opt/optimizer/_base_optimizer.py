@@ -1372,11 +1372,15 @@ class AbstractOptimizer(OptimizationDataStore):
         if not self._done_setup_before_parallel:
 
             # check compatibility with fem if needed
-            variables = self.variable_manager.get_variables()
-            for var_name, variable in variables.items():
-                if variable.pass_to_fem:
-                    # FIXME: コンテキストごとに呼ぶ
-                    self.fem._check_param_and_raise(var_name)
+            for ctx in self.fem_manager.contexts:
+                for variable in ctx.variable_manager.variables.values():
+                    if variable.pass_to_fem:
+                        ctx.fem._check_param_and_raise(variable.name)
+
+            for variable in self.variable_manager.variables.values():
+                if variable.properties.get('fem_ctx') is not None:
+                    if variable.pass_to_fem:
+                        self.fem._check_param_and_raise(variable.name)
 
             # check the enqueued trials is
             # compatible with current optimization
