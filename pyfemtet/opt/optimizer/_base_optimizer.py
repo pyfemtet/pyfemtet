@@ -24,7 +24,7 @@ __all__ = [
     'SubFidelityModel',
     'SubFidelityModels',
     '_FReturnValue',
-    'FEMContext',
+    'OptimizationDataPerFEM',
 ]
 
 
@@ -73,7 +73,7 @@ def _duplicated_name_check(name, names):
 
 
 # 最適化問題の情報をストアするクラス。
-class OptimizationDataStore:
+class OptimizationData:
     def __init__(self):
         self._initialize_problem()
 
@@ -339,7 +339,7 @@ class OptimizationDataStore:
 
 # 最適化問題の関数を FEM ごとに管理して
 # 実行制御とかを行うクラス
-class FEMContext(OptimizationDataStore):
+class OptimizationDataPerFEM(OptimizationData):
 
     fem: AbstractFEMInterface
 
@@ -495,8 +495,10 @@ class FEMContext(OptimizationDataStore):
         self._done_load_problem_from_fem = True
 
 
-class FEMManager(FEMContext):
-    _contexts: list[FEMContext]
+# 特定の FEM に紐づかない最適化問題データを管理しつつ (OptimizationData 部分)
+# 複数 FEM とデータの紐づけを管理するクラス (FEMListManager 部分)
+class GlobalOptimizationDataAndFEMListManager(OptimizationDataPerFEM):
+    _contexts: list[OptimizationDataPerFEM]
 
     def __init__(self):
         self._fems = FEMListInterface()
@@ -513,7 +515,7 @@ class FEMManager(FEMContext):
         # 新しい value に合わせて context を再構築する
         self._contexts = []
         for fem in value:
-            ctx = FEMContext(fem=fem)
+            ctx = OptimizationDataPerFEM(fem=fem)
             self._contexts.append(ctx)
 
         # fem_manager.append ではなく fem_manager.fem.append されても
@@ -534,13 +536,13 @@ class FEMManager(FEMContext):
                     *args, **kwargs  # type: ignore FEMListInterface のシグネチャと一致しなくて当然
                 )
 
-                # FEMManager.append が FEMContext を返すようにしたいが
-                # ここで append しておけば FEMManager.append 内で
+                # GlobalOptimizationDataAndFEMListManager.append が OptimizationDataPerFEM を返すようにしたいが
+                # ここで append しておけば GlobalOptimizationDataAndFEMListManager.append 内で
                 # _contexts[-1] を返せばよい。
-                self._contexts.append(FEMContext(fem_))
+                self._contexts.append(OptimizationDataPerFEM(fem_))
 
                 # 継承クラスで戻り値が設定されているかもしれないので
-                # append された FEMContext を戻り値にしてはいけない。
+                # append された OptimizationDataPerFEM を戻り値にしてはいけない。
                 return out
 
             value.append = MethodType(append, value)
@@ -549,19 +551,19 @@ class FEMManager(FEMContext):
         self._fems = value
 
     @property
-    def contexts(self) -> tuple[FEMContext, ...]:
+    def contexts(self) -> tuple[OptimizationDataPerFEM, ...]:
         return tuple(self._contexts)
 
-    def append(self, fem: AbstractFEMInterface) -> FEMContext:
+    def append(self, fem: AbstractFEMInterface) -> OptimizationDataPerFEM:
         self._fems.append(fem)
         # fem.setter で _fems.append が差し替えられているので
         # ここで _contexts.append してはいけない
-        # self._contexts.append(FEMContext(fem))
+        # self._contexts.append(OptimizationDataPerFEM(fem))
         ctx = self._contexts[-1]  # append されているので最後の要素を返す
         return ctx
 
 
-class AbstractOptimizer(OptimizationDataStore):
+class AbstractOptimizer(OptimizationData):
 
     # optimize
     n_trials: int | None
@@ -598,7 +600,7 @@ class AbstractOptimizer(OptimizationDataStore):
         self.sub_fidelity_models = SubFidelityModels()
 
         # System
-        self.fem_manager = FEMManager()
+        self.fem_manager = GlobalOptimizationDataAndFEMListManager()
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.termination_condition: Callable[[History], bool] = lambda _: False
@@ -644,7 +646,7 @@ class AbstractOptimizer(OptimizationDataStore):
     @staticmethod
     def _dispatch_no_fem_context_data_store_method(f):
         def wrapper(self: AbstractOptimizer, *args, **kwargs):
-            instance: FEMManager = self.fem_manager
+            instance: GlobalOptimizationDataAndFEMListManager = self.fem_manager
             method_name = f.__name__
             method = getattr(
                 instance,
@@ -1497,10 +1499,10 @@ class AbstractOptimizer(OptimizationDataStore):
 
     @property
     def _contexts_and_update_modes(self) -> tuple[
-        list[FEMContext], list[_UpdateMode]
+        list[OptimizationDataPerFEM], list[_UpdateMode]
     ]:
         """Usage: for ctx, update_mode in zip(*self._contexts_and_update_modes)"""
-        contexts: list[FEMContext] = []
+        contexts: list[OptimizationDataPerFEM] = []
         update_modes: list[_UpdateMode] = []
         for ctx in self.fem_manager.contexts:
             contexts.append(ctx)

@@ -27,7 +27,7 @@ from pyfemtet.opt.problem.problem import *
 logger = get_module_logger('opt.interface', False)
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, FEMContext
+    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, OptimizationDataPerFEM
 
 __all__ = [
     'AbstractFEMInterface',
@@ -203,13 +203,13 @@ class AbstractFEMInterface:
     def _check_param_and_raise(self, prm_name) -> None:
         pass
 
-    def load_variables(self, opt: FEMContext):
+    def load_variables(self, opt: OptimizationDataPerFEM):
         pass
 
-    def load_objectives(self, opt: FEMContext):
+    def load_objectives(self, opt: OptimizationDataPerFEM):
         pass
 
-    def load_constraints(self, opt: FEMContext):
+    def load_constraints(self, opt: OptimizationDataPerFEM):
         pass
 
     def _contact_optimizer(self, opt: AbstractOptimizer):

@@ -7,7 +7,7 @@ from pyfemtet.opt.problem.problem import TrialInput
 
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, FEMContext
+    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, OptimizationDataPerFEM
 
 
 class FEMListInterface(AbstractFEMInterface):
@@ -82,15 +82,15 @@ class FEMListInterface(AbstractFEMInterface):
         for fem in self._fems:
             fem._check_param_and_raise(prm_name)
 
-    def load_variables(self, opt: FEMContext):
+    def load_variables(self, opt: OptimizationDataPerFEM):
         for fem in self._fems:
             fem.load_variables(opt)
 
-    def load_objectives(self, opt: FEMContext):
+    def load_objectives(self, opt: OptimizationDataPerFEM):
         for fem in self._fems:
             fem.load_objectives(opt)
 
-    def load_constraints(self, opt: FEMContext):
+    def load_constraints(self, opt: OptimizationDataPerFEM):
         for fem in self._fems:
             fem.load_constraints(opt)
 

@@ -8,7 +8,7 @@ from pyfemtet.opt.interface import AbstractFEMInterface
 from pyfemtet._i18n import _
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import FEMContext, AbstractOptimizer
+    from pyfemtet.opt.optimizer._base_optimizer import OptimizationDataPerFEM, AbstractOptimizer
 
 
 __all__ = [
@@ -48,7 +48,7 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
     def _contact_optimizer(self, opt: AbstractOptimizer):
         self.load_objectives(opt.fem_manager)
 
-    def load_objectives(self, opt: FEMContext):
+    def load_objectives(self, opt: OptimizationDataPerFEM):
 
         # output directions が与えられない場合、
         # opt.add_objective との整合をチェックする

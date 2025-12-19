@@ -149,11 +149,11 @@ def test_multiple_fem_interface_basic_femtet():
 
         # objective が追加されていること
         # opt.objectives にはユーザー定義の目的関数のみ含まれる
-        # FEM 由来の目的関数は各 FEMContext.objectives に含まれる
+        # FEM 由来の目的関数は各 OptimizationDataPerFEM.objectives に含まれる
         print(f'{tuple(opt.objectives)=}')
         assert 'user_defined' in opt.objectives
 
-        # FEMContext の目的関数を確認
+        # OptimizationDataPerFEM の目的関数を確認
         all_objectives = list(opt.objectives.keys())
         print(f'{all_objectives=}')
         # assert 'user_defined' in all_objectives
@@ -290,11 +290,11 @@ def test_check_param_and_raise_with_ctx():
     # optimizer を作る
     opt = AbstractOptimizer()
 
-    # FEM を登録して FEMContext を取得
+    # FEM を登録して OptimizationDataPerFEM を取得
     ctx1 = opt.fems.append(fem1)
     ctx2 = opt.fems.append(fem2)
 
-    # 各 FEMContext に対応する変数を登録
+    # 各 OptimizationDataPerFEM に対応する変数を登録
     ctx1.add_parameter('x1', 5, -10, 10)
     ctx2.add_parameter('x2', 7, -10, 10)
 
@@ -326,7 +326,7 @@ def test_check_param_and_raise_without_ctx():
     opt.fems.append(fem1)
     opt.fems.append(fem2)
 
-    # opt 経由で変数を登録（FEMContext 経由ではない）
+    # opt 経由で変数を登録（OptimizationDataPerFEM 経由ではない）
     opt.add_parameter('x1', 5, -10, 10)
     opt.add_parameter('x2', 7, -10, 10)
 
@@ -352,7 +352,7 @@ def test_check_param_and_raise_error():
     # optimizer を作る
     opt = AbstractOptimizer()
 
-    # FEM を登録して FEMContext を取得
+    # FEM を登録して OptimizationDataPerFEM を取得
     ctx1 = opt.fems.append(fem1)
 
     # ctx1 に x1 を登録（しかし fem1 には x1 が存在しない）

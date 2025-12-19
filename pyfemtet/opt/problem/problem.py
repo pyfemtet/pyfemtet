@@ -21,7 +21,7 @@ from pyfemtet._util.helper import *
 from .variable_manager import *
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import FEMContext
+    from pyfemtet.opt.optimizer._base_optimizer import OptimizationDataPerFEM
     from pyfemtet.opt.interface import AbstractFEMInterface
 
 __all__ = [
@@ -51,7 +51,7 @@ class Function:
     _fun: Callable[..., float]
     args: tuple
     kwargs: dict
-    fem_ctx: FEMContext | None
+    fem_ctx: OptimizationDataPerFEM | None
 
     @property
     def fun(self) -> Callable[..., float]:
