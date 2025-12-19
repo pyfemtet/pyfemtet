@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Callable, TypeAlias, Sequence, Literal, NamedTuple, final, Any
+from types import MethodType
 from numbers import Real  # マイナーなので型ヒントでは使わず、isinstance で使う
 from time import sleep
 import os
@@ -501,7 +502,6 @@ class FEMManager(FEMContext):
         self._fems = FEMListInterface()
         # super() 内で self.fem = fem するので
         # contexts は @fem.setter 内で初期化される
-        # self._contexts: list[FEMContext] = []
         super().__init__(self._fems)
 
     @property
@@ -510,20 +510,54 @@ class FEMManager(FEMContext):
 
     @fem.setter
     def fem(self, value: FEMListInterface):
+        # 新しい value に合わせて context を再構築する
         self._contexts = []
         for fem in value:
             ctx = FEMContext(fem=fem)
-            self.contexts.append(ctx)
+            self._contexts.append(ctx)
+
+        # fem_manager.append ではなく fem_manager.fem.append されても
+        # fem_manager に ctx が append されるようにメソッドを差し替える
+        if not hasattr(value, "_method_replaced"):
+            # オリジナルの instance メソッド
+            original_instance_method_append = value.append
+
+            # FEMManger に紐づいた FEMListInterface は
+            # append 時に context も追加されるようなものに差し替える
+            def append(
+                    _,  # オリジナルがインスタンスメソッドなので self 不要
+                    fem_: AbstractFEMInterface,
+                    *args, **kwargs,  # 継承クラスでは他の引数があるかもしれない
+            ):
+                out = original_instance_method_append(
+                    fem_,
+                    *args, **kwargs  # type: ignore FEMListInterface のシグネチャと一致しなくて当然
+                )
+
+                # FEMManager.append が FEMContext を返すようにしたいが
+                # ここで append しておけば FEMManager.append 内で
+                # _contexts[-1] を返せばよい。
+                self._contexts.append(FEMContext(fem_))
+
+                # 継承クラスで戻り値が設定されているかもしれないので
+                # append された FEMContext を戻り値にしてはいけない。
+                return out
+
+            value.append = MethodType(append, value)
+            value._method_replaced = True
+
         self._fems = value
 
     @property
-    def contexts(self) -> list[FEMContext]:
-        return self._contexts
+    def contexts(self) -> tuple[FEMContext, ...]:
+        return tuple(self._contexts)
 
     def append(self, fem: AbstractFEMInterface) -> FEMContext:
-        ctx = FEMContext(fem)
         self._fems.append(fem)
-        self._contexts.append(ctx)
+        # fem.setter で _fems.append が差し替えられているので
+        # ここで _contexts.append してはいけない
+        # self._contexts.append(FEMContext(fem))
+        ctx = self._contexts[-1]  # append されているので最後の要素を返す
         return ctx
 
 
@@ -590,11 +624,12 @@ class AbstractOptimizer(OptimizationDataStore):
     @fem.setter
     def fem(self, value: AbstractFEMInterface):
         # 互換性のためと、単一 FEM しか使わない場合に
-        # FEMList を意識させないため
+        # FEMList を意識させないため AbstractFEMInterface も受け取れるようにし
+        # FEMListInterface に変換してセットする
         if isinstance(value, FEMListInterface):
             self.fem_manager.fem = value
         else:
-            self.fem_manager = FEMManager()
+            self.fem_manager.fem = FEMListInterface()
             self.fem_manager.append(value)
 
     @property
