@@ -46,7 +46,7 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
         self.current_obj_values = {}
 
     def _contact_optimizer(self, opt: AbstractOptimizer):
-        self.load_objectives(opt.fem_global)
+        self.load_objectives(opt.fem_manager)
 
     def load_objectives(self, opt: FEMContext):
 

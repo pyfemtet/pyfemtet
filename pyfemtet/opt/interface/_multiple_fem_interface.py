@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Callable, Any
 
 from ._base_interface import AbstractFEMInterface
 from pyfemtet.opt.problem.problem import TrialInput
-from pyfemtet.opt.exceptions import show_experimental_warning
 
 
 if TYPE_CHECKING:
@@ -15,7 +14,6 @@ class FEMListInterface(AbstractFEMInterface):
 
     def __init__(self):
         self._fems: list[AbstractFEMInterface] = []
-        self._ctxs: list[FEMContext] = []
 
     def __iter__(self):
         return iter(self._fems)
@@ -26,15 +24,8 @@ class FEMListInterface(AbstractFEMInterface):
     def __getitem__(self, index: int) -> AbstractFEMInterface:
         return self._fems[index]
 
-    def append(self, fem: AbstractFEMInterface, _show_experimental_warning: bool = True) -> FEMContext:
-        if _show_experimental_warning:
-            show_experimental_warning(feature_name="Multiple FEM support")
-
-        from pyfemtet.opt.optimizer._base_optimizer import FEMContext
-        ctx = FEMContext(fem=fem)
+    def append(self, fem: AbstractFEMInterface):
         self._fems.append(fem)
-        self._ctxs.append(ctx)
-        return ctx
 
     def remove(self, fem: AbstractFEMInterface):
         self._fems.remove(fem)
@@ -88,19 +79,7 @@ class FEMListInterface(AbstractFEMInterface):
             fem._setup_after_parallel(opt)
 
     def _check_param_and_raise(self, prm_name) -> None:
-        """Check if the parameter is registered in the corresponding FEM.
-
-        This method finds which FEMContext the parameter belongs to,
-        and calls _check_param_and_raise only on that FEM.
-        If the parameter does not belong to any FEMContext
-        (i.e., added via opt.add_parameter() instead of ctx.add_parameter()),
-        no check is performed.
-        """
-        for ctx, fem in zip(self._ctxs, self._fems):
-            if prm_name in ctx.variable_manager.variables:
-                fem._check_param_and_raise(prm_name)
-                return
-        # Parameter not found in any FEMContext - no check needed
+        pass
 
     def load_variables(self, opt: FEMContext):
         for fem in self._fems:

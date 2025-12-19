@@ -494,27 +494,37 @@ class FEMContext(OptimizationDataStore):
         self._done_load_problem_from_fem = True
 
 
-# AbstractOptimizer が使う前提の、意味的にわかりやすい、
-# 既存コードとの互換性を持った、
-# fem が FEMListInterface であることを
-# 特徴とするクラス
-class FEMGlobal(FEMContext):
-    _fems: FEMListInterface
+class FEMManager(FEMContext):
+    _contexts: list[FEMContext]
+
+    def __init__(self):
+        self._fems = FEMListInterface()
+        # super() 内で self.fem = fem するので
+        # contexts は @fem.setter 内で初期化される
+        # self._contexts: list[FEMContext] = []
+        super().__init__(self._fems)
 
     @property
-    def fem(self) -> AbstractFEMInterface:
-        if len(self._fems) == 1:
-            return self._fems[0]
-        else:
-            return self._fems
+    def fem(self) -> FEMListInterface:
+        return self._fems
 
     @fem.setter
-    def fem(self, value: AbstractFEMInterface):
-        if isinstance(value, FEMListInterface):
-            self._fems = value
-        else:
-            self._fems = FEMListInterface()
-            self._fems.append(value, _show_experimental_warning=False)
+    def fem(self, value: FEMListInterface):
+        self._contexts = []
+        for fem in value:
+            ctx = FEMContext(fem=fem)
+            self.contexts.append(ctx)
+        self._fems = value
+
+    @property
+    def contexts(self) -> list[FEMContext]:
+        return self._contexts
+
+    def append(self, fem: AbstractFEMInterface) -> FEMContext:
+        ctx = FEMContext(fem)
+        self._fems.append(fem)
+        self._contexts.append(ctx)
+        return ctx
 
 
 class AbstractOptimizer(OptimizationDataStore):
@@ -554,7 +564,7 @@ class AbstractOptimizer(OptimizationDataStore):
         self.sub_fidelity_models = SubFidelityModels()
 
         # System
-        self.fem_global = FEMGlobal(FEMListInterface())
+        self.fem_manager = FEMManager()
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.termination_condition: Callable[[History], bool] = lambda _: False
@@ -568,25 +578,38 @@ class AbstractOptimizer(OptimizationDataStore):
 
     @property
     def fem(self) -> AbstractFEMInterface:
-        return self.fem_global.fem
+        # 互換性のためと、単一 FEM しか使わない場合に
+        # FEMList を意識させないため FEM が一つの場合は
+        # AbstractFEMInterface そのものを返す
+        fem: FEMListInterface = self.fem_manager.fem
+        if len(fem) == 1:
+            return fem[0]
+        else:
+            return fem
 
     @fem.setter
     def fem(self, value: AbstractFEMInterface):
-        self.fem_global.fem = value
+        # 互換性のためと、単一 FEM しか使わない場合に
+        # FEMList を意識させないため
+        if isinstance(value, FEMListInterface):
+            self.fem_manager.fem = value
+        else:
+            self.fem_manager = FEMManager()
+            self.fem_manager.append(value)
 
     @property
     def fems(self) -> FEMListInterface:
-        return self.fem_global._fems
+        return self.fem_manager.fem
 
-    @fems.setter
-    def fems(self, value: FEMListInterface):
-        self.fem_global._fems = value
+    @property
+    def fem_contexts(self):
+        return self.fem_manager.contexts
 
     # ===== public =====
     @staticmethod
     def _dispatch_no_fem_context_data_store_method(f):
         def wrapper(self: AbstractOptimizer, *args, **kwargs):
-            instance: FEMGlobal = self.fem_global
+            instance: FEMManager = self.fem_manager
             method_name = f.__name__
             method = getattr(
                 instance,
@@ -844,7 +867,7 @@ class AbstractOptimizer(OptimizationDataStore):
         ) -> _FReturnValue:
             # create context
             if history is not None:
-                record_to_history = history.recording(opt_.fem_global._fems)
+                record_to_history = history.recording(opt_.fem_manager._fems)
             else:
 
                 class DummyRecordContext:
@@ -1295,7 +1318,7 @@ class AbstractOptimizer(OptimizationDataStore):
         # ctx の内容が減っている場合でも検出できるように初期化
         self._initialize_problem()
 
-        for ctx in self.fems._ctxs:
+        for ctx in self.fem_manager.contexts:
             # 各 context の fem 特有の問題設定は
             # 各 context が読み込む必要がある。
             # 直接 fem.load_... を呼んではいけない。
@@ -1308,16 +1331,16 @@ class AbstractOptimizer(OptimizationDataStore):
             self.variable_manager.variables.update(ctx.variable_manager.variables)
 
         # 自身に直接紐づく context を同期
-        self.objectives.update(self.fem_global.objectives)
-        self.constraints.update(self.fem_global.constraints)
-        self.other_outputs.update(self.fem_global.other_outputs)
+        self.objectives.update(self.fem_manager.objectives)
+        self.constraints.update(self.fem_manager.constraints)
+        self.other_outputs.update(self.fem_manager.other_outputs)
         self.variable_manager.variables.update(
-            self.fem_global.variable_manager.variables
+            self.fem_manager.variable_manager.variables
         )
 
         # 問題の同期が終わったら optimizer の情報を
         # 必要とする interface 向けの処理
-        for ctx in self.fems._ctxs:
+        for ctx in self.fem_manager.contexts:
             ctx.fem._contact_optimizer(self)
 
     # noinspection PyMethodMayBeStatic
@@ -1352,6 +1375,7 @@ class AbstractOptimizer(OptimizationDataStore):
             variables = self.variable_manager.get_variables()
             for var_name, variable in variables.items():
                 if variable.pass_to_fem:
+                    # FIXME: コンテキストごとに呼ぶ
                     self.fem._check_param_and_raise(var_name)
 
             # check the enqueued trials is
@@ -1439,7 +1463,7 @@ class AbstractOptimizer(OptimizationDataStore):
         """Usage: for ctx, update_mode in zip(*self._contexts_and_update_modes)"""
         contexts: list[FEMContext] = []
         update_modes: list[_UpdateMode] = []
-        for ctx in self.fems._ctxs:
+        for ctx in self.fem_manager.contexts:
             contexts.append(ctx)
             update_modes.append(
                 _UpdateMode(
@@ -1448,7 +1472,7 @@ class AbstractOptimizer(OptimizationDataStore):
                 )
             )
         contexts.append(
-            self.fem_global
+            self.fem_manager
         )
         update_modes.append(
             _UpdateMode(
