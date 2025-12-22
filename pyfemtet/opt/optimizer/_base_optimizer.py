@@ -1405,7 +1405,8 @@ class AbstractOptimizer(OptimizationData):
 
         # 特殊処理が必要な場合は最後に fem の責任で行う
         for ctx in self.fem_manager.contexts:
-            ctx.fem.contact_to_optimizer(self, self.fem_manager.global_data, ctx)
+            if not isinstance(ctx, GlobalOptimizationData):
+                ctx.fem.contact_to_optimizer(self, self.fem_manager.global_data, ctx)
 
     # noinspection PyMethodMayBeStatic
     def _get_additional_data(self) -> dict:
