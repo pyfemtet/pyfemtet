@@ -100,7 +100,7 @@ class FEMListInterface(AbstractFEMInterface):
             ctx: OptimizationDataPerFEM,
     ):
         for fem in self._fems:
-            fem.contact_to_optimizer(opt, global_fem, ctx)
+            fem.contact_to_optimizer(opt, global_data, ctx)
 
     def close(self, *args, **kwargs):
         # TODO: 引数の取り扱い
