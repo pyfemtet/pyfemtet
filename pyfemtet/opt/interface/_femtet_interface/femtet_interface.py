@@ -164,8 +164,7 @@ class FemtetInterface(COMInterface):
         self.connected_method = "unconnected"
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
-        self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
-        self._load_problem_from_fem = self.parametric_output_indexes_use_as_objective is not None
+        self.parametric_output_indexes_use_as_objective: dict[int, str | float] = parametric_output_indexes_use_as_objective
         self._original_autosave_enabled = _get_autosave_enabled()
         _set_autosave_enabled(False)
         self._warn_if_undefined_variable = True
@@ -319,11 +318,12 @@ class FemtetInterface(COMInterface):
 
     @AbstractFEMInterface._with_reopen
     def load_objectives(self, opt: AbstractOptimizer):
-        indexes = list(self.parametric_output_indexes_use_as_objective.keys())
-        directions = list(self.parametric_output_indexes_use_as_objective.values())
-        add_parametric_results_as_objectives(
-            opt, self.Femtet, indexes, directions
-        )
+        if self.parametric_output_indexes_use_as_objective is not None:
+            indexes = list(self.parametric_output_indexes_use_as_objective.keys())
+            directions = list(self.parametric_output_indexes_use_as_objective.values())
+            add_parametric_results_as_objectives(
+                opt, self.Femtet, indexes, directions
+            )
 
     def _check_using_fem(self, fun: callable):
         return _is_access_femtet(fun)

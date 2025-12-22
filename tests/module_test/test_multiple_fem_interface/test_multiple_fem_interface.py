@@ -9,6 +9,8 @@ from pyfemtet.opt.interface import FemtetInterface, NoFEM, FEMListInterface
 from pyfemtet.opt.exceptions import SolveError
 from pyfemtet.logger import get_module_logger
 
+import pytest
+
 here = os.path.dirname(__file__)
 logger = get_module_logger('opt.test.multiple_fem_interface', debug=True)
 
@@ -78,8 +80,8 @@ def test_multiple_fem_interface_basic_flow():
     opt = AbstractOptimizer()
 
     # MultipleFEMInterface に登録
-    opt.fems.append(fem1)
-    opt.fems.append(fem2)
+    opt.fem_manager.append(fem1)
+    opt.fem_manager.append(fem2)
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, -10, 10)
@@ -129,12 +131,12 @@ def test_multiple_fem_interface_basic_femtet():
         opt = AbstractOptimizer()
 
         # MultipleFEMInterface に登録
-        opt.fems.append(fem1)
-        opt.fems.append(fem2)
+        ctx1 = opt.fem_manager.append(fem1)
+        ctx2 = opt.fem_manager.append(fem2)
 
         # parameter を登録（optimizer に注入される想定）
-        opt.add_parameter('x1', 5, 2, 10)
-        opt.add_parameter('x2', 7, 2, 10)
+        ctx1.add_parameter('x1', 5, 2, 10)
+        ctx2.add_parameter('x2', 7, 2, 10)
 
         # objectives を登録
         opt.add_objective('user_defined', user_obj)
@@ -191,8 +193,8 @@ def test_multiple_fem_interface_on_error():
     opt = AbstractOptimizer()
 
     # MultipleFEMInterface に登録
-    opt.fems.append(fem1)
-    opt.fems.append(fem2)
+    opt.fem_manager.append(fem1)
+    opt.fem_manager.append(fem2)
 
     # parameter を登録（optimizer に注入される想定）
     opt.add_parameter('x1', 5, -10, 10)
@@ -245,8 +247,8 @@ def test_multiple_fem_prepost():
     opt = OptunaOptimizer()
 
     # MultipleFEMInterface に登録
-    opt.fems.append(fem1)
-    opt.fems.append(fem2)
+    opt.fem_manager.append(fem1)
+    opt.fem_manager.append(fem2)
 
     # femopt に追加
     femopt.opt = opt
@@ -291,8 +293,8 @@ def test_check_param_and_raise_with_ctx():
     opt = AbstractOptimizer()
 
     # FEM を登録して OptimizationDataPerFEM を取得
-    ctx1 = opt.fems.append(fem1)
-    ctx2 = opt.fems.append(fem2)
+    ctx1 = opt.fem_manager.append(fem1)
+    ctx2 = opt.fem_manager.append(fem2)
 
     # 各 OptimizationDataPerFEM に対応する変数を登録
     ctx1.add_parameter('x1', 5, -10, 10)
@@ -323,8 +325,8 @@ def test_check_param_and_raise_without_ctx():
     opt = AbstractOptimizer()
 
     # FEM を登録
-    opt.fems.append(fem1)
-    opt.fems.append(fem2)
+    opt.fem_manager.append(fem1)
+    opt.fem_manager.append(fem2)
 
     # opt 経由で変数を登録（OptimizationDataPerFEM 経由ではない）
     opt.add_parameter('x1', 5, -10, 10)
@@ -333,14 +335,16 @@ def test_check_param_and_raise_without_ctx():
     # objective を登録
     opt.add_objective('y', lambda fems_: 1.0)
 
-    # setup（_check_param_and_raise が呼ばれるが、どの ctx にも属さないのでチェックされない）
-    opt._finalize()
-
-    # どの FEM もチェックされない
-    assert fem1.checked_params == [], f"Expected [], got {fem1.checked_params}"
-    assert fem2.checked_params == [], f"Expected [], got {fem2.checked_params}"
-
-    print("✅ test_check_param_and_raise_without_ctx passed")
+    # setup（_check_param_and_raise が呼ばれる。共通変数なのでチェックに引っかかる。）
+    try:
+        opt._finalize()
+    except RuntimeError as e:
+        print(f'✅ Caught expected error: {e}')
+        assert 'x1' in str(e)
+        print("✅ test_check_param_and_raise_without_ctx passed")
+        return
+    else:
+        assert False
 
 
 def test_check_param_and_raise_error():
@@ -353,7 +357,7 @@ def test_check_param_and_raise_error():
     opt = AbstractOptimizer()
 
     # FEM を登録して OptimizationDataPerFEM を取得
-    ctx1 = opt.fems.append(fem1)
+    ctx1 = opt.fem_manager.append(fem1)
 
     # ctx1 に x1 を登録（しかし fem1 には x1 が存在しない）
     ctx1.add_parameter('x1', 5, -10, 10)
@@ -374,10 +378,18 @@ def test_check_param_and_raise_error():
 
 
 if __name__ == '__main__':
-    # test_multiple_fem_interface_basic_flow()
-    # test_multiple_fem_interface_basic_femtet()
-    # test_multiple_fem_interface_on_error()
-    # test_multiple_fem_prepost()
+    from time import sleep
+    test_multiple_fem_interface_basic_flow()
+    sleep(1)
+    test_multiple_fem_interface_basic_femtet()
+    sleep(1)
+    test_multiple_fem_interface_on_error()
+    sleep(1)
+    test_multiple_fem_prepost()
+    sleep(1)
     test_check_param_and_raise_with_ctx()
+    sleep(1)
     test_check_param_and_raise_without_ctx()
+    sleep(1)
     test_check_param_and_raise_error()
+    sleep(1)

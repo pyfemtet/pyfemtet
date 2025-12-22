@@ -6,6 +6,7 @@ from pyfemtet.opt.interface import NoFEM, FemtetInterface
 from pyfemtet.opt.optimizer import OptunaOptimizer
 from tests.utils.reccsv_processor import RECCSV
 
+import pytest
 
 here = os.path.dirname(__file__)
 
@@ -45,6 +46,7 @@ def test_parallel_nofem(record=False):
     reccsv.check(check_columns_float, check_columns_str, df)
 
 
+@pytest.mark.fem
 def test_parallel_femtet(record=False):
 
     base_path = os.path.join(here, 'test_parallel_femtet')

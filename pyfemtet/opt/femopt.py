@@ -60,11 +60,11 @@ class FEMOpt:
 
         # この時点で opt に fem がセットされていなければ
         # デフォルトをセット
-        if len(self.opt.fems) == 0:
+        if len(self.opt.fem_manager.fems) == 0:
             self.opt.fem = FemtetInterface()
         
         # fem が正しくセットされているか確認
-        if len(self.opt.fems) == 0:
+        if len(self.opt.fem_manager.fems) == 0:
             raise RuntimeError(
                 "FEM interface could not be initialized. "
                 "Please ensure that a valid FEM interface is provided or can be created."
@@ -318,7 +318,7 @@ class FEMOpt:
             self.opt._setup_before_parallel()
 
             # setup FEM (mainly for distributing files)
-            self.opt.fem._setup_before_parallel()
+            self.opt.fem_manager.all_fems_as_a_fem._setup_before_parallel()
 
             # create worker status list
             entire_status = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)

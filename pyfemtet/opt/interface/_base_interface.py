@@ -27,7 +27,11 @@ from pyfemtet.opt.problem.problem import *
 logger = get_module_logger('opt.interface', False)
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, OptimizationDataPerFEM
+    from pyfemtet.opt.optimizer._base_optimizer import (
+        AbstractOptimizer,
+        GlobalOptimizationData,
+        OptimizationDataPerFEM,
+    )
 
 __all__ = [
     'AbstractFEMInterface',
@@ -212,7 +216,12 @@ class AbstractFEMInterface:
     def load_constraints(self, opt: OptimizationDataPerFEM):
         pass
 
-    def _contact_optimizer(self, opt: AbstractOptimizer):
+    def contact_to_optimizer(
+            self,
+            opt: AbstractOptimizer,
+            global_data: GlobalOptimizationData,
+            ctx: OptimizationDataPerFEM,
+    ):
         pass
 
     def close(self, *args, **kwargs):  # context manager による予約語

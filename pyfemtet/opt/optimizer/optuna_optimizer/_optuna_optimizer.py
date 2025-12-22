@@ -681,7 +681,7 @@ class OptunaOptimizer(AbstractOptimizer):
         with self._removing_tmp_db_if_needed():
 
             # quit FEM even if abnormal termination
-            with closing(self.fem):
+            with closing(self.fem_manager.all_fems_as_a_fem):
 
                 # load study creating in setup_before_parallel()
                 # located on dask scheduler

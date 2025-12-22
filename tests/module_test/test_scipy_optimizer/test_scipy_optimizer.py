@@ -136,7 +136,7 @@ def test_scipy_timeout():
 
 
 def test_scipy_restart():
-    csv_path = 'test_scipy_restart.csv'
+    csv_path = 'pyfemtet.opt.test_scipy_restart.csv'
     if os.path.isfile(csv_path):
         os.remove(csv_path)
 

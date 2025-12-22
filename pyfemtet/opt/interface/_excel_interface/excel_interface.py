@@ -602,6 +602,7 @@ class ExcelInterface(COMInterface):
                     upper_bound=ub,
                     step=step,
                     fix=not use,
+                    supress_duplicated_name_check=True,
                 )
 
             elif kind == 'Categorical':
@@ -614,6 +615,7 @@ class ExcelInterface(COMInterface):
                     initial_value=value,
                     choices=choices,
                     fix=not use,
+                    supress_duplicated_name_check=True,
                 )
 
             else:
@@ -660,6 +662,7 @@ class ExcelInterface(COMInterface):
                     direction=direction,
                     fun=_ScapeGoatObjective(),
                     kwargs=dict(name=name),
+                    supress_duplicated_name_check=True,
                 )
 
     def load_constraints(self, opt: AbstractOptimizer, raise_if_no_keyword=False):
@@ -721,6 +724,7 @@ class ExcelInterface(COMInterface):
                     fun=_ScapeGoatObjective(),
                     kwargs=dict(name=name),
                     using_fem=not calc_before_solve,
+                    supress_duplicated_name_check=True,
                 )
 
     def objective_from_excel(self, _, name: str):

@@ -237,9 +237,9 @@ class ScipyOptimizer(AbstractOptimizer):
             pass_to_fem = self.variable_manager.get_variables(
                 filter='pass_to_fem', format='raw'
             )
-            self.fem.update_parameter(pass_to_fem)
+            self.fem_manager.all_fems_as_a_fem.update_parameter(pass_to_fem)
 
-        return cns.eval(self.fem)
+        return cns.eval(self.fem_manager.all_fems_as_a_fem)
 
     def _get_scipy_constraints(self) -> (
         None
@@ -410,7 +410,7 @@ class ScipyOptimizer(AbstractOptimizer):
             self._n_succeeded_trials_in_current_optimization = 0
 
         # ===== run =====
-        with closing(self.fem):
+        with closing(self.fem_manager.all_fems_as_a_fem):
 
             with self._setting_status(), \
                     suppress(InterruptOptimization), \

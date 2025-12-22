@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Callable, TypeAlias, Sequence, Literal, NamedTuple, final, Any
-from types import MethodType
 from numbers import Real  # マイナーなので型ヒントでは使わず、isinstance で使う
 from time import sleep
 import os
@@ -77,9 +76,12 @@ class OptimizationData:
     def __init__(self):
         self._initialize_problem()
 
+    def _initialize_objectives(self):  # SurrogateModel で使用
+        self.objectives = Objectives()
+
     def _initialize_problem(self):
         self.variable_manager = VariableManager()
-        self.objectives = Objectives()
+        self._initialize_objectives()
         self.constraints = Constraints()
         self.other_outputs = Functions()
 
@@ -90,6 +92,7 @@ class OptimizationData:
             properties: dict[str, Any] | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ) -> Variable:
         var: Variable
         # noinspection PyUnreachableCode
@@ -107,7 +110,8 @@ class OptimizationData:
         var.value = value
         var.pass_to_fem = pass_to_fem
         var.properties = properties if properties is not None else {}
-        _duplicated_name_check(name, self.variable_manager.variables.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
         return var
 
@@ -122,6 +126,7 @@ class OptimizationData:
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
+            supress_duplicated_name_check: bool = False,
     ) -> NumericParameter:
         properties = properties if properties is not None else {}
 
@@ -136,7 +141,8 @@ class OptimizationData:
         prm.step = step
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
-        _duplicated_name_check(name, self.variable_manager.variables.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(prm)
         return prm
 
@@ -147,6 +153,7 @@ class OptimizationData:
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ) -> ExpressionFromString:
         var = ExpressionFromString()
         var.name = name
@@ -155,7 +162,8 @@ class OptimizationData:
         )
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
-        _duplicated_name_check(name, self.variable_manager.variables.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
         return var
 
@@ -166,13 +174,15 @@ class OptimizationData:
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ) -> ExpressionFromString:
         var = ExpressionFromString()
         var.name = name
         var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
-        _duplicated_name_check(name, self.variable_manager.variables.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
         return var
 
@@ -185,6 +195,7 @@ class OptimizationData:
             kwargs: dict | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ) -> ExpressionFromFunction:
         var = ExpressionFromFunction()
         var.name = name
@@ -193,7 +204,8 @@ class OptimizationData:
         var.kwargs = kwargs or dict()
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
-        _duplicated_name_check(name, self.variable_manager.variables.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(var)
         return var
 
@@ -206,6 +218,7 @@ class OptimizationData:
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
+            supress_duplicated_name_check: bool = False,
     ) -> CategoricalParameter:
         properties = properties if properties is not None else {}
 
@@ -218,7 +231,8 @@ class OptimizationData:
         prm.choices = choices
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
-        _duplicated_name_check(name, self.variable_manager.variables.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.variable_manager.variables.keys())
         self.variable_manager.set_variable(prm)
         return prm
 
@@ -229,6 +243,7 @@ class OptimizationData:
             direction: DIRECTION = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ) -> Objective:
         obj = Objective()
         obj.fun = fun
@@ -236,7 +251,8 @@ class OptimizationData:
         obj.kwargs = kwargs or {}
         obj.direction = direction
         obj.fem_ctx = None
-        _duplicated_name_check(name, self.objectives.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.objectives.keys())
         self.objectives.update({name: obj})
         return obj  # Context で fem_ctx をセットするために返す
 
@@ -248,6 +264,7 @@ class OptimizationData:
             directions: DIRECTION | Sequence[DIRECTION | None] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ) -> list[Objective]:
         # argument processing
         # noinspection PyUnreachableCode
@@ -283,6 +300,7 @@ class OptimizationData:
                 direction=direction,
                 args=args,
                 kwargs=kwargs,
+                supress_duplicated_name_check=supress_duplicated_name_check,
             ))
 
         return out
@@ -297,6 +315,7 @@ class OptimizationData:
             kwargs: dict | None = None,
             strict: bool = True,
             using_fem: bool | None = None,
+            supress_duplicated_name_check: bool = False,
     ) -> Constraint:
         if lower_bound is None and upper_bound is None:
             raise ValueError(_(
@@ -315,7 +334,8 @@ class OptimizationData:
         cns.hard = strict
         cns.fem_ctx = None
         cns.using_fem = using_fem
-        _duplicated_name_check(name, self.constraints.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.constraints.keys())
         self.constraints.update({name: cns})
         return cns  # Context で fem_ctx をセットするために返す
 
@@ -325,14 +345,15 @@ class OptimizationData:
             fun: Callable[..., float],
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ):
-
         other_func = Function()
         other_func.fun = fun
         other_func.args = args or ()
         other_func.kwargs = kwargs or {}
         other_func.fem_ctx = None
-        _duplicated_name_check(name, self.other_outputs.keys())
+        if not supress_duplicated_name_check:
+            _duplicated_name_check(name, self.other_outputs.keys())
         self.other_outputs.update({name: other_func})
         return other_func
 
@@ -351,6 +372,7 @@ class OptimizationDataPerFEM(OptimizationData):
         super()._initialize_problem()
         self._done_load_problem_from_fem = False
 
+    # TODO: Constraint が using_fem check を使うためだけにこの実装は過剰。
     @staticmethod
     def _with_add_fem_ctx(f):
         def wrapper(self, *args, **kwargs):
@@ -379,6 +401,7 @@ class OptimizationDataPerFEM(OptimizationData):
         kwargs: dict | None = None,
         strict: bool = True,
         using_fem: bool | None = None,
+        supress_duplicated_name_check: bool = False,
     ):
         return super().add_constraint(
             name=name,
@@ -389,6 +412,7 @@ class OptimizationDataPerFEM(OptimizationData):
             kwargs=kwargs,
             strict=strict,
             using_fem=using_fem,
+            supress_duplicated_name_check=supress_duplicated_name_check,
         )
 
     @_with_add_fem_ctx
@@ -399,6 +423,7 @@ class OptimizationDataPerFEM(OptimizationData):
             direction: DIRECTION = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ) -> Objective:
         return super().add_objective(
             name=name,
@@ -406,6 +431,7 @@ class OptimizationDataPerFEM(OptimizationData):
             direction=direction,
             args=args,
             kwargs=kwargs,
+            supress_duplicated_name_check=supress_duplicated_name_check,
         )
 
     @_with_add_fem_ctx
@@ -417,6 +443,7 @@ class OptimizationDataPerFEM(OptimizationData):
             directions: DIRECTION | Sequence[DIRECTION | None] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ) -> list[Objective]:
         return super().add_objectives(
             names=names,
@@ -425,6 +452,7 @@ class OptimizationDataPerFEM(OptimizationData):
             directions=directions,
             args=args,
             kwargs=kwargs,
+            supress_duplicated_name_check=supress_duplicated_name_check,
         )
 
     @_with_add_fem_ctx
@@ -434,12 +462,14 @@ class OptimizationDataPerFEM(OptimizationData):
             fun: Callable[..., float],
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ):
         return super().add_other_output(
             name=name,
             fun=fun,
             args=args,
             kwargs=kwargs,
+            supress_duplicated_name_check=supress_duplicated_name_check,
         )
 
     def _y_common(self, fem: AbstractFEMInterface) -> TrialOutput:
@@ -488,78 +518,71 @@ class OptimizationDataPerFEM(OptimizationData):
         return self._other_outputs_common(out, self.fem)
 
     def _load_problem_from_fem(self):
-        if self.fem._load_problem_from_fem and not self._done_load_problem_from_fem:
+        if self.fem._load_problem_from_fem:
             self.fem.load_variables(self)
             self.fem.load_objectives(self)
             self.fem.load_constraints(self)
-        self._done_load_problem_from_fem = True
 
 
-# 特定の FEM に紐づかない最適化問題データを管理しつつ (OptimizationData 部分)
-# 複数 FEM とデータの紐づけを管理するクラス (FEMListManager 部分)
-class GlobalOptimizationDataAndFEMListManager(OptimizationDataPerFEM):
+class FEMListForGlobal(FEMListInterface):
+
+    # 単一 FEM しか使わない場合に list を意識させないため
+    # 長さ 1 の時は要素を返す処理が方々で必要
+    @property
+    def object_pass_to_fun(self):
+        out = super().object_pass_to_fun
+        if len(out) == 1:
+            return out[0]
+        else:
+            return out
+
+    # GlobalOptimizationData が これらを操作すると二重操作になる。
+    def update_parameter(self, x: TrialInput) -> None:
+        pass
+
+    def update(self):
+        pass
+
+    def _check_param_and_raise(self, prm_name) -> None:
+        pass
+
+    # ユーザーが操作できないようにする
+    def append(self, fem: AbstractFEMInterface):
+        raise RuntimeError("Invalid operation. Use `AbstractOptimizer.fem_manager.append` instead.")
+
+    def _append(self, fem: AbstractFEMInterface):
+        FEMListInterface.append(self, fem)
+
+
+# 特定の FEM に紐づかない最適化問題データを管理する
+class GlobalOptimizationData(OptimizationDataPerFEM):
+    fem: FEMListForGlobal
+
+
+# 特定の FEM とそれに紐づく最適化問題データを管理する
+class FEMAndDataConnectionManager:
     _contexts: list[OptimizationDataPerFEM]
+    _fems: list[AbstractFEMInterface]
 
     def __init__(self):
-        self._fems = FEMListInterface()
-        # super() 内で self.fem = fem するので
-        # contexts は @fem.setter 内で初期化される
-        super().__init__(self._fems)
+        self.all_fems_as_a_fem = FEMListForGlobal()
+        self.global_data = GlobalOptimizationData(self.all_fems_as_a_fem)
+        self._fems = []
+        self._contexts = []
 
     @property
-    def fem(self) -> FEMListInterface:
-        return self._fems
-
-    @fem.setter
-    def fem(self, value: FEMListInterface):
-        # 新しい value に合わせて context を再構築する
-        self._contexts = []
-        for fem in value:
-            ctx = OptimizationDataPerFEM(fem=fem)
-            self._contexts.append(ctx)
-
-        # fem_manager.append ではなく fem_manager.fem.append されても
-        # fem_manager に ctx が append されるようにメソッドを差し替える
-        if not hasattr(value, "_method_replaced"):
-            # オリジナルの instance メソッド
-            original_instance_method_append = value.append
-
-            # FEMManger に紐づいた FEMListInterface は
-            # append 時に context も追加されるようなものに差し替える
-            def append(
-                    _,  # オリジナルがインスタンスメソッドなので self 不要
-                    fem_: AbstractFEMInterface,
-                    *args, **kwargs,  # 継承クラスでは他の引数があるかもしれない
-            ):
-                out = original_instance_method_append(
-                    fem_,
-                    *args, **kwargs  # type: ignore FEMListInterface のシグネチャと一致しなくて当然
-                )
-
-                # GlobalOptimizationDataAndFEMListManager.append が OptimizationDataPerFEM を返すようにしたいが
-                # ここで append しておけば GlobalOptimizationDataAndFEMListManager.append 内で
-                # _contexts[-1] を返せばよい。
-                self._contexts.append(OptimizationDataPerFEM(fem_))
-
-                # 継承クラスで戻り値が設定されているかもしれないので
-                # append された OptimizationDataPerFEM を戻り値にしてはいけない。
-                return out
-
-            value.append = MethodType(append, value)
-            value._method_replaced = True
-
-        self._fems = value
+    def fems(self) -> tuple[AbstractFEMInterface, ...]:
+        return tuple(self._fems)
 
     @property
     def contexts(self) -> tuple[OptimizationDataPerFEM, ...]:
-        return tuple(self._contexts)
+        return tuple(self._contexts + [self.global_data])
 
     def append(self, fem: AbstractFEMInterface) -> OptimizationDataPerFEM:
         self._fems.append(fem)
-        # fem.setter で _fems.append が差し替えられているので
-        # ここで _contexts.append してはいけない
-        # self._contexts.append(OptimizationDataPerFEM(fem))
-        ctx = self._contexts[-1]  # append されているので最後の要素を返す
+        self.all_fems_as_a_fem._append(fem)
+        ctx = OptimizationDataPerFEM(fem)
+        self._contexts.append(ctx)
         return ctx
 
 
@@ -600,7 +623,7 @@ class AbstractOptimizer(OptimizationData):
         self.sub_fidelity_models = SubFidelityModels()
 
         # System
-        self.fem_manager = GlobalOptimizationDataAndFEMListManager()
+        self.fem_manager = FEMAndDataConnectionManager()
         self.history: History = History()
         self.solve_condition: Callable[[History], bool] = lambda _: True
         self.termination_condition: Callable[[History], bool] = lambda _: False
@@ -613,40 +636,30 @@ class AbstractOptimizer(OptimizationData):
         self._worker_name: str | None = None
 
     @property
-    def fem(self) -> AbstractFEMInterface:
-        # 互換性のためと、単一 FEM しか使わない場合に
-        # FEMList を意識させないため FEM が一つの場合は
-        # AbstractFEMInterface そのものを返す
-        fem: FEMListInterface = self.fem_manager.fem
-        if len(fem) == 1:
-            return fem[0]
+    def fem(self) -> AbstractFEMInterface | tuple[AbstractFEMInterface, ...]:
+        fems: tuple[AbstractFEMInterface, ...] = self.fem_manager.fems
+        if len(fems) == 1:
+            return fems[0]
         else:
-            return fem
+            return fems
 
     @fem.setter
     def fem(self, value: AbstractFEMInterface):
-        # 互換性のためと、単一 FEM しか使わない場合に
-        # FEMList を意識させないため AbstractFEMInterface も受け取れるようにし
-        # FEMListInterface に変換してセットする
-        if isinstance(value, FEMListInterface):
-            self.fem_manager.fem = value
-        else:
-            self.fem_manager.fem = FEMListInterface()
-            self.fem_manager.append(value)
+        # FEMList は初期化しつつ、
+        # global_data は初期化しないようにする
+        self.fem_manager.all_fems_as_a_fem = FEMListForGlobal()
+        self.fem_manager.global_data.fem = self.fem_manager.all_fems_as_a_fem
+        self.fem_manager.append(value)
 
-    @property
-    def fems(self) -> FEMListInterface:
-        return self.fem_manager.fem
-
-    @property
-    def fem_contexts(self):
-        return self.fem_manager.contexts
+    # @property
+    # def global_data(self) -> GlobalOptimizationData:
+    #     return self.fem_manager.global_data
 
     # ===== public =====
     @staticmethod
-    def _dispatch_no_fem_context_data_store_method(f):
+    def _dispatch_global_data_store(f):
         def wrapper(self: AbstractOptimizer, *args, **kwargs):
-            instance: GlobalOptimizationDataAndFEMListManager = self.fem_manager
+            instance: GlobalOptimizationData = self.fem_manager.global_data
             method_name = f.__name__
             method = getattr(
                 instance,
@@ -658,7 +671,7 @@ class AbstractOptimizer(OptimizationData):
 
         return wrapper
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_constant_value(
             self,
             name: str,
@@ -666,10 +679,11 @@ class AbstractOptimizer(OptimizationData):
             properties: dict[str, Any] | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ):
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_parameter(
             self,
             name: str,
@@ -681,10 +695,11 @@ class AbstractOptimizer(OptimizationData):
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
+            supress_duplicated_name_check: bool = False,
     ) -> None:
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_expression_string(
             self,
             name: str,
@@ -692,10 +707,11 @@ class AbstractOptimizer(OptimizationData):
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ) -> None:
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_expression_sympy(
             self,
             name: str,
@@ -703,10 +719,11 @@ class AbstractOptimizer(OptimizationData):
             properties: dict[str, ...] | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ) -> None:
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_expression(
             self,
             name: str,
@@ -716,10 +733,11 @@ class AbstractOptimizer(OptimizationData):
             kwargs: dict | None = None,
             *,
             pass_to_fem: bool = True,
+            supress_duplicated_name_check: bool = False,
     ) -> None:
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_categorical_parameter(
             self,
             name: str,
@@ -729,10 +747,11 @@ class AbstractOptimizer(OptimizationData):
             *,
             pass_to_fem: bool = True,
             fix: bool = False,
+            supress_duplicated_name_check: bool = False,
     ) -> None:
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_objective(
             self,
             name: str,
@@ -740,10 +759,11 @@ class AbstractOptimizer(OptimizationData):
             direction: DIRECTION = 'minimize',
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ) -> None:
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_objectives(
             self,
             names: str | list[str],
@@ -752,10 +772,11 @@ class AbstractOptimizer(OptimizationData):
             directions: DIRECTION | Sequence[DIRECTION | None] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ):
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_constraint(
             self,
             name: str,
@@ -766,16 +787,18 @@ class AbstractOptimizer(OptimizationData):
             kwargs: dict | None = None,
             strict: bool = True,
             using_fem: bool | None = None,
+            supress_duplicated_name_check: bool = False,
     ):
         pass
 
-    @_dispatch_no_fem_context_data_store_method
+    @_dispatch_global_data_store
     def add_other_output(
             self,
             name: str,
             fun: Callable[..., float],
             args: tuple | None = None,
             kwargs: dict | None = None,
+            supress_duplicated_name_check: bool = False,
     ):
         pass
 
@@ -904,7 +927,7 @@ class AbstractOptimizer(OptimizationData):
         ) -> _FReturnValue:
             # create context
             if history is not None:
-                record_to_history = history.recording(opt_.fem_manager._fems)
+                record_to_history = history.recording(opt_.fem_manager.fems)
             else:
 
                 class DummyRecordContext:
@@ -921,12 +944,12 @@ class AbstractOptimizer(OptimizationData):
 
                 # noinspection PyMethodParameters
                 def __enter__(self_):
-                    opt_.fem.trial_preprocess_per_fidelity()
+                    opt_.fem_manager.all_fems_as_a_fem.trial_postprocess_per_fidelity()
                     return self_
 
                 # noinspection PyMethodParameters
                 def __exit__(self_, exc_type, exc_val, exc_tb):
-                    opt_.fem.trial_postprocess_per_fidelity()
+                    opt_.fem_manager.all_fems_as_a_fem.trial_postprocess_per_fidelity()
 
             # processing with recording
             # postprocess_after_recording より後に trial_postprocess を
@@ -937,7 +960,7 @@ class AbstractOptimizer(OptimizationData):
                 empty_other_outputs: TrialFunctionOutput = TrialFunctionOutput()
                 empty_y = TrialOutput()
                 # (Required for direction recording to graph even if the value is nan)
-                for ctx, __ in zip(*opt_._contexts_and_update_modes):
+                for ctx in opt_.fem_manager.contexts:
                     empty_y.update({
                         obj_name: ObjectiveResult(obj, ctx.fem, float('nan'))
                         for obj_name, obj in ctx.objectives.items()
@@ -961,26 +984,34 @@ class AbstractOptimizer(OptimizationData):
                     record.state = TrialState.skipped
                     raise SkipSolve
 
+                from contextlib import nullcontext
+
                 # start solve per FEM
                 if opt_.sub_fidelity_name != MAIN_FIDELITY_NAME:
                     logger.info('----------')
                     logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
-                for ctx, update_mode in zip(*opt_._contexts_and_update_modes):
+                for ctx in opt_.fem_manager.contexts:
                     logger.info(_('input variables:'))
                     logger.info(parameters)
 
                     # ===== update FEM parameter =====
-                    if update_mode.update_fem:
-                        pass_to_fem = self.opt.variable_manager.get_variables(
+                    with nullcontext():
+                        # 共通
+                        pass_to_fem = self.opt.fem_manager.global_data.variable_manager.get_variables(
                             filter="pass_to_fem",
                             format="raw",
                         )
+                        # FEM ごとのものを追加
+                        pass_to_fem.update(ctx.variable_manager.get_variables(
+                            filter="pass_to_fem",
+                            format="raw",
+                        ))
                         logger.info(_('updating variables...'))
                         ctx.fem.update_parameter(pass_to_fem)
                         opt_._check_and_raise_interruption()
 
                     # ===== evaluate hard constraint =====
-                    if update_mode.update_function:
+                    with nullcontext():
                         ctx_hard_c = TrialConstraintOutput()
                         logger.info(_('evaluating constraint functions...'))
 
@@ -1014,7 +1045,7 @@ class AbstractOptimizer(OptimizationData):
                             raise HardConstraintViolation
 
                     # ===== update FEM =====
-                    if update_mode.update_fem:
+                    with nullcontext():
                         logger.info(_('Solving FEM...'))
 
                         try:
@@ -1037,7 +1068,7 @@ class AbstractOptimizer(OptimizationData):
                             raise e
 
                     # ===== evaluate y =====
-                    if update_mode.update_function:
+                    with nullcontext():
                         logger.info(_('evaluating objective functions...'))
 
                         try:
@@ -1061,7 +1092,7 @@ class AbstractOptimizer(OptimizationData):
                             raise e
 
                     # ===== evaluate soft constraint =====
-                    if update_mode.update_function:
+                    with nullcontext():
                         ctx_soft_c = TrialConstraintOutput()
                         logger.info(_('evaluating remaining constraints...'))
 
@@ -1082,7 +1113,7 @@ class AbstractOptimizer(OptimizationData):
                             raise e
 
                     # ===== evaluate other functions =====
-                    if update_mode.update_function:
+                    with nullcontext():
                         logger.info(_('evaluating other functions...'))
 
                         ctx_other_outputs = TrialFunctionOutput()
@@ -1183,12 +1214,16 @@ class AbstractOptimizer(OptimizationData):
 
                 # noinspection PyMethodParameters
                 def __enter__(self_):
-                    self.opt.fems.trial_preprocess()
+                    self.opt.fem_manager.all_fems_as_a_fem.trial_preprocess()
+                    for sub in self.opt.sub_fidelity_models.values():
+                        sub.fem_manager.all_fems_as_a_fem.trial_preprocess()
                     return self_
 
                 # noinspection PyMethodParameters
                 def __exit__(self_, exc_type, exc_val, exc_tb):
-                    self.opt.fems.trial_postprocess()
+                    self.opt.fem_manager.all_fems_as_a_fem.trial_postprocess()
+                    for sub in self.opt.sub_fidelity_models.values():
+                        sub.fem_manager.all_fems_as_a_fem.trial_postprocess()
 
             with AllFEMPrePostPerTrial():
 
@@ -1289,7 +1324,7 @@ class AbstractOptimizer(OptimizationData):
             self.worker_status.value = WorkerStatus.initializing
 
             self.worker_status.value = WorkerStatus.launching_fem
-            self.fem._setup_after_parallel(self)
+            self.fem_manager.all_fems_as_a_fem._setup_after_parallel(self)
 
             if wait_other_process_setup:
                 self.worker_status.value = WorkerStatus.waiting
@@ -1356,29 +1391,22 @@ class AbstractOptimizer(OptimizationData):
         self._initialize_problem()
 
         for ctx in self.fem_manager.contexts:
-            # 各 context の fem 特有の問題設定は
-            # 各 context が読み込む必要がある。
-            # 直接 fem.load_... を呼んではいけない。
-            ctx._load_problem_from_fem()
+            # femlist が _load すると各 FEMInterface が
+            # 想定するのと異なる object_pass_to_fun (=Sequence)が
+            # 渡されてしまうので、
+            # 各 context のみが _load_... を行う必要がある。
+            if not isinstance(ctx, GlobalOptimizationData):
+                ctx._load_problem_from_fem()
 
-            # さらに、global な最適化問題設定にも反映させる
+            # optimizer に反映する
             self.objectives.update(ctx.objectives)
             self.constraints.update(ctx.constraints)
             self.other_outputs.update(ctx.other_outputs)
             self.variable_manager.variables.update(ctx.variable_manager.variables)
 
-        # 自身に直接紐づく context を同期
-        self.objectives.update(self.fem_manager.objectives)
-        self.constraints.update(self.fem_manager.constraints)
-        self.other_outputs.update(self.fem_manager.other_outputs)
-        self.variable_manager.variables.update(
-            self.fem_manager.variable_manager.variables
-        )
-
-        # 問題の同期が終わったら optimizer の情報を
-        # 必要とする interface 向けの処理
+        # 特殊処理が必要な場合は最後に fem の責任で行う
         for ctx in self.fem_manager.contexts:
-            ctx.fem._contact_optimizer(self)
+            ctx.fem.contact_to_optimizer(self, self.fem_manager.global_data, ctx)
 
     # noinspection PyMethodMayBeStatic
     def _get_additional_data(self) -> dict:
@@ -1386,8 +1414,9 @@ class AbstractOptimizer(OptimizationData):
 
     def _collect_additional_data(self) -> dict:
         additional_data = {}
+
         additional_data.update(self._get_additional_data())
-        additional_data.update(self.fem._get_additional_data())
+        additional_data.update(self.fem_manager.all_fems_as_a_fem._get_additional_data())
         return additional_data
 
     def _finalize_history(self):
@@ -1410,14 +1439,14 @@ class AbstractOptimizer(OptimizationData):
 
             # check compatibility with fem if needed
             for ctx in self.fem_manager.contexts:
+                # 共通
+                for variable in self.fem_manager.global_data.variable_manager.variables.values():
+                    if variable.pass_to_fem:
+                        ctx.fem._check_param_and_raise(variable.name)
+                # ctx ごと
                 for variable in ctx.variable_manager.variables.values():
                     if variable.pass_to_fem:
                         ctx.fem._check_param_and_raise(variable.name)
-
-            for variable in self.variable_manager.variables.values():
-                if variable.properties.get('fem_ctx') is not None:
-                    if variable.pass_to_fem:
-                        self.fem._check_param_and_raise(variable.name)
 
             # check the enqueued trials is
             # compatible with current optimization
@@ -1496,33 +1525,6 @@ class AbstractOptimizer(OptimizationData):
         # setup if needed
         self._setup_before_parallel()
         self._setup_after_parallel()
-
-    @property
-    def _contexts_and_update_modes(self) -> tuple[
-        list[OptimizationDataPerFEM], list[_UpdateMode]
-    ]:
-        """Usage: for ctx, update_mode in zip(*self._contexts_and_update_modes)"""
-        contexts: list[OptimizationDataPerFEM] = []
-        update_modes: list[_UpdateMode] = []
-        for ctx in self.fem_manager.contexts:
-            contexts.append(ctx)
-            update_modes.append(
-                _UpdateMode(
-                    update_fem=True,
-                    update_function=True,
-                )
-            )
-        contexts.append(
-            self.fem_manager
-        )
-        update_modes.append(
-            _UpdateMode(
-                update_fem=False,
-                update_function=True,
-            )
-        )
-
-        return contexts, update_modes
 
 
 class SubFidelityModel(AbstractOptimizer):

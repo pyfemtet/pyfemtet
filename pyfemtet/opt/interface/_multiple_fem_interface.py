@@ -7,7 +7,11 @@ from pyfemtet.opt.problem.problem import TrialInput
 
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, OptimizationDataPerFEM
+    from pyfemtet.opt.optimizer._base_optimizer import (
+        AbstractOptimizer,
+        GlobalOptimizationData,
+        OptimizationDataPerFEM,
+    )
 
 
 class FEMListInterface(AbstractFEMInterface):
@@ -35,7 +39,7 @@ class FEMListInterface(AbstractFEMInterface):
 
     # TODO: この属性がそもそも AbstractFEMInterface に必要か検討する。
     @property
-    def _load_problem_from_fem(self):
+    def _load_problem_from_fem(self) -> bool:
         return any(fem._load_problem_from_fem for fem in self._fems)
 
     def update_parameter(self, x: TrialInput) -> None:
@@ -94,9 +98,14 @@ class FEMListInterface(AbstractFEMInterface):
         for fem in self._fems:
             fem.load_constraints(opt)
 
-    def _contact_optimizer(self, opt: AbstractOptimizer):
+    def contact_to_optimizer(
+            self,
+            opt: AbstractOptimizer,
+            global_data: GlobalOptimizationData,
+            ctx: OptimizationDataPerFEM,
+    ):
         for fem in self._fems:
-            fem._contact_optimizer(opt)
+            fem.contact_to_optimizer(opt, global_fem, ctx)
 
     def close(self, *args, **kwargs):
         # TODO: 引数の取り扱い

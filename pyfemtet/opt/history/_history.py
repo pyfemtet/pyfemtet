@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias, Literal
+from typing import TYPE_CHECKING, TypeAlias, Literal, Sequence
 
 import os
 import csv
@@ -1423,7 +1423,7 @@ class History:
     ):
         return get_trial_name(trial, fidelity, sub_sampling, row)
 
-    def recording(self, fems: FEMListInterface):
+    def recording(self, fems: Sequence[AbstractFEMInterface]):
         """:meta private:"""
 
         # noinspection PyMethodParameters
