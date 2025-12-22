@@ -22,7 +22,6 @@ __all__ = [
 
 
 class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
-    _load_problem_from_fem = True
     current_obj_values: dict[str, float]
     train_history: History
 

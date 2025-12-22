@@ -42,7 +42,6 @@ __all__ = [
 class AbstractFEMInterface:
 
     kwargs: dict = {}
-    _load_problem_from_fem: bool = False
     current_prm_values: TrialInput
     _tmp_dir: tempfile.TemporaryDirectory
     _file_suffix: str

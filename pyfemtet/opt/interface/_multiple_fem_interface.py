@@ -37,11 +37,6 @@ class FEMListInterface(AbstractFEMInterface):
     def pop(self, index: int) -> AbstractFEMInterface:
         return self._fems.pop(index)
 
-    # TODO: この属性がそもそも AbstractFEMInterface に必要か検討する。
-    @property
-    def _load_problem_from_fem(self) -> bool:
-        return any(fem._load_problem_from_fem for fem in self._fems)
-
     def update_parameter(self, x: TrialInput) -> None:
         for fem in self._fems:
             fem.update_parameter(x)

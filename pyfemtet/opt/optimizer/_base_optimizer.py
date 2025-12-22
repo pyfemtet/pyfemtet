@@ -518,10 +518,9 @@ class OptimizationDataPerFEM(OptimizationData):
         return self._other_outputs_common(out, self.fem)
 
     def _load_problem_from_fem(self):
-        if self.fem._load_problem_from_fem:
-            self.fem.load_variables(self)
-            self.fem.load_objectives(self)
-            self.fem.load_constraints(self)
+        self.fem.load_variables(self)
+        self.fem.load_objectives(self)
+        self.fem.load_constraints(self)
 
 
 class FEMListForGlobal(FEMListInterface):

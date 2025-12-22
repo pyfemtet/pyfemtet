@@ -211,7 +211,6 @@ class ExcelInterface(COMInterface):
     terminate_excel_when_quit: bool  # 終了時に Excel を終了するかどうか
     interactive: bool  # excel を対話モードにするかどうか
 
-    _load_problem_from_fem = True
     _excel_pid: int
     _excel_hwnd: int
     _with_femtet_autosave_setting: bool = True  # Femtet の自動保存機能の自動設定を行うかどうか。Femtet がインストールされていない場合はオフにする。クラス変数なので、インスタンス化前に設定する。

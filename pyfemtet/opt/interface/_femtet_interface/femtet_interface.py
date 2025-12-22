@@ -132,7 +132,7 @@ class FemtetInterface(COMInterface):
             open_result_with_gui: bool = True,
             always_open_copy=False,
             # ユーザーはメソッドを使うことを推奨。GUI などで使用。
-            parametric_output_indexes_use_as_objective: dict[int, str | float] = None,
+            parametric_output_indexes_use_as_objective: dict[int, str | float] | None = None,
     ):
         if parametric_output_indexes_use_as_objective is not None:
             if FemtetInterface._show_parametric_index_warning:
@@ -164,6 +164,8 @@ class FemtetInterface(COMInterface):
         self.connected_method = "unconnected"
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
+        if parametric_output_indexes_use_as_objective is None:
+            parametric_output_indexes_use_as_objective = {}
         self.parametric_output_indexes_use_as_objective: dict[int, str | float] = parametric_output_indexes_use_as_objective
         self._original_autosave_enabled = _get_autosave_enabled()
         _set_autosave_enabled(False)
@@ -308,17 +310,11 @@ class FemtetInterface(COMInterface):
 
         index = {number - 1: direction}
 
-        if self.parametric_output_indexes_use_as_objective is None:
-            self.parametric_output_indexes_use_as_objective = index
-
-        else:
-            self.parametric_output_indexes_use_as_objective.update(index)
-
-        self._load_problem_from_fem = True
+        self.parametric_output_indexes_use_as_objective.update(index)
 
     @AbstractFEMInterface._with_reopen
     def load_objectives(self, opt: AbstractOptimizer):
-        if self.parametric_output_indexes_use_as_objective is not None:
+        if len(self.parametric_output_indexes_use_as_objective) > 0:
             indexes = list(self.parametric_output_indexes_use_as_objective.keys())
             directions = list(self.parametric_output_indexes_use_as_objective.values())
             add_parametric_results_as_objectives(

@@ -53,12 +53,10 @@ def _class_factory(FEMClass: type[AbstractFEMInterface]) -> type[AbstractFEMInte
 
         # 構造が複雑で型ヒントが働かないため
         _excel_initialized: bool
-        _load_problem_from_fem: bool
 
         def init_excel(self, *args, **kwargs):
             ExcelInterface.__init__(self, *args, **kwargs)
             self._excel_initialized = True
-            self._load_problem_from_fem = True
 
         def _setup_before_parallel(self, scheduler_address=None):
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'
