@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 
 class RECCSV:
@@ -22,7 +23,8 @@ class RECCSV:
             self,
             check_columns_float,
             check_columns_str,
-            dif_df
+            dif_df,
+            rtol=None,
     ):
         if self.record:
             os.rename(self.csv_path, self.reccsv_path)
@@ -34,10 +36,15 @@ class RECCSV:
             for col in check_columns_float:
                 ref = [f'{v: .4e}' for v in ref_df[col].values]
                 dif = [f'{v: .4e}' for v in dif_df[col].values]
-                is_ok = [r == d for r, d in zip(ref, dif)]
+                if rtol is None:
+                    is_ok = [r == d for r, d in zip(ref, dif)]
+                else:
+                    is_ok = [np.isclose(float(r), float(d), atol=0., rtol=rtol)
+                             for r, d in zip(ref, dif)]
                 assert all(is_ok), f'{col} error.'
             for col in check_columns_str:
                 ref = ref_df[col].values
                 dif = dif_df[col].values
                 is_ok = [r == d for r, d in zip(ref, dif)]
                 assert all(is_ok), f'{col} error.'
+            print("RECCSV check passed.")
