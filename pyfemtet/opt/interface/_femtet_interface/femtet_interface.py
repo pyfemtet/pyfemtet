@@ -982,7 +982,7 @@ class FemtetInterface(COMInterface):
             is_Gaudi_method=True,
         )
 
-        if self.parametric_output_indexes_use_as_objective is not None:
+        if len(self.parametric_output_indexes_use_as_objective) > 0:
 
             # PyFemtet で保存させる pdt パスを決定する
             pdt_path = self.Femtet.ResultFilePath + ".pdt"
