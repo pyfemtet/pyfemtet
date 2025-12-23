@@ -53,7 +53,23 @@ class FEMOpt:
             opt: AbstractOptimizer = None,
     ):
         self.opt: AbstractOptimizer = opt or OptunaOptimizer()
-        self.opt.fem = fem or FemtetInterface()
+        
+        # fem が与えられていれば opt にセット
+        if fem is not None:
+            self.opt.fem = fem
+
+        # この時点で opt に fem がセットされていなければ
+        # デフォルトをセット
+        if len(self.opt.fem_manager.fems) == 0:
+            self.opt.fem = FemtetInterface()
+        
+        # fem が正しくセットされているか確認
+        if len(self.opt.fem_manager.fems) == 0:
+            raise RuntimeError(
+                "FEM interface could not be initialized. "
+                "Please ensure that a valid FEM interface is provided or can be created."
+            )
+        
         self.monitor_info: dict[str, str | int | None] = dict(
             host=None, port=None,
         )
@@ -294,14 +310,15 @@ class FEMOpt:
             logger.info(_('Setting up...'))
 
             # finalize history
-            self.opt._load_problem_from_fem()
+            self.opt._refresh_problem()
+            self.opt.variable_manager.resolve()
             self.opt._finalize_history()
 
             # optimizer-specific setup after history finalized
             self.opt._setup_before_parallel()
 
             # setup FEM (mainly for distributing files)
-            self.opt.fem._setup_before_parallel()
+            self.opt.fem_manager.all_fems_as_a_fem._setup_before_parallel()
 
             # create worker status list
             entire_status = WorkerStatus(ENTIRE_PROCESS_STATUS_KEY)

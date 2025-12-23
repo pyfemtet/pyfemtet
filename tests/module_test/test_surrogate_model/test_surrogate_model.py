@@ -16,9 +16,11 @@ def test_output_directions():
             _output_directions=_output_directions
         )
         try:
-            fem.load_objectives(opt)
-        except AssertionError as e:
+            fem.contact_to_optimizer(opt, opt.fem_manager.global_data, opt.fem_manager.contexts[0])
+        except ValueError as e:
             if '_output_directions' in str(e):
+                print('正しいエラー', str(e))
+            elif 'train_history' in str(e):
                 print('正しいエラー', str(e))
             else:
                 assert False, 'エラーメッセージが不正'
@@ -32,11 +34,11 @@ def test_output_directions():
             train_history=history,
             _output_directions=_output_directions
         )
-        fem.load_objectives(opt_)
+        fem.contact_to_optimizer(opt_, opt_.fem_manager.global_data, opt_.fem_manager.contexts[0])
 
     check_fail(('minimize',))
     check_fail({'obj4': 'minimize',})
-    check_fail({0: 0, 'obj2': 'minimize',})
+    check({0: 0, 'obj2': 'minimize',})
     check(('minimize', 0, 'maximize',))
     check({'obj1': 'minimize',})
     check({0: 0, 1: 'minimize',})

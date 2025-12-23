@@ -51,7 +51,7 @@ def impl_load_femtet_with_sw_with_excel_settings():
 
         opt.fem = fem
 
-        opt._load_problem_from_fem()
+        opt._refresh_problem()
         opt._finalize_history()
         fem._setup_before_parallel()
         fem._setup_after_parallel(opt)

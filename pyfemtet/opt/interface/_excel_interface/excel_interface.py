@@ -211,7 +211,6 @@ class ExcelInterface(COMInterface):
     terminate_excel_when_quit: bool  # 終了時に Excel を終了するかどうか
     interactive: bool  # excel を対話モードにするかどうか
 
-    _load_problem_from_fem = True
     _excel_pid: int
     _excel_hwnd: int
     _with_femtet_autosave_setting: bool = True  # Femtet の自動保存機能の自動設定を行うかどうか。Femtet がインストールされていない場合はオフにする。クラス変数なので、インスタンス化前に設定する。
@@ -602,6 +601,7 @@ class ExcelInterface(COMInterface):
                     upper_bound=ub,
                     step=step,
                     fix=not use,
+                    supress_duplicated_name_check=True,
                 )
 
             elif kind == 'Categorical':
@@ -614,6 +614,7 @@ class ExcelInterface(COMInterface):
                     initial_value=value,
                     choices=choices,
                     fix=not use,
+                    supress_duplicated_name_check=True,
                 )
 
             else:
@@ -660,6 +661,7 @@ class ExcelInterface(COMInterface):
                     direction=direction,
                     fun=_ScapeGoatObjective(),
                     kwargs=dict(name=name),
+                    supress_duplicated_name_check=True,
                 )
 
     def load_constraints(self, opt: AbstractOptimizer, raise_if_no_keyword=False):
@@ -721,6 +723,7 @@ class ExcelInterface(COMInterface):
                     fun=_ScapeGoatObjective(),
                     kwargs=dict(name=name),
                     using_fem=not calc_before_solve,
+                    supress_duplicated_name_check=True,
                 )
 
     def objective_from_excel(self, _, name: str):

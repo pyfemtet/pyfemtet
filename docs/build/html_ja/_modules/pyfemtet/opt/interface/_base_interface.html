@@ -109,7 +109,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_module_logger</span><span class="p">(</span><span class="s1">&#39;opt.interface&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">FEMContext</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;AbstractFEMInterface&#39;</span><span class="p">,</span>
@@ -146,6 +146,38 @@
         <span class="c1"># 現在の設計変数に基づいて solve を行い、</span>
         <span class="c1"># Objective が正しく値を計算できるようにする</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="AbstractFEMInterface.trial_preprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.trial_preprocess">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># trial の最初に呼ばれる前処理。</span>
+        <span class="c1"># 変数更新よりも先に呼ばれることを想定。</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AbstractFEMInterface.trial_postprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.trial_postprocess">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># trial の最後に呼ばれる後処理</span>
+        <span class="c1"># postprocess_after_recording よりも後に呼ぶことを想定。</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AbstractFEMInterface.trial_preprocess_per_fidelity">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.trial_preprocess_per_fidelity">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_preprocess_per_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># fidelity ごとの処理に入ってから最初に呼ばれる前処理</span>
+        <span class="c1"># 変数更新よりも先に呼ばれることを想定。</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AbstractFEMInterface.trial_postprocess_per_fidelity">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.trial_postprocess_per_fidelity">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_postprocess_per_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># fidelity ごとの処理が終わった後に呼ばれる後処理</span>
+        <span class="c1"># postprocess_after_recording よりも後に呼ぶことを想定。</span>
+        <span class="k">pass</span></div>
 
 
     <span class="c1"># ===== Function =====</span>
@@ -254,6 +286,19 @@
 
     <span class="c1"># ===== setup =====</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_with_reopen</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reopen</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+<div class="viewcode-block" id="AbstractFEMInterface.reopen">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.reopen">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reopen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_before_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_address</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span>
 
@@ -265,21 +310,24 @@
 
 <div class="viewcode-block" id="AbstractFEMInterface.load_variables">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.load_variables">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractFEMInterface.load_objectives">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.load_objectives">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractFEMInterface.load_constraints">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.load_constraints">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_contact_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
+        <span class="k">pass</span>
 
 <div class="viewcode-block" id="AbstractFEMInterface.close">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractFEMInterface.close">[ドキュメント]</a>

@@ -32,7 +32,7 @@ from pyfemtet._util.femtet_autosave import *
 from pyfemtet._util.femtet_access_inspection import *
 
 from pyfemtet.dispatch_extensions import *
-from pyfemtet.opt.interface._base_interface import COMInterface
+from pyfemtet.opt.interface._base_interface import AbstractFEMInterface, COMInterface
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.history import get_trial_name
@@ -132,7 +132,7 @@ class FemtetInterface(COMInterface):
             open_result_with_gui: bool = True,
             always_open_copy=False,
             # ユーザーはメソッドを使うことを推奨。GUI などで使用。
-            parametric_output_indexes_use_as_objective: dict[int, str | float] = None,
+            parametric_output_indexes_use_as_objective: dict[int, str | float] | None = None,
     ):
         if parametric_output_indexes_use_as_objective is not None:
             if FemtetInterface._show_parametric_index_warning:
@@ -164,8 +164,9 @@ class FemtetInterface(COMInterface):
         self.connected_method = "unconnected"
         self.max_api_retry = 3
         self.strictly_pid_specify = strictly_pid_specify
-        self.parametric_output_indexes_use_as_objective = parametric_output_indexes_use_as_objective
-        self._load_problem_from_fem = self.parametric_output_indexes_use_as_objective is not None
+        if parametric_output_indexes_use_as_objective is None:
+            parametric_output_indexes_use_as_objective = {}
+        self.parametric_output_indexes_use_as_objective: dict[int, str | float] = parametric_output_indexes_use_as_objective
         self._original_autosave_enabled = _get_autosave_enabled()
         _set_autosave_enabled(False)
         self._warn_if_undefined_variable = True
@@ -216,6 +217,22 @@ class FemtetInterface(COMInterface):
         # femprj を開く
         self.open(self.femprj_path, self.model_name)
 
+    def reopen(self):
+        # ParametricIF は solve ~ GetResult の間に
+        # モデル切替が発生すると動作しないため
+        # optimizer の実装で ctx ごとに一気に処理する形にしており
+        # そのため reopen() の前に SaveProject しなくてよい
+        if self.Femtet.Project != self.femprj_path:
+            self.open(self.femprj_path, self.model_name)
+
+        elif self.Femtet.AnalysisModelName != self.model_name:
+            if hasattr(self.Femtet, "SwitchAnalysisModel"):
+                succeeded = self.Femtet.SwitchAnalysisModel(self.model_name)
+                if not succeeded:
+                    self.open(self.femprj_path, self.model_name)
+            else:
+                self.open(self.femprj_path, self.model_name)
+
     def quit(self, timeout=15, force=True):
         """Force to terminate connected Femtet."""
         logger.info(_('Closing Femtet (pid = {pid}) ...', pid=self.femtet_pid))
@@ -233,6 +250,9 @@ class FemtetInterface(COMInterface):
         Please use `quit()` method.
 
         """
+
+        if not self.femtet_is_alive():
+            return
 
         _set_autosave_enabled(self._original_autosave_enabled)
 
@@ -290,20 +310,16 @@ class FemtetInterface(COMInterface):
 
         index = {number - 1: direction}
 
-        if self.parametric_output_indexes_use_as_objective is None:
-            self.parametric_output_indexes_use_as_objective = index
+        self.parametric_output_indexes_use_as_objective.update(index)
 
-        else:
-            self.parametric_output_indexes_use_as_objective.update(index)
-
-        self._load_problem_from_fem = True
-
+    @AbstractFEMInterface._with_reopen
     def load_objectives(self, opt: AbstractOptimizer):
-        indexes = list(self.parametric_output_indexes_use_as_objective.keys())
-        directions = list(self.parametric_output_indexes_use_as_objective.values())
-        add_parametric_results_as_objectives(
-            opt, self.Femtet, indexes, directions
-        )
+        if len(self.parametric_output_indexes_use_as_objective) > 0:
+            indexes = list(self.parametric_output_indexes_use_as_objective.keys())
+            directions = list(self.parametric_output_indexes_use_as_objective.values())
+            add_parametric_results_as_objectives(
+                opt, self.Femtet, indexes, directions
+            )
 
     def _check_using_fem(self, fun: callable):
         return _is_access_femtet(fun)
@@ -809,6 +825,7 @@ class FemtetInterface(COMInterface):
 
     # ===== model check and solve =====
 
+    @AbstractFEMInterface._with_reopen
     def _check_param_and_raise(self, param_name) -> None:
         """Check param_name is set in femprj file or not.
 
@@ -840,6 +857,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
+    @AbstractFEMInterface._with_reopen
     def update_parameter(self, x: TrialInput, with_warning=False) -> None | list[str]:
         """Update parameter of femprj."""
         COMInterface.update_parameter(self, x)
@@ -929,6 +947,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
+    @AbstractFEMInterface._with_reopen
     def update_model(self) -> None:
         """Updates the analysis model only."""
 
@@ -950,6 +969,7 @@ class FemtetInterface(COMInterface):
             is_Gaudi_method=True,
         )
 
+    @AbstractFEMInterface._with_reopen
     def solve(self) -> None:
         """Execute FEM analysis."""
 
@@ -962,7 +982,7 @@ class FemtetInterface(COMInterface):
             is_Gaudi_method=True,
         )
 
-        if self.parametric_output_indexes_use_as_objective is not None:
+        if len(self.parametric_output_indexes_use_as_objective) > 0:
 
             # PyFemtet で保存させる pdt パスを決定する
             pdt_path = self.Femtet.ResultFilePath + ".pdt"
@@ -1016,6 +1036,7 @@ class FemtetInterface(COMInterface):
             args=(self.open_result_with_gui,),
         )
 
+    @AbstractFEMInterface._with_reopen
     def preprocess(self, Femtet):
         """A method called just before :func:`solve`.
 
@@ -1027,6 +1048,7 @@ class FemtetInterface(COMInterface):
         """
         pass
 
+    @AbstractFEMInterface._with_reopen
     def postprocess(self, Femtet):
         """A method called just after :func:`solve`.
 
@@ -1038,6 +1060,7 @@ class FemtetInterface(COMInterface):
         """
         pass
 
+    @AbstractFEMInterface._with_reopen
     def update(self) -> None:
         """See :func:`FEMInterface.update`"""
         self.update_model()
@@ -1047,6 +1070,7 @@ class FemtetInterface(COMInterface):
 
     # ===== postprocess after recording =====
 
+    @AbstractFEMInterface._with_reopen
     def _create_postprocess_args(self):
         try:
             file_content = self._create_result_file_content()
@@ -1116,6 +1140,7 @@ class FemtetInterface(COMInterface):
                     if os.path.isfile(pdt_path_to_remove):
                         os.remove(pdt_path_to_remove)
 
+    @AbstractFEMInterface._with_reopen
     def _create_result_file_content(self):
         """Called after solve"""
         if self.save_pdt.lower() in ['all', 'optimal']:
@@ -1140,6 +1165,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
+    @AbstractFEMInterface._with_reopen
     def _create_jpg_content(self):
         result_dir = self.femprj_path.replace(".femprj", ".Results")
         jpg_path = os.path.join(result_dir, self.model_name + ".jpg")

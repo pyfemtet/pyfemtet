@@ -114,7 +114,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._util.femtet_access_inspection</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.dispatch_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">COMInterface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface._base_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">COMInterface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.problem</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_trial_name</span>
@@ -300,6 +300,25 @@
         <span class="c1"># femprj を開く</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span>
 
+<div class="viewcode-block" id="FemtetInterface.reopen">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.reopen">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reopen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># ParametricIF は solve ~ GetResult の間に</span>
+        <span class="c1"># モデル切替が発生すると動作しないため</span>
+        <span class="c1"># optimizer の実装で ctx ごとに一気に処理する形にしており</span>
+        <span class="c1"># そのため reopen() の前に SaveProject しなくてよい</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">Project</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">AnalysisModelName</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">,</span> <span class="s2">&quot;SwitchAnalysisModel&quot;</span><span class="p">):</span>
+                <span class="n">succeeded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="o">.</span><span class="n">SwitchAnalysisModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">succeeded</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="FemtetInterface.quit">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.quit">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -322,6 +341,9 @@
 <span class="sd">        Please use `quit()` method.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">femtet_is_alive</span><span class="p">():</span>
+            <span class="k">return</span>
 
         <span class="n">_set_autosave_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_autosave_enabled</span><span class="p">)</span>
 
@@ -391,15 +413,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_problem_from_fem</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="FemtetInterface.load_objectives">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.load_objectives">[ドキュメント]</a>
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
         <span class="n">indexes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">directions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parametric_output_indexes_use_as_objective</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="n">add_parametric_results_as_objectives</span><span class="p">(</span>
             <span class="n">opt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">,</span> <span class="n">indexes</span><span class="p">,</span> <span class="n">directions</span>
-        <span class="p">)</span></div>
-
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_using_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="nb">callable</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_is_access_femtet</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
@@ -914,6 +934,7 @@
 
     <span class="c1"># ===== model check and solve =====</span>
 
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_param_and_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check param_name is set in femprj file or not.</span>
 
@@ -945,8 +966,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="FemtetInterface.update_parameter">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.update_parameter">[ドキュメント]</a>
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">,</span> <span class="n">with_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update parameter of femprj.&quot;&quot;&quot;</span>
         <span class="n">COMInterface</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
@@ -1034,11 +1054,9 @@
         <span class="k">if</span> <span class="n">with_warning</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">warning_messages</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
+            <span class="k">return</span> <span class="kc">None</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.update_model">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.update_model">[ドキュメント]</a>
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the analysis model only.&quot;&quot;&quot;</span>
 
@@ -1058,11 +1076,9 @@
             <span class="n">ModelError</span><span class="p">,</span>  <span class="c1"># 生きてるのに失敗した場合</span>
             <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_MODEL_REDRAW_FAILED</span><span class="p">,</span>
             <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.solve">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.solve">[ドキュメント]</a>
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute FEM analysis.&quot;&quot;&quot;</span>
 
@@ -1127,11 +1143,9 @@
             <span class="n">error_message</span><span class="o">=</span><span class="n">Msg</span><span class="o">.</span><span class="n">ERR_OPEN_RESULT_FAILED</span><span class="p">,</span>
             <span class="n">is_Gaudi_method</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_result_with_gui</span><span class="p">,),</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.preprocess">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.preprocess">[ドキュメント]</a>
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A method called just before :func:`solve`.</span>
 
@@ -1141,11 +1155,9 @@
 <span class="sd">        to perform any desired preprocessing after</span>
 <span class="sd">        the model update and before solving.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">pass</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.postprocess">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.postprocess">[ドキュメント]</a>
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Femtet</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A method called just after :func:`solve`.</span>
 
@@ -1155,21 +1167,19 @@
 <span class="sd">        to perform any desired postprocessing after</span>
 <span class="sd">        the solve and before evaluating objectives.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">pass</span>
 
-
-<div class="viewcode-block" id="FemtetInterface.update">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.FemtetInterface.update">[ドキュメント]</a>
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;See :func:`FEMInterface.update`&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_model</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">)</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Femtet</span><span class="p">)</span>
 
     <span class="c1"># ===== postprocess after recording =====</span>
 
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_postprocess_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">file_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_result_file_content</span><span class="p">()</span>
@@ -1239,6 +1249,7 @@
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pdt_path_to_remove</span><span class="p">):</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pdt_path_to_remove</span><span class="p">)</span>
 
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_result_file_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after solve&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_pdt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;optimal&#39;</span><span class="p">]:</span>
@@ -1263,6 +1274,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
+    <span class="nd">@AbstractFEMInterface</span><span class="o">.</span><span class="n">_with_reopen</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_jpg_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">result_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">femprj_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.femprj&quot;</span><span class="p">,</span> <span class="s2">&quot;.Results&quot;</span><span class="p">)</span>
         <span class="n">jpg_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>

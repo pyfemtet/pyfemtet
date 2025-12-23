@@ -27,7 +27,11 @@ from pyfemtet.opt.problem.problem import *
 logger = get_module_logger('opt.interface', False)
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer import AbstractOptimizer
+    from pyfemtet.opt.optimizer._base_optimizer import (
+        AbstractOptimizer,
+        GlobalOptimizationData,
+        OptimizationDataPerFEM,
+    )
 
 __all__ = [
     'AbstractFEMInterface',
@@ -38,7 +42,6 @@ __all__ = [
 class AbstractFEMInterface:
 
     kwargs: dict = {}
-    _load_problem_from_fem: bool = False
     current_prm_values: TrialInput
     _tmp_dir: tempfile.TemporaryDirectory
     _file_suffix: str
@@ -57,6 +60,26 @@ class AbstractFEMInterface:
         # 現在の設計変数に基づいて solve を行い、
         # Objective が正しく値を計算できるようにする
         raise NotImplementedError
+
+    def trial_preprocess(self) -> None:
+        # trial の最初に呼ばれる前処理。
+        # 変数更新よりも先に呼ばれることを想定。
+        pass
+
+    def trial_postprocess(self) -> None:
+        # trial の最後に呼ばれる後処理
+        # postprocess_after_recording よりも後に呼ぶことを想定。
+        pass
+
+    def trial_preprocess_per_fidelity(self) -> None:
+        # fidelity ごとの処理に入ってから最初に呼ばれる前処理
+        # 変数更新よりも先に呼ばれることを想定。
+        pass
+
+    def trial_postprocess_per_fidelity(self) -> None:
+        # fidelity ごとの処理が終わった後に呼ばれる後処理
+        # postprocess_after_recording よりも後に呼ぶことを想定。
+        pass
 
     # ===== Function =====
 
@@ -164,6 +187,16 @@ class AbstractFEMInterface:
 
     # ===== setup =====
 
+    @staticmethod
+    def _with_reopen(method):
+        def wrapper(self, *args, **kwargs):
+            self.reopen()
+            return method(self, *args, **kwargs)
+        return wrapper
+
+    def reopen(self):
+        pass
+
     def _setup_before_parallel(self, scheduler_address=None) -> None:
         pass
 
@@ -173,13 +206,21 @@ class AbstractFEMInterface:
     def _check_param_and_raise(self, prm_name) -> None:
         pass
 
-    def load_variables(self, opt: AbstractOptimizer):
+    def load_variables(self, opt: OptimizationDataPerFEM):
         pass
 
-    def load_objectives(self, opt: AbstractOptimizer):
+    def load_objectives(self, opt: OptimizationDataPerFEM):
         pass
 
-    def load_constraints(self, opt: AbstractOptimizer):
+    def load_constraints(self, opt: OptimizationDataPerFEM):
+        pass
+
+    def contact_to_optimizer(
+            self,
+            opt: AbstractOptimizer,
+            global_data: GlobalOptimizationData,
+            ctx: OptimizationDataPerFEM,
+    ):
         pass
 
     def close(self, *args, **kwargs):  # context manager による予約語

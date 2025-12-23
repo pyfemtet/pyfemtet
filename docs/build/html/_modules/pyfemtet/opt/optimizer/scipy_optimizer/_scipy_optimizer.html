@@ -84,7 +84,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span><span class="p">,</span> <span class="n">contextmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -159,6 +159,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__n_succeeded_trials</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ScipyOptimizer.add_sub_fidelity_model">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.ScipyOptimizer.add_sub_fidelity_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_sub_fidelity_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sub_fidelity_model</span><span class="p">:</span> <span class="n">SubFidelityModel</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">:</span> <span class="n">Fidelity</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;ScipyOptimizer does not support multiple fidelity models.&quot;</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_n_succeeded_trials_in_current_optimization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># オーバーライド不可</span>

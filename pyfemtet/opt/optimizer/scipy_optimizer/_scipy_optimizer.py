@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from contextlib import suppress, contextmanager
+from contextlib import suppress
 from time import time
 
 import numpy as np
@@ -75,6 +75,9 @@ class ScipyOptimizer(AbstractOptimizer):
         self.timeout = None
         self._time_start = None
         self.__n_succeeded_trials = None
+
+    def add_sub_fidelity_model(self, name: str, sub_fidelity_model: SubFidelityModel, fidelity: Fidelity):
+        raise NotImplementedError("ScipyOptimizer does not support multiple fidelity models.")
 
     @property
     def _n_succeeded_trials_in_current_optimization(self) -> int | None:  # オーバーライド不可
@@ -234,9 +237,9 @@ class ScipyOptimizer(AbstractOptimizer):
             pass_to_fem = self.variable_manager.get_variables(
                 filter='pass_to_fem', format='raw'
             )
-            self.fem.update_parameter(pass_to_fem)
+            self.fem_manager.all_fems_as_a_fem.update_parameter(pass_to_fem)
 
-        return cns.eval(self.fem)
+        return cns.eval(self.fem_manager.all_fems_as_a_fem)
 
     def _get_scipy_constraints(self) -> (
         None
@@ -407,7 +410,7 @@ class ScipyOptimizer(AbstractOptimizer):
             self._n_succeeded_trials_in_current_optimization = 0
 
         # ===== run =====
-        with closing(self.fem):
+        with closing(self.fem_manager.all_fems_as_a_fem):
 
             with self._setting_status(), \
                     suppress(InterruptOptimization), \

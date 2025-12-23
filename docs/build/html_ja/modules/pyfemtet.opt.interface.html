@@ -126,7 +126,7 @@
 <span class="sig-name descname"><span class="pre">load_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.load_constraints"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.load_constraints" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>opt</strong> (<a class="reference internal" href="pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer.AbstractOptimizer"><em>AbstractOptimizer</em></a>) – </p>
+<dd class="field-odd"><p><strong>opt</strong> (<em>FEMContext</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -136,7 +136,7 @@
 <span class="sig-name descname"><span class="pre">load_objectives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.load_objectives"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.load_objectives" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>opt</strong> (<a class="reference internal" href="pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer.AbstractOptimizer"><em>AbstractOptimizer</em></a>) – </p>
+<dd class="field-odd"><p><strong>opt</strong> (<em>FEMContext</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -146,7 +146,7 @@
 <span class="sig-name descname"><span class="pre">load_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.load_variables"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.load_variables" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>opt</strong> (<a class="reference internal" href="pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer.AbstractOptimizer"><em>AbstractOptimizer</em></a>) – </p>
+<dd class="field-odd"><p><strong>opt</strong> (<em>FEMContext</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -158,6 +158,51 @@
 <dl class="field-list simple">
 <dt class="field-odd">戻り値<span class="colon">:</span></dt>
 <dd class="field-odd"><p>self (AbstractFEMInterface)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.reopen">
+<span class="sig-name descname"><span class="pre">reopen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.reopen"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.reopen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.trial_postprocess">
+<span class="sig-name descname"><span class="pre">trial_postprocess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.trial_postprocess"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.trial_postprocess" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.trial_postprocess_per_fidelity">
+<span class="sig-name descname"><span class="pre">trial_postprocess_per_fidelity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.trial_postprocess_per_fidelity"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.trial_postprocess_per_fidelity" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.trial_preprocess">
+<span class="sig-name descname"><span class="pre">trial_preprocess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.trial_preprocess"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.trial_preprocess" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractFEMInterface.trial_preprocess_per_fidelity">
+<span class="sig-name descname"><span class="pre">trial_preprocess_per_fidelity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_base_interface.html#AbstractFEMInterface.trial_preprocess_per_fidelity"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractFEMInterface.trial_preprocess_per_fidelity" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -210,17 +255,7 @@
 <span class="sig-name descname"><span class="pre">load_objectives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.html#AbstractSurrogateModelInterfaceBase.load_objectives"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.load_objectives" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>opt</strong> (<a class="reference internal" href="pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer.AbstractOptimizer"><em>AbstractOptimizer</em></a>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.load_variables">
-<span class="sig-name descname"><span class="pre">load_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.html#AbstractSurrogateModelInterfaceBase.load_variables"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.load_variables" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>opt</strong> (<a class="reference internal" href="pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer.AbstractOptimizer"><em>AbstractOptimizer</em></a>) – </p>
+<dd class="field-odd"><p><strong>opt</strong> (<em>FEMContext</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -785,13 +820,8 @@ Please use <cite>quit()</cite> method.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.load_objectives">
-<span class="sig-name descname"><span class="pre">load_objectives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_interface/femtet_interface.html#FemtetInterface.load_objectives"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.load_objectives" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>opt</strong> (<a class="reference internal" href="pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer" title="pyfemtet.opt.optimizer.AbstractOptimizer"><em>AbstractOptimizer</em></a>) – </p>
-</dd>
-</dl>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">load_objectives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.load_objectives" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun">
@@ -826,6 +856,7 @@ Please use <cite>quit()</cite> method.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.postprocess">
+<<<<<<< HEAD
 <span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Femtet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_interface/femtet_interface.html#FemtetInterface.postprocess"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.postprocess" title="Link to this definition"></a></dt>
 <dd><p>A method called just after <a class="reference internal" href="#pyfemtet.opt.interface.FemtetInterface.solve" title="pyfemtet.opt.interface.FemtetInterface.solve"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve()</span></code></a>.</p>
 <p>This method is called just after solve.
@@ -845,12 +876,26 @@ and overriding this method, it is possible
 to perform any desired preprocessing after
 the model update and before solving.</p>
 </dd></dl>
+=======
+<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.postprocess" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.preprocess" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+>>>>>>> feature/multiple-fem
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.quit">
 <span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_interface/femtet_interface.html#FemtetInterface.quit"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.quit" title="Link to this definition"></a></dt>
 <dd><p>接続された Femtet を強制終了します。</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.reopen">
+<span class="sig-name descname"><span class="pre">reopen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_interface/femtet_interface.html#FemtetInterface.reopen"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.reopen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.save_screenshot">
@@ -859,6 +904,7 @@ the model update and before solving.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.solve">
+<<<<<<< HEAD
 <span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_interface/femtet_interface.html#FemtetInterface.solve"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.solve" title="Link to this definition"></a></dt>
 <dd><p>Execute FEM analysis.</p>
 <dl class="field-list simple">
@@ -903,6 +949,25 @@ the model update and before solving.</p>
 </dd>
 </dl>
 </dd></dl>
+=======
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.solve" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.update_model">
+<span class="sig-name descname"><span class="pre">update_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.update_model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.update_parameter">
+<span class="sig-name descname"><span class="pre">update_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetInterface.update_parameter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+>>>>>>> feature/multiple-fem
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetInterface.use_parametric_output_as_objective">
@@ -963,8 +1028,12 @@ the model update and before solving.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithNXInterface.update_model">
 <span class="sig-name descname"><span class="pre">update_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.html#FemtetWithNXInterface.update_model"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithNXInterface.update_model" title="Link to this definition"></a></dt>
+<<<<<<< HEAD
 <dd><p>Updates the analysis model only.</p>
 </dd></dl>
+=======
+<dd></dd></dl>
+>>>>>>> feature/multiple-fem
 
 </dd></dl>
 
@@ -1009,14 +1078,22 @@ Please use <cite>quit()</cite> method.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_model">
 <span class="sig-name descname"><span class="pre">update_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.html#FemtetWithSolidworksInterface.update_model"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_model" title="Link to this definition"></a></dt>
+<<<<<<< HEAD
 <dd><p>Updates the analysis model only.</p>
+=======
+<dd><p>Update .sldprt</p>
+>>>>>>> feature/multiple-fem
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_parameter">
 <span class="sig-name descname"><span class="pre">update_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.html#FemtetWithSolidworksInterface.update_parameter"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksInterface.update_parameter" title="Link to this definition"></a></dt>
+<<<<<<< HEAD
 <dd><p>Update parameter of femprj.</p>
 <dl class="field-list simple">
+=======
+<dd><dl class="field-list simple">
+>>>>>>> feature/multiple-fem
 <dt class="field-odd">パラメータ<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
 </dd>
@@ -1032,6 +1109,159 @@ Please use <cite>quit()</cite> method.</p>
 <dt class="sig sig-object py" id="pyfemtet.opt.interface.FemtetWithSolidworksWithExcelSettingsInterface">
 <span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">FemtetWithSolidworksWithExcelSettingsInterface</span></span><a class="headerlink" href="#pyfemtet.opt.interface.FemtetWithSolidworksWithExcelSettingsInterface" title="Link to this definition"></a></dt>
 <dd><p>:py:class:<a href="#id14"><span class="problematic" id="id15">`</span></a>~pyfemtet.opt.interface._with_excel_settings.with_excel_settings._class_factory.&lt;locals&gt;._WithExcelSettingsInterface`の別名です。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.interface.</span></span><span class="sig-name descname"><span class="pre">MultipleFEMInterface</span></span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference internal" href="#pyfemtet.opt.interface.AbstractFEMInterface" title="pyfemtet.opt.interface._base_interface.AbstractFEMInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractFEMInterface</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.add"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.add" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fem</strong> (<a class="reference internal" href="#pyfemtet.opt.interface.AbstractFEMInterface" title="pyfemtet.opt.interface.AbstractFEMInterface"><em>AbstractFEMInterface</em></a>) – </p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>FEMContext</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.close"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.close" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.load_constraints">
+<span class="sig-name descname"><span class="pre">load_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.load_constraints"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.load_constraints" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opt</strong> (<em>FEMContext</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.load_objectives">
+<span class="sig-name descname"><span class="pre">load_objectives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.load_objectives"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.load_objectives" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opt</strong> (<em>FEMContext</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.load_variables">
+<span class="sig-name descname"><span class="pre">load_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.load_variables"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.load_variables" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opt</strong> (<em>FEMContext</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.object_pass_to_fun">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_pass_to_fun</span></span><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.object_pass_to_fun" title="Link to this definition"></a></dt>
+<dd><p>ユーザー定義目的関数の第1引数に渡されるオブジェクト。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self (AbstractFEMInterface)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.ordered_contexts">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ordered_contexts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">FEMContext</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.ordered_contexts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.pop"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.pop" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.remove"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.remove" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fem</strong> (<a class="reference internal" href="#pyfemtet.opt.interface.AbstractFEMInterface" title="pyfemtet.opt.interface._base_interface.AbstractFEMInterface"><em>AbstractFEMInterface</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.reopen">
+<span class="sig-name descname"><span class="pre">reopen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.reopen"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.reopen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess">
+<span class="sig-name descname"><span class="pre">trial_postprocess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.trial_postprocess"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess_per_fidelity">
+<span class="sig-name descname"><span class="pre">trial_postprocess_per_fidelity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.trial_postprocess_per_fidelity"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess_per_fidelity" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess">
+<span class="sig-name descname"><span class="pre">trial_preprocess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.trial_preprocess"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess_per_fidelity">
+<span class="sig-name descname"><span class="pre">trial_preprocess_per_fidelity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.trial_preprocess_per_fidelity"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess_per_fidelity" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.update"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyfemtet.opt.interface.MultipleFEMInterface.update_parameter">
+<span class="sig-name descname"><span class="pre">update_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/interface/_multiple_fem_interface.html#MultipleFEMInterface.update_parameter"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#pyfemtet.opt.interface.MultipleFEMInterface.update_parameter" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference internal" href="pyfemtet.opt.problem.variable_manager.html#pyfemtet.opt.problem.variable_manager.Variable" title="pyfemtet.opt.problem.variable_manager._variable_manager.Variable"><em>Variable</em></a><em>]</em>) – </p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">

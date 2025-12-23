@@ -1,0 +1,6 @@
+{},prm.num.value,prm.num.lower_bound,prm.num.upper_bound,prm.num.value,prm.num.lower_bound,prm.num.upper_bound,obj,obj.direction,obj,obj.direction,,,,,,,
+,,,,,,,,,,,,,,,,,
+trial,internal_radius,internal_radius_lower_bound,internal_radius_upper_bound,cooling_area_radius,cooling_area_radius_lower_bound,cooling_area_radius_upper_bound,0: 定常解析 / 温度[deg] / 最大値 / 全てのボディ属性,0: 定常解析 / 温度[deg] / 最大値 / 全てのボディ属性_direction,difference_between_nearest_natural_frequency,difference_between_nearest_natural_frequency_direction,state,datetime_start,datetime_end,messages,hypervolume,feasibility,optimality
+1,5.0,2.0,10.0,10.0,6.0,12.0,42.376622831147614,minimize,435.03206359681417,maximize,Success,2025-12-23 10:34:48.088678,2025-12-23 10:36:04.672207,Main,7.213127701998008e-07,True,True
+2,4.9963209507789,2.0,10.0,11.704104513966882,5.9963209507789,12.0,42.200555445571496,minimize,328.1003000564035,maximize,Success,2025-12-23 10:36:13.423221,2025-12-23 10:42:27.084093,Main,7.213127701998008e-07,True,False
+3,7.855951534491241,2.0,10.0,10.738162823094733,8.85595153449124,12.0,37.99676370397362,minimize,362.9007925550022,maximize,Success,2025-12-23 10:42:34.966997,2025-12-23 10:43:59.545812,Main,7.651113962162233e-07,True,True
